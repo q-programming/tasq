@@ -24,7 +24,7 @@ public class UserServiceTest {
 	private UserService userService = new UserService();
 
 	@Mock
-	private AccountRepository accountRepositoryMock;
+	private AccountService accountRepositoryMock;
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -61,7 +61,7 @@ public class UserServiceTest {
 		Assert.assertTrue(demoUser.getEmail().equals(userDetails.getUsername()));
 		Assert.assertTrue(demoUser.getPassword().equals(
 				userDetails.getPassword()));
-		Assert.assertTrue(hasAuthority(userDetails, demoUser.getRole()));
+		Assert.assertTrue(hasAuthority(userDetails, demoUser.getRole().toString()));
 	}
 
 	private boolean hasAuthority(UserDetails userDetails, String role) {

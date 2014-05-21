@@ -9,7 +9,7 @@
 			<span class="icon-bar"></span> <span class="icon-bar"></span> <span
 				class="icon-bar"></span>
 		</button>
-		<a class="navbar-brand" href="#" style="padding: 5px"><span class="glyphicon glyphicon-time"> </span>TasQ</a>
+		<a class="navbar-brand" href="#" style="padding-top: 0px;padding-bottom:0px"><img src="<c:url value="/resources/img/tasQ_logo_small.png"/>"></img></a>
 		<div class="nav-collapse collapse">
 			<ul class="nav navbar-nav">
 				<li class="active"><a href="#"><span

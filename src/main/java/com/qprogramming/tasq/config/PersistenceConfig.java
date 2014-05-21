@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.TransactionManagementConfigure
 
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories
+@EnableJpaRepositories(basePackages={"com.qprogramming.tasq.*"})
 public class PersistenceConfig implements TransactionManagementConfigurer {
 	
 	@Value("${dataSource.driverClassName}")
@@ -44,7 +44,7 @@ public class PersistenceConfig implements TransactionManagementConfigurer {
 		return dataSource;
 	}
 	
-	@Bean
+	@Bean(name="entityManagerFactory")
 	public LocalContainerEntityManagerFactoryBean configureEntityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
 		entityManagerFactoryBean.setDataSource(configureDataSource());
@@ -59,7 +59,7 @@ public class PersistenceConfig implements TransactionManagementConfigurer {
 		return entityManagerFactoryBean;
 	}
 
-	@Bean	
+	@Bean(name = "transactionManager")	
 	public PlatformTransactionManager annotationDrivenTransactionManager() {
 		return new JpaTransactionManager();
 	}

@@ -17,6 +17,8 @@ import org.springframework.web.servlet.config.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.view.tiles3.*;
 
+import com.qprogramming.tasq.account.Account;
+
 @Configuration
 public class WebMvcConfig extends WebMvcConfigurationSupport {
 	
@@ -82,12 +84,12 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
 	private static class UserDetailsHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
 		public boolean supportsParameter(MethodParameter parameter) {
-			return UserDetails.class.isAssignableFrom(parameter.getParameterType());
+			return Account.class.isAssignableFrom(parameter.getParameterType());
 		}
 
 		public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer modelAndViewContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 			Authentication auth = (Authentication) webRequest.getUserPrincipal();
-			return auth != null && auth.getPrincipal() instanceof UserDetails ? auth.getPrincipal() : null;
+			return auth != null && auth.getPrincipal() instanceof Account ? auth.getPrincipal() : null;
 		}
 	}
 }
