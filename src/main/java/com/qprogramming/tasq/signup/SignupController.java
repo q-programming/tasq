@@ -15,7 +15,7 @@ import com.qprogramming.tasq.support.web.*;
 public class SignupController {
 	
 	@Autowired
-	private AccountRepository accountRepository;
+	private AccountService accountSrv;
 	
 	@Autowired
 	private UserService userService;
@@ -31,7 +31,7 @@ public class SignupController {
 			return null;
 		}
 		
-		Account account = accountRepository.save(signupForm.createAccount());
+		Account account = accountSrv.save(signupForm.createAccount());
 		userService.signin(account);
 
         MessageHelper.addSuccessAttribute(ra, "Congratulations! You have successfully signed up.");

@@ -8,7 +8,6 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -20,10 +19,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "account")
-@NamedQuery(name = Account.FIND_BY_EMAIL, query = "select a from Account a where a.email = :email")
 public class Account implements java.io.Serializable, UserDetails {
-
-	public static final String FIND_BY_EMAIL = "Account.findByEmail";
 
 	@Id
 	@GeneratedValue
@@ -180,7 +176,7 @@ public class Account implements java.io.Serializable, UserDetails {
 	@Override
 	public boolean isAccountNonExpired() {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	/*
@@ -193,7 +189,7 @@ public class Account implements java.io.Serializable, UserDetails {
 	@Override
 	public boolean isAccountNonLocked() {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	/*
@@ -205,7 +201,7 @@ public class Account implements java.io.Serializable, UserDetails {
 	@Override
 	public boolean isCredentialsNonExpired() {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	/*
@@ -217,7 +213,7 @@ public class Account implements java.io.Serializable, UserDetails {
 	@Override
 	public boolean isEnabled() {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	/*

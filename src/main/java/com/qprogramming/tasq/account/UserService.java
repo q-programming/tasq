@@ -18,9 +18,6 @@ public class UserService implements UserDetailsService {
 	@Autowired
 	private AccountService accountSrv;
 	
-//	@Inject
-//	private PasswordEncoder passwordEncoder;
-	
 //	@PostConstruct	
 	protected void initialize() {
 		accountSrv.save(new Account("user", "demo", "ROLE_USER"));
@@ -33,7 +30,6 @@ public class UserService implements UserDetailsService {
 		if(account == null) {
 			throw new UsernameNotFoundException("user not found");
 		}
-		//account.setPassword(passwordEncoder.encode(account.getPassword()));
 		return account;
 	}
 	
