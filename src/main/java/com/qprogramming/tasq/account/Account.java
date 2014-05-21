@@ -64,10 +64,10 @@ public class Account implements java.io.Serializable, UserDetails {
 
 	}
 
-	public Account(String email, String password, String role) {
+	public Account(String email, String password, Role role) {
 		this.email = email;
 		this.password = password;
-		this.role = Role.ROLE_USER;
+		this.role = role;
 		this.username = email.split("@")[0];
 	}
 

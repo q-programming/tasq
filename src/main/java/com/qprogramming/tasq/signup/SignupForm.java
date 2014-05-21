@@ -3,6 +3,7 @@ package com.qprogramming.tasq.signup;
 import org.hibernate.validator.constraints.*;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.account.Account.Role;
 
 public class SignupForm {
 
@@ -12,6 +13,12 @@ public class SignupForm {
     @NotBlank(message = SignupForm.NOT_BLANK_MESSAGE)
 	@Email(message = SignupForm.EMAIL_MESSAGE)
 	private String email;
+    
+    @NotBlank
+    private String name;
+    
+    @NotBlank
+    private String surname;
 
     @NotBlank(message = SignupForm.NOT_BLANK_MESSAGE)
 	private String password;
@@ -32,7 +39,26 @@ public class SignupForm {
 		this.password = password;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public String getSurname() {
+		return surname;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setSurname(String surname) {
+		this.surname = surname;
+	}
+
 	public Account createAccount() {
-        return new Account(getEmail(), getPassword(), "ROLE_USER");
+		Account account = new Account(getEmail(), getPassword(), Role.ROLE_USER);
+		account.setName(getName());
+		account.setSurname(getSurname());
+        return account;
 	}
 }

@@ -18,12 +18,6 @@ public class UserService implements UserDetailsService {
 	@Autowired
 	private AccountService accountSrv;
 	
-//	@PostConstruct	
-	protected void initialize() {
-		accountSrv.save(new Account("user", "demo", "ROLE_USER"));
-		accountSrv.save(new Account("admin", "admin", "ROLE_ADMIN"));
-	}
-	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		Account account = accountSrv.findByEmail(username);
