@@ -1,0 +1,8 @@
+.white-frame {
+	border: 1px solid lightgray;
+	margin-bottom: 10px;
+	border-radius: 5px;
+	padding: 10px;
+	margin: 10px auto;
+	background: white;
+}

@@ -5,6 +5,9 @@ import java.util.Properties;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -38,14 +41,19 @@ public class MailMail {
 	@Value("${email.encoding}")
 	private String encoding;
 
+	private static final Logger LOG = LoggerFactory.getLogger(MailMail.class);
+
 	private JavaMailSenderImpl jmsi;
 
 	public static final int NOTIFICATION = 0;
 	public static final int MESSAGE = 1;
 	public static final int PROJECT = 2;
+	public static final int REGISTER = 3;
 
 	private static final String TASQ = "tasq@tasq.com";
 	private static final String TASQ_PERSONAL = "TasQ";
+	private static final String TASQ_REGISTER = "registration@tasq.com";
+	private static final String TASQ__REGISTER_PERSONAL = "Registration at TasQ";
 	private static final String NOTIFICATION_TASQ = "notification@tasq.com";
 	private static final String NOTIFICATION_TASQ_PERSONAL = "TasQ notifier";
 	private static final String MESSAGE_TASQ = "messages@tasq.com";
@@ -103,14 +111,16 @@ public class MailMail {
 		try {
 			switch (type) {
 			case NOTIFICATION:
-				helper.setFrom(NOTIFICATION_TASQ,
-						NOTIFICATION_TASQ_PERSONAL);
+				helper.setFrom(NOTIFICATION_TASQ, NOTIFICATION_TASQ_PERSONAL);
 				break;
 			case MESSAGE:
 				helper.setFrom(MESSAGE_TASQ, MESSAGE_TASQ_PERSONAL);
 				break;
 			case PROJECT:
 				helper.setFrom(PROJECT_TASQ, PROJECT_TASQ_PERSONAL);
+				break;
+			case REGISTER:
+				helper.setFrom(TASQ_REGISTER, TASQ__REGISTER_PERSONAL);
 				break;
 			default:
 				helper.setFrom(TASQ, TASQ_PERSONAL);
@@ -119,6 +129,7 @@ public class MailMail {
 			helper.setTo(to);
 			helper.setSubject(subject);
 			helper.setText(msg);
+			LOG.debug("Sending e-mail to:" + to);
 			((JavaMailSenderImpl) mailSender).send(message);
 		} catch (MailSendException e) {
 			return false;

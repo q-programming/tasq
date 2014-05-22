@@ -14,14 +14,17 @@ public class SignupForm {
 	@Email(message = SignupForm.EMAIL_MESSAGE)
 	private String email;
     
-    @NotBlank
+    @NotBlank(message = SignupForm.NOT_BLANK_MESSAGE)
     private String name;
     
-    @NotBlank
+    @NotBlank(message = SignupForm.NOT_BLANK_MESSAGE)
     private String surname;
 
     @NotBlank(message = SignupForm.NOT_BLANK_MESSAGE)
 	private String password;
+
+    @NotBlank(message = SignupForm.NOT_BLANK_MESSAGE)
+	private String confirmPassword;
 
     public String getEmail() {
 		return email;
@@ -60,5 +63,17 @@ public class SignupForm {
 		account.setName(getName());
 		account.setSurname(getSurname());
         return account;
+	}
+	
+	public boolean isPasswordConfirmed(){
+		return password.equals(confirmPassword);
+	}
+
+	public String getConfirmPassword() {
+		return confirmPassword;
+	}
+
+	public void setConfirmPassword(String confirmpassword) {
+		this.confirmPassword = confirmpassword;
 	}
 }

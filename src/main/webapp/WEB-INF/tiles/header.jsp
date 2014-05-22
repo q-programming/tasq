@@ -19,12 +19,12 @@
 			style="padding-top: 0px; padding-bottom: 0px"><img
 			src="<c:url value="/resources/img/tasQ_logo_small.png"/>"></img></a>
 		<div class="nav-collapse collapse">
-			<ul class="nav navbar-nav">
-				<li class="active"><a href="#"><span
-						class="glyphicon glyphicon-home"></span> Home</a></li>
-				<li><a href="#about">About</a></li>
-				<li><a href="#contact">Contact</a></li>
-			</ul>
+<!-- 			<ul class="nav navbar-nav"> -->
+<%-- 				<li class="active"><a href="#"><span --%>
+<%-- 						class="glyphicon glyphicon-home"></span> Home</a></li> --%>
+<!-- 				<li><a href="#about">About</a></li> -->
+<!-- 				<li><a href="#contact">Contact</a></li> -->
+<!-- 			</ul> -->
 			<ul class="nav navbar-nav pull-right">
 				<security:authorize access="!isAuthenticated()">
 					<li>
@@ -67,11 +67,25 @@
 						</div>
 					</li>
 				</security:authorize>
-
+				<%-- Logged in user --%>
 				<security:authorize access="isAuthenticated()">
-					<li><a href='<s:url value="/logout"></s:url>'><s:message
-								code="menu.logout" text="Log out" />(<security:authentication
-								property="principal" />) </a></li>
+					<security:authentication property="principal" var="user" />
+					<li>
+						<div>
+							<a class="btn btn-default btn-xxs a-tooltip" href='<s:url value="/settings"></s:url>' title="<s:message
+									code="menu.settings" text="Settings" />" data-placement="bottom"><span class="glyphicon glyphicon-cog"></span></a>
+							<a class="btn btn-default btn-xxs a-tooltip" href='<s:url value="/settings"></s:url>' title="<s:message
+									code="menu.help" text="Help" />" data-placement="bottom"><span class="glyphicon glyphicon-question-sign" ></span></a>
+							<a class="btn btn-default btn-xxs a-tooltip" href='<s:url value="/logout"></s:url>' title="<s:message
+									code="menu.logout" text="Log out" />" data-placement="bottom"><span class="glyphicon glyphicon-off"></span></a>
+						</div>
+						<div>${user}</div>
+					</li>
+					<li>
+						<div class="pull-right">
+							<img src="<c:url value="${user.avatar}"/>" style="height: 50px"></img>
+						</div>
+					</li>
 				</security:authorize>
 			</ul>
 		</div>

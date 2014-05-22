@@ -14,20 +14,23 @@
 <c:set var="password_txt">
 	<s:message code="signup.password" />
 </c:set>
-
+<c:set var="confirmPassword_txt">
+	<s:message code="signup.confirmPassword" />
+</c:set>
 
 <form:form class="form-narrow form-horizontal" method="post"
 	modelAttribute="signupForm">
-
 	<fieldset>
-		<legend><s:message code="signup.header" /></legend>
-		<form:errors path="" element="p" class="text-error" />
+		<legend>
+			<s:message code="signup.header" />
+		</legend>
+		<form:errors path="" element="p" class="text-danger" />
 		<div class="form-group">
 			<label for="name" class="col-lg-2 control-label">${name_txt}</label>
 			<div class="col-lg-10">
 				<form:input path="name" class="form-control"
 					cssErrorClass="form-control" id="name" placeholder="${name_txt}" />
-				<form:errors path="name" element="span" class="help-block" />
+				<form:errors path="name" element="p" class="text-danger"  />
 			</div>
 		</div>
 		<div class="form-group">
@@ -36,7 +39,7 @@
 				<form:input path="surname" class="form-control"
 					cssErrorClass="form-control" id="surname"
 					placeholder="${surname_txt}" />
-				<form:errors path="surname" element="span" class="help-block" />
+				<form:errors path="surname" element="p" class="text-danger"  />
 			</div>
 		</div>
 
@@ -45,7 +48,7 @@
 			<div class="col-lg-10">
 				<form:input path="email" class="form-control"
 					cssErrorClass="form-control" id="email" placeholder="${email_txt}" />
-				<form:errors path="email" element="span" class="help-block" />
+				<form:errors path="email" element="p" class="text-danger"  />
 			</div>
 		</div>
 		<div class="form-group">
@@ -53,9 +56,18 @@
 			<div class="col-lg-10">
 				<form:password path="password" class="form-control" id="password"
 					placeholder="${password_txt}" />
-				<form:errors path="password" element="span" class="help-block" />
+				<form:errors path="password" element="p" class="text-danger"  />
 			</div>
 		</div>
+		<div class="form-group">
+			<label for="password" class="col-lg-2 control-label">${confirmPassword_txt}</label>
+			<div class="col-lg-10">
+				<form:password path="confirmPassword" class="form-control"
+					placeholder="${confirmPassword_txt}" />
+				<form:errors path="confirmPassword" element="p" class="text-danger" />
+			</div>
+		</div>
+
 		<div class="form-group">
 			<div class="col-lg-offset-2 col-lg-10">
 				<button type="submit" class="btn btn-default">

@@ -1674,6 +1674,14 @@ textarea.input-lg,textarea.input-sm {
 	padding: 3px 5px
 }
 
+.btn-xxs{
+	padding: 3px 5px;
+	font-size: 10px;
+	line-height: 1.5;
+	border-radius: 3px;
+}
+
+
 .btn-block {
 	display: block;
 	width: 100%;
@@ -2408,7 +2416,8 @@ button.close {
 	padding-right: 15px;
 	padding-left: 15px;
 	margin-bottom: 5px;
-	background-color: #eee;
+	padding-top:5px;
+ 	background-color: #f5f5f5;
 	border-radius: 4px
 }
 

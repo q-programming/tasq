@@ -3,11 +3,14 @@
  */
 package com.qprogramming.tasq.account;
 
+import java.util.UUID;
+
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,30 +21,45 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class AccountService {
+	@Value("${default.locale}")
+	private String defaultLang;
+
 	@Autowired
 	AccountRepository accRepo;
-	
+
 	@PersistenceContext
 	private EntityManager entityManager;
-	
+
 	@Inject
 	private PasswordEncoder passwordEncoder;
-	
+
 	@Transactional
 	public Account save(Account account) {
 		account.setPassword(passwordEncoder.encode(account.getPassword()));
+		account.setLanguage(defaultLang);
+		account.setUuid(UUID.randomUUID().toString().replaceAll("-", ""));
 		entityManager.persist(account);
 		return account;
 	}
-	
-	public Account findByEmail(String email){
+
+	public Account findByEmail(String email) {
 		return accRepo.findByEmail(email);
 	}
-	
-	public Account findByUsername(String username){
+
+	public Account findByUsername(String username) {
 		return accRepo.findByUsername(username);
 	}
 
-	
-	
+	public Account findByUuid(String id) {
+		return accRepo.findByUuid(id);
+	}
+
+	/**
+	 * @param id
+	 */
+	@Transactional
+	public void update(Account account) {
+		accRepo.save(account);
+	}
+
 }

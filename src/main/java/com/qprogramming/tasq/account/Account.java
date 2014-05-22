@@ -36,7 +36,7 @@ public class Account implements java.io.Serializable, UserDetails {
 	private String password;
 
 	@Column
-	private boolean approved = false;
+	private boolean confirmed = false;
 
 	@Column
 	private String language = "en";
@@ -50,6 +50,12 @@ public class Account implements java.io.Serializable, UserDetails {
 	@Enumerated(EnumType.STRING)
 	private Role role;
 
+	@Column
+	private byte[] avatar;
+
+	@Column
+	private String uuid;
+	
 	@Transient
 	private Collection<GrantedAuthority> authorities;
 
@@ -57,8 +63,6 @@ public class Account implements java.io.Serializable, UserDetails {
 		ROLE_USER, ROLE_ADMIN
 	};
 
-	@Column
-	private byte[] avatar;
 
 	protected Account() {
 
@@ -91,12 +95,12 @@ public class Account implements java.io.Serializable, UserDetails {
 		this.password = password;
 	}
 
-	public boolean isApproved() {
-		return approved;
+	public boolean isConfirmed() {
+		return confirmed;
 	}
 
-	public void setApproved(boolean approved) {
-		this.approved = approved;
+	public void setConfirmed(boolean approved) {
+		this.confirmed = approved;
 	}
 
 	public void setId(Long id) {
@@ -143,9 +147,13 @@ public class Account implements java.io.Serializable, UserDetails {
 		this.authorities = authorities;
 	}
 
-	public byte[] getAvatar() {
-		return avatar;
+	public String getAvatar(){
+		return "/resources/img/avatar.png";
 	}
+	
+//	public byte[] getAvatar() {
+//		return avatar;
+//	}
 
 	public void setAvatar(byte[] avatar) {
 		this.avatar = avatar;
@@ -164,6 +172,14 @@ public class Account implements java.io.Serializable, UserDetails {
 
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
 
 	/*
@@ -226,7 +242,7 @@ public class Account implements java.io.Serializable, UserDetails {
 		if (name == null || surname == null) {
 			return username;
 		} else {
-			return name + surname;
+			return name + " " + surname;
 		}
 	}
 

@@ -13,6 +13,8 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
 	Account findByUsername(String username);
 
 	Account findById(Long id);
+	
+	Account findByUuid(String id);
 
 	List<Account> findByNameStartingWith(String name);
 

@@ -12,8 +12,10 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<link href="<c:url value="/resources/css/bootstrap.min.css" />" rel="stylesheet" media="screen" />
 	<link href="<c:url value="/resources/css/core.css" />" rel="stylesheet" media="screen" />
+	<link href="<c:url value="/resources/css/custom.css" />" rel="stylesheet" media="screen" />
 	<link rel="icon" type="image/png" href="<c:url value="/resources/img/favicon.ico"/>"/>
-	
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="<c:url value="/resources/js/bootstrap.min.js" />"></script>
 	<tilesx:useAttribute id="styles" name="styles" classname="java.util.List" ignore="true" />
 	<c:forEach var="cssName" items="${styles}">
 		<link type="text/css" href="<c:url value="/resources/css/${cssName}"/>" rel="stylesheet" media="screen" />
@@ -50,8 +52,5 @@
 	</div>
 	<!-- End of page content -->
 	<tiles:insertAttribute name="footer"  defaultValue="" />
-	
-	<script src="http://code.jquery.com/jquery-latest.js"></script>
-    <script src="<c:url value="/resources/js/bootstrap.min.js" />"></script>
 </body>
 </html>
