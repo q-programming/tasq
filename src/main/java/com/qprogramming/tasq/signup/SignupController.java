@@ -70,7 +70,7 @@ public class SignupController {
 				new Object[] { account.getName(), confirmlink,
 						Utils.getBaseURL() }, Utils.getDefaultLocale());
 		LOG.debug(confirmlink);
-		mailer.sendMail(MailMail.REGISTER, account.getEmail(), subject, message);
+		//mailer.sendMail(MailMail.REGISTER, account.getEmail(), subject, message);
 		MessageHelper.addSuccessAttribute(ra, msg.getMessage("signup.success",
 				null, Utils.getDefaultLocale()));
 

@@ -6,3 +6,6 @@
 	margin: 10px auto;
 	background: white;
 }
+.hidden{
+	visibility: hidden;
+}

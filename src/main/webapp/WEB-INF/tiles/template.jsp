@@ -42,7 +42,7 @@
                     <c:set value="alert-${fn:toLowerCase(message.type)}" var="alertClass" />
                 </c:otherwise>
             </c:choose>
-            <div class="alert ${alertClass}">
+            <div class="alert ${alertClass}" style="width:70%;margin:0 auto;">
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
                 <% /* Display a message by its code. If the code was not found, it will be displayed as default text */ %>
                 <s:message code="${message.message}" arguments="${message.args}" text="${message.message}" />
