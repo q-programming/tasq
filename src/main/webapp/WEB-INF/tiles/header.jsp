@@ -15,16 +15,34 @@
 			<span class="icon-bar"></span> <span class="icon-bar"></span> <span
 				class="icon-bar"></span>
 		</button>
-		<a class="navbar-brand" href="#"
+		<a class="navbar-brand" href="<c:url value="/"/>"
 			style="padding-top: 0px; padding-bottom: 0px"><img
 			src="<c:url value="/resources/img/tasQ_logo_small.png"/>"></img></a>
 		<div class="nav-collapse collapse">
-<!-- 			<ul class="nav navbar-nav"> -->
-<%-- 				<li class="active"><a href="#"><span --%>
-<%-- 						class="glyphicon glyphicon-home"></span> Home</a></li> --%>
-<!-- 				<li><a href="#about">About</a></li> -->
-<!-- 				<li><a href="#contact">Contact</a></li> -->
-<!-- 			</ul> -->
+			<ul class="nav navbar-nav">
+				<li><div class="dropdown" style="padding-top: 5px">
+						<a class="dropdown-toggle btn btn-default" type="button"
+							id="dropdownMenu1" data-toggle="dropdown"><s:message
+								code="project.projects" text="Projects" /><span class="caret"></span></a>
+						<ul class="dropdown-menu">
+							<c:forEach items="${last_projects}" var="project">
+								<li><a href="<c:url value="project?id=${project.id}"/>">[${project.id}]
+										${project.name}</a></li>
+							</c:forEach>
+							<li role="presentation" class="divider"></li>
+							<li style="margin: 10px;"><a href="#"><s:message
+										code="project.showAll" text="Projects" /></a></li>
+							<li style="margin: 10px;"><a
+								href="<c:url value="project/create"/>"><s:message
+										code="project.create" text="Create project" /></a></li>
+						</ul></li>
+			</ul>
+			<!-- 			<ul class="nav navbar-nav"> -->
+			<%-- 				<li class="active"><a href="#"><span --%>
+			<%-- 						class="glyphicon glyphicon-home"></span> Home</a></li> --%>
+			<!-- 				<li><a href="#about">About</a></li> -->
+			<!-- 				<li><a href="#contact">Contact</a></li> -->
+			<!-- 			</ul> -->
 			<ul class="nav navbar-nav pull-right">
 				<security:authorize access="!isAuthenticated()">
 					<li>
@@ -72,12 +90,24 @@
 					<security:authentication property="principal" var="user" />
 					<li>
 						<div>
-							<a class="btn btn-default btn-xxs a-tooltip" href='<s:url value="/settings"></s:url>' title="<s:message
-									code="menu.settings" text="Settings" />" data-placement="bottom"><span class="glyphicon glyphicon-cog"></span></a>
-							<a class="btn btn-default btn-xxs a-tooltip" href='<s:url value="/settings"></s:url>' title="<s:message
-									code="menu.help" text="Help" />" data-placement="bottom"><span class="glyphicon glyphicon-question-sign" ></span></a>
-							<a class="btn btn-default btn-xxs a-tooltip" href='<s:url value="/logout"></s:url>' title="<s:message
-									code="menu.logout" text="Log out" />" data-placement="bottom"><span class="glyphicon glyphicon-off"></span></a>
+							<a class="btn btn-default btn-xxs a-tooltip"
+								href='<s:url value="/settings"></s:url>'
+								title="<s:message
+									code="menu.settings" text="Settings" />"
+								data-placement="bottom"><span
+								class="glyphicon glyphicon-cog"></span></a> <a
+								class="btn btn-default btn-xxs a-tooltip"
+								href='<s:url value="/settings"></s:url>'
+								title="<s:message
+									code="menu.help" text="Help" />"
+								data-placement="bottom"><span
+								class="glyphicon glyphicon-question-sign"></span></a> <a
+								class="btn btn-default btn-xxs a-tooltip"
+								href='<s:url value="/logout"></s:url>'
+								title="<s:message
+									code="menu.logout" text="Log out" />"
+								data-placement="bottom"><span
+								class="glyphicon glyphicon-off"></span></a>
 						</div>
 						<div>${user}</div>
 					</li>

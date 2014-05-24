@@ -46,6 +46,7 @@ public class Project {
 		setName(name);
 		setAdministrator(administrator);
 		setStartDate(new Date());
+		setLastVisit(new Date());
 	}
 
 	public Long getId() {

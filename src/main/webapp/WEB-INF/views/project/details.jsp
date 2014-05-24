@@ -3,7 +3,7 @@
 <%@ taglib prefix="security"
 	uri="http://www.springframework.org/security/tags"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
-<div class="white-frame" style="height: 87vh; overflow: auto;">
+<div class="white-frame" style="overflow: auto;">
 	<security:authentication property="principal" var="user" />
 	<c:set var="projectName_text">
 		<s:message code="project.name" />
