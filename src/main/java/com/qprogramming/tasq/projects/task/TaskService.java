@@ -21,4 +21,9 @@ public class TaskService {
 		return taskRepo.findAllByProject(project);
 		
 	}
+
+	public List<Task> findAllbyUser() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

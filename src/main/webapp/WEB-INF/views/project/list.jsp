@@ -26,7 +26,7 @@
 		<c:forEach items="${projects}" var="project">
 			<c:if test="${project.active}">
 				<tr style="background: lightblue;">
-					<td><a href="<c:url value="project?id=${project.id}"/>"><b>${project.name}</b></a></td>
+					<td><a href="<c:url value="project?id=${project.id}"/>"><b>[${project.projectId}] ${project.name}</b></a></td>
 					<td><b>${project.description}</b></td>
 					<td><a class="btn btn-default a-tooltip pull-right" style="padding: 6px 11px;"
 						href='#'
@@ -38,7 +38,7 @@
 			</c:if>
 			<c:if test="${not project.active}">
 				<tr>
-					<td><a href="<c:url value="project?id=${project.id}"/>">${project.name}</a></td>
+					<td><a href="<c:url value="project?id=${project.id}"/>">[${project.projectId}] ${project.name}</a></td>
 					<td>${project.description}</td>
 					<td><a class="btn btn-default a-tooltip pull-right"
 						href='<s:url value="/project/activate?id=${project.id}"></s:url>'

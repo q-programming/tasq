@@ -90,6 +90,14 @@ public class ProjetController {
 		if (errors.hasErrors()) {
 			return null;
 		}
+		if (newProjectForm.getProject_id().length() > 5) {
+			errors.rejectValue("project_id", "project.idValid");
+			return null;
+		}
+		if (newProjectForm.getProject_id().matches(".*\\d.*")) {
+			errors.rejectValue("project_id", "project.idValid.letters");
+			return null;
+		}
 		Utils.setHttpRequest(request);
 		String name = newProjectForm.getName();
 		if (null != projSrv.findByName(name)) {
@@ -98,6 +106,13 @@ public class ProjetController {
 					Utils.getCurrentLocale()));
 			return "redirect:" + request.getHeader("Referer");
 		}
+		String project_id = newProjectForm.getProject_id();
+		if (null != projSrv.findByProjectId(project_id)) {
+			errors.rejectValue("project_id", "project.idunique",
+					new Object[] { project_id }, "");
+			return null;
+		}
+
 		Project new_project = newProjectForm.createProject();
 		new_project = projSrv.save(new_project);
 		MessageHelper.addSuccessAttribute(

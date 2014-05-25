@@ -27,11 +27,12 @@
 						<ul class="dropdown-menu">
 							<c:forEach items="${last_projects}" var="project">
 								<c:if test="${project.active }">
-									<li><a
-											href="<c:url value="project?id=${project.id}"/>"><b>${project.name}</b></a></li>
+									<li><a href="<c:url value="/project?id=${project.id}"/>"><b>[${project.projectId}]
+												${project.name}</b></a></li>
 								</c:if>
 								<c:if test="${not project.active }">
-									<li><a href="<c:url value="project?id=${project.id}"/>">${project.name}</a></li>
+									<li><a href="<c:url value="/project?id=${project.id}"/>">[${project.projectId}]
+											${project.name}</a></li>
 								</c:if>
 							</c:forEach>
 							<li role="presentation" class="divider"></li>
@@ -43,6 +44,15 @@
 								href="<c:url value="/project/create"/>"><span
 									class="glyphicon glyphicon-plus"></span> <s:message
 										code="project.create" text="Create project" /></a></li>
+						</ul></li>
+				<li><div class="dropdown" style="padding-top: 5px">
+						<a class="dropdown-toggle btn btn-default" type="button"
+							id="dropdownMenu1" data-toggle="dropdown"><s:message
+								code="task.tasks" text="Tasks" /><span class="caret"></span></a>
+						<ul class="dropdown-menu">
+							<li>1</li>
+							<li>1</li>
+							<li>1</li>
 						</ul></li>
 			</ul>
 			<!-- 			<ul class="nav navbar-nav"> -->

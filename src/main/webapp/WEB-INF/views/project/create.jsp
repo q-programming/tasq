@@ -7,6 +7,10 @@
 <c:set var="projectName_text">
 	<s:message code="project.name" />
 </c:set>
+<c:set var="projectID_text">
+	<s:message code="project.id" />
+</c:set>
+
 <c:set var="projectDesc_text">
 	<s:message code="project.description" />
 </c:set>
@@ -16,12 +20,39 @@
 <div class="white-frame" style="height: 87vh; overflow: auto;">
 	<form:form modelAttribute="newProjectForm" id="newProjectForm"
 		method="post">
-		<div class="form-group">
+		<%-- Check all potential errors --%>
+
+		<c:set var="id_error">
+			<form:errors path="project_id" />
+		</c:set>
+		<c:set var="name_error">
+			<form:errors path="name" />
+		</c:set>
+		<c:set var="desc_error">
+			<form:errors path="description" />
+		</c:set>
+		<c:if test="${not empty id_error}">
+			<c:set var="id_class" value="has-error" />
+		</c:if>
+		<c:if test="${not empty name_error}">
+			<c:set var="name_class" value="has-error" />
+		</c:if>
+		<c:if test="${not empty desc_error}">
+			<c:set var="desc_class" value="has-error" />
+		</c:if>
+
+		<div class="form-group pull-left ${id_class}" style="width: 100px">
+			<form:input path="project_id" class="form-control"
+				placeholder="${projectID_text}" />
+			<form:errors path="project_id" element="p" class="text-danger" />
+		</div>
+		<div class="form-group pull-left ${name_class }"
+			style="width: 500px; padding-left: 20px;">
 			<form:input path="name" class="form-control"
 				placeholder="${projectName_text}" />
 			<form:errors path="name" element="p" class="text-danger" />
 		</div>
-		<div class="form-group">
+		<div class="form-group ${desc_class}">
 			<form:textarea path="description" class="form-control" rows="5"
 				placeholder="${projectDesc_text}" />
 			<form:errors path="description" element="p" class="text-danger" />

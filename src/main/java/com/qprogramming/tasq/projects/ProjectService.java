@@ -60,4 +60,8 @@ public class ProjectService {
 		}
 		return null;
 	}
+
+	public Project findByProjectId(String project_id) {
+		return projRepo.findByProjectId(project_id);
+	}
 }

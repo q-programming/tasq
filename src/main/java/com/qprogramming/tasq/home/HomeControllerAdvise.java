@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
+import com.qprogramming.tasq.projects.task.Task;
+import com.qprogramming.tasq.projects.task.TaskService;
 import com.qprogramming.tasq.support.ProjectSorter;
 
 @Secured("ROLE_USER")
@@ -27,12 +29,16 @@ public class HomeControllerAdvise {
 
 	@Autowired
 	ProjectService projSrv;
+	@Autowired
+	TaskService taskSrv;
+	
 
 	@ModelAttribute("last_projects")
 	public List<Project> getLastProjects(HttpServletRequest request) {
 		Authentication authentication = SecurityContextHolder.getContext()
 				.getAuthentication();
 		if (!(authentication instanceof AnonymousAuthenticationToken)) {
+			//Get lasts 5 projects
 			List<Project> projects = projSrv.findAllByUser();
 			Collections.sort(projects, new ProjectSorter(
 					ProjectSorter.SORTBY.LAST_VISIT, true));
@@ -43,6 +49,25 @@ public class HomeControllerAdvise {
 			}
 		}
 		return null;
-
+	}
+	@ModelAttribute("last_tasks")
+	public List<Project> getLastTasks(HttpServletRequest request) {
+//		Authentication authentication = SecurityContextHolder.getContext()
+//				.getAuthentication();
+//		if (!(authentication instanceof AnonymousAuthenticationToken)) {
+//			//Get lasts 5 Tasks
+//			List<Task> tasks = taskSrv.findAllbyUser();
+//			
+//			
+//			List<Project> projects = projSrv.findAllByUser();
+//			Collections.sort(projects, new ProjectSorter(
+//					ProjectSorter.SORTBY.LAST_VISIT, true));
+//			if (projects.size() > 5) {
+//				return projects.subList(0, 5);
+//			} else {
+//				return projects;
+//			}
+//		}
+		return null;
 	}
 }

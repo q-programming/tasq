@@ -21,7 +21,10 @@ public class Project {
 	private Long id;
 
 	@Column
-	private Long task_count;
+	private Long task_count = 0L;
+
+	@Column(unique = true)
+	private String projectId;
 
 	@Column(unique = true)
 	private String name;
@@ -126,6 +129,14 @@ public class Project {
 
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+
+	public String getProjectId() {
+		return projectId;
+	}
+
+	public void setProjectId(String projectId) {
+		this.projectId = projectId;
 	}
 
 	@Override

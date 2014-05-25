@@ -30,7 +30,7 @@
 			</a>
 		</c:if>
 	</div>
-	<h3>${project.name}</h3>
+	<h3>[${project.projectId}] ${project.name}</h3>
 	<hr>
 	${project.description}
 	<table>
