@@ -26,14 +26,22 @@
 								code="project.projects" text="Projects" /><span class="caret"></span></a>
 						<ul class="dropdown-menu">
 							<c:forEach items="${last_projects}" var="project">
-								<li><a href="<c:url value="project?id=${project.id}"/>">[${project.id}]
-										${project.name}</a></li>
+								<c:if test="${project.active }">
+									<li><a
+											href="<c:url value="project?id=${project.id}"/>"><b>${project.name}</b></a></li>
+								</c:if>
+								<c:if test="${not project.active }">
+									<li><a href="<c:url value="project?id=${project.id}"/>">${project.name}</a></li>
+								</c:if>
 							</c:forEach>
 							<li role="presentation" class="divider"></li>
-							<li style="margin: 10px;"><a href="#"><s:message
+							<li style="margin: 10px;"><a
+								href="<c:url value="/projects"/>"><span
+									class="glyphicon glyphicon-list"></span> <s:message
 										code="project.showAll" text="Projects" /></a></li>
 							<li style="margin: 10px;"><a
-								href="<c:url value="project/create"/>"><s:message
+								href="<c:url value="/project/create"/>"><span
+									class="glyphicon glyphicon-plus"></span> <s:message
 										code="project.create" text="Create project" /></a></li>
 						</ul></li>
 			</ul>

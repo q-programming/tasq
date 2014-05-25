@@ -22,7 +22,11 @@ public class ProjectSorter implements Comparator<Project> {
 		int result = 0;
 		switch (sortBy) {
 		case LAST_VISIT:
-			if (a.getLastVisit() == null) {
+			if (a.isActive()) {
+				result = 1;
+			} else if (b.isActive()) {
+				result = -1;
+			} else if (a.getLastVisit() == null) {
 				result = -1;
 			} else if (b.getLastVisit() == null) {
 				result = 1;

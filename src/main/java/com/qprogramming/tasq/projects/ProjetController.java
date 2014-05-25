@@ -1,6 +1,8 @@
 package com.qprogramming.tasq.projects;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -16,6 +18,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.qprogramming.tasq.projects.task.Task;
+import com.qprogramming.tasq.projects.task.TaskService;
+import com.qprogramming.tasq.support.ProjectSorter;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.web.MessageHelper;
 
@@ -24,6 +29,9 @@ public class ProjetController {
 
 	@Autowired
 	private ProjectService projSrv;
+
+	@Autowired
+	private TaskService taskSrv;
 
 	@Autowired
 	MessageSource msg;
@@ -37,13 +45,37 @@ public class ProjetController {
 					ra,
 					msg.getMessage("project.notexists", null,
 							Utils.getCurrentLocale()));
-			return "redirect:" + request.getHeader("Referer");
+			return "redirect:/projects";
 		}
 		project.setLastVisit(new Date());
-		//mark it as last visit
+		// mark it as last visit
 		projSrv.save(project);
+		List<Task> taskList = taskSrv.findAllByProject(project);
 		model.addAttribute("project", project);
+		model.addAttribute("tasks", taskList);
 		return "project/details";
+	}
+
+	@RequestMapping(value = "projects", method = RequestMethod.GET)
+	public String listProjects(Model model) {
+		List<Project> projects = projSrv.findAllByUser();
+		Collections.sort(projects, new ProjectSorter(
+				ProjectSorter.SORTBY.LAST_VISIT, true));
+		model.addAttribute("projects", projects);
+		return "project/list";
+	}
+
+	@RequestMapping(value = "project/activate", method = RequestMethod.GET)
+	public String activate(@RequestParam(value = "id") Long id,
+			HttpServletRequest request, RedirectAttributes ra) {
+		Project activated_proj = projSrv.activate(id);
+		if (activated_proj != null) {
+			MessageHelper.addSuccessAttribute(ra, msg.getMessage(
+					"project.activated",
+					new Object[] { activated_proj.getName() },
+					Utils.getCurrentLocale()));
+		}
+		return "redirect:" + request.getHeader("Referer");
 	}
 
 	@RequestMapping(value = "project/create", method = RequestMethod.GET)

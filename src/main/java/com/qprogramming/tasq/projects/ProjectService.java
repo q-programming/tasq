@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.support.Utils;
 
 @Service
@@ -44,5 +45,19 @@ public class ProjectService {
 			}
 		}
 		return userProjects;
+	}
+
+	public Project activate(Long id) {
+		Project project = projRepo.findById(id);
+		if (project != null) {
+			Project active_project = projRepo.findByActive(true);
+			if (active_project != null) {
+				active_project.setActive(false);
+				projRepo.save(active_project);
+			}
+			project.setActive(true);
+			return projRepo.save(project);
+		}
+		return null;
 	}
 }

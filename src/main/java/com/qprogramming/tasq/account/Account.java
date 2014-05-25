@@ -55,7 +55,7 @@ public class Account implements java.io.Serializable, UserDetails {
 
 	@Column
 	private String uuid;
-	
+
 	@Column
 	private boolean email_notifications;
 
@@ -65,7 +65,6 @@ public class Account implements java.io.Serializable, UserDetails {
 	public enum Role {
 		ROLE_USER, ROLE_ADMIN
 	};
-
 
 	protected Account() {
 
@@ -150,13 +149,13 @@ public class Account implements java.io.Serializable, UserDetails {
 		this.authorities = authorities;
 	}
 
-	public String getAvatar(){
+	public String getAvatar() {
 		return "/resources/img/avatar.png";
 	}
-	
-//	public byte[] getAvatar() {
-//		return avatar;
-//	}
+
+	// public byte[] getAvatar() {
+	// return avatar;
+	// }
 
 	public void setAvatar(byte[] avatar) {
 		this.avatar = avatar;

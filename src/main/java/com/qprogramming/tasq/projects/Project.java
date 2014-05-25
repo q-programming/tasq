@@ -20,6 +20,9 @@ public class Project {
 	@GeneratedValue
 	private Long id;
 
+	@Column
+	private Long task_count;
+
 	@Column(unique = true)
 	private String name;
 
@@ -37,6 +40,9 @@ public class Project {
 
 	@Column
 	private Date lastVisit;
+
+	@Column
+	private boolean active = false;
 
 	public Project() {
 		// TODO Auto-generated constructor stub
@@ -104,6 +110,22 @@ public class Project {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public Long getTask_count() {
+		return task_count;
+	}
+
+	public void setTask_count(Long task_count) {
+		this.task_count = task_count;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 
 	@Override
