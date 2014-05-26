@@ -1,4 +1,4 @@
-package com.qprogramming.tasq.projects.task;
+package com.qprogramming.tasq.task;
 
 import java.util.List;
 

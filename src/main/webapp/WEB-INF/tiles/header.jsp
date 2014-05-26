@@ -20,11 +20,15 @@
 			src="<c:url value="/resources/img/tasQ_logo_small.png"/>"></img></a>
 		<div class="nav-collapse collapse">
 			<ul class="nav navbar-nav">
-				<li><div class="dropdown" style="padding-top: 5px">
+				<%-- PROJECTS --%>
+				<li><div class="dropdown"
+						style="padding-top: 5px; padding: 5px">
 						<a class="dropdown-toggle btn btn-default" type="button"
 							id="dropdownMenu1" data-toggle="dropdown"><s:message
 								code="project.projects" text="Projects" /><span class="caret"></span></a>
 						<ul class="dropdown-menu">
+							<li><strong style="padding: 5px 10px;"><s:message
+										code="project.recent" text="Recent projects" /></strong></li>
 							<c:forEach items="${last_projects}" var="project">
 								<c:if test="${project.active }">
 									<li><a href="<c:url value="/project?id=${project.id}"/>"><b>[${project.projectId}]
@@ -45,14 +49,24 @@
 									class="glyphicon glyphicon-plus"></span> <s:message
 										code="project.create" text="Create project" /></a></li>
 						</ul></li>
+				<%-- TASKS --%>
 				<li><div class="dropdown" style="padding-top: 5px">
 						<a class="dropdown-toggle btn btn-default" type="button"
 							id="dropdownMenu1" data-toggle="dropdown"><s:message
 								code="task.tasks" text="Tasks" /><span class="caret"></span></a>
 						<ul class="dropdown-menu">
-							<li>1</li>
-							<li>1</li>
-							<li>1</li>
+							<c:forEach items="${last_tasks}" var="task">
+								<li>${task.name}</li>
+							</c:forEach>
+							<li role="presentation" class="divider"></li>
+							<li style="margin: 10px;"><a href="<c:url value="/tasks"/>"><span
+									class="glyphicon glyphicon-list"></span> <s:message
+										code="task.showAll" text="Show all" /></a></li>
+
+							<li style="margin: 10px;"><a
+								href="<c:url value="/task/create"/>"><span
+									class="glyphicon glyphicon-plus"></span> <s:message
+										code="task.create" text="Create task" /></a></li>
 						</ul></li>
 			</ul>
 			<!-- 			<ul class="nav navbar-nav"> -->

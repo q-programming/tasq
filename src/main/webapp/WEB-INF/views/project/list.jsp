@@ -49,8 +49,6 @@
 					</a></td>
 				</tr>
 			</c:if>
-
-
 		</c:forEach>
 	</table>
 </div>

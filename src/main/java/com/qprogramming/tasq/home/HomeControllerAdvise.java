@@ -17,9 +17,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
-import com.qprogramming.tasq.projects.task.Task;
-import com.qprogramming.tasq.projects.task.TaskService;
 import com.qprogramming.tasq.support.ProjectSorter;
+import com.qprogramming.tasq.task.TaskService;
 
 @Secured("ROLE_USER")
 @ControllerAdvice

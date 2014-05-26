@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.qprogramming.tasq.projects.task.Task;
-import com.qprogramming.tasq.projects.task.TaskService;
 import com.qprogramming.tasq.support.ProjectSorter;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.web.MessageHelper;
+import com.qprogramming.tasq.task.Task;
+import com.qprogramming.tasq.task.TaskService;
 
 @Controller
 public class ProjetController {

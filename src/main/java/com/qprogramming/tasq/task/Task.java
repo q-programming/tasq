@@ -1,4 +1,4 @@
-package com.qprogramming.tasq.projects.task;
+package com.qprogramming.tasq.task;
 
 import java.util.Date;
 import java.util.List;
@@ -10,6 +10,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.projects.Project;
@@ -57,9 +59,8 @@ public class Task {
 	@Column
 	private Long estimate;
 
-	@Column
-	@ElementCollection(targetClass = Date.class)
-	private List<Date> worklog;
+	@OneToMany(fetch = FetchType.EAGER)
+	private List<WorkLog> worklog;
 
 	public Long getId() {
 		return id;
@@ -111,10 +112,6 @@ public class Task {
 
 	public Long getEstimate() {
 		return estimate;
-	}
-
-	public List<Date> getWorklog() {
-		return worklog;
 	}
 
 	public void setId(Long id) {
@@ -169,8 +166,49 @@ public class Task {
 		this.estimate = estimate;
 	}
 
-	public void setWorklog(List<Date> worklog) {
+	public List<WorkLog> getWorklog() {
+		return worklog;
+	}
+
+	public void setWorklog(List<WorkLog> worklog) {
 		this.worklog = worklog;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((task_id == null) ? 0 : task_id.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Task other = (Task) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (task_id == null) {
+			if (other.task_id != null)
+				return false;
+		} else if (!task_id.equals(other.task_id))
+			return false;
+		return true;
 	}
 
 }
