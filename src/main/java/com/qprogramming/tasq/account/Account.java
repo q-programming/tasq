@@ -7,8 +7,10 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 import javax.persistence.Transient;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -22,7 +24,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class Account implements java.io.Serializable, UserDetails {
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy=GenerationType.TABLE, generator="generatorName")  
+	@TableGenerator(name="generatorName", allocationSize=1)  
 	private Long id;
 
 	@Column(unique = true)
