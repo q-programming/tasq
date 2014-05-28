@@ -11,9 +11,16 @@
 	<c:set var="taskDesc_text">
 		<s:message code="task.description" />
 	</c:set>
-	<h3>[${task.taskId}] ${task.name}</h3>
+	<h3>[${task.id}] ${task.name}</h3>
 	<hr>
 	${task.description}
+	<hr>
+	WorkLog
+	<table class="table table-condensed">
+	<c:forEach items="${task.worklog}" var="worklog">
+		<tr><td>${worklog.account} ${worklog.type} - ${worklog.time}</td></tr>
+	</c:forEach>
+	</table>
 </div>
 <script>
 	$(document).ready(function($) {

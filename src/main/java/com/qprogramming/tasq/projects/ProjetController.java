@@ -112,7 +112,6 @@ public class ProjetController {
 					new Object[] { project_id }, "");
 			return null;
 		}
-
 		Project new_project = newProjectForm.createProject();
 		new_project = projSrv.save(new_project);
 		MessageHelper.addSuccessAttribute(

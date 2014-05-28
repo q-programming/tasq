@@ -2,6 +2,7 @@ package com.qprogramming.tasq.projects;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -57,6 +58,7 @@ public class Project {
 	public Project(String name, Account administrator) {
 		setName(name);
 		setAdministrator(administrator);
+		addParticipant(administrator);
 		setStartDate(new Date());
 		setLastVisit(new Date());
 	}
@@ -96,6 +98,12 @@ public class Project {
 
 	public void setParticipants(List<Account> participants) {
 		this.participants = participants;
+	}
+	public void addParticipant(Account account){
+		if (participants == null){
+			participants = new LinkedList<Account>();
+		}
+		participants.add(account);
 	}
 
 	public void setStartDate(Date startDate) {

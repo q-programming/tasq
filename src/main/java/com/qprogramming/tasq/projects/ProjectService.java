@@ -1,6 +1,5 @@
 package com.qprogramming.tasq.projects;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.qprogramming.tasq.account.Account;
-import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.support.Utils;
 
 @Service
@@ -36,21 +34,19 @@ public class ProjectService {
 
 	public List<Project> findAllByUser() {
 		Account curent_user = Utils.getCurrentAccount();
-		List<Project> projects = findAll();
-		List<Project> userProjects = new LinkedList<Project>();
-		for (Project project : projects) {
-			if (project.getAdministrator().equals(curent_user)
-					|| project.getParticipants().contains(curent_user)) {
-				userProjects.add(project);
-			}
-		}
-		return userProjects;
+		return projRepo.findByParticipants_Id(curent_user.getId());
 	}
 
 	public Project activate(Long id) {
 		Project project = projRepo.findById(id);
 		if (project != null) {
-			Project active_project = projRepo.findByActive(true);
+			List<Project> users_projects = findAllByUser();
+			Project active_project = null;
+			for (Project user_project : users_projects) {
+				if (user_project.isActive()) {
+					active_project = user_project;
+				}
+			}
 			if (active_project != null) {
 				active_project.setActive(false);
 				projRepo.save(active_project);
@@ -63,5 +59,19 @@ public class ProjectService {
 
 	public Project findByProjectId(String project_id) {
 		return projRepo.findByProjectId(project_id);
+	}
+
+	/**
+	 * @return
+	 */
+	public Project findUserActiveProject() {
+		List<Project> projects = findAllByUser();
+		Project active = null;
+		for (Project project : projects) {
+			if (project.isActive()) {
+				active = project;
+			}
+		}
+		return active;
 	}
 }

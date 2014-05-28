@@ -56,7 +56,8 @@
 								code="task.tasks" text="Tasks" /><span class="caret"></span></a>
 						<ul class="dropdown-menu">
 							<c:forEach items="${last_tasks}" var="task">
-								<li>${task.name}</li>
+								<li><a href="<c:url value="/task?id=${task.id}"/>">[${task.id}]
+												${task.name}</a></li>
 							</c:forEach>
 							<li role="presentation" class="divider"></li>
 							<li style="margin: 10px;"><a href="<c:url value="/tasks"/>"><span

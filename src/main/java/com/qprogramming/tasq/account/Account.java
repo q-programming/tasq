@@ -1,22 +1,30 @@
 package com.qprogramming.tasq.account;
 
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Transient;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.hibernate.annotations.IndexColumn;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import com.qprogramming.tasq.task.Task;
 
 @SuppressWarnings("serial")
 @Entity
@@ -24,8 +32,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class Account implements java.io.Serializable, UserDetails {
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.TABLE, generator="generatorName")  
-	@TableGenerator(name="generatorName", allocationSize=1)  
+	@GeneratedValue(strategy = GenerationType.TABLE, generator = "generatorName")
+	@TableGenerator(name = "generatorName", allocationSize = 1)
 	private Long id;
 
 	@Column(unique = true)
@@ -61,6 +69,11 @@ public class Account implements java.io.Serializable, UserDetails {
 
 	@Column
 	private boolean email_notifications;
+
+	@ManyToMany(fetch = FetchType.EAGER)
+	@IndexColumn(name="INDEX_COL")
+	@JoinTable(name = "last_visited")
+	private List<Task> last_visited = new LinkedList<Task>();
 
 	@Transient
 	private Collection<GrantedAuthority> authorities;
@@ -159,6 +172,14 @@ public class Account implements java.io.Serializable, UserDetails {
 	// public byte[] getAvatar() {
 	// return avatar;
 	// }
+
+	public void setLast_visited(List<Task> last_visited) {
+		this.last_visited = last_visited;
+	}
+
+	public List<Task> getLast_visited() {
+		return last_visited;
+	}
 
 	public void setAvatar(byte[] avatar) {
 		this.avatar = avatar;

@@ -16,16 +16,16 @@
 <div class="white-frame" style="overflow: auto;">
 	<security:authentication property="principal" var="user" />
 	<table class="table table-condensed">
-		<thead style="font-weight: bold;">
+		<thead>
 			<tr>
-				<td style="width: 300px"><s:message code="task.name" /></td>
-				<td>${taskDesc_text}</td>
-				<td style="width: 100px"><s:message code="task.action" /></td>
+				<th style="width: 300px"><s:message code="task.name" /></th>
+				<th><s:message code="task.type"/></th>
+				<th style="width: 100px"><s:message code="main.action" /></th>
 			</tr>
 		</thead>
 		<c:forEach items="${tasks}" var="task">
 			<tr>
-				<td><a href="<c:url value="project?id=${task.id}"/>">[${task.taskId}]
+				<td><a href="<c:url value="task?id=${task.id}"/>">[${task.id}]
 						${task.name}</a></td>
 				<td>${project.description}</td>
 			</tr>

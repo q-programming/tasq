@@ -20,7 +20,7 @@
 			<tr>
 				<td style="width: 300px"><s:message code="project.name" /></td>
 				<td><s:message code="project.description" /></td>
-				<td style="width: 100px"><s:message code="project.action" /></td>
+				<td style="width: 100px"><s:message code="main.action" /></td>
 			</tr>
 		</thead>
 		<c:forEach items="${projects}" var="project">

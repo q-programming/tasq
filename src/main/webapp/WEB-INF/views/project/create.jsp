@@ -59,8 +59,8 @@
 		</div>
 		<div class="form-group" style="margin: 0 auto; text-align: center">
 			<div>
-				<button type="submit" class="btn btn-default">
-					<s:message code="project.create.btn" text="Create" />
+				<button type="submit" class="btn btn-success">
+					<s:message code="main.create" text="Create" />
 				</button>
 			</div>
 		</div>

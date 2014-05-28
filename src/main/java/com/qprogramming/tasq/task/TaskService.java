@@ -16,14 +16,26 @@ public class TaskService {
 	public Task save(Task task) {
 		return taskRepo.save(task);
 	}
-	
-	public List<Task> findAllByProject(Project project){
+
+	public List<Task> findAllByProject(Project project) {
 		return taskRepo.findAllByProject(project);
-		
+
+	}
+
+	public List<Task> findAll() {
+		return taskRepo.findAll();
 	}
 
 	public List<Task> findAllbyUser() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	/**
+	 * @param id
+	 * @return
+	 */
+	public Task findById(String id) {
+		return taskRepo.findById(id);
 	}
 }

@@ -10,7 +10,7 @@
 <c:set var="taskDesc_text">
 	<s:message code="task.description" text="Description" />
 </c:set>
-<div class="white-frame" style="width: 600px; overflow: auto;">
+<div class="white-frame" style="width: 700px; overflow: auto;">
 	<h3>
 		<s:message code="task.create" text="Create task"></s:message>
 	</h3>
@@ -41,7 +41,7 @@
 		</div>
 		<hr>
 		<div class="form-group">
-			<label>Project</label>
+			<label><s:message code="project.project" /></label>
 			<form:select path="project" id="project" style="width:300px;"
 				class="form-control">
 				<c:forEach items="${projects}" var="project">
@@ -50,10 +50,10 @@
 					</option>
 				</c:forEach>
 			</form:select>
-			<span class="help-block">Project help</span>
+			<span class="help-block"><s:message code ="task.project.help" /></span>
 		</div>
 		<div class="form-group">
-			<label>Type</label>
+			<label><s:message code ="task.type" /></label>
 			<form:select path="type" id="type" style="width:300px;"
 				class="form-control">
 				<option>Task</option>
@@ -61,33 +61,25 @@
 				<option>Bug</option>
 				<option>User story</option>
 			</form:select>
-			<span class="help-block">Task type help</span>
+			<span class="help-block"><s:message code ="task.type.help" /></span>
 		</div>
 		<div class="form-group">
-			<label>Estimate</label>
-			<form:input path="estimate" class="form-control" style="width:100px" />
-			<span class="help-block">An estimate of how much work remains
-				until this issue will be resolved.<br>The format of this is '
-				*w *d *h *m ' (representing weeks, days, hours and minutes - where *
-				can be any number)<br>Examples: 4d, 5h 30m, 60m and 3w.
+			<label><s:message code ="task.estimate" /></label>
+			<form:input path="estimate" class="form-control" style="width:150px" />
+			<span class="help-block"><s:message code ="task.estimate.help" /><br><s:message code ="task.estimate.help.pattern" />
 			</span>
 		</div>
-		<div class="form-group">
-			<label>Story points</label>
-			<form:input path="estimate" class="form-control" style="width:100px" />
-			<span class="help-block">Measurement of complexity and/or size
-				of a requirement.</span>
+		<div>
+			<label><s:message code ="task.storyPoints" /></label>
+			<form:input path="estimate" class="form-control" style="width:150px" />
+			<span class="help-block"><s:message code ="task.storyPoints.help" /></span>
 		</div>
-
-
-		<div class="form-group" style="margin: 0 auto; text-align: center">
-			<div>
-				<button type="submit" class="btn btn-default">
-					<s:message code="project.create.btn" text="Create" />
+		<div style="margin: 10px auto; text-align: right;">
+				<button type="submit" class="btn btn-success">
+					<s:message code="main.create" text="Create" />
 				</button>
-			</div>
+				<span class="btn" onclick="location.href='<c:url value="/"/>';"><s:message code="main.cancel" text="Cancel" /></span>
 		</div>
-
 	</form:form>
 </div>
 <script>

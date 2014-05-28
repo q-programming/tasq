@@ -33,9 +33,11 @@
 	<h3>[${project.projectId}] ${project.name}</h3>
 	<hr>
 	${project.description}
+	<hr>
+	<h3><s:message code="task.tasks"/></h3>
 	<table>
 	<c:forEach items="${tasks}" var="task">
-		<tr><td>${task.name}</tr>
+		<tr><td><a href="<c:url value="task?id=${task.id}"/>">[${task.id}] ${task.name}</a></tr>
 	</c:forEach>
 	</table>
 </div>

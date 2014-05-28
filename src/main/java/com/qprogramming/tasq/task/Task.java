@@ -1,38 +1,30 @@
 package com.qprogramming.tasq.task;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.TableGenerator;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.projects.Project;
+import com.qprogramming.tasq.task.worklog.WorkLog;
 
 @Entity
 public class Task {
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.TABLE, generator="generatorName")  
-	@TableGenerator(name="generatorName", allocationSize=1)  
-	private Long id;
-
-	@Column(unique = true)
-	private String task_id;
+	private String id;
 
 	@Column
 	private String name;
 
-	@Column
+	@Column(length = 4000)
 	private String description;
 
 	@ManyToOne(fetch = FetchType.EAGER)
@@ -65,12 +57,8 @@ public class Task {
 	@OneToMany(fetch = FetchType.EAGER)
 	private List<WorkLog> worklog;
 
-	public Long getId() {
+	public String getId() {
 		return id;
-	}
-
-	public String getTask_id() {
-		return task_id;
 	}
 
 	public String getName() {
@@ -117,12 +105,8 @@ public class Task {
 		return estimate;
 	}
 
-	public void setId(Long id) {
+	public void setId(String id) {
 		this.id = id;
-	}
-
-	public void setTask_id(String task_id) {
-		this.task_id = task_id;
 	}
 
 	public void setName(String name) {
@@ -177,41 +161,11 @@ public class Task {
 		this.worklog = worklog;
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((task_id == null) ? 0 : task_id.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Task other = (Task) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		if (task_id == null) {
-			if (other.task_id != null)
-				return false;
-		} else if (!task_id.equals(other.task_id))
-			return false;
-		return true;
+	public void addWorkLog(WorkLog wl) {
+		if (worklog == null) {
+			worklog = new LinkedList<WorkLog>();
+		}
+		worklog.add(wl);
 	}
 
 }

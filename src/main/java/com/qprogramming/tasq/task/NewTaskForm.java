@@ -3,6 +3,8 @@
  */
 package com.qprogramming.tasq.task;
 
+import java.util.Date;
+
 import org.hibernate.validator.constraints.NotBlank;
 
 /**
@@ -11,7 +13,7 @@ import org.hibernate.validator.constraints.NotBlank;
  */
 public class NewTaskForm {
 	private static final String NOT_BLANK_MESSAGE = "{notBlank.message}";
-	
+
 	private Long id;
 
 	@NotBlank(message = NOT_BLANK_MESSAGE)
@@ -42,8 +44,11 @@ public class NewTaskForm {
 	public Task createTask() {
 		Task task = new Task();
 		task.setName(getName());
+		task.setCreate_date(new Date());
 		task.setDescription(getDescription());
-		task.setStory_points(Integer.parseInt(getStory_points()));
+		if (null != getStory_points()) {
+			task.setStory_points(Integer.parseInt(getStory_points()));
+		}
 		// TODO estimate
 
 		return task;
