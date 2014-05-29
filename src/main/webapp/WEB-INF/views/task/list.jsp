@@ -4,14 +4,30 @@
 	uri="http://www.springframework.org/security/tags"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <c:set var="tasks_text">
-	<s:message code="tasks.tasks" text="Tasks" />
+	<s:message code="task.tasks" text="Tasks" />
 </c:set>
 <c:set var="taskDesc_text">
 	<s:message code="task.description" text="Description" />
 </c:set>
-
+<c:if test="${not empty param.projectID}">
+	<c:set var="active_project" value="${param.projectID}" />
+</c:if>
 <div>
-	<h3>${tasks_text}</h3>
+	<div style="display: table-cell;">
+		<h4>${tasks_text}</h4>
+	</div>
+	<div style="display: table-cell;padding-left:20px">
+		<select id="project" name="project" style="width: 300px;"
+			class="form-control">
+			<c:forEach items="${projects}" var="project">
+				<option
+					<c:if test="${active_project eq project.projectId}">
+						selected
+					</c:if>
+					value="${project.projectId}">${project.name}</option>
+			</c:forEach>
+		</select>
+	</div>
 </div>
 <div class="white-frame" style="overflow: auto;">
 	<security:authentication property="principal" var="user" />
@@ -19,7 +35,7 @@
 		<thead>
 			<tr>
 				<th style="width: 300px"><s:message code="task.name" /></th>
-				<th><s:message code="task.type"/></th>
+				<th><s:message code="task.type" /></th>
 				<th style="width: 100px"><s:message code="main.action" /></th>
 			</tr>
 		</thead>
@@ -34,7 +50,10 @@
 </div>
 <script>
 	$(document).ready(function($) {
-
+		$("#project").change(function(){
+			var link = "<c:url value="/tasks?projectID="/>";
+			window.location = link + $(this).val();
+		});
 	});
 
 	

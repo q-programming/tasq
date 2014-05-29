@@ -6,6 +6,11 @@ package com.qprogramming.tasq.task;
 import java.util.Date;
 
 import org.hibernate.validator.constraints.NotBlank;
+import org.joda.time.Period;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
+
+import com.qprogramming.tasq.support.PeriodHelper;
 
 /**
  * @author romanjak
@@ -41,16 +46,17 @@ public class NewTaskForm {
 		setDescription(task.getDescription());
 	}
 
-	public Task createTask() {
+	public Task createTask() throws IllegalArgumentException {
 		Task task = new Task();
 		task.setName(getName());
 		task.setCreate_date(new Date());
 		task.setDescription(getDescription());
-		if (null != getStory_points()) {
+		if (!"".equals(getStory_points())) {
 			task.setStory_points(Integer.parseInt(getStory_points()));
 		}
-		// TODO estimate
-
+		Period p = PeriodHelper.inFormat(getEstimate());
+		task.setEstimate(p);
+		task.setLogged_work(PeriodHelper.inFormat(""));
 		return task;
 	}
 

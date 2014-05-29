@@ -46,7 +46,7 @@
 				class="form-control">
 				<c:forEach items="${projects}" var="project">
 					<option
-						<c:if test="${project.active}"> selected style="font-weight:bold"</c:if>>${project.name}
+						<c:if test="${project.active}"> selected style="font-weight:bold"</c:if> value="${project.projectId}">${project.name}
 					</option>
 				</c:forEach>
 			</form:select>
@@ -66,12 +66,13 @@
 		<div class="form-group">
 			<label><s:message code ="task.estimate" /></label>
 			<form:input path="estimate" class="form-control" style="width:150px" />
+			<form:errors path="estimate" element="p" class="text-danger" />
 			<span class="help-block"><s:message code ="task.estimate.help" /><br><s:message code ="task.estimate.help.pattern" />
 			</span>
 		</div>
 		<div>
 			<label><s:message code ="task.storyPoints" /></label>
-			<form:input path="estimate" class="form-control" style="width:150px" />
+			<form:input path="story_points" class="form-control" style="width:150px" />
 			<span class="help-block"><s:message code ="task.storyPoints.help" /></span>
 		</div>
 		<div style="margin: 10px auto; text-align: right;">

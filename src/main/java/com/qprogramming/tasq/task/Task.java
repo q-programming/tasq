@@ -11,8 +11,11 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import org.joda.time.Period;
+
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.projects.Project;
+import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 
 @Entity
@@ -52,7 +55,10 @@ public class Task {
 	private Integer story_points;
 
 	@Column
-	private Long estimate;
+	private Period estimate;
+
+	@Column
+	private Period logged_work;
 
 	@OneToMany(fetch = FetchType.EAGER)
 	private List<WorkLog> worklog;
@@ -101,7 +107,11 @@ public class Task {
 		return story_points;
 	}
 
-	public Long getEstimate() {
+	public String getEstimate() {
+		return PeriodHelper.outFormat(estimate);
+	}
+
+	public Period getRawEstimate() {
 		return estimate;
 	}
 
@@ -149,7 +159,7 @@ public class Task {
 		this.story_points = story_points;
 	}
 
-	public void setEstimate(Long estimate) {
+	public void setEstimate(Period estimate) {
 		this.estimate = estimate;
 	}
 
@@ -166,6 +176,65 @@ public class Task {
 			worklog = new LinkedList<WorkLog>();
 		}
 		worklog.add(wl);
+	}
+
+	public String getLogged_work() {
+		return PeriodHelper.outFormat(logged_work);
+	}
+	public Period getRawLogged_work(){
+		return logged_work;
+	}
+
+	public void setLogged_work(Period logged_work) {
+		this.logged_work = logged_work;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+
+		return getId() + " " + getName();
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((project == null) ? 0 : project.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Task other = (Task) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (project == null) {
+			if (other.project != null)
+				return false;
+		} else if (!project.equals(other.project))
+			return false;
+		return true;
 	}
 
 }

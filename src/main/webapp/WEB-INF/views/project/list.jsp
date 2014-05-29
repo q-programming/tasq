@@ -25,8 +25,8 @@
 		</thead>
 		<c:forEach items="${projects}" var="project">
 			<c:if test="${project.active}">
-				<tr style="background: lightblue;">
-					<td><a href="<c:url value="project?id=${project.id}"/>"><b>[${project.projectId}] ${project.name}</b></a></td>
+				<tr style="background: #428bca;color:white">
+					<td><a style="color:white" href="<c:url value="project?id=${project.id}"/>"><b>[${project.projectId}] ${project.name}</b></a></td>
 					<td><b>${project.description}</b></td>
 					<td><a class="btn btn-default a-tooltip pull-right" style="padding: 6px 11px;"
 						href='#'

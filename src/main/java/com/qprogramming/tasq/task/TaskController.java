@@ -3,8 +3,10 @@
  */
 package com.qprogramming.tasq.task;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -13,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.hibernate.Hibernate;
+import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
@@ -28,6 +31,7 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
+import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.support.ProjectSorter;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.web.MessageHelper;
@@ -70,9 +74,15 @@ public class TaskController {
 		if (errors.hasErrors()) {
 			return null;
 		}
-		Project project = projectSrv.findByName(newTaskForm.getProject());
+		Project project = projectSrv.findByProjectId(newTaskForm.getProject());
 		if (project != null) {
-			Task task = newTaskForm.createTask();
+			Task task = null;
+			try {
+				task = newTaskForm.createTask();
+			} catch (IllegalArgumentException e) {
+				errors.rejectValue("estimate", "error.estimateFormat");
+				return null;
+			}
 			// build ID
 			Long taskCount = project.getTask_count();
 			taskCount++;
@@ -108,33 +118,60 @@ public class TaskController {
 		if (last_visited.size() > 4) {
 			last_visited = last_visited.subList(0, 4);
 		}
-		account.setLast_visited(last_visited);
+		List<Task> clean = new ArrayList<Task>();
+		HashSet<Task> lookup = new HashSet<Task>();
+		for (Task item : last_visited) {
+			if (lookup.add(item)) {
+				clean.add(item);
+			}
+		}
+		account.setLast_visited(clean);
 		accSrv.update(account);
 		model.addAttribute("task", task);
+		//TODO add displays %
 		return "task/details";
 	}
 
 	@RequestMapping(value = "tasks", method = RequestMethod.GET)
 	public String listTasks(
-			@RequestParam(value = "project", required = false) Long proj_id,
+			@RequestParam(value = "projectID", required = false) String proj_id,
 			Model model) {
 		List<Project> projects = projectSrv.findAllByUser();
 		Collections.sort(projects, new ProjectSorter(
 				ProjectSorter.SORTBY.LAST_VISIT, true));
 		model.addAttribute("projects", projects);
+
 		// Get active or choosen project
 		Project active = null;
 		if (proj_id == null) {
 			active = projectSrv.findUserActiveProject();
 		} else {
-			active = projectSrv.findById(proj_id);
+			active = projectSrv.findByProjectId(proj_id);
 		}
 		if (active != null) {
 			List<Task> taskList = taskSrv.findAllByProject(active);
 			model.addAttribute("tasks", taskList);
+			model.addAttribute("active_project", active);
+		}
+		return "task/list";
+	}
+
+	@RequestMapping(value = "logwork", method = RequestMethod.POST)
+	public String logWork(@RequestParam(value = "taskID") String taskID,@RequestParam(value="logged_work") String logged_work,
+			RedirectAttributes ra, HttpServletRequest request,Model model) {
+		Task task = taskSrv.findById(taskID);
+		if (task != null) {
+			//TODO add LOGFORM to better handle errors
+			Period logged = PeriodHelper.inFormat(logged_work);
+			Period task_work_log = task.getRawLogged_work();
+			task_work_log = PeriodHelper.plusPeriods(task_work_log, logged);
+			//TODO if logged is greater than esstimate?
+			task.setLogged_work(task_work_log);
+			taskSrv.save(task);
+			//TODO add worklog 
 		}
 
-		return "task/list";
+		return "redirect:/task?id=" + taskID;
 	}
 
 }

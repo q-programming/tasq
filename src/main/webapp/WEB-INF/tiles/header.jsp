@@ -29,14 +29,14 @@
 						<ul class="dropdown-menu">
 							<li><strong style="padding: 5px 10px;"><s:message
 										code="project.recent" text="Recent projects" /></strong></li>
-							<c:forEach items="${last_projects}" var="project">
-								<c:if test="${project.active }">
-									<li><a href="<c:url value="/project?id=${project.id}"/>"><b>[${project.projectId}]
-												${project.name}</b></a></li>
+							<c:forEach items="${last_projects}" var="l_project">
+								<c:if test="${l_project.active }">
+									<li><a href="<c:url value="/project?id=${l_project.id}"/>"><b>[${l_project.projectId}]
+												${l_project.name}</b></a></li>
 								</c:if>
-								<c:if test="${not project.active }">
-									<li><a href="<c:url value="/project?id=${project.id}"/>">[${project.projectId}]
-											${project.name}</a></li>
+								<c:if test="${not l_project.active }">
+									<li><a href="<c:url value="/project?id=${l_project.id}"/>">[${l_project.projectId}]
+											${l_project.name}</a></li>
 								</c:if>
 							</c:forEach>
 							<li role="presentation" class="divider"></li>
@@ -55,9 +55,9 @@
 							id="dropdownMenu1" data-toggle="dropdown"><s:message
 								code="task.tasks" text="Tasks" /><span class="caret"></span></a>
 						<ul class="dropdown-menu">
-							<c:forEach items="${last_tasks}" var="task">
-								<li><a href="<c:url value="/task?id=${task.id}"/>">[${task.id}]
-												${task.name}</a></li>
+							<c:forEach items="${last_tasks}" var="l_task">
+								<li><a href="<c:url value="/task?id=${l_task.id}"/>">[${l_task.id}]
+												${l_task.name}</a></li>
 							</c:forEach>
 							<li role="presentation" class="divider"></li>
 							<li style="margin: 10px;"><a href="<c:url value="/tasks"/>"><span
