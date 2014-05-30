@@ -38,6 +38,9 @@ public class WorkLog {
 
 	@Enumerated(EnumType.STRING)
 	private LogType type;
+	
+	@Column
+	private String message;
 
 	public Long getId() {
 		return id;
@@ -55,6 +58,10 @@ public class WorkLog {
 	public void setTime(Date time) {
 		this.time = time;
 	}
+	
+	public Date getRawTime(){
+		return time;
+	}
 
 	public Account getAccount() {
 		return account;
@@ -70,5 +77,13 @@ public class WorkLog {
 
 	public void setType(LogType type) {
 		this.type = type;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
 	}
 }

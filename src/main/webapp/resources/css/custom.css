@@ -6,6 +6,18 @@
 	margin: 10px auto;
 	background: white;
 }
-.hidden{
+
+.hidden {
 	visibility: hidden;
+}
+
+.bar_td {
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+.state_span {
+	padding: 4px;
+	font-size: smaller;
+	width: 100px;
 }

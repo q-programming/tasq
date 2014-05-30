@@ -7,8 +7,6 @@ import java.util.Date;
 
 import org.hibernate.validator.constraints.NotBlank;
 import org.joda.time.Period;
-import org.joda.time.format.PeriodFormatter;
-import org.joda.time.format.PeriodFormatterBuilder;
 
 import com.qprogramming.tasq.support.PeriodHelper;
 
@@ -51,6 +49,7 @@ public class NewTaskForm {
 		task.setName(getName());
 		task.setCreate_date(new Date());
 		task.setDescription(getDescription());
+		task.setState(TaskState.TO_DO);
 		if (!"".equals(getStory_points())) {
 			task.setStory_points(Integer.parseInt(getStory_points()));
 		}

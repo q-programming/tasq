@@ -26,7 +26,7 @@ public class PeriodHelper {
 	 * @return
 	 */
 	public static Period inFormat(String time) {
-		return IN_FORMATER.parsePeriod(time.replaceAll("\\s+",""));
+		return IN_FORMATER.parsePeriod(time.replaceAll("\\s+","")).normalizedStandard();
 	}
 	
 	/** Returns string from period formated in OUT_FORMATER form

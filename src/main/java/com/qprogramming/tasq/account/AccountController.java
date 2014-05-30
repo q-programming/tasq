@@ -54,7 +54,7 @@ public class AccountController {
 
 	@Transactional
 	@RequestMapping(value = "settings", method = RequestMethod.POST)
-	public String saveSettings(@RequestParam(value = "emails") String emails,
+	public String saveSettings(@RequestParam(value = "emails",required=false) String emails,
 			@RequestParam(value = "language") String language,
 			RedirectAttributes ra, HttpServletRequest request,
 			HttpServletResponse response) {

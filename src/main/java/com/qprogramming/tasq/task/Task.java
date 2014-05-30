@@ -6,6 +6,8 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -19,7 +21,12 @@ import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 
 @Entity
-public class Task {
+public class Task implements java.io.Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7134768543931740392L;
 
 	@Id
 	private String id;
@@ -59,6 +66,9 @@ public class Task {
 
 	@Column
 	private Period logged_work;
+
+	@Column
+	private Enum<TaskState> state;
 
 	@OneToMany(fetch = FetchType.EAGER)
 	private List<WorkLog> worklog;
@@ -181,12 +191,39 @@ public class Task {
 	public String getLogged_work() {
 		return PeriodHelper.outFormat(logged_work);
 	}
-	public Period getRawLogged_work(){
+
+	public String getRemaining() {
+		return PeriodHelper.outFormat(getRawRemaining());
+	}
+
+	public Period getRawRemaining() {
+		return PeriodHelper.minusPeriods(estimate, logged_work);
+	}
+
+	public float getPercentage_logged() {
+		return logged_work.toStandardDuration().getMillis() * 100
+				/ estimate.toStandardDuration().getMillis();
+	};
+	
+	public float getPercentage_left() {
+		return getRawRemaining().toStandardDuration().getMillis() * 100
+				/ estimate.toStandardDuration().getMillis();
+	};
+
+	public Period getRawLogged_work() {
 		return logged_work;
 	}
 
 	public void setLogged_work(Period logged_work) {
 		this.logged_work = logged_work;
+	}
+
+	public Enum<TaskState> getState(){
+		return state;
+	}
+
+	public void setState(Enum<TaskState> state) {
+		this.state = state;
 	}
 
 	/*

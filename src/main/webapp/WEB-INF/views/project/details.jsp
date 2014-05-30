@@ -34,11 +34,29 @@
 	<hr>
 	${project.description}
 	<hr>
-	<h3><s:message code="task.tasks"/></h3>
+	<h3>
+		<s:message code="task.tasks" />
+	</h3>
 	<table>
-	<c:forEach items="${tasks}" var="task">
-		<tr><td><a href="<c:url value="task?id=${task.id}"/>">[${task.id}] ${task.name}</a></tr>
-	</c:forEach>
+		<c:forEach items="${tasks}" var="task">
+			<tr>
+				<td><a href="<c:url value="task?id=${task.id}"/>">[${task.id}]
+						${task.name}</a>
+				<td>
+				<td><div class="progress" style="width: 50px">
+						<c:set var="logged_class"></c:set>
+						<c:if test="${task.percentage_logged gt 100 or task.state eq 'BLOCKED'}">
+							<c:set var="logged_class">progress-bar-danger</c:set>
+						</c:if>
+						<c:if test="${task.state eq 'CLOSED'}">
+							<c:set var="logged_class">progress-bar-success</c:set>
+						</c:if>
+						<div class="progress-bar ${logged_class}" role="progressbar"
+							aria-valuenow="${task.percentage_logged}" aria-valuemin="0"
+							aria-valuemax="100" style="width:${task.percentage_logged}%"></div>
+					</div></td>
+			</tr>
+		</c:forEach>
 	</table>
 </div>
 <script>

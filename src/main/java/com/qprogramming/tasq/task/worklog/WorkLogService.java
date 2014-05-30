@@ -25,13 +25,14 @@ public class WorkLogService {
 	@Autowired
 	TaskService taskSrv;
 
-	public void addWorkLog(Task task, LogType type) {
+	public void addWorkLog(Task task, LogType type, String msg) {
 		task = taskSrv.findById(task.getId());
 		if (task != null) {
 			WorkLog wl = new WorkLog();
 			wl.setAccount(Utils.getCurrentAccount());
 			wl.setTime(new Date());
 			wl.setType(type);
+			wl.setMessage(msg);
 			wl = wlRepo.save(wl);
 			task.addWorkLog(wl);
 			taskSrv.save(task);

@@ -33,7 +33,9 @@ import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.support.ProjectSorter;
+import com.qprogramming.tasq.support.TaskSorter;
 import com.qprogramming.tasq.support.Utils;
+import com.qprogramming.tasq.support.WorkLogSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLog;
@@ -93,7 +95,7 @@ public class TaskController {
 			taskSrv.save(task);
 			project.setTask_count(taskCount);
 			projectSrv.save(project);
-			wlSrv.addWorkLog(task, LogType.CREATE);
+			wlSrv.addWorkLog(task, LogType.CREATE, "");
 			return "redirect:/task?id=" + taskID;
 		}
 		return null;
@@ -127,8 +129,8 @@ public class TaskController {
 		}
 		account.setLast_visited(clean);
 		accSrv.update(account);
+		Collections.sort(task.getWorklog(),new WorkLogSorter(true));
 		model.addAttribute("task", task);
-		//TODO add displays %
 		return "task/details";
 	}
 
@@ -150,6 +152,8 @@ public class TaskController {
 		}
 		if (active != null) {
 			List<Task> taskList = taskSrv.findAllByProject(active);
+			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID,
+					false));
 			model.addAttribute("tasks", taskList);
 			model.addAttribute("active_project", active);
 		}
@@ -157,20 +161,40 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "logwork", method = RequestMethod.POST)
-	public String logWork(@RequestParam(value = "taskID") String taskID,@RequestParam(value="logged_work") String logged_work,
-			RedirectAttributes ra, HttpServletRequest request,Model model) {
+	public String logWork(@RequestParam(value = "taskID") String taskID,
+			@RequestParam(value = "logged_work") String logged_work,
+			RedirectAttributes ra, HttpServletRequest request, Model model) {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
-			//TODO add LOGFORM to better handle errors
+			// TODO add LOGFORM to better handle errors
 			Period logged = PeriodHelper.inFormat(logged_work);
 			Period task_work_log = task.getRawLogged_work();
 			task_work_log = PeriodHelper.plusPeriods(task_work_log, logged);
-			//TODO if logged is greater than esstimate?
+			// TODO if logged is greater than esstimate?
 			task.setLogged_work(task_work_log);
+			if (task.getState().equals(TaskState.TO_DO)) {
+				task.setState(TaskState.ONGOING);
+			}
 			taskSrv.save(task);
-			//TODO add worklog 
+			// TODO add worklog
+			wlSrv.addWorkLog(task, LogType.LOG, logged_work);
 		}
 
+		return "redirect:/task?id=" + taskID;
+	}
+
+	@RequestMapping(value = "/task/state", method = RequestMethod.POST)
+	public String changeState(@RequestParam(value = "taskID") String taskID,
+			@RequestParam(value = "state") TaskState state,
+			RedirectAttributes ra, HttpServletRequest request, Model model) {
+		Task task = taskSrv.findById(taskID);
+		if (task != null) {
+			TaskState old_state = (TaskState) task.getState();
+			task.setState(state);
+			taskSrv.save(task);
+			wlSrv.addWorkLog(task, LogType.STATUS, old_state.getDescription()
+					+ " -> " + state.getDescription());
+		}
 		return "redirect:/task?id=" + taskID;
 	}
 

@@ -3770,8 +3770,8 @@ to {
 
 }
 .progress {
-	height: 20px;
-	margin-bottom: 20px;
+	height: 15px;
+	margin-bottom: 0px;
 	overflow: hidden;
 	background-color: #f5f5f5;
 	border-radius: 4px;

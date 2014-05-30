@@ -1,5 +1,6 @@
 package com.qprogramming.tasq.projects;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
@@ -17,7 +18,12 @@ import javax.persistence.TableGenerator;
 import com.qprogramming.tasq.account.Account;
 
 @Entity
-public class Project {
+public class Project implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 143468447150832121L;
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.TABLE, generator="generatorName")  

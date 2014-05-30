@@ -8,7 +8,7 @@ import com.qprogramming.tasq.task.Task;
 public class TaskSorter implements Comparator<Task> {
 
 	public static enum SORTBY {
-		NAME, START_DATE, LAST_VISIT;
+		NAME, START_DATE, LAST_VISIT,ID;
 	}
 
 	private SORTBY sortBy;
@@ -42,6 +42,10 @@ public class TaskSorter implements Comparator<Task> {
 		case NAME:
 			result = a.getName().compareTo(b.getName());
 			return isDescending ? -result : result;
+		case ID:
+			result = a.getId().compareTo(b.getId());
+			return isDescending ? -result : result;
+
 		default:
 			result = 0;
 			break;
