@@ -155,14 +155,27 @@ public class TaskController {
 		return "task/list";
 	}
 
+	/**
+	 * Logs work . If only digits are sent , it's pressumed that those were
+	 * hours
+	 * 
+	 * @param taskID - ID of task for which work is logged
+	 * @param logged_work - amount of time spent
+	 * @param ra 
+	 * @param request
+	 * @param model
+	 * @return
+	 */
 	@RequestMapping(value = "logwork", method = RequestMethod.POST)
 	public String logWork(@RequestParam(value = "taskID") String taskID,
 			@RequestParam(value = "logged_work") String logged_work,
 			RedirectAttributes ra, HttpServletRequest request, Model model) {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
-			// TODO add LOGFORM to better handle errors
 			try {
+				if (logged_work.matches("[0-9]+")) {
+					logged_work += "h";
+				}
 				Period logged = PeriodHelper.inFormat(logged_work);
 				if (task.getState().equals(TaskState.TO_DO)) {
 					task.setState(TaskState.ONGOING);
