@@ -6,12 +6,11 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
 import org.joda.time.Period;
 
@@ -64,7 +63,7 @@ public class Task implements java.io.Serializable {
 	@Column
 	private Period estimate;
 
-	@Column
+	@Transient
 	private Period logged_work;
 
 	@Column
@@ -189,6 +188,7 @@ public class Task implements java.io.Serializable {
 	}
 
 	public String getLogged_work() {
+		getRawLogged_work();
 		return PeriodHelper.outFormat(logged_work);
 	}
 
@@ -201,16 +201,22 @@ public class Task implements java.io.Serializable {
 	}
 
 	public float getPercentage_logged() {
+		getRawLogged_work();
 		return logged_work.toStandardDuration().getMillis() * 100
 				/ estimate.toStandardDuration().getMillis();
 	};
-	
+
 	public float getPercentage_left() {
 		return getRawRemaining().toStandardDuration().getMillis() * 100
 				/ estimate.toStandardDuration().getMillis();
 	};
 
 	public Period getRawLogged_work() {
+		logged_work = new Period();
+		for (WorkLog activity : worklog) {
+			logged_work = PeriodHelper.plusPeriods(logged_work,
+					activity.getActivity());
+		}
 		return logged_work;
 	}
 
@@ -218,7 +224,7 @@ public class Task implements java.io.Serializable {
 		this.logged_work = logged_work;
 	}
 
-	public Enum<TaskState> getState(){
+	public Enum<TaskState> getState() {
 		return state;
 	}
 
@@ -273,5 +279,4 @@ public class Task implements java.io.Serializable {
 			return false;
 		return true;
 	}
-
 }

@@ -5,16 +5,12 @@ package com.qprogramming.tasq.task;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
-import org.hibernate.Hibernate;
 import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -38,7 +34,6 @@ import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.WorkLogSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
 import com.qprogramming.tasq.task.worklog.LogType;
-import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
 /**
@@ -95,7 +90,7 @@ public class TaskController {
 			taskSrv.save(task);
 			project.setTask_count(taskCount);
 			projectSrv.save(project);
-			wlSrv.addWorkLog(task, LogType.CREATE, "");
+			wlSrv.addWorkLog(task, LogType.CREATE, "", null);
 			return "redirect:/task?id=" + taskID;
 		}
 		return null;
@@ -129,7 +124,7 @@ public class TaskController {
 		}
 		account.setLast_visited(clean);
 		accSrv.update(account);
-		Collections.sort(task.getWorklog(),new WorkLogSorter(true));
+		Collections.sort(task.getWorklog(), new WorkLogSorter(true));
 		model.addAttribute("task", task);
 		return "task/details";
 	}
@@ -167,19 +162,21 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// TODO add LOGFORM to better handle errors
-			Period logged = PeriodHelper.inFormat(logged_work);
-			Period task_work_log = task.getRawLogged_work();
-			task_work_log = PeriodHelper.plusPeriods(task_work_log, logged);
-			// TODO if logged is greater than esstimate?
-			task.setLogged_work(task_work_log);
-			if (task.getState().equals(TaskState.TO_DO)) {
-				task.setState(TaskState.ONGOING);
+			try {
+				Period logged = PeriodHelper.inFormat(logged_work);
+				if (task.getState().equals(TaskState.TO_DO)) {
+					task.setState(TaskState.ONGOING);
+				}
+				taskSrv.save(task);
+				wlSrv.addWorkLog(task, LogType.LOG, logged_work, logged);
+			} catch (IllegalArgumentException e) {
+				MessageHelper.addErrorAttribute(
+						ra,
+						msg.getMessage("error.estimateFormat", null,
+								Utils.getCurrentLocale()));
+				return "redirect:/task?id=" + taskID;
 			}
-			taskSrv.save(task);
-			// TODO add worklog
-			wlSrv.addWorkLog(task, LogType.LOG, logged_work);
 		}
-
 		return "redirect:/task?id=" + taskID;
 	}
 
@@ -193,7 +190,7 @@ public class TaskController {
 			task.setState(state);
 			taskSrv.save(task);
 			wlSrv.addWorkLog(task, LogType.STATUS, old_state.getDescription()
-					+ " -> " + state.getDescription());
+					+ " -> " + state.getDescription(), null);
 		}
 		return "redirect:/task?id=" + taskID;
 	}

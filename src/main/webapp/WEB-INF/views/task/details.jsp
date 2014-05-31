@@ -33,7 +33,7 @@
 	<%--ESTIMATES TAB --%>
 	<c:set var="estimate_value">100</c:set>
 	<c:if test="${task.percentage_logged gt 100}">
-		<c:set var="estimate_value">${100 + remaning}</c:set>
+		<c:set var="estimate_value">${100 + task.percentage_left}</c:set>
 	</c:if>
 	<table style="width: 400px">
 		<tr>
