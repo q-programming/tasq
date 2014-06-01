@@ -37,23 +37,31 @@
 			<tr>
 				<th style="width: 30px"><s:message code="task.type" /></th>
 				<th style="width: 500px"><s:message code="task.name" /></th>
-				<th><s:message code="task.progress"/></th>
-				<th><s:message code="task.state"/></th>
+				<th><s:message code="task.progress" /></th>
+				<th><s:message code="task.state" /></th>
 				<th style="width: 100px"><s:message code="main.action" /></th>
 			</tr>
 		</thead>
 		<c:forEach items="${tasks}" var="task">
-			<tr>
-				<td><t:type type="${task.type}" list="true"/></td>
-				<td><a href="<c:url value="task?id=${task.id}"/>">[${task.id}]
-						${task.name}</a></td>
-				<c:if test="${task.estimate eq '0m'}">
-					<td>${task.logged_work}</td>
-				</c:if>
-				<c:if test="${task.estimate ne '0m'}">
+			<c:if test="${task.id eq user.active_task[0]}">
+				<tr style="background: #428bca; color: white">
+					<c:set var="blinker" value="blink" />
+			</c:if>
+			<c:if test="${task.id ne user.active_task[0]}">
+				<tr>
+					<c:set var="blinker" value="" />
+			</c:if>
+			<td><t:type type="${task.type}" list="true" /></td>
+			<td><a href="<c:url value="task?id=${task.id}"/>"
+				style="color: inherit;">[${task.id}] ${task.name}</a></td>
+			<c:if test="${task.estimate eq '0m'}">
+				<td>${task.logged_work}</td>
+			</c:if>
+			<c:if test="${task.estimate ne '0m'}">
 				<td><div class="progress" style="width: 50px">
 						<c:set var="logged_class"></c:set>
-						<c:if test="${task.percentage_logged gt 100 or task.state eq 'BLOCKED'}">
+						<c:if
+							test="${task.percentage_logged gt 100 or task.state eq 'BLOCKED'}">
 							<c:set var="logged_class">progress-bar-danger</c:set>
 						</c:if>
 						<c:if test="${task.state eq 'CLOSED'}">
@@ -63,9 +71,9 @@
 							aria-valuenow="${task.percentage_logged}" aria-valuemin="0"
 							aria-valuemax="100" style="width:${task.percentage_logged}%"></div>
 					</div></td>
-				</c:if>
-				<td><t:state state="${task.state}"></t:state></td>
-				<td></td>
+			</c:if>
+			<td class="${blinker}"><t:state state="${task.state}"></t:state></td>
+			<td></td>
 			</tr>
 		</c:forEach>
 	</table>

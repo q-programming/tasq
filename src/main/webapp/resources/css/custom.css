@@ -36,3 +36,29 @@
 	border-radius: 5px;
 	border-color: darkgray;
 }
+
+.footer-time {
+	padding: 10px;
+	position: fixed;
+	bottom: 0;
+	margin-bottom: 0;
+	margin: 0px auto;
+	width:100%;
+	border: 1px solid lightgray;
+	border-radius: 5px;
+	background: white;
+}
+
+/* Blink */
+@-webkit-keyframes blinker {
+  from {opacity: 1.0;}
+  to {opacity: 0.0;}
+}
+.blink{
+	text-decoration: blink;
+	-webkit-animation-name: blinker;
+	-webkit-animation-duration: 0.8s;
+	-webkit-animation-iteration-count:infinite;
+	-webkit-animation-timing-function:ease-in-out;
+	-webkit-animation-direction: alternate;
+}

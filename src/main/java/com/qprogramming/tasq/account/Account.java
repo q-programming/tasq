@@ -21,6 +21,7 @@ import javax.persistence.Transient;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.hibernate.annotations.IndexColumn;
 import org.hibernate.validator.constraints.NotEmpty;
+import org.joda.time.DateTime;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -71,12 +72,19 @@ public class Account implements java.io.Serializable, UserDetails {
 	private boolean email_notifications;
 
 	@ManyToMany(fetch = FetchType.EAGER)
-	@IndexColumn(name="INDEX_COL")
+	@IndexColumn(name = "INDEX_COL")
 	@JoinTable(name = "last_visited")
 	private List<Task> last_visited = new LinkedList<Task>();
 
 	@Transient
 	private Collection<GrantedAuthority> authorities;
+
+	@Column
+	private Object[] active_task = new Object[] { "", "" };
+	
+//	@Transient
+//	private long active_task_seconds;
+
 
 	public enum Role {
 		ROLE_USER, ROLE_ADMIN
@@ -216,6 +224,33 @@ public class Account implements java.io.Serializable, UserDetails {
 		this.email_notifications = email_notifications;
 	}
 
+	public Object[] getActive_task() {
+		return active_task;
+	}
+
+	public Object getActive_task_time() {
+		return active_task[1];
+	}
+
+	public void startTimerOnTask(String taskID) {
+		active_task = new Object[] { taskID, new DateTime() };
+	}
+
+	public void setActive_task(Object[] task) {
+		active_task = task;
+	}
+
+	public void clearActive_task() {
+		active_task = new Object[] {};
+	}
+
+	public long getActive_task_seconds() {
+		if (active_task != null && active_task.length > 0) {
+			return ((DateTime) active_task[1]).getMillis() / 1000;
+		}
+		return 0;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -318,4 +353,30 @@ public class Account implements java.io.Serializable, UserDetails {
 		return true;
 	}
 
+	public class ActiveTask {
+		private String taskID;
+		private DateTime started;
+
+		public ActiveTask(String taskID) {
+			this.taskID = taskID;
+			this.started = new DateTime();
+		}
+
+		public String getTaskID() {
+			return taskID;
+		}
+
+		public DateTime getStarted() {
+			return started;
+		}
+
+		public void setTaskID(String taskID) {
+			this.taskID = taskID;
+		}
+
+		public void setStarted(DateTime started) {
+			this.started = started;
+		}
+
+	}
 }

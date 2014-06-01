@@ -5,13 +5,17 @@ package com.qprogramming.tasq.task;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.joda.time.DateTime;
+import org.joda.time.Minutes;
 import org.joda.time.Period;
+import org.joda.time.ReadableInstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
@@ -24,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.account.Account.ActiveTask;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
@@ -42,6 +47,10 @@ import com.qprogramming.tasq.task.worklog.WorkLogService;
  */
 @Controller
 public class TaskController {
+
+	private static final String START = "start";
+
+	private static final String STOP = "stop";
 
 	@Autowired
 	private TaskService taskSrv;
@@ -67,7 +76,8 @@ public class TaskController {
 	@RequestMapping(value = "task/create", method = RequestMethod.POST)
 	public String createTask(
 			@Valid @ModelAttribute("newTaskForm") NewTaskForm newTaskForm,
-			Errors errors, RedirectAttributes ra, HttpServletRequest request,Model model) {
+			Errors errors, RedirectAttributes ra, HttpServletRequest request,
+			Model model) {
 		if (errors.hasErrors()) {
 			model.addAttribute("projects", projectSrv.findAllByUser());
 			return null;
@@ -107,7 +117,7 @@ public class TaskController {
 					ra,
 					msg.getMessage("task.notexists", null,
 							Utils.getCurrentLocale()));
-			return "redirect:/projects";
+			return "redirect:/tasks";
 		}
 		Account account = Utils.getCurrentAccount();
 		account = accSrv.findByEmail(account.getEmail());
@@ -161,9 +171,11 @@ public class TaskController {
 	 * Logs work . If only digits are sent , it's pressumed that those were
 	 * hours
 	 * 
-	 * @param taskID - ID of task for which work is logged
-	 * @param logged_work - amount of time spent
-	 * @param ra 
+	 * @param taskID
+	 *            - ID of task for which work is logged
+	 * @param logged_work
+	 *            - amount of time spent
+	 * @param ra
 	 * @param request
 	 * @param model
 	 * @return
@@ -206,6 +218,49 @@ public class TaskController {
 			taskSrv.save(task);
 			wlSrv.addWorkLog(task, LogType.STATUS, old_state.getDescription()
 					+ " -> " + state.getDescription(), null);
+		}
+		return "redirect:/task?id=" + taskID;
+	}
+
+	@RequestMapping(value = "/task/time", method = RequestMethod.GET)
+	public String handleTimer(@RequestParam(value = "id") String taskID,
+			@RequestParam(value = "action") String action,
+			RedirectAttributes ra, HttpServletRequest request, Model model) {
+		Utils.setHttpRequest(request);
+		Task task = taskSrv.findById(taskID);
+		if (task != null) {
+			if (action.equals(START)) {
+				Account account = Utils.getCurrentAccount();
+				if (account.getActive_task() != null & account.getActive_task().length > 0 ) {
+//					String task_URL = Utils.getBaseURL() + "task?id="
+//							+ account.getActive_task()[0];
+					MessageHelper.addWarningAttribute(ra, msg.getMessage(
+							"task.stopTime.warning", new Object[] {account.getActive_task()[0]},
+							Utils.getCurrentLocale()));
+					return "redirect:" + request.getHeader("Referer");
+				}
+				account.startTimerOnTask(taskID);
+				accSrv.update(account);
+			} else if (action.equals(STOP)) {
+				Account account = Utils.getCurrentAccount();
+				DateTime now = new DateTime();
+				Period log_work = new Period(
+						(DateTime) account.getActive_task_time(), now);
+				// Only log work if greater than 1 minute
+				if (log_work.toStandardDuration().getMillis() / 1000 / 60 > 1) {
+					wlSrv.addWorkLog(task, LogType.LOG,
+							PeriodHelper.outFormat(log_work), log_work);
+				}
+				account.clearActive_task();
+				accSrv.update(account);
+			} else {
+
+			}
+			// taskSrv.save(task);
+			// wlSrv.addWorkLog(task, LogType.STATUS, old_state.getDescription()
+			// + " -> " + state.getDescription(), null);
+		}else{
+			return "redirect:" + request.getHeader("Referer");
 		}
 		return "redirect:/task?id=" + taskID;
 	}

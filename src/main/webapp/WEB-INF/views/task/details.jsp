@@ -36,9 +36,29 @@
 	<!-- Button trigger modal -->
 	<button class="btn btn-default btn-sm" data-toggle="modal"
 		data-target="#logWork">
-		<span class="glyphicon glyphicon-time"></span>
+		<span class="glyphicon glyphicon-calendar"></span>
 		<s:message code="task.logWork"></s:message>
 	</button>
+	<c:if test="${not empty user.active_task && user.active_task[0] eq task.id}">
+		<a href="<c:url value="/task/time?id=${task.id}&action=stop"/>">
+			<button class="btn btn-default btn-sm">
+				<span class="glyphicon glyphicon-time"></span>
+				<s:message code="task.stopTime"></s:message>
+			</button>
+		</a>
+		<div>
+			Current timer: <span class="timer"></span>
+		</div>
+	</c:if>
+	<c:if test="${empty user.active_task || user.active_task[0] ne task.id}">
+		<a href="<c:url value="/task/time?id=${task.id}&action=start"/>">
+			<button class="btn btn-default btn-sm">
+				<span class="glyphicon glyphicon-time"></span>
+				<s:message code="task.startTime"></s:message>
+			</button>
+		</a>
+	</c:if>
+
 	<%--ESTIMATES TAB --%>
 	<c:set var="estimate_value">100</c:set>
 	<c:if test="${task.percentage_logged gt 100}">
@@ -188,8 +208,28 @@
 </div>
 
 <script>
-	$(document).ready(function($) {
-	});
+// 	$(document).ready(
+// 			function($) {
+// 				var task_start_time = "${user.active_task_seconds}";
+// 				var startTime = new Date(0);
+// 				startTime.setUTCSeconds(task_start_time);
+// 				setTimeout(display, 1000);
 
-	
+// 				function display() {
+// 					var endTime = new Date();
+// 					var timeDiff = endTime - startTime;
+// 					timeDiff /= 1000;
+// 					var seconds = Math.round(timeDiff % 60);
+// 					timeDiff = Math.floor(timeDiff / 60);
+// 					var minutes = Math.round(timeDiff % 60);
+// 					timeDiff = Math.floor(timeDiff / 60);
+// 					var hours = Math.round(timeDiff % 24);
+// 					timeDiff = Math.floor(timeDiff / 24);
+// 					var days = timeDiff;
+// 					$("#time").text(
+// 							days + "d " + hours + "h " + minutes + "m "
+// 									+ seconds + "s");
+// 					setTimeout(display, 1000);
+// 				}
+// 			});
 </script>
