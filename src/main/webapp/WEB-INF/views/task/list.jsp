@@ -35,8 +35,8 @@
 	<table class="table table-condensed">
 		<thead>
 			<tr>
-				<th style="width: 50px"><s:message code="task.type" /></th>
-				<th style="width: 300px"><s:message code="task.name" /></th>
+				<th style="width: 30px"><s:message code="task.type" /></th>
+				<th style="width: 500px"><s:message code="task.name" /></th>
 				<th><s:message code="task.progress"/></th>
 				<th><s:message code="task.state"/></th>
 				<th style="width: 100px"><s:message code="main.action" /></th>
@@ -44,9 +44,13 @@
 		</thead>
 		<c:forEach items="${tasks}" var="task">
 			<tr>
-				<td></td>
+				<td><t:type type="${task.type}" list="true"/></td>
 				<td><a href="<c:url value="task?id=${task.id}"/>">[${task.id}]
 						${task.name}</a></td>
+				<c:if test="${task.estimate eq '0m'}">
+					<td>${task.logged_work}</td>
+				</c:if>
+				<c:if test="${task.estimate ne '0m'}">
 				<td><div class="progress" style="width: 50px">
 						<c:set var="logged_class"></c:set>
 						<c:if test="${task.percentage_logged gt 100 or task.state eq 'BLOCKED'}">
@@ -59,6 +63,7 @@
 							aria-valuenow="${task.percentage_logged}" aria-valuemin="0"
 							aria-valuemax="100" style="width:${task.percentage_logged}%"></div>
 					</div></td>
+				</c:if>
 				<td><t:state state="${task.state}"></t:state></td>
 				<td></td>
 			</tr>

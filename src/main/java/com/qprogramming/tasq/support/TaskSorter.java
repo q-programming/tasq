@@ -43,7 +43,13 @@ public class TaskSorter implements Comparator<Task> {
 			result = a.getName().compareTo(b.getName());
 			return isDescending ? -result : result;
 		case ID:
-			result = a.getId().compareTo(b.getId());
+			String a_id = a.getId().split("-")[1];
+			String b_id = b.getId().split("-")[1];
+			if(Integer.parseInt(a_id) > Integer.parseInt(b_id)){
+				result = 1;
+			}else{
+				result = -1;
+			}
 			return isDescending ? -result : result;
 
 		default:

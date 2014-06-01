@@ -25,7 +25,7 @@ public class Task implements java.io.Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 7134768543931740392L;
+	private static final long serialVersionUID = -7551953383145553379L;
 
 	@Id
 	private String id;
@@ -68,6 +68,9 @@ public class Task implements java.io.Serializable {
 
 	@Column
 	private Enum<TaskState> state;
+
+	@Column
+	private Enum<TaskType> type;
 
 	@OneToMany(fetch = FetchType.EAGER)
 	private List<WorkLog> worklog;
@@ -202,13 +205,24 @@ public class Task implements java.io.Serializable {
 
 	public float getPercentage_logged() {
 		getRawLogged_work();
-		return logged_work.toStandardDuration().getMillis() * 100
-				/ estimate.toStandardDuration().getMillis();
+		long estimate_milis = estimate.toStandardDuration().getMillis();
+		if (estimate_milis > 0) {
+			return logged_work.toStandardDuration().getMillis() * 100
+					/ estimate_milis;
+		} else {
+			return 0;
+		}
+
 	};
 
 	public float getPercentage_left() {
-		return getRawRemaining().toStandardDuration().getMillis() * 100
-				/ estimate.toStandardDuration().getMillis();
+		long estimate_milis = estimate.toStandardDuration().getMillis();
+		if (estimate_milis > 0) {
+			return getRawRemaining().toStandardDuration().getMillis() * 100
+					/ estimate_milis;
+		} else {
+			return 0;
+		}
 	};
 
 	public Period getRawLogged_work() {
@@ -230,6 +244,14 @@ public class Task implements java.io.Serializable {
 
 	public void setState(Enum<TaskState> state) {
 		this.state = state;
+	}
+
+	public Enum<TaskType> getType() {
+		return type;
+	}
+
+	public void setType(Enum<TaskType> type) {
+		this.type = type;
 	}
 
 	/*

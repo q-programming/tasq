@@ -16,6 +16,7 @@ import com.qprogramming.tasq.support.PeriodHelper;
  */
 public class NewTaskForm {
 	private static final String NOT_BLANK_MESSAGE = "{notBlank.message}";
+	private static final String TYPE_NOT_BLANK_MESSAGE = "{error.taskType}";
 
 	private Long id;
 
@@ -28,7 +29,7 @@ public class NewTaskForm {
 	@NotBlank(message = NOT_BLANK_MESSAGE)
 	private String description;
 
-	@NotBlank(message = NOT_BLANK_MESSAGE)
+	@NotBlank(message = TYPE_NOT_BLANK_MESSAGE)
 	private String type;
 
 	private String estimate;
@@ -50,6 +51,7 @@ public class NewTaskForm {
 		task.setCreate_date(new Date());
 		task.setDescription(getDescription());
 		task.setState(TaskState.TO_DO);
+		task.setType(TaskType.valueOf(getType()));
 		if (!"".equals(getStory_points())) {
 			task.setStory_points(Integer.parseInt(getStory_points()));
 		}

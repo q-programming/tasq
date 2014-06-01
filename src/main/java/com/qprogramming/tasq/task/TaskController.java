@@ -67,8 +67,9 @@ public class TaskController {
 	@RequestMapping(value = "task/create", method = RequestMethod.POST)
 	public String createTask(
 			@Valid @ModelAttribute("newTaskForm") NewTaskForm newTaskForm,
-			Errors errors, RedirectAttributes ra, HttpServletRequest request) {
+			Errors errors, RedirectAttributes ra, HttpServletRequest request,Model model) {
 		if (errors.hasErrors()) {
+			model.addAttribute("projects", projectSrv.findAllByUser());
 			return null;
 		}
 		Project project = projectSrv.findByProjectId(newTaskForm.getProject());
@@ -78,6 +79,7 @@ public class TaskController {
 				task = newTaskForm.createTask();
 			} catch (IllegalArgumentException e) {
 				errors.rejectValue("estimate", "error.estimateFormat");
+				model.addAttribute("projects", projectSrv.findAllByUser());
 				return null;
 			}
 			// build ID

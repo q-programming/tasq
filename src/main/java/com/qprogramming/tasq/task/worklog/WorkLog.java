@@ -3,6 +3,7 @@
  */
 package com.qprogramming.tasq.task.worklog;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -27,7 +28,12 @@ import com.qprogramming.tasq.account.Account;
  * @date 26 maj 2014
  */
 @Entity
-public class WorkLog {
+public class WorkLog implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5421564881978300937L;
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.TABLE, generator="generatorName")  

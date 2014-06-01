@@ -21,7 +21,6 @@
 	<form:form modelAttribute="newProjectForm" id="newProjectForm"
 		method="post">
 		<%-- Check all potential errors --%>
-
 		<c:set var="id_error">
 			<form:errors path="project_id" />
 		</c:set>
