@@ -57,6 +57,7 @@ public class NewTaskForm {
 		}
 		Period p = PeriodHelper.inFormat(getEstimate());
 		task.setEstimate(p);
+		task.setRemaining(p);
 		task.setLogged_work(PeriodHelper.inFormat(""));
 		return task;
 	}

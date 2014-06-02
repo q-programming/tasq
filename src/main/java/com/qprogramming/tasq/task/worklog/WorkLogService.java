@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
+import com.qprogramming.tasq.task.TaskState;
 
 /**
  * @author romanjak
@@ -26,20 +27,33 @@ public class WorkLogService {
 	@Autowired
 	TaskService taskSrv;
 
-	public void addWorkLog(Task task, LogType type, String msg, Period activity) {
+	public void addTimedWorkLog(Task task, String msg, Date when,
+			Period remaining, Period activity, LogType type) {
 		task = taskSrv.findById(task.getId());
 		if (task != null) {
 			WorkLog wl = new WorkLog();
 			wl.setAccount(Utils.getCurrentAccount());
-			wl.setTime(new Date());
+			wl.setTimeLogged(new Date());
+			wl.setTime(when);
 			wl.setType(type);
 			wl.setMessage(msg);
 			wl.setActivity(activity);
 			wl = wlRepo.save(wl);
 			task.addWorkLog(wl);
-			taskSrv.save(task);
+			if (remaining == null) {
+				task.reduceRemaining(activity);
+			} else {
+				task.setRemaining(remaining);
+			}
+			taskSrv.save(checkState(task));
 		}
+	}
 
+	private Task checkState(Task task) {
+		if (task.getState().equals(TaskState.TO_DO)) {
+			task.setState(TaskState.ONGOING);
+		}
+		return task;
 	}
 
 	/**
@@ -47,6 +61,52 @@ public class WorkLogService {
 	 */
 	public void findAllByTask(Task task) {
 		// TODO Auto-generated method stub
+
+	}
+
+	/**
+	 * @param task
+	 * @param string
+	 * @param status
+	 */
+	public void addActivityLog(Task task, String msg, LogType type) {
+		task = taskSrv.findById(task.getId());
+		if (task != null) {
+			WorkLog wl = new WorkLog();
+			wl.setAccount(Utils.getCurrentAccount());
+			wl.setTime(new Date());
+			wl.setTimeLogged(new Date());
+			wl.setType(type);
+			wl.setMessage(msg);
+			wl = wlRepo.save(wl);
+			task.addWorkLog(wl);
+			taskSrv.save(checkState(task));
+		}
+
+	}
+
+	/**
+	 * @param task
+	 * @param outFormat
+	 * @param log_work
+	 * @param log
+	 */
+	public void addNormalWorkLog(Task task, String msg, Period activity,
+			LogType type) {
+		task = taskSrv.findById(task.getId());
+		if (task != null) {
+			WorkLog wl = new WorkLog();
+			wl.setAccount(Utils.getCurrentAccount());
+			wl.setTimeLogged(new Date());
+			wl.setTime(new Date());
+			wl.setType(type);
+			wl.setMessage(msg);
+			wl.setActivity(activity);
+			wl = wlRepo.save(wl);
+			task.addWorkLog(wl);
+			task.reduceRemaining(activity);
+			taskSrv.save(checkState(task));
+		}
 
 	}
 

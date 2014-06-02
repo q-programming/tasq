@@ -63,6 +63,9 @@ public class Task implements java.io.Serializable {
 	@Column
 	private Period estimate;
 
+	@Column
+	private Period remaining;
+
 	@Transient
 	private Period logged_work;
 
@@ -196,11 +199,19 @@ public class Task implements java.io.Serializable {
 	}
 
 	public String getRemaining() {
-		return PeriodHelper.outFormat(getRawRemaining());
+		return PeriodHelper.outFormat(remaining);
 	}
 
 	public Period getRawRemaining() {
-		return PeriodHelper.minusPeriods(estimate, logged_work);
+		return remaining;
+	}
+	
+	public void reduceRemaining(Period activity){
+		remaining = PeriodHelper.minusPeriods(remaining, activity);
+	}
+	
+	public void setRemaining(Period remaining){
+		this.remaining = remaining;
 	}
 
 	public float getPercentage_logged() {

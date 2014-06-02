@@ -14,9 +14,9 @@ public class WorkLogSorter implements Comparator<WorkLog> {
 
 	public int compare(WorkLog a, WorkLog b) {
 		int result = 0;
-		if (a.getRawTime().before(b.getRawTime())) {
+		if (a.getRawTimeLogged().before(b.getRawTimeLogged())) {
 			result = -1;
-		} else if (a.getRawTime() == b.getRawTime()) {
+		} else if (a.getRawTimeLogged() == b.getRawTimeLogged()) {
 			result = 0;
 		} else {
 			result = 1;

@@ -3,6 +3,8 @@
  */
 package com.qprogramming.tasq.task;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -102,7 +104,8 @@ public class TaskController {
 			taskSrv.save(task);
 			project.setTask_count(taskCount);
 			projectSrv.save(project);
-			wlSrv.addWorkLog(task, LogType.CREATE, "", null);
+			wlSrv.addActivityLog(task, "", LogType.CREATE);
+
 			return "redirect:/task?id=" + taskID;
 		}
 		return null;
@@ -181,8 +184,12 @@ public class TaskController {
 	 * @return
 	 */
 	@RequestMapping(value = "logwork", method = RequestMethod.POST)
-	public String logWork(@RequestParam(value = "taskID") String taskID,
+	public String logWork(
+			@RequestParam(value = "taskID") String taskID,
 			@RequestParam(value = "logged_work") String logged_work,
+			@RequestParam(value = "remaining", required = false) String remaining_txt,
+			@RequestParam("date_logged") String date_logged,
+			@RequestParam("time_logged") String time_logged,
 			RedirectAttributes ra, HttpServletRequest request, Model model) {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
@@ -191,17 +198,38 @@ public class TaskController {
 					logged_work += "h";
 				}
 				Period logged = PeriodHelper.inFormat(logged_work);
-				if (task.getState().equals(TaskState.TO_DO)) {
-					task.setState(TaskState.ONGOING);
+				StringBuffer message = new StringBuffer(logged_work);
+				Period remaining = null;
+				if (remaining_txt != null && remaining_txt != "") {
+					if (remaining_txt.matches("[0-9]+")) {
+						remaining_txt += "h";
+					}
+					remaining = PeriodHelper.inFormat(remaining_txt);
+					message.append("<br>");
+					message.append("Remaining: ");
+					message.append(remaining_txt);
 				}
-				taskSrv.save(task);
-				wlSrv.addWorkLog(task, LogType.LOG, logged_work, logged);
+				Date when = new Date();
+				if (date_logged != "" && time_logged != "") {
+					when = new SimpleDateFormat("dd-M-yyyy HH:mm")
+							.parse(date_logged + " " + time_logged);
+					message.append("<br>");
+					message.append("Date: ");
+					message.append(date_logged + " " + time_logged);
+				}
+				wlSrv.addTimedWorkLog(task, message.toString(), when,
+						remaining, logged, LogType.LOG);
+				// wlSrv.addWorkLog(task, LogType.LOG, logged_work, logged,
+				// remaining);
 			} catch (IllegalArgumentException e) {
 				MessageHelper.addErrorAttribute(
 						ra,
 						msg.getMessage("error.estimateFormat", null,
 								Utils.getCurrentLocale()));
 				return "redirect:/task?id=" + taskID;
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 		return "redirect:/task?id=" + taskID;
@@ -216,8 +244,8 @@ public class TaskController {
 			TaskState old_state = (TaskState) task.getState();
 			task.setState(state);
 			taskSrv.save(task);
-			wlSrv.addWorkLog(task, LogType.STATUS, old_state.getDescription()
-					+ " -> " + state.getDescription(), null);
+			wlSrv.addActivityLog(task, old_state.getDescription() + " -> "
+					+ state.getDescription(), LogType.STATUS);
 		}
 		return "redirect:/task?id=" + taskID;
 	}
@@ -231,16 +259,23 @@ public class TaskController {
 		if (task != null) {
 			if (action.equals(START)) {
 				Account account = Utils.getCurrentAccount();
-				if (account.getActive_task() != null & account.getActive_task().length > 0 ) {
-//					String task_URL = Utils.getBaseURL() + "task?id="
-//							+ account.getActive_task()[0];
+				if (account.getActive_task() != null
+						&& account.getActive_task().length > 0
+						&& !account.getActive_task()[0].equals("")) {
+					// String task_URL = Utils.getBaseURL() + "task?id="
+					// + account.getActive_task()[0];
 					MessageHelper.addWarningAttribute(ra, msg.getMessage(
-							"task.stopTime.warning", new Object[] {account.getActive_task()[0]},
+							"task.stopTime.warning",
+							new Object[] { account.getActive_task()[0] },
 							Utils.getCurrentLocale()));
 					return "redirect:" + request.getHeader("Referer");
 				}
 				account.startTimerOnTask(taskID);
 				accSrv.update(account);
+				if (task.getState().equals(TaskState.TO_DO)) {
+					task.setState(TaskState.ONGOING);
+					taskSrv.save(task);
+				}
 			} else if (action.equals(STOP)) {
 				Account account = Utils.getCurrentAccount();
 				DateTime now = new DateTime();
@@ -248,8 +283,9 @@ public class TaskController {
 						(DateTime) account.getActive_task_time(), now);
 				// Only log work if greater than 1 minute
 				if (log_work.toStandardDuration().getMillis() / 1000 / 60 > 1) {
-					wlSrv.addWorkLog(task, LogType.LOG,
-							PeriodHelper.outFormat(log_work), log_work);
+					wlSrv.addNormalWorkLog(task,
+							PeriodHelper.outFormat(log_work), log_work,
+							LogType.LOG);
 				}
 				account.clearActive_task();
 				accSrv.update(account);
@@ -259,7 +295,7 @@ public class TaskController {
 			// taskSrv.save(task);
 			// wlSrv.addWorkLog(task, LogType.STATUS, old_state.getDescription()
 			// + " -> " + state.getDescription(), null);
-		}else{
+		} else {
 			return "redirect:" + request.getHeader("Referer");
 		}
 		return "redirect:/task?id=" + taskID;

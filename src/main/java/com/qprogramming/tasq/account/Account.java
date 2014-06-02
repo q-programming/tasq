@@ -80,11 +80,10 @@ public class Account implements java.io.Serializable, UserDetails {
 	private Collection<GrantedAuthority> authorities;
 
 	@Column
-	private Object[] active_task = new Object[] { "", "" };
-	
-//	@Transient
-//	private long active_task_seconds;
+	private Object[] active_task;
 
+	// @Transient
+	// private long active_task_seconds;
 
 	public enum Role {
 		ROLE_USER, ROLE_ADMIN
@@ -245,7 +244,8 @@ public class Account implements java.io.Serializable, UserDetails {
 	}
 
 	public long getActive_task_seconds() {
-		if (active_task != null && active_task.length > 0) {
+		if (active_task != null && active_task.length > 0
+				&& !active_task[0].equals("")) {
 			return ((DateTime) active_task[1]).getMillis() / 1000;
 		}
 		return 0;

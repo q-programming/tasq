@@ -12,22 +12,36 @@
 <head>
 <title>TasQ</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<%-- jQuery UI --%>
+<script src="<c:url value="/resources/js/jquery-ui-1.10.4.custom.js" />"></script>
+<link
+	href="<c:url value="/resources/css/jquery-ui-1.10.4.custom.min.css" />"
+	rel="stylesheet" media="screen" />
+<%-- Fix issue jQueryUI vs Bootstrap argue over tooltip --%>
+<script>
+$.widget.bridge('uitooltip', $.ui.tooltip);
+</script>
+<%-- BOOTSTRAP --%>
+<script src="<c:url value="/resources/js/bootstrap.min.js" />"></script>
 <link href="<c:url value="/resources/css/bootstrap.min.css" />"
 	rel="stylesheet" media="screen" />
 <link href="<c:url value="/resources/css/core.css" />" rel="stylesheet"
 	media="screen" />
+<%-- CUSTOMS --%>
 <link href="<c:url value="/resources/css/custom.css" />"
 	rel="stylesheet" media="screen" />
 <link rel="icon" type="image/png"
 	href="<c:url value="/resources/img/favicon.ico"/>" />
-<script src="http://code.jquery.com/jquery-latest.js"></script>
-<script src="<c:url value="/resources/js/bootstrap.min.js" />"></script>
-<tilesx:useAttribute id="styles" name="styles"
-	classname="java.util.List" ignore="true" />
-<c:forEach var="cssName" items="${styles}">
-	<link type="text/css" href="<c:url value="/resources/css/${cssName}"/>"
-		rel="stylesheet" media="screen" />
-</c:forEach>
+<script src="<c:url value="/resources/js/jquery.mask.min.js" />"></script>
+
+
+<%-- <tilesx:useAttribute id="styles" name="styles" --%>
+<%-- 	classname="java.util.List" ignore="true" /> --%>
+<%-- <c:forEach var="cssName" items="${styles}"> --%>
+<%-- 	<link type="text/css" href="<c:url value="/resources/css/${cssName}"/>" --%>
+<!-- 		rel="stylesheet" media="screen" /> -->
+<%-- </c:forEach> --%>
 
 <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
 <!--[if lt IE 9]>

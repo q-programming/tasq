@@ -43,6 +43,9 @@ public class WorkLog implements Serializable{
 	@Column
 	private Date time;
 
+	@Column
+	private Date timeLogged;
+
 	@ManyToOne
 	private Account account;
 
@@ -106,6 +109,19 @@ public class WorkLog implements Serializable{
 
 	public void setActivity(Period activity) {
 		this.activity = activity;
+	}
+
+	public String getTimeLogged() {
+		SimpleDateFormat sdf = new SimpleDateFormat("dd.M.yyyy HH:mm");
+		return sdf.format(timeLogged);
+	}
+	
+	public Date getRawTimeLogged() {
+		return timeLogged;
+	}
+
+	public void setTimeLogged(Date timeLogged) {
+		this.timeLogged = timeLogged;
 	}
 
 	@Override
