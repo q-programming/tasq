@@ -36,6 +36,8 @@ public class NewTaskForm {
 
 	private String story_points;
 
+	private String no_estimation;
+
 	public NewTaskForm() {
 		// TODO Auto-generated constructor stub
 	}
@@ -52,12 +54,14 @@ public class NewTaskForm {
 		task.setDescription(getDescription());
 		task.setState(TaskState.TO_DO);
 		task.setType(TaskType.valueOf(getType()));
+		boolean estimated = !Boolean.parseBoolean(getNo_estimation());
 		if (!"".equals(getStory_points())) {
 			task.setStory_points(Integer.parseInt(getStory_points()));
 		}
 		Period p = PeriodHelper.inFormat(getEstimate());
 		task.setEstimate(p);
 		task.setRemaining(p);
+		task.setEstimated(estimated);
 		task.setLogged_work(PeriodHelper.inFormat(""));
 		return task;
 	}
@@ -116,5 +120,13 @@ public class NewTaskForm {
 
 	public void setStory_points(String story_points) {
 		this.story_points = story_points;
+	}
+
+	public String getNo_estimation() {
+		return no_estimation;
+	}
+
+	public void setNo_estimation(String no_estimation) {
+		this.no_estimation = no_estimation;
 	}
 }

@@ -60,10 +60,12 @@
 		<c:if test="${not empty type_error}">
 			<c:set var="type_error" value="border-color: #b94a48;" />
 		</c:if>
+		<hr>
 		<div class="form-group">
 			<label><s:message code="task.type" /></label>
 			<div class="dropdown">
-				<button id="type_button" class="btn btn-default " style="${type_error}" type="button" id="dropdownMenu1"
+				<button id="type_button" class="btn btn-default "
+					style="${type_error}" type="button" id="dropdownMenu1"
 					data-toggle="dropdown">
 					<div id="task_type" class="image-combo">Choose type</div>
 					<span class="caret"></span>
@@ -75,28 +77,42 @@
 					%>
 					<c:forEach items="${types}" var="enum_type">
 						<li><a tabindex="-1" href="#" id="${enum_type.code}"><t:type
-								type="${enum_type}" show_text="true" list="true" /></a></li>
+									type="${enum_type}" show_text="true" list="true" /></a></li>
 					</c:forEach>
 				</ul>
 			</div>
 			<span class="help-block"><s:message code="task.type.help" /></span>
-			<form:input path="type" type="hidden" id="type"/>
+			<form:input path="type" type="hidden" id="type" />
 			<form:errors path="type" element="p" class="text-danger" />
 		</div>
-		<div class="form-group">
-			<label><s:message code="task.estimate" /></label>
-			<form:input path="estimate" class="form-control" style="width:150px" />
-			<form:errors path="estimate" element="p" class="text-danger" />
-			<span class="help-block"><s:message code="task.estimate.help" /><br>
-				<s:message code="task.estimate.help.pattern" /> </span>
+		<%-- Estimate --%>
+		<hr>
+		<h4>
+			<s:message code="task.estimate" />
+		</h4>
+		<div id="estimate_div">
+			<div class="form-group">
+				<form:input path="estimate" class="form-control" style="width:150px" />
+				<form:errors path="estimate" element="p" class="text-danger" />
+				<span class="help-block"><s:message code="task.estimate.help" /><br>
+					<s:message code="task.estimate.help.pattern" /> </span>
+			</div>
+			<div>
+				<label><s:message code="task.storyPoints" /></label>
+				<form:input path="story_points" class="form-control"
+					style="width:150px" />
+				<span class="help-block"><s:message
+						code="task.storyPoints.help" /></span>
+			</div>
 		</div>
-		<div>
-			<label><s:message code="task.storyPoints" /></label>
-			<form:input path="story_points" class="form-control"
-				style="width:150px" />
-			<span class="help-block"><s:message
-					code="task.storyPoints.help" /></span>
-		</div>
+		<label class="checkbox" style="display: inherit; font-weight: normal">
+			<input type="checkbox" name="no_estimation" id="no_estimation"
+			value="true"> <s:message code="task.withoutEstimation" /> <span
+			class="glyphicon glyphicon-question-sign a-tooltip"
+			title="<s:message code ="task.withoutEstimation.help"/>"
+			data-placement="right"></span>
+		</label>
+
 		<div style="margin: 10px auto; text-align: right;">
 			<button type="submit" class="btn btn-success">
 				<s:message code="main.create" text="Create" />
@@ -107,16 +123,26 @@
 	</form:form>
 </div>
 <script>
-$(document).ready(function($) {
-	<c:forEach items="${types}" var="enum_type">
-	$("#${enum_type.code}").click(function() {
-		console.log("${enum_type.code}");
-		var type = '<img src="<c:url value="/resources/img/${enum_type.code}.png"/>"> <s:message code="task.type.${enum_type.code}"/>';
-		$("#task_type").html(type);
-		$("#type").val("${enum_type}");
-	});
-	</c:forEach>
-});
+	$(document)
+			.ready(
+					function($) {
+						<c:forEach items="${types}" var="enum_type">
+						$("#${enum_type.code}")
+								.click(
+										function() {
+											console.log("${enum_type.code}");
+											var type = '<img src="<c:url value="/resources/img/${enum_type.code}.png"/>"> <s:message code="task.type.${enum_type.code}"/>';
+											$("#task_type").html(type);
+											$("#type").val("${enum_type}");
+										});
+						</c:forEach>
+
+						$("#no_estimation").change(function() {
+							$("#estimate").val("");
+							$('#estimate_div').slideToggle("slow");
+						});
+
+					});
 
 	
 </script>

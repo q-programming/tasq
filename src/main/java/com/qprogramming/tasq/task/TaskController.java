@@ -282,11 +282,12 @@ public class TaskController {
 				Period log_work = new Period(
 						(DateTime) account.getActive_task_time(), now);
 				// Only log work if greater than 1 minute
-				if (log_work.toStandardDuration().getMillis() / 1000 / 60 > 1) {
+				if (log_work.toStandardDuration().getMillis() / 1000 / 60 < 1) {
+					log_work = new Period().plusMinutes(1);
+				}
 					wlSrv.addNormalWorkLog(task,
 							PeriodHelper.outFormat(log_work), log_work,
 							LogType.LOG);
-				}
 				account.clearActive_task();
 				accSrv.update(account);
 			} else {

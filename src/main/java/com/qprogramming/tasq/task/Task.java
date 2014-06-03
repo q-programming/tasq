@@ -77,6 +77,10 @@ public class Task implements java.io.Serializable {
 
 	@OneToMany(fetch = FetchType.EAGER)
 	private List<WorkLog> worklog;
+	
+	@Column
+	private Boolean estimated = false;
+
 
 	public String getId() {
 		return id;
@@ -205,26 +209,56 @@ public class Task implements java.io.Serializable {
 	public Period getRawRemaining() {
 		return remaining;
 	}
-	
-	public void reduceRemaining(Period activity){
+
+	public void reduceRemaining(Period activity) {
 		remaining = PeriodHelper.minusPeriods(remaining, activity);
+		if (remaining.toStandardDuration().getMillis() < 0) {
+			remaining = new Period();
+		}
 	}
-	
-	public void setRemaining(Period remaining){
+
+	public void setRemaining(Period remaining) {
 		this.remaining = remaining;
 	}
 
 	public float getPercentage_logged() {
-		getRawLogged_work();
+
 		long estimate_milis = estimate.toStandardDuration().getMillis();
 		if (estimate_milis > 0) {
-			return logged_work.toStandardDuration().getMillis() * 100
+			return getRawLogged_work().toStandardDuration().getMillis() * 100
 					/ estimate_milis;
 		} else {
 			return 0;
 		}
 
 	};
+
+	public boolean getLowerThanEstimate() {
+		Period loggedAndLeft = PeriodHelper.plusPeriods(getRawLogged_work(),
+				remaining);
+		Period result = PeriodHelper.minusPeriods(estimate, loggedAndLeft);
+		return result.toStandardDuration().getMillis() > 0;
+	}
+
+	public float getMoreThanEstimate() {
+		Period loggedAndLeft = getRawLogged_work();
+		if (remaining.toStandardDuration().getMillis() > 0) {
+			loggedAndLeft = PeriodHelper.plusPeriods(loggedAndLeft, remaining);
+		}
+		return estimate.toStandardDuration().getMillis() * 100
+				/ loggedAndLeft.toStandardDuration().getMillis();
+	}
+
+	public float getOverCommited() {
+		long remaining_milis = remaining.toStandardDuration().getMillis();
+		if (remaining_milis > 0) {
+			return (remaining_milis * 100)
+					/ PeriodHelper.plusPeriods(getRawLogged_work(), remaining)
+							.toStandardDuration().getMillis();
+		}
+		return 0;
+
+	}
 
 	public float getPercentage_left() {
 		long estimate_milis = estimate.toStandardDuration().getMillis();
@@ -263,6 +297,14 @@ public class Task implements java.io.Serializable {
 
 	public void setType(Enum<TaskType> type) {
 		this.type = type;
+	}
+
+	public Boolean getEstimated() {
+		return estimated;
+	}
+
+	public void setEstimated(Boolean estimated) {
+		this.estimated = estimated;
 	}
 
 	/*

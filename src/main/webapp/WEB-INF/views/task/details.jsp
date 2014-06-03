@@ -47,8 +47,9 @@
 				<s:message code="task.stopTime"></s:message>
 			</button>
 		</a>
-		<div>
-			Current timer: <span class="timer"></span>
+		<div class="bar_td">
+			<s:message code="task.currentTime" />
+			: <span class="timer"></span>
 		</div>
 	</c:if>
 	<c:if
@@ -60,15 +61,40 @@
 			</button>
 		</a>
 	</c:if>
-
-	<%--ESTIMATES TAB --%>
+	<%--ESTIMATES TAB	--%>
+	<%-- Default values --%>
 	<c:set var="estimate_value">100</c:set>
-	<c:if test="${task.percentage_logged gt 100}">
-		<c:set var="estimate_value">${100 + task.percentage_left}</c:set>
+	<c:set var="logged_work">${task.percentage_logged}</c:set>
+	<c:set var="remaining_width">100</c:set>
+	<c:set var="remaining_bar">${task.percentage_left}</c:set>
+	<%-- 	<br>${logged_work} <br>${task.percentage_left} <br>${task.lowerThanEstimate eq 'true'} --%>
+
+	<%-- Check if it's not lower than estimate --%>
+	<c:if test="${task.lowerThanEstimate eq 'true'}">
+		<c:set var="remaining_width">${task.percentage_logged + task.percentage_left}</c:set>
+		<c:set var="logged_work">${100- task.percentage_left}</c:set>
+	</c:if>
+	<%-- logged work is greater than 100% and remaning time is greater than 0 --%>
+	<c:if
+		test="${task.percentage_logged gt 100 && task.remaining ne '0m' }">
+		<c:set var="estimate_width">${task.moreThanEstimate}</c:set>
+		<c:set var="remaining_bar">${task.overCommited}</c:set>
+		<c:set var="logged_work">${100-task.overCommited}</c:set>
+	</c:if>
+	<%-- There was more logged but remaining is 0 --%>
+	<c:if
+		test="${task.percentage_logged gt 100 && task.remaining eq '0m' }">
+		<c:set var="estimate_width">${task.moreThanEstimate}</c:set>
 	</c:if>
 	<table style="width: 400px">
-		<%-- IF ESTIMATE IS 0 --%>
-		<c:if test="${task.estimate eq '0m'}">
+		<tr>
+			<td></td>
+			<td style="width: 150px"></td>
+			<td></td>
+		</tr>
+		<%-- TODO add display based on type! --%>
+		<%-- if there weas no ESTIMATE at all --%>
+		<c:if test="${not task.estimated}">
 			<tr>
 				<td class="bar_td"><s:message code="task.logged" /></td>
 				<td class="bar_td">${task.logged_work}</td>
@@ -76,37 +102,41 @@
 			</tr>
 		</c:if>
 		<%-- IF ESTIMATE IS NOT 0 --%>
-		<c:if test="${task.estimate ne '0m'}">
+		<c:if test="${task.estimated}">
+			<%-- Estimate bar --%>
 			<tr>
 				<td class="bar_td" style="width: 50px"><s:message
 						code="task.estimate" /></td>
-				<td style="width: 150px"><div class="progress">
-						<div class="progress-bar" role="progressbar"
-							aria-valuenow="${estimate_value}" aria-valuemin="0"
-							aria-valuemax="100" style="width: ${estimate_value}%;"></div>
+				<td class="bar_td"><div class="progress"
+						style="width: ${estimate_width}%">
+						<div class="progress-bar" role="progressbar" aria-valuenow="100"
+							aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div>
 					</div></td>
 				<td class="bar_td">${task.estimate}</td>
 			</tr>
+			<%-- Logged work bar --%>
 			<tr>
 				<td class="bar_td"><s:message code="task.logged" /></td>
-				<td><div class="progress">
+				<td class="bar_td"><div class="progress"
+						style="width:${remaining_width}%">
 						<c:set var="logged_class">progress-bar-warning</c:set>
 						<c:if test="${task.percentage_logged gt 100}">
 							<c:set var="logged_class">progress-bar-danger</c:set>
 						</c:if>
 						<div class="progress-bar ${logged_class}" role="progressbar"
-							aria-valuenow="${task.percentage_logged}" aria-valuemin="0"
-							aria-valuemax="100" style="width:${task.percentage_logged}%"></div>
+							aria-valuenow="${logged_work}" aria-valuemin="0"
+							aria-valuemax="100" style="width:${logged_work}%"></div>
 					</div></td>
 				<td class="bar_td">${task.logged_work}</td>
 			</tr>
+			<%-- Remaining work bar --%>
 			<tr>
 				<td class="bar_td"><s:message code="task.remaining" /></td>
-				<td><div class="progress">
+				<td class="bar_td"><div class="progress"
+						style="width:${remaining_width}%">
 						<div class="progress-bar progress-bar-success" role="progressbar"
-							aria-valuenow="${task.percentage_left}" aria-valuemin="0"
-							aria-valuemax="100"
-							style="width:${task.percentage_left}% ; float:right"></div>
+							aria-valuenow="${remaining_bar}" aria-valuemin="0"
+							aria-valuemax="100" style="width:${remaining_bar}% ; float:right"></div>
 					</div></td>
 				<td class="bar_td">${task.remaining }</td>
 			</tr>
@@ -126,7 +156,10 @@
 						<t:logType logType="${worklog.type}" />
 						<div class="pull-right">${worklog.timeLogged}</div>
 					</div> <c:if test="${not empty worklog.message}">
-						${worklog.message}
+						<div>
+							<blockquote
+								style="margin-bottom: 0; font-size: smaller; padding: 10px;">${worklog.message}</blockquote>
+						</div>
 					</c:if></td>
 			</tr>
 		</c:forEach>
@@ -176,14 +209,15 @@
 						<label><s:message code="task.remaining" /></label>
 						<div class="radio">
 							<label> <input type="radio" name="estimate_reduce"
-								id="estimate_auto" value="auto" checked> Reduce automatically
+								id="estimate_auto" value="auto" checked> Reduce
+								automatically
 							</label>
 						</div>
 						<div class="radio">
 							<label> <input type="radio" name="estimate_reduce"
 								id="estimate_manual" value="auto"> Set manually
-							</label>
-							<input id="remaining" name="remaining" class="form-control" style="width:150px;height: 25px" disabled>
+							</label> <input id="remaining" name="remaining" class="form-control"
+								style="width: 150px; height: 25px" disabled>
 						</div>
 
 					</div>
@@ -267,14 +301,13 @@
 			placeholder : "__:__"
 		});
 		$("#estimate_manual").change(function() {
-			$('#remaining').attr("disabled", !this.checked); 
+			$('#remaining').attr("disabled", !this.checked);
 		});
 		$("#estimate_auto").change(function() {
 			$('#remaining').val("");
-			$('#remaining').attr("disabled", this.checked); 
+			$('#remaining').attr("disabled", this.checked);
 		});
-		
-		
+
 	});
 
 	

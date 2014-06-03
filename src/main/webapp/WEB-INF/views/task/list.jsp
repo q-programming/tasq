@@ -54,22 +54,24 @@
 			<td><t:type type="${task.type}" list="true" /></td>
 			<td><a href="<c:url value="task?id=${task.id}"/>"
 				style="color: inherit;">[${task.id}] ${task.name}</a></td>
-			<c:if test="${task.estimate eq '0m'}">
+			<c:if test="${not task.estimated}">
 				<td>${task.logged_work}</td>
 			</c:if>
-			<c:if test="${task.estimate ne '0m'}">
+			<c:if test="${task.estimated}">
 				<td><div class="progress" style="width: 50px">
 						<c:set var="logged_class"></c:set>
+						<c:set var="percentage">${100-task.percentage_left}</c:set>
 						<c:if
 							test="${task.percentage_logged gt 100 or task.state eq 'BLOCKED'}">
 							<c:set var="logged_class">progress-bar-danger</c:set>
+							<c:set var="percentage">${100-task.overCommited}</c:set>
 						</c:if>
 						<c:if test="${task.state eq 'CLOSED'}">
 							<c:set var="logged_class">progress-bar-success</c:set>
 						</c:if>
 						<div class="progress-bar ${logged_class}" role="progressbar"
-							aria-valuenow="${task.percentage_logged}" aria-valuemin="0"
-							aria-valuemax="100" style="width:${task.percentage_logged}%"></div>
+							aria-valuenow="${percentage}" aria-valuemin="0"
+							aria-valuemax="100" style="width:${percentage}%"></div>
 					</div></td>
 			</c:if>
 			<td class="${blinker}"><t:state state="${task.state}"></t:state></td>
