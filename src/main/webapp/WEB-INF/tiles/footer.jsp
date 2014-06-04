@@ -10,7 +10,7 @@
 		<div>
 			<s:message code ="task.active"/> <a
 				href="<c:url value="task?id=${user.active_task[0]}"/>">${user.active_task[0]}</a>
-			<a class="btn btn-default btn-xxs a-tooltip" title="<s:message code="task.stopTime"></s:message>"
+			<a class="btn btn-default btn-xxs a-tooltip" title="<s:message code="task.stopTime.description"></s:message>"
 				href='<c:url value="task/time?id=${user.active_task[0]}&action=stop"/>'> <span
 				class="glyphicon glyphicon-time"></span></a> <span class="timer"></span>
 		</div>

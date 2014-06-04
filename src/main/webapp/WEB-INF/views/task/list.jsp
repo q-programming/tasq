@@ -48,8 +48,15 @@
 					<c:set var="blinker" value="blink" />
 			</c:if>
 			<c:if test="${task.id ne user.active_task[0]}">
-				<tr>
-					<c:set var="blinker" value="" />
+				<c:set var="blinker" value="" />
+				<c:set var="tr_bg" value="" />
+				<c:if test="${task.state eq 'CLOSED'}">
+					<c:set var="tr_bg" value="background: rgba(50, 205, 81, 0.12);" />
+				</c:if>
+				<c:if test="${task.state eq 'BLOCKED'}">
+					<c:set var="tr_bg" value="background: rgba(205, 50, 50, 0.12);" />
+				</c:if>
+				<tr style="${tr_bg}">
 			</c:if>
 			<td><t:type type="${task.type}" list="true" /></td>
 			<td><a href="<c:url value="task?id=${task.id}"/>"

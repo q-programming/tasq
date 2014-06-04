@@ -172,13 +172,9 @@ public class Account implements java.io.Serializable, UserDetails {
 		this.authorities = authorities;
 	}
 
-	public String getAvatar() {
-		return "/resources/img/avatar.png";
+	public byte[] getAvatar() {
+		return avatar;
 	}
-
-	// public byte[] getAvatar() {
-	// return avatar;
-	// }
 
 	public void setLast_visited(List<Task> last_visited) {
 		this.last_visited = last_visited;

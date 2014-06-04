@@ -146,7 +146,7 @@
 					</li>
 					<li>
 						<div class="pull-right">
-							<img src="<c:url value="${user.avatar}"/>" style="height: 50px"></img>
+							<img src="<c:url value="/userAvatar"/>" style="height: 50px"></img>
 						</div>
 					</li>
 				</security:authorize>

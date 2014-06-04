@@ -1,22 +1,27 @@
 package com.qprogramming.tasq.task;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.IndexColumn;
 import org.joda.time.Period;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.support.PeriodHelper;
+import com.qprogramming.tasq.task.comments.Comment;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 
 @Entity
@@ -76,11 +81,15 @@ public class Task implements java.io.Serializable {
 	private Enum<TaskType> type;
 
 	@OneToMany(fetch = FetchType.EAGER)
-	private List<WorkLog> worklog;
-	
+	private Set<WorkLog> worklog;
+
 	@Column
 	private Boolean estimated = false;
 
+	@OneToMany(fetch = FetchType.EAGER)
+	@IndexColumn(name = "INDEX_COL")
+	@JoinTable(name = "task_comments")
+	private List<Comment> comments;
 
 	public String getId() {
 		return id;
@@ -182,17 +191,17 @@ public class Task implements java.io.Serializable {
 		this.estimate = estimate;
 	}
 
-	public List<WorkLog> getWorklog() {
+	public Set<WorkLog> getWorklog() {
 		return worklog;
 	}
 
-	public void setWorklog(List<WorkLog> worklog) {
+	public void setWorklog(Set<WorkLog> worklog) {
 		this.worklog = worklog;
 	}
 
 	public void addWorkLog(WorkLog wl) {
 		if (worklog == null) {
-			worklog = new LinkedList<WorkLog>();
+			worklog = new HashSet<WorkLog>();
 		}
 		worklog.add(wl);
 	}
@@ -210,65 +219,9 @@ public class Task implements java.io.Serializable {
 		return remaining;
 	}
 
-	public void reduceRemaining(Period activity) {
-		remaining = PeriodHelper.minusPeriods(remaining, activity);
-		if (remaining.toStandardDuration().getMillis() < 0) {
-			remaining = new Period();
-		}
-	}
-
 	public void setRemaining(Period remaining) {
 		this.remaining = remaining;
 	}
-
-	public float getPercentage_logged() {
-
-		long estimate_milis = estimate.toStandardDuration().getMillis();
-		if (estimate_milis > 0) {
-			return getRawLogged_work().toStandardDuration().getMillis() * 100
-					/ estimate_milis;
-		} else {
-			return 0;
-		}
-
-	};
-
-	public boolean getLowerThanEstimate() {
-		Period loggedAndLeft = PeriodHelper.plusPeriods(getRawLogged_work(),
-				remaining);
-		Period result = PeriodHelper.minusPeriods(estimate, loggedAndLeft);
-		return result.toStandardDuration().getMillis() > 0;
-	}
-
-	public float getMoreThanEstimate() {
-		Period loggedAndLeft = getRawLogged_work();
-		if (remaining.toStandardDuration().getMillis() > 0) {
-			loggedAndLeft = PeriodHelper.plusPeriods(loggedAndLeft, remaining);
-		}
-		return estimate.toStandardDuration().getMillis() * 100
-				/ loggedAndLeft.toStandardDuration().getMillis();
-	}
-
-	public float getOverCommited() {
-		long remaining_milis = remaining.toStandardDuration().getMillis();
-		if (remaining_milis > 0) {
-			return (remaining_milis * 100)
-					/ PeriodHelper.plusPeriods(getRawLogged_work(), remaining)
-							.toStandardDuration().getMillis();
-		}
-		return 0;
-
-	}
-
-	public float getPercentage_left() {
-		long estimate_milis = estimate.toStandardDuration().getMillis();
-		if (estimate_milis > 0) {
-			return getRawRemaining().toStandardDuration().getMillis() * 100
-					/ estimate_milis;
-		} else {
-			return 0;
-		}
-	};
 
 	public Period getRawLogged_work() {
 		logged_work = new Period();
@@ -305,6 +258,21 @@ public class Task implements java.io.Serializable {
 
 	public void setEstimated(Boolean estimated) {
 		this.estimated = estimated;
+	}
+
+	public List<Comment> getComments() {
+		return comments;
+	}
+
+	public void setComments(List<Comment> comments) {
+		this.comments = comments;
+	}
+
+	public void addComment(Comment comment) {
+		if (comments == null) {
+			comments = new LinkedList<Comment>();
+		}
+		comments.add(comment);
 	}
 
 	/*
@@ -353,5 +321,73 @@ public class Task implements java.io.Serializable {
 		} else if (!project.equals(other.project))
 			return false;
 		return true;
+	}
+
+	/**
+	 * Helpers
+	 */
+
+	public float getPercentage_logged() {
+		long estimate_milis = estimate.toStandardDuration().getMillis();
+		if (estimate_milis > 0) {
+			return getRawLogged_work().toStandardDuration().getMillis() * 100
+					/ estimate_milis;
+			// task was without estimation time but is estimated type
+		} else if (estimate_milis <= 0 & estimated) {
+			if (getRawRemaining().toStandardDuration().getMillis() == 0) {
+				return 100;
+			} else {
+				return getRawLogged_work().toStandardDuration().getMillis()
+						* 100
+						/ getRawRemaining().toStandardDuration().getMillis();
+			}
+		} else {
+			return 0;
+		}
+
+	};
+
+	public boolean getLowerThanEstimate() {
+		Period loggedAndLeft = PeriodHelper.plusPeriods(getRawLogged_work(),
+				remaining);
+		Period result = PeriodHelper.minusPeriods(estimate, loggedAndLeft);
+		return result.toStandardDuration().getMillis() > 0;
+	}
+
+	public float getMoreThanEstimate() {
+		Period loggedAndLeft = getRawLogged_work();
+		if (remaining.toStandardDuration().getMillis() > 0) {
+			loggedAndLeft = PeriodHelper.plusPeriods(loggedAndLeft, remaining);
+		}
+		return estimate.toStandardDuration().getMillis() * 100
+				/ loggedAndLeft.toStandardDuration().getMillis();
+	}
+
+	public float getOverCommited() {
+		long remaining_milis = remaining.toStandardDuration().getMillis();
+		if (remaining_milis > 0) {
+			return (remaining_milis * 100)
+					/ PeriodHelper.plusPeriods(getRawLogged_work(), remaining)
+							.toStandardDuration().getMillis();
+		}
+		return 0;
+
+	}
+
+	public float getPercentage_left() {
+		long estimate_milis = estimate.toStandardDuration().getMillis();
+		if (estimate_milis > 0) {
+			return getRawRemaining().toStandardDuration().getMillis() * 100
+					/ estimate_milis;
+		} else {
+			return 0;
+		}
+	}
+
+	public void reduceRemaining(Period activity) {
+		remaining = PeriodHelper.minusPeriods(remaining, activity);
+		if (remaining.toStandardDuration().getMillis() < 0) {
+			remaining = new Period();
+		}
 	}
 }

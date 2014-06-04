@@ -139,7 +139,8 @@ public class TaskController {
 		}
 		account.setLast_visited(clean);
 		accSrv.update(account);
-		Collections.sort(task.getWorklog(), new WorkLogSorter(true));
+		//TODO Add sorting
+		//Collections.sort(task.getWorklog(), new WorkLogSorter(true));
 		model.addAttribute("task", task);
 		return "task/details";
 	}
