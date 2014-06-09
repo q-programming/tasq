@@ -2,7 +2,9 @@ package com.qprogramming.tasq.projects;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -20,9 +22,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.support.ProjectSorter;
 import com.qprogramming.tasq.support.Utils;
+import com.qprogramming.tasq.support.WorkLogSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
+import com.qprogramming.tasq.task.TaskState;
+import com.qprogramming.tasq.task.worklog.WorkLog;
+import com.qprogramming.tasq.task.worklog.WorkLogService;
 
 @Controller
 public class ProjetController {
@@ -32,6 +38,9 @@ public class ProjetController {
 
 	@Autowired
 	private TaskService taskSrv;
+
+	@Autowired
+	private WorkLogService wrkLogSrv;
 
 	@Autowired
 	MessageSource msg;
@@ -50,7 +59,26 @@ public class ProjetController {
 		project.setLastVisit(new Date());
 		// mark it as last visit
 		projSrv.save(project);
+		//get latest events for this project
+		List<WorkLog> workLogs = wrkLogSrv.getProjectEvents(project);
+		Collections.sort(workLogs, new WorkLogSorter(true));
+		//Check status of all projects
+		List<Task> tasks = project.getTasks();
+		Map<TaskState,Integer> state_count = new HashMap<TaskState,Integer>();
+		for (TaskState state : TaskState.values()) {
+			state_count.put(state, 0);
+		}
+		for (Task task : tasks) {
+			Integer value = state_count.get(task.getState());
+			value++;
+			state_count.put((TaskState)task.getState(), value);
+		}
+		model.addAttribute("TO_DO", state_count.get(TaskState.TO_DO));
+		model.addAttribute("ONGOING", state_count.get(TaskState.ONGOING));
+		model.addAttribute("CLOSED", state_count.get(TaskState.CLOSED));
+		model.addAttribute("BLOCKED", state_count.get(TaskState.BLOCKED));
 		model.addAttribute("project", project);
+		model.addAttribute("events", workLogs);
 		return "project/details";
 	}
 
@@ -111,11 +139,11 @@ public class ProjetController {
 			return null;
 		}
 		Project new_project = newProjectForm.createProject();
-		if (projSrv.findAll().size()==0){
+		if (projSrv.findAll().size() == 0) {
 			new_project.setActive(true);
 		}
 		new_project = projSrv.save(new_project);
-		
+
 		MessageHelper.addSuccessAttribute(
 				ra,
 				msg.getMessage("project.created", new Object[] { name },

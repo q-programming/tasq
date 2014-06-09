@@ -14,10 +14,10 @@
 <c:set var="projectDesc_text">
 	<s:message code="project.description" />
 </c:set>
+<div class="white-frame" style="width: 700px; overflow: auto;">
 <h3>
 	<s:message code="project.create"></s:message>
 </h3>
-<div class="white-frame" style="height: 87vh; overflow: auto;">
 	<form:form modelAttribute="newProjectForm" id="newProjectForm"
 		method="post">
 		<%-- Check all potential errors --%>

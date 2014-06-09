@@ -4,11 +4,14 @@
 package com.qprogramming.tasq.task.worklog;
 
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
@@ -110,7 +113,12 @@ public class WorkLogService {
 			task.reduceRemaining(activity);
 			taskSrv.save(checkState(task));
 		}
+	}
 
+	public List<WorkLog> getProjectEvents(Project project) {
+		List<WorkLog> project_worklog = new LinkedList<WorkLog>();
+		project_worklog = wlRepo.findByTaskProjectId(project.getId());
+		return project_worklog;
 	}
 
 }
