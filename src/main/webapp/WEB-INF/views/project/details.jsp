@@ -34,11 +34,25 @@
 	<h3>[${project.projectId}] ${project.name}</h3>
 	${project.description}
 	<hr>
-	<div><s:message code="task.state.todo"/> ${TO_DO}</div>
-	<div><s:message code="task.state.ongoing"/> ${ONGOING}</div>
-	<div><s:message code="task.state.closed"/> ${CLOSED}</div>
-	<div><s:message code="task.state.blocked"/> ${BLOCKED}</div>
-	
+	<c:set var="tasks_total">${TO_DO + ONGOING+ CLOSED+ BLOCKED}</c:set>
+	<c:set var="tasks_todo">${TO_DO * 100 / tasks_total }</c:set>
+	<c:set var="tasks_ongoing">${ONGOING * 100 / tasks_total}</c:set>
+	<c:set var="tasks_closed">${CLOSED *100 / tasks_total}</c:set>
+	<c:set var="tasks_blocked">${BLOCKED*100 / tasks_total}</c:set>
+	<div class="progress">
+		<div class="progress-bar progress-bar-warning a-tooltip"
+			style="width: ${tasks_todo}%" title="${TO_DO} <s:message code="task.state.todo"/>">
+		</div>
+		<div class="progress-bar a-tooltip" style="width: ${tasks_ongoing}%"
+			title="${ONGOING} <s:message code="task.state.ongoing"/>">
+		</div>
+		<div class="progress-bar progress-bar-success a-tooltip"
+			style="width: ${tasks_closed}%" title="${CLOSED} <s:message code="task.state.closed"/>" >
+		</div>
+		<div class="progress-bar progress-bar-danger a-tooltip"
+			style="width: ${tasks_blocked}%" title="${BLOCKED} <s:message code="task.state.blocked"/>">
+		</div>
+	</div>
 	<div style="display: table-cell; width: 65%">
 		<h3>
 			<s:message code="project.latestEvents" />
@@ -50,7 +64,7 @@
 						style="height: 30px; float: left; padding-right: 10px;"
 						src="<c:url value="/userAvatar/${worklog.account.id}"/>" />
 						${worklog.account} <t:logType logType="${worklog.type}" /> <a
-						href="<c:url value="/task&id=${worklog.task.id}"/>">[${worklog.task.id}]
+						href="<c:url value="/task?id=${worklog.task.id}"/>">[${worklog.task.id}]
 							${worklog.task.name}</a>
 						<div class="pull-right">${worklog.timeLogged}</div>
 						</div> <c:if test="${not empty worklog.message}">
@@ -58,6 +72,7 @@
 						</c:if></td>
 				</tr>
 			</c:forEach>
+
 		</table>
 	</div>
 	<div style="display: table-cell; padding-left: 30px">

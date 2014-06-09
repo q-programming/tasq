@@ -16,7 +16,7 @@
 	</c:set>
 	<h3>
 		<t:type type="${task.type}" />
-		[${task.id}] ${task.name}
+		<a href='<c:url value="/project?id=${task.project.id}"/>'>${task.project.projectId}</a> \ [${task.id}] ${task.name}
 	</h3>
 	<h4>
 		<s:message code="task.state" />
@@ -287,7 +287,7 @@
 						<div>
 							<label><s:message code="main.time" /></label> <input
 								id="time_logged" name="time_logged"
-								style="width: 60px; height: 25px" class="form-control"
+								style="width: 70px; height: 25px" class="form-control"
 								type="text" value="">
 						</div>
 					</div>

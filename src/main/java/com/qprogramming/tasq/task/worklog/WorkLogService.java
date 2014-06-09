@@ -53,13 +53,6 @@ public class WorkLogService {
 		}
 	}
 
-	private Task checkState(Task task) {
-		if (task.getState().equals(TaskState.TO_DO)) {
-			task.setState(TaskState.ONGOING);
-		}
-		return task;
-	}
-
 	/**
 	 * @param task
 	 */
@@ -85,7 +78,7 @@ public class WorkLogService {
 			wl.setMessage(msg);
 			wl = wlRepo.save(wl);
 			task.addWorkLog(wl);
-			taskSrv.save(checkState(task));
+			taskSrv.save(task);
 		}
 
 	}
@@ -119,6 +112,13 @@ public class WorkLogService {
 		List<WorkLog> project_worklog = new LinkedList<WorkLog>();
 		project_worklog = wlRepo.findByTaskProjectId(project.getId());
 		return project_worklog;
+	}
+	
+	private Task checkState(Task task) {
+		if (task.getState().equals(TaskState.TO_DO)) {
+			task.setState(TaskState.ONGOING);
+		}
+		return task;
 	}
 
 }
