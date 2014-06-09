@@ -14,8 +14,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 import javax.persistence.Transient;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -33,8 +33,8 @@ import com.qprogramming.tasq.task.Task;
 public class Account implements java.io.Serializable, UserDetails {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "generatorName")
-	@TableGenerator(name = "generatorName", allocationSize = 1)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "account_seq_gen")
+	@SequenceGenerator(name = "account_seq_gen", sequenceName = "account_id_seq", allocationSize = 1)
 	private Long id;
 
 	@Column(unique = true)

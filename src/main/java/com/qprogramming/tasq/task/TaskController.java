@@ -95,17 +95,16 @@ public class TaskController {
 				return null;
 			}
 			// build ID
-			Long taskCount = project.getTask_count();
+			int taskCount = project.getTasks().size();
 			taskCount++;
 			String taskID = project.getProjectId() + "-" + taskCount;
 			task.setId(taskID);
 			task.setProject(project);
+			project.getTasks().add(task);
 			// Create log work
 			taskSrv.save(task);
-			project.setTask_count(taskCount);
 			projectSrv.save(project);
 			wlSrv.addActivityLog(task, "", LogType.CREATE);
-
 			return "redirect:/task?id=" + taskID;
 		}
 		return null;

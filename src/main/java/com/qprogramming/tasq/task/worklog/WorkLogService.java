@@ -32,6 +32,7 @@ public class WorkLogService {
 		task = taskSrv.findById(task.getId());
 		if (task != null) {
 			WorkLog wl = new WorkLog();
+			wl.setTask(task);
 			wl.setAccount(Utils.getCurrentAccount());
 			wl.setTimeLogged(new Date());
 			wl.setTime(when);
@@ -73,6 +74,7 @@ public class WorkLogService {
 		task = taskSrv.findById(task.getId());
 		if (task != null) {
 			WorkLog wl = new WorkLog();
+			wl.setTask(task);
 			wl.setAccount(Utils.getCurrentAccount());
 			wl.setTime(new Date());
 			wl.setTimeLogged(new Date());
@@ -96,6 +98,7 @@ public class WorkLogService {
 		task = taskSrv.findById(task.getId());
 		if (task != null) {
 			WorkLog wl = new WorkLog();
+			wl.setTask(task);
 			wl.setAccount(Utils.getCurrentAccount());
 			wl.setTimeLogged(new Date());
 			wl.setTime(new Date());

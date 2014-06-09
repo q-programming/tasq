@@ -50,9 +50,7 @@ public class ProjetController {
 		project.setLastVisit(new Date());
 		// mark it as last visit
 		projSrv.save(project);
-		List<Task> taskList = taskSrv.findAllByProject(project);
 		model.addAttribute("project", project);
-		model.addAttribute("tasks", taskList);
 		return "project/details";
 	}
 

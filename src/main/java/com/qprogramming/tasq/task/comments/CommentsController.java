@@ -69,6 +69,7 @@ public class CommentsController {
 			if (messageValid(message, ra)) {
 				Hibernate.initialize(task.getComments());
 				Comment comment = new Comment();
+				comment.setTask(task);
 				comment.setAuthor(currAccount);
 				comment.setDate(new Date());
 				comment.setMessage(message);

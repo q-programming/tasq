@@ -1,26 +1,30 @@
 package com.qprogramming.tasq.task;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinTable;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.IndexColumn;
 import org.joda.time.Period;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.projects.Project;
+import com.qprogramming.tasq.support.CommentsSorter;
 import com.qprogramming.tasq.support.PeriodHelper;
+import com.qprogramming.tasq.support.WorkLogSorter;
 import com.qprogramming.tasq.task.comments.Comment;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 
@@ -42,6 +46,7 @@ public class Task implements java.io.Serializable {
 	private String description;
 
 	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "project_tasks")
 	private Project project;
 
 	@ManyToOne
@@ -80,16 +85,14 @@ public class Task implements java.io.Serializable {
 	@Column
 	private Enum<TaskType> type;
 
-	@OneToMany(fetch = FetchType.EAGER)
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "task")
 	private Set<WorkLog> worklog;
 
 	@Column
 	private Boolean estimated = false;
 
-	@OneToMany(fetch = FetchType.EAGER)
-	@IndexColumn(name = "INDEX_COL")
-	@JoinTable(name = "task_comments")
-	private List<Comment> comments;
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "task")
+	private Set<Comment> comments;
 
 	public String getId() {
 		return id;
@@ -191,8 +194,10 @@ public class Task implements java.io.Serializable {
 		this.estimate = estimate;
 	}
 
-	public Set<WorkLog> getWorklog() {
-		return worklog;
+	public List<WorkLog> getWorklog() {
+		List<WorkLog> list_worklog = new ArrayList<WorkLog>(worklog);
+		Collections.sort(list_worklog, new WorkLogSorter(true));
+		return list_worklog;
 	}
 
 	public void setWorklog(Set<WorkLog> worklog) {
@@ -261,16 +266,18 @@ public class Task implements java.io.Serializable {
 	}
 
 	public List<Comment> getComments() {
-		return comments;
+		List<Comment> comments_list = new ArrayList<Comment>(comments);
+		Collections.sort(comments_list, new CommentsSorter(false));
+		return comments_list;
 	}
 
-	public void setComments(List<Comment> comments) {
+	public void setComments(Set<Comment> comments) {
 		this.comments = comments;
 	}
 
 	public void addComment(Comment comment) {
 		if (comments == null) {
-			comments = new LinkedList<Comment>();
+			comments = new HashSet<Comment>();
 		}
 		comments.add(comment);
 	}

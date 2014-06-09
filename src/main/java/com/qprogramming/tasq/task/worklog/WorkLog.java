@@ -11,24 +11,26 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.TableGenerator;
 
 import org.joda.time.Period;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.task.Task;
 
 /**
  * @author romanjak
  * @date 26 maj 2014
  */
 @Entity
-public class WorkLog implements Serializable{
+public class WorkLog implements Serializable {
 
 	/**
 	 * 
@@ -36,8 +38,8 @@ public class WorkLog implements Serializable{
 	private static final long serialVersionUID = 5421564881978300937L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.TABLE, generator="generatorName")  
-	@TableGenerator(name="generatorName", allocationSize=1)  
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "worklog_seq_gen")
+	@SequenceGenerator(name = "worklog_seq_gen", sequenceName = "worklog_id_seq", allocationSize = 1)
 	private Long id;
 
 	@Column
@@ -51,12 +53,16 @@ public class WorkLog implements Serializable{
 
 	@Enumerated(EnumType.STRING)
 	private LogType type;
-	
+
 	@Column
 	private Period activity;
-	
+
 	@Column
 	private String message;
+
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "task_worklog")
+	private Task task;
 
 	public Long getId() {
 		return id;
@@ -74,8 +80,8 @@ public class WorkLog implements Serializable{
 	public void setTime(Date time) {
 		this.time = time;
 	}
-	
-	public Date getRawTime(){
+
+	public Date getRawTime() {
 		return time;
 	}
 
@@ -115,13 +121,21 @@ public class WorkLog implements Serializable{
 		SimpleDateFormat sdf = new SimpleDateFormat("dd.M.yyyy HH:mm");
 		return sdf.format(timeLogged);
 	}
-	
+
 	public Date getRawTimeLogged() {
 		return timeLogged;
 	}
 
 	public void setTimeLogged(Date timeLogged) {
 		this.timeLogged = timeLogged;
+	}
+
+	public Task getTask() {
+		return task;
+	}
+
+	public void setTask(Task task) {
+		this.task = task;
 	}
 
 	@Override

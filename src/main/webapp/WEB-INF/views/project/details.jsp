@@ -38,7 +38,7 @@
 		<s:message code="task.tasks" />
 	</h3>
 	<table>
-		<c:forEach items="${tasks}" var="task">
+		<c:forEach items="${project.tasks}" var="task">
 			<tr>
 				<td><a href="<c:url value="task?id=${task.id}"/>">[${task.id}]
 						${task.name}</a>

@@ -12,25 +12,26 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 
 import com.qprogramming.tasq.account.Account;
-
+import com.qprogramming.tasq.task.Task;
 
 @Entity
 @Table(name = "comments")
-public class Comment implements Serializable{
+public class Comment implements Serializable {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 4161639839117869343L;
+	private static final long serialVersionUID = 4622057683991517326L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.TABLE, generator="generatorName")  
-	@TableGenerator(name="generatorName", allocationSize=1)  
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "comment_seq_gen")
+	@SequenceGenerator(name = "comment_seq_gen", sequenceName = "comment_id_seq", allocationSize = 1)
 	private Long id;
 
 	@ManyToOne
@@ -44,6 +45,10 @@ public class Comment implements Serializable{
 
 	@Column
 	private Date date_edited;
+
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "task_comments")
+	private Task task;
 
 	SimpleDateFormat sdf = new SimpleDateFormat("dd.M.yyyy HH:mm");
 
@@ -93,6 +98,14 @@ public class Comment implements Serializable{
 
 	public void setDate_edited(Date date_edited) {
 		this.date_edited = date_edited;
+	}
+
+	public Task getTask() {
+		return task;
+	}
+
+	public void setTask(Task task) {
+		this.task = task;
 	}
 
 	@Override

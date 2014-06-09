@@ -10,7 +10,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<title>TasQ</title>
+<title>Q-Tasker</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <script src="http://code.jquery.com/jquery-latest.js"></script>
 <%-- jQuery UI --%>

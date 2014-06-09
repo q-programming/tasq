@@ -6,16 +6,21 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.TableGenerator;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.task.Task;
 
 @Entity
 public class Project implements Serializable{
@@ -26,12 +31,9 @@ public class Project implements Serializable{
 	private static final long serialVersionUID = 143468447150832121L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.TABLE, generator="generatorName")  
-	@TableGenerator(name="generatorName", allocationSize=1)  
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "project_seq_gen")
+	@SequenceGenerator(name = "project_seq_gen", sequenceName = "project_id_seq", allocationSize = 1)
 	private Long id;
-
-	@Column
-	private Long task_count = 0L;
 
 	@Column(unique = true)
 	private String projectId;
@@ -56,6 +58,9 @@ public class Project implements Serializable{
 
 	@Column
 	private boolean active = false;
+	
+	@OneToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL,mappedBy = "project")
+	private List<Task> tasks;
 
 	public Project() {
 		// TODO Auto-generated constructor stub
@@ -132,14 +137,6 @@ public class Project implements Serializable{
 		this.description = description;
 	}
 
-	public Long getTask_count() {
-		return task_count;
-	}
-
-	public void setTask_count(Long task_count) {
-		this.task_count = task_count;
-	}
-
 	public boolean isActive() {
 		return active;
 	}
@@ -154,6 +151,14 @@ public class Project implements Serializable{
 
 	public void setProjectId(String projectId) {
 		this.projectId = projectId;
+	}
+
+	public List<Task> getTasks() {
+		return tasks;
+	}
+
+	public void setTasks(List<Task> tasks) {
+		this.tasks = tasks;
 	}
 
 	@Override

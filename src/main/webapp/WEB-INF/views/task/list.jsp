@@ -73,6 +73,9 @@
 							<c:set var="logged_class">progress-bar-danger</c:set>
 							<c:set var="percentage">${100-task.overCommited}</c:set>
 						</c:if>
+						<c:if test="${task.estimate eq '0m' && task.remaining ne '0m'}">
+							<c:set var="percentage">${100- task.percentage_logged}</c:set>
+						</c:if>
 						<c:if test="${task.state eq 'CLOSED'}">
 							<c:set var="logged_class">progress-bar-success</c:set>
 						</c:if>
