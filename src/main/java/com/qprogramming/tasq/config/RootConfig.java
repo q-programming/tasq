@@ -4,6 +4,7 @@ import org.springframework.context.annotation.*;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 @Configuration
 @ComponentScan(basePackages = { "com.qprogramming.tasq" })
@@ -17,6 +18,11 @@ public class RootConfig {
 				new ClassPathResource("/project.properties"),
 				new ClassPathResource("/email.properties"), });
 		return ppc;
+	}
+	
+	@Bean(name = "multipartResolver")
+	public CommonsMultipartResolver getMultipartResolver() {
+		return new CommonsMultipartResolver();
 	}
 
 }

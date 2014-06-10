@@ -57,7 +57,7 @@
 						<ul class="dropdown-menu">
 							<c:forEach items="${last_tasks}" var="l_task">
 								<li><a href="<c:url value="/task?id=${l_task.id}"/>">[${l_task.id}]
-												${l_task.name}</a></li>
+										${l_task.name}</a></li>
 							</c:forEach>
 							<li role="presentation" class="divider"></li>
 							<li style="margin: 10px;"><a href="<c:url value="/tasks"/>"><span
@@ -121,6 +121,11 @@
 				<%-- Logged in user --%>
 				<security:authorize access="isAuthenticated()">
 					<security:authentication property="principal" var="user" />
+					<li><form class="form-search form-inline" action="search">
+						<input type="text" name="query" class="form-control search-query input-sm"
+							placeholder="Search..." style="border-radius:10px"/>
+					</form>
+					</li>
 					<li>
 						<div>
 							<a class="btn btn-default btn-xxs a-tooltip"
@@ -146,7 +151,8 @@
 					</li>
 					<li>
 						<div class="pull-right">
-							<img src="<c:url value="/userAvatar"/>" style="height: 50px"></img>
+							<img src="<c:url value="/userAvatar"/>"
+								style="height: 50px; padding-left: 5px;"></img>
 						</div>
 					</li>
 				</security:authorize>

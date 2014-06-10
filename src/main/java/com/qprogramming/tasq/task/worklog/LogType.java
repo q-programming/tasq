@@ -9,15 +9,19 @@ package com.qprogramming.tasq.task.worklog;
  * @date 28 maj 2014
  */
 public enum LogType {
-	CREATE("logtype.create"), CHANGE("logtype.change"), LOG("logtype.log"), STATUS(
-			"logtype.status"), ESTIMATE("logtype.estimate"), CLOSED("logtype.closed");
+	CREATE("log.type.create"), CHANGE("log.type.change"), LOG("log.type.log"), STATUS(
+			"log.type.status"), ESTIMATE("log.type.estimate"), CLOSED("log.type.closed"),COMMENT("log.type.comment");
 
-	private String type;
+	private String code;
 	/**
 	 * 
 	 */
-	private LogType(String type) {
-		this.type = type;
+	private LogType(String code) {
+		this.code = code;
+	}
+
+	public String getCode() {
+		return code;
 	}
 
 	/*
@@ -27,6 +31,6 @@ public enum LogType {
 	 */
 	@Override
 	public String toString() {
-		return type;
+		return code;
 	}
 }

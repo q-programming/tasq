@@ -11,11 +11,11 @@
 		<s:message code="panel.settings"></s:message>
 	</h3>
 	<hr>
-	<form id="panelForm" name="panelForm" method="post">
+	<form id="panelForm" name="panelForm" method="post" enctype="multipart/form-data">
 		<div style="overflow: auto; padding: 5px">
 			<div id="avatar"
 				style="border: 1px dashed; display: inline-block; text-align: center; min-width: 110px; float: left">
-				<img id="avatar_src" src="<c:url value="${user.avatar}"/>"
+				<img id="avatar_src" src="<c:url value="/userAvatar"/>" 
 					style="padding: 10px;"></img>
 				<div id="avatar_upload" class="hidden" style="margin-top: -30px">
 					<input id="file_upload" name="avatar" type="file"
@@ -58,7 +58,7 @@
 		</div>
 		<hr>
 		<div style="text-align: center;">
-			<button class="btn btn-primary" type="submit">
+			<button class="btn btn-success" type="submit">
 				<s:message code="panel.save" text="Save settings" />
 			</button>
 		</div>

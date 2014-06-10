@@ -76,3 +76,26 @@ table.button-table tr td .buttons_panel {
 table.button-table tr:hover td .buttons_panel {
 	display: block;
 }
+
+input.search-query {
+	padding-left: 26px;
+}
+
+form.form-search {
+	padding-right: 10px;
+	position: relative;
+}
+
+form.form-search:before {
+	display: block;
+	width: 14px;
+	height: 14px;
+	content: "\e003";
+	font-family: 'Glyphicons Halflings';
+	background-position: -48px 0;
+	position: absolute;
+	top: 8px;
+	left: 8px;
+	opacity: .5;
+	z-index: 1000;
+}

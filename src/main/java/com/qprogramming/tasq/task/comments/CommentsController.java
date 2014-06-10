@@ -27,6 +27,8 @@ import com.qprogramming.tasq.support.web.MessageHelper;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
+import com.qprogramming.tasq.task.worklog.LogType;
+import com.qprogramming.tasq.task.worklog.WorkLogService;
 
 @Controller
 public class CommentsController {
@@ -45,6 +47,8 @@ public class CommentsController {
 	// @Autowired TODO
 	// private WatchedTaskService watchedTaskServ;
 	//
+	@Autowired
+	private WorkLogService wlSrv;
 
 	@Autowired
 	private SessionLocaleResolver localeResolver;
@@ -76,6 +80,7 @@ public class CommentsController {
 				commRepo.save(comment);
 				task.addComment(comment);
 				taskSrv.save(task);
+				wlSrv.addActivityLog(task, message, LogType.COMMENT);
 				// search for watchers and send notifications
 				// TODO
 				MessageHelper.addSuccessAttribute(ra,

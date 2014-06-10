@@ -1,10 +1,12 @@
 package com.qprogramming.tasq.account;
 
+import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
 
+import javax.imageio.ImageIO;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -61,11 +64,31 @@ public class AccountController {
 	@Transactional
 	@RequestMapping(value = "settings", method = RequestMethod.POST)
 	public String saveSettings(
+			@RequestParam(value = "avatar", required = false) MultipartFile avatarFile,
 			@RequestParam(value = "emails", required = false) String emails,
-			@RequestParam(value = "language") String language,
+			@RequestParam(value = "language", required = false) String language,
 			RedirectAttributes ra, HttpServletRequest request,
 			HttpServletResponse response) {
 		Account account = Utils.getCurrentAccount();
+		if (avatarFile.getSize() != 0) {
+			try {
+				BufferedImage image = ImageIO.read(avatarFile.getInputStream());
+				Integer width = image.getWidth();
+				Integer height = image.getHeight();
+				if (width > 150 || height > 150 || avatarFile.getSize() > 100000) {
+					MessageHelper.addErrorAttribute(
+							ra,
+							msg.getMessage("error.file100kb", null,
+									Utils.getCurrentLocale()));
+					return "redirect:/settings";
+				}
+				byte[] bytes = avatarFile.getBytes();
+				account.setAvatar(bytes);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		account.setLanguage(language);
 		localeResolver.setLocale(request, response, new Locale(language));
 		account.setEmail_notifications(Boolean.parseBoolean(emails));

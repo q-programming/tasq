@@ -24,6 +24,7 @@ import org.joda.time.Period;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.task.Task;
+import com.qprogramming.tasq.task.TaskType;
 
 /**
  * @author romanjak
@@ -51,8 +52,9 @@ public class WorkLog implements Serializable {
 	@ManyToOne
 	private Account account;
 
-	@Enumerated(EnumType.STRING)
-	private LogType type;
+	@Column
+	
+	private Enum<LogType>type;
 
 	@Column
 	private Period activity;
@@ -93,14 +95,6 @@ public class WorkLog implements Serializable {
 		this.account = account;
 	}
 
-	public LogType getType() {
-		return type;
-	}
-
-	public void setType(LogType type) {
-		this.type = type;
-	}
-
 	public String getMessage() {
 		return message;
 	}
@@ -136,6 +130,14 @@ public class WorkLog implements Serializable {
 
 	public void setTask(Task task) {
 		this.task = task;
+	}
+
+	public Enum<LogType> getType() {
+		return type;
+	}
+
+	public void setType(Enum<LogType> type) {
+		this.type = type;
 	}
 
 	@Override

@@ -3,6 +3,7 @@
 <%@ taglib prefix="security"
 	uri="http://www.springframework.org/security/tags"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
 <div class="white-frame" style="overflow: auto;">
 	<security:authentication property="principal" var="user" />
@@ -41,22 +42,91 @@
 	<c:set var="tasks_blocked">${BLOCKED*100 / tasks_total}</c:set>
 	<div class="progress">
 		<div class="progress-bar progress-bar-warning a-tooltip"
-			style="width: ${tasks_todo}%" title="${TO_DO} <s:message code="task.state.todo"/>">
+			style="width: ${tasks_todo}%"
+			title="${TO_DO} <s:message code="task.state.todo"/>">
+			<c:if test="${tasks_todo gt 10.0}">
+				<span>${TO_DO} <s:message code="task.state.todo" /></span>
+			</c:if>
 		</div>
 		<div class="progress-bar a-tooltip" style="width: ${tasks_ongoing}%"
 			title="${ONGOING} <s:message code="task.state.ongoing"/>">
+			<c:if test="${tasks_ongoing gt 10.0}">
+				<span>${ONGOING} <s:message code="task.state.ongoing" /></span>
+			</c:if>
 		</div>
 		<div class="progress-bar progress-bar-success a-tooltip"
-			style="width: ${tasks_closed}%" title="${CLOSED} <s:message code="task.state.closed"/>" >
+			style="width: ${tasks_closed}%"
+			title="${CLOSED} <s:message code="task.state.closed"/>">
+			<c:if test="${tasks_closed gt 10.0}">
+				<span>${CLOSED} <s:message code="task.state.closed" /></span>
+			</c:if>
 		</div>
 		<div class="progress-bar progress-bar-danger a-tooltip"
-			style="width: ${tasks_blocked}%" title="${BLOCKED} <s:message code="task.state.blocked"/>">
+			style="width: ${tasks_blocked}%"
+			title="${BLOCKED} <s:message code="task.state.blocked"/>">
+			<c:if test="${tasks_blocked gt 10.0}">
+				<span>${BLOCKED} <s:message code="task.state.blocked" /></span>
+			</c:if>
 		</div>
 	</div>
 	<div style="display: table-cell; width: 65%">
+		<%------------------------------ EVENTS ------------------------%>
 		<h3>
 			<s:message code="project.latestEvents" />
 		</h3>
+		<%-- Next previous div --%>
+		<div>
+			<c:choose>
+				<c:when test="${fn:length(events) eq 25 && empty param['show']}">
+					<div class="pull-left"></div>
+					<div class="pull-right">
+						<a class="btn btn-default btn-xxs"
+							href="<c:url value="/project?id=${project.id}&show=1"/>"><s:message
+								code="project.next" /></a>
+					</div>
+				</c:when>
+				<c:when test="${fn:length(events) eq 25 && param['show'] eq 1}">
+					<div class="pull-left">
+						<a class="btn btn-default btn-xxs"
+							href="<c:url value="/project?id=${project.id}"/>"><s:message
+								code="project.previous" /></a>
+					</div>
+					<div class="pull-right">
+						<a class="btn btn-default btn-xxs"
+							href="<c:url value="/project?id=${project.id}&show=1"/>"><s:message
+								code="project.next" /></a>
+					</div>
+				</c:when>
+				<c:when test="${fn:length(events) lt 25 && param['show'] eq 1}">
+					<div class="pull-left">
+						<a class="btn btn-default btn-xxs"
+							href="<c:url value="/project?id=${project.id}"/>"><s:message
+								code="project.previous" /></a>
+					</div>
+					<div class="pull-right"></div>
+				</c:when>
+				<c:when test="${fn:length(events) lt 25 && not empty param['show']}">
+					<div class="pull-left">
+						<a class="btn btn-default btn-xxs"
+							href="<c:url value="/project?id=${project.id}&show=${param['show']-1}"/>"><s:message
+								code="project.previous" /></a>
+					</div>
+					<div class="pull-right"></div>
+				</c:when>
+				<c:when test="${fn:length(events) eq 25 && not empty param['show']}">
+					<div class="pull-left">
+						<a class="btn btn-default btn-xxs"
+							href="<c:url value="/project?id=${project.id}&show=${param['show']-1}"/>"><s:message
+								code="project.previous" /></a>
+					</div>
+					<div class="pull-right">
+						<a class="btn btn-default btn-xxs"
+							href="<c:url value="/project?id=${project.id}&show=1"/>"><s:message
+								code="project.next" /></a>
+					</div>
+				</c:when>
+			</c:choose>
+		</div>
 		<table class="table">
 			<c:forEach items="${events}" var="worklog">
 				<tr>
@@ -72,12 +142,13 @@
 						</c:if></td>
 				</tr>
 			</c:forEach>
-
 		</table>
 	</div>
+	<%------------------------TASKS -------------------------------%>
 	<div style="display: table-cell; padding-left: 30px">
 		<h3>
-			<s:message code="task.tasks" />
+			<a href="<c:url value="/tasks"/>" style="color: black"><s:message
+					code="task.tasks" /></a>
 		</h3>
 		<table class="table">
 			<c:forEach items="${project.tasks}" var="task">
@@ -86,19 +157,20 @@
 					<td><a href="<c:url value="task?id=${task.id}"/>">[${task.id}]
 							${task.name}</a>
 					<td>
-					<td><div class="progress" style="width: 50px">
-							<c:set var="logged_class"></c:set>
-							<c:if
-								test="${task.percentage_logged gt 100 or task.state eq 'BLOCKED'}">
-								<c:set var="logged_class">progress-bar-danger</c:set>
-							</c:if>
-							<c:if test="${task.state eq 'CLOSED'}">
-								<c:set var="logged_class">progress-bar-success</c:set>
-							</c:if>
-							<div class="progress-bar ${logged_class}" role="progressbar"
-								aria-valuenow="${task.percentage_logged}" aria-valuemin="0"
-								aria-valuemax="100" style="width:${task.percentage_logged}%"></div>
-						</div></td>
+					<td><c:set var="logged_class"></c:set> <c:if
+							test="${task.percentage_logged gt 100 or task.state eq 'BLOCKED'}">
+							<c:set var="logged_class">progress-bar-danger</c:set>
+						</c:if> <c:if test="${task.state eq 'CLOSED'}">
+							<c:set var="logged_class">progress-bar-success</c:set>
+						</c:if> <c:if test="${not task.estimated}">
+							<div>${task.logged_work}</div>
+						</c:if> <c:if test="${task.estimated}">
+							<div class="progress" style="width: 50px">
+								<div class="progress-bar ${logged_class}" role="progressbar"
+									aria-valuenow="${task.percentage_logged}" aria-valuemin="0"
+									aria-valuemax="100" style="width:${task.percentage_logged}%"></div>
+							</div>
+						</c:if></td>
 				</tr>
 			</c:forEach>
 		</table>

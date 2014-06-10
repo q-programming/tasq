@@ -1,3 +1,4 @@
+<%@page import="com.qprogramming.tasq.task.TaskState"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
 <%@ taglib prefix="security"
@@ -38,7 +39,23 @@
 				<th style="width: 30px"><s:message code="task.type" /></th>
 				<th style="width: 500px"><s:message code="task.name" /></th>
 				<th><s:message code="task.progress" /></th>
-				<th><s:message code="task.state" /></th>
+				<th>
+					<div class="dropdown" style="padding-top: 5px">
+						<a class="dropdown-toggle" type="button"
+							id="dropdownMenu1" data-toggle="dropdown"><s:message
+								code="task.state" /><span class="caret"></span></a>
+						<%
+							pageContext.setAttribute("states", TaskState.values());
+						%>
+						<ul class="dropdown-menu">
+							<c:forEach items="${states}" var="state">
+								<li><a href="#"><t:state state="${state}"></t:state></a></li>	
+							</c:forEach>
+							
+						</ul>
+					</div>
+
+				</th>
 				<th style="width: 100px"><s:message code="main.action" /></th>
 			</tr>
 		</thead>

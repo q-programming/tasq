@@ -9,6 +9,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.qprogramming.tasq.signup.SignupController;
 import com.qprogramming.tasq.support.ProjectSorter;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.WorkLogSorter;
@@ -32,6 +35,8 @@ import com.qprogramming.tasq.task.worklog.WorkLogService;
 
 @Controller
 public class ProjetController {
+	private static final Logger LOG = LoggerFactory
+			.getLogger(ProjetController.class);
 
 	@Autowired
 	private ProjectService projSrv;
@@ -46,8 +51,9 @@ public class ProjetController {
 	MessageSource msg;
 
 	@RequestMapping(value = "project", method = RequestMethod.GET)
-	public String showDetails(@RequestParam(value = "id") Long id, Model model,
-			RedirectAttributes ra, HttpServletRequest request) {
+	public String showDetails(@RequestParam(value = "id") Long id,
+			@RequestParam(value = "show", required = false) Integer show,
+			Model model, RedirectAttributes ra, HttpServletRequest request) {
 		Project project = projSrv.findById(id);
 		if (project == null) {
 			MessageHelper.addErrorAttribute(
@@ -59,20 +65,27 @@ public class ProjetController {
 		project.setLastVisit(new Date());
 		// mark it as last visit
 		projSrv.save(project);
-		//get latest events for this project
+		// get latest events for this project
 		List<WorkLog> workLogs = wrkLogSrv.getProjectEvents(project);
 		Collections.sort(workLogs, new WorkLogSorter(true));
-		//Check status of all projects
+		// Check status of all projects
 		List<Task> tasks = project.getTasks();
-		Map<TaskState,Integer> state_count = new HashMap<TaskState,Integer>();
+		Map<TaskState, Integer> state_count = new HashMap<TaskState, Integer>();
 		for (TaskState state : TaskState.values()) {
 			state_count.put(state, 0);
 		}
 		for (Task task : tasks) {
 			Integer value = state_count.get(task.getState());
 			value++;
-			state_count.put((TaskState)task.getState(), value);
+			state_count.put((TaskState) task.getState(), value);
 		}
+		show = show == null ? 0 : show;
+		show++;
+		int begin = (show - 1) * 25;
+		int end = show * 25;
+		begin = begin < 0 ? 0 : begin;
+		end = end > workLogs.size() ? workLogs.size() : end;
+		workLogs = workLogs.subList(begin, end);
 		model.addAttribute("TO_DO", state_count.get(TaskState.TO_DO));
 		model.addAttribute("ONGOING", state_count.get(TaskState.ONGOING));
 		model.addAttribute("CLOSED", state_count.get(TaskState.CLOSED));
