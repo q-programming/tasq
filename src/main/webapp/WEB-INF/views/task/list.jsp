@@ -30,8 +30,54 @@
 			</c:forEach>
 		</select>
 	</div>
+	<%--------------FILTERS ----------------------------%>
+	<c:if
+		test="${not empty param.projectID || not empty param.state || not empty param.query}">
+		<c:if test="${not empty param.projectID}">
+			<c:set var="projID_url">
+								projectID=${param.projectID}&
+							</c:set>
+		</c:if>
+		<c:if test="${not empty param.state}">
+			<c:set var="state_url">
+								state=${param.state}&
+				</c:set>
+		</c:if>
+		<c:if test="${not empty param.query}">
+			<c:set var="query_url">
+								query=${param.query}&
+				</c:set>
+		</c:if>
+
+		<div style="display: table-cell; padding-left: 20px; width: 100%">
+			<c:if test="${not empty param.projectID}">
+				<span><s:message code="project.project" />: <span
+					class="filter_span"> ${param.projectID}<a
+						href="<c:url value="tasks?${state_url}${query_url}"/>"><span
+							class="glyphicon glyphicon-remove"
+							style="font-size: smaller; margin-left: 3px; color: lightgray"></span></a></span></span>
+			</c:if>
+			<c:if test="${not empty param.state}">
+				<span><s:message code="task.state" />: <span
+					class="filter_span"><t:state state="${param.state}" /> <a
+						href="<c:url value="tasks?${projID_url}${query_url}"/>"><span
+							class="glyphicon glyphicon-remove"
+							style="font-size: smaller; margin-left: 3px; color: lightgray"></span></a></span></span>
+			</c:if>
+			<c:if test="${not empty param.query}">
+				<c:set var="query_url">
+								query=${param.query}&
+				</c:set>
+				<span><s:message code="main.search" />: <span
+					class="filter_span"> ${param.query}<a
+						href="<c:url value="tasks?${projID_url}${state_url}"/>"><span
+							class="glyphicon glyphicon-remove"
+							style="font-size: smaller; margin-left: 3px; color: lightgray"></span></a></span></span>
+			</c:if>
+		</div>
+	</c:if>
 </div>
-<div class="white-frame" style="overflow: auto;">
+<div class="white-frame">
 	<security:authentication property="principal" var="user" />
 	<table class="table table-condensed">
 		<thead>
@@ -40,18 +86,19 @@
 				<th style="width: 500px"><s:message code="task.name" /></th>
 				<th><s:message code="task.progress" /></th>
 				<th>
-					<div class="dropdown" style="padding-top: 5px">
-						<a class="dropdown-toggle" type="button"
-							id="dropdownMenu1" data-toggle="dropdown"><s:message
+					<div class="dropdown" style="padding-top: 5px; cursor: pointer;">
+						<a class="dropdown-toggle" type="button" id="dropdownMenu1"
+							data-toggle="dropdown" style="color: black"><s:message
 								code="task.state" /><span class="caret"></span></a>
 						<%
 							pageContext.setAttribute("states", TaskState.values());
 						%>
 						<ul class="dropdown-menu">
 							<c:forEach items="${states}" var="state">
-								<li><a href="#"><t:state state="${state}"></t:state></a></li>	
+								<li><a
+									href="<c:url value="tasks?${projID_url}${query_url}state=${state}"/>"><t:state
+											state="${state}"></t:state></a></li>
 							</c:forEach>
-							
 						</ul>
 					</div>
 
@@ -110,7 +157,9 @@
 <script>
 	$(document).ready(function($) {
 		$("#project").change(function(){
-			var link = "<c:url value="/tasks?projectID="/>";
+			var query = "${query_url}";
+			var state = "${state_url}";
+			var link = "<c:url value="/tasks?projectID="/>" + $(this).val()+"&" + query + state;
 			window.location = link + $(this).val();
 		});
 	});

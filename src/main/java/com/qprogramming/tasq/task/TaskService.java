@@ -30,6 +30,10 @@ public class TaskService {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	public List<Task> findByProjectAndState(Project project, TaskState state){
+		return taskRepo.findByProjectAndState(project,state);
+	}
 
 	/**
 	 * @param id

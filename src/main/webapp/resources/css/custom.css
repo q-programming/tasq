@@ -94,8 +94,15 @@ form.form-search:before {
 	font-family: 'Glyphicons Halflings';
 	background-position: -48px 0;
 	position: absolute;
-	top: 8px;
+	top: 5px;
 	left: 8px;
 	opacity: .5;
 	z-index: 1000;
+}
+
+.filter_span {
+	border: 1px solid;
+	padding: 5px;
+	border-radius: 3px;
+	background-color: white;
 }

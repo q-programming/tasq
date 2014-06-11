@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -138,8 +139,8 @@ public class TaskController {
 		}
 		account.setLast_visited(clean);
 		accSrv.update(account);
-		//TODO Add sorting
-		//Collections.sort(task.getWorklog(), new WorkLogSorter(true));
+		// TODO Add sorting
+		// Collections.sort(task.getWorklog(), new WorkLogSorter(true));
 		model.addAttribute("task", task);
 		return "task/details";
 	}
@@ -147,6 +148,8 @@ public class TaskController {
 	@RequestMapping(value = "tasks", method = RequestMethod.GET)
 	public String listTasks(
 			@RequestParam(value = "projectID", required = false) String proj_id,
+			@RequestParam(value = "state", required = false) String state,
+			@RequestParam(value = "query", required = false) String query,
 			Model model) {
 		List<Project> projects = projectSrv.findAllByUser();
 		Collections.sort(projects, new ProjectSorter(
@@ -161,7 +164,25 @@ public class TaskController {
 			active = projectSrv.findByProjectId(proj_id);
 		}
 		if (active != null) {
-			List<Task> taskList = taskSrv.findAllByProject(active);
+			List<Task> taskList = new LinkedList<Task>();
+			if (state == null || state == "") {
+				taskList = taskSrv.findAllByProject(active);
+			} else {
+				taskList = taskSrv.findByProjectAndState(active,
+						TaskState.valueOf(state));
+			}
+			if (query != null && query != "") {
+				List<Task> searchResult = new LinkedList<Task>();
+				for (Task task : taskList) {
+					if (task.getName().contains(query)
+							|| task.getDescription().contains(query)) {
+						searchResult.add(task);
+					}
+				}
+				if (searchResult.size() > 0) {
+					taskList = searchResult;
+				}
+			}
 			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID,
 					false));
 			model.addAttribute("tasks", taskList);
@@ -285,9 +306,8 @@ public class TaskController {
 				if (log_work.toStandardDuration().getMillis() / 1000 / 60 < 1) {
 					log_work = new Period().plusMinutes(1);
 				}
-					wlSrv.addNormalWorkLog(task,
-							PeriodHelper.outFormat(log_work), log_work,
-							LogType.LOG);
+				wlSrv.addNormalWorkLog(task, PeriodHelper.outFormat(log_work),
+						log_work, LogType.LOG);
 				account.clearActive_task();
 				accSrv.update(account);
 			} else {

@@ -121,9 +121,9 @@
 				<%-- Logged in user --%>
 				<security:authorize access="isAuthenticated()">
 					<security:authentication property="principal" var="user" />
-					<li><form class="form-search form-inline" action="search">
+					<li><form class="form-search form-inline" action="<s:url value="/tasks"></s:url>">
 						<input type="text" name="query" class="form-control search-query input-sm"
-							placeholder="Search..." style="border-radius:10px"/>
+							placeholder="<s:message code="task.search"/>" style="border-radius:10px"/>
 					</form>
 					</li>
 					<li>
