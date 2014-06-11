@@ -16,9 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.joda.time.DateTime;
-import org.joda.time.Minutes;
 import org.joda.time.Period;
-import org.joda.time.ReadableInstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
@@ -31,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.account.Account;
-import com.qprogramming.tasq.account.Account.ActiveTask;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
@@ -39,7 +36,6 @@ import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.support.ProjectSorter;
 import com.qprogramming.tasq.support.TaskSorter;
 import com.qprogramming.tasq.support.Utils;
-import com.qprogramming.tasq.support.WorkLogSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
@@ -50,6 +46,16 @@ import com.qprogramming.tasq.task.worklog.WorkLogService;
  */
 @Controller
 public class TaskController {
+
+	/**
+	 * 
+	 */
+	private static final String CHANGE_TO = " -> ";
+
+	/**
+	 * 
+	 */
+	private static final String BR = "<br>";
 
 	private static final String START = "start";
 
@@ -71,25 +77,25 @@ public class TaskController {
 	private MessageSource msg;
 
 	@RequestMapping(value = "task/create", method = RequestMethod.GET)
-	public NewTaskForm startTaskCreate(Model model) {
+	public TaskForm startTaskCreate(Model model) {
 		model.addAttribute("projects", projectSrv.findAllByUser());
-		return new NewTaskForm();
+		return new TaskForm();
 	}
 
 	@RequestMapping(value = "task/create", method = RequestMethod.POST)
 	public String createTask(
-			@Valid @ModelAttribute("newTaskForm") NewTaskForm newTaskForm,
+			@Valid @ModelAttribute("newTaskForm") TaskForm taskForm,
 			Errors errors, RedirectAttributes ra, HttpServletRequest request,
 			Model model) {
 		if (errors.hasErrors()) {
 			model.addAttribute("projects", projectSrv.findAllByUser());
 			return null;
 		}
-		Project project = projectSrv.findByProjectId(newTaskForm.getProject());
+		Project project = projectSrv.findByProjectId(taskForm.getProject());
 		if (project != null) {
 			Task task = null;
 			try {
-				task = newTaskForm.createTask();
+				task = taskForm.createTask();
 			} catch (IllegalArgumentException e) {
 				errors.rejectValue("estimate", "error.estimateFormat");
 				model.addAttribute("projects", projectSrv.findAllByUser());
@@ -109,6 +115,57 @@ public class TaskController {
 			return "redirect:/task?id=" + taskID;
 		}
 		return null;
+	}
+
+	@RequestMapping(value = "/task/edit", method = RequestMethod.GET)
+	public TaskForm startEditTask(@RequestParam("id") String id, Model model) {
+		Task task = taskSrv.findById(id);
+		return new TaskForm(task);
+	}
+
+	@RequestMapping(value = "/task/edit", method = RequestMethod.POST)
+	public String editTask(
+			@Valid @ModelAttribute("newTaskForm") TaskForm taskForm,
+			Errors errors, RedirectAttributes ra, HttpServletRequest request,
+			Model model) {
+		if (errors.hasErrors()) {
+			return null;
+		}
+		String taskID = taskForm.getId();
+		Task task = taskSrv.findById(taskID);
+		if (task == null) {
+			// something went wrong
+			return null;
+		}
+		StringBuffer message = new StringBuffer();
+		if(!task.getName().equalsIgnoreCase(taskForm.getName())){
+			message.append("Name:");
+			message.append(task.getName());
+			message.append(CHANGE_TO);
+			message.append(taskForm.getName());
+			message.append(BR);
+			task.setName(taskForm.getName());
+		}
+		if(!task.getDescription().equalsIgnoreCase(taskForm.getDescription())){
+			message.append("Description:");
+			message.append(task.getDescription());
+			message.append(CHANGE_TO);
+			message.append(taskForm.getDescription());
+			message.append(BR);
+			task.setDescription(taskForm.getDescription());
+		}
+		if(!task.getEstimate().equalsIgnoreCase(taskForm.getEstimate())){
+			message.append("Estimate:");
+			message.append(task.getEstimate());
+			message.append(CHANGE_TO);
+			message.append(taskForm.getEstimate());
+			message.append(BR);
+			task.setDescription(taskForm.getDescription());
+		}
+		task.setEstimated(!Boolean.parseBoolean(taskForm.getNo_estimation()));
+		task.setEstimate(PeriodHelper.inFormat(taskForm.getEstimate()));
+		
+		return "redirect:/task?id=" + taskID;
 	}
 
 	@RequestMapping(value = "task", method = RequestMethod.GET)
@@ -226,7 +283,7 @@ public class TaskController {
 						remaining_txt += "h";
 					}
 					remaining = PeriodHelper.inFormat(remaining_txt);
-					message.append("<br>");
+					message.append(BR);
 					message.append("Remaining: ");
 					message.append(remaining_txt);
 				}
@@ -234,7 +291,7 @@ public class TaskController {
 				if (date_logged != "" && time_logged != "") {
 					when = new SimpleDateFormat("dd-M-yyyy HH:mm")
 							.parse(date_logged + " " + time_logged);
-					message.append("<br>");
+					message.append(BR);
 					message.append("Date: ");
 					message.append(date_logged + " " + time_logged);
 				}
@@ -265,7 +322,7 @@ public class TaskController {
 			TaskState old_state = (TaskState) task.getState();
 			task.setState(state);
 			taskSrv.save(task);
-			wlSrv.addActivityLog(task, old_state.getDescription() + " -> "
+			wlSrv.addActivityLog(task, old_state.getDescription() + CHANGE_TO
 					+ state.getDescription(), LogType.STATUS);
 		}
 		return "redirect:/task?id=" + taskID;

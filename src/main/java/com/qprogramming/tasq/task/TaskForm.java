@@ -14,11 +14,11 @@ import com.qprogramming.tasq.support.PeriodHelper;
  * @author romanjak
  * @date 26 maj 2014
  */
-public class NewTaskForm {
+public class TaskForm {
 	private static final String NOT_BLANK_MESSAGE = "{notBlank.message}";
 	private static final String TYPE_NOT_BLANK_MESSAGE = "{error.taskType}";
 
-	private Long id;
+	private String id;
 
 	@NotBlank(message = NOT_BLANK_MESSAGE)
 	private String name;
@@ -38,13 +38,20 @@ public class NewTaskForm {
 
 	private String no_estimation;
 
-	public NewTaskForm() {
+	public TaskForm() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public NewTaskForm(Task task) {
+	public TaskForm(Task task) {
 		setName(task.getName());
+		setProject(task.getProject().toString());
 		setDescription(task.getDescription());
+		setNo_estimation(task.getEstimated().toString());
+		setEstimate(task.getEstimate());
+		setStory_points(task.getStory_points() != null ? task.getStory_points()
+				.toString() : "");
+		setType(((TaskType) task.getType()).getEnum());
+		setId(task.getId());
 	}
 
 	public Task createTask() throws IllegalArgumentException {
@@ -66,11 +73,11 @@ public class NewTaskForm {
 		return task;
 	}
 
-	public Long getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 

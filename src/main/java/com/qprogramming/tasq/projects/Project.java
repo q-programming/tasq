@@ -23,7 +23,7 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.task.Task;
 
 @Entity
-public class Project implements Serializable{
+public class Project implements Serializable {
 
 	/**
 	 * 
@@ -58,8 +58,8 @@ public class Project implements Serializable{
 
 	@Column
 	private boolean active = false;
-	
-	@OneToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL,mappedBy = "project")
+
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "project")
 	private List<Task> tasks;
 
 	public Project() {
@@ -110,8 +110,9 @@ public class Project implements Serializable{
 	public void setParticipants(List<Account> participants) {
 		this.participants = participants;
 	}
-	public void addParticipant(Account account){
-		if (participants == null){
+
+	public void addParticipant(Account account) {
+		if (participants == null) {
 			participants = new LinkedList<Account>();
 		}
 		participants.add(account);
@@ -159,6 +160,16 @@ public class Project implements Serializable{
 
 	public void setTasks(List<Task> tasks) {
 		this.tasks = tasks;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return getName();
 	}
 
 	@Override
