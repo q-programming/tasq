@@ -3,6 +3,7 @@
  */
 package com.qprogramming.tasq.account;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -64,6 +65,13 @@ public class AccountService {
 	
 	public Account findById(Long id){
 		return accRepo.findById(id);
+	}
+
+	/**
+	 * @return
+	 */
+	public List<Account> findAll() {
+		return accRepo.findAll();
 	}
 
 }

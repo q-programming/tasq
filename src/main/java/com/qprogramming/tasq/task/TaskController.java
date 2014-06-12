@@ -17,9 +17,12 @@ import javax.validation.Valid;
 
 import org.joda.time.DateTime;
 import org.joda.time.Period;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -29,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.account.Account.Role;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
@@ -47,14 +51,11 @@ import com.qprogramming.tasq.task.worklog.WorkLogService;
 @Controller
 public class TaskController {
 
-	/**
-	 * 
-	 */
+	private static final Logger LOG = LoggerFactory
+			.getLogger(TaskController.class);
+
 	private static final String CHANGE_TO = " -> ";
 
-	/**
-	 * 
-	 */
 	private static final String BR = "<br>";
 
 	private static final String START = "start";
@@ -84,7 +85,7 @@ public class TaskController {
 
 	@RequestMapping(value = "task/create", method = RequestMethod.POST)
 	public String createTask(
-			@Valid @ModelAttribute("newTaskForm") TaskForm taskForm,
+			@Valid @ModelAttribute("taskForm") TaskForm taskForm,
 			Errors errors, RedirectAttributes ra, HttpServletRequest request,
 			Model model) {
 		if (errors.hasErrors()) {
@@ -93,6 +94,14 @@ public class TaskController {
 		}
 		Project project = projectSrv.findByProjectId(taskForm.getProject());
 		if (project != null) {
+			// check if can edit
+			if (!canEdit(project)) {
+				MessageHelper.addErrorAttribute(
+						ra,
+						msg.getMessage("error.accesRights", null,
+								Utils.getCurrentLocale()));
+				return "redirect:" + request.getHeader("Referer");
+			}
 			Task task = null;
 			try {
 				task = taskForm.createTask();
@@ -120,12 +129,14 @@ public class TaskController {
 	@RequestMapping(value = "/task/edit", method = RequestMethod.GET)
 	public TaskForm startEditTask(@RequestParam("id") String id, Model model) {
 		Task task = taskSrv.findById(id);
+		model.addAttribute("task", task);
 		return new TaskForm(task);
 	}
 
+	@Transactional
 	@RequestMapping(value = "/task/edit", method = RequestMethod.POST)
 	public String editTask(
-			@Valid @ModelAttribute("newTaskForm") TaskForm taskForm,
+			@Valid @ModelAttribute("taskForm") TaskForm taskForm,
 			Errors errors, RedirectAttributes ra, HttpServletRequest request,
 			Model model) {
 		if (errors.hasErrors()) {
@@ -137,34 +148,58 @@ public class TaskController {
 			// something went wrong
 			return null;
 		}
+		// check if can edit
+		if (!canEdit(task.getProject())) {
+			MessageHelper.addErrorAttribute(
+					ra,
+					msg.getMessage("error.accesRights", null,
+							Utils.getCurrentLocale()));
+			return "redirect:" + request.getHeader("Referer");
+		}
 		StringBuffer message = new StringBuffer();
-		if(!task.getName().equalsIgnoreCase(taskForm.getName())){
-			message.append("Name:");
+		if (!task.getName().equalsIgnoreCase(taskForm.getName())) {
+			message.append("Name: ");
 			message.append(task.getName());
 			message.append(CHANGE_TO);
 			message.append(taskForm.getName());
 			message.append(BR);
 			task.setName(taskForm.getName());
 		}
-		if(!task.getDescription().equalsIgnoreCase(taskForm.getDescription())){
-			message.append("Description:");
+		if (!task.getDescription().equalsIgnoreCase(taskForm.getDescription())) {
+			message.append("Description: ");
 			message.append(task.getDescription());
 			message.append(CHANGE_TO);
 			message.append(taskForm.getDescription());
 			message.append(BR);
 			task.setDescription(taskForm.getDescription());
 		}
-		if(!task.getEstimate().equalsIgnoreCase(taskForm.getEstimate())){
+		if (!task.getEstimate().equalsIgnoreCase(taskForm.getEstimate())) {
 			message.append("Estimate:");
 			message.append(task.getEstimate());
 			message.append(CHANGE_TO);
 			message.append(taskForm.getEstimate());
 			message.append(BR);
-			task.setDescription(taskForm.getDescription());
+			task.setEstimate(PeriodHelper.inFormat(taskForm.getEstimate()));
 		}
-		task.setEstimated(!Boolean.parseBoolean(taskForm.getNo_estimation()));
-		task.setEstimate(PeriodHelper.inFormat(taskForm.getEstimate()));
-		
+		if (!task.getEstimated().equals(
+				!Boolean.parseBoolean(taskForm.getNo_estimation()))) {
+			message.append("Estimated changed to ");
+			message.append(!Boolean.parseBoolean(taskForm.getNo_estimation()));
+			message.append(BR);
+			task.setEstimated(!Boolean.parseBoolean(taskForm.getNo_estimation()));
+		}
+		int story_points = taskForm.getStory_points().equals("") ? 0 : Integer
+				.parseInt(taskForm.getStory_points());
+		if (task.getStory_points() != story_points) {
+			message.append("Story points: ");
+			message.append(task.getStory_points());
+			message.append(CHANGE_TO);
+			message.append(story_points);
+			task.setStory_points(story_points);
+		}
+		LOG.debug(message.toString());
+		taskSrv.save(task);
+		wlSrv.addActivityLog(task, message.toString(), LogType.EDITED);
 		return "redirect:/task?id=" + taskID;
 	}
 
@@ -181,7 +216,6 @@ public class TaskController {
 		}
 		Account account = Utils.getCurrentAccount();
 		account = accSrv.findByEmail(account.getEmail());
-
 		List<Task> last_visited = account.getLast_visited();
 		last_visited.add(0, task);
 		if (last_visited.size() > 4) {
@@ -271,6 +305,14 @@ public class TaskController {
 			RedirectAttributes ra, HttpServletRequest request, Model model) {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
+			// check if can edit
+			if (!canEdit(task.getProject())) {
+				MessageHelper.addErrorAttribute(
+						ra,
+						msg.getMessage("error.accesRights", null,
+								Utils.getCurrentLocale()));
+				return "redirect:" + request.getHeader("Referer");
+			}
 			try {
 				if (logged_work.matches("[0-9]+")) {
 					logged_work += "h";
@@ -319,6 +361,14 @@ public class TaskController {
 			RedirectAttributes ra, HttpServletRequest request, Model model) {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
+			// check if can edit
+			if (!canEdit(task.getProject())) {
+				MessageHelper.addErrorAttribute(
+						ra,
+						msg.getMessage("error.accesRights", null,
+								Utils.getCurrentLocale()));
+				return "redirect:" + request.getHeader("Referer");
+			}
 			TaskState old_state = (TaskState) task.getState();
 			task.setState(state);
 			taskSrv.save(task);
@@ -335,6 +385,14 @@ public class TaskController {
 		Utils.setHttpRequest(request);
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
+			// check if can edit
+			if (!canEdit(task.getProject())) {
+				MessageHelper.addErrorAttribute(
+						ra,
+						msg.getMessage("error.accesRights", null,
+								Utils.getCurrentLocale()));
+				return "redirect:" + request.getHeader("Referer");
+			}
 			if (action.equals(START)) {
 				Account account = Utils.getCurrentAccount();
 				if (account.getActive_task() != null
@@ -377,6 +435,24 @@ public class TaskController {
 			return "redirect:" + request.getHeader("Referer");
 		}
 		return "redirect:/task?id=" + taskID;
+	}
+
+	/**
+	 * Checks if currently logged in user have privileges to change anything in
+	 * project
+	 * 
+	 * @param task
+	 * @return
+	 */
+	private boolean canEdit(Project project) {
+		Project repo_project = projectSrv.findById(project.getId());
+		if (repo_project == null) {
+			return false;
+		}
+		Account current_account = Utils.getCurrentAccount();
+		return (repo_project.getAdministrators().contains(current_account)
+				|| repo_project.getParticipants().contains(current_account) || current_account
+				.getRole().equals(Role.ROLE_ADMIN));
 	}
 
 }

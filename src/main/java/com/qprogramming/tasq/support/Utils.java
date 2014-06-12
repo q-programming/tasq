@@ -1,5 +1,6 @@
 package com.qprogramming.tasq.support;
 
+import java.util.Collection;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,7 +18,7 @@ public class Utils {
 	private static final String HTML_TAG_PATTERN = "<([A-Za-z][A-Za-z0-9]*)\\b[^>]*>(.*?)</\\1>";
 	private static String baseURL;
 	private static HttpServletRequest request;
-	
+
 	@Value("${default.locale}")
 	private String defaultLang;
 
@@ -62,5 +63,9 @@ public class Utils {
 	 */
 	public static Locale getDefaultLocale() {
 		return LocaleContextHolder.getLocale();
+	}
+
+	public static boolean contains(Collection<?> coll, Object o) {
+		return coll.contains(o);
 	}
 }

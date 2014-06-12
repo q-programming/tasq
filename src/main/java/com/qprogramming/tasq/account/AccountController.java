@@ -4,6 +4,8 @@ import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import javax.imageio.ImageIO;
@@ -13,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +28,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -75,7 +79,8 @@ public class AccountController {
 				BufferedImage image = ImageIO.read(avatarFile.getInputStream());
 				Integer width = image.getWidth();
 				Integer height = image.getHeight();
-				if (width > 150 || height > 150 || avatarFile.getSize() > 100000) {
+				if (width > 150 || height > 150
+						|| avatarFile.getSize() > 100000) {
 					MessageHelper.addErrorAttribute(
 							ra,
 							msg.getMessage("error.file100kb", null,
@@ -140,4 +145,87 @@ public class AccountController {
 		response.getOutputStream().flush();
 	}
 
+	@RequestMapping(value = "/getAccounts", method = RequestMethod.GET)
+	public @ResponseBody
+	List<DisplayAccount> listAccounts(@RequestParam String term,
+			HttpServletResponse response) {
+		response.setContentType("application/json");
+		List<Account> all_accountr = accountSrv.findAll();
+		List<DisplayAccount> result = new ArrayList<DisplayAccount>();
+		for (Account account : all_accountr) {
+			if (term == null) {
+				DisplayAccount s_account = new DisplayAccount(account);
+				result.add(s_account);
+			} else {
+				if (StringUtils.containsIgnoreCase(account.toString(), term)) {
+					DisplayAccount s_account = new DisplayAccount(account);
+					result.add(s_account);
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Internal class to display it in form of autocomplete
+	 * 
+	 * @author romanjak
+	 * 
+	 */
+	static class DisplayAccount {
+		private String name;
+		private String surname;
+		private String email;
+		private String username;
+		private Long id;
+
+		public DisplayAccount(Account account) {
+			setId(account.getId());
+			setName(account.getName());
+			setSurname(account.getSurname());
+			setEmail(account.getEmail());
+			setUsername(account.getUsername());
+
+		}
+
+		public String getEmail() {
+			return email;
+		}
+
+		public void setEmail(String email) {
+			this.email = email;
+		}
+
+		public Long getId() {
+			return id;
+		}
+
+		public void setId(Long id) {
+			this.id = id;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getSurname() {
+			return surname;
+		}
+
+		public void setSurname(String surname) {
+			this.surname = surname;
+		}
+
+		public String getUsername() {
+			return username;
+		}
+
+		public void setUsername(String username) {
+			this.username = username;
+		}
+	}
 }

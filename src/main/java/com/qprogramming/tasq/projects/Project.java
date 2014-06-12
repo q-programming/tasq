@@ -3,8 +3,10 @@ package com.qprogramming.tasq.projects;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -13,11 +15,12 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.TableGenerator;
+
+import org.hibernate.annotations.IndexColumn;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.task.Task;
@@ -44,11 +47,15 @@ public class Project implements Serializable {
 	@Column(length = 4000)
 	private String description;
 
-	@ManyToOne
-	private Account administrator;
+	@ManyToMany(fetch = FetchType.EAGER)
+	@IndexColumn(name = "INDEX_COL")
+	@JoinTable(name = "projects_admins")
+	private Set<Account> administrators;
 
-	@ManyToMany
-	private List<Account> participants;
+	@ManyToMany(fetch = FetchType.EAGER)
+	@IndexColumn(name = "INDEX_COL")
+	@JoinTable(name = "projects_participants")
+	private Set<Account> participants;
 
 	@Column
 	private Date startDate;
@@ -68,7 +75,7 @@ public class Project implements Serializable {
 
 	public Project(String name, Account administrator) {
 		setName(name);
-		setAdministrator(administrator);
+		addAdministrator(administrator);
 		addParticipant(administrator);
 		setStartDate(new Date());
 		setLastVisit(new Date());
@@ -82,11 +89,7 @@ public class Project implements Serializable {
 		return name;
 	}
 
-	public Account getAdministrator() {
-		return administrator;
-	}
-
-	public List<Account> getParticipants() {
+	public Set<Account> getParticipants() {
 		return participants;
 	}
 
@@ -103,19 +106,42 @@ public class Project implements Serializable {
 		this.name = name;
 	}
 
-	public void setAdministrator(Account administrator) {
-		this.administrator = administrator;
-	}
-
-	public void setParticipants(List<Account> participants) {
+	public void setParticipants(Set<Account> participants) {
 		this.participants = participants;
 	}
 
 	public void addParticipant(Account account) {
 		if (participants == null) {
-			participants = new LinkedList<Account>();
+			participants = new HashSet<Account>();
 		}
 		participants.add(account);
+	}
+
+	public void removeParticipant(Account account) {
+		if (participants != null) {
+			participants.remove(account);
+		}
+	}
+
+	public Set<Account> getAdministrators() {
+		return administrators;
+	}
+
+	public void setAdministrators(Set<Account> administrators) {
+		this.administrators = administrators;
+	}
+
+	public void addAdministrator(Account account) {
+		if (administrators == null) {
+			administrators = new HashSet<Account>();
+		}
+		administrators.add(account);
+	}
+
+	public void removeAdministrator(Account account) {
+		if (administrators != null) {
+			administrators.remove(account);
+		}
 	}
 
 	public void setStartDate(Date startDate) {

@@ -16,11 +16,11 @@
 	<!-- 	<h3> -->
 	<%-- 		<s:message code="task.edit" text="Create task"></s:message> --%>
 	<!-- 	</h3> -->
-	<form:form modelAttribute="newTaskForm" id="newTaskForm" method="post">
+	<form:form modelAttribute="taskForm" id="taskForm" method="post">
 		<div>
 			<h3>
-				<t:type type="${newTaskForm.type}" />
-				[${newTaskForm.id}] - ${newTaskForm.name}
+				<t:type type="${taskForm.type}" />
+				[${taskForm.id}] - ${taskForm.name}
 				<%-- 			<form:hidden path="id"/> --%>
 				<form:hidden path="type" />
 			</h3>
@@ -28,7 +28,7 @@
 		<div>
 			<h4>
 				<s:message code="project.project" />
-				: ${newTaskForm.project}
+				: ${taskForm.project}
 				<form:hidden path="project" />
 			</h4>
 		</div>
@@ -64,12 +64,24 @@
 		</h4>
 		<div id="estimate_div">
 			<div class="form-group">
-				<form:input path="estimate" class="form-control" style="width:150px" />
-				<form:errors path="estimate" element="p" class="text-danger" />
-				<span class="help-block"><s:message code="task.estimate.help" /><br>
-					<s:message code="task.estimate.help.pattern" /> <br>
-				<br>
-				<s:message code="task.estimate.edit.help " /></span>
+				<c:if test="${task.estimate ne '0m' }">
+					<div>${taskForm.estimate}
+						<span class="glyphicon glyphicon-question-sign a-tooltip"
+							title="<s:message code ="task.estimateStarted"/>"
+							data-placement="right"></span>
+						<form:hidden path="estimate" />
+					</div>
+
+				</c:if>
+				<c:if test="${task.estimate eq '0m' }">
+					<form:input path="estimate" class="form-control"
+						style="width:150px" />
+					<form:errors path="estimate" element="p" class="text-danger" />
+					<span class="help-block"><s:message
+							code="task.estimate.help" /><br> <s:message
+							code="task.estimate.help.pattern" /> <br> <br> <s:message
+							code="task.estimate.edit.help" /></span>
+				</c:if>
 			</div>
 			<div>
 				<label><s:message code="task.storyPoints" /></label>
@@ -79,14 +91,6 @@
 						code="task.storyPoints.help" /></span>
 			</div>
 		</div>
-		<label class="checkbox" style="display: inherit; font-weight: normal">
-			<input type="checkbox" name="no_estimation" id="no_estimation"
-			value="true"> <s:message code="task.withoutEstimation" /> <span
-			class="glyphicon glyphicon-question-sign a-tooltip"
-			title="<s:message code ="task.withoutEstimation.help"/>"
-			data-placement="right"></span>
-		</label>
-
 		<div style="margin: 10px auto; text-align: right;">
 			<button type="submit" class="btn btn-success">
 				<s:message code="task.edit" text="Edit"></s:message>
@@ -97,26 +101,8 @@
 	</form:form>
 </div>
 <script>
-	$(document)
-			.ready(
-					function($) {
-						<c:forEach items="${types}" var="enum_type">
-						$("#${enum_type.code}")
-								.click(
-										function() {
-											console.log("${enum_type.code}");
-											var type = '<img src="<c:url value="/resources/img/${enum_type.code}.png"/>"> <s:message code="task.type.${enum_type.code}"/>';
-											$("#task_type").html(type);
-											$("#type").val("${enum_type}");
-										});
-						</c:forEach>
-
-						$("#no_estimation").change(function() {
-							$("#estimate").val("");
-							$('#estimate_div').slideToggle("slow");
-						});
-
-					});
+	$(document).ready(function($) {
+	});
 
 	
 </script>

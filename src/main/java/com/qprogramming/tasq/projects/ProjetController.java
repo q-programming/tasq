@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -22,7 +24,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.qprogramming.tasq.signup.SignupController;
+import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.support.ProjectSorter;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.WorkLogSorter;
@@ -40,6 +43,9 @@ public class ProjetController {
 
 	@Autowired
 	private ProjectService projSrv;
+
+	@Autowired
+	private AccountService accSrv;
 
 	@Autowired
 	private TaskService taskSrv;
@@ -164,4 +170,125 @@ public class ProjetController {
 		return "redirect:/project?id=" + new_project.getId();
 	}
 
+	@RequestMapping(value = "project/manage", method = RequestMethod.GET)
+	public String manageProject(@RequestParam(value = "id") Long id,
+			Model model, RedirectAttributes ra, HttpServletRequest request) {
+		Project project = projSrv.findById(id);
+		if (project == null) {
+			MessageHelper.addErrorAttribute(
+					ra,
+					msg.getMessage("project.notexists", null,
+							Utils.getCurrentLocale()));
+			return "redirect:/projects";
+		}
+
+		model.addAttribute("project", project);
+		return "project/manage";
+	}
+
+	@RequestMapping(value = "project/useradd", method = RequestMethod.POST)
+	public String addParticipant(@RequestParam(value = "id") Long id,
+			@RequestParam(value = "email") String email, Model model,
+			RedirectAttributes ra, HttpServletRequest request) {
+		Account account = accSrv.findByEmail(email);
+		if (account != null) {
+			Project project = projSrv.findById(id);
+			if (project == null) {
+				MessageHelper.addErrorAttribute(
+						ra,
+						msg.getMessage("project.notexists", null,
+								Utils.getCurrentLocale()));
+				return "redirect:/projects";
+			}
+			project.addParticipant(account);
+			projSrv.save(project);
+		}
+		return "redirect:" + request.getHeader("Referer");
+	}
+
+	@Transactional
+	@RequestMapping(value = "project/userRemove", method = RequestMethod.POST)
+	public String removeParticipant(
+			@RequestParam(value = "project_id") Long project_id,
+			@RequestParam(value = "account_id") Long account_id, Model model,
+			RedirectAttributes ra, HttpServletRequest request) {
+		Account account = accSrv.findById(account_id);
+		if (account != null) {
+			Project project = projSrv.findById(project_id);
+			if (project == null) {
+				MessageHelper.addErrorAttribute(
+						ra,
+						msg.getMessage("project.notexists", null,
+								Utils.getCurrentLocale()));
+				return "redirect:" + request.getHeader("Referer");
+			}
+			Set<Account> admins = project.getAdministrators();
+			if (admins.contains(account)) {
+				if (admins.size() == 1) {
+					MessageHelper.addErrorAttribute(
+							ra,
+							msg.getMessage("project.lastAdmin", null,
+									Utils.getCurrentLocale()));
+					return "redirect:" + request.getHeader("Referer");
+				} else {
+					project.removeAdministrator(account);
+				}
+
+			}
+			project.removeParticipant(account);
+			projSrv.save(project);
+		}
+		return "redirect:" + request.getHeader("Referer");
+	}
+
+	@Transactional
+	@RequestMapping(value = "project/grantAdmin", method = RequestMethod.POST)
+	public String grantAdmin(
+			@RequestParam(value = "project_id") Long project_id,
+			@RequestParam(value = "account_id") Long account_id, Model model,
+			RedirectAttributes ra, HttpServletRequest request) {
+		Account account = accSrv.findById(account_id);
+		if (account != null) {
+			Project project = projSrv.findById(project_id);
+			if (project == null) {
+				MessageHelper.addErrorAttribute(
+						ra,
+						msg.getMessage("project.notexists", null,
+								Utils.getCurrentLocale()));
+				return "redirect:/projects";
+			}
+			project.addAdministrator(account);
+			projSrv.save(project);
+		}
+		return "redirect:" + request.getHeader("Referer");
+	}
+
+	@Transactional
+	@RequestMapping(value = "project/removeAdmin", method = RequestMethod.POST)
+	public String removeAdmin(
+			@RequestParam(value = "project_id") Long project_id,
+			@RequestParam(value = "account_id") Long account_id, Model model,
+			RedirectAttributes ra, HttpServletRequest request) {
+		Account account = accSrv.findById(account_id);
+		if (account != null) {
+			Project project = projSrv.findById(project_id);
+			if (project == null) {
+				MessageHelper.addErrorAttribute(
+						ra,
+						msg.getMessage("project.notexists", null,
+								Utils.getCurrentLocale()));
+				return "redirect:/projects";
+			}
+			if (project.getAdministrators().size() == 1) {
+				MessageHelper.addErrorAttribute(
+						ra,
+						msg.getMessage("project.lastAdmin", null,
+								Utils.getCurrentLocale()));
+				return "redirect:" + request.getHeader("Referer");
+			}
+			project.removeAdministrator(account);
+			projSrv.save(project);
+		}
+		return "redirect:" + request.getHeader("Referer");
+	}
 }

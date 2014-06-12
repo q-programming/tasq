@@ -17,7 +17,7 @@
 		<s:message code="task.create" text="Create task"></s:message>
 	</h3>
 	<hr>
-	<form:form modelAttribute="newTaskForm" id="newTaskForm" method="post">
+	<form:form modelAttribute="taskForm" id="taskForm" method="post">
 		<%-- Check all potential errors --%>
 		<c:set var="name_error">
 			<form:errors path="name" />

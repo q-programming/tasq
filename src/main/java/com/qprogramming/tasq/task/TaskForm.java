@@ -64,6 +64,8 @@ public class TaskForm {
 		boolean estimated = !Boolean.parseBoolean(getNo_estimation());
 		if (!"".equals(getStory_points())) {
 			task.setStory_points(Integer.parseInt(getStory_points()));
+		} else {
+			task.setStory_points(0);
 		}
 		Period p = PeriodHelper.inFormat(getEstimate());
 		task.setEstimate(p);
