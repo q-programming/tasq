@@ -438,6 +438,48 @@ public class TaskController {
 		return "redirect:/task?id=" + taskID;
 	}
 
+	@RequestMapping(value = "/task/assign", method = RequestMethod.POST)
+	public String assign(@RequestParam(value = "taskID") String taskID,
+			@RequestParam(value = "email") String email, RedirectAttributes ra,
+			HttpServletRequest request, Model model) {
+		Task task = taskSrv.findById(taskID);
+		if (task != null) {
+			if (task.getState().equals(TaskState.CLOSED)) {
+				String localized = msg.getMessage(
+						((TaskState) task.getState()).getCode(), null,
+						Utils.getCurrentLocale());
+				MessageHelper.addWarningAttribute(ra, msg.getMessage(
+						"task.closed", new Object[]{ localized },
+						Utils.getCurrentLocale()));
+				return "redirect:" + request.getHeader("Referer");
+
+			}
+			if (email.equals("") && task.getAssignee() != null) {
+				task.setAssignee(null);
+				taskSrv.save(task);
+				wlSrv.addActivityLog(task, "Unassigned", LogType.ASSIGNED);
+
+			} else {
+				Account assignee = accSrv.findByEmail(email);
+				if (assignee != null && !assignee.equals(task.getAssignee())) {
+					// check if can edit
+					if (!canEdit(task.getProject())) {
+						MessageHelper.addErrorAttribute(
+								ra,
+								msg.getMessage("error.accesRights", null,
+										Utils.getCurrentLocale()));
+						return "redirect:" + request.getHeader("Referer");
+					}
+					task.setAssignee(assignee);
+					taskSrv.save(task);
+					wlSrv.addActivityLog(task, assignee.toString(),
+							LogType.ASSIGNED);
+				}
+			}
+		}
+		return "redirect:" + request.getHeader("Referer");
+	}
+
 	/**
 	 * Checks if currently logged in user have privileges to change anything in
 	 * project

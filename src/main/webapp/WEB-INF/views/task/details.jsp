@@ -16,7 +16,8 @@
 	</c:set>
 	<h3>
 		<t:type type="${task.type}" />
-		<a href='<c:url value="/project?id=${task.project.id}"/>'>${task.project.projectId}</a> \ [${task.id}] ${task.name}
+		<a href='<c:url value="/project?id=${task.project.id}"/>'>${task.project.projectId}</a>
+		\ [${task.id}] ${task.name}
 	</h3>
 	<h4>
 		<s:message code="task.state" />
@@ -26,129 +27,181 @@
 	<hr>
 	${task.description}
 	<hr>
-	<!-- Button trigger modal -->
-	<button class="btn btn-default btn-sm" data-toggle="modal"
-		data-target="#changeState">
-		<span class="glyphicon glyphicon-list-alt"></span>
-		<s:message code="task.changeState" />
-	</button>
+	<%----------------ESTIMATES DIV -------------------------%>
+	<div>
+		<!-- Button trigger modal -->
+		<button class="btn btn-default btn-sm" data-toggle="modal"
+			data-target="#changeState">
+			<span class="glyphicon glyphicon-list-alt"></span>
+			<s:message code="task.changeState" />
+		</button>
 
-	<!-- Button trigger modal -->
-	<button class="btn btn-default btn-sm" data-toggle="modal"
-		data-target="#logWorkform">
-		<span class="glyphicon glyphicon-calendar"></span>
-		<s:message code="task.logWork"></s:message>
-	</button>
-	<c:if
-		test="${not empty user.active_task && user.active_task[0] eq task.id}">
-		<a href="<c:url value="/task/time?id=${task.id}&action=stop"/>">
-			<button class="btn btn-default btn-sm a-tooltip"
-				title="<s:message code="task.stopTime.description" />">
-				<span class="glyphicon glyphicon-time"></span>
-				<s:message code="task.stopTime"></s:message>
-			</button>
-		</a>
-		<div class="bar_td">
-			<s:message code="task.currentTime" />
-			: <span class="timer"></span>
-		</div>
-	</c:if>
-	<c:if
-		test="${empty user.active_task || user.active_task[0] ne task.id}">
-		<a href="<c:url value="/task/time?id=${task.id}&action=start"/>">
-			<button class="btn btn-default btn-sm">
-				<span class="glyphicon glyphicon-time"></span>
-				<s:message code="task.startTime"></s:message>
-			</button>
-		</a>
-	</c:if>
-	<%--ESTIMATES TAB	--%>
-	<%-- Default values --%>
-	<c:set var="estimate_value">100</c:set>
-	<c:set var="logged_work">${task.percentage_logged}</c:set>
-	<c:set var="remaining_width">100</c:set>
-	<c:set var="remaining_bar">${task.percentage_left}</c:set>
-	<%-- 	<br>${logged_work} <br>${task.percentage_left} <br>${task.lowerThanEstimate eq 'true'} --%>
-
-	<%-- Check if it's not lower than estimate --%>
-	<c:if test="${task.lowerThanEstimate eq 'true'}">
-		<c:set var="remaining_width">${task.percentage_logged + task.percentage_left}</c:set>
-		<c:set var="logged_work">${100- task.percentage_left}</c:set>
-	</c:if>
-	<%-- logged work is greater than 100% and remaning time is greater than 0 --%>
-	<c:if
-		test="${task.percentage_logged gt 100 && task.remaining ne '0m' }">
-		<c:set var="estimate_width">${task.moreThanEstimate}</c:set>
-		<c:set var="remaining_bar">${task.overCommited}</c:set>
-		<c:set var="logged_work">${100-task.overCommited}</c:set>
-	</c:if>
-	<%-- There was more logged but remaining is 0 --%>
-	<c:if
-		test="${task.percentage_logged gt 100 && task.remaining eq '0m' }">
-		<c:set var="estimate_width">${task.moreThanEstimate}</c:set>
-	</c:if>
-	<%-- Task without estimate but with remaining time --%>
-	<c:if test="${task.estimate eq '0m' && task.remaining ne '0m'}">
-		<c:set var="remaining_bar">	${100-task.percentage_logged}</c:set>
-	</c:if>
-	<table style="width: 400px">
-		<tr>
-			<td></td>
-			<td style="width: 150px"></td>
-			<td></td>
-		</tr>
-		<%-- TODO add display based on type! --%>
-		<%-- if there weas no ESTIMATE at all --%>
-		<c:if test="${not task.estimated}">
-			<tr>
-				<td class="bar_td"><s:message code="task.logged" /></td>
-				<td class="bar_td">${task.logged_work}</td>
-				<td class="bar_td"></td>
-			</tr>
+		<!-- Button trigger modal -->
+		<button class="btn btn-default btn-sm" data-toggle="modal"
+			data-target="#logWorkform">
+			<span class="glyphicon glyphicon-calendar"></span>
+			<s:message code="task.logWork"></s:message>
+		</button>
+		<c:if
+			test="${not empty user.active_task && user.active_task[0] eq task.id}">
+			<a href="<c:url value="/task/time?id=${task.id}&action=stop"/>">
+				<button class="btn btn-default btn-sm a-tooltip"
+					title="<s:message code="task.stopTime.description" />">
+					<span class="glyphicon glyphicon-time"></span>
+					<s:message code="task.stopTime"></s:message>
+				</button>
+			</a>
+			<div class="bar_td">
+				<s:message code="task.currentTime" />
+				: <span class="timer"></span>
+			</div>
 		</c:if>
-		<%-- IF ESTIMATE IS NOT 0 --%>
-		<c:if test="${task.estimated}">
-			<%-- Estimate bar --%>
-			<c:if test="${task.estimate ne '0m'}">
+		<c:if
+			test="${empty user.active_task || user.active_task[0] ne task.id}">
+			<a href="<c:url value="/task/time?id=${task.id}&action=start"/>">
+				<button class="btn btn-default btn-sm">
+					<span class="glyphicon glyphicon-time"></span>
+					<s:message code="task.startTime"></s:message>
+				</button>
+			</a>
+		</c:if>
+		<%--ESTIMATES TAB	--%>
+		<%-- Default values --%>
+		<c:set var="estimate_value">100</c:set>
+		<c:set var="logged_work">${task.percentage_logged}</c:set>
+		<c:set var="remaining_width">100</c:set>
+		<c:set var="remaining_bar">${task.percentage_left}</c:set>
+		<%-- 	<br>${logged_work} <br>${task.percentage_left} <br>${task.lowerThanEstimate eq 'true'} --%>
+
+		<%-- Check if it's not lower than estimate --%>
+		<c:if test="${task.lowerThanEstimate eq 'true'}">
+			<c:set var="remaining_width">${task.percentage_logged + task.percentage_left}</c:set>
+			<c:set var="logged_work">${100- task.percentage_left}</c:set>
+		</c:if>
+		<%-- logged work is greater than 100% and remaning time is greater than 0 --%>
+		<c:if
+			test="${task.percentage_logged gt 100 && task.remaining ne '0m' }">
+			<c:set var="estimate_width">${task.moreThanEstimate}</c:set>
+			<c:set var="remaining_bar">${task.overCommited}</c:set>
+			<c:set var="logged_work">${100-task.overCommited}</c:set>
+		</c:if>
+		<%-- There was more logged but remaining is 0 --%>
+		<c:if
+			test="${task.percentage_logged gt 100 && task.remaining eq '0m' }">
+			<c:set var="estimate_width">${task.moreThanEstimate}</c:set>
+		</c:if>
+		<%-- Task without estimate but with remaining time --%>
+		<c:if test="${task.estimate eq '0m' && task.remaining ne '0m'}">
+			<c:set var="remaining_bar">	${100-task.percentage_logged}</c:set>
+		</c:if>
+		<table style="width: 400px">
+			<tr>
+				<td></td>
+				<td style="width: 150px"></td>
+				<td></td>
+			</tr>
+			<%-- TODO add display based on type! --%>
+			<%-- if there weas no ESTIMATE at all --%>
+			<c:if test="${not task.estimated}">
 				<tr>
-					<td class="bar_td" style="width: 50px"><s:message
-							code="task.estimate" /></td>
-					<td class="bar_td"><div class="progress"
-							style="width: ${estimate_width}%">
-							<div class="progress-bar" role="progressbar" aria-valuenow="100"
-								aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div>
-						</div></td>
-					<td class="bar_td">${task.estimate}</td>
+					<td class="bar_td"><s:message code="task.logged" /></td>
+					<td class="bar_td">${task.logged_work}</td>
+					<td class="bar_td"></td>
 				</tr>
 			</c:if>
-			<%-- Logged work bar --%>
-			<tr>
-				<td class="bar_td"><s:message code="task.logged" /></td>
-				<td class="bar_td"><div class="progress"
-						style="width:${remaining_width}%">
-						<c:set var="logged_class">progress-bar-warning</c:set>
-						<c:if test="${task.percentage_logged gt 100}">
-							<c:set var="logged_class">progress-bar-danger</c:set>
-						</c:if>
-						<div class="progress-bar ${logged_class}" role="progressbar"
-							aria-valuenow="${logged_work}" aria-valuemin="0"
-							aria-valuemax="100" style="width:${logged_work}%"></div>
-					</div></td>
-				<td class="bar_td">${task.logged_work}</td>
-			</tr>
-			<%-- Remaining work bar --%>
-			<tr>
-				<td class="bar_td"><s:message code="task.remaining" /></td>
-				<td class="bar_td"><div class="progress"
-						style="width:${remaining_width}%">
-						<div class="progress-bar progress-bar-success" role="progressbar"
-							aria-valuenow="${remaining_bar}" aria-valuemin="0"
-							aria-valuemax="100" style="width:${remaining_bar}% ; float:right"></div>
-					</div></td>
-				<td class="bar_td">${task.remaining }</td>
-			</tr>
-		</c:if>
-	</table>
+			<%-- IF ESTIMATE IS NOT 0 --%>
+			<c:if test="${task.estimated}">
+				<%-- Estimate bar --%>
+				<c:if test="${task.estimate ne '0m'}">
+					<tr>
+						<td class="bar_td" style="width: 50px"><s:message
+								code="task.estimate" /></td>
+						<td class="bar_td"><div class="progress"
+								style="width: ${estimate_width}%">
+								<div class="progress-bar" role="progressbar" aria-valuenow="100"
+									aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div>
+							</div></td>
+						<td class="bar_td">${task.estimate}</td>
+					</tr>
+				</c:if>
+				<%-- Logged work bar --%>
+				<tr>
+					<td class="bar_td"><s:message code="task.logged" /></td>
+					<td class="bar_td"><div class="progress"
+							style="width:${remaining_width}%">
+							<c:set var="logged_class">progress-bar-warning</c:set>
+							<c:if test="${task.percentage_logged gt 100}">
+								<c:set var="logged_class">progress-bar-danger</c:set>
+							</c:if>
+							<div class="progress-bar ${logged_class}" role="progressbar"
+								aria-valuenow="${logged_work}" aria-valuemin="0"
+								aria-valuemax="100" style="width:${logged_work}%"></div>
+						</div></td>
+					<td class="bar_td">${task.logged_work}</td>
+				</tr>
+				<%-- Remaining work bar --%>
+				<tr>
+					<td class="bar_td"><s:message code="task.remaining" /></td>
+					<td class="bar_td"><div class="progress"
+							style="width:${remaining_width}%">
+							<div class="progress-bar progress-bar-success" role="progressbar"
+								aria-valuenow="${remaining_bar}" aria-valuemin="0"
+								aria-valuemax="100"
+								style="width:${remaining_bar}% ; float:right"></div>
+						</div></td>
+					<td class="bar_td">${task.remaining }</td>
+				</tr>
+			</c:if>
+		</table>
+	</div>
+	<hr>
+	<%--------------------PEOPLE DIV -------------------------------------%>
+	<div>
+		<h4>People</h4>
+		<div>
+			<div>
+				<s:message code="task.owner"/> : <img data-src="holder.js/20x20" style="height: 20px; padding-right: 5px;" 
+						src="<c:url value="/userAvatar/${task.owner.id}"/>" /><a href="<c:url value="/user?id=${task.owner.id}"/>">${task.owner}</a>
+			</div>
+			<div style="display: table-cell; padding-left: 20px; display: none"
+				id="assign_div">
+				<div>
+					<form id="assign" action="<c:url value="/task/assign"/>"
+						method="post">
+						<input type="hidden" name="taskID" value="${task.id}">
+						<div  style="width: 250px;display: table-cell;">
+							<input type="text" class="form-control input-sm" name="account"
+								placeholder="<s:message code="project.participant.hint"/>"
+								id="assignee">
+						</div>
+						<div style="display: table-cell;">
+							<button class="btn btn-default btn-sm a-tooltip" type="button" id="assign_me" title="<s:message code="task.assignme"/>"><span class="glyphicon glyphicon-user"></span></button> 
+						</div>
+						<div style="display: table-cell;">
+							<button class="btn btn-default btn-sm a-tooltip" type="button" id="unassign" title="<s:message code="task.unassign"/>"><span class="glyphicon glyphicon-remove"></span></button> 
+						</div>
+						<div style="display: table-cell;">
+							<button type="button" id="dismiss_assign" class="close a-tooltip" title="<s:message code="main.cancel"/>" style="padding-left: 5px">×</button>
+						</div>
+						
+					</form>
+				</div>
+			</div>
+			<div id="assign_button_div" >
+				<div style="display: table-cell;">
+					<c:if test="${empty task.assignee}"><s:message code="task.assignee"/>: <i><s:message code="task.unassigned"/></i></c:if>			
+					<c:if test="${not empty task.assignee}">
+					<s:message code="task.assignee"/> : <img data-src="holder.js/20x20" style="height: 20px; padding-right: 5px;" 
+						src="<c:url value="/userAvatar/${task.assignee.id}"/>" /><a href="<c:url value="/user?id=${task.assignee.id}"/>">${task.assignee}</a>
+					</c:if>
+				</div>
+				<div style="display: table-cell;padding-left:5px">
+					<span class="btn btn-default btn-sm a-tooltip" id="assign_button" title="<s:message code="task.assign"/>">
+						<span class="glyphicon glyphicon-hand-left"></span>
+					</span>
+				</div>
+		</div>
+	</div>
 	<div>
 		<%--------------------------- BOTTOM TABS------------------------------------%>
 		<hr>
@@ -252,6 +305,7 @@
 			</div>
 		</div>
 	</div>
+</div>
 </div>
 <!-- LOG WORK MODAL -->
 <div class="modal fade" id="logWorkform" tabindex="-1" role="dialog"
@@ -460,6 +514,55 @@
 		$('#comments_cancel').click(function() {
 			toggle_comment();
 		});
+		
+		$("#assignee").autocomplete({
+	        minLength: 1,
+	        delay: 500,
+	        //define callback to format results
+	        source: function (request, response) {
+	            $.getJSON("<c:url value="/project/${task.project.id}/getParticipants"/>", request, function(result) {
+	                response($.map(result, function(item) {
+	                    return {
+	                        // following property gets displayed in drop down
+	                        label: item.name + " " + item.surname,
+	                        value: item.email,
+	                    }
+	                }));
+	            });
+	        },
+	        //define select handler
+	        select : function(event, ui) {
+	            if (ui.item) {
+	                event.preventDefault();
+	                $("#assignee").val(ui.item.label);
+	                $("#assign").append('<input type="hidden" name="email" value=' + ui.item.value + '>');
+	                $("#assign").submit();
+	                return false;
+	            }
+	        }
+	    });
+		
+		$("#assign_me").click(function(){
+			var current_email = "${user.email}";
+			$("#assign").append('<input type="hidden" name="email" value=' + current_email + '>');
+        	$("#assign").submit();
+		});
+		$("#unassign").click(function(){
+			var current_email = "";
+			$("#assign").append('<input type="hidden" name="email" value=' + current_email + '>');
+        	$("#assign").submit();
+		});
+		
+		$("#assign_button").click(function(){
+			$('#assign_div').toggle("blind");
+			$('#assign_button_div').toggle("blind");
+			$('#assignee').focus();
+			});
+		$("#dismiss_assign").click(function(){
+			$('#assign_div').toggle("blind");
+			$('#assign_button_div').toggle("blind");
+			});
+		
 	});
 
 	

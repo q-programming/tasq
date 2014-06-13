@@ -10,8 +10,10 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +23,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
+import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.support.ProjectSorter;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.WorkLogSorter;
@@ -307,5 +312,26 @@ public class ProjetController {
 			projSrv.save(project);
 		}
 		return "redirect:" + request.getHeader("Referer");
+	}
+	@RequestMapping(value = "/project/{id}/getParticipants", method = RequestMethod.GET)
+	public @ResponseBody
+	List<DisplayAccount> listParticipants(@PathVariable Long id,
+			@RequestParam String term, HttpServletResponse response) {
+		response.setContentType("application/json");
+		Project project = projSrv.findById(id);
+		Set<Account> all_participants = project.getParticipants();
+		List<DisplayAccount> result = new ArrayList<DisplayAccount>();
+		for (Account account : all_participants) {
+			if (term == null) {
+				DisplayAccount s_account = new DisplayAccount(account);
+				result.add(s_account);
+			} else {
+				if (StringUtils.containsIgnoreCase(account.toString(), term)) {
+					DisplayAccount s_account = new DisplayAccount(account);
+					result.add(s_account);
+				}
+			}
+		}
+		return result;
 	}
 }

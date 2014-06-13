@@ -9,6 +9,7 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.joda.time.Period;
 
 import com.qprogramming.tasq.support.PeriodHelper;
+import com.qprogramming.tasq.support.Utils;
 
 /**
  * @author romanjak
@@ -72,6 +73,7 @@ public class TaskForm {
 		task.setRemaining(p);
 		task.setEstimated(estimated);
 		task.setLogged_work(PeriodHelper.inFormat(""));
+		task.setOwner(Utils.getCurrentAccount());
 		return task;
 	}
 

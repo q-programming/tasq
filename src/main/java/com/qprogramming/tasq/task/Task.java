@@ -94,6 +94,14 @@ public class Task implements java.io.Serializable {
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "task")
 	private Set<Comment> comments;
 
+	@ManyToOne
+	@JoinColumn(name = "task_owner")
+	private Account owner;
+	
+	@ManyToOne
+	@JoinColumn(name = "task_assignee")
+	private Account assignee;
+
 	public String getId() {
 		return id;
 	}
@@ -280,6 +288,22 @@ public class Task implements java.io.Serializable {
 			comments = new HashSet<Comment>();
 		}
 		comments.add(comment);
+	}
+
+	public Account getAssignee() {
+		return assignee;
+	}
+
+	public void setAssignee(Account assignee) {
+		this.assignee = assignee;
+	}
+
+	public Account getOwner() {
+		return owner;
+	}
+
+	public void setOwner(Account owner) {
+		this.owner = owner;
 	}
 
 	/*
