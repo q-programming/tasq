@@ -5,10 +5,10 @@
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
-<security:authentication property="principal" var="user" />
 <security:authorize access="hasRole('ROLE_ADMIN')">
 	<c:set var="is_admin" value="true" />
 </security:authorize>
+<security:authentication property="principal" var="user" />
 <c:forEach items="${project.administrators}" var="admin">
 	<c:if test="${admin.id == user.id || is_admin}">
 		<c:set var="can_edit" value="true" />
@@ -29,7 +29,7 @@
 	</div>
 	</c:if>
 	<div class="pull-right">
-		<c:if test="${project.active}">
+		<c:if test="${project.id eq user.active_project}">
 			<a class="btn btn-default a-tooltip pull-right"
 				style="padding: 6px 11px;" href='#'
 				title="<s:message
@@ -37,7 +37,7 @@
 				data-placement="bottom"> <img
 				src="<c:url value="/resources/img/active.gif"/>"></img></a>
 		</c:if>
-		<c:if test="${not project.active}">
+		<c:if test="${project.id ne user.active_project}">
 			<a class="btn btn-default a-tooltip pull-right"
 				href='<s:url value="/project/activate?id=${project.id}"></s:url>'
 				title="<s:message

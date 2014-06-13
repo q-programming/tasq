@@ -11,6 +11,7 @@
 <c:set var="taskDesc_text">
 	<s:message code="task.description" text="Description" />
 </c:set>
+<security:authentication property="principal" var="user" />
 <c:if test="${not empty param.projectID}">
 	<c:set var="active_project" value="${param.projectID}" />
 </c:if>

@@ -1,8 +1,10 @@
 package com.qprogramming.tasq.projects;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,9 +70,22 @@ public class ProjetController {
 							Utils.getCurrentLocale()));
 			return "redirect:/projects";
 		}
-		project.setLastVisit(new Date());
-		// mark it as last visit
-		projSrv.save(project);
+		// set last visited
+		Account current = Utils.getCurrentAccount();
+		List<Project> last_visited = current.getLast_visited_p();
+		last_visited.add(0, project);
+		if (last_visited.size() > 4) {
+			last_visited = last_visited.subList(0, 4);
+		}
+		List<Project> clean = new ArrayList<Project>();
+		HashSet<Project> lookup = new HashSet<Project>();
+		for (Project item : last_visited) {
+			if (lookup.add(item)) {
+				clean.add(item);
+			}
+		}
+		current.setLast_visited_p(clean);
+		accSrv.update(current);
 		// get latest events for this project
 		List<WorkLog> workLogs = wrkLogSrv.getProjectEvents(project);
 		Collections.sort(workLogs, new WorkLogSorter(true));
@@ -105,7 +120,8 @@ public class ProjetController {
 	public String listProjects(Model model) {
 		List<Project> projects = projSrv.findAllByUser();
 		Collections.sort(projects, new ProjectSorter(
-				ProjectSorter.SORTBY.LAST_VISIT, true));
+				ProjectSorter.SORTBY.LAST_VISIT, Utils.getCurrentAccount()
+						.getActive_project(), true));
 		model.addAttribute("projects", projects);
 		return "project/list";
 	}
@@ -158,11 +174,12 @@ public class ProjetController {
 			return null;
 		}
 		Project new_project = newProjectForm.createProject();
-		if (projSrv.findAll().size() == 0) {
-			new_project.setActive(true);
-		}
 		new_project = projSrv.save(new_project);
-
+		if (projSrv.findAll().size() == 1) {
+			Account account = Utils.getCurrentAccount();
+			account.setActive_project(new_project.getId());
+			accSrv.update(account);
+		}
 		MessageHelper.addSuccessAttribute(
 				ra,
 				msg.getMessage("project.created", new Object[] { name },

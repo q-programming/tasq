@@ -25,6 +25,7 @@ import org.joda.time.DateTime;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.task.Task;
 
 @SuppressWarnings("serial")
@@ -73,14 +74,23 @@ public class Account implements java.io.Serializable, UserDetails {
 
 	@ManyToMany(fetch = FetchType.EAGER)
 	@IndexColumn(name = "INDEX_COL")
-	@JoinTable(name = "last_visited")
-	private List<Task> last_visited = new LinkedList<Task>();
+	@JoinTable(name = "last_visited_t")
+	private List<Task> last_visited_t = new LinkedList<Task>();
+	
+	@ManyToMany(fetch = FetchType.EAGER)
+	@IndexColumn(name = "INDEX_COL")
+	@JoinTable(name = "last_visited_p")
+	private List<Project> last_visited_p = new LinkedList<Project>();
+
 
 	@Transient
 	private Collection<GrantedAuthority> authorities;
 
 	@Column
 	private Object[] active_task;
+	
+	@Column
+	private Long active_project;
 
 	// @Transient
 	// private long active_task_seconds;
@@ -176,12 +186,20 @@ public class Account implements java.io.Serializable, UserDetails {
 		return avatar;
 	}
 
-	public void setLast_visited(List<Task> last_visited) {
-		this.last_visited = last_visited;
+	public void setLast_visited_t(List<Task> last_visited) {
+		this.last_visited_t = last_visited;
 	}
 
-	public List<Task> getLast_visited() {
-		return last_visited;
+	public List<Task> getLast_visited_t() {
+		return last_visited_t;
+	}
+
+	public List<Project> getLast_visited_p() {
+		return last_visited_p;
+	}
+
+	public void setLast_visited_p(List<Project> last_visited_p) {
+		this.last_visited_p = last_visited_p;
 	}
 
 	public void setAvatar(byte[] avatar) {
@@ -245,6 +263,14 @@ public class Account implements java.io.Serializable, UserDetails {
 			return ((DateTime) active_task[1]).getMillis() / 1000;
 		}
 		return 0;
+	}
+
+	public Long getActive_project() {
+		return active_project;
+	}
+
+	public void setActive_project(Long active_project) {
+		this.active_project = active_project;
 	}
 
 	/*

@@ -48,7 +48,7 @@
 				class="form-control">
 				<c:forEach items="${projects}" var="project">
 					<option
-						<c:if test="${project.active}"> selected style="font-weight:bold"</c:if>
+						<c:if test="${project.id eq user.active_project}"> selected style="font-weight:bold"</c:if>
 						value="${project.projectId}">${project.name}</option>
 				</c:forEach>
 			</form:select>

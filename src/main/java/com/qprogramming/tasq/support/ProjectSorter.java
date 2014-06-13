@@ -12,30 +12,35 @@ public class ProjectSorter implements Comparator<Project> {
 
 	private SORTBY sortBy;
 	private boolean isDescending;
+	private Long active_project;
 
 	public ProjectSorter(SORTBY sortBy, boolean isDescending) {
 		this.sortBy = sortBy;
 		this.isDescending = isDescending;
 	}
 
+	/**
+	 * @param active_project
+	 * @param isDescending2
+	 */
+	public ProjectSorter(SORTBY sortBy, Long active_project,
+			boolean isDescending) {
+		this.active_project = active_project;
+		this.isDescending = isDescending;
+		this.sortBy = sortBy;
+	}
+
 	public int compare(Project a, Project b) {
 		int result = 0;
 		switch (sortBy) {
+		// sort by active , then just by name
 		case LAST_VISIT:
-			if (a.isActive()) {
+			if (a.getId().equals(active_project)) {
 				result = 1;
-			} else if (b.isActive()) {
-				result = -1;
-			} else if (a.getLastVisit() == null) {
-				result = -1;
-			} else if (b.getLastVisit() == null) {
-				result = 1;
-			} else if (a.getLastVisit() == b.getLastVisit()) {
-				result = 0;
-			} else if (a.getLastVisit().before(b.getLastVisit())) {
+			} else if (b.getId().equals(active_project)) {
 				result = -1;
 			} else {
-				result = 1;
+				result = a.getName().compareTo(b.getName());
 			}
 			return isDescending ? -result : result;
 		case NAME:

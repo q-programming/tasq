@@ -6,10 +6,10 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <%@ taglib prefix="myfn" uri="/WEB-INF/tags/custom.tld"%>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
-<security:authentication property="principal" var="user" />
 <security:authorize access="hasRole('ROLE_ADMIN')">
 	<c:set var="is_admin" value="true" />
 </security:authorize>
+<security:authentication property="principal" var="user" />
 <div class="white-frame" style="overflow: auto;">
 	<h3><a href="<c:url value="/project?id=${project.id}"/>">[${project.projectId}] ${project.name}</a></h3>
 	<hr>
@@ -126,6 +126,7 @@ $(document).ready(function($) {
 	$("#add_button").click(function(){
 		$('#add_button_div').toggle();
 		$('#add_div').toggle("slide");
+		$('#participant').focus();
 		});
 	$("#dismiss_add").click(function(){
 		$('#add_div').toggle();

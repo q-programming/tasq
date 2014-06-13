@@ -1,6 +1,7 @@
 package com.qprogramming.tasq.home;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -21,7 +22,6 @@ import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.ProjectSorter;
-import com.qprogramming.tasq.support.TaskSorter;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
@@ -38,7 +38,6 @@ public class HomeControllerAdvice {
 	TaskService taskSrv;
 	@Autowired
 	AccountService accSrv;
-	
 
 	@ModelAttribute("last_projects")
 	public List<Project> getLastProjects(HttpServletRequest request) {
@@ -46,14 +45,13 @@ public class HomeControllerAdvice {
 				.getAuthentication();
 		if (!(authentication instanceof AnonymousAuthenticationToken)) {
 			// Get lasts 5 projects
-			List<Project> projects = projSrv.findAllByUser();
+			Account current_account = Utils.getCurrentAccount();
+			current_account = accSrv.findByEmail(current_account.getEmail());
+			List<Project> projects = current_account.getLast_visited_p();
 			Collections.sort(projects, new ProjectSorter(
-					ProjectSorter.SORTBY.LAST_VISIT, true));
-			if (projects.size() > 5) {
-				return projects.subList(0, 5);
-			} else {
-				return projects;
-			}
+					ProjectSorter.SORTBY.LAST_VISIT, Utils.getCurrentAccount()
+							.getActive_project(), true));
+			return projects;
 		}
 		return null;
 	}
@@ -66,7 +64,7 @@ public class HomeControllerAdvice {
 			// Get lasts 5 Tasks
 			Account current_account = Utils.getCurrentAccount();
 			current_account = accSrv.findByEmail(current_account.getEmail());
-			List<Task> tasks = current_account.getLast_visited();
+			List<Task> tasks = current_account.getLast_visited_t();
 			return tasks;
 		}
 		return null;

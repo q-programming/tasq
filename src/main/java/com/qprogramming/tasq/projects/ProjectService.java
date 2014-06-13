@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.support.Utils;
 
 @Service
@@ -14,6 +15,9 @@ public class ProjectService {
 
 	@Autowired
 	private ProjectRepository projRepo;
+
+	@Autowired
+	private AccountService accSrv;
 
 	public Project findByName(String name) {
 		return projRepo.findByName(name);
@@ -40,18 +44,9 @@ public class ProjectService {
 	public Project activate(Long id) {
 		Project project = projRepo.findById(id);
 		if (project != null) {
-			List<Project> users_projects = findAllByUser();
-			Project active_project = null;
-			for (Project user_project : users_projects) {
-				if (user_project.isActive()) {
-					active_project = user_project;
-				}
-			}
-			if (active_project != null) {
-				active_project.setActive(false);
-				projRepo.save(active_project);
-			}
-			project.setActive(true);
+			Account account = Utils.getCurrentAccount();
+			account.setActive_project(project.getId());
+			accSrv.update(account);
 			return projRepo.save(project);
 		}
 		return null;
@@ -65,13 +60,10 @@ public class ProjectService {
 	 * @return
 	 */
 	public Project findUserActiveProject() {
-		List<Project> projects = findAllByUser();
-		Project active = null;
-		for (Project project : projects) {
-			if (project.isActive()) {
-				active = project;
-			}
+		Account account = Utils.getCurrentAccount();
+		if (account.getActive_project() != null) {
+			return projRepo.findById(account.getActive_project());
 		}
-		return active;
+		return null;
 	}
 }

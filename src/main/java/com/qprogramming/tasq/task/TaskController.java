@@ -179,7 +179,9 @@ public class TaskController {
 			message.append(CHANGE_TO);
 			message.append(taskForm.getEstimate());
 			message.append(BR);
-			task.setEstimate(PeriodHelper.inFormat(taskForm.getEstimate()));
+			Period estimate = PeriodHelper.inFormat(taskForm.getEstimate());
+			task.setEstimate(estimate);
+			task.setRemaining(estimate);
 		}
 		if (!task.getEstimated().equals(
 				!Boolean.parseBoolean(taskForm.getNo_estimation()))) {
@@ -216,7 +218,7 @@ public class TaskController {
 		}
 		Account account = Utils.getCurrentAccount();
 		account = accSrv.findByEmail(account.getEmail());
-		List<Task> last_visited = account.getLast_visited();
+		List<Task> last_visited = account.getLast_visited_t();
 		last_visited.add(0, task);
 		if (last_visited.size() > 4) {
 			last_visited = last_visited.subList(0, 4);
@@ -228,7 +230,7 @@ public class TaskController {
 				clean.add(item);
 			}
 		}
-		account.setLast_visited(clean);
+		account.setLast_visited_t(clean);
 		accSrv.update(account);
 		// TODO Add sorting
 		// Collections.sort(task.getWorklog(), new WorkLogSorter(true));
@@ -244,7 +246,8 @@ public class TaskController {
 			Model model) {
 		List<Project> projects = projectSrv.findAllByUser();
 		Collections.sort(projects, new ProjectSorter(
-				ProjectSorter.SORTBY.LAST_VISIT, true));
+				ProjectSorter.SORTBY.LAST_VISIT, Utils.getCurrentAccount()
+						.getActive_project(), true));
 		model.addAttribute("projects", projects);
 
 		// Get active or choosen project
@@ -270,9 +273,7 @@ public class TaskController {
 						searchResult.add(task);
 					}
 				}
-				if (searchResult.size() > 0) {
-					taskList = searchResult;
-				}
+				taskList = searchResult;
 			}
 			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID,
 					false));

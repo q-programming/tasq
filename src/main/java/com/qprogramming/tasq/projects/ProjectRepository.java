@@ -12,8 +12,6 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
 
 	Project findById(Long id);
 
-	Project findByActive(boolean active);
-
 	Project findByProjectId(String project_id);
 
 	List<Project> findByParticipants_Id(Long id);

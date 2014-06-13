@@ -8,6 +8,7 @@
 <c:set var="password_txt">
 	<s:message code="signup.password" />
 </c:set>
+<security:authentication property="principal" var="user" />
 <div class="navbar navbar-fixed-top">
 	<div class="container">
 		<button type="button" class="navbar-toggle" data-toggle="collapse"
@@ -30,11 +31,11 @@
 							<li><strong style="padding: 5px 10px;"><s:message
 										code="project.recent" text="Recent projects" /></strong></li>
 							<c:forEach items="${last_projects}" var="l_project">
-								<c:if test="${l_project.active }">
+								<c:if test="${l_project.id eq user.active_project}">
 									<li><a href="<c:url value="/project?id=${l_project.id}"/>"><b>[${l_project.projectId}]
 												${l_project.name}</b></a></li>
 								</c:if>
-								<c:if test="${not l_project.active }">
+								<c:if test="${l_project.id ne user.active_project}">
 									<li><a href="<c:url value="/project?id=${l_project.id}"/>">[${l_project.projectId}]
 											${l_project.name}</a></li>
 								</c:if>

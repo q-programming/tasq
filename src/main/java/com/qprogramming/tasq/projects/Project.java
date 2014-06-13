@@ -60,12 +60,6 @@ public class Project implements Serializable {
 	@Column
 	private Date startDate;
 
-	@Column
-	private Date lastVisit;
-
-	@Column
-	private boolean active = false;
-
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "project")
 	private List<Task> tasks;
 
@@ -78,7 +72,6 @@ public class Project implements Serializable {
 		addAdministrator(administrator);
 		addParticipant(administrator);
 		setStartDate(new Date());
-		setLastVisit(new Date());
 	}
 
 	public Long getId() {
@@ -148,28 +141,12 @@ public class Project implements Serializable {
 		this.startDate = startDate;
 	}
 
-	public Date getLastVisit() {
-		return lastVisit;
-	}
-
-	public void setLastVisit(Date lastVisit) {
-		this.lastVisit = lastVisit;
-	}
-
 	public String getDescription() {
 		return description;
 	}
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	public boolean isActive() {
-		return active;
-	}
-
-	public void setActive(boolean active) {
-		this.active = active;
 	}
 
 	public String getProjectId() {

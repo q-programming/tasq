@@ -16,6 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.qprogramming.tasq.support.Utils;
+
 /**
  * @author romanjak
  * @date 21 maj 2014
@@ -73,5 +75,4 @@ public class AccountService {
 	public List<Account> findAll() {
 		return accRepo.findAll();
 	}
-
 }

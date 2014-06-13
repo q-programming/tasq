@@ -9,12 +9,11 @@
 <c:set var="projectDesc_text">
 	<s:message code="project.description" />
 </c:set>
-
+<security:authentication property="principal" var="user" />
 <div>
 	<h3>${projects_text}</h3>
 </div>
 <div class="white-frame" style="overflow: auto;">
-	<security:authentication property="principal" var="user" />
 	<table class="table table-condensed">
 		<thead>
 			<tr>
@@ -25,7 +24,7 @@
 			</tr>
 		</thead>
 		<c:forEach items="${projects}" var="project">
-			<c:if test="${project.active}">
+			<c:if test="${project.id eq user.active_project}">
 				<tr style="background: #428bca; color: white">
 					<td><a style="color: white"
 						href="<c:url value="project?id=${project.id}"/>"><b>[${project.projectId}]
@@ -43,7 +42,7 @@
 							src="<c:url value="/resources/img/active.gif"/>"></img></a></td>
 				</tr>
 			</c:if>
-			<c:if test="${not project.active}">
+			<c:if test="${project.id ne user.active_project}">
 				<tr>
 					<td><a href="<c:url value="project?id=${project.id}"/>">[${project.projectId}]
 							${project.name}</a></td>
