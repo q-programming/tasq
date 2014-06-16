@@ -15,6 +15,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.hibernate.Hibernate;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.slf4j.Logger;
@@ -41,6 +42,8 @@ import com.qprogramming.tasq.support.ProjectSorter;
 import com.qprogramming.tasq.support.TaskSorter;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.web.MessageHelper;
+import com.qprogramming.tasq.task.comments.Comment;
+import com.qprogramming.tasq.task.comments.CommentsRepository;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
@@ -76,6 +79,9 @@ public class TaskController {
 
 	@Autowired
 	private MessageSource msg;
+
+	@Autowired
+	private CommentsRepository commRepo;
 
 	@RequestMapping(value = "task/create", method = RequestMethod.GET)
 	public TaskForm startTaskCreate(Model model) {
@@ -173,7 +179,9 @@ public class TaskController {
 			message.append(BR);
 			task.setDescription(taskForm.getDescription());
 		}
-		if (!task.getEstimate().equalsIgnoreCase(taskForm.getEstimate())) {
+		if ((!taskForm.equals(""))
+				&& (!task.getEstimate()
+						.equalsIgnoreCase(taskForm.getEstimate()))) {
 			message.append("Estimate:");
 			message.append(task.getEstimate());
 			message.append(CHANGE_TO);
@@ -232,8 +240,7 @@ public class TaskController {
 		}
 		account.setLast_visited_t(clean);
 		accSrv.update(account);
-		// TODO Add sorting
-		// Collections.sort(task.getWorklog(), new WorkLogSorter(true));
+		task.setDescription(task.getDescription().replaceAll("\n", "<br>"));
 		model.addAttribute("task", task);
 		return "task/details";
 	}
@@ -243,7 +250,7 @@ public class TaskController {
 			@RequestParam(value = "projectID", required = false) String proj_id,
 			@RequestParam(value = "state", required = false) String state,
 			@RequestParam(value = "query", required = false) String query,
-			Model model) {
+			Model model, HttpServletRequest request) {
 		List<Project> projects = projectSrv.findAllByUser();
 		Collections.sort(projects, new ProjectSorter(
 				ProjectSorter.SORTBY.LAST_VISIT, Utils.getCurrentAccount()
@@ -357,8 +364,11 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/state", method = RequestMethod.POST)
-	public String changeState(@RequestParam(value = "taskID") String taskID,
+	public String changeState(
+			@RequestParam(value = "taskID") String taskID,
 			@RequestParam(value = "state") TaskState state,
+			@RequestParam(value = "zero_checkbox", required = false) Boolean remaining_zero,
+			@RequestParam(value = "message", required = false) String message,
 			RedirectAttributes ra, HttpServletRequest request, Model model) {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
@@ -372,9 +382,38 @@ public class TaskController {
 			}
 			TaskState old_state = (TaskState) task.getState();
 			task.setState(state);
+			// Zero remaining time
+			if (remaining_zero != null && remaining_zero) {
+				task.setRemaining(PeriodHelper.inFormat("0m"));
+			}
+			// add comment for task change state?
+			if (message != null && message != "") {
+				if (Utils.containsHTMLTags(message)) {
+					MessageHelper.addErrorAttribute(
+							ra,
+							msg.getMessage("comment.htmlTag", null,
+									Utils.getCurrentLocale()));
+					return "redirect:" + request.getHeader("Referer");
+				} else {
+					Comment comment = new Comment();
+					comment.setTask(task);
+					comment.setAuthor(Utils.getCurrentAccount());
+					comment.setDate(new Date());
+					comment.setMessage(message);
+					commRepo.save(comment);
+					task.addComment(comment);
+					wlSrv.addActivityLog(task, message, LogType.COMMENT);
+				}
+			}
+			// Save all
 			taskSrv.save(task);
-			wlSrv.addActivityLog(task, old_state.getDescription() + CHANGE_TO
-					+ state.getDescription(), LogType.STATUS);
+			if (state.equals(TaskState.CLOSED)) {
+				wlSrv.addActivityLog(task, "", LogType.CLOSED);
+
+			} else {
+				wlSrv.addActivityLog(task, old_state.getDescription()
+						+ CHANGE_TO + state.getDescription(), LogType.STATUS);
+			}
 		}
 		return "redirect:/task?id=" + taskID;
 	}
@@ -449,7 +488,7 @@ public class TaskController {
 						((TaskState) task.getState()).getCode(), null,
 						Utils.getCurrentLocale());
 				MessageHelper.addWarningAttribute(ra, msg.getMessage(
-						"task.closed", new Object[]{ localized },
+						"task.closed", new Object[] { localized },
 						Utils.getCurrentLocale()));
 				return "redirect:" + request.getHeader("Referer");
 

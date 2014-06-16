@@ -106,3 +106,18 @@ form.form-search:before {
 	border-radius: 3px;
 	background-color: white;
 }
+.mod-header {
+	background: url(/tasq/resources/img/mod_header_bg.png) repeat-x center;
+	margin-top: 15px;
+	padding-bottom: 5px;
+}
+
+.mod-header-title {
+	background: white;
+	display: inline;
+	padding: 5px;
+	font-weight: bold;
+}
+.left-margin{
+	padding-left: 20px;
+}

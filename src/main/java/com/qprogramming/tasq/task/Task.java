@@ -1,5 +1,6 @@
 package com.qprogramming.tasq.task;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -62,9 +63,6 @@ public class Task implements java.io.Serializable {
 	private boolean active = false;
 
 	@Column
-	private Date start_date;
-
-	@Column
 	private Date due_date;
 
 	@Column
@@ -122,8 +120,9 @@ public class Task implements java.io.Serializable {
 		return project_admin;
 	}
 
-	public Date getCreate_date() {
-		return create_date;
+	public String getCreate_date() {
+		SimpleDateFormat sdf = new SimpleDateFormat("dd.M.yyyy HH:mm");
+		return sdf.format(create_date);
 	}
 
 	public Date getLast_visit() {
@@ -132,10 +131,6 @@ public class Task implements java.io.Serializable {
 
 	public boolean isActive() {
 		return active;
-	}
-
-	public Date getStart_date() {
-		return start_date;
 	}
 
 	public Date getDue_date() {
@@ -184,10 +179,6 @@ public class Task implements java.io.Serializable {
 
 	public void setActive(boolean active) {
 		this.active = active;
-	}
-
-	public void setStart_date(Date start_date) {
-		this.start_date = start_date;
 	}
 
 	public void setDue_date(Date due_date) {

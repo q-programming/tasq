@@ -38,6 +38,8 @@ public class TaskForm {
 	private String story_points;
 
 	private String no_estimation;
+	
+	private String remaining;
 
 	public TaskForm() {
 		// TODO Auto-generated constructor stub
@@ -53,6 +55,7 @@ public class TaskForm {
 				.toString() : "");
 		setType(((TaskType) task.getType()).getEnum());
 		setId(task.getId());
+		setRemaining(task.getRemaining());
 	}
 
 	public Task createTask() throws IllegalArgumentException {
@@ -139,5 +142,13 @@ public class TaskForm {
 
 	public void setNo_estimation(String no_estimation) {
 		this.no_estimation = no_estimation;
+	}
+
+	public String getRemaining() {
+		return remaining;
+	}
+
+	public void setRemaining(String remaining) {
+		this.remaining = remaining;
 	}
 }

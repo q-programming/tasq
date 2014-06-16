@@ -223,6 +223,10 @@ public class ProjetController {
 				return "redirect:/projects";
 			}
 			project.addParticipant(account);
+			if (account.getActive_project() == null) {
+				account.setActive_project(id);
+				accSrv.update(account);
+			}
 			projSrv.save(project);
 		}
 		return "redirect:" + request.getHeader("Referer");
@@ -313,6 +317,7 @@ public class ProjetController {
 		}
 		return "redirect:" + request.getHeader("Referer");
 	}
+
 	@RequestMapping(value = "/project/{id}/getParticipants", method = RequestMethod.GET)
 	public @ResponseBody
 	List<DisplayAccount> listParticipants(@PathVariable Long id,

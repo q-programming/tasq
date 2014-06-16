@@ -64,23 +64,26 @@
 		</h4>
 		<div id="estimate_div">
 			<div class="form-group">
-				<c:if test="${task.estimate ne '0m' }">
-					<div>${taskForm.estimate}
-						<span class="glyphicon glyphicon-question-sign a-tooltip"
-							title="<s:message code ="task.estimateStarted"/>"
-							data-placement="right"></span>
-						<form:hidden path="estimate" />
+				<c:if test="${task.logged_work ne '0m' }">
+					<div>
+						<label><s:message code="task.remaining"/></label>
+						<form:input path="remaining" class="form-control"
+							style="width:150px" />
+						<form:errors path="remaining" element="p" class="text-danger" />
+						<span class="help-block"><s:message
+								code="task.edit.remaining.help" /><br> <s:message
+								code="task.estimate.help.pattern" />
+						</span>
 					</div>
-
 				</c:if>
-				<c:if test="${task.estimate eq '0m' }">
+				<c:if test="${task.logged_work eq '0m' }">
 					<form:input path="estimate" class="form-control"
 						style="width:150px" />
 					<form:errors path="estimate" element="p" class="text-danger" />
 					<span class="help-block"><s:message
 							code="task.estimate.help" /><br> <s:message
-							code="task.estimate.help.pattern" /> <br> <br> <s:message
-							code="task.estimate.edit.help" /></span>
+							code="task.estimate.help.pattern" />
+					</span>
 				</c:if>
 			</div>
 			<div>
@@ -95,7 +98,7 @@
 			<button type="submit" class="btn btn-success">
 				<s:message code="task.edit" text="Edit"></s:message>
 			</button>
-			<span class="btn" onclick="location.href='<c:url value="/"/>';"><s:message
+			<span class="btn" onclick="location.href='<c:url value="/task?id=${task.id}"/>';"><s:message
 					code="main.cancel" text="Cancel" /></span>
 		</div>
 	</form:form>
