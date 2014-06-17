@@ -58,15 +58,15 @@
 			<form:errors path="description" element="p" class="text-danger" />
 		</div>
 		<%-- Estimate --%>
-		<hr>
-		<h4>
-			<s:message code="task.estimate" />
-		</h4>
 		<div id="estimate_div">
 			<div class="form-group">
 				<c:if test="${task.logged_work ne '0m' }">
 					<div>
-						<label><s:message code="task.remaining"/></label>
+						<div class="mod-header">
+							<h5 class="mod-header-title">
+								<s:message code="task.remaining" />
+							</h5>
+						</div>
 						<form:input path="remaining" class="form-control"
 							style="width:150px" />
 						<form:errors path="remaining" element="p" class="text-danger" />
@@ -77,6 +77,11 @@
 					</div>
 				</c:if>
 				<c:if test="${task.logged_work eq '0m' }">
+					<div class="mod-header">
+						<h5 class="mod-header-title">
+							<s:message code="task.estimate" />
+						</h5>
+					</div>
 					<form:input path="estimate" class="form-control"
 						style="width:150px" />
 					<form:errors path="estimate" element="p" class="text-danger" />
@@ -94,6 +99,19 @@
 						code="task.storyPoints.help" /></span>
 			</div>
 		</div>
+		<div>
+			<div class="mod-header">
+				<h5 class="mod-header-title">
+					<s:message code="task.dueDate" />
+				</h5>
+			</div>
+			<input id="due_date"
+				name="due_date" style="width: 150px;"
+				class="form-control datepicker" type="text" value="">
+			<span class="help-block"><s:message	code="task.dueDate.help" /></span>
+			
+		</div>
+		
 		<div style="margin: 10px auto; text-align: right;">
 			<button type="submit" class="btn btn-success">
 				<s:message code="task.edit" text="Edit"></s:message>
@@ -105,6 +123,11 @@
 </div>
 <script>
 	$(document).ready(function($) {
+		//------------------------------------Datepickers
+		$(".datepicker").datepicker({
+			minDate : '0'
+		});
+		$(".datepicker").datepicker("option", "dateFormat", "dd-mm-yy");
 	});
 
 	

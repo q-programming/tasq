@@ -1,3 +1,4 @@
+<%@page import="com.qprogramming.tasq.task.TaskPriority"%>
 <%@page import="com.qprogramming.tasq.task.TaskState"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
@@ -33,7 +34,7 @@
 	</div>
 	<%--------------FILTERS ----------------------------%>
 	<c:if
-		test="${not empty param.projectID || not empty param.state || not empty param.query}">
+		test="${not empty param.projectID || not empty param.state || not empty param.query || not empty param.priority}">
 		<c:if test="${not empty param.projectID}">
 			<c:set var="projID_url">
 								projectID=${param.projectID}&
@@ -49,19 +50,32 @@
 								query=${param.query}&
 				</c:set>
 		</c:if>
+		<c:if test="${not empty param.priority}">
+			<c:set var="priority_url">
+								priority=${param.priority}&
+				</c:set>
+		</c:if>
+
 
 		<div style="display: table-cell; padding-left: 20px; width: 100%">
 			<c:if test="${not empty param.projectID}">
 				<span><s:message code="project.project" />: <span
 					class="filter_span"> ${param.projectID}<a
-						href="<c:url value="tasks?${state_url}${query_url}"/>"><span
+						href="<c:url value="tasks?${state_url}${query_url}${priority_url}"/>"><span
 							class="glyphicon glyphicon-remove"
 							style="font-size: smaller; margin-left: 3px; color: lightgray"></span></a></span></span>
 			</c:if>
 			<c:if test="${not empty param.state}">
 				<span><s:message code="task.state" />: <span
 					class="filter_span"><t:state state="${param.state}" /> <a
-						href="<c:url value="tasks?${projID_url}${query_url}"/>"><span
+						href="<c:url value="tasks?${projID_url}${query_url}${priority_url}"/>"><span
+							class="glyphicon glyphicon-remove"
+							style="font-size: smaller; margin-left: 3px; color: lightgray"></span></a></span></span>
+			</c:if>
+			<c:if test="${not empty param.priority}">
+				<span><s:message code="task.priority" />: <span
+					class="filter_span"><t:priority priority="${param.priority}" /> <a
+						href="<c:url value="tasks?${projID_url}${query_url}${state_url}"/>"><span
 							class="glyphicon glyphicon-remove"
 							style="font-size: smaller; margin-left: 3px; color: lightgray"></span></a></span></span>
 			</c:if>
@@ -71,7 +85,7 @@
 				</c:set>
 				<span><s:message code="main.search" />: <span
 					class="filter_span"> ${param.query}<a
-						href="<c:url value="tasks?${projID_url}${state_url}"/>"><span
+						href="<c:url value="tasks?${projID_url}${state_url}${priority_url}"/>"><span
 							class="glyphicon glyphicon-remove"
 							style="font-size: smaller; margin-left: 3px; color: lightgray"></span></a></span></span>
 			</c:if>
@@ -84,6 +98,23 @@
 		<thead>
 			<tr>
 				<th style="width: 30px"><s:message code="task.type" /></th>
+				<th style="width: 30px"><span class="dropdown a-tooltip"
+					title="<s:message code="task.priority" />"
+					style="padding-top: 5px; cursor: pointer;"> <a
+						class="dropdown-toggle" type="button" id="dropdownMenu2"
+						data-toggle="dropdown" style="color: black"> <span
+							class="caret"></span></a> 
+						<%
+ 							pageContext.setAttribute("priorities", TaskPriority.values());
+ 						%>
+						<ul class="dropdown-menu">
+							<c:forEach items="${priorities}" var="priority">
+								<li><a
+									href="<c:url value="tasks?${projID_url}${query_url}${state_url}priority=${priority}"/>"><t:priority
+											priority="${priority}"></t:priority></a></li>
+							</c:forEach>
+						</ul>
+				</span></th>
 				<th style="width: 500px"><s:message code="task.name" /></th>
 				<th><s:message code="task.progress" /></th>
 				<th>
@@ -97,7 +128,7 @@
 						<ul class="dropdown-menu">
 							<c:forEach items="${states}" var="state">
 								<li><a
-									href="<c:url value="tasks?${projID_url}${query_url}state=${state}"/>"><t:state
+									href="<c:url value="tasks?${projID_url}${query_url}${priority_url}state=${state}"/>"><t:state
 											state="${state}"></t:state></a></li>
 							</c:forEach>
 						</ul>
@@ -124,6 +155,7 @@
 				<tr style="${tr_bg}">
 			</c:if>
 			<td><t:type type="${task.type}" list="true" /></td>
+			<td><t:priority priority="${task.priority}" list="true" /></td>
 			<td><a href="<c:url value="task?id=${task.id}"/>"
 				style="color: inherit;">[${task.id}] ${task.name}</a></td>
 			<c:if test="${not task.estimated}">

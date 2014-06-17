@@ -3,10 +3,14 @@
  */
 package com.qprogramming.tasq.task;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.hibernate.validator.constraints.NotBlank;
 import org.joda.time.Period;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.support.Utils;
@@ -16,6 +20,8 @@ import com.qprogramming.tasq.support.Utils;
  * @date 26 maj 2014
  */
 public class TaskForm {
+	private static final Logger LOG = LoggerFactory.getLogger(TaskForm.class);
+
 	private static final String NOT_BLANK_MESSAGE = "{notBlank.message}";
 	private static final String TYPE_NOT_BLANK_MESSAGE = "{error.taskType}";
 
@@ -32,14 +38,18 @@ public class TaskForm {
 
 	@NotBlank(message = TYPE_NOT_BLANK_MESSAGE)
 	private String type;
+	
+	private TaskPriority priority;
 
 	private String estimate;
 
 	private String story_points;
 
 	private String no_estimation;
-	
+
 	private String remaining;
+
+	private String due_date;
 
 	public TaskForm() {
 		// TODO Auto-generated constructor stub
@@ -56,12 +66,17 @@ public class TaskForm {
 		setType(((TaskType) task.getType()).getEnum());
 		setId(task.getId());
 		setRemaining(task.getRemaining());
+		setDue_date(task.getDue_date());
+		setPriority((TaskPriority) task.getPriority());
 	}
 
 	public Task createTask() throws IllegalArgumentException {
 		Task task = new Task();
 		task.setName(getName());
 		task.setCreate_date(new Date());
+		if (!"".equals(getDue_date())) {
+			task.setDue_date(convertDueDate());
+		}
 		task.setDescription(getDescription());
 		task.setState(TaskState.TO_DO);
 		task.setType(TaskType.valueOf(getType()));
@@ -77,6 +92,7 @@ public class TaskForm {
 		task.setEstimated(estimated);
 		task.setLogged_work(PeriodHelper.inFormat(""));
 		task.setOwner(Utils.getCurrentAccount());
+		task.setPriority(getPriority());
 		return task;
 	}
 
@@ -150,5 +166,31 @@ public class TaskForm {
 
 	public void setRemaining(String remaining) {
 		this.remaining = remaining;
+	}
+
+	public String getDue_date() {
+		return due_date;
+	}
+
+	public void setDue_date(String due_date) {
+		this.due_date = due_date;
+	}
+
+	public TaskPriority getPriority() {
+		return priority;
+	}
+
+	public void setPriority(TaskPriority priority) {
+		this.priority = priority;
+	}
+
+	public Date convertDueDate() {
+		Date dueDate = null;
+		try {
+			dueDate = new SimpleDateFormat("dd-M-yyyy").parse(getDue_date());
+		} catch (ParseException e) {
+			LOG.error(e.getMessage());
+		}
+		return dueDate;
 	}
 }

@@ -1,3 +1,4 @@
+<%@page import="com.qprogramming.tasq.task.TaskPriority"%>
 <%@page import="com.qprogramming.tasq.task.TaskType"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
@@ -13,11 +14,12 @@
 	<s:message code="task.description" text="Description" />
 </c:set>
 <div class="white-frame" style="width: 700px; overflow: auto;">
-	<h3>
-		<s:message code="task.create" text="Create task"></s:message>
-	</h3>
-	<hr>
-	<form:form modelAttribute="taskForm" id="taskForm" method="post">
+	<div class="mod-header">
+		<h3 class="mod-header-title">
+				<s:message code="task.create" text="Create task"></s:message>
+		</h3>
+	</div>
+	<form:form modelAttribute="taskForm" id="taskForm" method="post" style="margin-top: 5px;">
 		<%-- Check all potential errors --%>
 		<c:set var="name_error">
 			<form:errors path="name" />
@@ -41,9 +43,13 @@
 				placeholder="${taskDesc_text}" />
 			<form:errors path="description" element="p" class="text-danger" />
 		</div>
-		<hr>
+		<%-------------------------Project ----------------------------------%>
 		<div class="form-group">
-			<label><s:message code="project.project" /></label>
+			<div class="mod-header">
+				<h5 class="mod-header-title">
+					<s:message code="project.project" />
+				</h5>
+			</div>
 			<form:select path="project" id="project" style="width:300px;"
 				class="form-control">
 				<c:forEach items="${projects}" var="project">
@@ -60,9 +66,13 @@
 		<c:if test="${not empty type_error}">
 			<c:set var="type_error" value="border-color: #b94a48;" />
 		</c:if>
-		<hr>
+		<%-----------------TASK TYPE ---------------%>
 		<div class="form-group">
-			<label><s:message code="task.type" /></label>
+			<div class="mod-header">
+				<h5 class="mod-header-title">
+					<s:message code="task.type" />
+				</h5>
+			</div>
 			<div class="dropdown">
 				<button id="type_button" class="btn btn-default "
 					style="${type_error}" type="button" id="dropdownMenu1"
@@ -85,11 +95,40 @@
 			<form:input path="type" type="hidden" id="type" />
 			<form:errors path="type" element="p" class="text-danger" />
 		</div>
+		<div class="form-group">
+			<div class="mod-header">
+				<h5 class="mod-header-title">
+					<s:message code="task.priority" />
+				</h5>
+			</div>
+			<div class="dropdown">
+			<%
+				pageContext.setAttribute("priorities", TaskPriority.values());
+				pageContext.setAttribute("major", TaskPriority.MAJOR);
+			%>
+			
+				<button id="priority_button" class="btn btn-default "
+					style="${type_error}" type="button" id="dropdownMenu2"
+					data-toggle="dropdown">
+					<div id="task_priority" class="image-combo"><t:priority	priority="${major}"/></div>
+					<span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu" role="menu"
+					aria-labelledby="dropdownMenu2">
+					<c:forEach items="${priorities}" var="enum_priority">
+						<li><a tabindex="-1" href="#" id="${enum_priority}"><t:priority	priority="${enum_priority}"/></a></li>
+					</c:forEach>
+				</ul>
+			</div>
+			<form:input path="priority" type="hidden" id="priority" />
+			<form:errors path="priority" element="p"/>
+		</div>
 		<%-- Estimate --%>
-		<hr>
-		<h4>
-			<s:message code="task.estimate" />
-		</h4>
+		<div class="mod-header">
+				<h5 class="mod-header-title">
+					<s:message code="task.estimate" />
+				</h5>
+		</div>
 		<div id="estimate_div">
 			<div class="form-group">
 				<form:input path="estimate" class="form-control" style="width:150px" />
@@ -112,7 +151,20 @@
 			title="<s:message code ="task.withoutEstimation.help"/>"
 			data-placement="right"></span>
 		</label>
-
+		<%----------DUE DATE --------------------------%>
+		<div>
+			<div class="mod-header">
+				<h5 class="mod-header-title">
+					<s:message code="task.dueDate" />
+				</h5>
+			</div>
+			<input id="due_date"
+				name="due_date" style="width: 150px;"
+				class="form-control datepicker" type="text" value="">
+				<span class="help-block"><s:message
+						code="task.dueDate.help" /></span>
+		</div>
+		<%--------------Submit button -----------------%>
 		<div style="margin: 10px auto; text-align: right;">
 			<button type="submit" class="btn btn-success">
 				<s:message code="main.create" text="Create" />
@@ -123,26 +175,33 @@
 	</form:form>
 </div>
 <script>
-	$(document)
-			.ready(
-					function($) {
-						<c:forEach items="${types}" var="enum_type">
-						$("#${enum_type.code}")
-								.click(
-										function() {
-											console.log("${enum_type.code}");
-											var type = '<img src="<c:url value="/resources/img/${enum_type.code}.png"/>"> <s:message code="task.type.${enum_type.code}"/>';
-											$("#task_type").html(type);
-											$("#type").val("${enum_type}");
-										});
-						</c:forEach>
+$(document).ready(function($) {
+	<c:forEach items="${types}" var="enum_type">
+		$("#${enum_type.code}").click(function() {
+			var type = '<img src="<c:url value="/resources/img/${enum_type.code}.png"/>"> <s:message code="task.type.${enum_type.code}"/>';
+			$("#task_type").html(type);
+			$("#type").val("${enum_type}");
+		});
+	</c:forEach>
 
-						$("#no_estimation").change(function() {
-							$("#estimate").val("");
-							$('#estimate_div').slideToggle("slow");
-						});
-
-					});
+	<c:forEach items="${priorities}" var="enum_priority">
+	$("#${enum_priority}").click(function() {
+		var type = '<img src="<c:url value="/resources/img/${enum_priority.imgcode}.png"/>"> <s:message code="${enum_priority.code}"></s:message>';
+		$("#task_priority").html(type);
+		$("#priority").val("${enum_priority}");
+	});
+</c:forEach>
+	
+	$("#no_estimation").change(function() {
+			$("#estimate").val("");
+			$('#estimate_div').slideToggle("slow");
+	});
+	//------------------------------------Datepickers
+	$(".datepicker").datepicker({
+		minDate : '0'
+	});
+	$(".datepicker").datepicker("option", "dateFormat", "dd-mm-yy");
+});
 
 	
 </script>

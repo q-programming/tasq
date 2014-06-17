@@ -15,7 +15,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
-import org.hibernate.Hibernate;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.slf4j.Logger;
@@ -179,7 +178,7 @@ public class TaskController {
 			message.append(BR);
 			task.setDescription(taskForm.getDescription());
 		}
-		if ((!taskForm.equals(""))
+		if ((taskForm.getEstimate() != null)
 				&& (!task.getEstimate()
 						.equalsIgnoreCase(taskForm.getEstimate()))) {
 			message.append("Estimate:");
@@ -206,6 +205,14 @@ public class TaskController {
 			message.append(CHANGE_TO);
 			message.append(story_points);
 			task.setStory_points(story_points);
+		}
+		if (!task.getDue_date().equalsIgnoreCase(taskForm.getDue_date())) {
+			message.append("Due date: ");
+			message.append(task.getDue_date());
+			message.append(CHANGE_TO);
+			message.append(taskForm.getDue_date());
+			message.append(BR);
+			task.setDue_date(taskForm.convertDueDate());
 		}
 		LOG.debug(message.toString());
 		taskSrv.save(task);
@@ -250,6 +257,7 @@ public class TaskController {
 			@RequestParam(value = "projectID", required = false) String proj_id,
 			@RequestParam(value = "state", required = false) String state,
 			@RequestParam(value = "query", required = false) String query,
+			@RequestParam(value = "priority", required = false) String priority,
 			Model model, HttpServletRequest request) {
 		List<Project> projects = projectSrv.findAllByUser();
 		Collections.sort(projects, new ProjectSorter(
@@ -277,6 +285,17 @@ public class TaskController {
 				for (Task task : taskList) {
 					if (task.getName().contains(query)
 							|| task.getDescription().contains(query)) {
+						searchResult.add(task);
+					}
+				}
+				taskList = searchResult;
+			}
+			if (priority != null && priority != "") {
+				List<Task> searchResult = new LinkedList<Task>();
+				for (Task task : taskList) {
+					if (task.getPriority() != null
+							&& task.getPriority().equals(
+									TaskPriority.valueOf(priority))) {
 						searchResult.add(task);
 					}
 				}
@@ -515,6 +534,42 @@ public class TaskController {
 							LogType.ASSIGNED);
 				}
 			}
+		}
+		return "redirect:" + request.getHeader("Referer");
+	}
+
+	@RequestMapping(value = "/task/priority", method = RequestMethod.GET)
+	public String changePriority(@RequestParam(value = "id") String taskID,
+			@RequestParam(value = "priority") String priority,
+			RedirectAttributes ra, HttpServletRequest request, Model model) {
+		Task task = taskSrv.findById(taskID);
+		if (task != null) {
+			if (task.getState().equals(TaskState.CLOSED)) {
+				String localized = msg.getMessage(
+						((TaskState) task.getState()).getCode(), null,
+						Utils.getCurrentLocale());
+				MessageHelper.addWarningAttribute(ra, msg.getMessage(
+						"task.closed", new Object[] { localized },
+						Utils.getCurrentLocale()));
+				return "redirect:" + request.getHeader("Referer");
+
+			}
+			if (canEdit(task.getProject())) {
+				StringBuffer message = new StringBuffer();
+				String oldPriority = "";
+				// TODO temporary due to old DB
+				if (task.getPriority() != null) {
+					oldPriority = task.getPriority().toString();
+				}
+				message.append(oldPriority);
+				message.append(CHANGE_TO);
+				task.setPriority(TaskPriority.valueOf(priority));
+				message.append(task.getPriority().toString());
+				taskSrv.save(task);
+				wlSrv.addActivityLog(task, message.toString(), LogType.PRIORITY);
+
+			}
+
 		}
 		return "redirect:" + request.getHeader("Referer");
 	}

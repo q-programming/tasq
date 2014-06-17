@@ -1,3 +1,4 @@
+<%@page import="com.qprogramming.tasq.task.TaskPriority"%>
 <%@page import="com.qprogramming.tasq.task.TaskState"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
@@ -63,6 +64,37 @@
 						<td style="width: 80px;"><s:message code="task.state" /></td>
 						<td class="left-margin"><t:state state="${task.state}" /></td>
 					</tr>
+					<tr>
+						<td ><s:message code="task.priority" /></td>
+						<td class="left-margin">
+						<c:choose>
+							<c:when test="${can_edit || is_assignee}">
+								<div class="dropdown">
+									<%
+									pageContext.setAttribute("priorities", TaskPriority.values());
+									%>
+									<div id="task_priority" class="image-combo a-tooltip" data-toggle="dropdown" data-placement="top" title="<s:message code="main.click"/>">
+										<t:priority	priority="${task.priority}"/>
+										<span class="caret"></span>
+									</div>
+									<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">
+										<c:forEach items="${priorities}" var="enum_priority">
+											<li>
+												<a tabindex="-1" href='<c:url value="task/priority?id=${task.id}&priority=${enum_priority}"></c:url>' id="${enum_priority}">
+													<t:priority	priority="${enum_priority}"/>
+												</a>
+											</li>
+										</c:forEach>
+									</ul>
+								</div>
+							</c:when>
+							<c:otherwise>
+								<t:priority priority="${task.priority}" />
+							</c:otherwise>
+						</c:choose>
+						</td>
+					</tr>
+					
 					<tr>
 						<td style="vertical-align: top;"><s:message code="task.description" /></td>
 						<td class="left-margin">${task.description}</td>

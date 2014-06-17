@@ -83,6 +83,10 @@ public class Task implements java.io.Serializable {
 	@Column
 	private Enum<TaskType> type;
 
+	@Column
+	private Enum<TaskPriority> priority;
+
+	
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "task")
 	private Set<WorkLog> worklog;
 
@@ -95,7 +99,7 @@ public class Task implements java.io.Serializable {
 	@ManyToOne
 	@JoinColumn(name = "task_owner")
 	private Account owner;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "task_assignee")
 	private Account assignee;
@@ -133,8 +137,12 @@ public class Task implements java.io.Serializable {
 		return active;
 	}
 
-	public Date getDue_date() {
-		return due_date;
+	public String getDue_date() {
+		if (due_date != null) {
+			SimpleDateFormat sdf = new SimpleDateFormat("dd.M.yyyy");
+			return sdf.format(due_date);
+		}
+		return "";
 	}
 
 	public Integer getStory_points() {
@@ -295,6 +303,14 @@ public class Task implements java.io.Serializable {
 
 	public void setOwner(Account owner) {
 		this.owner = owner;
+	}
+
+	public Enum<TaskPriority> getPriority() {
+		return priority;
+	}
+
+	public void setPriority(Enum<TaskPriority> priority) {
+		this.priority = priority;
 	}
 
 	/*
