@@ -87,7 +87,7 @@ public class Project implements Serializable {
 	}
 
 	public String getStartDate() {
-		SimpleDateFormat sdf = new SimpleDateFormat("dd.M.yyyy HH:mm");
+		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
 		return sdf.format(startDate);
 	}
 

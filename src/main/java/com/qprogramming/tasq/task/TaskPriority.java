@@ -1,14 +1,16 @@
 package com.qprogramming.tasq.task;
 
 public enum TaskPriority {
-	BLOCKER("task.priority.blocker"), CRITICAL("task.priority.critical"), MAJOR(
-			"task.priority.major"), MINOR("task.priority.minor"), TRIVIAL(
-			"task.priority.trivial");
+	BLOCKER("task.priority.blocker", 0), CRITICAL("task.priority.critical", 1), MAJOR(
+			"task.priority.major", 2), MINOR("task.priority.minor", 3), TRIVIAL(
+			"task.priority.trivial", 4);
 
 	private String code;
+	private int priority;
 
-	private TaskPriority(String code) {
+	private TaskPriority(String code, int priority) {
 		this.code = code;
+		this.priority = priority;
 	}
 
 	@Override
@@ -25,13 +27,17 @@ public enum TaskPriority {
 	public String getDescription() {
 		return toString();
 	}
-	
-	public String getImgcode(){
+
+	public String getImgcode() {
 		return super.toString().toLowerCase();
 	}
 
 	public String getCode() {
 		return code;
+	}
+
+	public int getPriority() {
+		return priority;
 	}
 
 }

@@ -28,6 +28,9 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 	rel="stylesheet" media="screen" />
 <link href="<c:url value="/resources/css/core.css" />" rel="stylesheet"
 	media="screen" />
+<%-------THEME ------%>
+<link href="<c:url value="/resources/css/theme.css" />"
+	rel="stylesheet" media="screen" />
 <%-- CUSTOMS --%>
 <link href="<c:url value="/resources/css/custom.css" />"
 	rel="stylesheet" media="screen" />

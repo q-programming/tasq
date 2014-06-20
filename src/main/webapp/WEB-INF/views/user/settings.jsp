@@ -74,16 +74,14 @@
 		}, function() {
 			$('#avatar_upload').addClass('hidden');
 		});
-
+		
 		$("#file_upload").change(function() {
 			readURL(this);
 		});
 
 		function readURL(input) {
-
 			if (input.files && input.files[0]) {
 				var reader = new FileReader();
-
 				reader.onload = function(e) {
 					$('#avatar_src').attr('src', e.target.result);
 				}

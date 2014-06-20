@@ -95,6 +95,7 @@
 			<form:input path="type" type="hidden" id="type" />
 			<form:errors path="type" element="p" class="text-danger" />
 		</div>
+		<%------------PRIORITY --------------------%>
 		<div class="form-group">
 			<div class="mod-header">
 				<h5 class="mod-header-title">
@@ -104,11 +105,11 @@
 			<div class="dropdown">
 			<%
 				pageContext.setAttribute("priorities", TaskPriority.values());
-				pageContext.setAttribute("major", TaskPriority.MAJOR);
+				pageContext.setAttribute("major", TaskPriority.MAJOR.getEnum());
 			%>
 			
 				<button id="priority_button" class="btn btn-default "
-					style="${type_error}" type="button" id="dropdownMenu2"
+					type="button" id="dropdownMenu2"
 					data-toggle="dropdown">
 					<div id="task_priority" class="image-combo"><t:priority	priority="${major}"/></div>
 					<span class="caret"></span>
@@ -120,7 +121,7 @@
 					</c:forEach>
 				</ul>
 			</div>
-			<form:input path="priority" type="hidden" id="priority" />
+			<form:input path="priority" type="hidden" id="priority" value="${major}" />
 			<form:errors path="priority" element="p"/>
 		</div>
 		<%-- Estimate --%>
@@ -158,9 +159,8 @@
 					<s:message code="task.dueDate" />
 				</h5>
 			</div>
-			<input id="due_date"
-				name="due_date" style="width: 150px;"
-				class="form-control datepicker" type="text" value="">
+			<form:input path="due_date" class="form-control datepicker"
+				id="due_date" style="width:150px" />
 				<span class="help-block"><s:message
 						code="task.dueDate.help" /></span>
 		</div>
@@ -201,6 +201,10 @@ $(document).ready(function($) {
 		minDate : '0'
 	});
 	$(".datepicker").datepicker("option", "dateFormat", "dd-mm-yy");
+	$('.datepicker').datepicker("option", "firstDay", 1);
+	var currentDue = "${taskForm.due_date}";
+	$("#due_date").val(currentDue);
+
 });
 
 	

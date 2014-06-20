@@ -9,7 +9,7 @@
 	<s:message code="signup.password" />
 </c:set>
 <security:authentication property="principal" var="user" />
-<div class="navbar navbar-fixed-top">
+<div class="navbar navbar-fixed-top theme">
 	<div class="container">
 		<button type="button" class="navbar-toggle" data-toggle="collapse"
 			data-target=".nav-collapse">
@@ -17,16 +17,16 @@
 				class="icon-bar"></span>
 		</button>
 		<a class="navbar-brand" href="<c:url value="/"/>"
-			style="padding-top: 0px; padding-bottom: 0px"><img
+			style="padding-top: 0px; padding-bottom: 4px"><img
 			src="<c:url value="/resources/img/tasQ_logo_small.png"/>"></img></a>
 		<div class="nav-collapse collapse">
 			<ul class="nav navbar-nav">
 				<%-- PROJECTS --%>
 				<li><div class="dropdown"
 						style="padding-top: 5px; padding: 5px">
-						<a class="dropdown-toggle btn btn-default" type="button"
+						<a class="dropdown-toggle btn theme" type="button"
 							id="dropdownMenu1" data-toggle="dropdown"><s:message
-								code="project.projects" text="Projects" /><span class="caret"></span></a>
+								code="project.projects" text="Projects" /> <span class="caret theme"></span></a>
 						<ul class="dropdown-menu">
 							<li><strong style="padding: 5px 10px;"><s:message
 										code="project.recent" text="Recent projects" /></strong></li>
@@ -52,9 +52,9 @@
 						</ul></li>
 				<%-- TASKS --%>
 				<li><div class="dropdown" style="padding-top: 5px">
-						<a class="dropdown-toggle btn btn-default" type="button"
+						<a class="dropdown-toggle btn theme" type="button"
 							id="dropdownMenu1" data-toggle="dropdown"><s:message
-								code="task.tasks" text="Tasks" /><span class="caret"></span></a>
+								code="task.tasks" text="Tasks" /> <span class="caret theme"></span></a>
 						<ul class="dropdown-menu">
 							<c:forEach items="${last_tasks}" var="l_task">
 								<li><a href="<c:url value="/task?id=${l_task.id}"/>">[${l_task.id}]
@@ -148,7 +148,7 @@
 								data-placement="bottom"><span
 								class="glyphicon glyphicon-off"></span></a>
 						</div>
-						<div>${user}</div>
+						<div style="color:white">${user}</div>
 					</li>
 					<li>
 						<div class="pull-right">

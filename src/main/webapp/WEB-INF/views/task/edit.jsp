@@ -72,8 +72,7 @@
 						<form:errors path="remaining" element="p" class="text-danger" />
 						<span class="help-block"><s:message
 								code="task.edit.remaining.help" /><br> <s:message
-								code="task.estimate.help.pattern" />
-						</span>
+								code="task.estimate.help.pattern" /> </span>
 					</div>
 				</c:if>
 				<c:if test="${task.logged_work eq '0m' }">
@@ -87,8 +86,7 @@
 					<form:errors path="estimate" element="p" class="text-danger" />
 					<span class="help-block"><s:message
 							code="task.estimate.help" /><br> <s:message
-							code="task.estimate.help.pattern" />
-					</span>
+							code="task.estimate.help.pattern" /> </span>
 				</c:if>
 			</div>
 			<div>
@@ -105,18 +103,18 @@
 					<s:message code="task.dueDate" />
 				</h5>
 			</div>
-			<input id="due_date"
-				name="due_date" style="width: 150px;"
-				class="form-control datepicker" type="text" value="">
-			<span class="help-block"><s:message	code="task.dueDate.help" /></span>
-			
+			<form:input path="due_date" class="form-control datepicker"
+				id="due_date" style="width:150px" />
+			<span class="help-block"><s:message code="task.dueDate.help" /></span>
+
 		</div>
-		
+
 		<div style="margin: 10px auto; text-align: right;">
 			<button type="submit" class="btn btn-success">
 				<s:message code="task.edit" text="Edit"></s:message>
 			</button>
-			<span class="btn" onclick="location.href='<c:url value="/task?id=${task.id}"/>';"><s:message
+			<span class="btn"
+				onclick="location.href='<c:url value="/task?id=${task.id}"/>';"><s:message
 					code="main.cancel" text="Cancel" /></span>
 		</div>
 	</form:form>
@@ -128,6 +126,9 @@
 			minDate : '0'
 		});
 		$(".datepicker").datepicker("option", "dateFormat", "dd-mm-yy");
+		$('.datepicker').datepicker("option", "firstDay", 1);
+		var currentDue = "${taskForm.due_date}";
+		$("#due_date").val(currentDue);
 	});
 
 	

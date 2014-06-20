@@ -95,15 +95,15 @@
 <div class="white-frame">
 	<security:authentication property="principal" var="user" />
 	<table class="table table-condensed">
-		<thead>
+		<thead class="theme">
 			<tr>
 				<th style="width: 30px"><s:message code="task.type" /></th>
 				<th style="width: 30px"><span class="dropdown a-tooltip"
 					title="<s:message code="task.priority" />"
 					style="padding-top: 5px; cursor: pointer;"> <a
-						class="dropdown-toggle" type="button" id="dropdownMenu2"
+						class="dropdown-toggle theme" type="button" id="dropdownMenu2"
 						data-toggle="dropdown" style="color: black"> <span
-							class="caret"></span></a> 
+							class="caret theme"></span></a> 
 						<%
  							pageContext.setAttribute("priorities", TaskPriority.values());
  						%>
@@ -119,15 +119,15 @@
 				<th><s:message code="task.progress" /></th>
 				<th>
 					<div class="dropdown" style="padding-top: 5px; cursor: pointer;">
-						<a class="dropdown-toggle" type="button" id="dropdownMenu1"
-							data-toggle="dropdown" style="color: black"><s:message
-								code="task.state" /><span class="caret"></span></a>
+						<a class="dropdown-toggle theme" type="button" id="dropdownMenu1"
+							data-toggle="dropdown"><s:message
+								code="task.state" /><span class="caret theme"></span></a>
 						<%
 							pageContext.setAttribute("states", TaskState.values());
 						%>
 						<ul class="dropdown-menu">
 							<c:forEach items="${states}" var="state">
-								<li><a
+								<li><a 
 									href="<c:url value="tasks?${projID_url}${query_url}${priority_url}state=${state}"/>"><t:state
 											state="${state}"></t:state></a></li>
 							</c:forEach>
@@ -135,9 +135,10 @@
 					</div>
 
 				</th>
-				<th style="width: 100px"><s:message code="main.action" /></th>
+				<th style="width: 200px"><s:message code="task.assignee" /></th>
 			</tr>
 		</thead>
+		<%----------------TASKS -----------------------------%>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.id eq user.active_task[0]}">
 				<tr style="background: #428bca; color: white">
@@ -182,7 +183,17 @@
 					</div></td>
 			</c:if>
 			<td class="${blinker}"><t:state state="${task.state}"></t:state></td>
-			<td></td>
+			<td><c:if test="${empty task.assignee}">
+								<i><s:message
+										code="task.unassigned" /></i>
+							</c:if>
+							<c:if test="${not empty task.assignee}">
+								<img
+									data-src="holder.js/20x20"
+									style="height: 20px; padding-right: 5px;"
+									src="<c:url value="/userAvatar/${task.assignee.id}"/>" />
+								<a href="<c:url value="/user?id=${task.assignee.id}"/>">${task.assignee}</a>
+							</c:if></td>
 			</tr>
 		</c:forEach>
 	</table>

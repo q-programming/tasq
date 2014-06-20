@@ -84,7 +84,8 @@
 			</c:if>
 		</div>
 	</div>
-	<div style="display: table-cell; width: 65%">
+	<div style="display: table;width:100%">
+	<div style="display: table-cell; width: 600px">
 		<%------------------------------ EVENTS ------------------------%>
 		<h3>
 			<s:message code="project.latestEvents" />
@@ -108,7 +109,7 @@
 					</div>
 					<div class="pull-right">
 						<a class="btn btn-default btn-xxs"
-							href="<c:url value="/project?id=${project.id}&show=1"/>"><s:message
+							href="<c:url value="/project?id=${project.id}&show=${param.show +1}"/>"><s:message
 								code="project.next" /></a>
 					</div>
 				</c:when>
@@ -169,6 +170,7 @@
 			<c:forEach items="${project.tasks}" var="task">
 				<tr>
 					<td><t:type type="${task.type}" list="true" /></td>
+					<td><t:priority priority="${task.priority}" list="true" /></td>
 					<td><a href="<c:url value="task?id=${task.id}"/>">[${task.id}]
 							${task.name}</a>
 					<td>
@@ -190,7 +192,7 @@
 			</c:forEach>
 		</table>
 	</div>
-
+</div>
 </div>
 <script>
 	$(document).ready(function($) {

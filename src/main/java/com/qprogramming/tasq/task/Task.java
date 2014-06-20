@@ -86,7 +86,6 @@ public class Task implements java.io.Serializable {
 	@Column
 	private Enum<TaskPriority> priority;
 
-	
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "task")
 	private Set<WorkLog> worklog;
 
@@ -125,7 +124,7 @@ public class Task implements java.io.Serializable {
 	}
 
 	public String getCreate_date() {
-		SimpleDateFormat sdf = new SimpleDateFormat("dd.M.yyyy HH:mm");
+		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
 		return sdf.format(create_date);
 	}
 
@@ -139,10 +138,14 @@ public class Task implements java.io.Serializable {
 
 	public String getDue_date() {
 		if (due_date != null) {
-			SimpleDateFormat sdf = new SimpleDateFormat("dd.M.yyyy");
+			SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 			return sdf.format(due_date);
 		}
 		return "";
+	}
+
+	public Date getRawDue_date() {
+		return due_date;
 	}
 
 	public Integer getStory_points() {

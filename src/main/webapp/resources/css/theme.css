@@ -1,0 +1,24 @@
+a.theme {
+	color: white;
+}
+
+.caret.theme {
+	border-top-color: white;
+	border-bottom-color: white;
+}
+
+div.navbar.navbar-fixed-top.theme {
+	background-color: skyblue;
+}
+
+div.modal-header.theme {
+	background-color: skyblue;
+	color: white;
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+}
+
+thead.theme {
+	background: skyblue;
+	color: white;
+}

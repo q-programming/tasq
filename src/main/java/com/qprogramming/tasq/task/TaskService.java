@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.projects.Project;
 
 @Service
@@ -26,13 +27,8 @@ public class TaskService {
 		return taskRepo.findAll();
 	}
 
-	public List<Task> findAllbyUser() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	public List<Task> findByProjectAndState(Project project, TaskState state){
-		return taskRepo.findByProjectAndState(project,state);
+	public List<Task> findByProjectAndState(Project project, TaskState state) {
+		return taskRepo.findByProjectAndState(project, state);
 	}
 
 	/**
@@ -42,4 +38,13 @@ public class TaskService {
 	public Task findById(String id) {
 		return taskRepo.findById(id);
 	}
+
+	public List<Task> findByAssignee(Account assignee) {
+		return taskRepo.findByAssignee(assignee);
+	}
+
+	public List<Task> findAllByUser(Account account) {
+		return taskRepo.findAllByProjectParticipants_Id(account.getId());
+	}
+
 }
