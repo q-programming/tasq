@@ -9,8 +9,6 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -18,13 +16,11 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.TableGenerator;
 
 import org.joda.time.Period;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.task.Task;
-import com.qprogramming.tasq.task.TaskType;
 
 /**
  * @author romanjak
@@ -61,6 +57,9 @@ public class WorkLog implements Serializable {
 
 	@Column
 	private String message;
+	
+	@Column 
+	private Long projectId;
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "task_worklog")
@@ -138,6 +137,14 @@ public class WorkLog implements Serializable {
 
 	public void setType(Enum<LogType> type) {
 		this.type = type;
+	}
+
+	public Long getProject_id() {
+		return projectId;
+	}
+
+	public void setProject_id(Long project_id) {
+		this.projectId = project_id;
 	}
 
 	@Override

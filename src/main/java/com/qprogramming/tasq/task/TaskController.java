@@ -574,6 +574,53 @@ public class TaskController {
 		return "redirect:" + request.getHeader("Referer");
 	}
 
+	@Transactional
+	@RequestMapping(value = "/task/delete", method = RequestMethod.GET)
+	public String deleteTask(@RequestParam(value = "id") String taskID,
+			RedirectAttributes ra, HttpServletRequest request, Model model) {
+		Task task = taskSrv.findById(taskID);
+		if (task != null) {
+			Project project = projectSrv.findById(task.getProject().getId());
+			// Only allow delete for administrators, owner or app admin
+			if (isAdmin(task, project)) {
+				task.setOwner(null);
+				task.setAssignee(null);
+				task.setProject(null);
+				// clear last and potential actives
+				Account account = accSrv.getCurrent();
+				if (account.getActive_task().length > 0
+						&& account.getActive_task()[0].equals(taskID)) {
+					account.clearActive_task();
+				}
+				List<Task> lastVisited = account.getLast_visited_t();
+				if (lastVisited.contains(task)) {
+					lastVisited.remove(task);
+					account.setLast_visited_t(lastVisited);
+				}
+				accSrv.update(account);
+				// leave message and clear all
+				StringBuffer message = new StringBuffer();
+				message.append("[");
+				message.append(task.getId());
+				message.append("]");
+				message.append(" - ");
+				message.append(task.getName());
+				taskSrv.delete(task);
+				wlSrv.addWorkLogNoTask(message.toString(), project,
+						LogType.DELETED);
+			}
+			return "redirect:/project?id=" + project.getId();
+		}
+		return "redirect:" + request.getHeader("Referer");
+	}
+
+	private boolean isAdmin(Task task, Project project) {
+		Account current_account = Utils.getCurrentAccount();
+		return project.getAdministrators().contains(current_account)
+				|| task.getOwner().equals(current_account)
+				|| current_account.getRole().equals(Role.ROLE_ADMIN);
+	}
+
 	/**
 	 * Checks if currently logged in user have privileges to change anything in
 	 * project

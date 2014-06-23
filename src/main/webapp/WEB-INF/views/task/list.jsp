@@ -143,10 +143,14 @@
 			<c:if test="${task.id eq user.active_task[0]}">
 				<tr style="background: #428bca; color: white">
 					<c:set var="blinker" value="blink" />
+					<c:set var="link">
+						style="color:white"
+					</c:set>
 			</c:if>
 			<c:if test="${task.id ne user.active_task[0]}">
 				<c:set var="blinker" value="" />
 				<c:set var="tr_bg" value="" />
+				<c:set var="link" value=""/>
 				<c:if test="${task.state eq 'CLOSED'}">
 					<c:set var="tr_bg" value="background: rgba(50, 205, 81, 0.12);" />
 				</c:if>
@@ -192,7 +196,7 @@
 									data-src="holder.js/20x20"
 									style="height: 20px; padding-right: 5px;"
 									src="<c:url value="/userAvatar/${task.assignee.id}"/>" />
-								<a href="<c:url value="/user?id=${task.assignee.id}"/>">${task.assignee}</a>
+								<a ${link} href="<c:url value="/user?id=${task.assignee.id}"/>">${task.assignee}</a>
 							</c:if></td>
 			</tr>
 		</c:forEach>

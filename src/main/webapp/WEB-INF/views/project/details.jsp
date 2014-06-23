@@ -149,11 +149,13 @@
 					<td><img data-src="holder.js/30x30"
 						style="height: 30px; float: left; padding-right: 10px;"
 						src="<c:url value="/userAvatar/${worklog.account.id}"/>" />
-						${worklog.account} <t:logType logType="${worklog.type}" /> <a
-						href="<c:url value="/task?id=${worklog.task.id}"/>">[${worklog.task.id}]
+						${worklog.account} <t:logType logType="${worklog.type}" /> 
+						<c:if test="${not empty worklog.task}">
+						<a href="<c:url value="/task?id=${worklog.task.id}"/>">[${worklog.task.id}]
 							${worklog.task.name}</a>
+						</c:if>
 						<div class="pull-right">${worklog.timeLogged}</div>
-						</div> <c:if test="${not empty worklog.message}">
+						<c:if test="${not empty worklog.message}">
 							<div>${worklog.message}</div>
 						</c:if></td>
 				</tr>

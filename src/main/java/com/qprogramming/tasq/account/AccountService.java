@@ -64,8 +64,8 @@ public class AccountService {
 	public void update(Account account) {
 		accRepo.save(account);
 	}
-	
-	public Account findById(Long id){
+
+	public Account findById(Long id) {
 		return accRepo.findById(id);
 	}
 
@@ -74,5 +74,9 @@ public class AccountService {
 	 */
 	public List<Account> findAll() {
 		return accRepo.findAll();
+	}
+
+	public Account getCurrent() {
+		return accRepo.findByEmail(Utils.getCurrentAccount().getEmail());
 	}
 }

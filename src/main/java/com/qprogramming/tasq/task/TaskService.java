@@ -47,4 +47,9 @@ public class TaskService {
 		return taskRepo.findAllByProjectParticipants_Id(account.getId());
 	}
 
+	public void delete(Task task) {
+		taskRepo.delete(task);
+
+	}
+
 }

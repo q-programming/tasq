@@ -86,6 +86,10 @@ public class Account implements java.io.Serializable, UserDetails {
 	@Transient
 	private Collection<GrantedAuthority> authorities;
 
+	/**
+	 * [0] Task ID
+	 * [1] active task start time
+	 */
 	@Column
 	private Object[] active_task;
 	

@@ -9,8 +9,10 @@ import org.springframework.stereotype.Repository;
 public interface WorkLogRepository extends JpaRepository<WorkLog, Integer> {
 
 	WorkLog findById(Long id);
-	
+
 	List<WorkLog> findByTaskProjectId(Long id);
-	
+
 	List<WorkLog> findByTask_worklogLike(String id);
+
+	List<WorkLog> findByProjectId(Long id);
 }

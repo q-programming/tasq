@@ -41,6 +41,11 @@
 						<s:message code="task.edit" />
 					</button></a>
 			</c:if>
+			<c:if test="${can_edit}">
+				<a href="<c:url value="task/delete?id=${task.id}"/>"><button class="btn btn-default btn-sm">
+						<span class="glyphicon glyphicon-trash"></span>
+					</button></a>
+			</c:if>
 		</div>
 		<h3>
 			<t:type type="${task.type}" />
