@@ -7,9 +7,11 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.hibernate.Hibernate;
 import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
@@ -117,6 +119,7 @@ public class WorkLogService {
 
 	/**
 	 * Add worklog without task ( for example for project only )
+	 * 
 	 * @param task
 	 * @param outFormat
 	 * @param log_work

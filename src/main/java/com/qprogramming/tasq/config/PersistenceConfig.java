@@ -33,6 +33,8 @@ public class PersistenceConfig implements TransactionManagementConfigurer {
 	private String dialect;
 	@Value("${hibernate.hbm2ddl.auto}")
 	private String hbm2ddlAuto;
+	@Value("${hibernate.show_sql}")
+	private String show_sql;
 
 	@Bean
 	public DataSource configureDataSource() {
@@ -54,6 +56,7 @@ public class PersistenceConfig implements TransactionManagementConfigurer {
 		Properties jpaProperties = new Properties();
 		jpaProperties.put(org.hibernate.cfg.Environment.DIALECT, dialect);
 		jpaProperties.put(org.hibernate.cfg.Environment.HBM2DDL_AUTO, hbm2ddlAuto);
+		jpaProperties.put(org.hibernate.cfg.Environment.SHOW_SQL, show_sql);
 		entityManagerFactoryBean.setJpaProperties(jpaProperties);
 		
 		return entityManagerFactoryBean;

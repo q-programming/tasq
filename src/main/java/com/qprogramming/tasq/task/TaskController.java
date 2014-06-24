@@ -15,6 +15,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.hibernate.Hibernate;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.slf4j.Logger;
@@ -220,8 +221,10 @@ public class TaskController {
 		return "redirect:/task?id=" + taskID;
 	}
 
+	@Transactional
 	@RequestMapping(value = "task", method = RequestMethod.GET)
 	public String showDetails(@RequestParam(value = "id") String id,
+			@RequestParam(value = "tab", required = false) String tab,
 			Model model, RedirectAttributes ra, HttpServletRequest request) {
 		Task task = taskSrv.findById(id);
 		if (task == null) {
@@ -247,6 +250,9 @@ public class TaskController {
 		}
 		account.setLast_visited_t(clean);
 		accSrv.update(account);
+		// TASK
+		// Load worklog or comments
+		Hibernate.initialize(task.getComments());
 		task.setDescription(task.getDescription().replaceAll("\n", "<br>"));
 		model.addAttribute("task", task);
 		return "task/details";
@@ -587,17 +593,33 @@ public class TaskController {
 				task.setAssignee(null);
 				task.setProject(null);
 				// clear last and potential actives
-				Account account = accSrv.getCurrent();
-				if (account.getActive_task().length > 0
-						&& account.getActive_task()[0].equals(taskID)) {
-					account.clearActive_task();
+				List<Account> accounts = accSrv.findAll();
+				for (Account account : accounts) {
+					boolean update = false;
+					if (account.getActive_task() != null
+							&& account.getActive_task().length > 0
+							&& account.getActive_task()[0].equals(taskID)) {
+						if (account.equals(Utils.getCurrentAccount())) {
+							account.clearActive_task();
+							update = true;
+						} else {
+							MessageHelper.addErrorAttribute(ra, msg.getMessage(
+									"task.delete.work",
+									new Object[] { account },
+									Utils.getCurrentLocale()));
+							return "redirect:" + request.getHeader("Referer");
+						}
+					}
+					List<Task> lastVisited = account.getLast_visited_t();
+					if (lastVisited.contains(task)) {
+						lastVisited.remove(task);
+						account.setLast_visited_t(lastVisited);
+						update = true;
+					}
+					if (update) {
+						accSrv.update(account);
+					}
 				}
-				List<Task> lastVisited = account.getLast_visited_t();
-				if (lastVisited.contains(task)) {
-					lastVisited.remove(task);
-					account.setLast_visited_t(lastVisited);
-				}
-				accSrv.update(account);
 				// leave message and clear all
 				StringBuffer message = new StringBuffer();
 				message.append("[");

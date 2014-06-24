@@ -42,9 +42,12 @@
 					</button></a>
 			</c:if>
 			<c:if test="${can_edit}">
-				<a href="<c:url value="task/delete?id=${task.id}"/>"><button class="btn btn-default btn-sm">
+				<a class="btn btn-default btn-sm a-tooltip delete_task" href="<c:url value="task/delete?id=${task.id}"/>"
+							title="<s:message code="task.delete" text="Delete task" />"
+							data-lang="${pageContext.response.locale}"
+							data-msg='<s:message code="task.delete.confirm"></s:message>'>
 						<span class="glyphicon glyphicon-trash"></span>
-					</button></a>
+					</a>
 			</c:if>
 		</div>
 		<h3>
@@ -601,7 +604,7 @@
 </div>
 <!-- /.modal -->
 <script>
-	$(document).ready(function($) {
+$(document).ready(function($) {
 		//------------------------------------Datepickers
 		$(".datepicker").datepicker({
 			maxDate : '0'
@@ -716,5 +719,20 @@
 				$("#zero_checkbox").attr('checked', false);
 			}
 		});
+});
+$(document).on(	"click",".delete_task",function(e) {
+	var msg = '<p style="text-align:center"><span class="glyphicon glyphicon-warning-sign" style="display: initial;"></span> '
+				+ $(this).data('msg') + '</p>';
+	var lang = $(this).data('lang');
+	bootbox.setDefaults({
+		locale : lang
 	});
+	e.preventDefault();
+	var $link = $(this);
+	bootbox.confirm(msg, function(result) {
+		if (result == true) {
+			document.location.assign($link.attr('href'));
+			}
+	});
+});
 </script>

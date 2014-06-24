@@ -1,3 +1,5 @@
+<%@page import="com.qprogramming.tasq.task.TaskPriority"%>
+<%@page import="com.qprogramming.tasq.task.TaskType"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
 <%@ taglib prefix="security"
@@ -12,7 +14,54 @@
 <security:authentication property="principal" var="user" />
 <div class="white-frame" style="overflow: auto;">
 	<h3><a href="<c:url value="/project?id=${project.id}"/>">[${project.projectId}] ${project.name}</a></h3>
+	<form id="priority_form" action="<c:url value="/project/${project.id}/update"/>" method="post">
+	<div>Default task priority:
+	<div class="dropdown">
+			<%
+				pageContext.setAttribute("priorities", TaskPriority.values());
+			%>
+				<button id="priority_button" class="btn btn-default "
+					type="button" id="dropdownMenu2"
+					data-toggle="dropdown">
+					<div id="task_priority" class="image-combo"><t:priority	priority="${project.default_priority}"/></div>
+					<span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu" role="menu"
+					aria-labelledby="dropdownMenu2">
+					<c:forEach items="${priorities}" var="enum_priority">
+						<li><a tabindex="-1" href="#" id="${enum_priority}"><t:priority	priority="${enum_priority}"/></a></li>
+					</c:forEach>
+				</ul>
+				<input name="default_priority" id="default_priority" type="hidden" value="${project.default_priority}">
+			</div>
+	</div>
+	<div>Default task type:
+	<div class="dropdown">
+				<button id="type_button" class="btn btn-default "
+					style="${type_error}" type="button" id="dropdownMenu1"
+					data-toggle="dropdown">
+					<div id="task_type" class="image-combo"><t:type
+									type="${project.default_type}" show_text="true" list="true" /></div>
+					<span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu" role="menu"
+					aria-labelledby="dropdownMenu1">
+					<%
+						pageContext.setAttribute("types", TaskType.values());
+					%>
+					<li>------</li>
+					<c:forEach items="${types}" var="enum_type">
+						<li><a tabindex="-1" href="#" id="${enum_type.code}"><t:type
+									type="${enum_type}" show_text="true" list="true" /></a></li>
+					</c:forEach>
+				</ul>
+				<input name="default_type" id="default_type" type="hidden" value="${project.default_type}">
+			</div>
+	</div>
+	</form>
+	
 	<hr>
+	<%-----------ADMINS --%>
 	<h4><s:message code="project.admins"/></h4>
 	<table class="table">
 		<c:forEach items="${project.administrators}" var="admin">
@@ -52,6 +101,7 @@
 			</div>
 	</div>
 	</div>
+	<%------------PARTICIPANTS --------------------------%>
 	<table class="table">
 		<c:forEach items="${project.participants}" var="participant">
 			<tr>
@@ -96,6 +146,19 @@
 </div>
 <script>
 $(document).ready(function($) {
+	<c:forEach items="${types}" var="enum_type">
+		$("#${enum_type.code}").click(function() {
+			$("#default_type").val("${enum_type}");
+			$("#priority_form").submit();
+		});
+	</c:forEach>
+
+	<c:forEach items="${priorities}" var="enum_priority">
+	$("#${enum_priority}").click(function() {
+		$("#default_priority").val("${enum_priority}");
+		$("#priority_form").submit();
+	});	
+	</c:forEach>
 	$("#participant").autocomplete({
         minLength: 1,
         delay: 500,

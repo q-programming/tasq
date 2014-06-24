@@ -38,8 +38,10 @@ import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.WorkLogSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
 import com.qprogramming.tasq.task.Task;
+import com.qprogramming.tasq.task.TaskPriority;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
+import com.qprogramming.tasq.task.TaskType;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
@@ -338,5 +340,28 @@ public class ProjetController {
 			}
 		}
 		return result;
+	}
+
+	@Transactional
+	@RequestMapping(value = "project/{id}/update", method = RequestMethod.POST)
+	public String updateProperties(
+			@PathVariable Long id,
+			@RequestParam(value = "default_priority", required = false) TaskPriority priority,
+			@RequestParam(value = "default_type", required = false) TaskType type,
+			Model model, RedirectAttributes ra, HttpServletRequest request) {
+		Project project = projSrv.findById(id);
+		if (project == null) {
+			MessageHelper.addErrorAttribute(
+					ra,
+					msg.getMessage("project.notexists", null,
+							Utils.getCurrentLocale()));
+			return "redirect:/projects";
+		}
+		if (priority != null) {
+			project.setDefault_priority(priority);
+		}
+		project.setDefault_type(type);
+		projSrv.save(project);
+		return "redirect:" + request.getHeader("Referer");
 	}
 }

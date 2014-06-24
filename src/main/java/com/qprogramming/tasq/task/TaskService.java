@@ -49,7 +49,6 @@ public class TaskService {
 
 	public void delete(Task task) {
 		taskRepo.delete(task);
-
 	}
 
 }

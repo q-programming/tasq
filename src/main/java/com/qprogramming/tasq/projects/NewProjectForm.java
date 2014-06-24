@@ -3,6 +3,7 @@ package com.qprogramming.tasq.projects;
 import org.hibernate.validator.constraints.NotBlank;
 
 import com.qprogramming.tasq.support.Utils;
+import com.qprogramming.tasq.task.TaskPriority;
 
 public class NewProjectForm {
 	private static final String NOT_BLANK_MESSAGE = "{notBlank.message}";
@@ -33,6 +34,7 @@ public class NewProjectForm {
 		Project project = new Project(getName(), Utils.getCurrentAccount());
 		project.setDescription(getDescription());
 		project.setProjectId(getProject_id().toUpperCase());
+		project.setDefault_priority(TaskPriority.MAJOR);
 		return project;
 	}
 

@@ -81,7 +81,7 @@
 				<security:authorize access="!isAuthenticated()">
 					<li>
 						<div class="dropdown" style="padding-top: 5px">
-							<a class="dropdown-toggle" type="button" id="dropdownMenu1"
+							<a class="dropdown-toggle btn theme" type="button" id="dropdownMenu1"
 								data-toggle="dropdown"><s:message code="menu.signin"
 									text="Sign in" /></a>
 							<ul class="dropdown-menu">

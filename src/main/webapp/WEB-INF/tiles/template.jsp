@@ -37,6 +37,7 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 <link rel="icon" type="image/png"
 	href="<c:url value="/resources/img/favicon.ico"/>" />
 <script src="<c:url value="/resources/js/jquery.mask.min.js" />"></script>
+<script src="<c:url value="/resources/js/bootbox.min.js" />"></script>
 
 
 <%-- <tilesx:useAttribute id="styles" name="styles" --%>

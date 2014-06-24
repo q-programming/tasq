@@ -24,6 +24,8 @@ import org.hibernate.annotations.IndexColumn;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.task.Task;
+import com.qprogramming.tasq.task.TaskPriority;
+import com.qprogramming.tasq.task.TaskType;
 
 @Entity
 public class Project implements Serializable {
@@ -62,6 +64,13 @@ public class Project implements Serializable {
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "project")
 	private List<Task> tasks;
+	
+	@Column
+	private Enum<TaskType> default_type;
+
+	@Column
+	private Enum<TaskPriority> default_priority;
+
 
 	public Project() {
 		// TODO Auto-generated constructor stub
@@ -163,6 +172,22 @@ public class Project implements Serializable {
 
 	public void setTasks(List<Task> tasks) {
 		this.tasks = tasks;
+	}
+
+	public Enum<TaskType> getDefault_type() {
+		return default_type;
+	}
+
+	public void setDefault_type(Enum<TaskType> default_type) {
+		this.default_type = default_type;
+	}
+
+	public Enum<TaskPriority> getDefault_priority() {
+		return default_priority;
+	}
+
+	public void setDefault_priority(Enum<TaskPriority> default_priority) {
+		this.default_priority = default_priority;
 	}
 
 	/*
