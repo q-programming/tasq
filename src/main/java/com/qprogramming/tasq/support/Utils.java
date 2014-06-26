@@ -1,17 +1,20 @@
 package com.qprogramming.tasq.support;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.task.Task;
 
 public class Utils {
 
@@ -68,4 +71,16 @@ public class Utils {
 	public static boolean contains(Collection<?> coll, Object o) {
 		return coll.contains(o);
 	}
+
+	/**
+	 * Initialize fetching of worklogs for each task in taskList
+	 * 
+	 * @param taskList
+	 */
+	public static void initializeWorkLogs(List<Task> taskList) {
+		for (Task task : taskList) {
+			Hibernate.initialize(task.getRawWorkLog());
+		}
+	}
+
 }

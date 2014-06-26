@@ -36,6 +36,7 @@ public class WorkLogService {
 	@Autowired
 	ProjectService projSrv;
 
+	@Transactional
 	public void addTimedWorkLog(Task task, String msg, Date when,
 			Period remaining, Period activity, LogType type) {
 		task = taskSrv.findById(task.getId());
@@ -50,6 +51,7 @@ public class WorkLogService {
 			wl.setMessage(msg);
 			wl.setActivity(activity);
 			wl = wlRepo.save(wl);
+			Hibernate.initialize(task.getWorklog());
 			task.addWorkLog(wl);
 			if (remaining == null) {
 				task.reduceRemaining(activity);
@@ -73,6 +75,7 @@ public class WorkLogService {
 	 * @param string
 	 * @param status
 	 */
+	@Transactional
 	public void addActivityLog(Task task, String msg, LogType type) {
 		task = taskSrv.findById(task.getId());
 		if (task != null) {
@@ -85,6 +88,7 @@ public class WorkLogService {
 			wl.setType(type);
 			wl.setMessage(msg);
 			wl = wlRepo.save(wl);
+			Hibernate.initialize(task.getWorklog());
 			task.addWorkLog(wl);
 			taskSrv.save(task);
 		}
@@ -97,6 +101,7 @@ public class WorkLogService {
 	 * @param log_work
 	 * @param log
 	 */
+	@Transactional
 	public void addNormalWorkLog(Task task, String msg, Period activity,
 			LogType type) {
 		task = taskSrv.findById(task.getId());
@@ -111,6 +116,7 @@ public class WorkLogService {
 			wl.setMessage(msg);
 			wl.setActivity(activity);
 			wl = wlRepo.save(wl);
+			Hibernate.initialize(task.getWorklog());
 			task.addWorkLog(wl);
 			task.reduceRemaining(activity);
 			taskSrv.save(checkState(task));

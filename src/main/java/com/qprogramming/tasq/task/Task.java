@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -18,7 +19,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
+import org.hibernate.Hibernate;
 import org.joda.time.Period;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.projects.Project;
@@ -85,7 +88,7 @@ public class Task implements java.io.Serializable {
 	@Column
 	private Enum<TaskPriority> priority;
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE, mappedBy = "task")
+	@OneToMany(cascade = CascadeType.REMOVE, mappedBy = "task")
 	private Set<WorkLog> worklog;
 
 	@Column
@@ -204,13 +207,18 @@ public class Task implements java.io.Serializable {
 	}
 
 	public List<WorkLog> getWorklog() {
-		List<WorkLog> list_worklog = new ArrayList<WorkLog>(worklog);
+		List<WorkLog> list_worklog = new ArrayList<WorkLog>();
+		list_worklog.addAll(getRawWorkLog());
 		Collections.sort(list_worklog, new WorkLogSorter(true));
 		return list_worklog;
 	}
 
 	public void setWorklog(Set<WorkLog> worklog) {
 		this.worklog = worklog;
+	}
+	
+	public Set<WorkLog> getRawWorkLog(){
+		return worklog;
 	}
 
 	public void addWorkLog(WorkLog wl) {
@@ -236,9 +244,9 @@ public class Task implements java.io.Serializable {
 	public void setRemaining(Period remaining) {
 		this.remaining = remaining;
 	}
-
 	public Period getRawLogged_work() {
 		logged_work = new Period();
+		Set<WorkLog> worklog = getRawWorkLog();
 		for (WorkLog activity : worklog) {
 			logged_work = PeriodHelper.plusPeriods(logged_work,
 					activity.getActivity());

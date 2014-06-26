@@ -85,7 +85,8 @@ public class TaskController {
 
 	@RequestMapping(value = "task/create", method = RequestMethod.GET)
 	public TaskForm startTaskCreate(Model model) {
-		model.addAttribute("projects", projectSrv.findAllByUser());
+		model.addAttribute("project", projectSrv.findUserActiveProject());
+		model.addAttribute("projects_list", projectSrv.findAllByUser());
 		return new TaskForm();
 	}
 
@@ -95,7 +96,8 @@ public class TaskController {
 			Errors errors, RedirectAttributes ra, HttpServletRequest request,
 			Model model) {
 		if (errors.hasErrors()) {
-			model.addAttribute("projects", projectSrv.findAllByUser());
+			model.addAttribute("projects_list", projectSrv.findAllByUser());
+			model.addAttribute("project", projectSrv.findUserActiveProject());
 			return null;
 		}
 		Project project = projectSrv.findByProjectId(taskForm.getProject());
@@ -132,9 +134,11 @@ public class TaskController {
 		return null;
 	}
 
+	@Transactional
 	@RequestMapping(value = "/task/edit", method = RequestMethod.GET)
 	public TaskForm startEditTask(@RequestParam("id") String id, Model model) {
 		Task task = taskSrv.findById(id);
+		Hibernate.initialize(task.getRawWorkLog());
 		model.addAttribute("task", task);
 		return new TaskForm(task);
 	}
@@ -251,13 +255,14 @@ public class TaskController {
 		account.setLast_visited_t(clean);
 		accSrv.update(account);
 		// TASK
-		// Load worklog or comments
 		Hibernate.initialize(task.getComments());
+		Hibernate.initialize(task.getWorklog());
 		task.setDescription(task.getDescription().replaceAll("\n", "<br>"));
 		model.addAttribute("task", task);
 		return "task/details";
 	}
 
+	@Transactional
 	@RequestMapping(value = "tasks", method = RequestMethod.GET)
 	public String listTasks(
 			@RequestParam(value = "projectID", required = false) String proj_id,
@@ -309,6 +314,7 @@ public class TaskController {
 			}
 			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID,
 					false));
+			Utils.initializeWorkLogs(taskList);
 			model.addAttribute("tasks", taskList);
 			model.addAttribute("active_project", active);
 		}
@@ -388,6 +394,7 @@ public class TaskController {
 		return "redirect:/task?id=" + taskID;
 	}
 
+	@Transactional
 	@RequestMapping(value = "/task/state", method = RequestMethod.POST)
 	public String changeState(
 			@RequestParam(value = "taskID") String taskID,
@@ -426,6 +433,7 @@ public class TaskController {
 					comment.setDate(new Date());
 					comment.setMessage(message);
 					commRepo.save(comment);
+					Hibernate.initialize(task.getComments());
 					task.addComment(comment);
 					wlSrv.addActivityLog(task, message, LogType.COMMENT);
 				}

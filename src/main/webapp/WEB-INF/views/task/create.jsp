@@ -6,6 +6,7 @@
 	uri="http://www.springframework.org/security/tags"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <security:authentication property="principal" var="user" />
 <c:set var="taskName_text">
 	<s:message code="task.name" text="Summary" />
@@ -50,13 +51,13 @@
 					<s:message code="project.project" />
 				</h5>
 			</div>
-			<form:select path="project" id="project" style="width:300px;"
-				class="form-control">
-				<c:forEach items="${projects}" var="project">
-					<option
-						<c:if test="${project.id eq user.active_project}"> selected style="font-weight:bold"</c:if>
-						value="${project.projectId}">${project.name}</option>
-				</c:forEach>
+			<form:select id="projects_list" style="width:300px;" path="project"	class="form-control">
+ 				<c:forEach items="${projects_list}" var="list_project">
+					<option id="${list_project.projectId}"
+ 						<c:if test="${list_project.id eq user.active_project}">selected style="font-weight:bold"
+ 						</c:if>
+ 						value="${list_project.projectId}">${list_project.name}</option>
+ 				</c:forEach> 
 			</form:select>
 			<span class="help-block"><s:message code="task.project.help" /></span>
 		</div>
@@ -77,7 +78,8 @@
 				<button id="type_button" class="btn btn-default "
 					style="${type_error}" type="button" id="dropdownMenu1"
 					data-toggle="dropdown">
-					<div id="task_type" class="image-combo">Choose type</div>
+					<div id="task_type" class="image-combo">
+						<t:type	type="${project.default_type}" show_text="true" list="true" /></div>
 					<span class="caret"></span>
 				</button>
 				<ul class="dropdown-menu" role="menu"
@@ -91,8 +93,8 @@
 					</c:forEach>
 				</ul>
 			</div>
-			<span class="help-block"><s:message code="task.type.help" /></span>
-			<form:input path="type" type="hidden" id="type" />
+			<span class="help-block"><s:message code="task.type.help" /> <a href="#"><span class="glyphicon glyphicon-question-sign"></span></a></span>
+			<form:hidden path="type" id="type" value="${fn:toUpperCase(project.default_type)}"/>
 			<form:errors path="type" element="p" class="text-danger" />
 		</div>
 		<%------------PRIORITY --------------------%>
@@ -105,13 +107,12 @@
 			<div class="dropdown">
 			<%
 				pageContext.setAttribute("priorities", TaskPriority.values());
-				pageContext.setAttribute("major", TaskPriority.MAJOR.getEnum());
 			%>
 			
 				<button id="priority_button" class="btn btn-default "
 					type="button" id="dropdownMenu2"
 					data-toggle="dropdown">
-					<div id="task_priority" class="image-combo"><t:priority	priority="${major}"/></div>
+					<div id="task_priority" class="image-combo"><t:priority	priority="${project.default_priority}"/></div>
 					<span class="caret"></span>
 				</button>
 				<ul class="dropdown-menu" role="menu"
@@ -121,7 +122,7 @@
 					</c:forEach>
 				</ul>
 			</div>
-			<form:input path="priority" type="hidden" id="priority" value="${major}" />
+			<form:hidden path="priority" id="priority" value="${fn:toUpperCase(project.default_priority)}" />
 			<form:errors path="priority" element="p"/>
 		</div>
 		<%-- Estimate --%>
@@ -186,11 +187,12 @@ $(document).ready(function($) {
 
 	<c:forEach items="${priorities}" var="enum_priority">
 	$("#${enum_priority}").click(function() {
-		var type = '<img src="<c:url value="/resources/img/${enum_priority.imgcode}.png"/>"> <s:message code="${enum_priority.code}"></s:message>';
-		$("#task_priority").html(type);
+		var priority = '<img src="<c:url value="/resources/img/${enum_priority.imgcode}.png"/>"> <s:message code="${enum_priority.code}"></s:message>';
+		$("#task_priority").html(priority);
 		$("#priority").val("${enum_priority}");
 	});
-</c:forEach>
+	</c:forEach>
+	//Projects
 	
 	$("#no_estimation").change(function() {
 			$("#estimate").val("");

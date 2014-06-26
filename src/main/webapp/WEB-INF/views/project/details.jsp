@@ -169,7 +169,7 @@
 					code="task.tasks" /></a>
 		</h3>
 		<table class="table">
-			<c:forEach items="${project.tasks}" var="task">
+			<c:forEach items="${tasks}" var="task">
 				<tr>
 					<td><t:type type="${task.type}" list="true" /></td>
 					<td><t:priority priority="${task.priority}" list="true" /></td>

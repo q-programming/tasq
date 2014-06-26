@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.support.ProjectSorter;
+import com.qprogramming.tasq.support.TaskSorter;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.WorkLogSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
@@ -65,6 +67,7 @@ public class ProjetController {
 	@Autowired
 	MessageSource msg;
 
+	@Transactional
 	@RequestMapping(value = "project", method = RequestMethod.GET)
 	public String showDetails(@RequestParam(value = "id") Long id,
 			@RequestParam(value = "show", required = false) Integer show,
@@ -118,6 +121,12 @@ public class ProjetController {
 		model.addAttribute("ONGOING", state_count.get(TaskState.ONGOING));
 		model.addAttribute("CLOSED", state_count.get(TaskState.CLOSED));
 		model.addAttribute("BLOCKED", state_count.get(TaskState.BLOCKED));
+		// Initilize getRawWorkLog for all task in this project . Otherwise lazy
+		// init exception is thrown
+		List<Task> taskList = taskSrv.findAllByProject(project);
+		Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID, false));
+		Utils.initializeWorkLogs(taskList);
+		model.addAttribute("tasks", taskList);
 		model.addAttribute("project", project);
 		model.addAttribute("events", workLogs);
 		return "project/details";
