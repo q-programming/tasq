@@ -106,6 +106,7 @@ form.form-search:before {
 	border-radius: 3px;
 	background-color: white;
 }
+
 .mod-header {
 	background: url(/tasq/resources/img/mod_header_bg.png) repeat-x center;
 	margin-top: 15px;
@@ -118,6 +119,39 @@ form.form-search:before {
 	padding: 5px;
 	font-weight: bold;
 }
-.left-margin{
+
+.left-margin {
 	padding-left: 20px;
+}
+
+.agile-card {
+	color: inherit;
+	border: 1px solid;
+	padding: 5px;
+	margin-bottom: 5px;
+	border-color: lightgray;
+	background-color: rgba(239, 250, 255, 1);
+}
+
+.table_state {
+	margin: 10px;
+	padding: 0 10px;
+	width: 25%;
+	display: table-cell;
+}
+
+.state_default {
+	border-style: dashed;
+	border-width: 2px;
+	border-color: lightgray;
+}
+
+.state_hover {
+	border-style: dashed;
+	border-width: 2px;
+	border-color: cadetblue;
+}
+
+.state_highlight {
+	background: blue;
 }

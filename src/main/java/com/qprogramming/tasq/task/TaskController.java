@@ -448,7 +448,7 @@ public class TaskController {
 						+ CHANGE_TO + state.getDescription(), LogType.STATUS);
 			}
 		}
-		return "redirect:/task?id=" + taskID;
+		return "redirect:" + request.getHeader("Referer");
 	}
 
 	@RequestMapping(value = "/task/time", method = RequestMethod.GET)
