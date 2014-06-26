@@ -5,7 +5,7 @@ public enum TaskState {
 	TO_DO("task.state.todo"), ONGOING("task.state.ongoing"), BLOCKED(
 			"task.state.blocked"), CLOSED("task.state.closed");
 
-	String localCode;
+	private String localCode;
 
 	private TaskState(String code) {
 		this.localCode = code;

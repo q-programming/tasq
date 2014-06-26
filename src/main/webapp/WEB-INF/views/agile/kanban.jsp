@@ -15,7 +15,7 @@
 <security:authentication property="principal" var="user" />
 <div class="white-frame" style="display: table; width: 100%;height:85vh">
 	<div class="table_state" data-state="TO_DO">
-		<div>TODO</div>
+		<div><h4><s:message code="task.state.todo"/></h4></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'TO_DO'}">
 				<t:card task="${task}" />
@@ -23,7 +23,7 @@
 		</c:forEach>
 	</div>
 	<div class="table_state" data-state="ONGOING">
-		<div>ONGOING</div>
+		<div><h4><s:message code="task.state.ongoing"/></h4></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'ONGOING'}">
 				<t:card task="${task}" />
@@ -31,7 +31,7 @@
 		</c:forEach>
 	</div>
 	<div class="table_state" data-state="CLOSED">
-		<div>DONE</div>
+		<div><h4><s:message code="task.state.closed"/></h4></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'CLOSED'}">
 				<t:card task="${task}" />
@@ -39,7 +39,7 @@
 		</c:forEach>
 	</div>
 	<div class="table_state" data-state="BLOCKED">
-		<div>BLOCKED</div>
+		<div><h4><s:message code="task.state.blocked"/></h4></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'BLOCKED'}">
 				<t:card task="${task}" />
@@ -63,13 +63,24 @@
 		      activeClass: "state_default",
 		      hoverClass: "state_hover",
 		      drop: function( event, ui ) {
-		    	  var element = $(event.toElement);
 		    	  //event on drop
-		        //$(this).addClass( "state_highlight" );
-		    	 $("#state").val($(this).data('state'));
-		    	 $("#state_from").submit();
-// 		    	alert("Moving " + element.data('taskID')+ " to " + $(this).data('state'));
-		      }
+		    	 var taskID = ui.draggable.attr("id");
+		    	 var state = $(this).data('state');
+		    	 if($("#state_" + taskID).val() != state){
+			    	 if(state == 'CLOSED'){
+		    		 	alert("closing");
+		    	 	}
+		    	 	$("#state_" + taskID).val(state);
+		    	 	$("#state_form_"+taskID).submit();
+		    	 }
+		    	 
+		      },
+		      accept: function(dropElem) {
+		    	  	var taskID = dropElem.attr("id");
+		    	  	var state = $(this).data('state');
+		    	  	return $("#state_" + taskID).val() != state;
+		    	  	
+		    	  }
 		    });
 	});
 </script>

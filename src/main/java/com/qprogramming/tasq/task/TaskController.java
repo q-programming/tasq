@@ -442,10 +442,21 @@ public class TaskController {
 			taskSrv.save(task);
 			if (state.equals(TaskState.CLOSED)) {
 				wlSrv.addActivityLog(task, "", LogType.CLOSED);
-
+				MessageHelper.addSuccessAttribute(ra,
+						msg.getMessage("task.state.changed.closed",
+								new Object[] { task.getId() },
+								Utils.getCurrentLocale()));
 			} else {
 				wlSrv.addActivityLog(task, old_state.getDescription()
 						+ CHANGE_TO + state.getDescription(), LogType.STATUS);
+				String localised = msg.getMessage(state.getCode(), null,
+						Utils.getCurrentLocale());
+				MessageHelper.addSuccessAttribute(
+						ra,
+						msg.getMessage("task.state.changed", new Object[] {
+								task.getId(), localised },
+								Utils.getCurrentLocale()));
+
 			}
 		}
 		return "redirect:" + request.getHeader("Referer");
