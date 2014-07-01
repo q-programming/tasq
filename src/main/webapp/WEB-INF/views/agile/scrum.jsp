@@ -13,7 +13,7 @@
 	<s:message code="task.description" text="Description" />
 </c:set>
 <security:authentication property="principal" var="user" />
-<h4>Kanban Board</h4>
+<h4>SCRUM Board</h4>
 <div class="white-frame" style="display: table; width: 100%;height:85vh">
 	<div class="table_state" data-state="TO_DO">
 		<div><h4><s:message code="task.state.todo"/></h4></div>

@@ -557,6 +557,13 @@ public class TaskController {
 					taskSrv.save(task);
 					wlSrv.addActivityLog(task, assignee.toString(),
 							LogType.ASSIGNED);
+					MessageHelper.addSuccessAttribute(
+							ra,
+							msg.getMessage(
+									"task.assigned",
+									new Object[] { task.getId(),
+											assignee.toString() },
+									Utils.getCurrentLocale()));
 				}
 			}
 		}

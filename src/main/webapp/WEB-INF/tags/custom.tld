@@ -11,4 +11,10 @@
 			java.lang.Object)
 		</function-signature>
 	</function>
+	<function>
+		<name>capitalizeFirst</name>
+		<function-class>com.qprogramming.tasq.support.Utils</function-class>
+		<function-signature>java.lang.String contains(java.lang.String)
+		</function-signature>
+	</function>
 </taglib>

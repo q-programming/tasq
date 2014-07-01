@@ -76,7 +76,7 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 			</c:otherwise>
 		</c:choose>
 		<div class="alert ${alertClass}"
-			style="position: absolute; bottom: 0px; width: 100%;">
+			style="position: fixed; bottom: 0px; width: 100%;">
 			<button type="button" class="close" data-dismiss="alert">&times;</button>
 			<%
 				/* Display a message by its code. If the code was not found, it will be displayed as default text */

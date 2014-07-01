@@ -51,6 +51,15 @@
 				placeholder="${projectName_text}" />
 			<form:errors path="name" element="p" class="text-danger" />
 		</div>
+		<div class="form-group"
+			style="width: 300px;">
+			<label><s:message code="project.agile.type" /></label>
+			<form:select path="agile_type" class="form-control">
+				<option value="SCRUM" selected>SCRUM</option>
+				<option value="KANBAN">Kanban</option>
+			</form:select>
+			<form:errors path="name" element="p" class="text-danger" />
+		</div>
 		<div class="form-group ${desc_class}">
 			<form:textarea path="description" class="form-control" rows="5"
 				placeholder="${projectDesc_text}" />

@@ -4,13 +4,14 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -64,13 +65,19 @@ public class Project implements Serializable {
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "project")
 	private List<Task> tasks;
-	
+
 	@Column
 	private Enum<TaskType> default_type;
 
 	@Column
 	private Enum<TaskPriority> default_priority;
 
+	@Enumerated(EnumType.STRING)
+	private AgileType agile_type;
+
+	public enum AgileType {
+		KANBAN, SCRUM
+	};
 
 	public Project() {
 		// TODO Auto-generated constructor stub
@@ -188,6 +195,14 @@ public class Project implements Serializable {
 
 	public void setDefault_priority(Enum<TaskPriority> default_priority) {
 		this.default_priority = default_priority;
+	}
+
+	public AgileType getAgile_type() {
+		return agile_type;
+	}
+
+	public void setAgile_type(String agile_type) {
+		this.agile_type = AgileType.valueOf(agile_type);
 	}
 
 	/*

@@ -82,5 +82,9 @@ public class Utils {
 			Hibernate.initialize(task.getRawWorkLog());
 		}
 	}
+	public static String capitalizeFirst(String s){
+		s = s.replaceAll("_", " ");
+		return s.substring(0, 1) + s.substring(1).toLowerCase();
+	}
 
 }

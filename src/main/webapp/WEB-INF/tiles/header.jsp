@@ -2,6 +2,7 @@
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
 <%@ taglib uri="http://www.springframework.org/security/tags"
 	prefix="security"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <c:set var="email_txt">
 	<s:message code="signup.email" />
 </c:set>
@@ -70,13 +71,26 @@
 									class="glyphicon glyphicon-plus"></span> <s:message
 										code="task.create" text="Create task" /></a></li>
 						</ul></li>
+				<%--AGILE --%>
+				<li><div class="dropdown" style="padding-top: 5px">
+						<a class="dropdown-toggle btn theme" type="button"
+							id="dropdownMenu1" data-toggle="dropdown"><s:message
+								code="agile.agile" text="Agile" /> <span class="caret theme"></span></a>
+						<ul class="dropdown-menu">
+						<c:forEach items="${last_projects}" var="l_project">
+								<c:if test="${l_project.id eq user.active_project}">
+								<li><a href="<c:url value="/agile/${l_project.id}/"/>"><b>${l_project.name} (<s:message code="agile.board.${l_project.agile_type}"/>)</b></a></li>
+								</c:if>
+								<c:if test="${l_project.id ne user.active_project}">
+									<li><a href="<c:url value="//agile/${l_project.id}/"/>">${l_project.name} (<s:message code="agile.board.${l_project.agile_type}"/>)</a></li>
+								</c:if>
+							</c:forEach>
+							<li role="presentation" class="divider"></li>
+							<li style="margin: 10px;"><a href="<c:url value="/tasks"/>"><span
+									class="glyphicon glyphicon-list"></span> <s:message
+										code="agile.showAll" text="Show all" /></a></li>
+						</ul></li>
 			</ul>
-			<!-- 			<ul class="nav navbar-nav"> -->
-			<%-- 				<li class="active"><a href="#"><span --%>
-			<%-- 						class="glyphicon glyphicon-home"></span> Home</a></li> --%>
-			<!-- 				<li><a href="#about">About</a></li> -->
-			<!-- 				<li><a href="#contact">Contact</a></li> -->
-			<!-- 			</ul> -->
 			<ul class="nav navbar-nav pull-right">
 				<security:authorize access="!isAuthenticated()">
 					<li>
