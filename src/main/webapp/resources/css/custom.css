@@ -77,6 +77,14 @@ table.button-table tr:hover td .buttons_panel {
 	display: block;
 }
 
+.buttons_panel{
+	display: none;
+}
+
+.table_sprint:hover .buttons_panel {
+	display: block;
+}
+
 input.search-query {
 	padding-left: 26px;
 }
@@ -124,32 +132,27 @@ form.form-search:before {
 	padding-left: 20px;
 }
 
-.agile-card {
-	color: inherit;
-	border: 1px solid;
-	padding: 5px;
-	margin-bottom: 5px;
-	border-color: lightgray;
-	background-color: rgba(239, 250, 255, 1);
-}
-
 .table_state {
 	margin: 10px;
 	padding: 0 10px;
 	width: 25%;
 	display: table-cell;
+	border-left: 1px solid;
+	border-color: lightgray;
 }
 
 .state_default {
 	border-style: dashed;
 	border-width: 2px;
 	border-color: lightgray;
+	border-radius: 5px;
 }
 
 .state_hover {
 	border-style: dashed;
 	border-width: 2px;
-	border-color: cadetblue;
+	border-color: blue;
+	border-radius: 5px;
 }
 
 .state_highlight {

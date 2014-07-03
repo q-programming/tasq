@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.projects.Project;
 
 @Repository
@@ -22,4 +23,7 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
 	List<Task> findByProjectAndState(Project project, TaskState state);
 	
 	List<Task> findByAssignee(Account account);
+	
+	List<Task> findByProjectAndSprint(Project project,Sprint sprint);
+	
 }

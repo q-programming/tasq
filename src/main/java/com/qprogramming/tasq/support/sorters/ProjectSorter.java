@@ -1,4 +1,4 @@
-package com.qprogramming.tasq.support;
+package com.qprogramming.tasq.support.sorters;
 
 import java.util.Comparator;
 

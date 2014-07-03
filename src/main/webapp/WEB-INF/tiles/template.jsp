@@ -34,10 +34,14 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 <%-- CUSTOMS --%>
 <link href="<c:url value="/resources/css/custom.css" />"
 	rel="stylesheet" media="screen" />
+<link href="<c:url value="/resources/css/jquery.contextmenu.css" />"
+	rel="stylesheet" media="screen" />
 <link rel="icon" type="image/png"
 	href="<c:url value="/resources/img/favicon.ico"/>" />
 <script src="<c:url value="/resources/js/jquery.mask.min.js" />"></script>
 <script src="<c:url value="/resources/js/bootbox.min.js" />"></script>
+<script src="<c:url value="/resources/js/jquery.contextmenu.js" />"></script>
+
 
 
 <%-- <tilesx:useAttribute id="styles" name="styles" --%>

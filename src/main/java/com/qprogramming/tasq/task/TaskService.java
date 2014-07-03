@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.projects.Project;
 
 @Service
@@ -49,6 +50,10 @@ public class TaskService {
 
 	public void delete(Task task) {
 		taskRepo.delete(task);
+	}
+
+	public List<Task> findAllBySprint(Project project, Sprint sprint) {
+		return taskRepo.findByProjectAndSprint(project, sprint);
 	}
 
 }

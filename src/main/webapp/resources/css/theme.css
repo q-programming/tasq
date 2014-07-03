@@ -22,3 +22,33 @@ thead.theme {
 	background: skyblue;
 	color: white;
 }
+.agile-card {
+	color: inherit;
+	border: 1px solid;
+	padding: 5px;
+	margin-bottom: 5px;
+	border-color: lightgray;
+	background-color: rgba(249, 253, 255, 1)
+}
+.agile-list{
+	color: inherit;
+	border: 1px solid;
+	padding: 5px;
+	margin-bottom: 5px;
+	border-color: lightgray;
+	background-color: rgba(249, 253, 255, 1)
+}
+.table_sprint {
+	border-style: dashed;
+	border-width: 2px;
+	border-color: rgba(205, 236, 252, 1);
+	padding: 5px;
+	border-radius: 5px;
+}
+span.badge.theme{
+	float:right;
+	background-color: rgb(69, 161, 199)
+}
+span.badge.theme.zero{
+	color: rgb(69, 161, 199)
+}

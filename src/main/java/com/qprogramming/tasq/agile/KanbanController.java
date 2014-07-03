@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
-import com.qprogramming.tasq.support.TaskSorter;
+import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.worklog.WorkLogService;

@@ -13,9 +13,19 @@
 	<s:message code="task.description" text="Description" />
 </c:set>
 <security:authentication property="principal" var="user" />
-<h4>SCRUM Board</h4>
+
+<%-- <h4>SCRUM Board</h4><h4><a href="<c:url value="/${projectID}/scrum/backlog"/>">SCRUM Backlog</a></h4> --%>
 <div class="white-frame" style="display: table; width: 100%;height:85vh">
-	<div class="table_state" data-state="TO_DO">
+<div style="display:table-caption;margin-left: 10px;">
+	<ul class="nav nav-tabs" style="border-bottom:0">
+			<li class="active"><a style="color: black" href="#"><span class="glyphicon glyphicon-list-alt"></span> Board</a></li>
+			<li><a style="color: black" href="<c:url value="/${projectID}/scrum/backlog"/>"><span class="glyphicon glyphicon-book"></span>
+					Backlog</a></li>
+			<li><a style="color: black" href="#"><span class="glyphicon glyphicon-bullhorn"></span> Reports</a></li>
+	</ul>
+</div>
+<div style="display:table-header-group;"><h4>Sprint ${sprint}</h4></div>
+	<div class="table_state" data-state="TO_DO" style="border-left:0px">
 		<div><h4><s:message code="task.state.todo"/></h4></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'TO_DO'}">

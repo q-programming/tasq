@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -19,15 +18,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
-import org.hibernate.Hibernate;
 import org.joda.time.Period;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.projects.Project;
-import com.qprogramming.tasq.support.CommentsSorter;
 import com.qprogramming.tasq.support.PeriodHelper;
-import com.qprogramming.tasq.support.WorkLogSorter;
+import com.qprogramming.tasq.support.sorters.CommentsSorter;
+import com.qprogramming.tasq.support.sorters.WorkLogSorter;
 import com.qprogramming.tasq.task.comments.Comment;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 
@@ -104,6 +102,10 @@ public class Task implements java.io.Serializable {
 	@ManyToOne
 	@JoinColumn(name = "task_assignee")
 	private Account assignee;
+	
+	@ManyToOne
+	@JoinColumn(name = "task_sprint")
+	private Sprint sprint;
 
 	public String getId() {
 		return id;
@@ -321,6 +323,14 @@ public class Task implements java.io.Serializable {
 
 	public void setPriority(Enum<TaskPriority> priority) {
 		this.priority = priority;
+	}
+
+	public Sprint getSprint() {
+		return sprint;
+	}
+
+	public void setSprint(Sprint sprint) {
+		this.sprint = sprint;
 	}
 
 	/*

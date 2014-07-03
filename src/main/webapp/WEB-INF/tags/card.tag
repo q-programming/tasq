@@ -4,18 +4,21 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
 <%@ attribute name="task" required="true"
 	type="com.qprogramming.tasq.task.Task"%>
-<div class="agile-card" data-id="${task.id}" id="${task.id}">
+<div class="agile-card theme" data-id="${task.id}" id="${task.id}">
 	<div>
 		<t:type type="${task.type}" list="true" />
-		<a href="<c:url value="task?id=${task.id}"/>" style="color: inherit;">[${task.id}]
-			${task.name}</a>
+		<a href="<c:url value="/task?id=${task.id}"/>" style="color: inherit;">[${task.id}]
+			${task.name}</a> <span
+			class="badge theme <c:if test="${task.story_points == 0}">zero</c:if>">${task.story_points}
+		</span>
 	</div>
-	<div style="display: table;width:100%;margin-top: 5px;">
-		<div style="display: table-cell;vertical-align: bottom;">
+	<div style="display: table; width: 100%; margin-top: 5px;">
+		<div style="display: table-cell; vertical-align: bottom;">
 			<button class="btn btn-default btn-xxs a-tooltip" type="button"
-				id="log_time" title="<s:message code="task.assignme"/>">
+				id="log_time" title="<s:message code="task.logWork"/>">
 				<span class="glyphicon glyphicon-time"></span>
 			</button>
+			<span class="a-tooltip" title="<s:message code="task.remaining"/>">${task.remaining}</span>
 		</div>
 		<%---Assignee--%>
 		<div style="margin-top: 10px; text-align: right; display: table-cell;">
