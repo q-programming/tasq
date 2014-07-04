@@ -6,6 +6,7 @@
 	uri="http://www.springframework.org/security/tags"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
+<%@ taglib prefix="myfn" uri="/WEB-INF/tags/custom.tld"%>
 <c:set var="tasks_text">
 	<s:message code="task.tasks" text="Tasks" />
 </c:set>
@@ -13,7 +14,12 @@
 	<s:message code="task.description" text="Description" />
 </c:set>
 <security:authentication property="principal" var="user" />
-
+<security:authorize access="hasRole('ROLE_ADMIN')">
+	<c:set var="is_admin" value="true" />
+</security:authorize>
+<c:if test="${myfn:contains(project.participants,user) || is_admin}">
+	<c:set var="can_edit" value="true" />
+</c:if>
 <%-- <h4>SCRUM Board</h4><h4><a href="<c:url value="/${projectID}/scrum/backlog"/>">SCRUM Backlog</a></h4> --%>
 <div class="white-frame" style="display: table; width: 100%;height:85vh">
 <div style="display:table-caption;margin-left: 10px;">
@@ -60,6 +66,7 @@
 </div>
 <script>
 	$(document).ready(function($) {
+		<c:if test="${can_edit}">
 		$("#assign_me").click(function(){
 			var current_email = "${user.email}";
 			$("#assign").append('<input type="hidden" name="email" value=' + current_email + '>');
@@ -93,5 +100,6 @@
 		    	  	
 		    	  }
 		    });
+		</c:if>
 	});
 </script>

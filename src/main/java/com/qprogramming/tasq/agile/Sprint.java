@@ -15,7 +15,12 @@ import javax.persistence.SequenceGenerator;
 import com.qprogramming.tasq.projects.Project;
 
 @Entity
-public class Sprint {
+public class Sprint implements java.io.Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7624092840001371525L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sprint_seq_gen")

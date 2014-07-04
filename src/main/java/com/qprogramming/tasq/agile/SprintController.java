@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.account.Account.Role;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.Utils;
@@ -43,7 +45,7 @@ public class SprintController {
 	private MessageSource msg;
 
 	@RequestMapping(value = "{id}/scrum/board", method = RequestMethod.GET)
-	public String listTasks(@PathVariable String id, Model model,
+	public String showBoard(@PathVariable String id, Model model,
 			HttpServletRequest request, RedirectAttributes ra) {
 		Project project = projSrv.findByProjectId(id);
 		if (project != null) {
@@ -59,7 +61,7 @@ public class SprintController {
 				return "redirect:/" + project.getProjectId() + "/scrum/backlog";
 			}
 			List<Task> taskList = new LinkedList<Task>();
-			taskList = taskSrv.findAllBySprint(project, sprint);
+			taskList = taskSrv.findAllBySprint(sprint);
 			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID,
 					false));
 			model.addAttribute("sprint", sprint.getSprint_no());
@@ -147,4 +149,43 @@ public class SprintController {
 		return "redirect:" + request.getHeader("Referer");
 	}
 
+	@Transactional
+	@RequestMapping(value = "/scrum/delete", method = RequestMethod.GET)
+	public String deleteSprint(@RequestParam(value = "id") Long id,
+			Model model, HttpServletRequest request, RedirectAttributes ra) {
+		Sprint sprint = sprintRepo.findById(id);
+		if (sprint != null && !sprint.isActive()) {
+			if (canEdit(sprint.getProject())) {
+				List<Task> taskList = taskSrv.findAllBySprint(sprint);
+				for (Task task : taskList) {
+					task.setSprint(null);
+					taskSrv.save(task);
+				}
+			}
+		}
+		sprintRepo.delete(sprint);
+		MessageHelper.addSuccessAttribute(
+				ra,
+				msg.getMessage("agile.sprint.removed", null,
+						Utils.getCurrentLocale()));
+		return "redirect:" + request.getHeader("Referer");
+	}
+
+	/**
+	 * Checks if currently logged in user have privileges to change anything in
+	 * project
+	 * 
+	 * @param task
+	 * @return
+	 */
+	private boolean canEdit(Project project) {
+		Project repo_project = projSrv.findById(project.getId());
+		if (repo_project == null) {
+			return false;
+		}
+		Account current_account = Utils.getCurrentAccount();
+		return (repo_project.getAdministrators().contains(current_account)
+				|| repo_project.getParticipants().contains(current_account) || current_account
+				.getRole().equals(Role.ROLE_ADMIN));
+	}
 }

@@ -6,6 +6,7 @@
 	uri="http://www.springframework.org/security/tags"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
+<%@ taglib prefix="myfn" uri="/WEB-INF/tags/custom.tld"%>
 <c:set var="tasks_text">
 	<s:message code="task.tasks" text="Tasks" />
 </c:set>
@@ -13,6 +14,12 @@
 	<s:message code="task.description" text="Description" />
 </c:set>
 <security:authentication property="principal" var="user" />
+<security:authorize access="hasRole('ROLE_ADMIN')">
+	<c:set var="is_admin" value="true" />
+</security:authorize>
+<c:if test="${myfn:contains(project.administrators,user) || is_admin}">
+	<c:set var="can_edit" value="true" />
+</c:if>
 <div class="white-frame" style="display: table; width: 100%">
 	<%--MENU --%>
 	<div style="display: table-caption; margin-left: 10px;">
@@ -32,12 +39,14 @@
 		<h4>
 			<s:message code="agile.sprints" />
 		</h4>
+		<c:if test="${can_edit}">
 		<div style="margin: 5px 0px;">
 			<s:message code="agile.create.sprint" />
 			<button id="create_sprint" class="btn btn-default btn-sm">
 				<span class="glyphicon glyphicon-plus"></span>
 			</button>
 		</div>
+		</c:if>
 		<form id="create_form"
 			action="<c:url value="/${project.projectId}/scrum/create"/>"
 			method="post"></form>
@@ -45,24 +54,30 @@
 			<c:set var="count" value="0" />
 			<div class="table_sprint" data-id="${sprint.id}">
 				<%---Buttons --%>
-				<div class="buttons_panel" style="float: right">
-					<c:if test="${not sprint.active}">
-					<button class="btn btn-default btn-sm">
-						<span class="glyphicon glyphicon-play"></span>
-						<s:message code="agile.sprint.start" />
-					</button>
-					</c:if>
-					<c:if test="${sprint.active}">
-						<button class="btn btn-default btn-sm">
-							<span class="glyphicon glyphicon-ok"></span>
-							<s:message code="agile.sprint.finish" />
-						</button>
-					</c:if>
-					<button class="btn btn-default btn-sm">
-						<span class="glyphicon glyphicon-remove"></span>
-						<s:message code="agile.sprint.delete" />
-					</button>
-				</div>
+				<c:if test="${can_edit}">
+					<div class="buttons_panel" style="float: right">
+						<c:if test="${not sprint.active}">
+							<button class="btn btn-default btn-sm">
+								<span class="glyphicon glyphicon-play"></span>
+								<s:message code="agile.sprint.start" />
+							</button>
+							<a class="btn btn-default btn-sm a-tooltip delete_sprint"
+								href="<c:url value="/scrum/delete?id=${sprint.id}"/>"
+								title="<s:message code="agile.sprint.delete" />"
+								data-lang="${pageContext.response.locale}"
+								data-msg='<s:message code="agile.sprint.delete.confirm"></s:message>'>
+								<span class="glyphicon glyphicon-trash"></span>
+							</a>
+						</c:if>
+						<c:if test="${sprint.active}">
+							<button class="btn btn-default btn-sm">
+								<span class="glyphicon glyphicon-ok"></span>
+								<s:message code="agile.sprint.finish" />
+							</button>
+						</c:if>
+
+					</div>
+				</c:if>
 				<%--Sprint content --%>
 				<div>
 					<h4>Sprint ${sprint.sprint_no}</h4>
@@ -71,8 +86,12 @@
 					<%--Sprint task --%>
 					<c:forEach items="${tasks}" var="task">
 						<c:if test="${task.sprint eq sprint }">
-						<c:set var="count" value="${count + task.story_points}" />
-							<div class="agile-list" data-id="${task.id}" id="${task.id}">
+							<c:set var="count" value="${count + task.story_points}" />
+							<div class="agile-list" data-id="${task.id}" id="${task.id}" 
+							<c:if test="${task.state eq 'CLOSED' }">
+							style="text-decoration: line-through;"
+							</c:if>
+							>
 								<div>
 									<t:type type="${task.type}" list="true" />
 									<a href="<c:url value="/task?id=${task.id}"/>"
@@ -90,7 +109,8 @@
 					</c:forEach>
 				</div>
 				<div style="text-align: right;">
-					<s:message code="agile.storypoints.total"/><span class="badge theme" style="margin:0px 5px;">${count}</span>
+					<s:message code="agile.storypoints.total" />
+					<span class="badge theme" style="margin: 0px 5px;">${count}</span>
 				</div>
 			</div>
 			<hr>
@@ -101,7 +121,7 @@
 			<s:message code="task.tasks" />
 		</h4>
 		<c:forEach items="${tasks}" var="task">
-			<c:if test="${empty task.sprint}">
+			<c:if test="${empty task.sprint && task.state ne 'CLOSED'}">
 				<div class="agile-card" data-id="${task.id}" id="${task.id}">
 					<div>
 						<t:type type="${task.type}" list="true" />
@@ -124,56 +144,71 @@
 	</div>
 </div>
 <script>
-	$(document).ready(function($) {
-		var assign_txt = "<s:message code="agile.assing"/>";
-		var assing_too_txt = "<s:message code="agile.assing2"/>";
-		var remove_txt = "<s:message code="agile.sprint.remove"/>";
-		$("#create_sprint").click(function() {
-			$("#create_form").submit();
-		});
-
-		$(".agile-card").draggable({
-			revert : 'invalid',
-			cursor : 'move'
-		});
-		$(".table_sprint").droppable({
-			activeClass : "state_default",
-			hoverClass : "state_hover",
-			drop : function(event, ui) {
-				//event on drop
-				var taskID = ui.draggable.attr("id");
-				var sprintID = $(this).data('id');
-				$("#sprintID_" + taskID).val(sprintID);
-				$("#sprint_assign_" + taskID).submit();
-			},
-		});
-		$('.agile-card').contextPopup({
-			title: assign_txt,
-			items : 
-			[
-			 <c:forEach items="${sprints}" var="sprint">
-			 {label : assing_too_txt + ' '+ "${sprint.sprint_no}",
-					icon : '',
-					action : function(event) {
-						var taskID = event.currentTarget.id;
-						var sprintID = "${sprint.id}";
-						$("#sprintID_" + taskID).val(sprintID);
-						$("#sprint_assign_" + taskID).submit();
-						}
-			},
-			 </c:forEach>
-			]});
-		
-		$('.agile-list').contextPopup({
-			items : 
-			[{label : remove_txt,
-					icon : '',
-					action : function(event) {
-						var taskID = event.currentTarget.id;
-						$("#sprint_remove_" + taskID).submit();
-						}
-			}]});
+$(document).ready(function($) {
+	var assign_txt = "<s:message code="agile.assing"/>";
+	var assing_too_txt = "<s:message code="agile.assing2"/>";
+	var remove_txt = "<s:message code="agile.sprint.remove"/>";
+	<c:if test="${can_edit}">
+	$("#create_sprint").click(function() {
+		$("#create_form").submit();
 	});
-
+		
+	$(".delete_sprint").click(function(e) {
+		var msg = '<p style="text-align:center">'
+			+ $(this).data('msg') + '</p>';
+		var lang = $(this).data('lang');
+		bootbox.setDefaults({
+				locale : lang
+		});
+		e.preventDefault();
+		var $link = $(this);
+		bootbox.confirm(msg, function(result) {
+			if (result == true) {
+				document.location.assign($link.attr('href'));
+			}
+		});
+	});
+	$(".agile-card").draggable({
+		revert : 'invalid',
+		cursor : 'move'
+	});
+	$(".table_sprint").droppable({
+		activeClass : "state_default",
+		hoverClass : "state_hover",
+		drop : function(event, ui) {
+			//event on drop
+			var taskID = ui.draggable.attr("id");
+			var sprintID = $(this).data('id');
+			$("#sprintID_" + taskID).val(sprintID);
+			$("#sprint_assign_" + taskID).submit();
+		},
+	});
+	$('.agile-card').contextPopup({
+		title: assign_txt,
+		items : 
+		[
+		 <c:forEach items="${sprints}" var="sprint">
+		 {label : assing_too_txt + ' '+ "${sprint.sprint_no}",
+				icon : '',
+				action : function(event) {
+					var taskID = event.currentTarget.id;
+					var sprintID = "${sprint.id}";
+					$("#sprintID_" + taskID).val(sprintID);
+					$("#sprint_assign_" + taskID).submit();
+					}
+		},
+		 </c:forEach>
+		]});
 	
+	$('.agile-list').contextPopup({
+		items : 
+		[{label : remove_txt,
+				icon : '',
+				action : function(event) {
+					var taskID = event.currentTarget.id;
+					$("#sprint_remove_" + taskID).submit();
+					}
+		}]});
+	</c:if>
+});	
 </script>

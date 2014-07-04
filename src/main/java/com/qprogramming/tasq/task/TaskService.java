@@ -52,8 +52,8 @@ public class TaskService {
 		taskRepo.delete(task);
 	}
 
-	public List<Task> findAllBySprint(Project project, Sprint sprint) {
-		return taskRepo.findByProjectAndSprint(project, sprint);
+	public List<Task> findAllBySprint(Sprint sprint) {
+		return taskRepo.findByProjectAndSprint(sprint.getProject(), sprint);
 	}
 
 }
