@@ -7,7 +7,9 @@
 <div class="agile-card theme" data-id="${task.id}" id="${task.id}">
 	<div>
 		<t:type type="${task.type}" list="true" />
-		<a href="<c:url value="/task?id=${task.id}"/>" style="color: inherit;">[${task.id}]
+		<a href="<c:url value="/task?id=${task.id}"/>" style="color: inherit;<c:if test="${task.state eq 'CLOSED' }">
+							text-decoration: line-through;
+							</c:if>">[${task.id}]
 			${task.name}</a> <span
 			class="badge theme <c:if test="${task.story_points == 0}">zero</c:if>">${task.story_points}
 		</span>

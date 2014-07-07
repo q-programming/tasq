@@ -30,8 +30,10 @@
 			<li><a style="color: black" href="#"><span class="glyphicon glyphicon-bullhorn"></span> Reports</a></li>
 	</ul>
 </div>
-<div style="display:table-header-group;"><h4>Sprint ${sprint}</h4></div>
-	<div class="table_state" data-state="TO_DO" style="border-left:0px">
+<div style="display:table-header-group;">
+	<h4>Sprint ${sprint.sprint_no} <span style="font-size: small;">(<s:message code="agile.sprint.activeEnding"/> ${sprint.end_date})</span></h4>
+</div>
+	<div class="table_state" data-state="TO_DO" >
 		<div><h4><s:message code="task.state.todo"/></h4></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'TO_DO'}">

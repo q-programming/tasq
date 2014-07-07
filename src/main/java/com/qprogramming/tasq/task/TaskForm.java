@@ -38,7 +38,7 @@ public class TaskForm {
 
 	@NotBlank(message = TYPE_NOT_BLANK_MESSAGE)
 	private String type;
-	
+
 	private TaskPriority priority;
 
 	private String estimate;
@@ -75,7 +75,7 @@ public class TaskForm {
 		task.setName(getName());
 		task.setCreate_date(new Date());
 		if (!"".equals(getDue_date())) {
-			task.setDue_date(convertDueDate());
+			task.setDue_date(Utils.convertDueDate(getDue_date()));
 		}
 		task.setDescription(getDescription());
 		task.setState(TaskState.TO_DO);
@@ -182,15 +182,5 @@ public class TaskForm {
 
 	public void setPriority(TaskPriority priority) {
 		this.priority = priority;
-	}
-
-	public Date convertDueDate() {
-		Date dueDate = null;
-		try {
-			dueDate = new SimpleDateFormat("dd-M-yyyy").parse(getDue_date());
-		} catch (ParseException e) {
-			LOG.error(e.getMessage());
-		}
-		return dueDate;
 	}
 }

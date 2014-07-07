@@ -173,7 +173,9 @@
 				<tr>
 					<td><t:type type="${task.type}" list="true" /></td>
 					<td><t:priority priority="${task.priority}" list="true" /></td>
-					<td><a href="<c:url value="task?id=${task.id}"/>">[${task.id}]
+					<td><a href="<c:url value="task?id=${task.id}"/>" style="<c:if test="${task.state eq 'CLOSED' }">
+							text-decoration: line-through;
+							</c:if>">[${task.id}]
 							${task.name}</a>
 					<td>
 					<td><c:set var="logged_class"></c:set> <c:if

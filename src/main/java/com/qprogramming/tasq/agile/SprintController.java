@@ -64,7 +64,7 @@ public class SprintController {
 			taskList = taskSrv.findAllBySprint(sprint);
 			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID,
 					false));
-			model.addAttribute("sprint", sprint.getSprint_no());
+			model.addAttribute("sprint", sprint);
 			model.addAttribute("tasks", taskList);
 			return "/scrum/board";
 		}
@@ -145,6 +145,11 @@ public class SprintController {
 					msg.getMessage("agile.taskRemoved",
 							new Object[] { task.getId() },
 							Utils.getCurrentLocale()));
+		} else {
+			MessageHelper.addErrorAttribute(
+					ra,
+					msg.getMessage("agile.cantRemove.active", null,
+							Utils.getCurrentLocale()));
 		}
 		return "redirect:" + request.getHeader("Referer");
 	}
@@ -168,6 +173,26 @@ public class SprintController {
 				ra,
 				msg.getMessage("agile.sprint.removed", null,
 						Utils.getCurrentLocale()));
+		return "redirect:" + request.getHeader("Referer");
+	}
+
+	@Transactional
+	@RequestMapping(value = "/scrum/start", method = RequestMethod.POST)
+	public String startSprint(@RequestParam(value = "sprintID") Long id,
+			@RequestParam(value = "project_id") Long project_id,
+			@RequestParam(value = "sprint_start") String sprint_start,
+			@RequestParam(value = "sprint_end") String sprint_end, Model model,
+			HttpServletRequest request, RedirectAttributes ra) {
+		Sprint sprint = sprintRepo.findById(id);
+		Sprint active = sprintRepo.findByProjectIdAndActive(project_id, true);
+		if (sprint != null && !sprint.isActive() && active == null) {
+			if (canEdit(sprint.getProject())) {
+				sprint.setStart_date(Utils.convertDueDate(sprint_start));
+				sprint.setEnd_date(Utils.convertDueDate(sprint_end));
+				sprint.setActive(true);
+				// TODO
+			}
+		}
 		return "redirect:" + request.getHeader("Referer");
 	}
 

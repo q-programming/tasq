@@ -35,17 +35,17 @@
 						code="agile.reports" /></a></li>
 		</ul>
 	</div>
-	<div style="display: table-cell">
+	<div style="display: table-cell; width: 55%">
 		<h4>
 			<s:message code="agile.sprints" />
 		</h4>
 		<c:if test="${can_edit}">
-		<div style="margin: 5px 0px;">
-			<s:message code="agile.create.sprint" />
-			<button id="create_sprint" class="btn btn-default btn-sm">
-				<span class="glyphicon glyphicon-plus"></span>
-			</button>
-		</div>
+			<div style="margin: 5px 0px;">
+				<s:message code="agile.create.sprint" />
+				<button id="create_sprint" class="btn btn-default btn-sm">
+					<span class="glyphicon glyphicon-plus"></span>
+				</button>
+			</div>
 		</c:if>
 		<form id="create_form"
 			action="<c:url value="/${project.projectId}/scrum/create"/>"
@@ -54,13 +54,19 @@
 			<c:set var="count" value="0" />
 			<div class="table_sprint" data-id="${sprint.id}">
 				<%---Buttons --%>
+				<%-- Only print button for sprint at top (active or not_active) --%>
 				<c:if test="${can_edit}">
 					<div class="buttons_panel" style="float: right">
 						<c:if test="${not sprint.active}">
-							<button class="btn btn-default btn-sm">
-								<span class="glyphicon glyphicon-play"></span>
-								<s:message code="agile.sprint.start" />
-							</button>
+							<c:if test="${not b_rendered}">
+								<c:set var="b_rendered" value="true" />
+								<button class="btn btn-default btn-sm" id="start-sprint"
+									data-sprint="${sprint.id}" data-toggle="modal"
+									data-target="#startSprint">
+									<span class="glyphicon glyphicon-play"></span>
+									<s:message code="agile.sprint.start" />
+								</button>
+							</c:if>
 							<a class="btn btn-default btn-sm a-tooltip delete_sprint"
 								href="<c:url value="/scrum/delete?id=${sprint.id}"/>"
 								title="<s:message code="agile.sprint.delete" />"
@@ -70,6 +76,7 @@
 							</a>
 						</c:if>
 						<c:if test="${sprint.active}">
+							<c:set var="b_rendered" value="true" />
 							<button class="btn btn-default btn-sm">
 								<span class="glyphicon glyphicon-ok"></span>
 								<s:message code="agile.sprint.finish" />
@@ -82,16 +89,18 @@
 				<div>
 					<h4>Sprint ${sprint.sprint_no}</h4>
 				</div>
+				<c:if test="${sprint.active}">
+							<p><span class="glyphicon glyphicon-repeat"></span> <s:message code="agile.sprint.activeEnding"/> ${sprint.end_date} </p>
+				</c:if>
 				<div id="sprint_${sprint.sprint_no}">
 					<%--Sprint task --%>
 					<c:forEach items="${tasks}" var="task">
 						<c:if test="${task.sprint eq sprint }">
 							<c:set var="count" value="${count + task.story_points}" />
-							<div class="agile-list" data-id="${task.id}" id="${task.id}" 
-							<c:if test="${task.state eq 'CLOSED' }">
+							<div class="agile-list" data-id="${task.id}" id="${task.id}"
+								<c:if test="${task.state eq 'CLOSED' }">
 							style="text-decoration: line-through;"
-							</c:if>
-							>
+							</c:if>>
 								<div>
 									<t:type type="${task.type}" list="true" />
 									<a href="<c:url value="/task?id=${task.id}"/>"
@@ -116,7 +125,7 @@
 			<hr>
 		</c:forEach>
 	</div>
-	<div style="display: table-cell; padding-left: 20px">
+	<div style="display: table-cell; padding-left: 20px; width: 45%">
 		<h4>
 			<s:message code="task.tasks" />
 		</h4>
@@ -143,6 +152,55 @@
 		</c:forEach>
 	</div>
 </div>
+<div class="modal fade" id="startSprint" tabindex="-1" role="dialog"
+	aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header theme">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-hidden="true">&times;</button>
+				<h4 class="modal-title" id="myModalLabel">
+					<s:message code="agile.sprint.start.title" />
+				</h4>
+			</div>
+			<form id="startSprintForm" name="startSprintForm" method="post"
+				action="<c:url value="/scrum/start"/>">
+				<div class="modal-body">
+					<input id="project_id" type="hidden" name="project_id" value="${project.id}">
+					<input id="sprintID" type="hidden" name="sprintID">
+					<div>
+						<div style="margin-right: 50px; display: table-cell">
+							<label><s:message code="agile.sprint.from" /></label> <input
+								id="sprint_start" name="sprint_start"
+								style="width: 150px; height: 25px"
+								class="form-control datepicker" type="text" value="">
+						</div>
+						<div style="padding-left: 50px; display: table-cell">
+							<label><s:message code="agile.sprint.to" /></label> <input
+								id="sprint_end" name="sprint_end"
+								style="width: 150px; height: 25px"
+								class="form-control datepicker" type="text" value="">
+						</div>
+						<p id="errors" class="text-danger"></p>
+						<span class="help-block"><s:message
+								code="agile.sprint.startstop"></s:message></span>
+					
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-default" type="submit">
+						<s:message code="agile.sprint.start" />
+					</button>
+					<a class="btn" data-dismiss="modal"><s:message
+							code="main.cancel" /></a>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+
+
 <script>
 $(document).ready(function($) {
 	var assign_txt = "<s:message code="agile.assing"/>";
@@ -152,6 +210,45 @@ $(document).ready(function($) {
 	$("#create_sprint").click(function() {
 		$("#create_form").submit();
 	});
+	$(document).on("click", "#start-sprint", function() {
+		var id = $(this).data('sprint');
+		$("#sprintID").val(id);
+		$("#errors").html("");
+		$("#sprint_start").val("");
+		$("#sprint_end").val("");
+	});
+	
+	$(".datepicker").datepicker({
+		minDate : '0',
+		dateFormat : "dd-mm-yy",
+		firstDay: 1
+	});
+	$( "#startSprintForm" ).submit(function( event ) {
+		var start = $("#sprint_start").val();
+		var end = $("#sprint_end").val();
+		var start_date = $.datepicker.parseDate("dd-mm-yy",start);
+		var end_date = $.datepicker.parseDate("dd-mm-yy",end);
+		if(start_date==null || end_date==null|| start_date > end_date){
+			var error_msg = "<s:message code="agile.sprint.startstop.error"/>";
+			$("#errors").html(error_msg)
+			event.preventDefault();
+		}
+		else{
+			$("#startSprintForm").submit();
+			}
+		});
+	
+// 	$("#startSprintForm").submit(function( event ) {
+// 		var end_date = $.datepicker.parseDate("dd-mm-yy",$("#sprint_end").val() );
+// 		var start_date = $.datepicker.parseDate("dd-mm-yy",$("#sprint_start").val() );
+// 		aler("start: " + start_date + " end: " + end_date);
+// 		event.preventDefault();
+// 	});
+// 	$("#sprint_end").datepicker({
+// 		maxDate : '+1m',
+// 		minDate : '0'
+// 	});
+// 	$(".datepicker").datepicker("option", "dateFormat", "dd-mm-yy");
 		
 	$(".delete_sprint").click(function(e) {
 		var msg = '<p style="text-align:center">'

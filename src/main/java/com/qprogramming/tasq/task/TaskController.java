@@ -217,7 +217,7 @@ public class TaskController {
 			message.append(CHANGE_TO);
 			message.append(taskForm.getDue_date());
 			message.append(BR);
-			task.setDue_date(taskForm.convertDueDate());
+			task.setDue_date(Utils.convertDueDate(taskForm.getDue_date()));
 		}
 		LOG.debug(message.toString());
 		taskSrv.save(task);

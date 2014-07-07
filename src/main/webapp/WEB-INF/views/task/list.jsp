@@ -162,7 +162,9 @@
 			<td><t:type type="${task.type}" list="true" /></td>
 			<td><t:priority priority="${task.priority}" list="true" /></td>
 			<td><a href="<c:url value="task?id=${task.id}"/>"
-				style="color: inherit;">[${task.id}] ${task.name}</a></td>
+				style="color: inherit;<c:if test="${task.state eq 'CLOSED' }">
+							text-decoration: line-through;
+							</c:if>">[${task.id}] ${task.name}</a></td>
 			<c:if test="${not task.estimated}">
 				<td>${task.logged_work}</td>
 			</c:if>

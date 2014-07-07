@@ -1,5 +1,6 @@
 package com.qprogramming.tasq.agile;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -15,7 +16,7 @@ import javax.persistence.SequenceGenerator;
 import com.qprogramming.tasq.projects.Project;
 
 @Entity
-public class Sprint implements java.io.Serializable{
+public class Sprint implements java.io.Serializable {
 
 	/**
 	 * 
@@ -30,7 +31,7 @@ public class Sprint implements java.io.Serializable{
 	@Column
 	private String name;
 
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne
 	@JoinColumn(name = "project_sprint")
 	private Project project;
 
@@ -89,7 +90,15 @@ public class Sprint implements java.io.Serializable{
 		this.start_date = start_date;
 	}
 
-	public Date getEnd_date() {
+	public String getEnd_date() {
+		if (end_date != null) {
+			SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+			return sdf.format(end_date);
+		}
+		return "";
+	}
+
+	public Date getRawEnd_date() {
 		return end_date;
 	}
 
