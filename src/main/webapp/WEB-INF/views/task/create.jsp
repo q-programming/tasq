@@ -14,12 +14,19 @@
 <c:set var="taskDesc_text">
 	<s:message code="task.description" text="Description" />
 </c:set>
-<div class="white-frame" style="width: 700px; overflow: auto;">
-	<div class="mod-header">
-		<h3 class="mod-header-title">
-				<s:message code="task.create" text="Create task"></s:message>
-		</h3>
-	</div>
+
+<div class="white-frame" style="width: 700px; overflow: auto;display:table">
+<div style="display:table-caption;margin-left: 10px;">
+	<ul class="nav nav-tabs" style="border-bottom:0">
+			<li class="active"><a style="color: black" href="#"><span class="glyphicon glyphicon-plus"></span> <s:message code="task.create" text="Create task"/></a></li>
+			<li><a style="color: black" href="<c:url value="/task/import"/>"><span class="glyphicon glyphicon-import"></span> Import</a></li>
+	</ul>
+</div>
+<!-- 	<div class="mod-header"> -->
+<!-- 		<h3 class="mod-header-title"> -->
+<%-- 				<s:message code="task.create" text="Create task"/> --%>
+<!-- 		</h3> -->
+<!-- 	</div> -->
 	<form:form modelAttribute="taskForm" id="taskForm" method="post" style="margin-top: 5px;">
 		<%-- Check all potential errors --%>
 		<c:set var="name_error">

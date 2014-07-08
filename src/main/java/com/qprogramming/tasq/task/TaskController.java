@@ -3,6 +3,12 @@
  */
 package com.qprogramming.tasq.task;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,8 +19,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.apache.commons.io.IOUtils;
 import org.hibernate.Hibernate;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
@@ -30,6 +38,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.account.Account;
@@ -88,6 +97,13 @@ public class TaskController {
 		model.addAttribute("project", projectSrv.findUserActiveProject());
 		model.addAttribute("projects_list", projectSrv.findAllByUser());
 		return new TaskForm();
+	}
+
+	@RequestMapping(value = "task/import", method = RequestMethod.GET)
+	public String startTaskImport(Model model) {
+		model.addAttribute("project", projectSrv.findUserActiveProject());
+		model.addAttribute("projects_list", projectSrv.findAllByUser());
+		return "/task/import";
 	}
 
 	@RequestMapping(value = "task/create", method = RequestMethod.POST)
@@ -660,6 +676,25 @@ public class TaskController {
 						LogType.DELETED);
 			}
 			return "redirect:/project?id=" + project.getId();
+		}
+		return "redirect:" + request.getHeader("Referer");
+	}
+
+	@RequestMapping(value = "/task/getTemplateFile", method = RequestMethod.GET)
+	public @ResponseBody String downloadTemplate(HttpServletRequest request,
+			HttpServletResponse response) throws IOException {
+		URL fileURL = getClass().getResource("/template.xls");
+		File file;
+		try {
+			file = new File(fileURL.toURI());
+			if (file != null) {
+				response.setHeader("content-Disposition",
+						"attachment; filename=" + file.getName());
+				InputStream is = new FileInputStream(file);
+				IOUtils.copyLarge(is, response.getOutputStream());
+			}
+		} catch (URISyntaxException e) {
+			LOG.error(e.getMessage());
 		}
 		return "redirect:" + request.getHeader("Referer");
 	}
