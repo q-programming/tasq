@@ -7,7 +7,8 @@
 <div class="agile-card theme" data-id="${task.id}" id="${task.id}">
 	<div>
 		<t:type type="${task.type}" list="true" />
-		<a href="<c:url value="/task?id=${task.id}"/>" style="color: inherit;<c:if test="${task.state eq 'CLOSED' }">
+		<a href="<c:url value="/task?id=${task.id}"/>"
+			style="color: inherit;<c:if test="${task.state eq 'CLOSED' }">
 							text-decoration: line-through;
 							</c:if>">[${task.id}]
 			${task.name}</a> <span
@@ -16,8 +17,9 @@
 	</div>
 	<div style="display: table; width: 100%; margin-top: 5px;">
 		<div style="display: table-cell; vertical-align: bottom;">
-			<button class="btn btn-default btn-xxs a-tooltip" type="button"
-				id="log_time" title="<s:message code="task.logWork"/>">
+			<button class="btn btn-default btn-xxs a-tooltip worklog" type="button"
+				data-toggle="modal" data-target="#logWorkform" data-taskID="${task.id}" id="log_time"
+				title="<s:message code="task.logWork"/>">
 				<span class="glyphicon glyphicon-time"></span>
 			</button>
 			<span class="a-tooltip" title="<s:message code="task.remaining"/>">${task.remaining}</span>

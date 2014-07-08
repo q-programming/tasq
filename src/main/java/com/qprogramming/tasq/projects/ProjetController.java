@@ -2,9 +2,9 @@ package com.qprogramming.tasq.projects;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +70,7 @@ public class ProjetController {
 	@RequestMapping(value = "project", method = RequestMethod.GET)
 	public String showDetails(@RequestParam(value = "id") Long id,
 			@RequestParam(value = "show", required = false) Integer show,
+			@RequestParam(value = "closed", required = false) String closed,
 			Model model, RedirectAttributes ra, HttpServletRequest request) {
 		Project project = projSrv.findById(id);
 		if (project == null) {
@@ -124,6 +124,15 @@ public class ProjetController {
 		// Initilize getRawWorkLog for all task in this project . Otherwise lazy
 		// init exception is thrown
 		List<Task> taskList = taskSrv.findAllByProject(project);
+		if (closed != null) {
+			List<Task> result = new LinkedList<Task>();
+			for (Task task : taskList) {
+				if (!task.getState().equals(TaskState.CLOSED)) {
+					result.add(task);
+				}
+			}
+			taskList = result;
+		}
 		Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID, false));
 		Utils.initializeWorkLogs(taskList);
 		model.addAttribute("tasks", taskList);
@@ -330,9 +339,9 @@ public class ProjetController {
 	}
 
 	@RequestMapping(value = "/project/{id}/getParticipants", method = RequestMethod.GET)
-	public @ResponseBody
-	List<DisplayAccount> listParticipants(@PathVariable Long id,
-			@RequestParam String term, HttpServletResponse response) {
+	public @ResponseBody List<DisplayAccount> listParticipants(
+			@PathVariable Long id, @RequestParam String term,
+			HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(id);
 		Set<Account> all_participants = project.getParticipants();

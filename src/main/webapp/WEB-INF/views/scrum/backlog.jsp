@@ -67,7 +67,7 @@
 									<s:message code="agile.sprint.start" />
 								</button>
 							</c:if>
-							<a class="btn btn-default btn-sm a-tooltip delete_sprint"
+							<a class="btn btn-default btn-sm a-tooltip confirm_action"
 								href="<c:url value="/scrum/delete?id=${sprint.id}"/>"
 								title="<s:message code="agile.sprint.delete" />"
 								data-lang="${pageContext.response.locale}"
@@ -77,10 +77,13 @@
 						</c:if>
 						<c:if test="${sprint.active}">
 							<c:set var="b_rendered" value="true" />
-							<button class="btn btn-default btn-sm">
-								<span class="glyphicon glyphicon-ok"></span>
-								<s:message code="agile.sprint.finish" />
-							</button>
+							<a class="btn btn-default btn-sm confirm_action"
+								href="<c:url value="/scrum/stop?id=${sprint.id}"/>"
+								data-lang="${pageContext.response.locale}"
+								data-msg='<s:message code="agile.sprint.finish.confirm"></s:message>'>
+								<span class="glyphicon glyphicon-ok"></span> <s:message
+									code="agile.sprint.finish" />
+							</a>
 						</c:if>
 
 					</div>
@@ -90,7 +93,11 @@
 					<h4>Sprint ${sprint.sprint_no}</h4>
 				</div>
 				<c:if test="${sprint.active}">
-							<p><span class="glyphicon glyphicon-repeat"></span> <s:message code="agile.sprint.activeEnding"/> ${sprint.end_date} </p>
+					<p>
+						<span class="glyphicon glyphicon-repeat"></span>
+						<s:message code="agile.sprint.activeEnding" />
+						${sprint.end_date}
+					</p>
 				</c:if>
 				<div id="sprint_${sprint.sprint_no}">
 					<%--Sprint task --%>
@@ -152,6 +159,7 @@
 		</c:forEach>
 	</div>
 </div>
+<%---------------------START SPRINT MODAL --%>
 <div class="modal fade" id="startSprint" tabindex="-1" role="dialog"
 	aria-labelledby="myModalLabel" aria-hidden="true">
 	<div class="modal-dialog">
@@ -166,8 +174,9 @@
 			<form id="startSprintForm" name="startSprintForm" method="post"
 				action="<c:url value="/scrum/start"/>">
 				<div class="modal-body">
-					<input id="project_id" type="hidden" name="project_id" value="${project.id}">
-					<input id="sprintID" type="hidden" name="sprintID">
+					<input id="project_id" type="hidden" name="project_id"
+						value="${project.id}"> <input id="sprintID" type="hidden"
+						name="sprintID">
 					<div>
 						<div style="margin-right: 50px; display: table-cell">
 							<label><s:message code="agile.sprint.from" /></label> <input
@@ -184,7 +193,7 @@
 						<p id="errors" class="text-danger"></p>
 						<span class="help-block"><s:message
 								code="agile.sprint.startstop"></s:message></span>
-					
+
 					</div>
 				</div>
 				<div class="modal-footer">
@@ -198,9 +207,6 @@
 		</div>
 	</div>
 </div>
-
-
-
 <script>
 $(document).ready(function($) {
 	var assign_txt = "<s:message code="agile.assing"/>";
@@ -210,7 +216,7 @@ $(document).ready(function($) {
 	$("#create_sprint").click(function() {
 		$("#create_form").submit();
 	});
-	$(document).on("click", "#start-sprint", function() {
+	$("#start-sprint").click(function(e) {
 		var id = $(this).data('sprint');
 		$("#sprintID").val(id);
 		$("#errors").html("");
@@ -250,7 +256,7 @@ $(document).ready(function($) {
 // 	});
 // 	$(".datepicker").datepicker("option", "dateFormat", "dd-mm-yy");
 		
-	$(".delete_sprint").click(function(e) {
+	$(".confirm_action").click(function(e) {
 		var msg = '<p style="text-align:center">'
 			+ $(this).data('msg') + '</p>';
 		var lang = $(this).data('lang');
@@ -265,6 +271,7 @@ $(document).ready(function($) {
 			}
 		});
 	});
+	
 	$(".agile-card").draggable({
 		revert : 'invalid',
 		cursor : 'move'

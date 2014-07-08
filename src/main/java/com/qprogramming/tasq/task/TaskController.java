@@ -380,18 +380,23 @@ public class TaskController {
 						remaining, logged, LogType.LOG);
 				// wlSrv.addWorkLog(task, LogType.LOG, logged_work, logged,
 				// remaining);
+				MessageHelper.addSuccessAttribute(
+						ra,
+						msg.getMessage("task.logWork.logged", new Object[] {
+								logged_work, task.getId() },
+								Utils.getCurrentLocale()));
 			} catch (IllegalArgumentException e) {
 				MessageHelper.addErrorAttribute(
 						ra,
 						msg.getMessage("error.estimateFormat", null,
 								Utils.getCurrentLocale()));
-				return "redirect:/task?id=" + taskID;
+				return "redirect:" + request.getHeader("Referer");
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-		return "redirect:/task?id=" + taskID;
+		return "redirect:" + request.getHeader("Referer");
 	}
 
 	@Transactional
@@ -482,8 +487,6 @@ public class TaskController {
 				if (account.getActive_task() != null
 						&& account.getActive_task().length > 0
 						&& !account.getActive_task()[0].equals("")) {
-					// String task_URL = Utils.getBaseURL() + "task?id="
-					// + account.getActive_task()[0];
 					MessageHelper.addWarningAttribute(ra, msg.getMessage(
 							"task.stopTime.warning",
 							new Object[] { account.getActive_task()[0] },
@@ -508,17 +511,16 @@ public class TaskController {
 				wlSrv.addNormalWorkLog(task, PeriodHelper.outFormat(log_work),
 						log_work, LogType.LOG);
 				account.clearActive_task();
+				MessageHelper.addSuccessAttribute(ra, msg.getMessage(
+						"task.logWork.logged",
+						new Object[] { PeriodHelper.outFormat(log_work),
+								task.getId() }, Utils.getCurrentLocale()));
 				accSrv.update(account);
-			} else {
-
 			}
-			// taskSrv.save(task);
-			// wlSrv.addWorkLog(task, LogType.STATUS, old_state.getDescription()
-			// + " -> " + state.getDescription(), null);
 		} else {
 			return "redirect:" + request.getHeader("Referer");
 		}
-		return "redirect:/task?id=" + taskID;
+		return "redirect:" + request.getHeader("Referer");
 	}
 
 	@RequestMapping(value = "/task/assign", method = RequestMethod.POST)

@@ -8,7 +8,8 @@ public enum LogType {
 			"log.type.status"), ESTIMATE("log.type.estimate"), CLOSED(
 			"log.type.closed"), COMMENT("log.type.comment"), EDITED(
 			"log.type.edited"), ASSIGNED("log.type.assign"), PRIORITY(
-			"log.type.priority"), DELETED("log.type.delete");
+			"log.type.priority"), DELETED("log.type.delete"), SPRINT_START(
+			"log.type.sprintstart"), SPRINT_STOP("log.type.sprintstop");
 
 	private String code;
 

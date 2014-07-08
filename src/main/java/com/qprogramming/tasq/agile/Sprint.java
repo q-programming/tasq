@@ -114,6 +114,14 @@ public class Sprint implements java.io.Serializable {
 		this.active = active;
 	}
 
+	public boolean getFinished() {
+		return finished;
+	}
+
+	public void finish() {
+		this.finished = true;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

@@ -1,8 +1,11 @@
 package com.qprogramming.tasq.agile;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -28,9 +31,16 @@ import com.qprogramming.tasq.support.web.MessageHelper;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
+import com.qprogramming.tasq.task.worklog.LogType;
+import com.qprogramming.tasq.task.worklog.WorkLog;
+import com.qprogramming.tasq.task.worklog.WorkLogService;
 
 @Controller
 public class SprintController {
+
+	private static final String SPACE = " ";
+
+	private static final String NEW_LINE = "\n";
 
 	@Autowired
 	ProjectService projSrv;
@@ -40,6 +50,9 @@ public class SprintController {
 
 	@Autowired
 	SprintRepository sprintRepo;
+
+	@Autowired
+	WorkLogService wrkLogSrv;
 
 	@Autowired
 	private MessageSource msg;
@@ -184,13 +197,57 @@ public class SprintController {
 			@RequestParam(value = "sprint_end") String sprint_end, Model model,
 			HttpServletRequest request, RedirectAttributes ra) {
 		Sprint sprint = sprintRepo.findById(id);
+		Project project = projSrv.findById(project_id);
 		Sprint active = sprintRepo.findByProjectIdAndActive(project_id, true);
 		if (sprint != null && !sprint.isActive() && active == null) {
 			if (canEdit(sprint.getProject())) {
 				sprint.setStart_date(Utils.convertDueDate(sprint_start));
 				sprint.setEnd_date(Utils.convertDueDate(sprint_end));
 				sprint.setActive(true);
-				// TODO
+				MessageHelper.addSuccessAttribute(ra, msg.getMessage(
+						"agile.sprint.started",
+						new Object[] { sprint.getSprint_no() },
+						Utils.getCurrentLocale()));
+				wrkLogSrv.addWorkLogNoTask(null, project, LogType.SPRINT_START);
+			}
+		}
+		return "redirect:" + request.getHeader("Referer");
+	}
+
+	@Transactional
+	@RequestMapping(value = "/scrum/stop", method = RequestMethod.GET)
+	public String stopSprint(@RequestParam(value = "id") Long id,
+			Model model, HttpServletRequest request, RedirectAttributes ra) {
+		Sprint sprint = sprintRepo.findById(id);
+		if (sprint != null) {
+			Project project = projSrv.findById(sprint.getProject().getId());
+			if (sprint.isActive() && canEdit(sprint.getProject())) {
+				sprint.setActive(false);
+				sprint.finish();
+				List<Task> taskList = taskSrv.findAllBySprint(sprint);
+				Map<TaskState, Integer> state_count = new HashMap<TaskState, Integer>();
+				for (Task task : taskList) {
+					task.setSprint(null);
+					Integer value = state_count.get(task.getState());
+					value = value == null ? 0 : value;
+					value++;
+					state_count.put((TaskState) task.getState(), value);
+					taskSrv.save(task);
+				}
+				StringBuilder message = new StringBuilder(msg.getMessage(
+						"agile.sprint.finished",
+						new Object[] { sprint.getSprint_no() },
+						Utils.getCurrentLocale()));
+				for (Entry<TaskState, Integer> entry : state_count.entrySet()) {
+					message.append(NEW_LINE);
+					message.append(msg.getMessage(entry.getKey().getCode(),
+							null, Utils.getCurrentLocale()));
+					message.append(SPACE);
+					message.append(entry.getValue());
+				}
+				MessageHelper.addSuccessAttribute(ra, message.toString());
+				wrkLogSrv.addWorkLogNoTask(null, project, LogType.SPRINT_STOP);
+				sprintRepo.save(sprint);
 			}
 		}
 		return "redirect:" + request.getHeader("Referer");
