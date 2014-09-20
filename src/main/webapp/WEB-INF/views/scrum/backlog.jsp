@@ -30,7 +30,7 @@
 						code="agile.board" /></a></li>
 			<li class="active"><a style="color: black" href="#"><span
 					class="glyphicon glyphicon-book"></span> Backlog</a></li>
-			<li><a style="color: black" href="#"><span
+			<li><a style="color: black" href="<c:url value="/${project.projectId}/scrum/burndown"/>"><span
 					class="glyphicon glyphicon-bullhorn"></span> <s:message
 						code="agile.reports" /></a></li>
 		</ul>
@@ -90,7 +90,7 @@
 				</c:if>
 				<%--Sprint content --%>
 				<div>
-					<h4>Sprint ${sprint.sprint_no}</h4>
+					<h4>Sprint ${sprint.sprintNo}</h4>
 				</div>
 				<c:if test="${sprint.active}">
 					<p>
@@ -99,7 +99,7 @@
 						${sprint.end_date}
 					</p>
 				</c:if>
-				<div id="sprint_${sprint.sprint_no}">
+				<div id="sprint_${sprint.sprintNo}">
 					<%--Sprint task --%>
 					<c:forEach items="${tasks}" var="task">
 						<c:if test="${task.sprint eq sprint }">
@@ -225,7 +225,7 @@ $(document).ready(function($) {
 	});
 	
 	$(".datepicker").datepicker({
-		minDate : '0',
+// 		minDate : '0',
 		dateFormat : "dd-mm-yy",
 		firstDay: 1
 	});
@@ -292,7 +292,7 @@ $(document).ready(function($) {
 		items : 
 		[
 		 <c:forEach items="${sprints}" var="sprint">
-		 {label : assing_too_txt + ' '+ "${sprint.sprint_no}",
+		 {label : assing_too_txt + ' '+ "${sprint.sprintNo}",
 				icon : '',
 				action : function(event) {
 					var taskID = event.currentTarget.id;

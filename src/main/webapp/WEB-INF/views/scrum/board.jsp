@@ -20,18 +20,19 @@
 <c:if test="${myfn:contains(project.participants,user) || is_admin}">
 	<c:set var="can_edit" value="true" />
 </c:if>
-<%-- <h4>SCRUM Board</h4><h4><a href="<c:url value="/${projectID}/scrum/backlog"/>">SCRUM Backlog</a></h4> --%>
 <div class="white-frame" style="display: table; width: 100%;height:85vh">
 <div style="display:table-caption;margin-left: 10px;">
 	<ul class="nav nav-tabs" style="border-bottom:0">
-			<li class="active"><a style="color: black" href="#"><span class="glyphicon glyphicon-list-alt"></span> Board</a></li>
-			<li><a style="color: black" href="<c:url value="/${projectID}/scrum/backlog"/>"><span class="glyphicon glyphicon-book"></span>
+			<li class="active"><a style="color: black" href="#"><span class="glyphicon glyphicon-list-alt"></span> <s:message
+						code="agile.board" /></a></li>
+			<li><a style="color: black" href="<c:url value="/${project.projectId}/scrum/backlog"/>"><span class="glyphicon glyphicon-book"></span>
 					Backlog</a></li>
-			<li><a style="color: black" href="#"><span class="glyphicon glyphicon-bullhorn"></span> Reports</a></li>
+			<li><a style="color: black" href="<c:url value="/${project.projectId}/scrum/burndown"/>"><span class="glyphicon glyphicon-bullhorn"></span>
+			 <s:message code="agile.reports" /></a></li>
 	</ul>
 </div>
 <div style="display:table-header-group;">
-	<h4>Sprint ${sprint.sprint_no} <span style="font-size: small;">(<s:message code="agile.sprint.activeEnding"/> ${sprint.end_date})</span></h4>
+	<h4>Sprint ${sprint.sprintNo} <span style="font-size: small;">(<s:message code="agile.sprint.activeEnding"/> ${sprint.end_date})</span></h4>
 </div>
 	<div class="table_state" data-state="TO_DO" >
 		<div><h4><s:message code="task.state.todo"/></h4></div>

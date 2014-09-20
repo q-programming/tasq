@@ -124,7 +124,7 @@ public class ProjetController {
 		// Initilize getRawWorkLog for all task in this project . Otherwise lazy
 		// init exception is thrown
 		List<Task> taskList = taskSrv.findAllByProject(project);
-		if (closed != null) {
+		if (closed == null) {
 			List<Task> result = new LinkedList<Task>();
 			for (Task task : taskList) {
 				if (!task.getState().equals(TaskState.CLOSED)) {

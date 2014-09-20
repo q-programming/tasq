@@ -7,7 +7,7 @@ import com.qprogramming.tasq.agile.Sprint;
 public class SprintSorter implements Comparator<Sprint> {
 
 	public int compare(Sprint a, Sprint b) {
-		if (a.getSprint_no() > b.getSprint_no()) {
+		if (a.getSprintNo() > b.getSprintNo()) {
 			return 1;
 		} else {
 			return -1;

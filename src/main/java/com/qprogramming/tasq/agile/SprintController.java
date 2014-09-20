@@ -1,5 +1,6 @@
 package com.qprogramming.tasq.agile;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -9,6 +10,12 @@ import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.hibernate.Hibernate;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
+import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
@@ -18,12 +25,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.Account.Role;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
+import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.SprintSorter;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
@@ -65,7 +74,6 @@ public class SprintController {
 			model.addAttribute("project", project);
 			Sprint sprint = sprintRepo.findByProjectIdAndActive(
 					project.getId(), true);
-			model.addAttribute("projectID", project.getProjectId());
 			if (sprint == null) {
 				MessageHelper.addWarningAttribute(
 						ra,
@@ -138,7 +146,7 @@ public class SprintController {
 		MessageHelper.addSuccessAttribute(
 				ra,
 				msg.getMessage("agile.task2Sprint", new Object[] {
-						task.getId(), sprint.getSprint_no() },
+						task.getId(), sprint.getSprintNo() },
 						Utils.getCurrentLocale()));
 		return "redirect:" + request.getHeader("Referer");
 	}
@@ -206,7 +214,7 @@ public class SprintController {
 				sprint.setActive(true);
 				MessageHelper.addSuccessAttribute(ra, msg.getMessage(
 						"agile.sprint.started",
-						new Object[] { sprint.getSprint_no() },
+						new Object[] { sprint.getSprintNo() },
 						Utils.getCurrentLocale()));
 				wrkLogSrv.addWorkLogNoTask(null, project, LogType.SPRINT_START);
 			}
@@ -216,8 +224,8 @@ public class SprintController {
 
 	@Transactional
 	@RequestMapping(value = "/scrum/stop", method = RequestMethod.GET)
-	public String stopSprint(@RequestParam(value = "id") Long id,
-			Model model, HttpServletRequest request, RedirectAttributes ra) {
+	public String stopSprint(@RequestParam(value = "id") Long id, Model model,
+			HttpServletRequest request, RedirectAttributes ra) {
 		Sprint sprint = sprintRepo.findById(id);
 		if (sprint != null) {
 			Project project = projSrv.findById(sprint.getProject().getId());
@@ -236,7 +244,7 @@ public class SprintController {
 				}
 				StringBuilder message = new StringBuilder(msg.getMessage(
 						"agile.sprint.finished",
-						new Object[] { sprint.getSprint_no() },
+						new Object[] { sprint.getSprintNo() },
 						Utils.getCurrentLocale()));
 				for (Entry<TaskState, Integer> entry : state_count.entrySet()) {
 					message.append(NEW_LINE);
@@ -251,6 +259,89 @@ public class SprintController {
 			}
 		}
 		return "redirect:" + request.getHeader("Referer");
+	}
+
+	@Transactional
+	@RequestMapping(value = "/{id}/scrum/burndown", method = RequestMethod.GET, produces = "application/json")
+	public String showBurndown(@PathVariable String id, Model model) {
+		int[] results_estimates = {};
+		int[] results_burned = {};
+		Map<LocalDate, Period> burndown_map = new HashMap<LocalDate, Period>();
+		Project project = projSrv.findByProjectId(id);
+		Period total_estimate = new Period();
+		if (project != null) {
+			Sprint sprint = sprintRepo.findByProjectIdAndActive(
+					project.getId(), true);
+			List<Task> taskList = new LinkedList<Task>();
+			taskList = taskSrv.findAllBySprint(sprint);
+			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID,
+					false));
+			LocalDate start_time = new LocalDate(sprint.getStart_date());
+			LocalDate end_time = new LocalDate(sprint.getRawEnd_date());
+			int sprint_days = Days.daysBetween(start_time, end_time).getDays();
+			results_estimates = new int[sprint_days];
+			results_burned = new int[sprint_days];
+			for (Task task : taskList) {
+				total_estimate = PeriodHelper.plusPeriods(total_estimate,
+						task.getRawEstimate());
+				Hibernate.initialize(task.getWorklog());
+				List<WorkLog> workLog_list = task.getWorklog();
+				burndown_map = fillTaskBurndown(burndown_map, start_time,
+						end_time, workLog_list);
+			}
+			// Iterate over sprint days
+			Period remaining_estimate = total_estimate;
+			Period burned = new Period();
+			for (int i = 0; i < sprint_days; i++) {
+				Period value = burndown_map.get(start_time.plusDays(i));
+				remaining_estimate = PeriodHelper.minusPeriods(
+						remaining_estimate, value);
+				burned = PeriodHelper.plusPeriods(burned, value);
+				results_estimates[i] = (int) remaining_estimate
+						.toStandardDuration().getStandardMinutes();
+				results_burned[i] = (int) burned.toStandardDuration()
+						.getStandardMinutes();
+			}
+			model.addAttribute("sprint",sprint);
+			model.addAttribute("project", project);
+			model.addAttribute("left", Arrays.toString(results_estimates));
+			model.addAttribute("burned", Arrays.toString(results_burned));
+		}
+		return "/scrum/burndown";
+	}
+
+	/**
+	 * Fils burndown map with worklogs from task in format <Date, Period Burned>
+	 * Only events with activity ( Period ) are added
+	 * 
+	 * @param burndown_map
+	 *            - entry and exit map
+	 * @param start_time
+	 *            -sprint start time
+	 * @param end_time
+	 *            - sprint end time
+	 * @param workLog_list
+	 *            - task worklogs
+	 * @return
+	 */
+	private Map<LocalDate, Period> fillTaskBurndown(
+			Map<LocalDate, Period> burndown_map, LocalDate start_time,
+			LocalDate end_time, List<WorkLog> workLog_list) {
+		for (WorkLog worklog : workLog_list) {
+			LocalDate date_logged = new LocalDate(worklog.getRawTime());
+			if (date_logged.isAfter(start_time)
+					&& date_logged.isBefore(end_time)) {
+				Period value = burndown_map.get(date_logged);
+				if (value == null) {
+					burndown_map.put(date_logged, worklog.getActivity());
+				} else {
+					value = PeriodHelper.plusPeriods(value,
+							worklog.getActivity());
+					burndown_map.put(date_logged, value);
+				}
+			}
+		}
+		return burndown_map;
 	}
 
 	/**
@@ -269,5 +360,14 @@ public class SprintController {
 		return (repo_project.getAdministrators().contains(current_account)
 				|| repo_project.getParticipants().contains(current_account) || current_account
 				.getRole().equals(Role.ROLE_ADMIN));
+	}
+
+	private Period countTotalEstimate(List<Task> taskList) {
+		Period total_estimate = new Period();
+		for (Task task : taskList) {
+			total_estimate = PeriodHelper.plusPeriods(total_estimate,
+					task.getRawEstimate());
+		}
+		return total_estimate;
 	}
 }

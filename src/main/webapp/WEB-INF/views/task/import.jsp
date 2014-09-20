@@ -18,9 +18,9 @@
 					class="glyphicon glyphicon-import"></span> Import</a></li>
 		</ul>
 	</div>
-	Import many task at once, from filled template file.<a
+	<s:message code="task.import.hint"/> <a
 		href="<c:url value="/task/getTemplateFile"/>"><span
-		class="glyphicon glyphicon-file"></span>Download template here</a>
+		class="glyphicon glyphicon-file"></span> <s:message code="task.import.template"/></a>
 	<form id="importForm" name="importForm" method="post"
 		enctype="multipart/form-data">
 		<input id="file_upload" name="avatar" type="file"

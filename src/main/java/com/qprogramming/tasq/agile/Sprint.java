@@ -36,7 +36,7 @@ public class Sprint implements java.io.Serializable {
 	private Project project;
 
 	@Column
-	private Long sprint_no;
+	private Long sprintNo;
 
 	@Column
 	private Date start_date;
@@ -74,12 +74,12 @@ public class Sprint implements java.io.Serializable {
 		this.project = project;
 	}
 
-	public Long getSprint_no() {
-		return sprint_no;
+	public Long getSprintNo() {
+		return sprintNo;
 	}
 
 	public void setSprint_no(Long sprint_no) {
-		this.sprint_no = sprint_no;
+		this.sprintNo = sprint_no;
 	}
 
 	public Date getStart_date() {

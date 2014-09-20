@@ -177,16 +177,16 @@
 			<h3>
 				<a href="<c:url value="/tasks"/>" style="color: black"><s:message
 						code="task.tasks" /></a>
-				<c:if test="${not empty param.closed}">
-					<a href="<s:url value="/project?${show_q}id=${project.id}"></s:url>"><span
+				<c:if test="${empty param.closed}">
+					<a href="<s:url value="/project?${show_q}id=${project.id}&closed=yes"></s:url>"><span
 						style="display: inherit; font-size: small; font-weight: normal; color:black;float: right">
 							<span class="glyphicon glyphicon-check"></span> <s:message
 								code="project.hideClosed"></s:message>
 					</span></a>
 				</c:if>
-				<c:if test="${empty param.closed}">
+				<c:if test="${not empty param.closed}">
 					<a
-						href="<s:url value="/project?${show_q}id=${project.id}&closed=hide"></s:url>"><span
+						href="<s:url value="/project?${show_q}id=${project.id}"></s:url>"><span
 						style="display: inherit; font-size: small; font-weight: normal; color:black; float: right">
 							<span class="glyphicon glyphicon-unchecked"></span> <s:message
 								code="project.hideClosed"></s:message>
