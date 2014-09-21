@@ -20,6 +20,7 @@
 <c:if test="${myfn:contains(project.administrators,user) || is_admin}">
 	<c:set var="can_edit" value="true" />
 </c:if>
+<h3>[${project.projectId}] ${project}</h3>
 <div class="white-frame" style="display: table; width: 100%">
 	<%--MENU --%>
 	<div style="display: table-caption; margin-left: 10px;">

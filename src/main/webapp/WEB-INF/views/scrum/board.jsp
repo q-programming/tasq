@@ -20,6 +20,7 @@
 <c:if test="${myfn:contains(project.participants,user) || is_admin}">
 	<c:set var="can_edit" value="true" />
 </c:if>
+<h3>[${project.projectId}] ${project}</h3>
 <div class="white-frame" style="display: table; width: 100%;height:85vh">
 <div style="display:table-caption;margin-left: 10px;">
 	<ul class="nav nav-tabs" style="border-bottom:0">
@@ -32,7 +33,7 @@
 	</ul>
 </div>
 <div style="display:table-header-group;">
-	<h4>Sprint ${sprint.sprintNo} <span style="font-size: small;">(<s:message code="agile.sprint.activeEnding"/> ${sprint.end_date})</span></h4>
+	<h4>Sprint ${sprint.sprintNo} <span style="font-size: small;">(${sprint.start_date} - ${sprint.end_date})</span></h4>
 </div>
 	<div class="table_state" data-state="TO_DO" >
 		<div><h4><s:message code="task.state.todo"/></h4></div>
@@ -126,11 +127,11 @@
 							code="task.logWork.estimate.help"></s:message> </span>
 				</div>
 				<div class="modal-footer">
+					<a class="btn" data-dismiss="modal"><s:message
+							code="main.cancel" /></a>
 					<button class="btn btn-default" type="submit">
 						<s:message code="main.log" />
 					</button>
-					<a class="btn" data-dismiss="modal"><s:message
-							code="main.cancel" /></a>
 				</div>
 			</form>
 		</div>
@@ -181,9 +182,10 @@
 		    });
 		//------------------------------------Datepickers
 		$(".datepicker").datepicker({
-			maxDate : '0'
+			maxDate : '0',
+			dateFormat : "dd-mm-yy",
+			firstDay: 1
 		});
-		$(".datepicker").datepicker("option", "dateFormat", "dd-mm-yy");
 		$(".datepicker").change(function() {
 			var date = new Date;
 			var minutes = date.getMinutes();

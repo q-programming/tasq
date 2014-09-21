@@ -82,8 +82,16 @@ public class Sprint implements java.io.Serializable {
 		this.sprintNo = sprint_no;
 	}
 
-	public Date getStart_date() {
+	public Date getRawStart_date() {
 		return start_date;
+	}
+
+	public String getStart_date() {
+		if (start_date != null) {
+			SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+			return sdf.format(start_date);
+		}
+		return "";
 	}
 
 	public void setStart_date(Date start_date) {

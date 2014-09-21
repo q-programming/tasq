@@ -555,11 +555,11 @@
 					</div>
 				</div>
 				<div class="modal-footer">
+					<a class="btn" data-dismiss="modal"><s:message
+							code="main.cancel" /></a>
 					<button class="btn btn-default" type="submit">
 						<s:message code="main.change" />
 					</button>
-					<a class="btn" data-dismiss="modal"><s:message
-							code="main.cancel" /></a>
 				</div>
 			</form>
 		</div>

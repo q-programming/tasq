@@ -1,8 +1,9 @@
 package com.qprogramming.tasq.agile;
 
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -11,10 +12,8 @@ import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
 
 import org.hibernate.Hibernate;
-import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -25,7 +24,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.account.Account;
@@ -232,6 +230,7 @@ public class SprintController {
 			if (sprint.isActive() && canEdit(sprint.getProject())) {
 				sprint.setActive(false);
 				sprint.finish();
+				sprint.setEnd_date(new Date());
 				List<Task> taskList = taskSrv.findAllBySprint(sprint);
 				Map<TaskState, Integer> state_count = new HashMap<TaskState, Integer>();
 				for (Task task : taskList) {
@@ -263,24 +262,32 @@ public class SprintController {
 
 	@Transactional
 	@RequestMapping(value = "/{id}/scrum/burndown", method = RequestMethod.GET, produces = "application/json")
-	public String showBurndown(@PathVariable String id, Model model) {
-		int[] results_estimates = {};
-		int[] results_burned = {};
+	public String showBurndown(@PathVariable String id,
+			@RequestParam(value = "sprint", required = false) Long sprintNo,
+			Model model) {
+		Map<String, Integer> results_estimates = new LinkedHashMap<String, Integer>();
+		Map<String, Integer> results_burned = new LinkedHashMap<String, Integer>();
+		Map<String, Integer> results_ideal = new LinkedHashMap<String, Integer>();
 		Map<LocalDate, Period> burndown_map = new HashMap<LocalDate, Period>();
 		Project project = projSrv.findByProjectId(id);
 		Period total_estimate = new Period();
 		if (project != null) {
-			Sprint sprint = sprintRepo.findByProjectIdAndActive(
-					project.getId(), true);
+			Sprint lastSprint = sprintRepo.findByProjectIdAndActive(project.getId(),
+					true);;
+			Sprint sprint;
+			if (sprintNo != null) {
+				sprint = sprintRepo.findByProjectIdAndSprintNo(project.getId(),
+						sprintNo);
+			} else {
+				sprint = lastSprint;
+			}
 			List<Task> taskList = new LinkedList<Task>();
 			taskList = taskSrv.findAllBySprint(sprint);
 			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID,
 					false));
-			LocalDate start_time = new LocalDate(sprint.getStart_date());
+			LocalDate start_time = new LocalDate(sprint.getRawStart_date());
 			LocalDate end_time = new LocalDate(sprint.getRawEnd_date());
 			int sprint_days = Days.daysBetween(start_time, end_time).getDays();
-			results_estimates = new int[sprint_days];
-			results_burned = new int[sprint_days];
 			for (Task task : taskList) {
 				total_estimate = PeriodHelper.plusPeriods(total_estimate,
 						task.getRawEstimate());
@@ -292,20 +299,34 @@ public class SprintController {
 			// Iterate over sprint days
 			Period remaining_estimate = total_estimate;
 			Period burned = new Period();
+			// Fill ideal burndown
+			results_ideal.put(start_time.toString(), (int) total_estimate
+					.toStandardDuration().getStandardHours());
+			results_ideal.put(end_time.toString(), 0);
 			for (int i = 0; i < sprint_days; i++) {
-				Period value = burndown_map.get(start_time.plusDays(i));
+				LocalDate date = start_time.plusDays(i);
+				Period value = burndown_map.get(date);
 				remaining_estimate = PeriodHelper.minusPeriods(
 						remaining_estimate, value);
 				burned = PeriodHelper.plusPeriods(burned, value);
-				results_estimates[i] = (int) remaining_estimate
-						.toStandardDuration().getStandardMinutes();
-				results_burned[i] = (int) burned.toStandardDuration()
-						.getStandardMinutes();
+				if (date.isAfter(LocalDate.now())) {
+					results_estimates.put(date.toString(), null);
+					results_burned.put(date.toString(), null);
+				} else {
+					results_estimates.put(date.toString(),
+							(int) remaining_estimate.toStandardDuration()
+									.getStandardHours());
+					results_burned.put(date.toString(), (int) burned
+							.toStandardDuration().getStandardHours());
+
+				}
 			}
-			model.addAttribute("sprint",sprint);
+			model.addAttribute("sprint", sprint);
+			model.addAttribute("lastSprint", lastSprint);
 			model.addAttribute("project", project);
-			model.addAttribute("left", Arrays.toString(results_estimates));
-			model.addAttribute("burned", Arrays.toString(results_burned));
+			model.addAttribute("left", formatResults(results_estimates));
+			model.addAttribute("burned", formatResults(results_burned));
+			model.addAttribute("ideal", formatResults(results_ideal));
 		}
 		return "/scrum/burndown";
 	}
@@ -345,6 +366,28 @@ public class SprintController {
 	}
 
 	/**
+	 * For purpose of jqPlot charts result formated into Array-like result.
+	 * Could be produced as JSON but this way it's quicker
+	 * 
+	 * @param input
+	 * @return
+	 */
+	private String formatResults(Map<String, Integer> input) {
+		StringBuffer result = new StringBuffer();
+		String separator = "";
+		for (Entry<String, Integer> entry : input.entrySet()) {
+			result.append(separator);
+			result.append("[\'");
+			result.append(entry.getKey());
+			result.append("\',");
+			result.append(entry.getValue());
+			result.append("]");
+			separator = ",";
+		}
+		return result.toString();
+	}
+
+	/**
 	 * Checks if currently logged in user have privileges to change anything in
 	 * project
 	 * 
@@ -360,14 +403,5 @@ public class SprintController {
 		return (repo_project.getAdministrators().contains(current_account)
 				|| repo_project.getParticipants().contains(current_account) || current_account
 				.getRole().equals(Role.ROLE_ADMIN));
-	}
-
-	private Period countTotalEstimate(List<Task> taskList) {
-		Period total_estimate = new Period();
-		for (Task task : taskList) {
-			total_estimate = PeriodHelper.plusPeriods(total_estimate,
-					task.getRawEstimate());
-		}
-		return total_estimate;
 	}
 }

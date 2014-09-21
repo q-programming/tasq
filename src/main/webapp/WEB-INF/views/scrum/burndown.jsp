@@ -2,46 +2,98 @@
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
 <script language="javascript" type="text/javascript"
 	src="<c:url value="/resources/js/jquery.jqplot.js"/>"></script>
+<script language="javascript" type="text/javascript"
+	src="<c:url value="/resources/js/jqplot.highlighter.js"/>"></script>
+<script language="javascript" type="text/javascript"
+	src="<c:url value="/resources/js/jqplot.dateAxisRenderer.js"/>"></script>
 <link rel="stylesheet" type="text/css"
 	href="<c:url value="/resources/css/jquery.jqplot.css"/>" />
-
+<h3>[${project.projectId}] ${project}</h3>
 <div class="white-frame"
 	style="display: table; width: 100%; height: 85vh">
 	<div style="display: table-caption; margin-left: 10px;">
 		<ul class="nav nav-tabs" style="border-bottom: 0">
-			<li><a style="color: black" href="<c:url value="/${project.projectId}/scrum/board"/>"><span
-					class="glyphicon glyphicon-list-alt"></span> Board</a></li>
+			<li><a style="color: black"
+				href="<c:url value="/${project.projectId}/scrum/board"/>"><span
+					class="glyphicon glyphicon-list-alt"></span> <s:message
+						code="agile.board" /></a></li>
 			<li><a style="color: black"
 				href="<c:url value="/${project.projectId}/scrum/backlog"/>"><span
 					class="glyphicon glyphicon-book"></span> Backlog</a></li>
 			<li class="active"><a style="color: black" href="#"><span
-					class="glyphicon glyphicon-bullhorn"></span> Reports</a></li>
+					class="glyphicon glyphicon-bullhorn"></span> <s:message
+						code="agile.reports" /></a></li>
 		</ul>
 	</div>
-	<div id="chartdiv" style="height: 400px;"></div>
-	${burndown}
+	<div style="display:table-cell;width:100px;padding: 10px;padding-left: 0px;">
+	<ul>
+		<c:if test="${empty param.sprint}">
+			<c:set var="ActiveSprint">${lastSprint.sprintNo }</c:set>
+		</c:if>
+		<c:if test="${not empty param.sprint}">
+			<c:set var="ActiveSprint">${param.sprint}</c:set>
+		</c:if>
+		<c:forEach var="i" begin="1" end="${lastSprint.sprintNo }">
+   			<a href="?sprint=${i}"><li class="btn btn-default 
+   				<c:if test="${i eq ActiveSprint}">active</c:if>">
+   				Sprint ${i}
+   			</li>
+   			</a>
+		</c:forEach>
+	</ul>
+	</div>
+	<div id="chartdiv" style="display:table-cell;height: 400px;width:90%"></div>
 </div>
 <script>
 	$(document).ready(function() {
-		var burned = ${burned};
-		var left = ${left};
-		var plot = $.jqplot('chartdiv', [left,burned], {
+		var burned = [${burned}];
+		var left = [${left}];
+		var ideal = [${ideal}];
+		var plot = $.jqplot('chartdiv', [ left,burned,ideal ], {
 			title : "Sprint ${sprint.sprintNo}",
+			highlighter : {
+				show : true,
+				sizeAdjust : 7.5
+			},
 			axesDefaults : {
 				labelRenderer : $.jqplot.CanvasAxisLabelRenderer
 			},
 			axes : {
 				xaxis : {
+					renderer:$.jqplot.DateAxisRenderer, 
+			        tickOptions:{formatString:'%#d-%m'},
 					label : '<s:message code="agile.sprintDays"/>',
 					pad : 0
 				},
-				yaxis: {
-			        pad : 0,
-			        tickOptions: {
-			            show: false
+				yaxis : {
+					pad : 0,
+					tickOptions : {
+						formatString : '%s h',
+						show : true
+					}
+				}
+			},
+			series:[
+			    {
+				    label: '<s:message code="agile.remaining"/>',
+			    },
+			    {
+				    label: '<s:message code="agile.burned"/>',
+			    },
+			    {
+				    color: '#B34202',
+				    label: '<s:message code="agile.ideal"/>',
+				    lineWidth:1, 
+				    markerOptions: {
+			            show: false,  
 			        }
+			    }],
+			legend: {
+			        show: true,
+			        location: 'ne',     
+			        xoffset: 12,        
+			        yoffset: 12,        
 			    }
-			}
 		});
 	});
 </script>

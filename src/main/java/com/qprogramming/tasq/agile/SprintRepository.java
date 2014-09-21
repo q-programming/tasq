@@ -15,7 +15,7 @@ public interface SprintRepository extends JpaRepository<Sprint, Integer> {
 	List<Sprint> findByProjectIdAndFinished(Long project_id, boolean finished);
 	
 	Sprint findByProjectIdAndActive(Long project_id, boolean active);
-	Sprint findByProjectIdAndSprintNo(Long project_id, Long sprint_no);
+	Sprint findByProjectIdAndSprintNo(Long project_id, Long sprintNo);
 
 	List<Sprint> findByProjectId(Long project_id);
 }
