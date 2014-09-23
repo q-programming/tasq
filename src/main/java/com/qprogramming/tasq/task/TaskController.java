@@ -434,6 +434,14 @@ public class TaskController {
 								Utils.getCurrentLocale()));
 				return "redirect:" + request.getHeader("Referer");
 			}
+			//TODO eliminate this?
+			if(state.equals(TaskState.TO_DO) && !task.getLogged_work().equals("0m")){
+				MessageHelper.addWarningAttribute(
+						ra,
+						msg.getMessage("task.alreadyStarted", new Object[] {task.getId()},
+								Utils.getCurrentLocale()));
+				return "redirect:" + request.getHeader("Referer");
+			}
 			TaskState old_state = (TaskState) task.getState();
 			task.setState(state);
 			// Zero remaining time
