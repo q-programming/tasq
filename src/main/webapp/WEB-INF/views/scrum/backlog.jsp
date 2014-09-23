@@ -25,12 +25,12 @@
 	<%--MENU --%>
 	<div style="display: table-caption; margin-left: 10px;">
 		<ul class="nav nav-tabs" style="border-bottom: 0">
+			<li class="active"><a style="color: black" href="#"><span
+					class="glyphicon glyphicon-book"></span> Backlog</a></li>
 			<li><a style="color: black"
 				href="<c:url value="/${project.projectId}/scrum/board"/>"><span
 					class="glyphicon glyphicon-list-alt"></span> <s:message
 						code="agile.board" /></a></li>
-			<li class="active"><a style="color: black" href="#"><span
-					class="glyphicon glyphicon-book"></span> Backlog</a></li>
 			<li><a style="color: black"
 				href="<c:url value="/${project.projectId}/scrum/burndown"/>"><span
 					class="glyphicon glyphicon-bullhorn"></span> <s:message
@@ -133,12 +133,13 @@
 			<hr>
 		</c:forEach>
 	</div>
+<!-- 	FREE TASK LIST -->
 	<div style="display: table-cell; padding-left: 20px; width: 45%">
 		<h4>
 			<s:message code="task.tasks" />
 		</h4>
 		<c:forEach items="${tasks}" var="task">
-			<c:if test="${empty task.sprints && task.state ne 'CLOSED'}">
+			<c:if test="${not task.inSprint && task.state ne 'CLOSED'}">
 				<div class="agile-card" data-id="${task.id}" id="${task.id}">
 					<div>
 						<t:type type="${task.type}" list="true" />

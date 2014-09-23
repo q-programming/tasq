@@ -105,19 +105,19 @@ public class SprintController {
 					resultList.add(task);
 				}
 			}
-			Map <Sprint,List<Task>> sprint_result = new HashMap<Sprint, List<Task>>();
+			Map<Sprint, List<Task>> sprint_result = new LinkedHashMap<Sprint, List<Task>>();
 
 			List<Sprint> sprintList = sprintRepo.findByProjectIdAndFinished(
 					project.getId(), false);
-			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.PRIORITY,
-					false));
+			Collections.sort(taskList, new TaskSorter(
+					TaskSorter.SORTBY.PRIORITY, false));
 			Collections.sort(sprintList, new SprintSorter());
-			//Assign tasks to sprints in order to display them
+			// Assign tasks to sprints in order to display them
 			for (Sprint sprint : sprintList) {
 				List<Task> sprint_tasks = new LinkedList<Task>();
 				for (Task task : taskList) {
 					Hibernate.initialize(task.getSprints());
-					if(task.getSprints().contains(sprint)){
+					if (task.getSprints().contains(sprint)) {
 						sprint_tasks.add(task);
 					}
 				}
@@ -145,6 +145,7 @@ public class SprintController {
 						Utils.getCurrentLocale()));
 		return "redirect:" + request.getHeader("Referer");
 	}
+
 	@Transactional
 	@RequestMapping(value = "/{id}/scrum/sprintAssign", method = RequestMethod.POST)
 	public String assignSprint(@PathVariable String id,
@@ -227,6 +228,20 @@ public class SprintController {
 				sprint.setStart_date(Utils.convertDueDate(sprint_start));
 				sprint.setEnd_date(Utils.convertDueDate(sprint_end));
 				sprint.setActive(true);
+				Period total_estimate = new Period();
+				List<Task> taskList = taskSrv.findAllBySprint(sprint);
+				for (Task task : taskList) {
+					if (task.getState().equals(TaskState.ONGOING)
+							|| task.getState().equals(TaskState.BLOCKED)) {
+						total_estimate = PeriodHelper.plusPeriods(
+								total_estimate, task.getRawRemaining());
+					} else {
+						total_estimate = PeriodHelper.plusPeriods(
+								total_estimate, task.getRawEstimate());
+					}
+				}
+				sprint.setTotal_estimate(total_estimate);
+				sprintRepo.save(sprint);
 				MessageHelper.addSuccessAttribute(ra, msg.getMessage(
 						"agile.sprint.started",
 						new Object[] { sprint.getSprintNo() },
@@ -239,8 +254,8 @@ public class SprintController {
 
 	@Transactional
 	@RequestMapping(value = "/scrum/stop", method = RequestMethod.GET)
-	public String stopSprint(@RequestParam(value = "id") Long id, Model model,
-			HttpServletRequest request, RedirectAttributes ra) {
+	public String finishSprint(@RequestParam(value = "id") Long id,
+			Model model, HttpServletRequest request, RedirectAttributes ra) {
 		Sprint sprint = sprintRepo.findById(id);
 		if (sprint != null) {
 			Project project = projSrv.findById(sprint.getProject().getId());
@@ -251,6 +266,7 @@ public class SprintController {
 				List<Task> taskList = taskSrv.findAllBySprint(sprint);
 				Map<TaskState, Integer> state_count = new HashMap<TaskState, Integer>();
 				for (Task task : taskList) {
+					task.setInSprint(false);
 					Integer value = state_count.get(task.getState());
 					value = value == null ? 0 : value;
 					value++;
@@ -286,10 +302,9 @@ public class SprintController {
 		Map<String, Integer> results_ideal = new LinkedHashMap<String, Integer>();
 		Map<LocalDate, Period> burndown_map = new HashMap<LocalDate, Period>();
 		Project project = projSrv.findByProjectId(id);
-		Period total_estimate = new Period();
 		if (project != null) {
-			Sprint lastSprint = sprintRepo.findByProjectIdAndActive(project.getId(),
-					true);;
+			Sprint lastSprint = sprintRepo.findByProjectIdAndActive(
+					project.getId(), true);
 			Sprint sprint;
 			if (sprintNo != null) {
 				sprint = sprintRepo.findByProjectIdAndSprintNo(project.getId(),
@@ -297,27 +312,25 @@ public class SprintController {
 			} else {
 				sprint = lastSprint;
 			}
-			List<Task> taskList = new LinkedList<Task>();
-			taskList = taskSrv.findAllBySprint(sprint);
+			List<Task> taskList = taskSrv.findAllBySprint(sprint);
 			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID,
 					false));
 			LocalDate start_time = new LocalDate(sprint.getRawStart_date());
 			LocalDate end_time = new LocalDate(sprint.getRawEnd_date());
-			int sprint_days = Days.daysBetween(start_time, end_time).getDays();
+			int sprint_days = Days.daysBetween(start_time, end_time).getDays() + 1;
 			for (Task task : taskList) {
-				total_estimate = PeriodHelper.plusPeriods(total_estimate,
-						task.getRawEstimate());
 				Hibernate.initialize(task.getWorklog());
 				List<WorkLog> workLog_list = task.getWorklog();
 				burndown_map = fillTaskBurndown(burndown_map, start_time,
 						end_time, workLog_list);
 			}
 			// Iterate over sprint days
-			Period remaining_estimate = total_estimate;
+			Period remaining_estimate = sprint.getTotal_estimate();
 			Period burned = new Period();
 			// Fill ideal burndown
-			results_ideal.put(start_time.toString(), (int) total_estimate
-					.toStandardDuration().getStandardHours());
+			results_ideal.put(start_time.toString(), (int) sprint
+					.getTotal_estimate().toStandardDuration()
+					.getStandardHours());
 			results_ideal.put(end_time.toString(), 0);
 			for (int i = 0; i < sprint_days; i++) {
 				LocalDate date = start_time.plusDays(i);
@@ -366,8 +379,10 @@ public class SprintController {
 			LocalDate end_time, List<WorkLog> workLog_list) {
 		for (WorkLog worklog : workLog_list) {
 			LocalDate date_logged = new LocalDate(worklog.getRawTime());
-			if (date_logged.isAfter(start_time)
-					&& date_logged.isBefore(end_time)) {
+			if ((date_logged.isAfter(start_time) && date_logged
+					.isBefore(end_time))
+					|| (date_logged.equals(start_time) || date_logged
+							.equals(end_time))) {
 				Period value = burndown_map.get(date_logged);
 				if (value == null) {
 					burndown_map.put(date_logged, worklog.getActivity());

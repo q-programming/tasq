@@ -111,6 +111,9 @@ public class Task implements java.io.Serializable {
 
 	@ManyToMany(fetch = FetchType.LAZY)
 	private Set<Sprint> sprints = new HashSet<Sprint>();
+	
+	@Column
+	private boolean inSprint;
 
 	public String getId() {
 		return id;
@@ -347,17 +350,13 @@ public class Task implements java.io.Serializable {
 		this.sprints = sprints;
 	}
 
-	public void addSprint(Sprint sprint) {
-		if (this.sprints == null) {
-			this.sprints = new LinkedHashSet<Sprint>();
-		}
-		this.sprints.add(sprint);
+
+	public boolean isInSprint() {
+		return inSprint;
 	}
 
-	public void removeSprint(Sprint sprint) {
-		if (this.sprints != null) {
-			this.sprints.remove(sprint);
-		}
+	public void setInSprint(boolean inSprint) {
+		this.inSprint = inSprint;
 	}
 
 	/*
@@ -473,6 +472,20 @@ public class Task implements java.io.Serializable {
 		remaining = PeriodHelper.minusPeriods(remaining, activity);
 		if (remaining.toStandardDuration().getMillis() < 0) {
 			remaining = new Period();
+		}
+	}
+	public void addSprint(Sprint sprint) {
+		if (this.sprints == null) {
+			this.sprints = new LinkedHashSet<Sprint>();
+		}
+		this.sprints.add(sprint);
+		setInSprint(true);
+	}
+
+	public void removeSprint(Sprint sprint) {
+		if (this.sprints != null) {
+			this.sprints.remove(sprint);
+			setInSprint(false);
 		}
 	}
 }
