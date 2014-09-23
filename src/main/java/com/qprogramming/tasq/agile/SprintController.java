@@ -90,6 +90,7 @@ public class SprintController {
 		return "";
 	}
 
+	@Transactional
 	@RequestMapping(value = "/{id}/scrum/backlog", method = RequestMethod.GET)
 	public String showBacklog(@PathVariable String id, Model model,
 			HttpServletRequest request) {
@@ -104,12 +105,25 @@ public class SprintController {
 					resultList.add(task);
 				}
 			}
+			Map <Sprint,List<Task>> sprint_result = new HashMap<Sprint, List<Task>>();
+
 			List<Sprint> sprintList = sprintRepo.findByProjectIdAndFinished(
 					project.getId(), false);
-			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID,
+			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.PRIORITY,
 					false));
 			Collections.sort(sprintList, new SprintSorter());
-
+			//Assign tasks to sprints in order to display them
+			for (Sprint sprint : sprintList) {
+				List<Task> sprint_tasks = new LinkedList<Task>();
+				for (Task task : taskList) {
+					Hibernate.initialize(task.getSprints());
+					if(task.getSprints().contains(sprint)){
+						sprint_tasks.add(task);
+					}
+				}
+				sprint_result.put(sprint, sprint_tasks);
+			}
+			model.addAttribute("sprint_result", sprint_result);
 			model.addAttribute("tasks", taskList);
 			model.addAttribute("sprints", sprintList);
 		}
@@ -131,7 +145,7 @@ public class SprintController {
 						Utils.getCurrentLocale()));
 		return "redirect:" + request.getHeader("Referer");
 	}
-
+	@Transactional
 	@RequestMapping(value = "/{id}/scrum/sprintAssign", method = RequestMethod.POST)
 	public String assignSprint(@PathVariable String id,
 			@RequestParam(value = "taskID") String taskID,
@@ -139,7 +153,8 @@ public class SprintController {
 			HttpServletRequest request, RedirectAttributes ra) {
 		Sprint sprint = sprintRepo.findById(sprintID);
 		Task task = taskSrv.findById(taskID);
-		task.setSprint(sprint);
+		Hibernate.initialize(task.getSprints());
+		task.addSprint(sprint);
 		taskSrv.save(task);
 		MessageHelper.addSuccessAttribute(
 				ra,
@@ -157,7 +172,8 @@ public class SprintController {
 		Task task = taskSrv.findById(taskID);
 		Sprint sprint = sprintRepo.findById(task.getSprint().getId());
 		if (!sprint.isActive()) {
-			task.setSprint(null);
+			Hibernate.initialize(task.getSprints());
+			task.removeSprint(sprint);
 			taskSrv.save(task);
 			MessageHelper.addSuccessAttribute(
 					ra,
@@ -182,7 +198,8 @@ public class SprintController {
 			if (canEdit(sprint.getProject())) {
 				List<Task> taskList = taskSrv.findAllBySprint(sprint);
 				for (Task task : taskList) {
-					task.setSprint(null);
+					Hibernate.initialize(task.getSprints());
+					task.removeSprint(sprint);
 					taskSrv.save(task);
 				}
 			}
@@ -234,7 +251,6 @@ public class SprintController {
 				List<Task> taskList = taskSrv.findAllBySprint(sprint);
 				Map<TaskState, Integer> state_count = new HashMap<TaskState, Integer>();
 				for (Task task : taskList) {
-					task.setSprint(null);
 					Integer value = state_count.get(task.getState());
 					value = value == null ? 0 : value;
 					value++;

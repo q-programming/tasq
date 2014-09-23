@@ -11,11 +11,12 @@
 	<c:set var="is_admin" value="true" />
 </security:authorize>
 <security:authentication property="principal" var="user" />
-<c:if test="${myfn:contains(task.project.administrators,user) || is_admin || task.owner.id == user.id}">
-		<c:set var="can_edit" value="true" />
+<c:if
+	test="${myfn:contains(task.project.administrators,user) || is_admin || task.owner.id == user.id}">
+	<c:set var="can_edit" value="true" />
 </c:if>
 <c:if test="${task.assignee.id == user.id}">
-		<c:set var="is_assignee" value="true" />
+	<c:set var="is_assignee" value="true" />
 </c:if>
 <div class="white-frame" style="overflow: auto;">
 	<c:set var="taskName_text">
@@ -29,25 +30,27 @@
 		<div class="pull-right">
 			<c:if test="${can_edit || is_assignee}">
 				<!-- change state trigger modal -->
-					<button class="btn btn-default btn-sm" data-toggle="modal"
-						data-target="#changeState">
-						<span class="glyphicon glyphicon-list-alt"></span>
-						<s:message code="task.changeState" />
-					</button>
+				<button class="btn btn-default btn-sm" data-toggle="modal"
+					data-target="#changeState">
+					<span class="glyphicon glyphicon-list-alt"></span>
+					<s:message code="task.changeState" />
+				</button>
 			</c:if>
 			<c:if test="${can_edit}">
-					<a href="<c:url value="task/edit?id=${task.id}"/>"><button class="btn btn-default btn-sm">
+				<a href="<c:url value="task/edit?id=${task.id}"/>"><button
+						class="btn btn-default btn-sm">
 						<span class="glyphicon glyphicon-pencil"></span>
 						<s:message code="task.edit" />
 					</button></a>
 			</c:if>
 			<c:if test="${can_edit}">
-				<a class="btn btn-default btn-sm a-tooltip delete_task" href="<c:url value="task/delete?id=${task.id}"/>"
-							title="<s:message code="task.delete" text="Delete task" />"
-							data-lang="${pageContext.response.locale}"
-							data-msg='<s:message code="task.delete.confirm"></s:message>'>
-						<span class="glyphicon glyphicon-trash"></span>
-					</a>
+				<a class="btn btn-default btn-sm a-tooltip delete_task"
+					href="<c:url value="task/delete?id=${task.id}"/>"
+					title="<s:message code="task.delete" text="Delete task" />"
+					data-lang="${pageContext.response.locale}"
+					data-msg='<s:message code="task.delete.confirm"></s:message>'>
+					<span class="glyphicon glyphicon-trash"></span>
+				</a>
 			</c:if>
 		</div>
 		<h3>
@@ -57,8 +60,8 @@
 		</h3>
 	</div>
 	<div style="display: table">
-	<%--------------------LEFT SIDE DIV -------------------------------------%>
-		<div style="display: table-cell;width:70%">
+		<%--------------------LEFT SIDE DIV -------------------------------------%>
+		<div style="display: table-cell; width: 70%">
 			<%-----------------TASK DETAILS ---------------------------------%>
 			<div>
 				<div class="mod-header">
@@ -73,38 +76,41 @@
 						<td class="left-margin"><t:state state="${task.state}" /></td>
 					</tr>
 					<tr>
-						<td ><s:message code="task.priority" /></td>
-						<td class="left-margin">
-						<c:choose>
-							<c:when test="${can_edit || is_assignee}">
-								<div class="dropdown">
-									<%
-									pageContext.setAttribute("priorities", TaskPriority.values());
-									%>
-									<div id="task_priority" class="image-combo a-tooltip" data-toggle="dropdown" data-placement="top" title="<s:message code="main.click"/>">
-										<t:priority	priority="${task.priority}"/>
-										<span class="caret"></span>
+						<td><s:message code="task.priority" /></td>
+						<td class="left-margin"><c:choose>
+								<c:when test="${can_edit || is_assignee}">
+									<div class="dropdown">
+										<%
+											pageContext.setAttribute("priorities",
+															TaskPriority.values());
+										%>
+										<div id="task_priority" class="image-combo a-tooltip"
+											data-toggle="dropdown" data-placement="top"
+											title="<s:message code="main.click"/>">
+											<t:priority priority="${task.priority}" />
+											<span class="caret"></span>
+										</div>
+										<ul class="dropdown-menu" role="menu"
+											aria-labelledby="dropdownMenu2">
+											<c:forEach items="${priorities}" var="enum_priority">
+												<li><a tabindex="-1"
+													href='<c:url value="task/priority?id=${task.id}&priority=${enum_priority}"></c:url>'
+													id="${enum_priority}"> <t:priority
+															priority="${enum_priority}" />
+												</a></li>
+											</c:forEach>
+										</ul>
 									</div>
-									<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">
-										<c:forEach items="${priorities}" var="enum_priority">
-											<li>
-												<a tabindex="-1" href='<c:url value="task/priority?id=${task.id}&priority=${enum_priority}"></c:url>' id="${enum_priority}">
-													<t:priority	priority="${enum_priority}"/>
-												</a>
-											</li>
-										</c:forEach>
-									</ul>
-								</div>
-							</c:when>
-							<c:otherwise>
-								<t:priority priority="${task.priority}" />
-							</c:otherwise>
-						</c:choose>
-						</td>
+								</c:when>
+								<c:otherwise>
+									<t:priority priority="${task.priority}" />
+								</c:otherwise>
+							</c:choose></td>
 					</tr>
-					
+
 					<tr>
-						<td style="vertical-align: top;"><s:message code="task.description" /></td>
+						<td style="vertical-align: top;"><s:message
+								code="task.description" /></td>
 						<td class="left-margin">${task.description}</td>
 					</tr>
 					<tr>
@@ -244,22 +250,22 @@
 			</div>
 		</div>
 		<%--------------------RIGHT SIDE DIV -------------------------------------%>
-		<div class="left-margin" style="display: table-cell;width:400px">
-		<%-------------------------PEOPLE ----------------------------------%>
+		<div class="left-margin" style="display: table-cell; width: 400px">
+			<%-------------------------PEOPLE ----------------------------------%>
 			<div>
-			<div class="mod-header">
-				<h5 class="mod-header-title">
-					<span class="glyphicon glyphicon-user"></span>
-					<s:message code="task.people" />
-				</h5>
-			</div>
-			<div>
+				<div class="mod-header">
+					<h5 class="mod-header-title">
+						<span class="glyphicon glyphicon-user"></span>
+						<s:message code="task.people" />
+					</h5>
+				</div>
 				<div>
-					<s:message code="task.owner" />
-					: <img data-src="holder.js/20x20"
-						style="height: 20px; padding-right: 5px;"
-						src="<c:url value="/userAvatar/${task.owner.id}"/>" /><a
-						href="<c:url value="/user?id=${task.owner.id}"/>">${task.owner}</a>
+					<div>
+						<s:message code="task.owner" />
+						: <img data-src="holder.js/20x20"
+							style="height: 20px; padding-right: 5px;"
+							src="<c:url value="/userAvatar/${task.owner.id}"/>" /><a
+							href="<c:url value="/user?id=${task.owner.id}"/>">${task.owner}</a>
 					</div>
 					<div style="display: table-cell; padding-left: 20px; display: none"
 						id="assign_div">
@@ -286,7 +292,8 @@
 								</div>
 								<div style="display: table-cell;">
 									<button type="button" id="dismiss_assign"
-										class="close a-tooltip" title="<s:message code="main.cancel"/>"
+										class="close a-tooltip"
+										title="<s:message code="main.cancel"/>"
 										style="padding-left: 5px">×</button>
 								</div>
 							</form>
@@ -333,6 +340,18 @@
 						<td class="left-margin">: ${task.due_date}</td>
 					</tr>
 				</table>
+			</div>
+			<%----------------SPRITNS ----------------------%>
+			<div>
+				<div class="mod-header">
+					<h5 class="mod-header-title">
+						<s:message code="task.sprints" />
+					</h5>
+				</div>
+			
+				<c:forEach items="${task.sprints}" var="sprint">
+					<div>Sprint ${sprint.sprintNo}</div>
+				</c:forEach>
 			</div>
 		</div>
 	</div>
@@ -530,27 +549,27 @@
 				<div class="modal-body">
 					<input type="hidden" name="taskID" value="${task.id}">
 					<div class="form-group">
-						<label><s:message code="task.state"/></label>
-						<select name="state" id="change_state"
-							class="form-control">
+						<label><s:message code="task.state" /></label> <select
+							name="state" id="change_state" class="form-control">
 							<c:forEach items="${states}" var="state">
 								<option value="${state}"
 									<c:if test="${task.state eq state}">
 										selected
-									</c:if>
-								><t:state state="${state}"/></option>
+									</c:if>><t:state
+										state="${state}" /></option>
 							</c:forEach>
-						</select> <span class="help-block"><s:message code="task.changeState.help"/></span>
+						</select> <span class="help-block"><s:message
+								code="task.changeState.help" /></span>
 					</div>
-					<div class="checkbox" id="zero_remaining"style="display: none">
-							<label class="checkbox"> 
-								<input type="checkbox" name="zero_checkbox" id="zero_checkbox" value="true">
-							<s:message code="task.setToZero"/>
-							</label>
-							
+					<div class="checkbox" id="zero_remaining" style="display: none">
+						<label class="checkbox"> <input type="checkbox"
+							name="zero_checkbox" id="zero_checkbox" value="true"> <s:message
+								code="task.setToZero" />
+						</label>
+
 					</div>
 					<div>
-						<label><s:message code="comment.add"/></label>
+						<label><s:message code="comment.add" /></label>
 						<textarea name="message" class="form-control" rows="3"></textarea>
 					</div>
 				</div>
@@ -604,135 +623,167 @@
 </div>
 <!-- /.modal -->
 <script>
-$(document).ready(function($) {
-		//------------------------------------Datepickers
-		$(".datepicker").datepicker({
-			maxDate : '0'
-		});
-		$(".datepicker").datepicker("option", "dateFormat", "dd-mm-yy");
-		$(".datepicker").change(function() {
-			var date = new Date;
-			var minutes = date.getMinutes();
-			var hour = date.getHours();
-			$("#time_logged").val(hour + ":" + minutes);
-		});
-		$("#time_logged").mask("Z0:A0", {
-			translation : {
-				'Z' : {
-					pattern : /[0-2]/
-				},
-				'A' : {
-					pattern : /[0-5]/
-				}
-			},
-			placeholder : "__:__"
-		});
-		$("#estimate_manual").change(function() {
-			$('#remaining').attr("disabled", !this.checked);
-		});
-		$("#estimate_auto").change(function() {
-			$('#remaining').val("");
-			$('#remaining').attr("disabled", this.checked);
-		});
-		//--------------------------------------Coments----------------------------
-		function toggle_comment() {
-			$('#comments_add').toggle();
-			$('#comments_div').slideToggle("slow");
-			$(document.body).animate({
-				'scrollTop' : $('#comments_div').offset().top
-			}, 2000);
-		}
-		$('#comments_scroll').click(function() {
-			$(document.body).animate({
-				'scrollTop' : $('#comments').offset().top
-			}, 2000);
-		});
+	$(document)
+			.ready(
+					function($) {
+						//------------------------------------Datepickers
+						$(".datepicker").datepicker({
+							maxDate : '0'
+						});
+						$(".datepicker").datepicker("option", "dateFormat",
+								"dd-mm-yy");
+						$(".datepicker").change(function() {
+							var date = new Date;
+							var minutes = date.getMinutes();
+							var hour = date.getHours();
+							$("#time_logged").val(hour + ":" + minutes);
+						});
+						$("#time_logged").mask("Z0:A0", {
+							translation : {
+								'Z' : {
+									pattern : /[0-2]/
+								},
+								'A' : {
+									pattern : /[0-5]/
+								}
+							},
+							placeholder : "__:__"
+						});
+						$("#estimate_manual").change(function() {
+							$('#remaining').attr("disabled", !this.checked);
+						});
+						$("#estimate_auto").change(function() {
+							$('#remaining').val("");
+							$('#remaining').attr("disabled", this.checked);
+						});
+						//--------------------------------------Coments----------------------------
+						function toggle_comment() {
+							$('#comments_add').toggle();
+							$('#comments_div').slideToggle("slow");
+							$(document.body).animate({
+								'scrollTop' : $('#comments_div').offset().top
+							}, 2000);
+						}
+						$('#comments_scroll').click(function() {
+							$(document.body).animate({
+								'scrollTop' : $('#comments').offset().top
+							}, 2000);
+						});
 
-		$('#comments_add').click(function() {
-			toggle_comment();
+						$('#comments_add').click(function() {
+							toggle_comment();
 
-		});
+						});
 
-		$('.comments_edit').click(function() {
-			var message = $(this).data('message');
-			var comment_id = $(this).data('comment_id');
-			$(".modal-body #message").val(message);
-			$(".modal-body #comment_id").val(comment_id);
-		});
+						$('.comments_edit').click(function() {
+							var message = $(this).data('message');
+							var comment_id = $(this).data('comment_id');
+							$(".modal-body #message").val(message);
+							$(".modal-body #comment_id").val(comment_id);
+						});
 
-		$('#comments_cancel').click(function() {
-			toggle_comment();
-		});
-		
-		$("#assignee").autocomplete({
-	        minLength: 1,
-	        delay: 500,
-	        //define callback to format results
-	        source: function (request, response) {
-	            $.getJSON("<c:url value="/project/${task.project.id}/getParticipants"/>", request, function(result) {
-	                response($.map(result, function(item) {
-	                    return {
-	                        // following property gets displayed in drop down
-	                        label: item.name + " " + item.surname,
-	                        value: item.email,
-	                    }
-	                }));
-	            });
-	        },
-	        //define select handler
-	        select : function(event, ui) {
-	            if (ui.item) {
-	                event.preventDefault();
-	                $("#assignee").val(ui.item.label);
-	                $("#assign").append('<input type="hidden" name="email" value=' + ui.item.value + '>');
-	                $("#assign").submit();
-	                return false;
-	            }
-	        }
-	    });
-		
-		$("#assign_me").click(function(){
-			var current_email = "${user.email}";
-			$("#assign").append('<input type="hidden" name="email" value=' + current_email + '>');
-        	$("#assign").submit();
-		});
-		$("#unassign").click(function(){
-			var current_email = "";
-			$("#assign").append('<input type="hidden" name="email" value=' + current_email + '>');
-        	$("#assign").submit();
-		});
-		
-		$("#assign_button").click(function(){
-			$('#assign_div').toggle("blind");
-			$('#assign_button_div').toggle("blind");
-			$('#assignee').focus();
-			});
-		$("#dismiss_assign").click(function(){
-			$('#assign_div').toggle("blind");
-			$('#assign_button_div').toggle("blind");
-			});
-		$("#change_state").change(function() {
-			if($(this).val()=='CLOSED'){
-				$("#zero_remaining").toggle("blind");
-			}else{
-				$("#zero_remaining").hide("blind");
-				$("#zero_checkbox").attr('checked', false);
-			}
-		});
-});
-$(document).on(	"click",".delete_task",function(e) {
-	var msg = '<p style="text-align:center"><span class="glyphicon glyphicon-warning-sign" style="display: initial;"></span> '
-				+ $(this).data('msg') + '</p>';
-	var lang = $(this).data('lang');
-	bootbox.setDefaults({
-		locale : lang
-	});
-	e.preventDefault();
-	var $link = $(this);
-	bootbox.confirm(msg, function(result) {
-		if (result == true) {
-			document.location.assign($link.attr('href'));
-			}
-	});
-});
+						$('#comments_cancel').click(function() {
+							toggle_comment();
+						});
+
+						$("#assignee")
+								.autocomplete(
+										{
+											minLength : 1,
+											delay : 500,
+											//define callback to format results
+											source : function(request, response) {
+												$
+														.getJSON(
+																"<c:url value="/project/${task.project.id}/getParticipants"/>",
+																request,
+																function(result) {
+																	response($
+																			.map(
+																					result,
+																					function(
+																							item) {
+																						return {
+																							// following property gets displayed in drop down
+																							label : item.name
+																									+ " "
+																									+ item.surname,
+																							value : item.email,
+																						}
+																					}));
+																});
+											},
+											//define select handler
+											select : function(event, ui) {
+												if (ui.item) {
+													event.preventDefault();
+													$("#assignee").val(
+															ui.item.label);
+													$("#assign")
+															.append(
+																	'<input type="hidden" name="email" value=' + ui.item.value + '>');
+													$("#assign").submit();
+													return false;
+												}
+											}
+										});
+
+						$("#assign_me")
+								.click(
+										function() {
+											var current_email = "${user.email}";
+											$("#assign")
+													.append(
+															'<input type="hidden" name="email" value=' + current_email + '>');
+											$("#assign").submit();
+										});
+						$("#unassign")
+								.click(
+										function() {
+											var current_email = "";
+											$("#assign")
+													.append(
+															'<input type="hidden" name="email" value=' + current_email + '>');
+											$("#assign").submit();
+										});
+
+						$("#assign_button").click(function() {
+							$('#assign_div').toggle("blind");
+							$('#assign_button_div').toggle("blind");
+							$('#assignee').focus();
+						});
+						$("#dismiss_assign").click(function() {
+							$('#assign_div').toggle("blind");
+							$('#assign_button_div').toggle("blind");
+						});
+						$("#change_state").change(function() {
+							if ($(this).val() == 'CLOSED') {
+								$("#zero_remaining").toggle("blind");
+							} else {
+								$("#zero_remaining").hide("blind");
+								$("#zero_checkbox").attr('checked', false);
+							}
+						});
+					});
+	$(document)
+			.on(
+					"click",
+					".delete_task",
+					function(e) {
+						var msg = '<p style="text-align:center"><span class="glyphicon glyphicon-warning-sign" style="display: initial;"></span> '
+								+ $(this).data('msg') + '</p>';
+						var lang = $(this).data('lang');
+						bootbox.setDefaults({
+							locale : lang
+						});
+						e.preventDefault();
+						var $link = $(this);
+						bootbox.confirm(msg, function(result) {
+							if (result == true) {
+								document.location.assign($link.attr('href'));
+							}
+						});
+					});
+
+	
 </script>

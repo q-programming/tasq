@@ -129,6 +129,10 @@ public class Sprint implements java.io.Serializable {
 	public void finish() {
 		this.finished = true;
 	}
+	@Override
+	public String toString() {
+		return "Sprint " + sprintNo;
+	}
 
 	@Override
 	public int hashCode() {
