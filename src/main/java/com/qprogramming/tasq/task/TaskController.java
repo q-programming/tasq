@@ -273,6 +273,7 @@ public class TaskController {
 		// TASK
 		Hibernate.initialize(task.getComments());
 		Hibernate.initialize(task.getWorklog());
+		Hibernate.initialize(task.getSprints());
 		task.setDescription(task.getDescription().replaceAll("\n", "<br>"));
 		model.addAttribute("task", task);
 		return "task/details";
@@ -430,6 +431,14 @@ public class TaskController {
 				MessageHelper.addErrorAttribute(
 						ra,
 						msg.getMessage("error.accesRights", null,
+								Utils.getCurrentLocale()));
+				return "redirect:" + request.getHeader("Referer");
+			}
+			//TODO eliminate this?
+			if(state.equals(TaskState.TO_DO) && !task.getLogged_work().equals("0m")){
+				MessageHelper.addWarningAttribute(
+						ra,
+						msg.getMessage("task.alreadyStarted", new Object[] {task.getId()},
 								Utils.getCurrentLocale()));
 				return "redirect:" + request.getHeader("Referer");
 			}

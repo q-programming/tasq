@@ -25,13 +25,14 @@
 	<%--MENU --%>
 	<div style="display: table-caption; margin-left: 10px;">
 		<ul class="nav nav-tabs" style="border-bottom: 0">
+			<li class="active"><a style="color: black" href="#"><span
+					class="glyphicon glyphicon-book"></span> Backlog</a></li>
 			<li><a style="color: black"
 				href="<c:url value="/${project.projectId}/scrum/board"/>"><span
 					class="glyphicon glyphicon-list-alt"></span> <s:message
 						code="agile.board" /></a></li>
-			<li class="active"><a style="color: black" href="#"><span
-					class="glyphicon glyphicon-book"></span> Backlog</a></li>
-			<li><a style="color: black" href="<c:url value="/${project.projectId}/scrum/burndown"/>"><span
+			<li><a style="color: black"
+				href="<c:url value="/${project.projectId}/scrum/burndown"/>"><span
 					class="glyphicon glyphicon-bullhorn"></span> <s:message
 						code="agile.reports" /></a></li>
 		</ul>
@@ -51,7 +52,8 @@
 		<form id="create_form"
 			action="<c:url value="/${project.projectId}/scrum/create"/>"
 			method="post"></form>
-		<c:forEach items="${sprints}" var="sprint">
+		<c:forEach var="entry" items="${sprint_result}">
+			<c:set var="sprint" value="${entry.key}" />
 			<c:set var="count" value="0" />
 			<div class="table_sprint" data-id="${sprint.id}">
 				<%---Buttons --%>
@@ -102,27 +104,25 @@
 				</c:if>
 				<div id="sprint_${sprint.sprintNo}">
 					<%--Sprint task --%>
-					<c:forEach items="${tasks}" var="task">
-						<c:if test="${task.sprint eq sprint }">
-							<c:set var="count" value="${count + task.story_points}" />
-							<div class="agile-list" data-id="${task.id}" id="${task.id}"
-								<c:if test="${task.state eq 'CLOSED' }">
+					<c:forEach items="${entry.value}" var="task">
+						<c:set var="count" value="${count + task.story_points}" />
+						<div class="agile-list" data-id="${task.id}" id="${task.id}"
+							<c:if test="${task.state eq 'CLOSED' }">
 							style="text-decoration: line-through;"
 							</c:if>>
-								<div>
-									<t:type type="${task.type}" list="true" />
-									<a href="<c:url value="/task?id=${task.id}"/>"
-										style="color: inherit;">[${task.id}] ${task.name}</a> <span
-										class="badge theme <c:if test="${task.story_points == 0}">zero</c:if>">
-										${task.story_points} </span>
-									<form id="sprint_remove_${task.id}"
-										action="<c:url value="/${project.projectId}/scrum/sprintRemove"/>"
-										method="post">
-										<input type="hidden" name="taskID" value="${task.id}">
-									</form>
-								</div>
+							<div>
+								<t:type type="${task.type}" list="true" />
+								<a href="<c:url value="/task?id=${task.id}"/>"
+									style="color: inherit;">[${task.id}] ${task.name}</a> <span
+									class="badge theme <c:if test="${task.story_points == 0}">zero</c:if>">
+									${task.story_points} </span>
+								<form id="sprint_remove_${task.id}"
+									action="<c:url value="/${project.projectId}/scrum/sprintRemove"/>"
+									method="post">
+									<input type="hidden" name="taskID" value="${task.id}">
+								</form>
 							</div>
-						</c:if>
+						</div>
 					</c:forEach>
 				</div>
 				<div style="text-align: right;">
@@ -133,12 +133,13 @@
 			<hr>
 		</c:forEach>
 	</div>
+<!-- 	FREE TASK LIST -->
 	<div style="display: table-cell; padding-left: 20px; width: 45%">
 		<h4>
 			<s:message code="task.tasks" />
 		</h4>
 		<c:forEach items="${tasks}" var="task">
-			<c:if test="${empty task.sprint && task.state ne 'CLOSED'}">
+			<c:if test="${not task.inSprint && task.state ne 'CLOSED'}">
 				<div class="agile-card" data-id="${task.id}" id="${task.id}">
 					<div>
 						<t:type type="${task.type}" list="true" />
@@ -245,17 +246,6 @@ $(document).ready(function($) {
 			}
 		});
 	
-// 	$("#startSprintForm").submit(function( event ) {
-// 		var end_date = $.datepicker.parseDate("dd-mm-yy",$("#sprint_end").val() );
-// 		var start_date = $.datepicker.parseDate("dd-mm-yy",$("#sprint_start").val() );
-// 		aler("start: " + start_date + " end: " + end_date);
-// 		event.preventDefault();
-// 	});
-// 	$("#sprint_end").datepicker({
-// 		maxDate : '+1m',
-// 		minDate : '0'
-// 	});
-// 	$(".datepicker").datepicker("option", "dateFormat", "dd-mm-yy");
 		
 	$(".confirm_action").click(function(e) {
 		var msg = '<p style="text-align:center">'

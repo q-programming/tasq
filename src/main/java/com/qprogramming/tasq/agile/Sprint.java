@@ -5,13 +5,14 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
+
+import org.joda.time.Period;
 
 import com.qprogramming.tasq.projects.Project;
 
@@ -49,6 +50,9 @@ public class Sprint implements java.io.Serializable {
 
 	@Column
 	private boolean finished;
+	
+	@Column
+	private Period total_estimate;
 
 	public Long getId() {
 		return id;
@@ -128,6 +132,18 @@ public class Sprint implements java.io.Serializable {
 
 	public void finish() {
 		this.finished = true;
+	}
+	public Period getTotal_estimate() {
+		return total_estimate;
+	}
+
+	public void setTotal_estimate(Period total_estimate) {
+		this.total_estimate = total_estimate;
+	}
+
+	@Override
+	public String toString() {
+		return "Sprint " + sprintNo;
 	}
 
 	@Override

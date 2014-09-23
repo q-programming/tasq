@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -14,6 +15,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
@@ -102,10 +104,16 @@ public class Task implements java.io.Serializable {
 	@ManyToOne
 	@JoinColumn(name = "task_assignee")
 	private Account assignee;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "task_sprint")
 	private Sprint sprint;
+
+	@ManyToMany(fetch = FetchType.LAZY)
+	private Set<Sprint> sprints = new HashSet<Sprint>();
+	
+	@Column
+	private boolean inSprint;
 
 	public String getId() {
 		return id;
@@ -218,8 +226,8 @@ public class Task implements java.io.Serializable {
 	public void setWorklog(Set<WorkLog> worklog) {
 		this.worklog = worklog;
 	}
-	
-	public Set<WorkLog> getRawWorkLog(){
+
+	public Set<WorkLog> getRawWorkLog() {
 		return worklog;
 	}
 
@@ -246,6 +254,7 @@ public class Task implements java.io.Serializable {
 	public void setRemaining(Period remaining) {
 		this.remaining = remaining;
 	}
+
 	public Period getRawLogged_work() {
 		logged_work = new Period();
 		Set<WorkLog> worklog = getRawWorkLog();
@@ -331,6 +340,23 @@ public class Task implements java.io.Serializable {
 
 	public void setSprint(Sprint sprint) {
 		this.sprint = sprint;
+	}
+
+	public Set<Sprint> getSprints() {
+		return sprints;
+	}
+
+	public void setSprints(Set<Sprint> sprints) {
+		this.sprints = sprints;
+	}
+
+
+	public boolean isInSprint() {
+		return inSprint;
+	}
+
+	public void setInSprint(boolean inSprint) {
+		this.inSprint = inSprint;
 	}
 
 	/*
@@ -446,6 +472,20 @@ public class Task implements java.io.Serializable {
 		remaining = PeriodHelper.minusPeriods(remaining, activity);
 		if (remaining.toStandardDuration().getMillis() < 0) {
 			remaining = new Period();
+		}
+	}
+	public void addSprint(Sprint sprint) {
+		if (this.sprints == null) {
+			this.sprints = new LinkedHashSet<Sprint>();
+		}
+		this.sprints.add(sprint);
+		setInSprint(true);
+	}
+
+	public void removeSprint(Sprint sprint) {
+		if (this.sprints != null) {
+			this.sprints.remove(sprint);
+			setInSprint(false);
 		}
 	}
 }
