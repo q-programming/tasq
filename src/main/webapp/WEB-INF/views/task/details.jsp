@@ -7,6 +7,7 @@
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
 <%@ taglib prefix="myfn" uri="/WEB-INF/tags/custom.tld"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <security:authorize access="hasRole('ROLE_ADMIN')">
 	<c:set var="is_admin" value="true" />
 </security:authorize>
@@ -348,9 +349,13 @@
 						<s:message code="task.sprints" />
 					</h5>
 				</div>
-			
+
 				<c:forEach items="${task.sprints}" var="sprint">
-					<div>Sprint ${sprint.sprintNo}</div>
+					<div>
+						<a
+							href="<c:url value="/${task.project.projectId}/${fn:toLowerCase(task.project.agile_type)}/burndown?sprint=${sprint.sprintNo}"/>">Sprint
+							${sprint.sprintNo}</a>
+					</div>
 				</c:forEach>
 			</div>
 		</div>

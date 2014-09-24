@@ -98,8 +98,7 @@
 				<c:if test="${sprint.active}">
 					<p>
 						<span class="glyphicon glyphicon-repeat"></span>
-						<s:message code="agile.sprint.activeEnding" />
-						${sprint.end_date}
+						${sprint.start_date} - ${sprint.end_date}
 					</p>
 				</c:if>
 				<div id="sprint_${sprint.sprintNo}">

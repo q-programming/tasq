@@ -350,6 +350,7 @@ public class SprintController {
 
 				}
 			}
+			model.addAttribute("tasksList", taskList);
 			model.addAttribute("sprint", sprint);
 			model.addAttribute("lastSprint", lastSprint);
 			model.addAttribute("project", project);

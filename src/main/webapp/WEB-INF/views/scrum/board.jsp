@@ -59,7 +59,7 @@
 			</c:if>
 		</c:forEach>
 	</div>
-	<div class="table_state" data-state="BLOCKED">
+	<div class="table_state" data-state="BLOCKED" style="border-right:1px solid;border-color:lightgray">
 		<div><h4><s:message code="task.state.blocked"/></h4></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'BLOCKED'}">
