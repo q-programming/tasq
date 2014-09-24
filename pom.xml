@@ -4,8 +4,8 @@
 	<groupId>com.qprogramming</groupId>
 	<artifactId>tasq</artifactId>
 	<packaging>war</packaging>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>Spring MVC Application</name>
+	<version>0.0.2</version>
+	<name>Task tracking app</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java-version>1.6</java-version>
