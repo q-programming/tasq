@@ -23,4 +23,8 @@ public enum TaskType {
 		return super.toString().toLowerCase();
 	}
 
+	public static TaskType toType(String string){
+		return valueOf(string.toUpperCase());
+	}
+
 }

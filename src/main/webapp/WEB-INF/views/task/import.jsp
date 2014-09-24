@@ -15,18 +15,51 @@
 					class="glyphicon glyphicon-plus"></span> <s:message
 						code="task.create" text="Create task" /></a></li>
 			<li class="active"><a style="color: black" href="#"><span
-					class="glyphicon glyphicon-import"></span> Import</a></li>
+					class="glyphicon glyphicon-import"></span> <s:message code="task.import"/></a></li>
 		</ul>
 	</div>
-	<s:message code="task.import.hint"/> <a
-		href="<c:url value="/task/getTemplateFile"/>"><span
-		class="glyphicon glyphicon-file"></span> <s:message code="task.import.template"/></a>
-	<form id="importForm" name="importForm" method="post"
-		enctype="multipart/form-data">
-		<input id="file_upload" name="avatar" type="file"
-			accept=".xls,.xlsx,.xml" title="Import excel file" class="inputfiles"
-			data-filename-placement="inside">
-	</form>
+	<div class="help-block">
+		<s:message code="task.import.hint" />
+		<a href="<c:url value="/task/getTemplateFile"/>"><span
+			class="glyphicon glyphicon-file"></span> <s:message
+				code="task.import.template" /></a>
+	</div>
+	<div class="form-group ">
+		<form id="importForm" name="importForm" method="post"
+			enctype="multipart/form-data">
+			<div class="form-group">
+				<div class="mod-header">
+					<h5 class="mod-header-title">
+						<s:message code="task.import.file" />
+					</h5>
+				</div>
+			
+				<input id="file_upload" name="file" type="file" accept=".xls,.xml"
+					title='<s:message code="task.import.selectFile" />'
+					class="inputfiles" data-filename-placement="inside">
+			</div>
+			<div class="form-group">
+				<div class="mod-header">
+					<h5 class="mod-header-title">
+						<s:message code="project.project" />
+					</h5>
+				</div>
+				<select id="projects_list" style="width: 300px;" name="project"
+					class="form-control">
+					<c:forEach items="${projects}" var="project">
+						<option id="${project.projectId}"
+							<c:if test="${project.id eq user.active_project}">selected style="font-weight:bold"
+ 						</c:if>
+							value="${project.projectId}">${project.name}</option>
+					</c:forEach>
+				</select>
+			</div>
+			<hr>
+			<button class="btn btn-success pull-right" type="submit"><span class="glyphicon glyphicon-import"></span> <s:message code="task.import"/></button>
+			<span class="btn pull-right" onclick="location.href='<c:url value="/"/>';"><s:message
+					code="main.cancel" text="Cancel" /></span>
+		</form>
+	</div>
 </div>
 <script>
 	$(document).ready(function($) {

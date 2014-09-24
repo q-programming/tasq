@@ -228,6 +228,9 @@ public class Task implements java.io.Serializable {
 	}
 
 	public Set<WorkLog> getRawWorkLog() {
+		if (worklog==null){
+			worklog = new HashSet<WorkLog>(); 
+		}
 		return worklog;
 	}
 
