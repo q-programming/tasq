@@ -39,5 +39,9 @@ public enum TaskPriority {
 	public int getPriority() {
 		return priority;
 	}
+	
+	public static TaskPriority toPriority(String string){
+		return valueOf(string.toUpperCase());
+	}
 
 }

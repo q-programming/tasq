@@ -24,10 +24,10 @@
 <div class="white-frame" style="display: table; width: 100%;height:85vh">
 <div style="display:table-caption;margin-left: 10px;">
 	<ul class="nav nav-tabs" style="border-bottom:0">
-			<li class="active"><a style="color: black" href="#"><span class="glyphicon glyphicon-list-alt"></span> <s:message
-						code="agile.board" /></a></li>
 			<li><a style="color: black" href="<c:url value="/${project.projectId}/scrum/backlog"/>"><span class="glyphicon glyphicon-book"></span>
 					Backlog</a></li>
+			<li class="active"><a style="color: black" href="#"><span class="glyphicon glyphicon-list-alt"></span> <s:message
+						code="agile.board" /></a></li>
 			<li><a style="color: black" href="<c:url value="/${project.projectId}/scrum/burndown"/>"><span class="glyphicon glyphicon-bullhorn"></span>
 			 <s:message code="agile.reports" /></a></li>
 	</ul>
@@ -59,7 +59,7 @@
 			</c:if>
 		</c:forEach>
 	</div>
-	<div class="table_state" data-state="BLOCKED">
+	<div class="table_state" data-state="BLOCKED" style="border-right:1px solid;border-color:lightgray">
 		<div><h4><s:message code="task.state.blocked"/></h4></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'BLOCKED'}">

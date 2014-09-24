@@ -1,5 +1,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
+<%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
+
 <script language="javascript" type="text/javascript"
 	src="<c:url value="/resources/js/jquery.jqplot.js"/>"></script>
 <script language="javascript" type="text/javascript"
@@ -10,16 +12,16 @@
 	href="<c:url value="/resources/css/jquery.jqplot.css"/>" />
 <h3>[${project.projectId}] ${project}</h3>
 <div class="white-frame"
-	style="display: table; width: 100%; height: 85vh">
+	style="display: table; width: 100%;">
 	<div style="display: table-caption; margin-left: 10px;">
 		<ul class="nav nav-tabs" style="border-bottom: 0">
+			<li><a style="color: black"
+				href="<c:url value="/${project.projectId}/scrum/backlog"/>"><span
+					class="glyphicon glyphicon-book"></span> Backlog</a></li>
 			<li><a style="color: black"
 				href="<c:url value="/${project.projectId}/scrum/board"/>"><span
 					class="glyphicon glyphicon-list-alt"></span> <s:message
 						code="agile.board" /></a></li>
-			<li><a style="color: black"
-				href="<c:url value="/${project.projectId}/scrum/backlog"/>"><span
-					class="glyphicon glyphicon-book"></span> Backlog</a></li>
 			<li class="active"><a style="color: black" href="#"><span
 					class="glyphicon glyphicon-bullhorn"></span> <s:message
 						code="agile.reports" /></a></li>
@@ -42,7 +44,37 @@
 		</c:forEach>
 	</ul>
 	</div>
-	<div id="chartdiv" style="display:table-cell;height: 400px;width:90%"></div>
+	<div id="chartdiv" style="display:table-cell;height:500px;width:90%"></div>
+	<div style="display:table-row;">
+		<div style="display:table-cell;"></div>
+		<div style="display:table-cell;">
+			<table class="table" style="width:100%">
+				<thead class="theme">
+					<tr>
+						<th style="width: 30px"><s:message code="task.type" /></th>
+						<th style="width: 30px"><s:message code="task.priority" /></th>
+						<th style="width: 500px"><s:message code="task.name" /></th>
+						<th style="width: 30px"><s:message code="task.logged" /></th>
+						<th style="width: 30px"><s:message code="task.remaining" /></th>
+						<th style="text-align:center"><s:message code="task.progress" /></th>
+					</tr>
+				</thead>
+				<c:forEach items="${tasksList}" var="task">
+					<tr>
+						<td><t:type type="${task.type}" list="true" /></td>
+						<td style="text-align:center"><t:priority priority="${task.priority}" list="true" /></td>
+						<td><a href="<c:url value="/task?id=${task.id}"/>"
+							style="color: inherit;<c:if test="${task.state eq 'CLOSED' }">
+										text-decoration: line-through;
+										</c:if>">[${task.id}] ${task.name}</a></td>
+						<td style="text-align: right;">${task.logged_work}</td>
+						<td style="text-align: right;">${task.remaining}</td>
+						<td style="text-align:center"><t:state state="${task.state}"></t:state></td>
+					</tr>
+				</c:forEach>
+			</table>
+		</div>
+	</div>
 </div>
 <script>
 	$(document).ready(function() {
@@ -50,7 +82,7 @@
 		var left = [${left}];
 		var ideal = [${ideal}];
 		var plot = $.jqplot('chartdiv', [ left,burned,ideal ], {
-			title : "Sprint ${sprint.sprintNo}",
+			title : 'Sprint ${sprint.sprintNo}<p style="font-size: xx-small;">${sprint.start_date} - ${sprint.end_date}</p>',
 			highlighter : {
 				show : true,
 				sizeAdjust : 7.5
@@ -62,7 +94,6 @@
 				xaxis : {
 					renderer:$.jqplot.DateAxisRenderer, 
 			        tickOptions:{formatString:'%#d-%m'},
-					label : '<s:message code="agile.sprintDays"/>',
 					pad : 0
 				},
 				yaxis : {

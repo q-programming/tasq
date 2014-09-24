@@ -39,7 +39,7 @@ public class TaskForm {
 	@NotBlank(message = TYPE_NOT_BLANK_MESSAGE)
 	private String type;
 
-	private TaskPriority priority;
+	private String priority;
 
 	private String estimate;
 
@@ -67,19 +67,19 @@ public class TaskForm {
 		setId(task.getId());
 		setRemaining(task.getRemaining());
 		setDue_date(task.getDue_date());
-		setPriority((TaskPriority) task.getPriority());
+		setPriority(task.getPriority().toString().toUpperCase());
 	}
 
 	public Task createTask() throws IllegalArgumentException {
 		Task task = new Task();
 		task.setName(getName());
 		task.setCreate_date(new Date());
-		if (!"".equals(getDue_date())) {
+		if (getDue_date()!=null && !"".equals(getDue_date())) {
 			task.setDue_date(Utils.convertDueDate(getDue_date()));
 		}
 		task.setDescription(getDescription());
 		task.setState(TaskState.TO_DO);
-		task.setType(TaskType.valueOf(getType()));
+		task.setType(TaskType.toType(getType()));
 		boolean estimated = !Boolean.parseBoolean(getNo_estimation());
 		if (!"".equals(getStory_points())) {
 			task.setStory_points(Integer.parseInt(getStory_points()));
@@ -92,7 +92,7 @@ public class TaskForm {
 		task.setEstimated(estimated);
 		task.setLogged_work(PeriodHelper.inFormat(""));
 		task.setOwner(Utils.getCurrentAccount());
-		task.setPriority(getPriority());
+		task.setPriority(TaskPriority.toPriority(getPriority()));
 		return task;
 	}
 
@@ -151,6 +151,10 @@ public class TaskForm {
 	public void setStory_points(String story_points) {
 		this.story_points = story_points;
 	}
+	public void setNumericStory_points(Double story_points) {
+		this.story_points = String.valueOf(story_points.intValue());
+	}
+
 
 	public String getNo_estimation() {
 		return no_estimation;
@@ -176,11 +180,11 @@ public class TaskForm {
 		this.due_date = due_date;
 	}
 
-	public TaskPriority getPriority() {
+	public String getPriority() {
 		return priority;
 	}
 
-	public void setPriority(TaskPriority priority) {
+	public void setPriority(String priority) {
 		this.priority = priority;
 	}
 }

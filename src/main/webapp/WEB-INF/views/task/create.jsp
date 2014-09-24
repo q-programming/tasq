@@ -19,7 +19,7 @@
 <div style="display:table-caption;margin-left: 10px;">
 	<ul class="nav nav-tabs" style="border-bottom:0">
 			<li class="active"><a style="color: black" href="#"><span class="glyphicon glyphicon-plus"></span> <s:message code="task.create" text="Create task"/></a></li>
-			<li><a style="color: black" href="<c:url value="/task/import"/>"><span class="glyphicon glyphicon-import"></span> Import</a></li>
+			<li><a style="color: black" href="<c:url value="/task/import"/>"><span class="glyphicon glyphicon-import"></span> <s:message code="task.import"/></a></li>
 	</ul>
 </div>
 <!-- 	<div class="mod-header"> -->
@@ -174,11 +174,11 @@
 		</div>
 		<%--------------Submit button -----------------%>
 		<div style="margin: 10px auto; text-align: right;">
+			<span class="btn" onclick="location.href='<c:url value="/"/>';"><s:message
+					code="main.cancel" text="Cancel" /></span>
 			<button type="submit" class="btn btn-success">
 				<s:message code="main.create" text="Create" />
 			</button>
-			<span class="btn" onclick="location.href='<c:url value="/"/>';"><s:message
-					code="main.cancel" text="Cancel" /></span>
 		</div>
 	</form:form>
 </div>
