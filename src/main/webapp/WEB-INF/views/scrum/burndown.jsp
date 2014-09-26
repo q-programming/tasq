@@ -53,7 +53,7 @@
 					<tr>
 						<th style="width: 300px"><s:message code="task.name" /></th>
 						<th style="width: 100px"><s:message code="main.date" /></th>
-						<th style="width: 30px"><s:message code="agile.event" /></th>
+						<th style="width: 30px"><s:message code="task.logWork.spent" /></th>
 						<th style="width: 100px"><s:message code="agile.user" /></th>
 <!-- 						TODO -->
 					</tr>
@@ -65,8 +65,8 @@
 								[${worklog.task.id}] ${worklog.task.name}
 							</a></td>
 						<td>${worklog.time}</td>
-						<td>${worklog.formatedActivity}</td>
-						<td>${worklog.account}</td>
+						<td style="text-align:center">${worklog.formatedActivity}</td>
+						<td rel="popover" data-container="body" data-placement="top" data-account="${worklog.account}" data-account_email="${worklog.account.email}" data-account_img="<c:url value="/userAvatar/${worklog.account.id}"/>">${worklog.account}</td>
 					</tr>
 				</c:forEach>
 			</table>
@@ -75,6 +75,18 @@
 </div>
 <script>
 	$(document).ready(function() {
+		$('td[rel=popover]').popover({
+			html : true,
+			trigger : 'hover',
+			content : function() {
+				var account_name = $(this).data('account');
+				var account_email = $(this).data('account_email');
+				var account_img = $(this).data('account_img');
+				var img = '<img data-src="holder.js/30x30"	style="height: 30px; float: left; padding-right: 10px;"	src="'+ account_img +'" />';
+				var html = '<div>'+img + account_name+'</div><div><a style="font-size: xx-small;float:right"href="mailto:"'+account_email+'">'+account_email+'</a>';
+				return html;
+			}});
+// 		jqPlot
 		var burned = [${burned}];
 		var left = [${left}];
 		var ideal = [${ideal}];

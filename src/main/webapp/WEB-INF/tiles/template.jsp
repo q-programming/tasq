@@ -12,10 +12,11 @@
 <head>
 <title>Tasqr</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<script src="http://code.jquery.com/jquery-latest.js"></script>
 <script src="<c:url value="/resources/js/jquery-1.11.1.min.js" />"></script>
 <%-- jQuery UI --%>
 <script src="<c:url value="/resources/js/jquery-ui-1.10.4.custom.js" />"></script>
+<script src="<c:url value="/resources/js/jquery.ui.datepicker-pl.js" />"></script>
+
 <link
 	href="<c:url value="/resources/css/jquery-ui-1.10.4.custom.min.css" />"
 	rel="stylesheet" media="screen" />

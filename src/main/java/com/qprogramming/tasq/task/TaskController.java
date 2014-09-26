@@ -436,6 +436,9 @@ public class TaskController {
 			RedirectAttributes ra, HttpServletRequest request, Model model) {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
+			if(state.equals(task.getState())){
+				return "redirect:" + request.getHeader("Referer");
+			}
 			// check if can edit
 			if (!canEdit(task.getProject())) {
 				MessageHelper.addErrorAttribute(
@@ -452,6 +455,7 @@ public class TaskController {
 						Utils.getCurrentLocale()));
 				return "redirect:" + request.getHeader("Referer");
 			}
+			
 			TaskState old_state = (TaskState) task.getState();
 			task.setState(state);
 			// Zero remaining time
