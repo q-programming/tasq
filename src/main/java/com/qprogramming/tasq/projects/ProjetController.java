@@ -98,7 +98,6 @@ public class ProjetController {
 		accSrv.update(current);
 		// get latest events for this project
 		List<WorkLog> workLogs = wrkLogSrv.getProjectEvents(project);
-		Collections.sort(workLogs, new WorkLogSorter(true));
 		// Check status of all projects
 		List<Task> tasks = project.getTasks();
 		Map<TaskState, Integer> state_count = new HashMap<TaskState, Integer>();

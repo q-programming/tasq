@@ -51,25 +51,22 @@
 			<table class="table" style="width:100%">
 				<thead class="theme">
 					<tr>
-						<th style="width: 30px"><s:message code="task.type" /></th>
-						<th style="width: 30px"><s:message code="task.priority" /></th>
-						<th style="width: 500px"><s:message code="task.name" /></th>
-						<th style="width: 30px"><s:message code="task.logged" /></th>
-						<th style="width: 30px"><s:message code="task.remaining" /></th>
-						<th style="text-align:center"><s:message code="task.progress" /></th>
+						<th style="width: 300px"><s:message code="task.name" /></th>
+						<th style="width: 100px"><s:message code="main.date" /></th>
+						<th style="width: 30px"><s:message code="task.logWork.spent" /></th>
+						<th style="width: 100px"><s:message code="agile.user" /></th>
+<!-- 						TODO -->
 					</tr>
 				</thead>
-				<c:forEach items="${tasksList}" var="task">
+				<c:forEach items="${workLogList}" var="worklog">
 					<tr>
-						<td><t:type type="${task.type}" list="true" /></td>
-						<td style="text-align:center"><t:priority priority="${task.priority}" list="true" /></td>
-						<td><a href="<c:url value="/task?id=${task.id}"/>"
-							style="color: inherit;<c:if test="${task.state eq 'CLOSED' }">
-										text-decoration: line-through;
-										</c:if>">[${task.id}] ${task.name}</a></td>
-						<td style="text-align: right;">${task.logged_work}</td>
-						<td style="text-align: right;">${task.remaining}</td>
-						<td style="text-align:center"><t:state state="${task.state}"></t:state></td>
+						<td><a class="a-tooltip" href="<c:url value="/task?id=${worklog.task.id}"/>" title="
+							[${worklog.task.id}] ${worklog.task.name}">
+								[${worklog.task.id}] ${worklog.task.name}
+							</a></td>
+						<td>${worklog.time}</td>
+						<td style="text-align:center">${worklog.formatedActivity}</td>
+						<td rel="popover" data-container="body" data-placement="top" data-account="${worklog.account}" data-account_email="${worklog.account.email}" data-account_img="<c:url value="/userAvatar/${worklog.account.id}"/>">${worklog.account}</td>
 					</tr>
 				</c:forEach>
 			</table>
@@ -78,6 +75,18 @@
 </div>
 <script>
 	$(document).ready(function() {
+		$('td[rel=popover]').popover({
+			html : true,
+			trigger : 'hover',
+			content : function() {
+				var account_name = $(this).data('account');
+				var account_email = $(this).data('account_email');
+				var account_img = $(this).data('account_img');
+				var img = '<img data-src="holder.js/30x30"	style="height: 30px; float: left; padding-right: 10px;"	src="'+ account_img +'" />';
+				var html = '<div>'+img + account_name+'</div><div><a style="font-size: xx-small;float:right"href="mailto:"'+account_email+'">'+account_email+'</a>';
+				return html;
+			}});
+// 		jqPlot
 		var burned = [${burned}];
 		var left = [${left}];
 		var ideal = [${ideal}];

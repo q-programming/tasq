@@ -52,3 +52,6 @@ span.badge.theme{
 span.badge.theme.zero{
 	color: rgb(69, 161, 199)
 }
+.side-bar.theme{
+	background-color: skyblue;
+}

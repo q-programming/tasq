@@ -160,3 +160,11 @@ form.form-search:before {
 .state_highlight {
 	background: blue;
 }
+.side-bar{
+	height: 100%;
+	left: 0;
+	position: absolute;
+	text-indent: -9999em;
+	top: 0;
+	width: 5px;
+}
