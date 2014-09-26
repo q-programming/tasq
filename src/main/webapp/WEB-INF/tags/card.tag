@@ -5,6 +5,7 @@
 <%@ attribute name="task" required="true"
 	type="com.qprogramming.tasq.task.Task"%>
 <div class="agile-card theme" data-id="${task.id}" id="${task.id}">
+	<div class="side-bar theme"></div>
 	<div>
 		<t:type type="${task.type}" list="true" />
 		<a href="<c:url value="/task?id=${task.id}"/>"

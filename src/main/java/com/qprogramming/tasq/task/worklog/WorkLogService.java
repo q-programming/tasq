@@ -3,19 +3,22 @@
  */
 package com.qprogramming.tasq.task.worklog;
 
+import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.hibernate.Hibernate;
+import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.Utils;
+import com.qprogramming.tasq.support.sorters.WorkLogSorter;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
@@ -143,7 +146,18 @@ public class WorkLogService {
 	}
 
 	public List<WorkLog> getProjectEvents(Project project) {
-		return wlRepo.findByProjectId(project.getId());
+		List<WorkLog> workLogs = wlRepo.findByProjectId(project.getId());
+		Collections.sort(workLogs, new WorkLogSorter(true));
+		return workLogs;
+	}
+
+	public List<WorkLog> getSprintEvents(Sprint sprint) {
+		DateTime start = new DateTime(sprint.getRawStart_date()).minusDays(1);
+		DateTime end = new DateTime(sprint.getRawEnd_date()).plusDays(1);
+		List<WorkLog> workLogs = wlRepo.findByProjectIdAndTimeBetweenAndActivityNotNullOrderByTimeAsc(sprint
+				.getProject().getId(), start.toDate(), end.toDate());
+//		Collections.sort(workLogs, new WorkLogSorter(true));
+		return workLogs;
 	}
 
 	private Task checkState(Task task) {

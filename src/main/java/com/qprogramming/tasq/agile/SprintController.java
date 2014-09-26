@@ -70,8 +70,8 @@ public class SprintController {
 		Project project = projSrv.findByProjectId(id);
 		if (project != null) {
 			model.addAttribute("project", project);
-			Sprint sprint = sprintRepo.findByProjectIdAndActive(
-					project.getId(), true);
+			Sprint sprint = sprintRepo.findByProjectIdAndActiveTrue(
+					project.getId());
 			if (sprint == null) {
 				MessageHelper.addWarningAttribute(
 						ra,
@@ -222,7 +222,7 @@ public class SprintController {
 			HttpServletRequest request, RedirectAttributes ra) {
 		Sprint sprint = sprintRepo.findById(id);
 		Project project = projSrv.findById(project_id);
-		Sprint active = sprintRepo.findByProjectIdAndActive(project_id, true);
+		Sprint active = sprintRepo.findByProjectIdAndActiveTrue(project_id);
 		if (sprint != null && !sprint.isActive() && active == null) {
 			if (canEdit(sprint.getProject())) {
 				sprint.setStart_date(Utils.convertDueDate(sprint_start));
@@ -303,8 +303,13 @@ public class SprintController {
 		Map<LocalDate, Period> burndown_map = new HashMap<LocalDate, Period>();
 		Project project = projSrv.findByProjectId(id);
 		if (project != null) {
-			Sprint lastSprint = sprintRepo.findByProjectIdAndActive(
-					project.getId(), true);
+			Sprint lastSprint = sprintRepo.findByProjectIdAndActiveTrue(project
+					.getId());
+			if (lastSprint == null) {
+				List<Sprint> sprints = sprintRepo.findByProjectId(project
+						.getId());
+				lastSprint = sprints.get(sprints.size()-1);
+			}
 			Sprint sprint;
 			if (sprintNo != null) {
 				sprint = sprintRepo.findByProjectIdAndSprintNo(project.getId(),
@@ -315,6 +320,7 @@ public class SprintController {
 			List<Task> taskList = taskSrv.findAllBySprint(sprint);
 			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID,
 					false));
+			List<WorkLog> worklogList = wrkLogSrv.getSprintEvents(sprint);
 			LocalDate start_time = new LocalDate(sprint.getRawStart_date());
 			LocalDate end_time = new LocalDate(sprint.getRawEnd_date());
 			int sprint_days = Days.daysBetween(start_time, end_time).getDays() + 1;
@@ -353,6 +359,7 @@ public class SprintController {
 			model.addAttribute("tasksList", taskList);
 			model.addAttribute("sprint", sprint);
 			model.addAttribute("lastSprint", lastSprint);
+			model.addAttribute("workLogList", worklogList);
 			model.addAttribute("project", project);
 			model.addAttribute("left", formatResults(results_estimates));
 			model.addAttribute("burned", formatResults(results_burned));

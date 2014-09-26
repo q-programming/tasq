@@ -51,25 +51,22 @@
 			<table class="table" style="width:100%">
 				<thead class="theme">
 					<tr>
-						<th style="width: 30px"><s:message code="task.type" /></th>
-						<th style="width: 30px"><s:message code="task.priority" /></th>
-						<th style="width: 500px"><s:message code="task.name" /></th>
-						<th style="width: 30px"><s:message code="task.logged" /></th>
-						<th style="width: 30px"><s:message code="task.remaining" /></th>
-						<th style="text-align:center"><s:message code="task.progress" /></th>
+						<th style="width: 300px"><s:message code="task.name" /></th>
+						<th style="width: 100px"><s:message code="main.date" /></th>
+						<th style="width: 30px"><s:message code="agile.event" /></th>
+						<th style="width: 100px"><s:message code="agile.user" /></th>
+<!-- 						TODO -->
 					</tr>
 				</thead>
-				<c:forEach items="${tasksList}" var="task">
+				<c:forEach items="${workLogList}" var="worklog">
 					<tr>
-						<td><t:type type="${task.type}" list="true" /></td>
-						<td style="text-align:center"><t:priority priority="${task.priority}" list="true" /></td>
-						<td><a href="<c:url value="/task?id=${task.id}"/>"
-							style="color: inherit;<c:if test="${task.state eq 'CLOSED' }">
-										text-decoration: line-through;
-										</c:if>">[${task.id}] ${task.name}</a></td>
-						<td style="text-align: right;">${task.logged_work}</td>
-						<td style="text-align: right;">${task.remaining}</td>
-						<td style="text-align:center"><t:state state="${task.state}"></t:state></td>
+						<td><a class="a-tooltip" href="<c:url value="/task?id=${worklog.task.id}"/>" title="
+							[${worklog.task.id}] ${worklog.task.name}">
+								[${worklog.task.id}] ${worklog.task.name}
+							</a></td>
+						<td>${worklog.time}</td>
+						<td>${worklog.formatedActivity}</td>
+						<td>${worklog.account}</td>
 					</tr>
 				</c:forEach>
 			</table>
