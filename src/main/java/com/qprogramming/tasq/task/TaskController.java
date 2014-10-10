@@ -722,12 +722,12 @@ public class TaskController {
 		}
 		return "redirect:" + request.getHeader("Referer");
 	}
+
 	@RequestMapping(value = "/task/import", method = RequestMethod.GET)
-	public String startImportTasks(Model model){
+	public String startImportTasks(Model model) {
 		model.addAttribute("projects", projectSrv.findAll());
 		return "/task/import";
 	}
-			
 
 	@Transactional
 	@RequestMapping(value = "/task/import", method = RequestMethod.POST)
@@ -761,7 +761,7 @@ public class TaskController {
 							logger.append(log_row);
 							continue;
 						}
-						//validation finished
+						// validation finished
 						TaskForm taskForm = new TaskForm();
 						taskForm.setName(row.getCell(NAME_CELL)
 								.getStringCellValue());
@@ -771,16 +771,22 @@ public class TaskController {
 								.getStringCellValue());
 						taskForm.setPriority(row.getCell(PRIORITY_CELL)
 								.getStringCellValue());
-						taskForm.setEstimate(row.getCell(
-								ESTIMATE_CELL).getStringCellValue());
-						taskForm.setNumericStory_points(row.getCell(SP_CELL).getNumericCellValue());
-						Date date = row.getCell(DUE_DATE_CELL).getDateCellValue();
+						taskForm.setEstimate(row.getCell(ESTIMATE_CELL)
+								.getStringCellValue());
 						Task task = taskForm.createTask();
-						task.setDue_date(date);
-
-						//Create ID
+						// optional fields
+						if (row.getCell(SP_CELL) != null) {
+							task.setStory_points(((Double)row.getCell(SP_CELL).getNumericCellValue()).intValue());
+						}
+						if (row.getCell(DUE_DATE_CELL) != null) {
+							Date date = row.getCell(DUE_DATE_CELL)
+									.getDateCellValue();
+							task.setDue_date(date);
+						}
+						// Create ID
 						taskCount++;
-						String taskID = project.getProjectId() + "-" + taskCount;
+						String taskID = project.getProjectId() + "-"
+								+ taskCount;
 						task.setId(taskID);
 						task.setProject(project);
 						project.getTasks().add(task);
@@ -802,7 +808,7 @@ public class TaskController {
 				LOG.error(e.getLocalizedMessage());
 			}
 		}
-		
+
 		return "/task/importResults";
 	}
 
@@ -821,28 +827,28 @@ public class TaskController {
 				logger.append(BR);
 			}
 		}
-		if (!isNumericCellValid(row,SP_CELL)) {
+		if (!isNumericCellValid(row, SP_CELL)) {
 			logger.append(log_header);
 			logger.append("Story points must be blank or numeric in cell ");
 			logger.append(COLS.charAt(SP_CELL));
 			logger.append(row.getRowNum());
 			logger.append(BR);
 		}
-		if(!isTaskTypeValid(row)){
+		if (!isTaskTypeValid(row)) {
 			logger.append(log_header);
 			logger.append("Wrong Task Priority in cell ");
 			logger.append(COLS.charAt(TYPE_CELL));
 			logger.append(row.getRowNum());
 			logger.append(BR);
 		}
-		if(!isTaskPriorityValid(row)){
+		if (!isTaskPriorityValid(row)) {
 			logger.append(log_header);
 			logger.append("Wrong Task Priority in cell ");
 			logger.append(COLS.charAt(PRIORITY_CELL));
 			logger.append(row.getRowNum());
 			logger.append(BR);
 		}
-		if (!isDATECellValid(row,DUE_DATE_CELL)) {
+		if (!isDATECellValid(row, DUE_DATE_CELL)) {
 			logger.append(log_header);
 			logger.append("Due date must be blank or date formated in cell ");
 			logger.append(COLS.charAt(DUE_DATE_CELL));
@@ -912,6 +918,7 @@ public class TaskController {
 		}
 		return true;
 	}
+
 	private boolean isTaskPriorityValid(Row row) {
 		Cell cell = row.getCell(PRIORITY_CELL);
 		if (cell != null && cell.getCellType() != Cell.CELL_TYPE_BLANK) {

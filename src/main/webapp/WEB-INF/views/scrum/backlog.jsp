@@ -142,6 +142,7 @@
 				<div class="agile-card" data-id="${task.id}" id="${task.id}">
 					<div>
 						<t:type type="${task.type}" list="true" />
+						<t:priority priority="${task.priority}" list="true" />
 						<a href="<c:url value="/task?id=${task.id}"/>"
 							style="color: inherit;">[${task.id}] ${task.name}</a> <span
 							class="badge theme <c:if test="${task.story_points == 0}">zero</c:if>">

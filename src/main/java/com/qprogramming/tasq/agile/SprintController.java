@@ -110,7 +110,7 @@ public class SprintController {
 			List<Sprint> sprintList = sprintRepo.findByProjectIdAndFinished(
 					project.getId(), false);
 			Collections.sort(taskList, new TaskSorter(
-					TaskSorter.SORTBY.PRIORITY, false));
+					TaskSorter.SORTBY.PRIORITY, true));
 			Collections.sort(sprintList, new SprintSorter());
 			// Assign tasks to sprints in order to display them
 			for (Sprint sprint : sprintList) {
