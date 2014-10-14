@@ -81,7 +81,7 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 					var="alertClass" />
 			</c:otherwise>
 		</c:choose>
-		<div class="alert ${alertClass}"
+		<div class="alert ${alertClass} fade in"
 			style="position: fixed; bottom: 0px; width: 100%;">
 			<button type="button" class="close" data-dismiss="alert">&times;</button>
 			<%
@@ -93,3 +93,7 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 	</c:if>
 </body>
 </html>
+<script>
+$(".alert").alert();
+window.setTimeout(function() { $(".alert").alert('close'); }, 5000);
+</script>

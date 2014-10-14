@@ -778,8 +778,10 @@ public class TaskController {
 								.getStringCellValue());
 						taskForm.setPriority(row.getCell(PRIORITY_CELL)
 								.getStringCellValue());
-						taskForm.setEstimate(row.getCell(ESTIMATE_CELL)
-								.getStringCellValue());
+						if (row.getCell(ESTIMATE_CELL) != null) {
+							taskForm.setEstimate(row.getCell(ESTIMATE_CELL)
+									.getStringCellValue());
+						}
 						Task task = taskForm.createTask();
 						// optional fields
 						if (row.getCell(SP_CELL) != null) {
