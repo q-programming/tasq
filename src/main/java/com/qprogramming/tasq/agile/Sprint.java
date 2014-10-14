@@ -52,7 +52,10 @@ public class Sprint implements java.io.Serializable {
 	private boolean finished;
 	
 	@Column
-	private Period total_estimate;
+	private Period totalEstimate;
+	
+	@Column
+	private Integer totalStoryPoints;
 
 	public Long getId() {
 		return id;
@@ -133,12 +136,20 @@ public class Sprint implements java.io.Serializable {
 	public void finish() {
 		this.finished = true;
 	}
-	public Period getTotal_estimate() {
-		return total_estimate;
+	public Period getTotalEstimate() {
+		return totalEstimate;
 	}
 
-	public void setTotal_estimate(Period total_estimate) {
-		this.total_estimate = total_estimate;
+	public void setTotalEstimate(Period total_estimate) {
+		this.totalEstimate = total_estimate;
+	}
+
+	public Integer getTotalStoryPoints() {
+		return totalStoryPoints;
+	}
+
+	public void setTotalStoryPoints(Integer totalStoryPoints) {
+		this.totalStoryPoints = totalStoryPoints;
 	}
 
 	@Override

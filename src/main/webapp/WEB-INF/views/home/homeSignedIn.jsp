@@ -7,7 +7,7 @@
 
 <div class="white-frame" style="height: 85vh; overflow: auto">
 	<div class="pull-left">
-		Hello
+		<s:message code="home.hello"/>
 		<security:authentication property="principal" />
 	</div>
 	<div class="pull-right">

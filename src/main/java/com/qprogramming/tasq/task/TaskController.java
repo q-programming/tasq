@@ -490,7 +490,14 @@ public class TaskController {
 						msg.getMessage("task.state.changed.closed",
 								new Object[] { task.getId() },
 								Utils.getCurrentLocale()));
-			} else {
+			}else if(old_state.equals(TaskState.CLOSED)){
+				wlSrv.addActivityLog(task, "", LogType.REOPEN);
+				MessageHelper.addSuccessAttribute(ra,
+						msg.getMessage("task.state.changed.reopened",
+								new Object[] { task.getId() },
+								Utils.getCurrentLocale()));
+			}
+			else {
 				wlSrv.addActivityLog(task, old_state.getDescription()
 						+ CHANGE_TO + state.getDescription(), LogType.STATUS);
 				String localised = msg.getMessage(state.getCode(), null,

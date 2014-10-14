@@ -152,13 +152,31 @@ public class WorkLogService {
 		return workLogs;
 	}
 
-	public List<WorkLog> getSprintEvents(Sprint sprint) {
+	/**
+	 * Returns all sprint events. If timeTracked will be set to true, only
+	 * events with logged activity ( time ) will be returned, otherwise only
+	 * events which were closing task will be returned
+	 * 
+	 * @param sprint
+	 *            sprint for which all events must be fetched
+	 * @param timeTracked
+	 *            if true, only events with logged activity ( time )
+	 * @return
+	 */
+	public List<WorkLog> getSprintEvents(Sprint sprint, boolean timeTracked) {
 		LocalDate start = new LocalDate(sprint.getRawStart_date()).minusDays(1);
 		LocalDate end = new LocalDate(sprint.getRawEnd_date()).plusDays(1);
-		List<WorkLog> workLogs = wlRepo.findByProjectIdAndTimeBetweenAndActivityNotNullOrderByTimeAsc(sprint
-				.getProject().getId(), start.toDate(), end.toDate());
-//		Collections.sort(workLogs, new WorkLogSorter(true));
-		return workLogs;
+		if (timeTracked) {
+			return wlRepo
+					.findByProjectIdAndTimeBetweenAndActivityNotNullOrderByTimeAsc(
+							sprint.getProject().getId(), start.toDate(),
+							end.toDate());
+		} else {
+			return wlRepo
+					.findByProjectIdAndTimeBetweenAndTypeOrTypeOrderByTimeAsc(
+							sprint.getProject().getId(), start.toDate(),
+							end.toDate(), LogType.CLOSED, LogType.REOPEN);
+		}
 	}
 
 	private Task checkState(Task task) {

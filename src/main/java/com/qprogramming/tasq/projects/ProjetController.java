@@ -363,8 +363,9 @@ public class ProjetController {
 	@RequestMapping(value = "project/{id}/update", method = RequestMethod.POST)
 	public String updateProperties(
 			@PathVariable Long id,
-			@RequestParam(value = "default_priority", required = false) TaskPriority priority,
-			@RequestParam(value = "default_type", required = false) TaskType type,
+			@RequestParam(value = "timeTracked") Boolean timeTracked,
+			@RequestParam(value = "default_priority") TaskPriority priority,
+			@RequestParam(value = "default_type") TaskType type,
 			Model model, RedirectAttributes ra, HttpServletRequest request) {
 		Project project = projSrv.findById(id);
 		if (project == null) {
@@ -378,6 +379,7 @@ public class ProjetController {
 			project.setDefault_priority(priority);
 		}
 		project.setDefault_type(type);
+		project.setTimeTracked(timeTracked);
 		projSrv.save(project);
 		return "redirect:" + request.getHeader("Referer");
 	}

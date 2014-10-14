@@ -53,7 +53,7 @@
 					<tr>
 						<th style="width: 300px"><s:message code="task.name" /></th>
 						<th style="width: 100px"><s:message code="main.date" /></th>
-						<th style="width: 30px"><s:message code="task.logWork.spent" /></th>
+						<th style="width: 90px"><s:message code="task.activeLog" /></th>
 						<th style="width: 100px"><s:message code="agile.user" /></th>
 <!-- 						TODO -->
 					</tr>
@@ -65,7 +65,12 @@
 								[${worklog.task.id}] ${worklog.task.name}
 							</a></td>
 						<td>${worklog.time}</td>
-						<td style="text-align:center">${worklog.formatedActivity}</td>
+						<c:if test="${not empty worklog.activity}">
+							<td style="text-align:center">${worklog.formatedActivity}</td>
+						</c:if>
+						<c:if test="${empty worklog.activity}">
+							<td style="text-align:center"><s:message code="task.state.${worklog.type.string}"/></td>
+						</c:if>
 						<td rel="popover" data-container="body" data-placement="top" data-account="${worklog.account}" data-account_email="${worklog.account.email}" data-account_img="<c:url value="/userAvatar/${worklog.account.id}"/>">${worklog.account}</td>
 					</tr>
 				</c:forEach>
@@ -87,6 +92,11 @@
 				return html;
 			}});
 // 		jqPlot
+		var timeTracked = ${project.timeTracked};
+		var labelFormat = '%s SP';
+		if (timeTracked){
+			labelFormat = '%s h';
+		}		
 		var burned = [${burned}];
 		var left = [${left}];
 		var ideal = [${ideal}];
@@ -108,7 +118,7 @@
 				yaxis : {
 					pad : 0,
 					tickOptions : {
-						formatString : '%s h',
+						formatString : labelFormat,
 						show : true
 					}
 				}

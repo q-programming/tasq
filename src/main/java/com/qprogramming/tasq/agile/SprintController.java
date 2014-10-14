@@ -229,6 +229,7 @@ public class SprintController {
 				sprint.setEnd_date(Utils.convertDueDate(sprint_end));
 				sprint.setActive(true);
 				Period total_estimate = new Period();
+				int totalStoryPoints = 0;
 				List<Task> taskList = taskSrv.findAllBySprint(sprint);
 				for (Task task : taskList) {
 					if (task.getState().equals(TaskState.ONGOING)
@@ -239,8 +240,10 @@ public class SprintController {
 						total_estimate = PeriodHelper.plusPeriods(
 								total_estimate, task.getRawEstimate());
 					}
+					totalStoryPoints += task.getStory_points();
 				}
-				sprint.setTotal_estimate(total_estimate);
+				sprint.setTotalEstimate(total_estimate);
+				sprint.setTotalStoryPoints(totalStoryPoints);
 				sprintRepo.save(sprint);
 				MessageHelper.addSuccessAttribute(ra, msg.getMessage(
 						"agile.sprint.started",
@@ -300,7 +303,8 @@ public class SprintController {
 		Map<String, Integer> results_estimates = new LinkedHashMap<String, Integer>();
 		Map<String, Integer> results_burned = new LinkedHashMap<String, Integer>();
 		Map<String, Integer> results_ideal = new LinkedHashMap<String, Integer>();
-		Map<LocalDate, Period> burndown_map = new HashMap<LocalDate, Period>();
+		Map<LocalDate, Integer> burndownMap = new HashMap<LocalDate, Integer>();
+		Map<LocalDate, Period> timeBurndownMap = new HashMap<LocalDate, Period>();
 		Project project = projSrv.findByProjectId(id);
 		if (project != null) {
 			Sprint lastSprint = sprintRepo.findByProjectIdAndActiveTrue(project
@@ -317,35 +321,62 @@ public class SprintController {
 			} else {
 				sprint = lastSprint;
 			}
-			List<WorkLog> worklogList = wrkLogSrv.getSprintEvents(sprint);
-			burndown_map = fillBurndownMap(worklogList);
-
+			// Fill maps based on time or story point driven board
 			LocalDate start_time = new LocalDate(sprint.getRawStart_date());
 			LocalDate end_time = new LocalDate(sprint.getRawEnd_date());
 			int sprint_days = Days.daysBetween(start_time, end_time).getDays() + 1;
-			Period remaining_estimate = sprint.getTotal_estimate();
-			Period burned = new Period();
-			// Fill ideal burndown
-			results_ideal.put(start_time.toString(), (int) sprint
-					.getTotal_estimate().toStandardDuration()
-					.getStandardHours());
-			results_ideal.put(end_time.toString(), 0);
-			// Iterate over sprint days
-			for (int i = 0; i < sprint_days; i++) {
-				LocalDate date = start_time.plusDays(i);
-				Period value = burndown_map.get(date);
-				remaining_estimate = PeriodHelper.minusPeriods(
-						remaining_estimate, value);
-				burned = PeriodHelper.plusPeriods(burned, value);
-				if (date.isAfter(LocalDate.now())) {
-					results_estimates.put(date.toString(), null);
-					results_burned.put(date.toString(), null);
-				} else {
-					results_estimates.put(date.toString(),
-							(int) remaining_estimate.toStandardDuration()
-									.getStandardHours());
-					results_burned.put(date.toString(), (int) burned
-							.toStandardDuration().getStandardHours());
+			boolean timeTracked = project.getTimeTracked();
+			List<WorkLog> worklogList = wrkLogSrv.getSprintEvents(sprint,
+					timeTracked);
+			if (timeTracked) {
+				timeBurndownMap = fillTimeBurndownMap(worklogList);
+				Period remaining_estimate = sprint.getTotalEstimate();
+				Period burned = new Period();
+				// Fill ideal burndown
+				results_ideal.put(start_time.toString(), (int) sprint
+						.getTotalEstimate().toStandardDuration()
+						.getStandardHours());
+				results_ideal.put(end_time.toString(), 0);
+				// Iterate over sprint days
+				for (int i = 0; i < sprint_days; i++) {
+					LocalDate date = start_time.plusDays(i);
+					Period value = timeBurndownMap.get(date);
+					remaining_estimate = PeriodHelper.minusPeriods(
+							remaining_estimate, value);
+					burned = PeriodHelper.plusPeriods(burned, value);
+					if (date.isAfter(LocalDate.now())) {
+						results_estimates.put(date.toString(), null);
+						results_burned.put(date.toString(), null);
+					} else {
+						results_estimates.put(date.toString(),
+								(int) remaining_estimate.toStandardDuration()
+										.getStandardHours());
+						results_burned.put(date.toString(), (int) burned
+								.toStandardDuration().getStandardHours());
+					}
+				}
+			} else {
+				burndownMap = fillBurndownMap(worklogList);
+				Integer remaining_estimate = sprint.getTotalStoryPoints();
+				Integer burned = new Integer(0);
+				results_ideal.put(start_time.toString(), remaining_estimate);
+				results_ideal.put(end_time.toString(), 0);
+				for (int i = 0; i < sprint_days; i++) {
+					LocalDate date = start_time.plusDays(i);
+					Integer value = burndownMap.get(date);
+					if(value==null){
+						value=0;
+					}
+					remaining_estimate -= value;
+					burned += value;
+					if (date.isAfter(LocalDate.now())) {
+						results_estimates.put(date.toString(), null);
+						results_burned.put(date.toString(), null);
+					} else {
+						results_estimates.put(date.toString(),
+								remaining_estimate);
+						results_burned.put(date.toString(), burned);
+					}
 				}
 			}
 			model.addAttribute("sprint", sprint);
@@ -360,26 +391,54 @@ public class SprintController {
 	}
 
 	/**
-	 * Fills burndown map with worklogs in format <Date, Period
-	 * Burned> Only events with before present day are added
+	 * Fills burndown map with worklogs in format <Date, Period Burned> Only
+	 * events with before present day are added
 	 * 
 	 * @param worklogList
 	 * 
 	 * @return
 	 **/
-	private Map<LocalDate, Period> fillBurndownMap(List<WorkLog> worklogList) {
+	private Map<LocalDate, Period> fillTimeBurndownMap(List<WorkLog> worklogList) {
 		Map<LocalDate, Period> burndown_map = new LinkedHashMap<LocalDate, Period>();
 		for (WorkLog workLog : worklogList) {
 			LocalDate date_logged = new LocalDate(workLog.getRawTime());
 			Period value = burndown_map.get(date_logged);
 			if (value == null) {
-				burndown_map.put(date_logged, workLog.getActivity());
+				value = workLog.getActivity();
 			} else {
 				value = PeriodHelper.plusPeriods(value, workLog.getActivity());
-				burndown_map.put(date_logged, value);
 			}
+			burndown_map.put(date_logged, value);
 		}
 		return burndown_map;
+	}
+
+	/**
+	 * Fils burned story points map based on worklogs
+	 * 
+	 * @param worklogList
+	 *            list of events with task closed event
+	 * @return
+	 */
+	private Map<LocalDate, Integer> fillBurndownMap(List<WorkLog> worklogList) {
+		Map<LocalDate, Integer> burndown_map = new LinkedHashMap<LocalDate, Integer>();
+		for (WorkLog workLog : worklogList) {
+			LocalDate date_logged = new LocalDate(workLog.getRawTime());
+			Integer taskStoryPoints = workLog.getTask().getStory_points();
+			Integer value = burndown_map.get(date_logged);
+			//If task reopened then re-add SP
+			if(workLog.getType().equals(LogType.REOPEN)){
+				taskStoryPoints *= -1;
+			}
+			if (value == null) {
+				value = taskStoryPoints;
+			} else {
+				value += taskStoryPoints;
+			}
+			burndown_map.put(date_logged, value);
+		}
+		return burndown_map;
+
 	}
 
 	/**

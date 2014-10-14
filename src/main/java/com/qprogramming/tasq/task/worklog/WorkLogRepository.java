@@ -18,5 +18,7 @@ public interface WorkLogRepository extends JpaRepository<WorkLog, Integer> {
 	List<WorkLog> findByProjectId(Long id);
 
 	List<WorkLog> findByProjectIdAndTimeBetweenAndActivityNotNullOrderByTimeAsc(Long id, Date start, Date end);
+	
+	List<WorkLog> findByProjectIdAndTimeBetweenAndTypeOrTypeOrderByTimeAsc(Long id, Date start, Date end, LogType closed, LogType reopen);
 
 }
