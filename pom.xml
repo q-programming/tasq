@@ -4,7 +4,7 @@
 	<groupId>com.qprogramming</groupId>
 	<artifactId>tasq</artifactId>
 	<packaging>war</packaging>
-	<version>0.0.2</version>
+	<version>0.7.0</version>
 	<name>Task tracking app</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -305,7 +305,7 @@
 				<artifactId>maven-war-plugin</artifactId>
 				<version>2.1.1</version>
 				<configuration>
-					<warName>tasq-0.0.1-SNAPSHOT</warName>
+					<warName>${project.artifactId}</warName>
 				</configuration>
 			</plugin>
 			<plugin>
