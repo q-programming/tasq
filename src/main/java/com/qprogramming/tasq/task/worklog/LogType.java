@@ -5,7 +5,8 @@ package com.qprogramming.tasq.task.worklog;
 
 public enum LogType {
 	CREATE("log.type.create"), CHANGE("log.type.change"), LOG("log.type.log"), STATUS(
-			"log.type.status"), ESTIMATE("log.type.estimate"), CLOSED(
+			"log.type.status"), ESTIMATE("log.type.estimate"), REOPEN(
+					"log.type.reopen"),CLOSED(
 			"log.type.closed"), COMMENT("log.type.comment"), EDITED(
 			"log.type.edited"), ASSIGNED("log.type.assign"), PRIORITY(
 			"log.type.priority"), DELETED("log.type.delete"), SPRINT_START(
@@ -29,5 +30,9 @@ public enum LogType {
 	@Override
 	public String toString() {
 		return code;
+	}
+	
+	public String getString(){
+		return super.toString().toLowerCase();
 	}
 }

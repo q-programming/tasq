@@ -74,6 +74,9 @@ public class Project implements Serializable {
 
 	@Enumerated(EnumType.STRING)
 	private AgileType agile_type;
+	
+	@Column
+	private Boolean timeTracked = false;
 
 	public enum AgileType {
 		KANBAN, SCRUM
@@ -203,6 +206,14 @@ public class Project implements Serializable {
 
 	public void setAgile_type(String agile_type) {
 		this.agile_type = AgileType.valueOf(agile_type);
+	}
+
+	public Boolean getTimeTracked() {
+		return timeTracked;
+	}
+
+	public void setTimeTracked(Boolean timeBurndown) {
+		this.timeTracked = timeBurndown;
 	}
 
 	/*

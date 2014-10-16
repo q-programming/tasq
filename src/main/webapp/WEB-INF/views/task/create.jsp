@@ -211,6 +211,7 @@ $(document).ready(function($) {
 	});
 	$(".datepicker").datepicker("option", "dateFormat", "dd-mm-yy");
 	$('.datepicker').datepicker("option", "firstDay", 1);
+	$('.datepicker').datepicker($.datepicker.regional['${user.language}']);
 	var currentDue = "${taskForm.due_date}";
 	$("#due_date").val(currentDue);
 

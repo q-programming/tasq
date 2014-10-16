@@ -81,7 +81,7 @@ public class TaskForm {
 		task.setState(TaskState.TO_DO);
 		task.setType(TaskType.toType(getType()));
 		boolean estimated = !Boolean.parseBoolean(getNo_estimation());
-		if (!"".equals(getStory_points())) {
+		if (getStory_points()!=null && !"".equals(getStory_points())) {
 			task.setStory_points(Integer.parseInt(getStory_points()));
 		} else {
 			task.setStory_points(0);

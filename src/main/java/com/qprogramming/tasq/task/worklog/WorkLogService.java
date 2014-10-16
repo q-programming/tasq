@@ -3,19 +3,23 @@
  */
 package com.qprogramming.tasq.task.worklog;
 
+import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.hibernate.Hibernate;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.Utils;
+import com.qprogramming.tasq.support.sorters.WorkLogSorter;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
@@ -143,7 +147,36 @@ public class WorkLogService {
 	}
 
 	public List<WorkLog> getProjectEvents(Project project) {
-		return wlRepo.findByProjectId(project.getId());
+		List<WorkLog> workLogs = wlRepo.findByProjectId(project.getId());
+		Collections.sort(workLogs, new WorkLogSorter(true));
+		return workLogs;
+	}
+
+	/**
+	 * Returns all sprint events. If timeTracked will be set to true, only
+	 * events with logged activity ( time ) will be returned, otherwise only
+	 * events which were closing task will be returned
+	 * 
+	 * @param sprint
+	 *            sprint for which all events must be fetched
+	 * @param timeTracked
+	 *            if true, only events with logged activity ( time )
+	 * @return
+	 */
+	public List<WorkLog> getSprintEvents(Sprint sprint, boolean timeTracked) {
+		LocalDate start = new LocalDate(sprint.getRawStart_date()).minusDays(1);
+		LocalDate end = new LocalDate(sprint.getRawEnd_date()).plusDays(1);
+		if (timeTracked) {
+			return wlRepo
+					.findByProjectIdAndTimeBetweenAndActivityNotNullOrderByTimeAsc(
+							sprint.getProject().getId(), start.toDate(),
+							end.toDate());
+		} else {
+			return wlRepo
+					.findByProjectIdAndTimeBetweenAndTypeOrTypeOrderByTimeAsc(
+							sprint.getProject().getId(), start.toDate(),
+							end.toDate(), LogType.CLOSED, LogType.REOPEN);
+		}
 	}
 
 	private Task checkState(Task task) {

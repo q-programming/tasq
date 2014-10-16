@@ -52,14 +52,8 @@ public class Task implements java.io.Serializable {
 	@JoinColumn(name = "project_tasks")
 	private Project project;
 
-	@ManyToOne
-	private Account project_admin;
-
 	@Column
 	private Date create_date;
-
-	@Column
-	private Date last_visit;
 
 	@Column
 	private boolean active = false;
@@ -131,17 +125,9 @@ public class Task implements java.io.Serializable {
 		return project;
 	}
 
-	public Account getProject_admin() {
-		return project_admin;
-	}
-
 	public String getCreate_date() {
 		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
 		return sdf.format(create_date);
-	}
-
-	public Date getLast_visit() {
-		return last_visit;
 	}
 
 	public boolean isActive() {
@@ -188,16 +174,8 @@ public class Task implements java.io.Serializable {
 		this.project = project;
 	}
 
-	public void setProject_admin(Account project_admin) {
-		this.project_admin = project_admin;
-	}
-
 	public void setCreate_date(Date create_date) {
 		this.create_date = create_date;
-	}
-
-	public void setLast_visit(Date last_visit) {
-		this.last_visit = last_visit;
 	}
 
 	public void setActive(boolean active) {

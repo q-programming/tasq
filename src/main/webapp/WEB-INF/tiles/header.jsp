@@ -21,13 +21,15 @@
 			style="padding-top: 0px; padding-bottom: 4px"><img
 			src="<c:url value="/resources/img/tasQ_logo_small.png"/>"></img></a>
 		<div class="nav-collapse collapse">
+			<security:authorize access="isAuthenticated()">
 			<ul class="nav navbar-nav">
 				<%-- PROJECTS --%>
 				<li><div class="dropdown"
 						style="padding-top: 5px; padding: 5px">
 						<a class="dropdown-toggle btn theme" type="button"
 							id="dropdownMenu1" data-toggle="dropdown"><s:message
-								code="project.projects" text="Projects" /> <span class="caret theme"></span></a>
+								code="project.projects" text="Projects" /> <span
+							class="caret theme"></span></a>
 						<ul class="dropdown-menu">
 							<li><strong style="padding: 5px 10px;"><s:message
 										code="project.recent" text="Recent projects" /></strong></li>
@@ -77,12 +79,16 @@
 							id="dropdownMenu1" data-toggle="dropdown"><s:message
 								code="agile.agile" text="Agile" /> <span class="caret theme"></span></a>
 						<ul class="dropdown-menu">
-						<c:forEach items="${last_projects}" var="l_project">
+							<c:forEach items="${last_projects}" var="l_project">
 								<c:if test="${l_project.id eq user.active_project}">
-								<li><a href="<c:url value="/agile/${l_project.id}/"/>"><b>${l_project.name} (<s:message code="agile.board.${l_project.agile_type}"/>)</b></a></li>
+									<li><a href="<c:url value="/agile/${l_project.id}/"/>"><b>${l_project.name}
+												(<s:message code="agile.board.${l_project.agile_type}" />)
+										</b></a></li>
 								</c:if>
 								<c:if test="${l_project.id ne user.active_project}">
-									<li><a href="<c:url value="/agile/${l_project.id}/"/>">${l_project.name} (<s:message code="agile.board.${l_project.agile_type}"/>)</a></li>
+									<li><a href="<c:url value="/agile/${l_project.id}/"/>">${l_project.name}
+											(<s:message code="agile.board.${l_project.agile_type}" />)
+									</a></li>
 								</c:if>
 							</c:forEach>
 							<li role="presentation" class="divider"></li>
@@ -90,14 +96,26 @@
 									class="glyphicon glyphicon-list"></span> <s:message
 										code="agile.showAll" text="Show all" /></a></li>
 						</ul></li>
+				<%--Create task button --%>
+				<li>
+					<div style="padding-top: 8px;">
+						<a class="btn btn-xs theme a-tooltip"
+							title="<s:message
+								code="task.create" text="Create task" />" data-placement="bottom"
+							href="<c:url value="/task/create"/>" style="padding: 5px 15px;border:1px solid">
+							<span class="glyphicon glyphicon-plus"></span>
+							<span class="glyphicon glyphicon-th-list"></span></a>
+					</div>
+				</li>
 			</ul>
+			</security:authorize>
 			<ul class="nav navbar-nav pull-right">
 				<security:authorize access="!isAuthenticated()">
 					<li>
 						<div class="dropdown" style="padding-top: 5px">
-							<a class="dropdown-toggle btn theme" type="button" id="dropdownMenu1"
-								data-toggle="dropdown"><s:message code="menu.signin"
-									text="Sign in" /></a>
+							<a class="dropdown-toggle btn theme" type="button"
+								id="dropdownMenu1" data-toggle="dropdown"><s:message
+									code="menu.signin" text="Sign in" /></a>
 							<ul class="dropdown-menu">
 								<li style="margin: 10px;">
 									<form action='<s:url value="/j_spring_security_check"/>'
@@ -136,11 +154,13 @@
 				<%-- Logged in user --%>
 				<security:authorize access="isAuthenticated()">
 					<security:authentication property="principal" var="user" />
-					<li><form class="form-search form-inline" action="<s:url value="/tasks"></s:url>">
-						<input type="text" name="query" class="form-control search-query input-sm"
-							placeholder="<s:message code="task.search"/>" style="border-radius:10px"/>
-					</form>
-					</li>
+					<li><form class="form-search form-inline"
+							action="<s:url value="/tasks"></s:url>">
+							<input type="text" name="query"
+								class="form-control search-query input-sm"
+								placeholder="<s:message code="task.search"/>"
+								style="border-radius: 10px" />
+						</form></li>
 					<li>
 						<div>
 							<a class="btn btn-default btn-xxs a-tooltip"
@@ -162,7 +182,7 @@
 								data-placement="bottom"><span
 								class="glyphicon glyphicon-off"></span></a>
 						</div>
-						<div style="color:white">${user}</div>
+						<div style="color: white">${user}</div>
 					</li>
 					<li>
 						<div class="pull-right">

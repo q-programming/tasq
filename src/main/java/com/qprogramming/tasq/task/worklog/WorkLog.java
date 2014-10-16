@@ -20,6 +20,7 @@ import javax.persistence.SequenceGenerator;
 import org.joda.time.Period;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.task.Task;
 
 /**
@@ -74,7 +75,7 @@ public class WorkLog implements Serializable {
 	}
 
 	public String getTime() {
-		SimpleDateFormat sdf = new SimpleDateFormat("dd.M.yyyy HH:mm");
+		SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm");
 		return sdf.format(time);
 	}
 
@@ -111,7 +112,7 @@ public class WorkLog implements Serializable {
 	}
 
 	public String getTimeLogged() {
-		SimpleDateFormat sdf = new SimpleDateFormat("dd.M.yyyy HH:mm");
+		SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm");
 		return sdf.format(timeLogged);
 	}
 
@@ -145,6 +146,10 @@ public class WorkLog implements Serializable {
 
 	public void setProject_id(Long project_id) {
 		this.projectId = project_id;
+	}
+	
+	public String getFormatedActivity(){
+		return PeriodHelper.outFormat(activity);
 	}
 
 	@Override

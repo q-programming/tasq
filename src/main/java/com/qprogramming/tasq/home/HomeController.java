@@ -25,7 +25,7 @@ public class HomeController {
 
 	@Autowired
 	TaskService taskSrv;
-	
+
 	@Autowired
 	ProjectService projSrv;
 
@@ -42,18 +42,20 @@ public class HomeController {
 			List<Task> currentAccTasks = new LinkedList<Task>();
 			List<Task> unassignedTasks = new LinkedList<Task>();
 			for (Task task : allTasks) {
-				if(usersProjects.contains(task.getProject())){
+				if (usersProjects.contains(task.getProject())) {
+					TaskState state = (TaskState) task.getState();
 					if (task.getRawDue_date() != null
 							&& (task.getRawDue_date().getTime()
 									- System.currentTimeMillis() < week)
-							& !task.getState().equals(TaskState.CLOSED)) {
+							& !state.equals(TaskState.CLOSED)) {
 						dueTasks.add(task);
 					}
 					if (task.getAssignee() == null
-							& !task.getState().equals(TaskState.CLOSED)) {
+							& !state.equals(TaskState.CLOSED)) {
 						unassignedTasks.add(task);
 					}
-					if (Utils.getCurrentAccount().equals(task.getAssignee())) {
+					if (Utils.getCurrentAccount().equals(task.getAssignee())
+							&& !state.equals(TaskState.CLOSED)) {
 						currentAccTasks.add(task);
 					}
 				}

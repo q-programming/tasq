@@ -36,7 +36,7 @@ public class UserServiceTest {
 	public void shouldThrowExceptionWhenUserNotFound() {
 		// arrange
 		thrown.expect(UsernameNotFoundException.class);
-		thrown.expectMessage("user not found");
+		thrown.expectMessage("User not found or is not confirmed");
 
 		when(accountRepositoryMock.findByEmail("user@example.com")).thenReturn(null);
 		// act
@@ -47,6 +47,7 @@ public class UserServiceTest {
 	public void shouldReturnUserDetails() {
 		// arrange
 		Account demoUser = new Account("user@example.com", "demo", Role.ROLE_USER);
+		demoUser.setConfirmed(true);
 		when(accountRepositoryMock.findByEmail("user@example.com")).thenReturn(demoUser);
 
 		// act

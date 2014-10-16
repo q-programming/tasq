@@ -29,7 +29,7 @@ public interface SprintRepository extends JpaRepository<Sprint, Integer> {
 	 * @param active
 	 * @return
 	 */
-	Sprint findByProjectIdAndActive(Long project_id, boolean active);
+	Sprint findByProjectIdAndActiveTrue(Long project_id);
 
 	Sprint findByProjectIdAndSprintNo(Long project_id, Long sprintNo);
 
