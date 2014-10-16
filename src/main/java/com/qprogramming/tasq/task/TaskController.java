@@ -807,6 +807,7 @@ public class TaskController {
 						logger.append("Task ");
 						logger.append(task);
 						logger.append(" succesfully created");
+						logger.append(BR);
 					}
 					model.addAttribute("logger", logger.toString().trim());
 				} else if (extension.equals(XLM)) {
