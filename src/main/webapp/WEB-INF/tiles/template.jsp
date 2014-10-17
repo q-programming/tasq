@@ -112,5 +112,5 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 </html>
 <script>
 $(".alert").alert();
-window.setTimeout(function() { $(".alert").alert('close'); }, 5000);
+window.setTimeout(function() { $(".alert").alert('close'); }, 10000);
 </script>

@@ -1,6 +1,5 @@
 package com.qprogramming.tasq.account;
 
-import java.util.Collection;
 import java.util.Collections;
 
 import org.slf4j.Logger;
@@ -31,7 +30,7 @@ public class UserService implements UserDetailsService {
 			throw new UsernameNotFoundException(
 					"User not found or is not confirmed");
 		}
-		account.addAuthority(createAuthority(account));
+		account.setAuthority(account.getRole());
 		return account;
 	}
 

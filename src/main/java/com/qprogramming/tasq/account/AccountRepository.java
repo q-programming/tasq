@@ -20,7 +20,7 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
 
 	List<Account> findBySurnameStartingWith(String surname);
 
-	List<Account> findByRole(Account.Role role);
+	List<Account> findByRole(Roles role);
 	
 	Account findByNameAndSurname(String name, String surname);
 }

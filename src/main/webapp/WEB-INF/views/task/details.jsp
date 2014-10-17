@@ -691,66 +691,43 @@
 							toggle_comment();
 						});
 
-						$("#assignee")
-								.autocomplete(
-										{
-											minLength : 1,
-											delay : 500,
-											//define callback to format results
-											source : function(request, response) {
-												$
-														.getJSON(
-																"<c:url value="/project/${task.project.id}/getParticipants"/>",
-																request,
-																function(result) {
-																	response($
-																			.map(
-																					result,
-																					function(
-																							item) {
-																						return {
-																							// following property gets displayed in drop down
-																							label : item.name
-																									+ " "
-																									+ item.surname,
-																							value : item.email,
-																						}
-																					}));
-																});
-											},
-											//define select handler
-											select : function(event, ui) {
-												if (ui.item) {
-													event.preventDefault();
-													$("#assignee").val(
-															ui.item.label);
-													$("#assign")
-															.append(
-																	'<input type="hidden" name="email" value=' + ui.item.value + '>');
-													$("#assign").submit();
-													return false;
+						$("#assignee").autocomplete({
+							minLength : 1,
+							delay : 500,
+							//define callback to format results
+							source : function(request, response) {
+								$.getJSON("<c:url value="/project/${task.project.id}/getParticipants"/>",request,function(result) {
+										response($.map(result,function(item) {
+											return {
+												// following property gets displayed in drop down
+												label : item.name+ " "+ item.surname,
+												value : item.email,
 												}
-											}
+											}));
 										});
+								},
+								//define select handler
+							select : function(event, ui) {
+								if (ui.item) {
+									event.preventDefault();
+									$("#assignee").val(ui.item.label);
+									$("#assign").append('<input type="hidden" name="email" value=' + ui.item.value + '>');
+									$("#assign").submit();
+									return false;
+								}
+							}
+						});
 
-						$("#assign_me")
-								.click(
-										function() {
-											var current_email = "${user.email}";
-											$("#assign")
-													.append(
-															'<input type="hidden" name="email" value=' + current_email + '>');
-											$("#assign").submit();
-										});
-						$("#unassign")
-								.click(
-										function() {
-											var current_email = "";
-											$("#assign")
-													.append(
-															'<input type="hidden" name="email" value=' + current_email + '>');
-											$("#assign").submit();
-										});
+						$("#assign_me").click(function() {
+							var current_email = "${user.email}";
+							$("#assign").append('<input type="hidden" name="email" value=' + current_email + '>');
+							$("#assign").submit();
+						});
+						$("#unassign").click(function() {
+							var current_email = "";
+							$("#assign").append('<input type="hidden" name="email" value=' + current_email + '>');
+							$("#assign").submit();
+						});
 
 						$("#assign_button").click(function() {
 							$('#assign_div').toggle("blind");
@@ -770,11 +747,7 @@
 							}
 						});
 					});
-	$(document)
-			.on(
-					"click",
-					".delete_task",
-					function(e) {
+	$(document).on("click",".delete_task",function(e) {
 						var msg = '<p style="text-align:center"><span class="glyphicon glyphicon-warning-sign" style="display: initial;"></span> '
 								+ $(this).data('msg') + '</p>';
 						var lang = $(this).data('lang');

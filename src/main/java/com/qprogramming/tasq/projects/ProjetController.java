@@ -33,6 +33,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.DisplayAccount;
+import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.error.TasqAuthException;
+import com.qprogramming.tasq.error.TasqException;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.ProjectSorter;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
@@ -165,7 +168,11 @@ public class ProjetController {
 
 	@RequestMapping(value = "project/create", method = RequestMethod.GET)
 	public NewProjectForm startProjectcreate() {
-		return new NewProjectForm();
+		if (Roles.isUser()) {
+			return new NewProjectForm();
+		} else {
+			throw new TasqAuthException(msg);
+		}
 	}
 
 	@RequestMapping(value = "project/create", method = RequestMethod.POST)
@@ -338,9 +345,9 @@ public class ProjetController {
 	}
 
 	@RequestMapping(value = "/project/{id}/getParticipants", method = RequestMethod.GET)
-	public @ResponseBody List<DisplayAccount> listParticipants(
-			@PathVariable Long id, @RequestParam String term,
-			HttpServletResponse response) {
+	public @ResponseBody
+	List<DisplayAccount> listParticipants(@PathVariable Long id,
+			@RequestParam String term, HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(id);
 		Set<Account> all_participants = project.getParticipants();
@@ -361,12 +368,11 @@ public class ProjetController {
 
 	@Transactional
 	@RequestMapping(value = "project/{id}/update", method = RequestMethod.POST)
-	public String updateProperties(
-			@PathVariable Long id,
+	public String updateProperties(@PathVariable Long id,
 			@RequestParam(value = "timeTracked") Boolean timeTracked,
 			@RequestParam(value = "default_priority") TaskPriority priority,
-			@RequestParam(value = "default_type") TaskType type,
-			Model model, RedirectAttributes ra, HttpServletRequest request) {
+			@RequestParam(value = "default_type") TaskType type, Model model,
+			RedirectAttributes ra, HttpServletRequest request) {
 		Project project = projSrv.findById(id);
 		if (project == null) {
 			MessageHelper.addErrorAttribute(

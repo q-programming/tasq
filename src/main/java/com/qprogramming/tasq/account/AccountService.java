@@ -85,7 +85,11 @@ public class AccountService {
 		return accRepo.findByNameStartingWith(name);
 	}
 
-	public Collection<? extends Account> findBySurnameStartingWith(String name) {
-		return findBySurnameStartingWith(name);
+	public List<Account> findBySurnameStartingWith(String name) {
+		return accRepo.findBySurnameStartingWith(name);
+	}
+
+	public List<Account> findAdmins() {
+		return accRepo.findByRole(Roles.ROLE_ADMIN);
 	}
 }

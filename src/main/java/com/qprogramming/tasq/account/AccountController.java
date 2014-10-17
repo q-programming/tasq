@@ -45,7 +45,7 @@ public class AccountController {
 	private static final String SORT_BY_NAME = "name";
 	private static final Object SORT_BY_EMAIL = "email";
 	private static final String SORT_BY_SURNAME = "surname";
-	
+
 	@Autowired
 	AccountService accountSrv;
 
@@ -110,7 +110,7 @@ public class AccountController {
 				msg.getMessage("panel.saved", null, Utils.getCurrentLocale()));
 		return "redirect:/settings";
 	}
-	
+
 	@RequestMapping(value = "/userList", method = RequestMethod.GET)
 	public String listUsers(
 			@RequestParam(value = "name", required = false) String name,
@@ -209,5 +209,25 @@ public class AccountController {
 			}
 		}
 		return result;
+	}
+
+	@RequestMapping(value = "role", method = RequestMethod.POST ,produces = "text/plain;charset=UTF-8")
+	@ResponseBody
+	public String setRole(
+			@RequestParam(value = "id") Long id,
+			@RequestParam(value = "role") Roles role) {
+		Account account = accountSrv.findById(id);
+		if(account!=null){
+			//check if not admin or user
+			List<Account> admins = accountSrv.findAdmins();
+			if(account.getRole().equals(Roles.ROLE_ADMIN) && admins.size()==1){
+				return msg.getMessage("role.last.admin", null, Utils.getCurrentLocale());
+			}else{
+				account.setRole(role);
+				accountSrv.update(account);
+				return "OK";
+			}
+		}
+		return null;
 	}
 }

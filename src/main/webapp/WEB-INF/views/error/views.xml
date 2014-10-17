@@ -5,5 +5,8 @@
 <tiles-definitions>
 	<definition name="generalError" extends="default">
 		<put-attribute name="body" value="/WEB-INF/views/error/generalError.jsp"></put-attribute>
-	</definition>	
+	</definition>
+	<definition name="authError" extends="default">
+		<put-attribute name="body" value="/WEB-INF/views/error/authError.jsp"></put-attribute>
+	</definition>		
 </tiles-definitions>
