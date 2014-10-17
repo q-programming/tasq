@@ -81,8 +81,10 @@ public class Account implements java.io.Serializable, UserDetails {
 	@IndexColumn(name = "INDEX_COL")
 	@JoinTable(name = "last_visited_p")
 	private List<Project> last_visited_p = new LinkedList<Project>();
-
-
+	
+	@Column
+	private String theme;
+	
 	@Transient
 	private Collection<GrantedAuthority> authorities;
 
@@ -168,6 +170,14 @@ public class Account implements java.io.Serializable, UserDetails {
 
 	public void setSurname(String surname) {
 		this.surname = surname;
+	}
+
+	public String getTheme() {
+		return theme;
+	}
+
+	public void setTheme(String theme) {
+		this.theme = theme;
 	}
 
 	public Role getRole() {

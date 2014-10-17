@@ -96,7 +96,8 @@
 		var hours = currentTime.getHours();
 		var minutes = currentTime.getMinutes();
 		var seconds = currentTime.getSeconds();
-		$("#time_span").text(hours + ":" + minutes + ":" + seconds);
+		var time=('0'  + hours).slice(-2)+':'+ ('0'  + minutes).slice(-2)+':'+('0' + seconds).slice(-2);
+		$("#time_span").text(time);
 		setTimeout(display, 1000);
 	}
 

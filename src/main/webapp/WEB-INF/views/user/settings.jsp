@@ -5,17 +5,18 @@
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <script src="<c:url value="/resources/js/bootstrap.file-input.js"/>"></script>
 <div class="white-frame"
-	style="height: 470px; overflow: auto; width: 500px">
+	style="height: 570px; overflow: auto; width: 600px">
 	<security:authentication property="principal" var="user" />
 	<h3>
 		<s:message code="panel.settings"></s:message>
 	</h3>
 	<hr>
-	<form id="panelForm" name="panelForm" method="post" enctype="multipart/form-data">
+	<form id="panelForm" name="panelForm" method="post"
+		enctype="multipart/form-data">
 		<div style="overflow: auto; padding: 5px">
 			<div id="avatar"
 				style="border: 1px dashed; display: inline-block; text-align: center; min-width: 110px; float: left">
-				<img id="avatar_src" src="<c:url value="/userAvatar"/>" 
+				<img id="avatar_src" src="<c:url value="/userAvatar"/>"
 					style="padding: 10px;"></img>
 				<div id="avatar_upload" class="hidden" style="margin-top: -30px">
 					<input id="file_upload" name="avatar" type="file"
@@ -33,8 +34,7 @@
 					<div class="checkbox">
 						<label class="checkbox" style="display: inherit;"> <input
 							type="checkbox" name="emails" id="emails" value="true"
-							<c:if test="${user.email_notifications}">checked</c:if>
-								>
+							<c:if test="${user.email_notifications}">checked</c:if>>
 							<span class="glyphicon glyphicon-envelope"></span> <s:message
 								code="panel.recieveEmails"></s:message>
 						</label>
@@ -51,6 +51,22 @@
 								<c:if test="${user.language eq 'en'}">selected</c:if>>English</option>
 							<option value="pl"
 								<c:if test="${user.language eq 'pl'}">selected</c:if>>Polski</option>
+						</select>
+					</div>
+				</div>
+				<hr>
+				<div>
+					<h4>
+						<s:message code="panel.theme"></s:message>
+					</h4>
+					<div style="width: 350px">
+						<select class="form-control input-sm" name="theme">
+							<option value=""
+								<c:if test="${empty user.theme}">selected</c:if>><s:message code="panel.theme.darkblue"/></option>
+							<option value="lightblue"
+								<c:if test="${user.theme eq 'lightblue'}">selected</c:if>><s:message code="panel.theme.lightblue"/></option>
+							<option value="green"
+								<c:if test="${user.theme eq 'green'}">selected</c:if>><s:message code="panel.theme.green"/></option>	
 						</select>
 					</div>
 				</div>
@@ -74,7 +90,7 @@
 		}, function() {
 			$('#avatar_upload').addClass('hidden');
 		});
-		
+
 		$("#file_upload").change(function() {
 			readURL(this);
 		});
@@ -91,4 +107,5 @@
 
 	});
 
+	
 </script>

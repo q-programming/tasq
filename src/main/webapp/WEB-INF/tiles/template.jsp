@@ -3,6 +3,8 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles-extras"
 	prefix="tilesx"%>
+<%@ taglib uri="http://www.springframework.org/security/tags"
+	prefix="security"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
@@ -31,8 +33,23 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 <link href="<c:url value="/resources/css/core.css" />" rel="stylesheet"
 	media="screen" />
 <%-------THEME ------%>
-<link href="<c:url value="/resources/css/theme.css" />"
-	rel="stylesheet" media="screen" />
+<security:authorize access="!isAuthenticated()">
+	<link href="<c:url value="/resources/css/theme.css" />"
+		rel="stylesheet" media="screen" />
+</security:authorize>
+<security:authorize access="isAuthenticated()">
+	<security:authentication property="principal" var="user" />
+	<c:if test="${not empty user.theme}">
+			<link href="<c:url value="/resources/css/theme-${user.theme}.css" />"
+		rel="stylesheet" media="screen" />
+	</c:if>
+	<c:if test="${empty user.theme}">
+		<link href="<c:url value="/resources/css/theme.css" />"
+			rel="stylesheet" media="screen" />
+	</c:if>
+</security:authorize>
+
+
 <%-- CUSTOMS --%>
 <link href="<c:url value="/resources/css/custom.css" />"
 	rel="stylesheet" media="screen" />
