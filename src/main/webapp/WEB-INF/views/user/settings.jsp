@@ -62,9 +62,9 @@
 					<div style="width: 350px">
 						<select class="form-control input-sm" name="theme">
 							<option value=""
-								<c:if test="${empty user.theme}">selected</c:if>><s:message code="panel.theme.lightblue"/></option>
-							<option value="darkblue"
-								<c:if test="${user.theme eq 'darkblue'}">selected</c:if>><s:message code="panel.theme.darkblue"/></option>
+								<c:if test="${empty user.theme}">selected</c:if>><s:message code="panel.theme.darkblue"/></option>
+							<option value="lightblue"
+								<c:if test="${user.theme eq 'lightblue'}">selected</c:if>><s:message code="panel.theme.lightblue"/></option>
 							<option value="green"
 								<c:if test="${user.theme eq 'green'}">selected</c:if>><s:message code="panel.theme.green"/></option>	
 						</select>

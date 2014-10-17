@@ -8,18 +8,18 @@ a.theme {
 }
 
 div.navbar.navbar-fixed-top.theme {
-	background-color: skyblue;
+	background-color: #2c5aa0;
 }
 
 div.modal-header.theme {
-	background-color: skyblue;
+	background-color: #2c5aa0;
 	color: white;
 	border-top-left-radius: 5px;
 	border-top-right-radius: 5px;
 }
 
 thead.theme {
-	background: skyblue;
+	background: #2c5aa0;
 	color: white;
 }
 .agile-card {
@@ -53,5 +53,5 @@ span.badge.theme.zero{
 	color: rgb(69, 161, 199)
 }
 .side-bar.theme{
-	background-color: skyblue;
+	background-color: #2c5aa0;
 }
