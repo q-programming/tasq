@@ -71,6 +71,7 @@ public class AccountController {
 			@RequestParam(value = "avatar", required = false) MultipartFile avatarFile,
 			@RequestParam(value = "emails", required = false) String emails,
 			@RequestParam(value = "language", required = false) String language,
+			@RequestParam(value = "theme", required = false) String theme,
 			RedirectAttributes ra, HttpServletRequest request,
 			HttpServletResponse response) {
 		Account account = Utils.getCurrentAccount();
@@ -97,6 +98,7 @@ public class AccountController {
 		account.setLanguage(language);
 		localeResolver.setLocale(request, response, new Locale(language));
 		account.setEmail_notifications(Boolean.parseBoolean(emails));
+		account.setTheme(theme);
 		accountSrv.update(account);
 		MessageHelper.addSuccessAttribute(ra,
 				msg.getMessage("panel.saved", null, Utils.getCurrentLocale()));
