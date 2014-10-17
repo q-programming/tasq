@@ -147,10 +147,11 @@
 			$("#taskID").val(taskID);
 		});
 		
-		$("#assign_me").click(function(){
+		$(".assign_me").click(function(){
+			var taskID = $(this).data('taskid');
 			var current_email = "${user.email}";
-			$("#assign").append('<input type="hidden" name="email" value=' + current_email + '>');
-        	$("#assign").submit();
+			$("#assign_" + taskID).append('<input type="hidden" name="email" value=' + current_email + '>');
+        	$("#assign_" + taskID).submit();
 		});
 
 		$(".agile-card").draggable({

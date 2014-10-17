@@ -29,8 +29,8 @@
 		<div style="margin-top: 10px; text-align: right; display: table-cell;">
 			<c:if test="${empty task.assignee}">
 				<i><s:message code="task.unassigned" />
-					<button class="btn btn-default btn-xxs a-tooltip" type="button"
-						id="assign_me" title="<s:message code="task.assignme"/>">
+					<button class="btn btn-default btn-xxs a-tooltip assign_me" type="button"
+						data-taskID="${task.id}" title="<s:message code="task.assignme"/>">
 						<span class="glyphicon glyphicon-user"></span>
 					</button></i>
 				<form id="state_form_${task.id}" name="state_form" method="post"
@@ -39,11 +39,10 @@
 						id="state_${task.id}" type="hidden" name="state"
 						value="${task.state}">
 				</form>
-				<form id="assign" action="<c:url value="/task/assign"/>"
+				<form id="assign_${task.id}" action="<c:url value="/task/assign"/>"
 					method="post">
 					<input type="hidden" name="taskID" value="${task.id}">
 				</form>
-
 			</c:if>
 			<c:if test="${not empty task.assignee}">
 				<img data-src="holder.js/20x20"
