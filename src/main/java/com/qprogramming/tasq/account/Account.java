@@ -1,5 +1,6 @@
 package com.qprogramming.tasq.account;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -195,6 +196,13 @@ public class Account implements java.io.Serializable, UserDetails {
 	public void setAuthorities(Collection<GrantedAuthority> authorities) {
 		this.authorities = authorities;
 	}
+	public void addAuthority(GrantedAuthority authority) {
+		if(this.authorities==null){
+			this.authorities = new ArrayList<GrantedAuthority>();
+		}
+		this.authorities.add(authority);
+	}
+
 
 	public byte[] getAvatar() {
 		return avatar;

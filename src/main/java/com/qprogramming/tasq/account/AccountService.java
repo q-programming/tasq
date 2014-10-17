@@ -3,6 +3,7 @@
  */
 package com.qprogramming.tasq.account;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -78,5 +79,13 @@ public class AccountService {
 
 	public Account getCurrent() {
 		return accRepo.findByEmail(Utils.getCurrentAccount().getEmail());
+	}
+
+	public List<Account> findByNameStartingWith(String name) {
+		return accRepo.findByNameStartingWith(name);
+	}
+
+	public Collection<? extends Account> findBySurnameStartingWith(String name) {
+		return findBySurnameStartingWith(name);
 	}
 }
