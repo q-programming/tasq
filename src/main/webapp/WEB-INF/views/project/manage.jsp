@@ -119,11 +119,12 @@
 			<s:message code="project.members" />
 		</h4>
 	</div>
-	<div style="display: table-cell; padding-left: 20px;">
-		<div id="add_button_div">
-			<span class="btn btn-default btn-sm" id="add_button"><span
-				class="glyphicon glyphicon-plus"></span> <s:message
-					code="project.participant.new" /></span>
+	<div style="display: table-row; padding-left: 20px;">
+		<div id="add_button_div" style="display: table-cell; padding-left: 20px;">
+			<span class="btn btn-default btn-sm a-tooltip" title="<s:message
+					code="project.participant.new" />" id="add_button"><span
+				class="glyphicon glyphicon-plus"></span><span
+				class="glyphicon glyphicon-user"></span></span>
 		</div>
 		<div style="display: table-cell; padding-left: 20px; display: none"
 			id="add_div">
@@ -143,6 +144,11 @@
 				</form>
 			</div>
 		</div>
+		<div style="display: table-cell; padding-left:5px;">
+			<a href="<c:url value="/users"></c:url>" target="_blank"><span class="btn btn-default btn-sm a-tooltip" title="<s:message
+					code="menu.users" />"><b>?</b> <span
+				class="glyphicon glyphicon-user"></span></span></a>
+		</div>
 	</div>
 	<%------------PARTICIPANTS --------------------------%>
 	<table class="table">
@@ -150,7 +156,7 @@
 			<tr>
 				<td><img data-src="holder.js/30x30"
 					style="height: 30px; float: left; padding-right: 10px;"
-					src="<c:url value="/userAvatar/${participant.id}"/>" />${participant}
+					src="<c:url value="/userAvatar/${participant.id}"/>" />${participant} <span style="color:#737373">(<s:message code="${participant.role.code}"/>)</span>
 				</td>
 				<td><c:if test="${can_edit}">
 						<div class="pull-right">

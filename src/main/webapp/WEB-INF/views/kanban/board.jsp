@@ -6,6 +6,7 @@
 	uri="http://www.springframework.org/security/tags"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
+<%@ taglib prefix="myfn" uri="/WEB-INF/tags/custom.tld"%>
 <c:set var="tasks_text">
 	<s:message code="task.tasks" text="Tasks" />
 </c:set>
@@ -13,13 +14,16 @@
 	<s:message code="task.description" text="Description" />
 </c:set>
 <security:authentication property="principal" var="user" />
+<c:if test="${myfn:contains(project.participants,user) && user.isUser || is_admin}">
+	<c:set var="can_edit" value="true" />
+</c:if>
 <h4>Kanban Board</h4>
 <div class="white-frame" style="display: table; width: 100%;height:85vh">
 	<div class="table_state" data-state="TO_DO">
 		<div><h4><s:message code="task.state.todo"/></h4></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'TO_DO'}">
-				<t:card task="${task}" />
+				<t:card task="${task}" can_edit="${can_edit}"/>
 			</c:if>
 		</c:forEach>
 	</div>
@@ -27,7 +31,7 @@
 		<div><h4><s:message code="task.state.ongoing"/></h4></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'ONGOING'}">
-				<t:card task="${task}" />
+				<t:card task="${task}" can_edit="${can_edit}"/>
 			</c:if>
 		</c:forEach>
 	</div>
@@ -35,7 +39,7 @@
 		<div><h4><s:message code="task.state.closed"/></h4></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'CLOSED'}">
-				<t:card task="${task}" />
+				<t:card task="${task}" can_edit="${can_edit}"/>
 			</c:if>
 		</c:forEach>
 	</div>
@@ -43,7 +47,7 @@
 		<div><h4><s:message code="task.state.blocked"/></h4></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'BLOCKED'}">
-				<t:card task="${task}" />
+				<t:card task="${task}" can_edit="${can_edit}"/>
 			</c:if>
 		</c:forEach>
 	</div>

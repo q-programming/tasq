@@ -2,18 +2,22 @@
 <p>
 	<c:out value="${errorMessage}" /> 	
 </p>
-<h5 class="toggle_stack btn btn-default">
-	<span style="font-size: x-small;"
-		class="glyphicon glyphicon-chevron-right"></span> Show stacktrace
-</h5>
-<div
-	style="display: none; padding: 5px; border: 1px solid; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; margin-top: 10px; background-color: white;">
-	<div>
-		<c:forEach items="${errorMessage.stackTrace}" var="element">
-			<c:out value="${element}" />
-		</c:forEach>
+
+<c:if test="${errorMessage['class'] ne 'class java.lang.String'}">
+	<h5 class="toggle_stack btn btn-default">
+		<span style="font-size: x-small;"
+			class="glyphicon glyphicon-chevron-right"></span> Show stacktrace
+	</h5>
+	<div
+		style="display: none; padding: 5px; border: 1px solid; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; margin-top: 10px; background-color: white;">
+		<div>
+			<!-- it's a String! -->
+			<c:forEach items="${errorMessage.stackTrace}" var="element">
+				<c:out value="${element}" />
+			</c:forEach>
+		</div>
 	</div>
-</div>
+</c:if>
 <script>
 $(".toggle_stack").click(function() {
 	toggle($(this));

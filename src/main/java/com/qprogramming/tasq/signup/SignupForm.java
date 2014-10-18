@@ -1,9 +1,10 @@
 package com.qprogramming.tasq.signup;
 
-import org.hibernate.validator.constraints.*;
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotBlank;
 
 import com.qprogramming.tasq.account.Account;
-import com.qprogramming.tasq.account.Account.Role;
+import com.qprogramming.tasq.account.Roles;
 
 public class SignupForm {
 
@@ -59,7 +60,7 @@ public class SignupForm {
 	}
 
 	public Account createAccount() {
-		Account account = new Account(getEmail(), getPassword(), Role.ROLE_USER);
+		Account account = new Account(getEmail(), getPassword(), Roles.ROLE_USER);
 		account.setName(getName());
 		account.setSurname(getSurname());
         return account;

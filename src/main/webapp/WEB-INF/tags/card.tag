@@ -4,6 +4,7 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
 <%@ attribute name="task" required="true"
 	type="com.qprogramming.tasq.task.Task"%>
+<%@ attribute name="can_edit" required="true"%>
 <div class="agile-card theme" data-id="${task.id}" id="${task.id}">
 	<div class="side-bar theme"></div>
 	<div>
@@ -18,32 +19,36 @@
 	</div>
 	<div style="display: table; width: 100%; margin-top: 5px;">
 		<div style="display: table-cell; vertical-align: bottom;">
-			<button class="btn btn-default btn-xxs a-tooltip worklog" type="button"
-				data-toggle="modal" data-target="#logWorkform" data-taskID="${task.id}" id="log_time"
-				title="<s:message code="task.logWork"/>">
-				<span class="glyphicon glyphicon-time"></span>
-			</button>
+			<c:if test="${can_edit}">
+				<button class="btn btn-default btn-xxs a-tooltip worklog" type="button"
+					data-toggle="modal" data-target="#logWorkform" data-taskID="${task.id}" id="log_time"
+					title="<s:message code="task.logWork"/>">
+					<span class="glyphicon glyphicon-time"></span>
+				</button>
+			</c:if>
 			<span class="a-tooltip" title="<s:message code="task.remaining"/>">${task.remaining}</span>
 		</div>
 		<%---Assignee--%>
 		<div style="margin-top: 10px; text-align: right; display: table-cell;">
 			<c:if test="${empty task.assignee}">
 				<i><s:message code="task.unassigned" />
-					<button class="btn btn-default btn-xxs a-tooltip" type="button"
-						id="assign_me" title="<s:message code="task.assignme"/>">
-						<span class="glyphicon glyphicon-user"></span>
-					</button></i>
+					<c:if test="${can_edit}">
+						<button class="btn btn-default btn-xxs a-tooltip assign_me" type="button"
+							data-taskID="${task.id}" title="<s:message code="task.assignme"/>">
+							<span class="glyphicon glyphicon-user"></span>
+						</button>
+					</c:if>
+				</i>
 				<form id="state_form_${task.id}" name="state_form" method="post"
 					action="<c:url value="/task/state"/>">
 					<input type="hidden" name="taskID" value="${task.id}"> <input
 						id="state_${task.id}" type="hidden" name="state"
 						value="${task.state}">
 				</form>
-				<form id="assign" action="<c:url value="/task/assign"/>"
+				<form id="assign_${task.id}" action="<c:url value="/task/assign"/>"
 					method="post">
 					<input type="hidden" name="taskID" value="${task.id}">
 				</form>
-
 			</c:if>
 			<c:if test="${not empty task.assignee}">
 				<img data-src="holder.js/20x20"

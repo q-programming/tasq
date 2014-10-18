@@ -41,6 +41,11 @@ public class ProjectService {
 		return projRepo.findByParticipants_Id(curent_user.getId());
 	}
 
+	public List<Project> findAllByUser(Long id) {
+		return projRepo.findByParticipants_Id(id);
+	}
+
+
 	public Project activate(Long id) {
 		Project project = projRepo.findById(id);
 		if (project != null) {

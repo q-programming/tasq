@@ -7,5 +7,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class SigninController {
 
 	@RequestMapping(value = "signin")
-	public void signin() {}
+	public void signin() {
+	}
 }
