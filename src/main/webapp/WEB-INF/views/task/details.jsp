@@ -29,7 +29,7 @@
 	<%----------------------TASK NAME-----------------------------%>
 	<div>
 		<div class="pull-right">
-			<c:if test="${can_edit || is_assignee}">
+			<c:if test="${can_edit && user.isUser || is_assignee}">
 				<!-- change state trigger modal -->
 				<button class="btn btn-default btn-sm" data-toggle="modal"
 					data-target="#changeState">
@@ -44,7 +44,7 @@
 						<s:message code="task.edit" />
 					</button></a>
 			</c:if>
-			<c:if test="${can_edit}">
+			<c:if test="${can_edit && user.isUser}">
 				<a class="btn btn-default btn-sm a-tooltip delete_task"
 					href="<c:url value="task/delete?id=${task.id}"/>"
 					title="<s:message code="task.delete" text="Delete task" />"
@@ -79,7 +79,7 @@
 					<tr>
 						<td><s:message code="task.priority" /></td>
 						<td class="left-margin"><c:choose>
-								<c:when test="${can_edit || is_assignee}">
+								<c:when test="${can_edit && user.isUser || is_assignee}">
 									<div class="dropdown">
 										<%
 											pageContext.setAttribute("priorities",
@@ -129,7 +129,7 @@
 					</h5>
 				</div>
 				<!-- logwork trigger modal -->
-				<c:if test="${can_edit || is_assignee}">
+				<c:if test="${can_edit && user.isUser || is_assignee}">
 					<button class="btn btn-default btn-sm" data-toggle="modal"
 						data-target="#logWorkform">
 						<span class="glyphicon glyphicon-calendar"></span>
@@ -314,13 +314,15 @@
 								<a href="<c:url value="/user?id=${task.assignee.id}"/>">${task.assignee}</a>
 							</c:if>
 						</div>
-						<div style="display: table-cell; padding-left: 5px">
-							<span class="btn btn-default btn-sm a-tooltip" id="assign_button"
-								title="<s:message code="task.assign"/>"> <span
-								class="glyphicon glyphicon-hand-left"></span>
-							</span>
+							<c:if test="${user.isUser}">
+								<div style="display: table-cell; padding-left: 5px">
+									<span class="btn btn-default btn-sm a-tooltip" id="assign_button"
+										title="<s:message code="task.assign"/>"> <span
+										class="glyphicon glyphicon-hand-left"></span>
+									</span>
+								</div>
+							</c:if>
 						</div>
-					</div>
 				</div>
 			</div>
 			<%----------------------DATES ----------------------------------------%>
@@ -438,10 +440,12 @@
 						</div>
 					</form>
 				</div>
-				<button id="comments_add" class="btn btn-default btn-sm">
-					<span class="glyphicon glyphicon-comment"></span>
-					<s:message code="comment.add" text="Add Comment" />
-				</button>
+				<c:if test="${user.isReporter}">
+					<button id="comments_add" class="btn btn-default btn-sm">
+						<span class="glyphicon glyphicon-comment"></span>
+						<s:message code="comment.add" text="Add Comment" />
+					</button>
+				</c:if>
 			</div>
 			<%------------------ WORK LOG -------------------------%>
 			<div id="logWork" class="tab-pane fade">

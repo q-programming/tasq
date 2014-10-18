@@ -27,7 +27,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.account.Account.Role;
+import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.PeriodHelper;
@@ -69,6 +71,10 @@ public class SprintController {
 			HttpServletRequest request, RedirectAttributes ra) {
 		Project project = projSrv.findByProjectId(id);
 		if (project != null) {
+			if (!project.getParticipants().contains(Utils.getCurrentAccount())
+					&& !Roles.isAdmin()) {
+				throw new TasqAuthException(msg);
+			}
 			model.addAttribute("project", project);
 			Sprint sprint = sprintRepo.findByProjectIdAndActiveTrue(project
 					.getId());
@@ -96,6 +102,10 @@ public class SprintController {
 			HttpServletRequest request) {
 		Project project = projSrv.findByProjectId(id);
 		if (project != null) {
+			if (!project.getParticipants().contains(Utils.getCurrentAccount())
+					&& !Roles.isAdmin()) {
+				throw new TasqAuthException(msg);
+			}
 			model.addAttribute("project", project);
 			List<Task> resultList = new LinkedList<Task>();
 			List<Task> taskList = taskSrv.findAllByProject(project);
@@ -134,6 +144,10 @@ public class SprintController {
 	public String createSprint(@PathVariable String id, Model model,
 			HttpServletRequest request, RedirectAttributes ra) {
 		Project project = projSrv.findByProjectId(id);
+		if (!project.getAdministrators().contains(Utils.getCurrentAccount())
+				&& !Roles.isAdmin()) {
+			throw new TasqAuthException(msg);
+		}
 		List<Sprint> sprints = sprintRepo.findByProjectId(project.getId());
 		Sprint sprint = new Sprint();
 		sprint.setProject(project);
@@ -154,6 +168,11 @@ public class SprintController {
 			HttpServletRequest request, RedirectAttributes ra) {
 		Sprint sprint = sprintRepo.findById(sprintID);
 		Task task = taskSrv.findById(taskID);
+		Project project = task.getProject();
+		if (!project.getAdministrators().contains(Utils.getCurrentAccount())
+				&& !Roles.isAdmin()) {
+			throw new TasqAuthException(msg);
+		}
 		Hibernate.initialize(task.getSprints());
 		task.addSprint(sprint);
 		taskSrv.save(task);
@@ -171,6 +190,11 @@ public class SprintController {
 			@RequestParam(value = "taskID") String taskID, Model model,
 			HttpServletRequest request, RedirectAttributes ra) {
 		Task task = taskSrv.findById(taskID);
+		Project project = task.getProject();
+		if (!project.getAdministrators().contains(Utils.getCurrentAccount())
+				&& !Roles.isAdmin()) {
+			throw new TasqAuthException(msg);
+		}
 		Sprint sprint = sprintRepo.findById(task.getSprint().getId());
 		if (!sprint.isActive()) {
 			Hibernate.initialize(task.getSprints());
@@ -195,6 +219,11 @@ public class SprintController {
 	public String deleteSprint(@RequestParam(value = "id") Long id,
 			Model model, HttpServletRequest request, RedirectAttributes ra) {
 		Sprint sprint = sprintRepo.findById(id);
+		Project project = sprint.getProject();
+		if (!project.getAdministrators().contains(Utils.getCurrentAccount())
+				&& !Roles.isAdmin()) {
+			throw new TasqAuthException(msg);
+		}
 		if (sprint != null && !sprint.isActive()) {
 			if (canEdit(sprint.getProject())) {
 				List<Task> taskList = taskSrv.findAllBySprint(sprint);
@@ -224,7 +253,7 @@ public class SprintController {
 		Project project = projSrv.findById(project_id);
 		Sprint active = sprintRepo.findByProjectIdAndActiveTrue(project_id);
 		if (sprint != null && !sprint.isActive() && active == null) {
-			if (canEdit(sprint.getProject())) {
+			if (canEdit(sprint.getProject()) || Roles.isAdmin()) {
 				sprint.setStart_date(Utils.convertDueDate(sprint_start));
 				sprint.setEnd_date(Utils.convertDueDate(sprint_end));
 				sprint.setActive(true);
@@ -262,7 +291,8 @@ public class SprintController {
 		Sprint sprint = sprintRepo.findById(id);
 		if (sprint != null) {
 			Project project = projSrv.findById(sprint.getProject().getId());
-			if (sprint.isActive() && canEdit(sprint.getProject())) {
+			if (sprint.isActive()
+					&& (canEdit(sprint.getProject()) || Roles.isAdmin())) {
 				sprint.setActive(false);
 				sprint.finish();
 				sprint.setEnd_date(new Date());
@@ -364,8 +394,8 @@ public class SprintController {
 				for (int i = 0; i < sprint_days; i++) {
 					LocalDate date = start_time.plusDays(i);
 					Integer value = burndownMap.get(date);
-					if(value==null){
-						value=0;
+					if (value == null) {
+						value = 0;
 					}
 					remaining_estimate -= value;
 					burned += value;
@@ -426,8 +456,8 @@ public class SprintController {
 			LocalDate date_logged = new LocalDate(workLog.getRawTime());
 			Integer taskStoryPoints = workLog.getTask().getStory_points();
 			Integer value = burndown_map.get(date_logged);
-			//If task reopened then re-add SP
-			if(workLog.getType().equals(LogType.REOPEN)){
+			// If task reopened then re-add SP
+			if (workLog.getType().equals(LogType.REOPEN)) {
 				taskStoryPoints *= -1;
 			}
 			if (value == null) {

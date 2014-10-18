@@ -50,8 +50,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.account.Account.Role;
 import com.qprogramming.tasq.account.AccountService;
+import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.PeriodHelper;
@@ -111,6 +113,9 @@ public class TaskController {
 
 	@RequestMapping(value = "task/create", method = RequestMethod.GET)
 	public TaskForm startTaskCreate(Model model) {
+		if (!Roles.isReporter()) {
+			throw new TasqAuthException(msg);
+		}
 		model.addAttribute("project", projectSrv.findUserActiveProject());
 		model.addAttribute("projects_list", projectSrv.findAllByUser());
 		return new TaskForm();
@@ -121,6 +126,9 @@ public class TaskController {
 			@Valid @ModelAttribute("taskForm") TaskForm taskForm,
 			Errors errors, RedirectAttributes ra, HttpServletRequest request,
 			Model model) {
+		if (!Roles.isReporter()) {
+			throw new TasqAuthException(msg);
+		}
 		if (errors.hasErrors()) {
 			model.addAttribute("projects_list", projectSrv.findAllByUser());
 			model.addAttribute("project", projectSrv.findUserActiveProject());
@@ -164,6 +172,10 @@ public class TaskController {
 	@RequestMapping(value = "/task/edit", method = RequestMethod.GET)
 	public TaskForm startEditTask(@RequestParam("id") String id, Model model) {
 		Task task = taskSrv.findById(id);
+		if (!Roles.isReporter()
+				|| !task.getOwner().equals(Utils.getCurrentAccount())) {
+			throw new TasqAuthException(msg);
+		}
 		Hibernate.initialize(task.getRawWorkLog());
 		model.addAttribute("task", task);
 		return new TaskForm(task);
@@ -185,7 +197,8 @@ public class TaskController {
 			return null;
 		}
 		// check if can edit
-		if (!canEdit(task.getProject())) {
+		if (!canEdit(task.getProject()) && (!Roles.isReporter()
+				|| !task.getOwner().equals(Utils.getCurrentAccount()))) {
 			MessageHelper.addErrorAttribute(
 					ra,
 					msg.getMessage("error.accesRights", null,
@@ -265,7 +278,6 @@ public class TaskController {
 			return "redirect:/tasks";
 		}
 		Account account = Utils.getCurrentAccount();
-		account = accSrv.findByEmail(account.getEmail());
 		List<Task> last_visited = account.getLast_visited_t();
 		last_visited.add(0, task);
 		if (last_visited.size() > 4) {
@@ -372,7 +384,7 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
-			if (!canEdit(task.getProject())) {
+			if (!canEdit(task.getProject()) && !Roles.isUser()) {
 				MessageHelper.addErrorAttribute(
 						ra,
 						msg.getMessage("error.accesRights", null,
@@ -436,17 +448,12 @@ public class TaskController {
 			RedirectAttributes ra, HttpServletRequest request, Model model) {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
-			if(state.equals(task.getState())){
+			if (state.equals(task.getState())) {
 				return "redirect:" + request.getHeader("Referer");
 			}
 			// check if can edit
-			if (!canEdit(task.getProject())) {
-				MessageHelper.addErrorAttribute(
-						ra,
-						msg.getMessage("error.accesRights", null,
-								Utils.getCurrentLocale()));
-				return "redirect:" + request.getHeader("Referer");
-			}
+			if (!canEdit(task.getProject()) && !Roles.isUser()) {
+				throw new TasqAuthException(msg);			}
 			// TODO eliminate this?
 			if (state.equals(TaskState.TO_DO)
 					&& !task.getLogged_work().equals("0m")) {
@@ -455,7 +462,7 @@ public class TaskController {
 						Utils.getCurrentLocale()));
 				return "redirect:" + request.getHeader("Referer");
 			}
-			
+
 			TaskState old_state = (TaskState) task.getState();
 			task.setState(state);
 			// Zero remaining time
@@ -490,14 +497,13 @@ public class TaskController {
 						msg.getMessage("task.state.changed.closed",
 								new Object[] { task.getId() },
 								Utils.getCurrentLocale()));
-			}else if(old_state.equals(TaskState.CLOSED)){
+			} else if (old_state.equals(TaskState.CLOSED)) {
 				wlSrv.addActivityLog(task, "", LogType.REOPEN);
 				MessageHelper.addSuccessAttribute(ra,
 						msg.getMessage("task.state.changed.reopened",
 								new Object[] { task.getId() },
 								Utils.getCurrentLocale()));
-			}
-			else {
+			} else {
 				wlSrv.addActivityLog(task, old_state.getDescription()
 						+ CHANGE_TO + state.getDescription(), LogType.STATUS);
 				String localised = msg.getMessage(state.getCode(), null,
@@ -521,7 +527,7 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
-			if (!canEdit(task.getProject())) {
+			if (!canEdit(task.getProject()) && !Roles.isUser()) {
 				MessageHelper.addErrorAttribute(
 						ra,
 						msg.getMessage("error.accesRights", null,
@@ -575,6 +581,9 @@ public class TaskController {
 			HttpServletRequest request, Model model) {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
+			if (!Roles.isUser()) {
+				throw new TasqAuthException(msg);
+			}
 			if (task.getState().equals(TaskState.CLOSED)) {
 				String localized = msg.getMessage(
 						((TaskState) task.getState()).getCode(), null,
@@ -634,7 +643,7 @@ public class TaskController {
 				return "redirect:" + request.getHeader("Referer");
 
 			}
-			if (canEdit(task.getProject())) {
+			if (canEdit(task.getProject()) && Roles.isUser()) {
 				StringBuffer message = new StringBuffer();
 				String oldPriority = "";
 				// TODO temporary due to old DB
@@ -785,7 +794,8 @@ public class TaskController {
 						Task task = taskForm.createTask();
 						// optional fields
 						if (row.getCell(SP_CELL) != null) {
-							task.setStory_points(((Double)row.getCell(SP_CELL).getNumericCellValue()).intValue());
+							task.setStory_points(((Double) row.getCell(SP_CELL)
+									.getNumericCellValue()).intValue());
 						}
 						if (row.getCell(DUE_DATE_CELL) != null) {
 							Date date = row.getCell(DUE_DATE_CELL)
@@ -893,8 +903,8 @@ public class TaskController {
 		}
 		Account current_account = Utils.getCurrentAccount();
 		return (repo_project.getAdministrators().contains(current_account)
-				|| repo_project.getParticipants().contains(current_account) || current_account
-				.getRole().equals(Role.ROLE_ADMIN));
+				|| repo_project.getParticipants().contains(current_account) || Roles
+					.isAdmin());
 	}
 
 	private boolean isNumericCellValid(Row row, int cell) {

@@ -83,6 +83,9 @@ public class ProjetController {
 							Utils.getCurrentLocale()));
 			return "redirect:/projects";
 		}
+		if (!project.getParticipants().contains(Utils.getCurrentAccount())) {
+			throw new TasqAuthException(msg, "role.error.project.permission");
+		}
 		// set last visited
 		Account current = Utils.getCurrentAccount();
 		List<Project> last_visited = current.getLast_visited_p();
@@ -168,17 +171,19 @@ public class ProjetController {
 
 	@RequestMapping(value = "project/create", method = RequestMethod.GET)
 	public NewProjectForm startProjectcreate() {
-		if (Roles.isUser()) {
-			return new NewProjectForm();
-		} else {
+		if (!Roles.isUser()) {
 			throw new TasqAuthException(msg);
-		}
+		} 
+		return new NewProjectForm();
 	}
 
 	@RequestMapping(value = "project/create", method = RequestMethod.POST)
 	public String createProject(
 			@Valid @ModelAttribute("newProjectForm") NewProjectForm newProjectForm,
 			Errors errors, RedirectAttributes ra, HttpServletRequest request) {
+		if (!Roles.isUser()) {
+			throw new TasqAuthException(msg);
+		}
 		if (errors.hasErrors()) {
 			return null;
 		}
@@ -221,6 +226,9 @@ public class ProjetController {
 	@RequestMapping(value = "project/manage", method = RequestMethod.GET)
 	public String manageProject(@RequestParam(value = "id") Long id,
 			Model model, RedirectAttributes ra, HttpServletRequest request) {
+		if (!Roles.isUser()) {
+			throw new TasqAuthException(msg);
+		}
 		Project project = projSrv.findById(id);
 		if (project == null) {
 			MessageHelper.addErrorAttribute(
@@ -238,6 +246,9 @@ public class ProjetController {
 	public String addParticipant(@RequestParam(value = "id") Long id,
 			@RequestParam(value = "email") String email, Model model,
 			RedirectAttributes ra, HttpServletRequest request) {
+		if (!Roles.isUser()) {
+			throw new TasqAuthException(msg);
+		}
 		Account account = accSrv.findByEmail(email);
 		if (account != null) {
 			Project project = projSrv.findById(id);
@@ -264,6 +275,9 @@ public class ProjetController {
 			@RequestParam(value = "project_id") Long project_id,
 			@RequestParam(value = "account_id") Long account_id, Model model,
 			RedirectAttributes ra, HttpServletRequest request) {
+		if (!Roles.isUser()) {
+			throw new TasqAuthException(msg);
+		}
 		Account account = accSrv.findById(account_id);
 		if (account != null) {
 			Project project = projSrv.findById(project_id);
@@ -299,6 +313,9 @@ public class ProjetController {
 			@RequestParam(value = "project_id") Long project_id,
 			@RequestParam(value = "account_id") Long account_id, Model model,
 			RedirectAttributes ra, HttpServletRequest request) {
+		if (!Roles.isUser()) {
+			throw new TasqAuthException(msg);
+		}
 		Account account = accSrv.findById(account_id);
 		if (account != null) {
 			Project project = projSrv.findById(project_id);
@@ -321,6 +338,9 @@ public class ProjetController {
 			@RequestParam(value = "project_id") Long project_id,
 			@RequestParam(value = "account_id") Long account_id, Model model,
 			RedirectAttributes ra, HttpServletRequest request) {
+		if (!Roles.isUser()) {
+			throw new TasqAuthException(msg);
+		}
 		Account account = accSrv.findById(account_id);
 		if (account != null) {
 			Project project = projSrv.findById(project_id);
@@ -373,6 +393,9 @@ public class ProjetController {
 			@RequestParam(value = "default_priority") TaskPriority priority,
 			@RequestParam(value = "default_type") TaskType type, Model model,
 			RedirectAttributes ra, HttpServletRequest request) {
+		if (!Roles.isUser()) {
+			throw new TasqAuthException(msg);
+		}
 		Project project = projSrv.findById(id);
 		if (project == null) {
 			MessageHelper.addErrorAttribute(

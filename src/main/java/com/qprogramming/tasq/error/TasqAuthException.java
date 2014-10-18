@@ -28,6 +28,15 @@ public class TasqAuthException extends RuntimeException {
 		this.message = msg.getMessage("role.error.auth",
 				new Object[] { role }, Utils.getCurrentLocale());
 	}
+	
+	/**
+	 * Throws authorization exception with given code, MessageSource has to be passed form calling method
+	 * @param msg
+	 */
+	public TasqAuthException(MessageSource msg, String code) {
+		this.msg = msg;
+		this.message = msg.getMessage(code,	null, Utils.getCurrentLocale());
+	}
 
 	@Override
 	public String toString() {

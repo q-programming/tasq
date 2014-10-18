@@ -150,7 +150,7 @@
 			<tr>
 				<td><img data-src="holder.js/30x30"
 					style="height: 30px; float: left; padding-right: 10px;"
-					src="<c:url value="/userAvatar/${participant.id}"/>" />${participant}
+					src="<c:url value="/userAvatar/${participant.id}"/>" />${participant} <span style="color:#737373">(<s:message code="${participant.role.code}"/>)</span>
 				</td>
 				<td><c:if test="${can_edit}">
 						<div class="pull-right">
