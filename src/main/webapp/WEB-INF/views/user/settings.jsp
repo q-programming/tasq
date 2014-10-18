@@ -48,9 +48,11 @@
 					<div style="width: 150px">
 						<select class="form-control input-sm" name="language">
 							<option value="en"
-								<c:if test="${user.language eq 'en'}">selected</c:if>>English</option>
+								<c:if test="${user.language eq 'en'}">selected</c:if>><s:message
+									code="lang.en" text="English" /></option>
 							<option value="pl"
-								<c:if test="${user.language eq 'pl'}">selected</c:if>>Polski</option>
+								<c:if test="${user.language eq 'pl'}">selected</c:if>><s:message
+									code="lang.pl" text="Polish" /></option>
 						</select>
 					</div>
 				</div>
@@ -61,12 +63,14 @@
 					</h4>
 					<div style="width: 350px">
 						<select class="form-control input-sm" name="theme">
-							<option value=""
-								<c:if test="${empty user.theme}">selected</c:if>><s:message code="panel.theme.darkblue"/></option>
+							<option value="" <c:if test="${empty user.theme}">selected</c:if>><s:message
+									code="panel.theme.darkblue" /></option>
 							<option value="lightblue"
-								<c:if test="${user.theme eq 'lightblue'}">selected</c:if>><s:message code="panel.theme.lightblue"/></option>
+								<c:if test="${user.theme eq 'lightblue'}">selected</c:if>><s:message
+									code="panel.theme.lightblue" /></option>
 							<option value="green"
-								<c:if test="${user.theme eq 'green'}">selected</c:if>><s:message code="panel.theme.green"/></option>	
+								<c:if test="${user.theme eq 'green'}">selected</c:if>><s:message
+									code="panel.theme.green" /></option>
 						</select>
 					</div>
 				</div>

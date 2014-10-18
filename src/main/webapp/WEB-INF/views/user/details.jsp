@@ -24,7 +24,7 @@
 			<div>
 				<span class="glyphicon glyphicon-flag"></span> <s:message code="panel.language"></s:message>
 				:
-				<s:message code="lang.${account.language}" />
+				<s:message code="lang.${account.language}" text="${account.language}"/>
 			</div>
 		</div>
 	</div>
