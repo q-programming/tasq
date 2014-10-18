@@ -35,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.AccountSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
@@ -47,7 +48,10 @@ public class AccountController {
 	private static final String SORT_BY_SURNAME = "surname";
 
 	@Autowired
-	AccountService accountSrv;
+	private AccountService accountSrv;
+	
+	@Autowired
+	private ProjectService projSrv;
 
 	@Autowired
 	private SessionLocaleResolver localeResolver;
@@ -111,7 +115,7 @@ public class AccountController {
 		return "redirect:/settings";
 	}
 
-	@RequestMapping(value = "/userList", method = RequestMethod.GET)
+	@RequestMapping(value = "/users", method = RequestMethod.GET)
 	public String listUsers(
 			@RequestParam(value = "name", required = false) String name,
 			@RequestParam(value = "sort", required = false) String sortBy,
@@ -145,7 +149,24 @@ public class AccountController {
 		model.addAttribute("desc", descending);
 		model.addAttribute("name", name);
 		model.addAttribute("accountsList", accountsList);
-		return "user/userList";
+		return "user/list";
+	}
+	
+	@RequestMapping(value = "/user", method = RequestMethod.GET)
+	public String getUser(
+			@RequestParam(value = "id") Long id,
+			Model model,RedirectAttributes ra) {
+		Account account = accountSrv.findById(id);
+		if(account==null){
+			MessageHelper.addErrorAttribute(
+					ra,
+					msg.getMessage("error.noUser", null,
+							Utils.getCurrentLocale()));
+			return "redirect:/users";
+		}
+		model.addAttribute("projects", projSrv.findAllByUser(account.getId()));
+		model.addAttribute("account", account);
+		return "user/details";
 	}
 
 	@RequestMapping("/userAvatar")
@@ -153,9 +174,7 @@ public class AccountController {
 			HttpServletRequest request) throws IOException {
 
 		response.setContentType("image/png");
-		Account auth = (Account) SecurityContextHolder.getContext()
-				.getAuthentication().getPrincipal();
-		byte[] imageBytes = auth.getAvatar();
+		byte[] imageBytes = Utils.getCurrentAccount().getAvatar();
 
 		if (imageBytes == null || imageBytes.length == 0) {
 			HttpSession session = request.getSession();

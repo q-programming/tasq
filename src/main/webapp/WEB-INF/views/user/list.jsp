@@ -6,24 +6,18 @@
 <%@page import="com.qprogramming.tasq.account.Roles"%>
 <%pageContext.setAttribute("roles", Roles.values());	%>
 <c:set var="name_text">
-	<s:message code="user.namesurname" text="Name" />
+	<s:message code="user.name" text="Name" /> <s:message code="user.surname" text="Surname" />
 </c:set>
-<c:set var="jobtitle_text">
-	<s:message code="user.jobtitle" text="Job Title" />
+<c:set var="role_text">
+	<s:message code="role.role" text="Role" />
 </c:set>
 <c:set var="userList_text">
-	<s:message code="user.userlist" text="User List" />
-</c:set>
-<c:set var="admin_text">
-	<s:message code="main.adminPanel" text="Admin Panel" />
+	<s:message code="user.users" text="User List" />
 </c:set>
 <c:set var="action_text">
 	<s:message code="main.action" text="Action" />
 </c:set>
-<c:set var="filterClean_text">
-	<s:message code="user.filterClean" text="Clear filter" />
-</c:set>
-<h3>Users</h3>
+<h3>${userList_text}</h3>
 <div class="white-frame" style="display: table; width: 100%;height:85vh">
 <div id="errors"></div>
 	<table id="user_table" class="table table-hover table-condensed">
@@ -32,8 +26,8 @@
 				<th style="cursor: pointer;" class="sorter a-tooltip"
 					data-toggle="tooltip" data-placement="left" data-container='body'
 					title="<s:message
-							code="user.name.sort" text="Sort by name" />">${name_text}</th>
-				<th>${jobtitle_text}</th>
+							code="user.sort.surname" text="Sort by name" />">${name_text}</th>
+				<th>${role_text}</th>
 				<th>${action_text}<button id="search" class="btn btn-default btn-xs pull-right"><span class="glyphicon glyphicon-search"></span></button></th>
 			</tr>
 		</thead>
@@ -41,12 +35,12 @@
 			<tr>
 				<td><security:authentication property="principal"
 						var="AuthUser" /> <a
-					href="<c:url value="/user/details?id=${p.id}"/>" class="btn"
+					href="<c:url value="/user?id=${p.id}"/>" class="btn"
 					rel="popover" data-img="<c:url value="/userAvatar/${p.id}"/>">${p.name}
 						${p.surname}</a></td>
 				<security:authorize access="hasRole('ROLE_ADMIN')">
 					<td>
-						<select class="change_role" data-user="${p.id}" style="border: 0px;">
+						<select class="change_role a-tooltip" title="<s:message code="user.role.change"/>" data-user="${p.id}" style="border: 0px;">
 							<c:forEach items="${roles}" var="enum_role">
 								<option value="${enum_role}" <c:if test="${p.role eq enum_role}">selected</c:if>><s:message code="${enum_role.code}"/></option>
 						</c:forEach>

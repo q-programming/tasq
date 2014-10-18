@@ -171,17 +171,24 @@
 					<li>
 						<div>
 							<a class="btn btn-default btn-xxs a-tooltip"
+								href='<s:url value="/users"></s:url>'
+								title="<s:message
+									code="menu.users" text="Settings" />"
+								data-placement="bottom"><span
+								class="glyphicon glyphicon-user"></span></a> 
+							<a class="btn btn-default btn-xxs a-tooltip"
 								href='<s:url value="/settings"></s:url>'
 								title="<s:message
 									code="menu.settings" text="Settings" />"
 								data-placement="bottom"><span
-								class="glyphicon glyphicon-cog"></span></a> <a
-								class="btn btn-default btn-xxs a-tooltip"
+								class="glyphicon glyphicon-cog"></span></a> 
+							<a class="btn btn-default btn-xxs a-tooltip"
 								href='<s:url value="/settings"></s:url>'
 								title="<s:message
 									code="menu.help" text="Help" />"
 								data-placement="bottom"><span
-								class="glyphicon glyphicon-question-sign"></span></a> <a
+								class="glyphicon glyphicon-question-sign"></span></a> 
+							<a
 								class="btn btn-default btn-xxs a-tooltip"
 								href='<s:url value="/logout"></s:url>'
 								title="<s:message

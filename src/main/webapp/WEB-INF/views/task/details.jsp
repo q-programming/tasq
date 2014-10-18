@@ -384,7 +384,7 @@
 									<img data-src="holder.js/30x30"
 										style="height: 30px; float: left; padding-right: 10px;"
 										src="<c:url value="/userAvatar/${comment.author.id}"/>" /> <a
-										href="<c:url value="/user/details?id=${comment.author.id}"/>">${comment.author}</a>
+										href="<c:url value="/user?id=${comment.author.id}"/>">${comment.author}</a>
 									<span style="color: gray; font-size: smaller; float: right;">${comment.date}</span>
 								</div> <%-- Comment buttons --%>
 								<div class="buttons_panel" style="float: right">
