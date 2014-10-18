@@ -48,11 +48,14 @@
 								href="<c:url value="/projects"/>"><span
 									class="glyphicon glyphicon-list"></span> <s:message
 										code="project.showAll" text="Projects" /></a></li>
-							<li style="margin: 10px;"><a
-								href="<c:url value="/project/create"/>"><span
-									class="glyphicon glyphicon-plus"></span> <s:message
-										code="project.create" text="Create project" /></a></li>
+							<c:if test="${user.isUser == true}">
+								<li style="margin: 10px;"><a
+									href="<c:url value="/project/create"/>"><span
+										class="glyphicon glyphicon-plus"></span> <s:message
+											code="project.create" text="Create project" /></a></li>
+							</c:if>
 						</ul></li>
+						
 				<%-- TASKS --%>
 				<li><div class="dropdown" style="padding-top: 5px">
 						<a class="dropdown-toggle btn theme" type="button"
@@ -68,10 +71,12 @@
 									class="glyphicon glyphicon-list"></span> <s:message
 										code="task.showAll" text="Show all" /></a></li>
 
+							<c:if test="${user.isReporter == true}">
 							<li style="margin: 10px;"><a
 								href="<c:url value="/task/create"/>"><span
 									class="glyphicon glyphicon-plus"></span> <s:message
 										code="task.create" text="Create task" /></a></li>
+							</c:if>
 						</ul></li>
 				<%--AGILE --%>
 				<li><div class="dropdown" style="padding-top: 5px">
@@ -97,6 +102,7 @@
 										code="agile.showAll" text="Show all" /></a></li>
 						</ul></li>
 				<%--Create task button --%>
+				<c:if test="${user.isReporter == true}">
 				<li>
 					<div style="padding-top: 8px;">
 						<a class="btn btn-xs theme a-tooltip"
@@ -107,6 +113,7 @@
 							<span class="glyphicon glyphicon-th-list"></span></a>
 					</div>
 				</li>
+				</c:if>
 			</ul>
 			</security:authorize>
 			<ul class="nav navbar-nav pull-right">
@@ -164,17 +171,24 @@
 					<li>
 						<div>
 							<a class="btn btn-default btn-xxs a-tooltip"
+								href='<s:url value="/users"></s:url>'
+								title="<s:message
+									code="menu.users" text="Settings" />"
+								data-placement="bottom"><span
+								class="glyphicon glyphicon-user"></span></a> 
+							<a class="btn btn-default btn-xxs a-tooltip"
 								href='<s:url value="/settings"></s:url>'
 								title="<s:message
 									code="menu.settings" text="Settings" />"
 								data-placement="bottom"><span
-								class="glyphicon glyphicon-cog"></span></a> <a
-								class="btn btn-default btn-xxs a-tooltip"
+								class="glyphicon glyphicon-cog"></span></a> 
+							<a class="btn btn-default btn-xxs a-tooltip"
 								href='<s:url value="/settings"></s:url>'
 								title="<s:message
 									code="menu.help" text="Help" />"
 								data-placement="bottom"><span
-								class="glyphicon glyphicon-question-sign"></span></a> <a
+								class="glyphicon glyphicon-question-sign"></span></a> 
+							<a
 								class="btn btn-default btn-xxs a-tooltip"
 								href='<s:url value="/logout"></s:url>'
 								title="<s:message

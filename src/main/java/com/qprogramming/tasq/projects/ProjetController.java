@@ -33,6 +33,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.DisplayAccount;
+import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.error.TasqAuthException;
+import com.qprogramming.tasq.error.TasqException;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.ProjectSorter;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
@@ -79,6 +82,9 @@ public class ProjetController {
 					msg.getMessage("project.notexists", null,
 							Utils.getCurrentLocale()));
 			return "redirect:/projects";
+		}
+		if (!project.getParticipants().contains(Utils.getCurrentAccount())) {
+			throw new TasqAuthException(msg, "role.error.project.permission");
 		}
 		// set last visited
 		Account current = Utils.getCurrentAccount();
@@ -165,6 +171,9 @@ public class ProjetController {
 
 	@RequestMapping(value = "project/create", method = RequestMethod.GET)
 	public NewProjectForm startProjectcreate() {
+		if (!Roles.isUser()) {
+			throw new TasqAuthException(msg);
+		} 
 		return new NewProjectForm();
 	}
 
@@ -172,6 +181,9 @@ public class ProjetController {
 	public String createProject(
 			@Valid @ModelAttribute("newProjectForm") NewProjectForm newProjectForm,
 			Errors errors, RedirectAttributes ra, HttpServletRequest request) {
+		if (!Roles.isUser()) {
+			throw new TasqAuthException(msg);
+		}
 		if (errors.hasErrors()) {
 			return null;
 		}
@@ -214,6 +226,9 @@ public class ProjetController {
 	@RequestMapping(value = "project/manage", method = RequestMethod.GET)
 	public String manageProject(@RequestParam(value = "id") Long id,
 			Model model, RedirectAttributes ra, HttpServletRequest request) {
+		if (!Roles.isUser()) {
+			throw new TasqAuthException(msg);
+		}
 		Project project = projSrv.findById(id);
 		if (project == null) {
 			MessageHelper.addErrorAttribute(
@@ -231,6 +246,9 @@ public class ProjetController {
 	public String addParticipant(@RequestParam(value = "id") Long id,
 			@RequestParam(value = "email") String email, Model model,
 			RedirectAttributes ra, HttpServletRequest request) {
+		if (!Roles.isUser()) {
+			throw new TasqAuthException(msg);
+		}
 		Account account = accSrv.findByEmail(email);
 		if (account != null) {
 			Project project = projSrv.findById(id);
@@ -257,6 +275,9 @@ public class ProjetController {
 			@RequestParam(value = "project_id") Long project_id,
 			@RequestParam(value = "account_id") Long account_id, Model model,
 			RedirectAttributes ra, HttpServletRequest request) {
+		if (!Roles.isUser()) {
+			throw new TasqAuthException(msg);
+		}
 		Account account = accSrv.findById(account_id);
 		if (account != null) {
 			Project project = projSrv.findById(project_id);
@@ -292,6 +313,9 @@ public class ProjetController {
 			@RequestParam(value = "project_id") Long project_id,
 			@RequestParam(value = "account_id") Long account_id, Model model,
 			RedirectAttributes ra, HttpServletRequest request) {
+		if (!Roles.isUser()) {
+			throw new TasqAuthException(msg);
+		}
 		Account account = accSrv.findById(account_id);
 		if (account != null) {
 			Project project = projSrv.findById(project_id);
@@ -314,6 +338,9 @@ public class ProjetController {
 			@RequestParam(value = "project_id") Long project_id,
 			@RequestParam(value = "account_id") Long account_id, Model model,
 			RedirectAttributes ra, HttpServletRequest request) {
+		if (!Roles.isUser()) {
+			throw new TasqAuthException(msg);
+		}
 		Account account = accSrv.findById(account_id);
 		if (account != null) {
 			Project project = projSrv.findById(project_id);
@@ -338,9 +365,9 @@ public class ProjetController {
 	}
 
 	@RequestMapping(value = "/project/{id}/getParticipants", method = RequestMethod.GET)
-	public @ResponseBody List<DisplayAccount> listParticipants(
-			@PathVariable Long id, @RequestParam String term,
-			HttpServletResponse response) {
+	public @ResponseBody
+	List<DisplayAccount> listParticipants(@PathVariable Long id,
+			@RequestParam String term, HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(id);
 		Set<Account> all_participants = project.getParticipants();
@@ -361,12 +388,14 @@ public class ProjetController {
 
 	@Transactional
 	@RequestMapping(value = "project/{id}/update", method = RequestMethod.POST)
-	public String updateProperties(
-			@PathVariable Long id,
+	public String updateProperties(@PathVariable Long id,
 			@RequestParam(value = "timeTracked") Boolean timeTracked,
 			@RequestParam(value = "default_priority") TaskPriority priority,
-			@RequestParam(value = "default_type") TaskType type,
-			Model model, RedirectAttributes ra, HttpServletRequest request) {
+			@RequestParam(value = "default_type") TaskType type, Model model,
+			RedirectAttributes ra, HttpServletRequest request) {
+		if (!Roles.isUser()) {
+			throw new TasqAuthException(msg);
+		}
 		Project project = projSrv.findById(id);
 		if (project == null) {
 			MessageHelper.addErrorAttribute(

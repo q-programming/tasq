@@ -1,5 +1,6 @@
 package com.qprogramming.tasq.account;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,9 +24,11 @@ import org.hibernate.annotations.IndexColumn;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.qprogramming.tasq.projects.Project;
+import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.task.Task;
 
 @SuppressWarnings("serial")
@@ -61,7 +64,7 @@ public class Account implements java.io.Serializable, UserDetails {
 	private String surname;
 
 	@Enumerated(EnumType.STRING)
-	private Role role;
+	private Roles role;
 
 	@Column
 	private byte[] avatar;
@@ -102,14 +105,14 @@ public class Account implements java.io.Serializable, UserDetails {
 	// private long active_task_seconds;
 
 	public enum Role {
-		ROLE_USER, ROLE_ADMIN
+		ROLE_USER, ROLE_ADMIN, ROLE_REPORTER,ROLE_VIEWER
 	};
 
 	protected Account() {
 
 	}
 
-	public Account(String email, String password, Role role) {
+	public Account(String email, String password, Roles role) {
 		this.email = email;
 		this.password = password;
 		this.role = role;
@@ -180,11 +183,11 @@ public class Account implements java.io.Serializable, UserDetails {
 		this.theme = theme;
 	}
 
-	public Role getRole() {
+	public Roles getRole() {
 		return role;
 	}
 
-	public void setRole(Role role) {
+	public void setRole(Roles role) {
 		this.role = role;
 	}
 
@@ -195,6 +198,17 @@ public class Account implements java.io.Serializable, UserDetails {
 	public void setAuthorities(Collection<GrantedAuthority> authorities) {
 		this.authorities = authorities;
 	}
+	public void setAuthority(Roles role) {
+		if(this.authorities==null){
+			this.authorities = new ArrayList<GrantedAuthority>();
+		}
+		this.authorities.add(createAuthority(role));
+	}
+	
+	private GrantedAuthority createAuthority(Roles role) {
+		return new SimpleGrantedAuthority(role.toString());
+	}
+
 
 	public byte[] getAvatar() {
 		return avatar;
@@ -286,6 +300,27 @@ public class Account implements java.io.Serializable, UserDetails {
 	public void setActive_project(Long active_project) {
 		this.active_project = active_project;
 	}
+	
+
+	public boolean getIsReporter(){
+		return getIsUser() || role.equals(Roles.ROLE_REPORTER); 
+	}
+	
+	/**
+	 * Checks if currently logged user have ROLE_USER authority 
+	 * @return
+	 */
+	public boolean getIsUser(){
+		return getIsAdmin() || role.equals(Roles.ROLE_USER); 
+	}
+	/**
+	 * Checks if currently logged user have ROLE_ADMIN authority 
+	 * @return
+	 */
+	public boolean getIsAdmin(){
+		return role.equals(Roles.ROLE_ADMIN); 
+	}
+	
 
 	/*
 	 * (non-Javadoc)

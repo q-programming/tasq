@@ -17,7 +17,7 @@
 <security:authorize access="hasRole('ROLE_ADMIN')">
 	<c:set var="is_admin" value="true" />
 </security:authorize>
-<c:if test="${myfn:contains(project.participants,user) || is_admin}">
+<c:if test="${myfn:contains(project.participants,user) && user.isUser || is_admin}">
 	<c:set var="can_edit" value="true" />
 </c:if>
 <h3>[${project.projectId}] ${project}</h3>
@@ -39,7 +39,7 @@
 		<div><h4><s:message code="task.state.todo"/></h4></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'TO_DO'}">
-				<t:card task="${task}" />
+				<t:card task="${task}" can_edit="${can_edit}"/>
 			</c:if>
 		</c:forEach>
 	</div>
@@ -47,7 +47,7 @@
 		<div><h4><s:message code="task.state.ongoing"/></h4></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'ONGOING'}">
-				<t:card task="${task}" />
+				<t:card task="${task}" can_edit="${can_edit}"/>
 			</c:if>
 		</c:forEach>
 	</div>
@@ -55,7 +55,7 @@
 		<div><h4><s:message code="task.state.closed"/></h4></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'CLOSED'}">
-				<t:card task="${task}" />
+				<t:card task="${task}" can_edit="${can_edit}" />
 			</c:if>
 		</c:forEach>
 	</div>
@@ -63,7 +63,7 @@
 		<div><h4><s:message code="task.state.blocked"/></h4></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'BLOCKED'}">
-				<t:card task="${task}" />
+				<t:card task="${task}" can_edit="${can_edit}"/>
 			</c:if>
 		</c:forEach>
 	</div>

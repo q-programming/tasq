@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -24,6 +25,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -33,15 +35,23 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.Utils;
+import com.qprogramming.tasq.support.sorters.AccountSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
 
 @Controller
 @Secured("ROLE_USER")
 public class AccountController {
+	private static final String SORT_BY_NAME = "name";
+	private static final Object SORT_BY_EMAIL = "email";
+	private static final String SORT_BY_SURNAME = "surname";
 
 	@Autowired
-	AccountService accountSrv;
+	private AccountService accountSrv;
+	
+	@Autowired
+	private ProjectService projSrv;
 
 	@Autowired
 	private SessionLocaleResolver localeResolver;
@@ -105,14 +115,66 @@ public class AccountController {
 		return "redirect:/settings";
 	}
 
+	@RequestMapping(value = "/users", method = RequestMethod.GET)
+	public String listUsers(
+			@RequestParam(value = "name", required = false) String name,
+			@RequestParam(value = "sort", required = false) String sortBy,
+			@RequestParam(value = "desc", required = false) String desc,
+			Model model) {
+		List<Account> accountsList;
+
+		if (name != null && name != "") {
+			accountsList = accountSrv.findByNameStartingWith(name);
+			accountsList.addAll(accountSrv.findBySurnameStartingWith(name));
+		} else {
+			accountsList = accountSrv.findAll();
+		}
+
+		// Accounts sorting
+		boolean descending = Boolean.parseBoolean(desc);
+		sortBy = sortBy != null ? sortBy : "";
+		if (SORT_BY_NAME.equals(sortBy)) {
+			Collections.sort(accountsList, new AccountSorter(
+					AccountSorter.SORTBY.NAME, descending));
+		} else if (SORT_BY_EMAIL.equals(sortBy)) {
+			Collections.sort(accountsList, new AccountSorter(
+					AccountSorter.SORTBY.EMAIL, descending));
+		} else {
+			Collections.sort(accountsList, new AccountSorter(
+					AccountSorter.SORTBY.SURNAME, descending));
+			sortBy = SORT_BY_SURNAME;
+		}
+
+		model.addAttribute("sort", sortBy);
+		model.addAttribute("desc", descending);
+		model.addAttribute("name", name);
+		model.addAttribute("accountsList", accountsList);
+		return "user/list";
+	}
+	
+	@RequestMapping(value = "/user", method = RequestMethod.GET)
+	public String getUser(
+			@RequestParam(value = "id") Long id,
+			Model model,RedirectAttributes ra) {
+		Account account = accountSrv.findById(id);
+		if(account==null){
+			MessageHelper.addErrorAttribute(
+					ra,
+					msg.getMessage("error.noUser", null,
+							Utils.getCurrentLocale()));
+			return "redirect:/users";
+		}
+		model.addAttribute("projects", projSrv.findAllByUser(account.getId()));
+		model.addAttribute("account", account);
+		return "user/details";
+	}
+
 	@RequestMapping("/userAvatar")
 	public void getImage(HttpServletResponse response,
 			HttpServletRequest request) throws IOException {
 
 		response.setContentType("image/png");
-		Account auth = (Account) SecurityContextHolder.getContext()
-				.getAuthentication().getPrincipal();
-		byte[] imageBytes = auth.getAvatar();
+		byte[] imageBytes = Utils.getCurrentAccount().getAvatar();
 
 		if (imageBytes == null || imageBytes.length == 0) {
 			HttpSession session = request.getSession();
@@ -166,5 +228,25 @@ public class AccountController {
 			}
 		}
 		return result;
+	}
+
+	@RequestMapping(value = "role", method = RequestMethod.POST ,produces = "text/plain;charset=UTF-8")
+	@ResponseBody
+	public String setRole(
+			@RequestParam(value = "id") Long id,
+			@RequestParam(value = "role") Roles role) {
+		Account account = accountSrv.findById(id);
+		if(account!=null){
+			//check if not admin or user
+			List<Account> admins = accountSrv.findAdmins();
+			if(account.getRole().equals(Roles.ROLE_ADMIN) && admins.size()==1){
+				return msg.getMessage("role.last.admin", null, Utils.getCurrentLocale());
+			}else{
+				account.setRole(role);
+				accountSrv.update(account);
+				return "OK";
+			}
+		}
+		return null;
 	}
 }
