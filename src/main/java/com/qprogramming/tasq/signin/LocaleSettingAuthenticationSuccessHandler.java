@@ -30,7 +30,7 @@ public class LocaleSettingAuthenticationSuccessHandler extends
 		//Eliminate signin error on saved request
 		SavedRequest savedRequest = new HttpSessionRequestCache().getRequest(
 				request, response);
-		if (savedRequest.getRedirectUrl() != null) {
+		if (savedRequest != null) {
 			String[] redirectUlr = savedRequest.getRedirectUrl().split("/");
 			if (redirectUlr[redirectUlr.length - 1].equals("sigin")) {
 				new HttpSessionRequestCache().removeRequest(request, response);

@@ -15,5 +15,5 @@
 		<appender-ref ref="STDOUT" />
 	</root>
 
-	<logger name="com.qprogramming.tasq" level="ALL" />
+	<logger name="com.qprogramming.tasq" level="WARN" />
 </configuration>
