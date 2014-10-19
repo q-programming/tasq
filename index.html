@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Tasq by q-programming</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Tasq</h1>
+        <p></p>
+
+        <p class="view"><a href="https://github.com/q-programming/tasq">View the Project on GitHub <small>q-programming/tasq</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/q-programming/tasq/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/q-programming/tasq/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/q-programming/tasq">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a name="tasq---project-tracking-application" class="anchor" href="#tasq---project-tracking-application"><span class="octicon octicon-link"></span></a>TasQ - Project tracking application</h1>
+
+<p>Appliation to track progress within project using either time estimation based or Agile style.
+Designed and implemented from scratch using <a href="https://github.com/q-programming/spring-mvc-quickstart-archetype.git">Spring MVC 4 Quickstart Maven Archetype</a>
+Still lots of work left here but it's pretty functionalbe already</p>
+
+<h2>
+<a name="live" class="anchor" href="#live"><span class="octicon octicon-link"></span></a>Live</h2>
+
+<p>Aplication is live and can be browsed under <a href="http://q-programming.pl/tasq/">This link</a></p>
+
+<p>Use following credentials to login:</p>
+
+<ul>
+<li>login: <a href="mailto:demo@q-programming.pl">demo@q-programming.pl</a>
+</li>
+<li>pass: demoUser</li>
+</ul>
+
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<ul>
+<li>Setup either local or remote PostgreSQL create 'tasq' DB and change parameters in 
+<code>/src/main/resources/persistence.properties</code>. Schema will be created on first app boot</li>
+<li>Update <code>/src/main/resources/email.properties</code> to point to your account</li>
+<li>Default app language is set as well in  <code>/src/main/resources/project.properties</code>.</li>
+<li>Deploy on tomcat or your favorite server :)</li>
+<li>First registered user will be made application administrator</li>
+</ul>
+
+<h2>
+<a name="language" class="anchor" href="#language"><span class="octicon octicon-link"></span></a>Language</h2>
+
+<p>For now supported is polish(pl) and english(en), but can be easly added as whole app is created to support multiple locale
+In order to add your language throw in new file in <code>src/main/webapp/WEB-INF/i18n/messages_XX.properties</code>
+and adding select option to settings panel : <code>src\main\webapp\WEB-INF\views\user\settings.jsp</code></p>
+
+<pre><code>&lt;option value="XX" &lt;c:if test="${user.language eq 'XX'}"&gt;selected&lt;/c:if&gt;&gt;
+     &lt;s:message code="lang.XX" text="XXXXXX" /&gt;
+&lt;/option&gt;
+</code></pre>
+
+<p>Also recomended to add lang.xx code to other languages properties files . This will be changed later to facilitate whole process,</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/q-programming">q-programming</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
