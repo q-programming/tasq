@@ -11,6 +11,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.Utils;
@@ -32,12 +34,17 @@ public class HomeController {
 	int week = 7 * 24 * 60 * 60 * 1000;
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
-	public String index(Principal principal, Model model) {
-		if (principal == null) {
+	public String index(Account account, Model model) {
+		if (account == null) {
 			return "homeNotSignedIn";
 		} else {
-			List<Task> allTasks = taskSrv.findAll();
 			List<Project> usersProjects = projSrv.findAllByUser();
+			if (usersProjects.size() == 0
+					&& (account.getRole().equals(Roles.ROLE_VIEWER) || account
+							.getRole().equals(Roles.ROLE_REPORTER))) {
+				return "homeNewUser";
+			}
+			List<Task> allTasks = taskSrv.findAll();
 			List<Task> dueTasks = new LinkedList<Task>();
 			List<Task> currentAccTasks = new LinkedList<Task>();
 			List<Task> unassignedTasks = new LinkedList<Task>();
