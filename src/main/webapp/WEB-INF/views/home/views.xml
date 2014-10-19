@@ -8,5 +8,8 @@
 	</definition>
 	<definition name="homeSignedIn" extends="default">
 		<put-attribute name="body" value="/WEB-INF/views/home/homeSignedIn.jsp"></put-attribute>
+	</definition>
+	<definition name="homeNewUser" extends="default">
+		<put-attribute name="body" value="/WEB-INF/views/home/homeNewUser.jsp"></put-attribute>
 	</definition>	
 </tiles-definitions>

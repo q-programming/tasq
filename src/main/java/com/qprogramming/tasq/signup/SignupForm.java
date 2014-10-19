@@ -60,7 +60,7 @@ public class SignupForm {
 	}
 
 	public Account createAccount() {
-		Account account = new Account(getEmail(), getPassword(), Roles.ROLE_USER);
+		Account account = new Account(getEmail(), getPassword(), Roles.ROLE_VIEWER);
 		account.setName(getName());
 		account.setSurname(getSurname());
         return account;

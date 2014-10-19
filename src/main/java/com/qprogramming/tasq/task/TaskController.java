@@ -116,6 +116,10 @@ public class TaskController {
 		if (!Roles.isReporter()) {
 			throw new TasqAuthException(msg);
 		}
+		Project project = projectSrv.findUserActiveProject();
+		if(project == null){
+			throw new TasqAuthException(msg, "error.noProjects");
+		}
 		model.addAttribute("project", projectSrv.findUserActiveProject());
 		model.addAttribute("projects_list", projectSrv.findAllByUser());
 		return new TaskForm();

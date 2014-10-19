@@ -17,6 +17,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
+import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.account.UserService;
 import com.qprogramming.tasq.mail.MailMail;
 import com.qprogramming.tasq.support.Utils;
@@ -59,7 +60,12 @@ public class SignupController {
 			errors.reject("error.email.notunique");
 			return null;
 		}
-		Account account = accountSrv.save(signupForm.createAccount());
+		
+		Account account = signupForm.createAccount();
+		if(accountSrv.findAll().size()==0){
+			account.setRole(Roles.ROLE_ADMIN);
+		}
+		account = accountSrv.save(account);
 		String confirmlink = Utils.getBaseURL() + "/confirm?id="
 				+ account.getUuid();
 
