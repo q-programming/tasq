@@ -5,9 +5,9 @@
 <%@ attribute name="task" required="true"
 	type="com.qprogramming.tasq.task.Task"%>
 <%@ attribute name="can_edit" required="true"%>
-<div class="agile-card theme" data-id="${task.id}" id="${task.id}">
+<div class="agile-card theme" data-id="${task.id}" data-state="task.state" id="${task.id}">
 	<div class="side-bar theme"></div>
-	<div>
+	<div style="padding-left: 5px;">
 		<t:type type="${task.type}" list="true" />
 		<a href="<c:url value="/task?id=${task.id}"/>"
 			style="color: inherit;<c:if test="${task.state eq 'CLOSED' }">
@@ -29,7 +29,7 @@
 			<span class="a-tooltip" title="<s:message code="task.remaining"/>">${task.remaining}</span>
 		</div>
 		<%---Assignee--%>
-		<div style="margin-top: 10px; text-align: right; display: table-cell;">
+		<div id="assignee_${task.id}" style="margin-top: 10px; text-align: right; display: table-cell;">
 			<c:if test="${empty task.assignee}">
 				<i><s:message code="task.unassigned" />
 					<c:if test="${can_edit}">
@@ -39,27 +39,11 @@
 						</button>
 					</c:if>
 				</i>
-				<form id="state_form_${task.id}" name="state_form" method="post"
-					action="<c:url value="/task/state"/>">
-					<input type="hidden" name="taskID" value="${task.id}"> <input
-						id="state_${task.id}" type="hidden" name="state"
-						value="${task.state}">
-				</form>
-				<form id="assign_${task.id}" action="<c:url value="/task/assign"/>"
-					method="post">
-					<input type="hidden" name="taskID" value="${task.id}">
-				</form>
 			</c:if>
 			<c:if test="${not empty task.assignee}">
 				<img data-src="holder.js/20x20"
 					style="height: 20px; padding-right: 5px;"
 					src="<c:url value="/userAvatar/${task.assignee.id}"/>" />
-				<form id="state_form_${task.id}" name="state_form" method="post"
-					action="<c:url value="/task/state"/>">
-					<input type="hidden" name="taskID" value="${task.id}"> <input
-						id="state_${task.id}" type="hidden" name="state"
-						value="${task.state}">
-				</form>
 				<a ${link} href="<c:url value="/user?id=${task.assignee.id}"/>">${task.assignee}</a>
 			</c:if>
 		</div>

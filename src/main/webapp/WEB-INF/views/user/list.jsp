@@ -17,9 +17,9 @@
 <c:set var="action_text">
 	<s:message code="main.action" text="Action" />
 </c:set>
+<!-- <div id="messages_div"></div> -->
 <h3>${userList_text}</h3>
 <div class="white-frame" style="display: table; width: 100%;height:85vh">
-<div id="errors"></div>
 	<table id="user_table" class="table table-hover table-condensed">
 		<thead>
 			<tr style="color: #428bca">
@@ -89,13 +89,9 @@ $(".change_role")
 	})
 	.change(function(){
 	var selectBox = $(this);
-	$.post('<c:url value="/role"/>',{id:selectBox.data('user'),role:selectBox.val()},function(result){
-		if(result!='OK'){
-			var errorMsg= '<div class="alert alert-danger fade in"	style="width:100%">'
-							+'<button type="button" class="close" data-dismiss="alert">&times;</button>'
-							+ result
-							+'</div>'
-			$('#errors').append(errorMsg);
+	$.post('<c:url value="/role"/>',{id:selectBox.data('user'),role:selectBox.val()},function(message){
+		if(message!='OK'){
+			showError(message);
 			selectBox.val(previous);
 		}
 	});

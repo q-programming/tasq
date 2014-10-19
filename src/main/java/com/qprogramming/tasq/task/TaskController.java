@@ -117,7 +117,7 @@ public class TaskController {
 			throw new TasqAuthException(msg);
 		}
 		Project project = projectSrv.findUserActiveProject();
-		if(project == null){
+		if (project == null) {
 			throw new TasqAuthException(msg, "error.noProjects");
 		}
 		model.addAttribute("project", projectSrv.findUserActiveProject());
@@ -201,8 +201,9 @@ public class TaskController {
 			return null;
 		}
 		// check if can edit
-		if (!canEdit(task.getProject()) && (!Roles.isReporter()
-				|| !task.getOwner().equals(Utils.getCurrentAccount()))) {
+		if (!canEdit(task.getProject())
+				&& (!Roles.isReporter() || !task.getOwner().equals(
+						Utils.getCurrentAccount()))) {
 			MessageHelper.addErrorAttribute(
 					ra,
 					msg.getMessage("error.accesRights", null,
@@ -457,7 +458,8 @@ public class TaskController {
 			}
 			// check if can edit
 			if (!canEdit(task.getProject()) && !Roles.isUser()) {
-				throw new TasqAuthException(msg);			}
+				throw new TasqAuthException(msg);
+			}
 			// TODO eliminate this?
 			if (state.equals(TaskState.TO_DO)
 					&& !task.getLogged_work().equals("0m")) {
@@ -495,32 +497,36 @@ public class TaskController {
 			}
 			// Save all
 			taskSrv.save(task);
-			if (state.equals(TaskState.CLOSED)) {
-				wlSrv.addActivityLog(task, "", LogType.CLOSED);
-				MessageHelper.addSuccessAttribute(ra,
-						msg.getMessage("task.state.changed.closed",
-								new Object[] { task.getId() },
-								Utils.getCurrentLocale()));
-			} else if (old_state.equals(TaskState.CLOSED)) {
-				wlSrv.addActivityLog(task, "", LogType.REOPEN);
-				MessageHelper.addSuccessAttribute(ra,
-						msg.getMessage("task.state.changed.reopened",
-								new Object[] { task.getId() },
-								Utils.getCurrentLocale()));
-			} else {
-				wlSrv.addActivityLog(task, old_state.getDescription()
-						+ CHANGE_TO + state.getDescription(), LogType.STATUS);
-				String localised = msg.getMessage(state.getCode(), null,
-						Utils.getCurrentLocale());
-				MessageHelper.addSuccessAttribute(
-						ra,
-						msg.getMessage("task.state.changed", new Object[] {
-								task.getId(), localised },
-								Utils.getCurrentLocale()));
-
-			}
+			String resultMessage = worklogStateChange(state, old_state, task);
+			MessageHelper.addSuccessAttribute(ra, resultMessage);
 		}
 		return "redirect:" + request.getHeader("Referer");
+	}
+
+	@Transactional
+	@RequestMapping(value = "/task/changeState", method = RequestMethod.POST, produces = "text/plain;charset=UTF-8")
+	@ResponseBody
+	public String changeStatePOST(@RequestParam(value = "id") String taskID,
+			@RequestParam(value = "state") TaskState state) {
+		// check if not admin or user
+		Task task = taskSrv.findById(taskID);
+		if (task != null) {
+			// check if can edit
+			if (!canEdit(task.getProject()) && !Roles.isUser()) {
+				throw new TasqAuthException(msg, "role.error.task.permission");
+			}
+			if (state.equals(TaskState.TO_DO)) {
+				Hibernate.initialize(task.getLogged_work());
+				if (!task.getLogged_work().equals("0m")) {
+					return "Started";
+				}
+			}
+			TaskState old_state = (TaskState) task.getState();
+			task.setState(state);
+			taskSrv.save(task);
+			return worklogStateChange(state, old_state, task);
+		}
+		return "Error";
 	}
 
 	@RequestMapping(value = "/task/time", method = RequestMethod.GET)
@@ -629,6 +635,25 @@ public class TaskController {
 			}
 		}
 		return "redirect:" + request.getHeader("Referer");
+	}
+
+	@RequestMapping(value = "/task/assignMe", method = RequestMethod.POST, produces = "text/plain;charset=UTF-8")
+	@ResponseBody
+	public String assignMe(@RequestParam(value = "id") String id) {
+		// check if not admin or user
+		if (!Roles.isUser()) {
+			throw new TasqAuthException(msg);
+		}
+		Task task = taskSrv.findById(id);
+		if (!canEdit(task.getProject())) {
+			return msg.getMessage("role.error.task.permission", null,
+					Utils.getCurrentLocale());
+		}
+		Account assignee = Utils.getCurrentAccount();
+		task.setAssignee(assignee);
+		taskSrv.save(task);
+		wlSrv.addActivityLog(task, assignee.toString(), LogType.ASSIGNED);
+		return "OK";
 	}
 
 	@RequestMapping(value = "/task/priority", method = RequestMethod.GET)
@@ -835,6 +860,27 @@ public class TaskController {
 
 		return "/task/importResults";
 	}
+	
+	private String worklogStateChange(TaskState state, TaskState old_state,
+			Task task) {
+		if (state.equals(TaskState.CLOSED)) {
+			wlSrv.addActivityLog(task, "", LogType.CLOSED);
+			return msg.getMessage("task.state.changed.closed",
+					new Object[] { task.getId() }, Utils.getCurrentLocale());
+		} else if (old_state.equals(TaskState.CLOSED)) {
+			wlSrv.addActivityLog(task, "", LogType.REOPEN);
+			return msg.getMessage("task.state.changed.reopened",
+					new Object[] { task.getId() }, Utils.getCurrentLocale());
+		} else {
+			wlSrv.addActivityLog(task, old_state.getDescription() + CHANGE_TO
+					+ state.getDescription(), LogType.STATUS);
+			String localised = msg.getMessage(state.getCode(), null,
+					Utils.getCurrentLocale());
+			return msg.getMessage("task.state.changed",
+					new Object[] { task.getId(), localised },
+					Utils.getCurrentLocale());
+		}
+	}
 
 	private StringBuffer verifyRow(Row row) {
 		StringBuffer logger = new StringBuffer();
@@ -889,8 +935,7 @@ public class TaskController {
 	private boolean isAdmin(Task task, Project project) {
 		Account current_account = Utils.getCurrentAccount();
 		return project.getAdministrators().contains(current_account)
-				|| task.getOwner().equals(current_account)
-				|| current_account.getRole().equals(Role.ROLE_ADMIN);
+				|| task.getOwner().equals(current_account) || Roles.isAdmin();
 	}
 
 	/**

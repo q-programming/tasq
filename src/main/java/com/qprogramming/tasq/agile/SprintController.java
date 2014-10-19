@@ -507,7 +507,6 @@ public class SprintController {
 		}
 		Account current_account = Utils.getCurrentAccount();
 		return (repo_project.getAdministrators().contains(current_account)
-				|| repo_project.getParticipants().contains(current_account) || current_account
-				.getRole().equals(Role.ROLE_ADMIN));
+				|| repo_project.getParticipants().contains(current_account) || Roles.isAdmin());
 	}
 }
