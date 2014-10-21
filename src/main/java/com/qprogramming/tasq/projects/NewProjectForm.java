@@ -4,6 +4,7 @@ import org.hibernate.validator.constraints.NotBlank;
 
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.task.TaskPriority;
+import com.qprogramming.tasq.task.TaskType;
 
 public class NewProjectForm {
 	private static final String NOT_BLANK_MESSAGE = "{notBlank.message}";
@@ -37,6 +38,7 @@ public class NewProjectForm {
 		project.setDescription(getDescription());
 		project.setProjectId(getProject_id().toUpperCase());
 		project.setDefault_priority(TaskPriority.MAJOR);
+		project.setDefault_type(TaskType.TASK);
 		project.setAgile_type(agile_type);
 		return project;
 	}
