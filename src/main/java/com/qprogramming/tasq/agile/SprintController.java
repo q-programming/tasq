@@ -329,7 +329,7 @@ public class SprintController {
 	@RequestMapping(value = "/{id}/scrum/burndown", method = RequestMethod.GET, produces = "application/json")
 	public String showBurndown(@PathVariable String id,
 			@RequestParam(value = "sprint", required = false) Long sprintNo,
-			Model model) {
+			Model model, RedirectAttributes ra) {
 		Map<String, Integer> results_estimates = new LinkedHashMap<String, Integer>();
 		Map<String, Integer> results_burned = new LinkedHashMap<String, Integer>();
 		Map<String, Integer> results_ideal = new LinkedHashMap<String, Integer>();
@@ -342,6 +342,14 @@ public class SprintController {
 			if (lastSprint == null) {
 				List<Sprint> sprints = sprintRepo.findByProjectId(project
 						.getId());
+				if (sprints.size() == 0) {
+					MessageHelper.addWarningAttribute(
+							ra,
+							msg.getMessage("agile.sprint.noActive", null,
+									Utils.getCurrentLocale()));
+					return "redirect:/" + project.getProjectId()
+							+ "/scrum/backlog";
+				}
 				lastSprint = sprints.get(sprints.size() - 1);
 			}
 			Sprint sprint;
@@ -507,7 +515,7 @@ public class SprintController {
 		}
 		Account current_account = Utils.getCurrentAccount();
 		return (repo_project.getAdministrators().contains(current_account)
-				|| repo_project.getParticipants().contains(current_account) || current_account
-				.getRole().equals(Role.ROLE_ADMIN));
+				|| repo_project.getParticipants().contains(current_account) || Roles
+					.isAdmin());
 	}
 }

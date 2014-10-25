@@ -57,6 +57,8 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 	rel="stylesheet" media="screen" />
 <link rel="icon" type="image/png"
 	href="<c:url value="/resources/img/favicon.ico"/>" />
+<%--CUSTOM SCRIPTS --%>
+<script src="<c:url value="/resources/js/tasq.js" />"></script>
 <script src="<c:url value="/resources/js/jquery.mask.min.js" />"></script>
 <script src="<c:url value="/resources/js/bootbox.min.js" />"></script>
 <script src="<c:url value="/resources/js/jquery.contextmenu.js" />"></script>
@@ -88,33 +90,35 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 	<%
 		/* Show a message. See support.web package */
 	%>
-	<c:if test="${not empty message}">
-		<c:choose>
-			<c:when test="${message.type == 'WARNING'}">
-				<c:set value="" var="alertClass" />
-			</c:when>
-			<c:otherwise>
-				<c:set value="alert-${fn:toLowerCase(message.type)}"
-					var="alertClass" />
-			</c:otherwise>
-		</c:choose>
-		<div class="alert ${alertClass} fade in"
-			style="position: fixed; bottom: 0px; width: 100%;">
-			<button type="button" class="close" data-dismiss="alert">&times;</button>
-			<%
-				/* Display a message by its code. If the code was not found, it will be displayed as default text */
-			%>
-			<s:message code="${message.message}" arguments="${message.args}"
-				text="${message.message}" />
-		</div>
-	</c:if>
+	<div id="messages_div" >
+		<c:if test="${not empty message}">
+			<c:choose>
+				<c:when test="${message.type == 'WARNING'}">
+					<c:set value="" var="alertClass" />
+				</c:when>
+				<c:otherwise>
+					<c:set value="alert-${fn:toLowerCase(message.type)}"
+						var="alertClass" />
+				</c:otherwise>
+			</c:choose>
+			<div class="alert ${alertClass} fade in"
+				style="position: fixed; bottom: 0px; width: 100%;">
+				<button type="button" class="close" data-dismiss="alert">&times;</button>
+				<%
+					/* Display a message by its code. If the code was not found, it will be displayed as default text */
+				%>
+				<s:message code="${message.message}" arguments="${message.args}"
+					text="${message.message}" />
+			</div>
+		</c:if>
+	</div>
 </body>
 <script>
 	$(".alert").alert();
 	window.setTimeout(function() { 
 		$(".alert-success").alert('close');
 		$(".alert-info").alert('close'); }
-	,5000);
-	window.setTimeout(function() { $(".alert-warning").alert('close'); }, 7000);
+	,15000);
+	window.setTimeout(function() { $(".alert-warning").alert('close'); }, 20000);
 </script>
 </html>

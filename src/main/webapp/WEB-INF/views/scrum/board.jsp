@@ -34,7 +34,8 @@
 </div>
 <div style="display:table-header-group;">
 	<h4>Sprint ${sprint.sprintNo} <span style="font-size: small;">(${sprint.start_date} - ${sprint.end_date})</span></h4>
-</div>
+</div >
+	
 	<div class="table_state" data-state="TO_DO" >
 		<div><h4><s:message code="task.state.todo"/></h4></div>
 		<c:forEach items="${tasks}" var="task">
@@ -59,7 +60,7 @@
 			</c:if>
 		</c:forEach>
 	</div>
-	<div class="table_state" data-state="BLOCKED" style="border-right:1px solid;border-color:lightgray">
+	<div class="table_state" data-state="BLOCKED">
 		<div><h4><s:message code="task.state.blocked"/></h4></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'BLOCKED'}">
@@ -67,6 +68,7 @@
 			</c:if>
 		</c:forEach>
 	</div>
+	
 </div>
 <%------------------LOG WORK MODAL ---------------------%>
 <div class="modal fade" id="logWorkform" tabindex="-1" role="dialog"
@@ -149,30 +151,56 @@
 		
 		$(".assign_me").click(function(){
 			var taskID = $(this).data('taskid');
-			var current_email = "${user.email}";
-			$("#assign_" + taskID).append('<input type="hidden" name="email" value=' + current_email + '>');
-        	$("#assign_" + taskID).submit();
+			//assignMe
+			$.post('<c:url value="/task/assignMe"/>',{id:taskID},function(message){
+				if(message!='OK'){
+					showError(message);
+				}
+				else{
+					var succes = '<s:message code="task.assinged.me"/> ' + taskID;
+					var assignee = '<img data-src="holder.js/20x20"	style="height: 20px; padding-right: 5px;" src="<c:url value="/userAvatar/${user.id}"/>" />'
+									+'<a href="<c:url value="/user?id=${user.id}"/>">${user}</a>';
+					$("#assignee_"+taskID).html(assignee);
+					showSuccess(succes);
+				}
+			});
 		});
 
-		$(".agile-card").draggable({
+		$(".agile-card").draggable ({
 		    	revert: 'invalid',
 		    	cursor: 'move'
 		});
+		
+       
 		$( ".table_state" ).droppable({
 		      activeClass: "state_default",
 		      hoverClass: "state_hover",
 		      drop: function( event, ui ) {
 		    	  //event on drop
 		    	 var taskID = ui.draggable.attr("id");
+		    	 var oldState =  ui.draggable.attr("state");
 		    	 var state = $(this).data('state');
-		    	 if($("#state_" + taskID).val() != state){
+		    	 if( oldState != state){
 			    	 if(state == 'CLOSED'){
-		    		 	alert("closing");
+			    		 //TODO zero hours?
+		    		 	//alert("closing");
 		    	 	}
-		    	 	$("#state_" + taskID).val(state);
-		    	 	$("#state_form_"+taskID).submit();
+						$.post('<c:url value="/task/changeState"/>',{id:taskID,state:state},function(message){
+							if(message=='Error'){
+								var errorMsg = '<s:message code="role.error.task.permission"/>';
+								showError(errorMsg);
+							}else if (message == 'Started'){
+								var errorMsg = '<s:message code="task.alreadyStarted"/>';
+								showError(errorMsg)
+							}
+							else{
+								showSuccess(message);
+							}
+						});
 		    	 }
-		    	 
+		    	 var dropped = ui.draggable;
+		         var droppedOn = $(this);
+		         $(dropped).detach().css({top: 0,left: 0}).appendTo(droppedOn);
 		      },
 		      accept: function(dropElem) {
 		    	  	var taskID = dropElem.attr("id");

@@ -137,9 +137,7 @@ form.form-search:before {
 	padding: 0 10px;
 	width: 25%;
 	display: table-cell;
-	border-top: 1px solid;
-	border-bottom: 1px solid;
-	border-left: 1px solid;
+	border: 1px solid;
 	border-color: lightgray;
 }
 
@@ -167,4 +165,7 @@ form.form-search:before {
 	text-indent: -9999em;
 	top: 0;
 	width: 5px;
+}
+.paddedleft40{
+	padding-left: 40px
 }

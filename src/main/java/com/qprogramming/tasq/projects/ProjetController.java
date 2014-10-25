@@ -173,7 +173,7 @@ public class ProjetController {
 	public NewProjectForm startProjectcreate() {
 		if (!Roles.isUser()) {
 			throw new TasqAuthException(msg);
-		} 
+		}
 		return new NewProjectForm();
 	}
 
@@ -391,8 +391,9 @@ public class ProjetController {
 	public String updateProperties(@PathVariable Long id,
 			@RequestParam(value = "timeTracked") Boolean timeTracked,
 			@RequestParam(value = "default_priority") TaskPriority priority,
-			@RequestParam(value = "default_type") TaskType type, Model model,
-			RedirectAttributes ra, HttpServletRequest request) {
+			@RequestParam(value = "default_type") TaskType type,
+			@RequestParam(value = "defaultAssignee") Long assigneId,
+			Model model, RedirectAttributes ra, HttpServletRequest request) {
 		if (!Roles.isUser()) {
 			throw new TasqAuthException(msg);
 		}
@@ -409,6 +410,9 @@ public class ProjetController {
 		}
 		project.setDefault_type(type);
 		project.setTimeTracked(timeTracked);
+		Account account = accSrv.findById(assigneId);
+		assigneId = account!=null ? account.getId():null;
+		project.setDefaultAssigneeID(assigneId);
 		projSrv.save(project);
 		return "redirect:" + request.getHeader("Referer");
 	}

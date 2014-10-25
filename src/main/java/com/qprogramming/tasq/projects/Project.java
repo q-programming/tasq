@@ -77,6 +77,9 @@ public class Project implements Serializable {
 	
 	@Column
 	private Boolean timeTracked = false;
+	
+	@Column
+	private Long defaultAssigneeID;
 
 	public enum AgileType {
 		KANBAN, SCRUM
@@ -214,6 +217,14 @@ public class Project implements Serializable {
 
 	public void setTimeTracked(Boolean timeBurndown) {
 		this.timeTracked = timeBurndown;
+	}
+
+	public Long getDefaultAssigneeID() {
+		return defaultAssigneeID;
+	}
+
+	public void setDefaultAssigneeID(Long defaultAssigneeID) {
+		this.defaultAssigneeID = defaultAssigneeID;
 	}
 
 	/*

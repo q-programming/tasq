@@ -56,7 +56,7 @@ public class WorkLog implements Serializable {
 	@Column
 	private Period activity;
 
-	@Column
+	@Column(length = 4000)
 	private String message;
 	
 	@Column 
