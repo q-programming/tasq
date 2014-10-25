@@ -3,8 +3,6 @@
  */
 package com.qprogramming.tasq.task;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.hibernate.validator.constraints.NotBlank;
@@ -74,14 +72,14 @@ public class TaskForm {
 		Task task = new Task();
 		task.setName(getName());
 		task.setCreate_date(new Date());
-		if (getDue_date()!=null && !"".equals(getDue_date())) {
+		if (getDue_date() != null && !"".equals(getDue_date())) {
 			task.setDue_date(Utils.convertDueDate(getDue_date()));
 		}
 		task.setDescription(getDescription());
 		task.setState(TaskState.TO_DO);
 		task.setType(TaskType.toType(getType()));
 		boolean estimated = !Boolean.parseBoolean(getNo_estimation());
-		if (getStory_points()!=null && !"".equals(getStory_points())) {
+		if (getStory_points() != null && !"".equals(getStory_points())) {
 			task.setStory_points(Integer.parseInt(getStory_points()));
 		} else {
 			task.setStory_points(0);
@@ -151,10 +149,10 @@ public class TaskForm {
 	public void setStory_points(String story_points) {
 		this.story_points = story_points;
 	}
+
 	public void setNumericStory_points(Double story_points) {
 		this.story_points = String.valueOf(story_points.intValue());
 	}
-
 
 	public String getNo_estimation() {
 		return no_estimation;

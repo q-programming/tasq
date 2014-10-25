@@ -163,6 +163,9 @@ public class TaskController {
 			task.setId(taskID);
 			task.setProject(project);
 			project.getTasks().add(task);
+			//assigne
+			Account assignee = accSrv.findById(project.getDefaultAssigneeID());
+			task.setAssignee(assignee);
 			// Create log work
 			taskSrv.save(task);
 			projectSrv.save(project);
