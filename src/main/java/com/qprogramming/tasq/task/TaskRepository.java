@@ -24,8 +24,6 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
 	
 	List<Task> findByAssignee(Account account);
 	
-	List<Task> findByProjectAndSprint(Project project,Sprint sprint);
-
 	List<Task> findByProjectAndSprintsId(Project project, Long id);
 	
 }

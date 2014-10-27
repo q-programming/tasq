@@ -28,7 +28,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.Roles;
-import com.qprogramming.tasq.account.Account.Role;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
@@ -185,9 +184,10 @@ public class SprintController {
 	}
 
 	@Transactional
-	@RequestMapping(value = "/{id}/scrum/sprintRemove", method = RequestMethod.POST)
-	public String removeFromSprint(@PathVariable String id,
-			@RequestParam(value = "taskID") String taskID, Model model,
+	@RequestMapping(value = "/task/sprintRemove", method = RequestMethod.POST)
+	public String removeFromSprint(
+			@RequestParam(value = "taskID") String taskID,
+			@RequestParam(value = "sprintID") Long sprintID, Model model,
 			HttpServletRequest request, RedirectAttributes ra) {
 		Task task = taskSrv.findById(taskID);
 		Project project = task.getProject();
@@ -195,7 +195,7 @@ public class SprintController {
 				&& !Roles.isAdmin()) {
 			throw new TasqAuthException(msg);
 		}
-		Sprint sprint = sprintRepo.findById(task.getSprint().getId());
+		Sprint sprint = sprintRepo.findById(sprintID);
 		if (!sprint.isActive()) {
 			Hibernate.initialize(task.getSprints());
 			task.removeSprint(sprint);

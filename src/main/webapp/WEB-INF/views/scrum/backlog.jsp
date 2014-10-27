@@ -105,7 +105,7 @@
 					<%--Sprint task --%>
 					<c:forEach items="${entry.value}" var="task">
 						<c:set var="count" value="${count + task.story_points}" />
-						<div class="agile-list" data-id="${task.id}" id="${task.id}"
+						<div class="agile-list" data-id="${task.id}" id="${task.id}" sprint-id="${sprint.id}"
 							<c:if test="${task.state eq 'CLOSED' }">
 							style="text-decoration: line-through;"
 							</c:if>>
@@ -150,9 +150,9 @@
 						<form id="sprint_assign_${task.id}"
 							action="<c:url value="/${project.projectId}/scrum/sprintAssign"/>"
 							method="post">
-							<input type="hidden" name="taskID" value="${task.id}"> <input
-								type="hidden" id="sprintID_${task.id}" name="sprintID"
-								value="${task.sprint.id}">
+							<input type="hidden" name="taskID" value="${task.id}"> 
+							<input
+								type="hidden" id="sprintID_${task.id}" name="sprintID">
 						</form>
 
 					</div>
@@ -301,8 +301,13 @@ $(document).ready(function($) {
 				icon : '',
 				action : function(event) {
 					var taskID = event.currentTarget.id;
-					$("#sprint_remove_" + taskID).submit();
-					}
+					var sprintID = event.currentTarget.getAttribute('sprint-id');
+					console.log(taskID);
+					console.log(sprintID);
+					$.post('<c:url value="/task/sprintRemove"/>',{taskID:taskID,sprintID:sprintID},function(){
+						location.reload();
+					});
+				}
 		}]});
 	</c:if>
 });	
