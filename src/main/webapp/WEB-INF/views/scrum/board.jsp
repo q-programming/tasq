@@ -7,6 +7,7 @@
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
 <%@ taglib prefix="myfn" uri="/WEB-INF/tags/custom.tld"%>
+<%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <c:set var="tasks_text">
 	<s:message code="task.tasks" text="Tasks" />
 </c:set>
@@ -139,6 +140,8 @@
 		</div>
 	</div>
 </div>
+<jsp:include page="../modals/close.jsp" />
+<%-- <tiles:insertTemplate template="modal/close"/> --%>
 <script>
 	$(document).ready(function($) {
 		<c:if test="${can_edit}">
@@ -177,26 +180,28 @@
 		      hoverClass: "state_hover",
 		      drop: function( event, ui ) {
 		    	  //event on drop
-		    	 var taskID = ui.draggable.attr("id");
+		    	 taskID = ui.draggable.attr("id");
 		    	 var oldState =  ui.draggable.attr("state");
 		    	 var state = $(this).data('state');
 		    	 if( oldState != state){
 			    	 if(state == 'CLOSED'){
-			    		 //TODO zero hours?
-		    		 	//alert("closing");
+			    		 $('#close_task').modal({
+			    	            show: true,
+			    	            keyboard: false,
+			    	            backdrop: 'static'
+			    	     });
+			    		 console.log('halt?');
 		    	 	}
-						$.post('<c:url value="/task/changeState"/>',{id:taskID,state:state},function(message){
-							if(message=='Error'){
-								var errorMsg = '<s:message code="role.error.task.permission"/>';
-								showError(errorMsg);
-							}else if (message == 'Started'){
-								var errorMsg = '<s:message code="task.alreadyStarted"/>';
-								showError(errorMsg)
+			    	else{
+						$.post('<c:url value="/task/changeState"/>',{id:taskID,state:state},function(result){
+							if(result.code == 'Error'){
+								showError(result.message);
 							}
 							else{
-								showSuccess(message);
+								showSuccess(result.message);
 							}
 						});
+			    	}
 		    	 }
 		    	 var dropped = ui.draggable;
 		         var droppedOn = $(this);

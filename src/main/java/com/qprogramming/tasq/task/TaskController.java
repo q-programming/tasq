@@ -57,6 +57,7 @@ import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.PeriodHelper;
+import com.qprogramming.tasq.support.ResultData;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.ProjectSorter;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
@@ -163,7 +164,7 @@ public class TaskController {
 			task.setId(taskID);
 			task.setProject(project);
 			project.getTasks().add(task);
-			//assigne
+			// assigne
 			Account assignee = accSrv.findById(project.getDefaultAssigneeID());
 			task.setAssignee(assignee);
 			// Create log work
@@ -507,10 +508,13 @@ public class TaskController {
 	}
 
 	@Transactional
-	@RequestMapping(value = "/task/changeState", method = RequestMethod.POST, produces = "text/plain;charset=UTF-8")
+	@RequestMapping(value = "/task/changeState", method = RequestMethod.POST)
 	@ResponseBody
-	public String changeStatePOST(@RequestParam(value = "id") String taskID,
-			@RequestParam(value = "state") TaskState state) {
+	public ResultData changeStatePOST(
+			@RequestParam(value = "id") String taskID,
+			@RequestParam(value = "state") TaskState state,
+			@RequestParam(value = "zero_checkbox", required = false) Boolean remaining_zero,
+			@RequestParam(value = "message", required = false) String message) {
 		// check if not admin or user
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
@@ -521,15 +525,40 @@ public class TaskController {
 			if (state.equals(TaskState.TO_DO)) {
 				Hibernate.initialize(task.getLogged_work());
 				if (!task.getLogged_work().equals("0m")) {
-					return "Started";
+					return new ResultData("ERROR", msg.getMessage(
+							"task.alreadyStarted", null,
+							Utils.getCurrentLocale()));
 				}
 			}
 			TaskState old_state = (TaskState) task.getState();
 			task.setState(state);
+			if (message != null && message != "") {
+				if (Utils.containsHTMLTags(message)) {
+					return new ResultData("ERROR", msg.getMessage(
+							"comment.htmlTag", null, Utils.getCurrentLocale()));
+				} else {
+					Comment comment = new Comment();
+					comment.setTask(task);
+					comment.setAuthor(Utils.getCurrentAccount());
+					comment.setDate(new Date());
+					comment.setMessage(message);
+					commRepo.save(comment);
+					Hibernate.initialize(task.getComments());
+					task.addComment(comment);
+					wlSrv.addActivityLog(task, message, LogType.COMMENT);
+				}
+			}
+
+			// Zero remaining time
+			if (remaining_zero != null && remaining_zero) {
+				task.setRemaining(PeriodHelper.inFormat("0m"));
+			}
 			taskSrv.save(task);
-			return worklogStateChange(state, old_state, task);
+			return new ResultData("OK", worklogStateChange(state, old_state,
+					task));
 		}
-		return "Error";
+		return new ResultData("ERROR", msg.getMessage("error.unknown", null,
+				Utils.getCurrentLocale()));
 	}
 
 	@RequestMapping(value = "/task/time", method = RequestMethod.GET)
@@ -863,7 +892,7 @@ public class TaskController {
 
 		return "/task/importResults";
 	}
-	
+
 	private String worklogStateChange(TaskState state, TaskState old_state,
 			Task task) {
 		if (state.equals(TaskState.CLOSED)) {
@@ -1003,5 +1032,4 @@ public class TaskController {
 		}
 		return true;
 	}
-
 }

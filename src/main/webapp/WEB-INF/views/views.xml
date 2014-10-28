@@ -12,4 +12,8 @@
 	<definition name="*" extends="default">
 		<put-attribute name="body" value="/WEB-INF/views/{1}.jsp"></put-attribute>
 	</definition>
+	<definition name="/modal/*" extends="default">
+		<put-attribute name="modals" value="/WEB-INF/views/modals/{1}.jsp" />
+	</definition>
+	
 </tiles-definitions>

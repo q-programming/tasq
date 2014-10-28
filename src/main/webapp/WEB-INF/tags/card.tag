@@ -5,7 +5,7 @@
 <%@ attribute name="task" required="true"
 	type="com.qprogramming.tasq.task.Task"%>
 <%@ attribute name="can_edit" required="true"%>
-<div class="agile-card theme" data-id="${task.id}" data-state="task.state" id="${task.id}">
+<div class="agile-card theme" data-id="${task.id}" state="${task.state}" id="${task.id}">
 	<div class="side-bar theme"></div>
 	<div style="padding-left: 5px;">
 		<t:type type="${task.type}" list="true" />
