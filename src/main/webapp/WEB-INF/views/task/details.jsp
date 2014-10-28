@@ -130,8 +130,8 @@
 				</div>
 				<!-- logwork trigger modal -->
 				<c:if test="${can_edit && user.isUser || is_assignee}">
-					<button class="btn btn-default btn-sm" data-toggle="modal"
-						data-target="#logWorkform">
+					<button class="btn btn-default btn-sm worklog" data-toggle="modal"
+						data-target="#logWorkform" data-taskID="${task.id}">
 						<span class="glyphicon glyphicon-calendar"></span>
 						<s:message code="task.logWork"></s:message>
 					</button>
@@ -468,76 +468,7 @@
 		</div>
 	</div>
 </div>
-<!-- LOG WORK MODAL -->
-<div class="modal fade" id="logWorkform" tabindex="-1" role="dialog"
-	aria-labelledby="myModalLabel" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header theme">
-				<button type="button" class="close" data-dismiss="modal"
-					aria-hidden="true">&times;</button>
-				<h4 class="modal-title" id="myModalLabel">
-					<s:message code="task.logWork" />
-				</h4>
-			</div>
-			<form id="mainForm" name="mainForm" method="post"
-				action="<c:url value="/logwork"/>">
-				<div class="modal-body">
-
-					<input type="hidden" name="taskID" value="${task.id}">
-					<div class="form-group">
-						<label><s:message code="task.logWork.spent" /></label> <input
-							id="logged_work" name="logged_work"
-							style="width: 150px; height: 25px" class="form-control"
-							type="text" value=""> <span class="help-block"><s:message
-								code="task.logWork.help"></s:message> </span>
-					</div>
-					<div>
-						<div style="float: left; margin-right: 50px;">
-							<label><s:message code="main.date" /></label> <input
-								id="datepicker" name="date_logged"
-								style="width: 150px; height: 25px"
-								class="form-control datepicker" type="text" value="">
-						</div>
-						<div>
-							<label><s:message code="main.time" /></label> <input
-								id="time_logged" name="time_logged"
-								style="width: 70px; height: 25px" class="form-control"
-								type="text" value="">
-						</div>
-					</div>
-					<span class="help-block"><s:message
-							code="task.logWork.when.help"></s:message> </span>
-					<div>
-						<label><s:message code="task.remaining" /></label>
-						<div class="radio">
-							<label> <input type="radio" name="estimate_reduce"
-								id="estimate_auto" value="auto" checked> <s:message
-									code="task.logWork.reduceAuto" />
-							</label>
-						</div>
-						<div class="radio">
-							<label> <input type="radio" name="estimate_reduce"
-								id="estimate_manual" value="auto"> <s:message
-									code="task.logWork.reduceManual" />
-							</label> <input id="remaining" name="remaining" class="form-control"
-								style="width: 150px; height: 25px" disabled>
-						</div>
-					</div>
-					<span class="help-block"><s:message
-							code="task.logWork.estimate.help"></s:message> </span>
-				</div>
-				<div class="modal-footer">
-					<button class="btn btn-default" type="submit">
-						<s:message code="main.log" />
-					</button>
-					<a class="btn" data-dismiss="modal"><s:message
-							code="main.cancel" /></a>
-				</div>
-			</form>
-		</div>
-	</div>
-</div>
+<jsp:include page="../modals/logWork.jsp" />
 <!-- CHANGE STATE MODAL -->
 <%
 	pageContext.setAttribute("states", TaskState.values());
