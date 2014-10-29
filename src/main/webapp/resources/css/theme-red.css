@@ -8,18 +8,18 @@ a.theme {
 }
 
 div.navbar.navbar-fixed-top.theme {
-	background-color: mediumseagreen;
+	background-color: #a12829;
 }
 
 div.modal-header.theme {
-	background-color: mediumseagreen;
+	background-color: #a12829;
 	color: white;
 	border-top-left-radius: 5px;
 	border-top-right-radius: 5px;
 }
 
 thead.theme {
-	background: mediumseagreen;
+	background: #a12829;
 	color: white;
 }
 .agile-card {
@@ -28,7 +28,7 @@ thead.theme {
 	padding: 5px;
 	margin-bottom: 5px;
 	border-color: lightgray;
-	background-color: rgba(249, 253, 255, 1)
+	background-color: rgba(255, 249, 249, 1);
 }
 .agile-list{
 	color: inherit;
@@ -36,7 +36,7 @@ thead.theme {
 	padding: 5px;
 	margin-bottom: 5px;
 	border-color: lightgray;
-	background-color: rgba(249, 253, 255, 1)
+	background-color: rgba(255, 249, 249, 1);
 }
 .table_sprint {
 	border-style: dashed;
@@ -47,11 +47,11 @@ thead.theme {
 }
 span.badge.theme{
 	float:right;
-	background-color: rgb(51, 161, 103);
+	background-color: #DD6264
 }
 span.badge.theme.zero{
-	color: rgb(51, 161, 103);
+	color: #DD6264
 }
 .side-bar.theme{
-	background-color: mediumseagreen;
+	background-color: #a12829;
 }
