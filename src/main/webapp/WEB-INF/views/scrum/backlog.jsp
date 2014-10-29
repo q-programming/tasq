@@ -173,8 +173,6 @@
 					<s:message code="agile.sprint.start.title" />
 				</h4>
 			</div>
-			<form id="startSprintForm" name="startSprintForm" method="post"
-				action="<c:url value="/scrum/start"/>">
 				<div class="modal-body">
 					<input id="project_id" type="hidden" name="project_id"
 						value="${project.id}"> <input id="sprintID" type="hidden"
@@ -199,13 +197,12 @@
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button class="btn btn-default" type="submit">
+					<button class="btn btn-default" id="sprint_start_btn">
 						<s:message code="agile.sprint.start" />
 					</button>
 					<a class="btn" data-dismiss="modal"><s:message
 							code="main.cancel" /></a>
 				</div>
-			</form>
 		</div>
 	</div>
 </div>
@@ -231,9 +228,12 @@ $(document).ready(function($) {
 		dateFormat : "dd-mm-yy",
 		firstDay: 1
 	});
-	$( "#startSprintForm" ).submit(function( event ) {
+	$( "#sprint_start_btn" ).click(function( event ) {
 		var start = $("#sprint_start").val();
 		var end = $("#sprint_end").val();
+		var projectID = $("#project_id").val();
+		var sprintID = $("#sprintID").val();
+		
 		var start_date = $.datepicker.parseDate("dd-mm-yy",start);
 		var end_date = $.datepicker.parseDate("dd-mm-yy",end);
 		if(start_date==null || end_date==null|| start_date > end_date){
@@ -242,7 +242,22 @@ $(document).ready(function($) {
 			event.preventDefault();
 		}
 		else{
-			$("#startSprintForm").submit();
+			$.post('<c:url value="/scrum/start"/>',{
+					sprintID:sprintID,
+					projectID:projectID,
+					sprintStart:start,
+					sprintEnd:end},function(result){
+				if(result.code == 'ERROR'){
+					showError(result.message);
+				}else if(result.code == 'WARNING'){
+					showWarning(result.message)
+				}
+				else{
+					showSuccess(result.message);
+					$("#start-sprint").remove();
+				}
+			$("#startSprint").modal('toggle');
+			});
 			}
 		});
 	

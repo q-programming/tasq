@@ -5,6 +5,9 @@ package com.qprogramming.tasq.support;
  *
  */
 public class ResultData {
+	public static final String OK = "OK";
+	public static final String WARNING = "WARNING";
+	public static final String ERROR = "ERROR";
 	public String code;
 	public String message;
 

@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.account.Account;
@@ -32,6 +33,7 @@ import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.PeriodHelper;
+import com.qprogramming.tasq.support.ResultData;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.SprintSorter;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
@@ -243,22 +245,21 @@ public class SprintController {
 	}
 
 	@Transactional
+	@ResponseBody
 	@RequestMapping(value = "/scrum/start", method = RequestMethod.POST)
-	public String startSprint(@RequestParam(value = "sprintID") Long id,
-			@RequestParam(value = "project_id") Long project_id,
-			@RequestParam(value = "sprint_start") String sprint_start,
-			@RequestParam(value = "sprint_end") String sprint_end, Model model,
+	public ResultData startSprint(@RequestParam(value = "sprintID") Long id,
+			@RequestParam(value = "projectID") Long project_id,
+			@RequestParam(value = "sprintStart") String sprint_start,
+			@RequestParam(value = "sprintEnd") String sprint_end, Model model,
 			HttpServletRequest request, RedirectAttributes ra) {
 		Sprint sprint = sprintRepo.findById(id);
 		Project project = projSrv.findById(project_id);
 		Sprint active = sprintRepo.findByProjectIdAndActiveTrue(project_id);
 		if (sprint != null && !sprint.isActive() && active == null) {
 			if (canEdit(sprint.getProject()) || Roles.isAdmin()) {
-				sprint.setStart_date(Utils.convertDueDate(sprint_start));
-				sprint.setEnd_date(Utils.convertDueDate(sprint_end));
-				sprint.setActive(true);
 				Period total_estimate = new Period();
 				int totalStoryPoints = 0;
+				StringBuilder warnings = new StringBuilder();
 				List<Task> taskList = taskSrv.findAllBySprint(sprint);
 				for (Task task : taskList) {
 					if (task.getState().equals(TaskState.ONGOING)
@@ -269,19 +270,35 @@ public class SprintController {
 						total_estimate = PeriodHelper.plusPeriods(
 								total_estimate, task.getRawEstimate());
 					}
+					if (!project.getTimeTracked()) {
+						if (task.getStory_points() == 0) {
+							warnings.append(task.getId());
+							warnings.append(" ");
+						}
+					}
 					totalStoryPoints += task.getStory_points();
+				}
+				if (warnings.length() > 0) {
+					return new ResultData(ResultData.WARNING, msg.getMessage(
+							"agile.sprint.notEstimated.sp",
+							new Object[] { warnings.toString() },
+							Utils.getCurrentLocale()));
 				}
 				sprint.setTotalEstimate(total_estimate);
 				sprint.setTotalStoryPoints(totalStoryPoints);
+				sprint.setStart_date(Utils.convertDueDate(sprint_start));
+				sprint.setEnd_date(Utils.convertDueDate(sprint_end));
+				sprint.setActive(true);
 				sprintRepo.save(sprint);
-				MessageHelper.addSuccessAttribute(ra, msg.getMessage(
+				wrkLogSrv.addWorkLogNoTask(null, project, LogType.SPRINT_START);
+				return new ResultData(ResultData.OK, msg.getMessage(
 						"agile.sprint.started",
 						new Object[] { sprint.getSprintNo() },
 						Utils.getCurrentLocale()));
-				wrkLogSrv.addWorkLogNoTask(null, project, LogType.SPRINT_START);
 			}
 		}
-		return "redirect:" + request.getHeader("Referer");
+		return new ResultData(ResultData.ERROR, msg.getMessage("error.unknown",
+				null, Utils.getCurrentLocale()));
 	}
 
 	@Transactional

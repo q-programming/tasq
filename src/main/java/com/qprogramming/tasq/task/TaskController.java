@@ -525,7 +525,7 @@ public class TaskController {
 			if (state.equals(TaskState.TO_DO)) {
 				Hibernate.initialize(task.getLogged_work());
 				if (!task.getLogged_work().equals("0m")) {
-					return new ResultData("ERROR", msg.getMessage(
+					return new ResultData(ResultData.ERROR, msg.getMessage(
 							"task.alreadyStarted", null,
 							Utils.getCurrentLocale()));
 				}
@@ -534,7 +534,7 @@ public class TaskController {
 			task.setState(state);
 			if (message != null && message != "") {
 				if (Utils.containsHTMLTags(message)) {
-					return new ResultData("ERROR", msg.getMessage(
+					return new ResultData(ResultData.ERROR, msg.getMessage(
 							"comment.htmlTag", null, Utils.getCurrentLocale()));
 				} else {
 					Comment comment = new Comment();
@@ -554,11 +554,11 @@ public class TaskController {
 				task.setRemaining(PeriodHelper.inFormat("0m"));
 			}
 			taskSrv.save(task);
-			return new ResultData("OK", worklogStateChange(state, old_state,
-					task));
+			return new ResultData(ResultData.OK, worklogStateChange(state,
+					old_state, task));
 		}
-		return new ResultData("ERROR", msg.getMessage("error.unknown", null,
-				Utils.getCurrentLocale()));
+		return new ResultData(ResultData.ERROR, msg.getMessage("error.unknown",
+				null, Utils.getCurrentLocale()));
 	}
 
 	@RequestMapping(value = "/task/time", method = RequestMethod.GET)
@@ -669,23 +669,25 @@ public class TaskController {
 		return "redirect:" + request.getHeader("Referer");
 	}
 
-	@RequestMapping(value = "/task/assignMe", method = RequestMethod.POST, produces = "text/plain;charset=UTF-8")
+	@RequestMapping(value = "/task/assignMe", method = RequestMethod.POST)
 	@ResponseBody
-	public String assignMe(@RequestParam(value = "id") String id) {
+	public ResultData assignMe(@RequestParam(value = "id") String id) {
 		// check if not admin or user
 		if (!Roles.isUser()) {
 			throw new TasqAuthException(msg);
 		}
 		Task task = taskSrv.findById(id);
 		if (!canEdit(task.getProject())) {
-			return msg.getMessage("role.error.task.permission", null,
-					Utils.getCurrentLocale());
+			return new ResultData(ResultData.ERROR, msg.getMessage(
+					"role.error.task.permission", null,
+					Utils.getCurrentLocale()));
 		}
 		Account assignee = Utils.getCurrentAccount();
 		task.setAssignee(assignee);
 		taskSrv.save(task);
 		wlSrv.addActivityLog(task, assignee.toString(), LogType.ASSIGNED);
-		return "OK";
+		return new ResultData(ResultData.OK, msg.getMessage("task.assinged.me",
+				null, Utils.getCurrentLocale()) + " " + task.getId());
 	}
 
 	@RequestMapping(value = "/task/priority", method = RequestMethod.GET)

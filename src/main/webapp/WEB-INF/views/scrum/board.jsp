@@ -80,16 +80,16 @@
 		$(".assign_me").click(function(){
 			var taskID = $(this).data('taskid');
 			//assignMe
-			$.post('<c:url value="/task/assignMe"/>',{id:taskID},function(message){
-				if(message!='OK'){
-					showError(message);
+			$.post('<c:url value="/task/assignMe"/>',{id:taskID},function(result){
+				console.log(result);
+				if(result.code!='OK'){
+					showError(result.message);
 				}
 				else{
-					var succes = '<s:message code="task.assinged.me"/> ' + taskID;
 					var assignee = '<img data-src="holder.js/20x20"	style="height: 20px; padding-right: 5px;" src="<c:url value="/userAvatar/${user.id}"/>" />'
 									+'<a href="<c:url value="/user?id=${user.id}"/>">${user}</a>';
 					$("#assignee_"+taskID).html(assignee);
-					showSuccess(succes);
+					showSuccess(result.message);
 				}
 			});
 		});
