@@ -109,18 +109,19 @@
 							<c:if test="${task.state eq 'CLOSED' }">
 							style="text-decoration: line-through;"
 							</c:if>>
-							<div>
+							<div style="display:table-cell;width: 100%;">
 								<t:type type="${task.type}" list="true" />
 								<a href="<c:url value="/task?id=${task.id}"/>"
-									style="color: inherit;">[${task.id}] ${task.name}</a> <span
-									class="badge theme <c:if test="${task.story_points == 0}">zero</c:if>">
-									${task.story_points} </span>
+									style="color: inherit;">[${task.id}] ${task.name}</a> 
 								<form id="sprint_remove_${task.id}"
 									action="<c:url value="/${project.projectId}/scrum/sprintRemove"/>"
 									method="post">
 									<input type="hidden" name="taskID" value="${task.id}">
 								</form>
 							</div>
+						<div style="display:table-cell"><span class="badge theme <c:if test="${task.story_points == 0}">zero</c:if>">
+							${task.story_points} </span>
+						</div>
 						</div>
 					</c:forEach>
 				</div>
@@ -140,13 +141,11 @@
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${not task.inSprint && task.state ne 'CLOSED'}">
 				<div class="agile-card" data-id="${task.id}" id="${task.id}">
-					<div>
+					<div style="display:table-cell;width: 100%;">
 						<t:type type="${task.type}" list="true" />
 						<t:priority priority="${task.priority}" list="true" />
 						<a href="<c:url value="/task?id=${task.id}"/>"
-							style="color: inherit;">[${task.id}] ${task.name}</a> <span
-							class="badge theme <c:if test="${task.story_points == 0}">zero</c:if>">
-							${task.story_points} </span>
+							style="color: inherit;">[${task.id}] ${task.name}</a> 
 						<form id="sprint_assign_${task.id}"
 							action="<c:url value="/${project.projectId}/scrum/sprintAssign"/>"
 							method="post">
@@ -154,7 +153,9 @@
 							<input
 								type="hidden" id="sprintID_${task.id}" name="sprintID">
 						</form>
-
+					</div>
+					<div style="display:table-cell"><span class="badge theme <c:if test="${task.story_points == 0}">zero</c:if>">
+							${task.story_points} </span>
 					</div>
 				</div>
 			</c:if>
