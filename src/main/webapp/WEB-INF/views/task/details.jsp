@@ -274,29 +274,31 @@
 							<form id="assign" action="<c:url value="/task/assign"/>"
 								method="post">
 								<input type="hidden" name="taskID" value="${task.id}">
-								<div style="width: 250px; display: table-cell;">
+								<table>
+								<tr><td style="width: 250px;">
+								
 									<input type="text" class="form-control input-sm" name="account"
 										placeholder="<s:message code="project.participant.hint"/>"
 										id="assignee">
-								</div>
-								<div style="display: table-cell;">
+								</td>
+								<td>
 									<button class="btn btn-default btn-sm a-tooltip" type="button"
 										id="assign_me" title="<s:message code="task.assignme"/>">
 										<span class="glyphicon glyphicon-user"></span>
 									</button>
-								</div>
-								<div style="display: table-cell;">
+								</td>
+								<td>
 									<button class="btn btn-default btn-sm a-tooltip" type="button"
 										id="unassign" title="<s:message code="task.unassign"/>">
 										<span class="glyphicon glyphicon-remove"></span>
 									</button>
-								</div>
-								<div style="display: table-cell;">
+								</td>
+								<td>
 									<button type="button" id="dismiss_assign"
 										class="close a-tooltip"
 										title="<s:message code="main.cancel"/>"
 										style="padding-left: 5px">×</button>
-								</div>
+								</td></tr></table>
 							</form>
 						</div>
 					</div>
