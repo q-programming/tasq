@@ -131,6 +131,10 @@
 									href="<c:url value="tasks?${projID_url}${query_url}${priority_url}state=${state}"/>"><t:state
 											state="${state}"></t:state></a></li>
 							</c:forEach>
+								<li class="divider"></li>
+								<li><a 
+									href="<c:url value="tasks?${projID_url}${query_url}${priority_url}state=OPEN"/>" class="a-tooltip" title="<s:message code="task.state.open.hint"/>"><t:state state="OPEN"></t:state>
+											</a></li>
 						</ul>
 					</div>
 

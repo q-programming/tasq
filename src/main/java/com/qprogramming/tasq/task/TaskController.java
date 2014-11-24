@@ -336,8 +336,12 @@ public class TaskController {
 			if (state == null || state == "") {
 				taskList = taskSrv.findAllByProject(active);
 			} else {
+				if (state.equals("OPEN")){
+					taskList = taskSrv.findByProjectAndOpen(active);
+				}else{
 				taskList = taskSrv.findByProjectAndState(active,
 						TaskState.valueOf(state));
+				}
 			}
 			if (query != null && query != "") {
 				List<Task> searchResult = new LinkedList<Task>();

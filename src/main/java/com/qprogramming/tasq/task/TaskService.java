@@ -31,6 +31,10 @@ public class TaskService {
 	public List<Task> findByProjectAndState(Project project, TaskState state) {
 		return taskRepo.findByProjectAndState(project, state);
 	}
+	
+	public List<Task> findByProjectAndOpen(Project project) {
+		return taskRepo.findByProjectAndStateNot(project, TaskState.CLOSED);
+	}
 
 	/**
 	 * @param id

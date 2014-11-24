@@ -126,19 +126,15 @@ public class ProjetController {
 		model.addAttribute("ONGOING", state_count.get(TaskState.ONGOING));
 		model.addAttribute("CLOSED", state_count.get(TaskState.CLOSED));
 		model.addAttribute("BLOCKED", state_count.get(TaskState.BLOCKED));
-		// Initilize getRawWorkLog for all task in this project . Otherwise lazy
-		// init exception is thrown
-		List<Task> taskList = taskSrv.findAllByProject(project);
+		List<Task> taskList = new LinkedList<Task>();
 		if (closed == null) {
-			List<Task> result = new LinkedList<Task>();
-			for (Task task : taskList) {
-				if (!task.getState().equals(TaskState.CLOSED)) {
-					result.add(task);
-				}
-			}
-			taskList = result;
+			taskList = taskSrv.findByProjectAndOpen(project);
+		}else{
+			taskList = taskSrv.findAllByProject(project);
 		}
 		Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID, false));
+		// Initilize getRawWorkLog for all task in this project . Otherwise lazy
+		// init exception is thrown
 		Utils.initializeWorkLogs(taskList);
 		model.addAttribute("tasks", taskList);
 		model.addAttribute("project", project);

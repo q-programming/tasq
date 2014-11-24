@@ -21,4 +21,8 @@
 		<span class="state_span"><span class="glyphicon glyphicon-ok"></span>
 			<s:message code="task.state.closed"></s:message></span>
 	</c:when>
+	<c:otherwise>
+		<span class="state_span"><span class="glyphicon glyphicon-refresh"></span> 
+			<s:message code="task.state.open"></s:message></span>
+	</c:otherwise>
 </c:choose>
