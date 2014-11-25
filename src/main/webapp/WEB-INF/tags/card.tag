@@ -10,8 +10,8 @@
 	<div style="padding-left: 5px;">
 		<t:type type="${task.type}" list="true" />
 		<a href="<c:url value="/task?id=${task.id}"/>"
-			style="color: inherit;<c:if test="${task.state eq 'CLOSED' }">
-							text-decoration: line-through;
+			style="color: inherit;" class="<c:if test="${task.state eq 'CLOSED' }">
+							closed
 							</c:if>">[${task.id}]
 			${task.name}</a> <span
 			class="badge theme <c:if test="${task.story_points == 0}">zero</c:if>">${task.story_points}

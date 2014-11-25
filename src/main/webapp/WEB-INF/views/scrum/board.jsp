@@ -115,7 +115,10 @@
 			    	            keyboard: false,
 			    	            backdrop: 'static'
 			    	     });
+			    		 $('#'+taskID + ' a[href]').toggleClass('closed');
+			    		 console.log($(ui.draggable, 'a'));
 			    		 console.log('halt?');
+			    		 
 		    	 	}
 			    	else{
 						$.post('<c:url value="/task/changeState"/>',{id:taskID,state:state},function(result){
@@ -124,6 +127,9 @@
 							}
 							else{
 								showSuccess(result.message);
+								if(oldState== 'CLOSED'){
+									$('#'+taskID + ' a[href]').toggleClass('closed');
+								}
 							}
 						});
 			    	}
