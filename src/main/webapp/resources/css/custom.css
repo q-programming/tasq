@@ -172,3 +172,6 @@ form.form-search:before {
 a.closed {
 	text-decoration: line-through;
 }
+.dropdown.pointer{
+	cursor: pointer;
+}
