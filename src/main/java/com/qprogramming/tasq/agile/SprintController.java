@@ -367,7 +367,19 @@ public class SprintController {
 					return "redirect:/" + project.getProjectId()
 							+ "/scrum/backlog";
 				}
-				lastSprint = sprints.get(sprints.size() - 1);
+				int counter = 1;
+				lastSprint = sprints.get(sprints.size() - counter);
+				while (lastSprint.getStart_date() == "") {
+					counter++;
+					if (counter > sprints.size()) {
+						MessageHelper.addWarningAttribute(ra, msg.getMessage(
+								"agile.sprint.noSprints", null,
+								Utils.getCurrentLocale()));
+						return "redirect:/" + project.getProjectId()
+								+ "/scrum/backlog";
+					}
+					lastSprint = sprints.get(sprints.size() - counter);
+				}
 			}
 			Sprint sprint;
 			if (sprintNo != null) {
