@@ -14,6 +14,7 @@ import org.springframework.beans.BeanUtils;
 public class DisplaySprint implements Comparable<DisplaySprint> {
 	private String name;
 	private Long sprintNo;
+	private String projectID;
 	private Date start_date;
 	private Date end_date;
 	private boolean active;
@@ -23,6 +24,7 @@ public class DisplaySprint implements Comparable<DisplaySprint> {
 
 	public DisplaySprint(Sprint sprint) {
 		BeanUtils.copyProperties(sprint, this);
+		projectID = sprint.getProject().getProjectId();
 	}
 
 	public String getName() {
@@ -87,6 +89,14 @@ public class DisplaySprint implements Comparable<DisplaySprint> {
 
 	public void setTotalStoryPoints(Integer totalStoryPoints) {
 		this.totalStoryPoints = totalStoryPoints;
+	}
+
+	public String getProjectID() {
+		return projectID;
+	}
+
+	public void setProjectID(String projectID) {
+		this.projectID = projectID;
 	}
 
 	@Override

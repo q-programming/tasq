@@ -63,7 +63,7 @@
 					<option id="${list_project.projectId}"
  						<c:if test="${list_project.id eq user.active_project}">selected style="font-weight:bold"
  						</c:if>
- 						value="${list_project.projectId}">${list_project.name}</option>
+ 						value="${list_project.id}">${list_project.name}</option>
  				</c:forEach> 
 			</form:select>
 			<span class="help-block"><s:message code="task.project.help" /></span>
@@ -131,6 +131,15 @@
 			</div>
 			<form:hidden path="priority" id="priority" value="${fn:toUpperCase(project.default_priority)}" />
 			<form:errors path="priority" element="p"/>
+		</div>
+		<div>
+			<div class="mod-header">
+				<h5 class="mod-header-title">
+					Sprint
+				</h5>
+			</div>
+		<select class="form-control" id="addToSprint" style="width:300px;">
+		</select>
 		</div>
 		<%-- Estimate --%>
 		<div class="mod-header">
@@ -214,7 +223,27 @@ $(document).ready(function($) {
 	$('.datepicker').datepicker($.datepicker.regional['${user.language}']);
 	var currentDue = "${taskForm.due_date}";
 	$("#due_date").val(currentDue);
-
+	$("#projects_list").change(function(){
+		fillSprints();
+	});
+	fillSprints();
+	
+	function fillSprints(){
+		$.get('<c:url value="/getSprints"/>',{projectID:$("#projects_list").val()},function(result){
+			$('#addToSprint').empty();
+			$.each(result, function(key, sprint) {
+				var isActive = "";
+				if (sprint.active){
+					isActive = " (<s:message code="agile.sprint.active"/>)";
+				}
+			    $('#addToSprint')
+			         .append($("<option></option>")
+			         .attr("value",sprint.sprintNo)
+			         .text("Sprint " + sprint.sprintNo + isActive));
+			     $('#addToSprint').val('');
+			});
+		});
+	}
 });
 
 	

@@ -53,6 +53,7 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.account.Account.Role;
 import com.qprogramming.tasq.account.AccountService;
+import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.agile.SprintRepository;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
@@ -109,7 +110,7 @@ public class TaskController {
 
 	@Autowired
 	private MessageSource msg;
-	
+
 	@Autowired
 	private SprintRepository sprintRepository;
 
@@ -143,7 +144,7 @@ public class TaskController {
 			model.addAttribute("project", projectSrv.findUserActiveProject());
 			return null;
 		}
-		Project project = projectSrv.findByProjectId(taskForm.getProject());
+		Project project = projectSrv.findById(taskForm.getProject());
 		if (project != null) {
 			// check if can edit
 			if (!canEdit(project)) {
@@ -156,6 +157,7 @@ public class TaskController {
 			Task task = null;
 			try {
 				task = taskForm.createTask();
+
 			} catch (IllegalArgumentException e) {
 				errors.rejectValue("estimate", "error.estimateFormat");
 				model.addAttribute("projects", projectSrv.findAllByUser());
@@ -171,6 +173,12 @@ public class TaskController {
 			// assigne
 			Account assignee = accSrv.findById(project.getDefaultAssigneeID());
 			task.setAssignee(assignee);
+			// lookup for sprint
+			if (taskForm.getAddToSprint() != null) {
+				task.addSprint(sprintRepository.findByProjectIdAndSprintNo(
+						project.getId(),
+						Long.valueOf(taskForm.getAddToSprint())));
+			}
 			// Create log work
 			taskSrv.save(task);
 			projectSrv.save(project);
@@ -340,11 +348,11 @@ public class TaskController {
 			if (state == null || state == "") {
 				taskList = taskSrv.findAllByProject(active);
 			} else {
-				if (state.equals("OPEN")){
+				if (state.equals("OPEN")) {
 					taskList = taskSrv.findByProjectAndOpen(active);
-				}else{
-				taskList = taskSrv.findByProjectAndState(active,
-						TaskState.valueOf(state));
+				} else {
+					taskList = taskSrv.findByProjectAndState(active,
+							TaskState.valueOf(state));
 				}
 			}
 			if (query != null && query != "") {
