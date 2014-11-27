@@ -1,5 +1,7 @@
 package com.qprogramming.tasq.agile;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -9,8 +11,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.persistence.Column;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.Hibernate;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
@@ -28,6 +35,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
@@ -362,7 +370,7 @@ public class SprintController {
 				if (sprints.size() == 0) {
 					MessageHelper.addWarningAttribute(
 							ra,
-							msg.getMessage("agile.sprint.noActive", null,
+							msg.getMessage("agile.sprint.noSprints", null,
 									Utils.getCurrentLocale()));
 					return "redirect:/" + project.getProjectId()
 							+ "/scrum/backlog";
@@ -457,6 +465,20 @@ public class SprintController {
 		return "/scrum/burndown";
 	}
 
+	@RequestMapping(value = "/getSprints", method = RequestMethod.GET)
+	public @ResponseBody
+	List<DisplaySprint> showProjectSprints(@RequestParam Long projectID,
+			HttpServletResponse response) {
+		response.setContentType("application/json");
+		List<DisplaySprint> result = new LinkedList<DisplaySprint>();
+		List<Sprint> projectSprints = sprintRepo.findByProjectIdAndFinished(projectID, false);
+		for (Sprint sprint : projectSprints) {
+			result.add(new DisplaySprint(sprint));
+		}
+		Collections.sort(result);
+		return result;
+	}
+	
 	/**
 	 * Fills burndown map with worklogs in format <Date, Period Burned> Only
 	 * events with before present day are added

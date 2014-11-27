@@ -48,6 +48,8 @@ public class TaskForm {
 	private String remaining;
 
 	private String due_date;
+	
+	private Long sprintId;
 
 	public TaskForm() {
 		// TODO Auto-generated constructor stub
@@ -184,5 +186,13 @@ public class TaskForm {
 
 	public void setPriority(String priority) {
 		this.priority = priority;
+	}
+
+	public Long getSprintId() {
+		return sprintId;
+	}
+
+	public void setSprintId(Long sprintId) {
+		this.sprintId = sprintId;
 	}
 }

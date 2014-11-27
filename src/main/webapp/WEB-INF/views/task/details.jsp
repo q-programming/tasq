@@ -75,7 +75,7 @@
 															TaskState.values());
 										%>
 										<div id="task_priority" class="image-combo a-tooltip"
-											data-toggle="dropdown" data-placement="left"
+											data-toggle="dropdown" data-placement="top"
 											title="<s:message code="main.click"/>">
 											<div id="current_state" style = "float: left;padding-right: 5px;">
 												<t:state state="${task.state}" />
@@ -110,7 +110,7 @@
 															TaskPriority.values());
 										%>
 										<div id="task_priority" class="image-combo a-tooltip"
-											data-toggle="dropdown" data-placement=left
+											data-toggle="dropdown" data-placement=top
 											title="<s:message code="main.click"/>">
 											<t:priority priority="${task.priority}" />
 											<span class="caret"></span>

@@ -53,6 +53,7 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.account.Account.Role;
 import com.qprogramming.tasq.account.AccountService;
+import com.qprogramming.tasq.agile.SprintRepository;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
@@ -108,6 +109,9 @@ public class TaskController {
 
 	@Autowired
 	private MessageSource msg;
+	
+	@Autowired
+	private SprintRepository sprintRepository;
 
 	@Autowired
 	private CommentsRepository commRepo;
