@@ -132,13 +132,14 @@
 			<form:hidden path="priority" id="priority" value="${fn:toUpperCase(project.default_priority)}" />
 			<form:errors path="priority" element="p"/>
 		</div>
+		<%-----------SPRINT---------------------------%>
 		<div>
 			<div class="mod-header">
 				<h5 class="mod-header-title">
 					Sprint
 				</h5>
 			</div>
-		<select class="form-control" id="addToSprint" style="width:300px;">
+		<select class="form-control" id="addToSprint" name="addToSprint" style="width:300px;">
 		</select>
 		</div>
 		<%-- Estimate --%>

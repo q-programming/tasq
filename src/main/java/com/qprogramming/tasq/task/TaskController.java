@@ -176,8 +176,7 @@ public class TaskController {
 			// lookup for sprint
 			if (taskForm.getAddToSprint() != null) {
 				task.addSprint(sprintRepository.findByProjectIdAndSprintNo(
-						project.getId(),
-						Long.valueOf(taskForm.getAddToSprint())));
+						project.getId(), taskForm.getAddToSprint()));
 			}
 			// Create log work
 			taskSrv.save(task);

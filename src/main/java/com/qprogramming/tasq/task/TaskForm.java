@@ -28,7 +28,6 @@ public class TaskForm {
 	@NotBlank(message = NOT_BLANK_MESSAGE)
 	private String name;
 
-	@NotBlank(message = NOT_BLANK_MESSAGE)
 	private Long project;
 
 	@NotBlank(message = NOT_BLANK_MESSAGE)
@@ -49,7 +48,7 @@ public class TaskForm {
 
 	private String due_date;
 	
-	private String addToSprint;
+	private Long addToSprint;
 
 	public TaskForm() {
 		// TODO Auto-generated constructor stub
@@ -188,12 +187,11 @@ public class TaskForm {
 		this.priority = priority;
 	}
 
-	public String getAddToSprint() {
+	public Long getAddToSprint() {
 		return addToSprint;
 	}
 
-	public void setAddToSprint(String addToSprint) {
+	public void setAddToSprint(Long addToSprint) {
 		this.addToSprint = addToSprint;
 	}
-
 }
