@@ -7,7 +7,7 @@
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
 <%@ taglib prefix="myfn" uri="/WEB-INF/tags/custom.tld"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <security:authorize access="hasRole('ROLE_ADMIN')">
 	<c:set var="is_admin" value="true" />
 </security:authorize>
@@ -29,14 +29,6 @@
 	<%----------------------TASK NAME-----------------------------%>
 	<div>
 		<div class="pull-right">
-			<c:if test="${can_edit && user.isUser || is_assignee}">
-				<!-- change state trigger modal -->
-				<button class="btn btn-default btn-sm" data-toggle="modal"
-					data-target="#changeState">
-					<span class="glyphicon glyphicon-list-alt"></span>
-					<s:message code="task.changeState" />
-				</button>
-			</c:if>
 			<c:if test="${can_edit}">
 				<a href="<c:url value="task/edit?id=${task.id}"/>"><button
 						class="btn btn-default btn-sm">
@@ -74,19 +66,51 @@
 				<table>
 					<tr>
 						<td style="width: 80px;"><s:message code="task.state" /></td>
-						<td class="left-margin"><t:state state="${task.state}" /></td>
+						<td class="left-margin">
+							<c:choose>
+								<c:when	test="${can_edit && user.isUser || is_assignee}">
+									<div class="dropdown pointer">
+										<%
+											pageContext.setAttribute("states",
+															TaskState.values());
+										%>
+										<div id="task_priority" class="image-combo a-tooltip"
+											data-toggle="dropdown" data-placement="top"
+											title="<s:message code="main.click"/>">
+											<div id="current_state" style = "float: left;padding-right: 5px;">
+												<t:state state="${task.state}" />
+											</div>
+											<span class="caret"></span>
+										</div>
+										<ul class="dropdown-menu" role="menu"
+											aria-labelledby="dropdownMenu2">
+											<c:forEach items="${states}" var="enum_state">
+												<li>
+													<a href="#" class="change_state" data-state="${enum_state}">
+														<t:state state="${enum_state}" />
+													</a>
+												</li>
+											</c:forEach>
+										</ul>
+									</div>
+								</c:when>
+								<c:otherwise>
+									<t:state state="${task.state}" />
+								</c:otherwise>
+							</c:choose>
+						</td>
 					</tr>
 					<tr>
 						<td><s:message code="task.priority" /></td>
 						<td class="left-margin"><c:choose>
 								<c:when test="${can_edit && user.isUser || is_assignee}">
-									<div class="dropdown">
+									<div class="dropdown pointer">
 										<%
 											pageContext.setAttribute("priorities",
 															TaskPriority.values());
 										%>
 										<div id="task_priority" class="image-combo a-tooltip"
-											data-toggle="dropdown" data-placement="top"
+											data-toggle="dropdown" data-placement=top
 											title="<s:message code="main.click"/>">
 											<t:priority priority="${task.priority}" />
 											<span class="caret"></span>
@@ -130,8 +154,8 @@
 				</div>
 				<!-- logwork trigger modal -->
 				<c:if test="${can_edit && user.isUser || is_assignee}">
-					<button class="btn btn-default btn-sm" data-toggle="modal"
-						data-target="#logWorkform">
+					<button class="btn btn-default btn-sm worklog" data-toggle="modal"
+						data-target="#logWorkform" data-taskID="${task.id}">
 						<span class="glyphicon glyphicon-calendar"></span>
 						<s:message code="task.logWork"></s:message>
 					</button>
@@ -274,29 +298,34 @@
 							<form id="assign" action="<c:url value="/task/assign"/>"
 								method="post">
 								<input type="hidden" name="taskID" value="${task.id}">
-								<div style="width: 250px; display: table-cell;">
-									<input type="text" class="form-control input-sm" name="account"
-										placeholder="<s:message code="project.participant.hint"/>"
-										id="assignee">
-								</div>
-								<div style="display: table-cell;">
-									<button class="btn btn-default btn-sm a-tooltip" type="button"
-										id="assign_me" title="<s:message code="task.assignme"/>">
-										<span class="glyphicon glyphicon-user"></span>
-									</button>
-								</div>
-								<div style="display: table-cell;">
-									<button class="btn btn-default btn-sm a-tooltip" type="button"
-										id="unassign" title="<s:message code="task.unassign"/>">
-										<span class="glyphicon glyphicon-remove"></span>
-									</button>
-								</div>
-								<div style="display: table-cell;">
-									<button type="button" id="dismiss_assign"
-										class="close a-tooltip"
-										title="<s:message code="main.cancel"/>"
-										style="padding-left: 5px">×</button>
-								</div>
+								<table>
+									<tr>
+										<td style="width: 250px;"><input type="text"
+											class="form-control input-sm" name="account"
+											placeholder="<s:message code="project.participant.hint"/>"
+											id="assignee"></td>
+										<td>
+											<button class="btn btn-default btn-sm a-tooltip"
+												type="button" id="assign_me"
+												title="<s:message code="task.assignme"/>">
+												<span class="glyphicon glyphicon-user"></span>
+											</button>
+										</td>
+										<td>
+											<button class="btn btn-default btn-sm a-tooltip"
+												type="button" id="unassign"
+												title="<s:message code="task.unassign"/>">
+												<span class="glyphicon glyphicon-remove"></span>
+											</button>
+										</td>
+										<td>
+											<button type="button" id="dismiss_assign"
+												class="close a-tooltip"
+												title="<s:message code="main.cancel"/>"
+												style="padding-left: 5px">×</button>
+										</td>
+									</tr>
+								</table>
 							</form>
 						</div>
 					</div>
@@ -314,15 +343,15 @@
 								<a href="<c:url value="/user?id=${task.assignee.id}"/>">${task.assignee}</a>
 							</c:if>
 						</div>
-							<c:if test="${user.isUser}">
-								<div style="display: table-cell; padding-left: 5px">
-									<span class="btn btn-default btn-sm a-tooltip" id="assign_button"
-										title="<s:message code="task.assign"/>"> <span
-										class="glyphicon glyphicon-hand-left"></span>
-									</span>
-								</div>
-							</c:if>
-						</div>
+						<c:if test="${user.isUser}">
+							<div style="display: table-cell; padding-left: 5px">
+								<span class="btn btn-default btn-sm a-tooltip"
+									id="assign_button" title="<s:message code="task.assign"/>">
+									<span class="glyphicon glyphicon-hand-left"></span>
+								</span>
+							</div>
+						</c:if>
+					</div>
 				</div>
 			</div>
 			<%----------------------DATES ----------------------------------------%>
@@ -468,131 +497,8 @@
 		</div>
 	</div>
 </div>
-<!-- LOG WORK MODAL -->
-<div class="modal fade" id="logWorkform" tabindex="-1" role="dialog"
-	aria-labelledby="myModalLabel" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header theme">
-				<button type="button" class="close" data-dismiss="modal"
-					aria-hidden="true">&times;</button>
-				<h4 class="modal-title" id="myModalLabel">
-					<s:message code="task.logWork" />
-				</h4>
-			</div>
-			<form id="mainForm" name="mainForm" method="post"
-				action="<c:url value="/logwork"/>">
-				<div class="modal-body">
-
-					<input type="hidden" name="taskID" value="${task.id}">
-					<div class="form-group">
-						<label><s:message code="task.logWork.spent" /></label> <input
-							id="logged_work" name="logged_work"
-							style="width: 150px; height: 25px" class="form-control"
-							type="text" value=""> <span class="help-block"><s:message
-								code="task.logWork.help"></s:message> </span>
-					</div>
-					<div>
-						<div style="float: left; margin-right: 50px;">
-							<label><s:message code="main.date" /></label> <input
-								id="datepicker" name="date_logged"
-								style="width: 150px; height: 25px"
-								class="form-control datepicker" type="text" value="">
-						</div>
-						<div>
-							<label><s:message code="main.time" /></label> <input
-								id="time_logged" name="time_logged"
-								style="width: 70px; height: 25px" class="form-control"
-								type="text" value="">
-						</div>
-					</div>
-					<span class="help-block"><s:message
-							code="task.logWork.when.help"></s:message> </span>
-					<div>
-						<label><s:message code="task.remaining" /></label>
-						<div class="radio">
-							<label> <input type="radio" name="estimate_reduce"
-								id="estimate_auto" value="auto" checked> <s:message
-									code="task.logWork.reduceAuto" />
-							</label>
-						</div>
-						<div class="radio">
-							<label> <input type="radio" name="estimate_reduce"
-								id="estimate_manual" value="auto"> <s:message
-									code="task.logWork.reduceManual" />
-							</label> <input id="remaining" name="remaining" class="form-control"
-								style="width: 150px; height: 25px" disabled>
-						</div>
-					</div>
-					<span class="help-block"><s:message
-							code="task.logWork.estimate.help"></s:message> </span>
-				</div>
-				<div class="modal-footer">
-					<button class="btn btn-default" type="submit">
-						<s:message code="main.log" />
-					</button>
-					<a class="btn" data-dismiss="modal"><s:message
-							code="main.cancel" /></a>
-				</div>
-			</form>
-		</div>
-	</div>
-</div>
-<!-- CHANGE STATE MODAL -->
-<%
-	pageContext.setAttribute("states", TaskState.values());
-%>
-<div class="modal fade" id="changeState" tabindex="-1" role="dialog"
-	aria-labelledby="myModalLabel" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header theme">
-				<button type="button" class="close" data-dismiss="modal"
-					aria-hidden="true">&times;</button>
-				<h4 class="modal-title" id="myModalLabel">
-					<s:message code="task.changeState" />
-				</h4>
-			</div>
-			<form id="mainForm" name="mainForm" method="post"
-				action="<c:url value="/task/state"/>">
-				<div class="modal-body">
-					<input type="hidden" name="taskID" value="${task.id}">
-					<div class="form-group">
-						<label><s:message code="task.state" /></label> <select
-							name="state" id="change_state" class="form-control">
-							<c:forEach items="${states}" var="state">
-								<option value="${state}"
-									<c:if test="${task.state eq state}">
-										selected
-									</c:if>><t:state
-										state="${state}" /></option>
-							</c:forEach>
-						</select> <span class="help-block"><s:message
-								code="task.changeState.help" /></span>
-					</div>
-					<div class="checkbox" id="zero_remaining" style="display: none">
-						<label class="checkbox"> <input type="checkbox"
-							name="zero_checkbox" id="zero_checkbox" value="true"> <s:message
-								code="task.setToZero" />
-						</label>
-
-					</div>
-					<div>
-						<label><s:message code="comment.add" /></label>
-						<textarea name="message" class="form-control" rows="3"></textarea>
-					</div>
-				</div>
-				<div class="modal-footer">
-					<a class="btn" data-dismiss="modal"><s:message
-							code="main.cancel" /></a>
-					<button class="btn btn-default" type="submit">
-						<s:message code="main.change" />
-					</button>
-				</div>
-			</form>
-		</div>
-	</div>
-</div>
+<jsp:include page="../modals/logWork.jsp" />
+<jsp:include page="../modals/close.jsp" />
 <!-- Edit Comment Modal -->
 <div class="modal fade" id="commentModal" tabindex="-1" role="dialog"
 	aria-labelledby="role" aria-hidden="true">
@@ -632,140 +538,133 @@
 </div>
 <!-- /.modal -->
 <script>
-	$(document)
-			.ready(
-					function($) {
-						//------------------------------------Datepickers
-						$(".datepicker").datepicker({
-							maxDate : '0'
-						});
-						$(".datepicker").datepicker("option", "dateFormat",
-								"dd-mm-yy");
-						$(".datepicker").change(function() {
-							var date = new Date;
-							var minutes = date.getMinutes();
-							var hour = date.getHours();
-							$("#time_logged").val(hour + ":" + minutes);
-						});
-						$("#time_logged").mask("Z0:A0", {
-							translation : {
-								'Z' : {
-									pattern : /[0-2]/
-								},
-								'A' : {
-									pattern : /[0-5]/
-								}
+$(document).ready(function($) {
+	taskID = "${task.id}";
+	//--------------------------------------Coments----------------------------
+			function toggle_comment() {
+						$('#comments_add').toggle();
+						$('#comments_div').slideToggle("slow");
+						$(document.body).animate({
+							'scrollTop' : $('#comments_div').offset().top
+						}, 2000);
+			}
+			
+			$('#comments_scroll').click(function() {
+					$(document.body).animate({
+							'scrollTop' : $('#comments').offset().top
+						}, 2000);
+			});
+
+			$('#comments_add').click(function() {
+						toggle_comment();
+
+			});
+
+			$('.comments_edit').click(function() {
+						var message = $(this).data('message');
+						var comment_id = $(this).data('comment_id');
+						$(".modal-body #message").val(message);
+						$(".modal-body #comment_id").val(comment_id);
+			});
+
+			$('#comments_cancel').click(function() {
+						toggle_comment();
+			});
+
+			$("#assignee").autocomplete({
+						minLength : 1,
+						delay : 500,
+						//define callback to format results
+						source : function(request, response) {
+							$.getJSON("<c:url value="/project/${task.project.id}/getParticipants"/>",request,function(result) {
+									response($.map(result,function(item) {
+										return {
+											// following property gets displayed in drop down
+											label : item.name+ " "+ item.surname,
+											value : item.email,
+											}
+										}));
+									});
 							},
-							placeholder : "__:__"
-						});
-						$("#estimate_manual").change(function() {
-							$('#remaining').attr("disabled", !this.checked);
-						});
-						$("#estimate_auto").change(function() {
-							$('#remaining').val("");
-							$('#remaining').attr("disabled", this.checked);
-						});
-						//--------------------------------------Coments----------------------------
-						function toggle_comment() {
-							$('#comments_add').toggle();
-							$('#comments_div').slideToggle("slow");
-							$(document.body).animate({
-								'scrollTop' : $('#comments_div').offset().top
-							}, 2000);
+							//define select handler
+						select : function(event, ui) {
+							if (ui.item) {
+								event.preventDefault();
+								$("#assignee").val(ui.item.label);
+								$("#assign").append('<input type="hidden" name="email" value=' + ui.item.value + '>');
+								$("#assign").submit();
+								return false;
+							}
 						}
-						$('#comments_scroll').click(function() {
-							$(document.body).animate({
-								'scrollTop' : $('#comments').offset().top
-							}, 2000);
-						});
-
-						$('#comments_add').click(function() {
-							toggle_comment();
-
-						});
-
-						$('.comments_edit').click(function() {
-							var message = $(this).data('message');
-							var comment_id = $(this).data('comment_id');
-							$(".modal-body #message").val(message);
-							$(".modal-body #comment_id").val(comment_id);
-						});
-
-						$('#comments_cancel').click(function() {
-							toggle_comment();
-						});
-
-						$("#assignee").autocomplete({
-							minLength : 1,
-							delay : 500,
-							//define callback to format results
-							source : function(request, response) {
-								$.getJSON("<c:url value="/project/${task.project.id}/getParticipants"/>",request,function(result) {
-										response($.map(result,function(item) {
-											return {
-												// following property gets displayed in drop down
-												label : item.name+ " "+ item.surname,
-												value : item.email,
-												}
-											}));
-										});
-								},
-								//define select handler
-							select : function(event, ui) {
-								if (ui.item) {
-									event.preventDefault();
-									$("#assignee").val(ui.item.label);
-									$("#assign").append('<input type="hidden" name="email" value=' + ui.item.value + '>');
-									$("#assign").submit();
-									return false;
-								}
-							}
-						});
-
-						$("#assign_me").click(function() {
-							var current_email = "${user.email}";
-							$("#assign").append('<input type="hidden" name="email" value=' + current_email + '>');
-							$("#assign").submit();
-						});
-						$("#unassign").click(function() {
-							var current_email = "";
-							$("#assign").append('<input type="hidden" name="email" value=' + current_email + '>');
-							$("#assign").submit();
-						});
-
-						$("#assign_button").click(function() {
-							$('#assign_div').toggle("blind");
-							$('#assign_button_div').toggle("blind");
-							$('#assignee').focus();
-						});
-						$("#dismiss_assign").click(function() {
-							$('#assign_div').toggle("blind");
-							$('#assign_button_div').toggle("blind");
-						});
-						$("#change_state").change(function() {
-							if ($(this).val() == 'CLOSED') {
-								$("#zero_remaining").toggle("blind");
-							} else {
-								$("#zero_remaining").hide("blind");
-								$("#zero_checkbox").attr('checked', false);
-							}
-						});
-					});
-	$(document).on("click",".delete_task",function(e) {
-						var msg = '<p style="text-align:center"><span class="glyphicon glyphicon-warning-sign" style="display: initial;"></span> '
-								+ $(this).data('msg') + '</p>';
-						var lang = $(this).data('lang');
-						bootbox.setDefaults({
-							locale : lang
-						});
-						e.preventDefault();
-						var $link = $(this);
-						bootbox.confirm(msg, function(result) {
-							if (result == true) {
-								document.location.assign($link.attr('href'));
-							}
-						});
 					});
 
-	
+			$("#assign_me").click(function() {
+						var current_email = "${user.email}";
+						$("#assign").append('<input type="hidden" name="email" value=' + current_email + '>');
+						$("#assign").submit();
+					});
+			
+			$("#unassign").click(function() {
+						var current_email = "";
+						$("#assign").append('<input type="hidden" name="email" value=' + current_email + '>');
+						$("#assign").submit();
+					});
+
+			$("#assign_button").click(function() {
+						$('#assign_div').toggle("blind");
+						$('#assign_button_div').toggle("blind");
+						$('#assignee').focus();
+					});
+			$("#dismiss_assign").click(function() {
+						$('#assign_div').toggle("blind");
+						$('#assign_button_div').toggle("blind");
+					});
+			$("#change_state").change(function() {
+						if ($(this).val() == 'CLOSED') {
+							$("#zero_remaining").toggle("blind");
+						} else {
+							$("#zero_remaining").hide("blind");
+							$("#zero_checkbox").attr('checked', false);
+						}
+					});
+			});
+			
+// 			change state
+			$(".change_state").click(function() {
+	    	 var state = $(this).data('state');
+	    	 $("#current_state").html($(this).html());
+	    	 if(state == 'CLOSED'){
+		    		 $('#close_task').modal({
+		    	            show: true,
+		    	            keyboard: false,
+		    	            backdrop: 'static'
+		    	     });
+	    	 	}
+		    	else{
+					$.post('<c:url value="/task/changeState"/>',{id:taskID,state:state},function(result){
+						if(result.code == 'Error'){
+							showError(result.message);
+						}
+						else{
+							showSuccess(result.message);
+						}
+					});
+		    	}
+			});
+			
+$(document).on("click",".delete_task",function(e) {
+					var msg = '<p style="text-align:center"><span class="glyphicon glyphicon-warning-sign" style="display: initial;"></span> '
+							+ $(this).data('msg') + '</p>';
+					var lang = $(this).data('lang');
+					bootbox.setDefaults({
+						locale : lang
+					});
+					e.preventDefault();
+					var $link = $(this);
+					bootbox.confirm(msg, function(result) {
+						if (result == true) {
+							document.location.assign($link.attr('href'));
+						}
+					});
+});	
 </script>

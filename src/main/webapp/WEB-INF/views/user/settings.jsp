@@ -71,6 +71,9 @@
 							<option value="green"
 								<c:if test="${user.theme eq 'green'}">selected</c:if>><s:message
 									code="panel.theme.green" /></option>
+							<option value="red"
+								<c:if test="${user.theme eq 'red'}">selected</c:if>><s:message
+									code="panel.theme.red" /></option>
 						</select>
 					</div>
 				</div>

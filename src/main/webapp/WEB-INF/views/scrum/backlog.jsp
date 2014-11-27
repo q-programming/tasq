@@ -105,22 +105,23 @@
 					<%--Sprint task --%>
 					<c:forEach items="${entry.value}" var="task">
 						<c:set var="count" value="${count + task.story_points}" />
-						<div class="agile-list" data-id="${task.id}" id="${task.id}"
+						<div class="agile-list" data-id="${task.id}" id="${task.id}" sprint-id="${sprint.id}"
 							<c:if test="${task.state eq 'CLOSED' }">
 							style="text-decoration: line-through;"
 							</c:if>>
-							<div>
+							<div style="display:table-cell;width: 100%;">
 								<t:type type="${task.type}" list="true" />
 								<a href="<c:url value="/task?id=${task.id}"/>"
-									style="color: inherit;">[${task.id}] ${task.name}</a> <span
-									class="badge theme <c:if test="${task.story_points == 0}">zero</c:if>">
-									${task.story_points} </span>
+									style="color: inherit;">[${task.id}] ${task.name}</a> 
 								<form id="sprint_remove_${task.id}"
 									action="<c:url value="/${project.projectId}/scrum/sprintRemove"/>"
 									method="post">
 									<input type="hidden" name="taskID" value="${task.id}">
 								</form>
 							</div>
+						<div style="display:table-cell"><span class="badge theme <c:if test="${task.story_points == 0}">zero</c:if>">
+							${task.story_points} </span>
+						</div>
 						</div>
 					</c:forEach>
 				</div>
@@ -140,21 +141,21 @@
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${not task.inSprint && task.state ne 'CLOSED'}">
 				<div class="agile-card" data-id="${task.id}" id="${task.id}">
-					<div>
+					<div style="display:table-cell;width: 100%;">
 						<t:type type="${task.type}" list="true" />
 						<t:priority priority="${task.priority}" list="true" />
 						<a href="<c:url value="/task?id=${task.id}"/>"
-							style="color: inherit;">[${task.id}] ${task.name}</a> <span
-							class="badge theme <c:if test="${task.story_points == 0}">zero</c:if>">
-							${task.story_points} </span>
+							style="color: inherit;">[${task.id}] ${task.name}</a> 
 						<form id="sprint_assign_${task.id}"
 							action="<c:url value="/${project.projectId}/scrum/sprintAssign"/>"
 							method="post">
-							<input type="hidden" name="taskID" value="${task.id}"> <input
-								type="hidden" id="sprintID_${task.id}" name="sprintID"
-								value="${task.sprint.id}">
+							<input type="hidden" name="taskID" value="${task.id}"> 
+							<input
+								type="hidden" id="sprintID_${task.id}" name="sprintID">
 						</form>
-
+					</div>
+					<div style="display:table-cell"><span class="badge theme <c:if test="${task.story_points == 0}">zero</c:if>">
+							${task.story_points} </span>
 					</div>
 				</div>
 			</c:if>
@@ -173,8 +174,6 @@
 					<s:message code="agile.sprint.start.title" />
 				</h4>
 			</div>
-			<form id="startSprintForm" name="startSprintForm" method="post"
-				action="<c:url value="/scrum/start"/>">
 				<div class="modal-body">
 					<input id="project_id" type="hidden" name="project_id"
 						value="${project.id}"> <input id="sprintID" type="hidden"
@@ -199,13 +198,12 @@
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button class="btn btn-default" type="submit">
+					<button class="btn btn-default" id="sprint_start_btn">
 						<s:message code="agile.sprint.start" />
 					</button>
 					<a class="btn" data-dismiss="modal"><s:message
 							code="main.cancel" /></a>
 				</div>
-			</form>
 		</div>
 	</div>
 </div>
@@ -231,9 +229,12 @@ $(document).ready(function($) {
 		dateFormat : "dd-mm-yy",
 		firstDay: 1
 	});
-	$( "#startSprintForm" ).submit(function( event ) {
+	$( "#sprint_start_btn" ).click(function( event ) {
 		var start = $("#sprint_start").val();
 		var end = $("#sprint_end").val();
+		var projectID = $("#project_id").val();
+		var sprintID = $("#sprintID").val();
+		
 		var start_date = $.datepicker.parseDate("dd-mm-yy",start);
 		var end_date = $.datepicker.parseDate("dd-mm-yy",end);
 		if(start_date==null || end_date==null|| start_date > end_date){
@@ -242,7 +243,22 @@ $(document).ready(function($) {
 			event.preventDefault();
 		}
 		else{
-			$("#startSprintForm").submit();
+			$.post('<c:url value="/scrum/start"/>',{
+					sprintID:sprintID,
+					projectID:projectID,
+					sprintStart:start,
+					sprintEnd:end},function(result){
+				if(result.code == 'ERROR'){
+					showError(result.message);
+				}else if(result.code == 'WARNING'){
+					showWarning(result.message)
+				}
+				else{
+					showSuccess(result.message);
+					$("#start-sprint").remove();
+				}
+			$("#startSprint").modal('toggle');
+			});
 			}
 		});
 	
@@ -301,8 +317,13 @@ $(document).ready(function($) {
 				icon : '',
 				action : function(event) {
 					var taskID = event.currentTarget.id;
-					$("#sprint_remove_" + taskID).submit();
-					}
+					var sprintID = event.currentTarget.getAttribute('sprint-id');
+					console.log(taskID);
+					console.log(sprintID);
+					$.post('<c:url value="/task/sprintRemove"/>',{taskID:taskID,sprintID:sprintID},function(){
+						location.reload();
+					});
+				}
 		}]});
 	</c:if>
 });	

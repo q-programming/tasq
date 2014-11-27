@@ -28,8 +28,7 @@ public class TaskForm {
 	@NotBlank(message = NOT_BLANK_MESSAGE)
 	private String name;
 
-	@NotBlank(message = NOT_BLANK_MESSAGE)
-	private String project;
+	private Long project;
 
 	@NotBlank(message = NOT_BLANK_MESSAGE)
 	private String description;
@@ -48,6 +47,8 @@ public class TaskForm {
 	private String remaining;
 
 	private String due_date;
+	
+	private Long addToSprint;
 
 	public TaskForm() {
 		// TODO Auto-generated constructor stub
@@ -55,7 +56,7 @@ public class TaskForm {
 
 	public TaskForm(Task task) {
 		setName(task.getName());
-		setProject(task.getProject().toString());
+		setProject(task.getProject().getId());
 		setDescription(task.getDescription());
 		setNo_estimation(task.getEstimated().toString());
 		setEstimate(task.getEstimate());
@@ -110,11 +111,11 @@ public class TaskForm {
 		this.name = name;
 	}
 
-	public String getProject() {
+	public Long getProject() {
 		return project;
 	}
 
-	public void setProject(String project) {
+	public void setProject(Long project) {
 		this.project = project;
 	}
 
@@ -184,5 +185,13 @@ public class TaskForm {
 
 	public void setPriority(String priority) {
 		this.priority = priority;
+	}
+
+	public Long getAddToSprint() {
+		return addToSprint;
+	}
+
+	public void setAddToSprint(Long addToSprint) {
+		this.addToSprint = addToSprint;
 	}
 }

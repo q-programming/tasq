@@ -7,6 +7,7 @@
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
 <%@ taglib prefix="myfn" uri="/WEB-INF/tags/custom.tld"%>
+<%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <c:set var="tasks_text">
 	<s:message code="task.tasks" text="Tasks" />
 </c:set>
@@ -70,98 +71,25 @@
 	</div>
 	
 </div>
-<%------------------LOG WORK MODAL ---------------------%>
-<div class="modal fade" id="logWorkform" tabindex="-1" role="dialog"
-	aria-labelledby="myModalLabel" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header theme">
-				<button type="button" class="close" data-dismiss="modal"
-					aria-hidden="true">&times;</button>
-				<h4 class="modal-title" id="myModalLabel">
-					<s:message code="task.logWork" />
-				</h4>
-			</div>
-			<form id="mainForm" name="mainForm" method="post"
-				action="<c:url value="/logwork"/>">
-				<div class="modal-body">
-					<input id="taskID" type="hidden" name="taskID">
-					<div class="form-group">
-						<label><s:message code="task.logWork.spent" /></label> <input
-							id="logged_work" name="logged_work"
-							style="width: 150px; height: 25px" class="form-control"
-							type="text" value=""> <span class="help-block"><s:message
-								code="task.logWork.help"></s:message> </span>
-					</div>
-					<div>
-						<div style="float: left; margin-right: 50px;">
-							<label><s:message code="main.date" /></label> <input
-								id="datepicker" name="date_logged"
-								style="width: 150px; height: 25px"
-								class="form-control datepicker" type="text" value="">
-						</div>
-						<div>
-							<label><s:message code="main.time" /></label> <input
-								id="time_logged" name="time_logged"
-								style="width: 70px; height: 25px" class="form-control"
-								type="text" value="">
-						</div>
-					</div>
-					<span class="help-block"><s:message
-							code="task.logWork.when.help"></s:message> </span>
-					<div>
-						<label><s:message code="task.remaining" /></label>
-						<div class="radio">
-							<label> <input type="radio" name="estimate_reduce"
-								id="estimate_auto" value="auto" checked> <s:message
-									code="task.logWork.reduceAuto" />
-							</label>
-						</div>
-						<div class="radio">
-							<label> <input type="radio" name="estimate_reduce"
-								id="estimate_manual" value="auto"> <s:message
-									code="task.logWork.reduceManual" />
-							</label> <input id="remaining" name="remaining" class="form-control"
-								style="width: 150px; height: 25px" disabled>
-						</div>
-					</div>
-					<span class="help-block"><s:message
-							code="task.logWork.estimate.help"></s:message> </span>
-				</div>
-				<div class="modal-footer">
-					<a class="btn" data-dismiss="modal"><s:message
-							code="main.cancel" /></a>
-					<button class="btn btn-default" type="submit">
-						<s:message code="main.log" />
-					</button>
-				</div>
-			</form>
-		</div>
-	</div>
-</div>
+<jsp:include page="../modals/logWork.jsp" />
+<jsp:include page="../modals/close.jsp" />
+<%-- <tiles:insertTemplate template="modal/close"/> --%>
 <script>
 	$(document).ready(function($) {
 		<c:if test="${can_edit}">
-		$(".worklog").click(function(){
-			var taskID = $(this).data('taskid');
-			var title = "<s:message code="task.logWork" /> " + taskID;
-			$("#myModalLabel").html(title);
-			$("#taskID").val(taskID);
-		});
-		
 		$(".assign_me").click(function(){
 			var taskID = $(this).data('taskid');
 			//assignMe
-			$.post('<c:url value="/task/assignMe"/>',{id:taskID},function(message){
-				if(message!='OK'){
-					showError(message);
+			$.post('<c:url value="/task/assignMe"/>',{id:taskID},function(result){
+				console.log(result);
+				if(result.code!='OK'){
+					showError(result.message);
 				}
 				else{
-					var succes = '<s:message code="task.assinged.me"/> ' + taskID;
 					var assignee = '<img data-src="holder.js/20x20"	style="height: 20px; padding-right: 5px;" src="<c:url value="/userAvatar/${user.id}"/>" />'
 									+'<a href="<c:url value="/user?id=${user.id}"/>">${user}</a>';
 					$("#assignee_"+taskID).html(assignee);
-					showSuccess(succes);
+					showSuccess(result.message);
 				}
 			});
 		});
@@ -177,26 +105,31 @@
 		      hoverClass: "state_hover",
 		      drop: function( event, ui ) {
 		    	  //event on drop
-		    	 var taskID = ui.draggable.attr("id");
+		    	 taskID = ui.draggable.attr("id");
 		    	 var oldState =  ui.draggable.attr("state");
 		    	 var state = $(this).data('state');
 		    	 if( oldState != state){
 			    	 if(state == 'CLOSED'){
-			    		 //TODO zero hours?
-		    		 	//alert("closing");
+			    		 $('#close_task').modal({
+			    	            show: true,
+			    	            keyboard: false,
+			    	            backdrop: 'static'
+			    	     });
+			    		 $('#'+taskID + ' a[href]').toggleClass('closed');
 		    	 	}
-						$.post('<c:url value="/task/changeState"/>',{id:taskID,state:state},function(message){
-							if(message=='Error'){
-								var errorMsg = '<s:message code="role.error.task.permission"/>';
-								showError(errorMsg);
-							}else if (message == 'Started'){
-								var errorMsg = '<s:message code="task.alreadyStarted"/>';
-								showError(errorMsg)
+			    	else{
+						$.post('<c:url value="/task/changeState"/>',{id:taskID,state:state},function(result){
+							if(result.code == 'Error'){
+								showError(result.message);
 							}
 							else{
-								showSuccess(message);
+								showSuccess(result.message);
+								if(oldState== 'CLOSED'){
+									$('#'+taskID + ' a[href]').toggleClass('closed');
+								}
 							}
 						});
+			    	}
 		    	 }
 		    	 var dropped = ui.draggable;
 		         var droppedOn = $(this);
@@ -209,36 +142,6 @@
 		    	  	
 		    	  }
 		    });
-		//------------------------------------Datepickers
-		$(".datepicker").datepicker({
-			maxDate : '0',
-			dateFormat : "dd-mm-yy",
-			firstDay: 1
-		});
-		$(".datepicker").change(function() {
-			var date = new Date;
-			var minutes = date.getMinutes();
-			var hour = date.getHours();
-			$("#time_logged").val(hour + ":" + minutes);
-		});
-		$("#time_logged").mask("Z0:A0", {
-			translation : {
-				'Z' : {
-					pattern : /[0-2]/
-				},
-				'A' : {
-					pattern : /[0-5]/
-				}
-			},
-			placeholder : "__:__"
-		});
-		$("#estimate_manual").change(function() {
-			$('#remaining').attr("disabled", !this.checked);
-		});
-		$("#estimate_auto").change(function() {
-			$('#remaining').val("");
-			$('#remaining').attr("disabled", this.checked);
-		});
 		</c:if>
 	});
 </script>

@@ -5,13 +5,13 @@
 <%@ attribute name="task" required="true"
 	type="com.qprogramming.tasq.task.Task"%>
 <%@ attribute name="can_edit" required="true"%>
-<div class="agile-card theme" data-id="${task.id}" data-state="task.state" id="${task.id}">
+<div class="agile-card theme" data-id="${task.id}" state="${task.state}" id="${task.id}">
 	<div class="side-bar theme"></div>
 	<div style="padding-left: 5px;">
 		<t:type type="${task.type}" list="true" />
 		<a href="<c:url value="/task?id=${task.id}"/>"
-			style="color: inherit;<c:if test="${task.state eq 'CLOSED' }">
-							text-decoration: line-through;
+			style="color: inherit;" class="<c:if test="${task.state eq 'CLOSED' }">
+							closed
 							</c:if>">[${task.id}]
 			${task.name}</a> <span
 			class="badge theme <c:if test="${task.story_points == 0}">zero</c:if>">${task.story_points}

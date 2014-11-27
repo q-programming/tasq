@@ -1,5 +1,7 @@
 package com.qprogramming.tasq.agile;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -9,8 +11,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.persistence.Column;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.Hibernate;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
@@ -24,15 +31,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.account.Roles;
-import com.qprogramming.tasq.account.Account.Role;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.PeriodHelper;
+import com.qprogramming.tasq.support.ResultData;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.SprintSorter;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
@@ -185,9 +194,10 @@ public class SprintController {
 	}
 
 	@Transactional
-	@RequestMapping(value = "/{id}/scrum/sprintRemove", method = RequestMethod.POST)
-	public String removeFromSprint(@PathVariable String id,
-			@RequestParam(value = "taskID") String taskID, Model model,
+	@RequestMapping(value = "/task/sprintRemove", method = RequestMethod.POST)
+	public String removeFromSprint(
+			@RequestParam(value = "taskID") String taskID,
+			@RequestParam(value = "sprintID") Long sprintID, Model model,
 			HttpServletRequest request, RedirectAttributes ra) {
 		Task task = taskSrv.findById(taskID);
 		Project project = task.getProject();
@@ -195,7 +205,7 @@ public class SprintController {
 				&& !Roles.isAdmin()) {
 			throw new TasqAuthException(msg);
 		}
-		Sprint sprint = sprintRepo.findById(task.getSprint().getId());
+		Sprint sprint = sprintRepo.findById(sprintID);
 		if (!sprint.isActive()) {
 			Hibernate.initialize(task.getSprints());
 			task.removeSprint(sprint);
@@ -243,22 +253,21 @@ public class SprintController {
 	}
 
 	@Transactional
+	@ResponseBody
 	@RequestMapping(value = "/scrum/start", method = RequestMethod.POST)
-	public String startSprint(@RequestParam(value = "sprintID") Long id,
-			@RequestParam(value = "project_id") Long project_id,
-			@RequestParam(value = "sprint_start") String sprint_start,
-			@RequestParam(value = "sprint_end") String sprint_end, Model model,
+	public ResultData startSprint(@RequestParam(value = "sprintID") Long id,
+			@RequestParam(value = "projectID") Long project_id,
+			@RequestParam(value = "sprintStart") String sprint_start,
+			@RequestParam(value = "sprintEnd") String sprint_end, Model model,
 			HttpServletRequest request, RedirectAttributes ra) {
 		Sprint sprint = sprintRepo.findById(id);
 		Project project = projSrv.findById(project_id);
 		Sprint active = sprintRepo.findByProjectIdAndActiveTrue(project_id);
 		if (sprint != null && !sprint.isActive() && active == null) {
 			if (canEdit(sprint.getProject()) || Roles.isAdmin()) {
-				sprint.setStart_date(Utils.convertDueDate(sprint_start));
-				sprint.setEnd_date(Utils.convertDueDate(sprint_end));
-				sprint.setActive(true);
 				Period total_estimate = new Period();
 				int totalStoryPoints = 0;
+				StringBuilder warnings = new StringBuilder();
 				List<Task> taskList = taskSrv.findAllBySprint(sprint);
 				for (Task task : taskList) {
 					if (task.getState().equals(TaskState.ONGOING)
@@ -269,19 +278,35 @@ public class SprintController {
 						total_estimate = PeriodHelper.plusPeriods(
 								total_estimate, task.getRawEstimate());
 					}
+					if (!project.getTimeTracked()) {
+						if (task.getStory_points() == 0) {
+							warnings.append(task.getId());
+							warnings.append(" ");
+						}
+					}
 					totalStoryPoints += task.getStory_points();
+				}
+				if (warnings.length() > 0) {
+					return new ResultData(ResultData.WARNING, msg.getMessage(
+							"agile.sprint.notEstimated.sp",
+							new Object[] { warnings.toString() },
+							Utils.getCurrentLocale()));
 				}
 				sprint.setTotalEstimate(total_estimate);
 				sprint.setTotalStoryPoints(totalStoryPoints);
+				sprint.setStart_date(Utils.convertDueDate(sprint_start));
+				sprint.setEnd_date(Utils.convertDueDate(sprint_end));
+				sprint.setActive(true);
 				sprintRepo.save(sprint);
-				MessageHelper.addSuccessAttribute(ra, msg.getMessage(
+				wrkLogSrv.addWorkLogNoTask(null, project, LogType.SPRINT_START);
+				return new ResultData(ResultData.OK, msg.getMessage(
 						"agile.sprint.started",
 						new Object[] { sprint.getSprintNo() },
 						Utils.getCurrentLocale()));
-				wrkLogSrv.addWorkLogNoTask(null, project, LogType.SPRINT_START);
 			}
 		}
-		return "redirect:" + request.getHeader("Referer");
+		return new ResultData(ResultData.ERROR, msg.getMessage("error.unknown",
+				null, Utils.getCurrentLocale()));
 	}
 
 	@Transactional
@@ -345,12 +370,24 @@ public class SprintController {
 				if (sprints.size() == 0) {
 					MessageHelper.addWarningAttribute(
 							ra,
-							msg.getMessage("agile.sprint.noActive", null,
+							msg.getMessage("agile.sprint.noSprints", null,
 									Utils.getCurrentLocale()));
 					return "redirect:/" + project.getProjectId()
 							+ "/scrum/backlog";
 				}
-				lastSprint = sprints.get(sprints.size() - 1);
+				int counter = 1;
+				lastSprint = sprints.get(sprints.size() - counter);
+				while (lastSprint.getStart_date() == "") {
+					counter++;
+					if (counter > sprints.size()) {
+						MessageHelper.addWarningAttribute(ra, msg.getMessage(
+								"agile.sprint.noSprints", null,
+								Utils.getCurrentLocale()));
+						return "redirect:/" + project.getProjectId()
+								+ "/scrum/backlog";
+					}
+					lastSprint = sprints.get(sprints.size() - counter);
+				}
 			}
 			Sprint sprint;
 			if (sprintNo != null) {
@@ -428,6 +465,20 @@ public class SprintController {
 		return "/scrum/burndown";
 	}
 
+	@RequestMapping(value = "/getSprints", method = RequestMethod.GET)
+	public @ResponseBody
+	List<DisplaySprint> showProjectSprints(@RequestParam Long projectID,
+			HttpServletResponse response) {
+		response.setContentType("application/json");
+		List<DisplaySprint> result = new LinkedList<DisplaySprint>();
+		List<Sprint> projectSprints = sprintRepo.findByProjectIdAndFinished(projectID, false);
+		for (Sprint sprint : projectSprints) {
+			result.add(new DisplaySprint(sprint));
+		}
+		Collections.sort(result);
+		return result;
+	}
+	
 	/**
 	 * Fills burndown map with worklogs in format <Date, Period Burned> Only
 	 * events with before present day are added

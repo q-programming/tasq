@@ -99,10 +99,6 @@ public class Task implements java.io.Serializable {
 	@JoinColumn(name = "task_assignee")
 	private Account assignee;
 
-	@ManyToOne
-	@JoinColumn(name = "task_sprint")
-	private Sprint sprint;
-
 	@ManyToMany(fetch = FetchType.LAZY)
 	private Set<Sprint> sprints = new HashSet<Sprint>();
 	
@@ -313,14 +309,6 @@ public class Task implements java.io.Serializable {
 
 	public void setPriority(Enum<TaskPriority> priority) {
 		this.priority = priority;
-	}
-
-	public Sprint getSprint() {
-		return sprint;
-	}
-
-	public void setSprint(Sprint sprint) {
-		this.sprint = sprint;
 	}
 
 	public Set<Sprint> getSprints() {
