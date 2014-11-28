@@ -46,6 +46,7 @@ import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.SprintSorter;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
+import com.qprogramming.tasq.task.DisplayTask;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
@@ -95,11 +96,15 @@ public class SprintController {
 				return "redirect:/" + project.getProjectId() + "/scrum/backlog";
 			}
 			List<Task> taskList = new LinkedList<Task>();
+			List<DisplayTask> resultList = new LinkedList<DisplayTask>();
 			taskList = taskSrv.findAllBySprint(sprint);
+			for (Task task : taskList) {
+				resultList.add(new DisplayTask(task));
+			}
 			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID,
 					false));
 			model.addAttribute("sprint", sprint);
-			model.addAttribute("tasks", taskList);
+			model.addAttribute("tasks", resultList);
 			return "/scrum/board";
 		}
 		return "";
