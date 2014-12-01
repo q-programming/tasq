@@ -121,15 +121,15 @@ public class SprintController {
 				throw new TasqAuthException(msg);
 			}
 			model.addAttribute("project", project);
-			List<Task> resultList = new LinkedList<Task>();
+			List<DisplayTask> resultList = new LinkedList<DisplayTask>();
 			List<Task> taskList = taskSrv.findAllByProject(project);
 			// Don't show closed tasks in backlog view
 			for (Task task : taskList) {
 				if (!task.getState().equals(TaskState.CLOSED)) {
-					resultList.add(task);
+					resultList.add(new DisplayTask(task));
 				}
 			}
-			Map<Sprint, List<Task>> sprint_result = new LinkedHashMap<Sprint, List<Task>>();
+			Map<Sprint, List<DisplayTask>> sprint_result = new LinkedHashMap<Sprint, List<DisplayTask>>();
 
 			List<Sprint> sprintList = sprintRepo.findByProjectIdAndFinished(
 					project.getId(), false);
@@ -138,11 +138,11 @@ public class SprintController {
 			Collections.sort(sprintList, new SprintSorter());
 			// Assign tasks to sprints in order to display them
 			for (Sprint sprint : sprintList) {
-				List<Task> sprint_tasks = new LinkedList<Task>();
+				List<DisplayTask> sprint_tasks = new LinkedList<DisplayTask>();
 				for (Task task : taskList) {
 					Hibernate.initialize(task.getSprints());
 					if (task.getSprints().contains(sprint)) {
-						sprint_tasks.add(task);
+						sprint_tasks.add(new DisplayTask(task));
 					}
 				}
 				sprint_result.put(sprint, sprint_tasks);

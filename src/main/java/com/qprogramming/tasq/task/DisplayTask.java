@@ -4,8 +4,9 @@ import org.joda.time.Period;
 import org.springframework.beans.BeanUtils;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.account.DisplayAccount;
 
-public class DisplayTask implements Comparable<DisplayTask>{
+public class DisplayTask implements Comparable<DisplayTask> {
 	private String id;
 	private String name;
 	private String projectID;
@@ -16,21 +17,15 @@ public class DisplayTask implements Comparable<DisplayTask>{
 	private Enum<TaskState> state;
 	private Enum<TaskType> type;
 	private Enum<TaskPriority> priority;
-	private Account assignee;
+	private DisplayAccount assignee;
 	private Boolean estimated = false;
-
-
-	public Account getAssignee() {
-		return assignee;
-	}
-
-	public void setAssignee(Account assignee) {
-		this.assignee = assignee;
-	}
 
 	public DisplayTask(Task task) {
 		BeanUtils.copyProperties(task, this);
 		projectID = task.getProject().getProjectId();
+		if (task.getAssignee() != null) {
+			assignee = new DisplayAccount(task.getAssignee());
+		}
 	}
 
 	public String getId() {
@@ -121,6 +116,19 @@ public class DisplayTask implements Comparable<DisplayTask>{
 		this.estimated = estimated;
 	}
 
+	public DisplayAccount getAssignee() {
+		return assignee;
+	}
+
+	public void setAssignee(DisplayAccount assignee) {
+		this.assignee = assignee;
+	}
+
+	@Override
+	public String toString() {
+		return getId() + " " + getName();
+	}
+
 	/**
 	 * Sorts by ID by default
 	 */
@@ -129,7 +137,7 @@ public class DisplayTask implements Comparable<DisplayTask>{
 		String a_id = a.getId().split("-")[1];
 		String b_id = getId().split("-")[1];
 		if (Integer.parseInt(a_id) > Integer.parseInt(b_id)) {
-			return  1;
+			return 1;
 		} else {
 			return -1;
 		}

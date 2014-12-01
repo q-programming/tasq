@@ -273,6 +273,21 @@
 					</c:if>
 				</table>
 			</div>
+			<%-------------- RELATED TASKS ------------------%>
+			<div>
+				<div class="mod-header">
+					<h5 class="mod-header-title">
+						<span class="glyphicon glyphicon-link"></span>
+						<s:message code="task.related"/>
+					</h5>
+					<a class="btn btn-default btn-xxs a-tooltip pull-right" href="#" title="" data-placement="top" data-original-title="Powiaz">
+						<span class="glyphicon glyphicon-plus"></span><span class="glyphicon glyphicon-link"></span>
+					</a>
+				</div>
+				<div class="form-group">
+					<input class="form-control input-sm" id="task_link">
+				</div>
+			</div>
 		</div>
 		<%--------------------RIGHT SIDE DIV -------------------------------------%>
 		<div class="left-margin" style="display: table-cell; width: 400px">
@@ -570,13 +585,19 @@ $(document).ready(function($) {
 			$('#comments_cancel').click(function() {
 						toggle_comment();
 			});
-
+			var cache = {};
 			$("#assignee").autocomplete({
 						minLength : 1,
 						delay : 500,
 						//define callback to format results
 						source : function(request, response) {
+							var term = request.term;
+							if ( term in cache ) {
+						          response( cache[ term ] );
+						          return;
+						    }
 							$.getJSON("<c:url value="/project/${task.project.id}/getParticipants"/>",request,function(result) {
+									cache[ term ] = result;
 									response($.map(result,function(item) {
 										return {
 											// following property gets displayed in drop down
@@ -597,6 +618,32 @@ $(document).ready(function($) {
 							}
 						}
 					});
+			$("#task_link").autocomplete({
+				minLength : 1,
+				delay : 500,
+				//define callback to format results
+				source : function(request, response) {
+					$.getJSON("<c:url value="/getTasks?projectID=${task.project.id}"/>",request,function(result) {
+							response($.map(result,function(item) {
+								return {
+									// following property gets displayed in drop down
+									label : item.id+ " "+ item.name,
+									value : item.id,
+									}
+								}));
+							});
+					},
+					//define select handler
+				select : function(event, ui) {
+					if (ui.item) {
+						event.preventDefault();
+// 						$("#assignee").val(ui.item.label);
+// 						$("#assign").append('<input type="hidden" name="email" value=' + ui.item.value + '>');
+// 						$("#assign").submit();
+						return false;
+					}
+				}
+			});
 
 			$("#assign_me").click(function() {
 						var current_email = "${user.email}";
@@ -628,7 +675,6 @@ $(document).ready(function($) {
 						}
 					});
 			});
-			
 // 			change state
 			$(".change_state").click(function() {
 	    	 var state = $(this).data('state');

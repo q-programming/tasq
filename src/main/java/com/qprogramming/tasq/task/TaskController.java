@@ -25,6 +25,7 @@ import javax.validation.Valid;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -906,8 +907,28 @@ public class TaskController {
 				LOG.error(e.getLocalizedMessage());
 			}
 		}
-
 		return "/task/importResults";
+	}
+
+	@RequestMapping(value = "/getTasks", method = RequestMethod.GET)
+	public @ResponseBody
+	List<DisplayTask> listTasks(@RequestParam Long projectID,
+			@RequestParam String term, HttpServletResponse response) {
+		response.setContentType("application/json");
+		Project project = projectSrv.findById(projectID);
+		List<Task> all_tasks = taskSrv.findAllByProject(project);
+		List<DisplayTask> result = new ArrayList<DisplayTask>();
+		for (Task task : all_tasks) {
+			if (term == null) {
+				result.add(new DisplayTask(task));
+			} else {
+				if (StringUtils.containsIgnoreCase(task.getName(), term)
+						|| StringUtils.containsIgnoreCase(task.getId(), term)) {
+					result.add(new DisplayTask(task));
+				}
+			}
+		}
+		return result;
 	}
 
 	private String worklogStateChange(TaskState state, TaskState old_state,
