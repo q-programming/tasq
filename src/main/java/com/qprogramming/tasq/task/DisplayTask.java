@@ -3,7 +3,6 @@ package com.qprogramming.tasq.task;
 import org.joda.time.Period;
 import org.springframework.beans.BeanUtils;
 
-import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.DisplayAccount;
 
 public class DisplayTask implements Comparable<DisplayTask> {

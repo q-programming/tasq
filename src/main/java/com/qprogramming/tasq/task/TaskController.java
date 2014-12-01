@@ -67,6 +67,9 @@ import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
 import com.qprogramming.tasq.task.comments.Comment;
 import com.qprogramming.tasq.task.comments.CommentsRepository;
+import com.qprogramming.tasq.task.link.TaskLink;
+import com.qprogramming.tasq.task.link.TaskLinkService;
+import com.qprogramming.tasq.task.link.TaskLinkType;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
@@ -114,6 +117,9 @@ public class TaskController {
 
 	@Autowired
 	private SprintRepository sprintRepository;
+	
+	@Autowired
+	private TaskLinkService linkService;
 
 	@Autowired
 	private CommentsRepository commRepo;
@@ -909,6 +915,28 @@ public class TaskController {
 		}
 		return "/task/importResults";
 	}
+	@Transactional
+	@RequestMapping(value = "/task/link", method = RequestMethod.POST)
+	public String linkTasks(
+			@RequestParam(value = "taskA") String A,
+			@RequestParam(value = "taskB") String B,
+			@RequestParam(value = "link") TaskLinkType linkType,
+			RedirectAttributes ra, HttpServletRequest request,
+			HttpServletResponse response, Model model) {
+		TaskLink link = linkService.findLink(A, B, linkType);
+		if(link!=null){
+			String linkTXT = msg.getMessage(linkType.getCode(), null, Utils.getCurrentLocale());
+			MessageHelper.addErrorAttribute(ra, msg.getMessage(
+					"task.link.error.linked",
+					new Object[] { A,linkTXT, B },
+					Utils.getCurrentLocale()));
+			return "redirect:" + request.getHeader("Referer");
+		}
+		linkService.save(new TaskLink(A,B,linkType));
+		return "redirect:" + request.getHeader("Referer");
+	}
+
+	
 
 	@RequestMapping(value = "/getTasks", method = RequestMethod.GET)
 	public @ResponseBody

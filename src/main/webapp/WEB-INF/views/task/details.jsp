@@ -1,3 +1,4 @@
+<%@page import="com.qprogramming.tasq.task.link.TaskLinkType"%>
 <%@page import="com.qprogramming.tasq.task.TaskPriority"%>
 <%@page import="com.qprogramming.tasq.task.TaskState"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
@@ -280,12 +281,36 @@
 						<span class="glyphicon glyphicon-link"></span>
 						<s:message code="task.related"/>
 					</h5>
-					<a class="btn btn-default btn-xxs a-tooltip pull-right" href="#" title="" data-placement="top" data-original-title="Powiaz">
+					<a class="btn btn-default btn-xxs a-tooltip pull-right linkButton" href="#" title="" data-placement="top" data-original-title="Powiaz">
 						<span class="glyphicon glyphicon-plus"></span><span class="glyphicon glyphicon-link"></span>
 					</a>
 				</div>
-				<div class="form-group">
-					<input class="form-control input-sm" id="task_link">
+				<div id="linkDiv" style="display:none" class="form-group">
+					<form id="linkTask" name="mainForm" method="post" action="<c:url value="/task/link"/>">
+						<div class="form-group col-md-4">
+							<select id="link" name="link" class="form-control input-sm">
+								<%
+								pageContext.setAttribute("linkTypes",TaskLinkType.values());
+								%>
+								<c:forEach items="${linkTypes}" var="linkType">
+									<option value="${linkType}"><s:message code="${linkType.code}"/></option>
+								</c:forEach>
+							</select>
+						</div>
+						<div class="form-group col-md-6">
+							<input class="form-control input-sm" id="task_link" placeholder="<s:message code="task.link.task.help"/>">
+						</div>
+						<input type="hidden" name="taskA" value="${task.id}">
+						<input type="hidden" id="taskB" name="taskB">
+						<div class="form-group col-md-4"  style="padding-left:20px">
+							<button type="submit" class="btn btn-default a-tooltip btn-sm" title="" data-placement="top" data-original-title="<s:message code="task.link.help" arguments="${task.id}"/>">
+								<span class="glyphicon glyphicon-link"></span> <s:message code="task.link"/>
+							</button>
+							<a id="linkCancel" class="btn btn-sm linkButton">
+								<s:message code="main.cancel"/>
+							</a>
+						</div>
+					</form>
 				</div>
 			</div>
 		</div>
@@ -637,9 +662,9 @@ $(document).ready(function($) {
 				select : function(event, ui) {
 					if (ui.item) {
 						event.preventDefault();
-// 						$("#assignee").val(ui.item.label);
-// 						$("#assign").append('<input type="hidden" name="email" value=' + ui.item.value + '>');
-// 						$("#assign").submit();
+						$("#task_link").val(ui.item.label);
+						$("#taskB").val(ui.item.value);
+						//$("#task_link").submit();
 						return false;
 					}
 				}
@@ -696,6 +721,22 @@ $(document).ready(function($) {
 						}
 					});
 		    	}
+			});
+			
+			$(".linkButton").click(function() {
+				//clean regardles what is pressed
+				$("#task_link").val('');
+				$("#taskB").val('');
+				$("#task_link").parent().removeClass("has-error");
+				$("#linkDiv").slideToggle("slow");
+				
+			});
+			
+			$("#linkTask").submit(function(e) {
+			    if($("#taskB").val()==''){
+			    	$("#task_link").parent().addClass("has-error");
+			    	e.preventDefault();
+			    }
 			});
 			
 $(document).on("click",".delete_task",function(e) {
