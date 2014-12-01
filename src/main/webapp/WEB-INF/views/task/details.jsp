@@ -141,7 +141,9 @@
 					</tr>
 					<tr>
 						<td><s:message code="task.storyPoints" /></td>
-						<td class="left-margin">${task.story_points}</td>
+						<td class="left-margin">
+							<span class="badge theme left">${task.story_points}</span>
+						</td>
 					</tr>
 				</table>
 			</div>
