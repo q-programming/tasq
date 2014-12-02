@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,6 +26,7 @@ import javax.validation.Valid;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -66,6 +68,9 @@ import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
 import com.qprogramming.tasq.task.comments.Comment;
 import com.qprogramming.tasq.task.comments.CommentsRepository;
+import com.qprogramming.tasq.task.link.TaskLink;
+import com.qprogramming.tasq.task.link.TaskLinkService;
+import com.qprogramming.tasq.task.link.TaskLinkType;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
@@ -113,6 +118,9 @@ public class TaskController {
 
 	@Autowired
 	private SprintRepository sprintRepository;
+
+	@Autowired
+	private TaskLinkService linkService;
 
 	@Autowired
 	private CommentsRepository commRepo;
@@ -317,7 +325,10 @@ public class TaskController {
 		Hibernate.initialize(task.getWorklog());
 		Hibernate.initialize(task.getSprints());
 		task.setDescription(task.getDescription().replaceAll("\n", "<br>"));
+		Map<TaskLinkType, List<DisplayTask>> links = linkService
+				.findTaskLinks(id);
 		model.addAttribute("task", task);
+		model.addAttribute("links", links);
 		return "task/details";
 	}
 
@@ -357,8 +368,12 @@ public class TaskController {
 			if (query != null && query != "") {
 				List<Task> searchResult = new LinkedList<Task>();
 				for (Task task : taskList) {
-					if (task.getName().contains(query)
-							|| task.getDescription().contains(query)) {
+
+					if (StringUtils.containsIgnoreCase(task.getId(), query)
+							|| StringUtils.containsIgnoreCase(task.getName(),
+									query)
+							|| StringUtils.containsIgnoreCase(
+									task.getDescription(), query)) {
 						searchResult.add(task);
 					}
 				}
@@ -906,8 +921,28 @@ public class TaskController {
 				LOG.error(e.getLocalizedMessage());
 			}
 		}
-
 		return "/task/importResults";
+	}
+
+	@RequestMapping(value = "/getTasks", method = RequestMethod.GET)
+	public @ResponseBody
+	List<DisplayTask> showTasks(@RequestParam Long projectID,
+			@RequestParam String term, HttpServletResponse response) {
+		response.setContentType("application/json");
+		Project project = projectSrv.findById(projectID);
+		List<Task> all_tasks = taskSrv.findAllByProject(project);
+		List<DisplayTask> result = new ArrayList<DisplayTask>();
+		for (Task task : all_tasks) {
+			if (term == null) {
+				result.add(new DisplayTask(task));
+			} else {
+				if (StringUtils.containsIgnoreCase(task.getName(), term)
+						|| StringUtils.containsIgnoreCase(task.getId(), term)) {
+					result.add(new DisplayTask(task));
+				}
+			}
+		}
+		return result;
 	}
 
 	private String worklogStateChange(TaskState state, TaskState old_state,

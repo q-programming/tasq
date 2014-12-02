@@ -3,6 +3,8 @@
  */
 package com.qprogramming.tasq.account;
 
+import org.springframework.beans.BeanUtils;
+
 public class DisplayAccount {
 	private String name;
 	private String surname;
@@ -11,12 +13,7 @@ public class DisplayAccount {
 	private Long id;
 
 	public DisplayAccount(Account account) {
-		setId(account.getId());
-		setName(account.getName());
-		setSurname(account.getSurname());
-		setEmail(account.getEmail());
-		setUsername(account.getUsername());
-
+		BeanUtils.copyProperties(account, this);
 	}
 
 	public String getEmail() {
@@ -57,5 +54,14 @@ public class DisplayAccount {
 
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	@Override
+	public String toString() {
+		if (name == null || surname == null) {
+			return username;
+		} else {
+			return name + " " + surname;
+		}
 	}
 }
