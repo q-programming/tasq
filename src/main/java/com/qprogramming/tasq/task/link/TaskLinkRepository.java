@@ -14,7 +14,9 @@ public interface TaskLinkRepository extends JpaRepository<TaskLink, Integer> {
 
 	List<TaskLink> findByTaskB(String taskB);
 
-	TaskLink findByTaskAAndLinkType(String taskA, TaskLinkType type);
+	TaskLink findByTaskAAndTaskBAndLinkType(String taskA, String taskB,
+			TaskLinkType type);
 
-	TaskLink findByTaskBAndLinkType(String taskB, TaskLinkType type);
+	TaskLink findByTaskBAndTaskAAndLinkType(String taskB, String taskA,
+			TaskLinkType type);
 }

@@ -314,6 +314,30 @@
 						</div>
 					</form>
 				</div>
+				<div style="display:table;width:100%">
+				<c:forEach var="entry" items="${links}">
+					<div style="display:table-row">
+						<div style="display:table-cell">
+							<s:message code="${entry.key.code}"/>
+						</div>
+						<div style="display:table-cell;padding-left:20px">
+							<table class="table table-hover table-condensed">
+								<c:forEach var="linkTask" items="${entry.value}">
+									<tr>
+										<td style="width: 30px"><t:type type="${linkTask.type}" list="true" /></td>
+										<td style="width: 30px"><t:priority priority="${linkTask.priority}" list="true" /></td>
+										<td>
+											<a href="<c:url value="task?id=${linkTask.id}"/>" style="color: inherit;
+												<c:if test="${linkTask.state eq 'CLOSED' }">text-decoration: line-through;</c:if>">
+													[${linkTask.id}] ${linkTask.name}</a>
+										</td>
+									</tr>
+								</c:forEach>
+							</table>							
+						</div>
+					</div>
+				</c:forEach>
+				</div>
 			</div>
 		</div>
 		<%--------------------RIGHT SIDE DIV -------------------------------------%>

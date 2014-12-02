@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -324,7 +325,9 @@ public class TaskController {
 		Hibernate.initialize(task.getWorklog());
 		Hibernate.initialize(task.getSprints());
 		task.setDescription(task.getDescription().replaceAll("\n", "<br>"));
+		Map<TaskLinkType, List<DisplayTask>> links = linkService.findTaskLinks(id);
 		model.addAttribute("task", task);
+		model.addAttribute("links", links);
 		return "task/details";
 	}
 
@@ -923,6 +926,9 @@ public class TaskController {
 			@RequestParam(value = "link") TaskLinkType linkType,
 			RedirectAttributes ra, HttpServletRequest request,
 			HttpServletResponse response, Model model) {
+		//get tasks
+		DisplayTask taskA = new DisplayTask(taskSrv.findById(A));
+		DisplayTask taskB = new DisplayTask(taskSrv.findById(B));
 		TaskLink link = linkService.findLink(A, B, linkType);
 		if(link!=null){
 			String linkTXT = msg.getMessage(linkType.getCode(), null, Utils.getCurrentLocale());
