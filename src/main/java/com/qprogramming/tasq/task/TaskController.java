@@ -118,7 +118,7 @@ public class TaskController {
 
 	@Autowired
 	private SprintRepository sprintRepository;
-	
+
 	@Autowired
 	private TaskLinkService linkService;
 
@@ -325,7 +325,8 @@ public class TaskController {
 		Hibernate.initialize(task.getWorklog());
 		Hibernate.initialize(task.getSprints());
 		task.setDescription(task.getDescription().replaceAll("\n", "<br>"));
-		Map<TaskLinkType, List<DisplayTask>> links = linkService.findTaskLinks(id);
+		Map<TaskLinkType, List<DisplayTask>> links = linkService
+				.findTaskLinks(id);
 		model.addAttribute("task", task);
 		model.addAttribute("links", links);
 		return "task/details";
@@ -918,31 +919,58 @@ public class TaskController {
 		}
 		return "/task/importResults";
 	}
+
 	@Transactional
 	@RequestMapping(value = "/task/link", method = RequestMethod.POST)
-	public String linkTasks(
-			@RequestParam(value = "taskA") String A,
+	public String linkTasks(@RequestParam(value = "taskA") String A,
 			@RequestParam(value = "taskB") String B,
 			@RequestParam(value = "link") TaskLinkType linkType,
 			RedirectAttributes ra, HttpServletRequest request,
 			HttpServletResponse response, Model model) {
-		//get tasks
-		DisplayTask taskA = new DisplayTask(taskSrv.findById(A));
-		DisplayTask taskB = new DisplayTask(taskSrv.findById(B));
+		// get tasks
 		TaskLink link = linkService.findLink(A, B, linkType);
-		if(link!=null){
-			String linkTXT = msg.getMessage(linkType.getCode(), null, Utils.getCurrentLocale());
-			MessageHelper.addErrorAttribute(ra, msg.getMessage(
-					"task.link.error.linked",
-					new Object[] { A,linkTXT, B },
-					Utils.getCurrentLocale()));
+		String linkTXT = msg.getMessage(linkType.getCode(), null,
+				Utils.getCurrentLocale());
+		if (link != null) {
+			MessageHelper.addErrorAttribute(
+					ra,
+					msg.getMessage("task.link.error.linked", new Object[] { A,
+							linkTXT, B }, Utils.getCurrentLocale()));
 			return "redirect:" + request.getHeader("Referer");
 		}
-		linkService.save(new TaskLink(A,B,linkType));
+		linkService.save(new TaskLink(A, B, linkType));
+		MessageHelper.addSuccessAttribute(ra, msg.getMessage(
+				"task.link.linked", new Object[] { A, linkTXT, B },
+				Utils.getCurrentLocale()));
 		return "redirect:" + request.getHeader("Referer");
 	}
 
-	
+	@Transactional
+	@RequestMapping(value = "/task/deletelink", method = RequestMethod.GET)
+	public String deleteLinks(@RequestParam(value = "taskA") String A,
+			@RequestParam(value = "taskB") String B,
+			@RequestParam(value = "link") TaskLinkType linkType,
+			RedirectAttributes ra, HttpServletRequest request,
+			HttpServletResponse response, Model model) {
+		// get tasks
+
+		TaskLink link = linkService.findLink(A, B, linkType);
+		String linkTXT = msg.getMessage(linkType.getCode(), null,
+				Utils.getCurrentLocale());
+		if (link == null) {
+			MessageHelper.addErrorAttribute(
+					ra,
+					msg.getMessage("task.link.error.notFound", new Object[] {
+							A, linkTXT, B }, Utils.getCurrentLocale()));
+			return "redirect:" + request.getHeader("Referer");
+		}
+		linkService.delete(link);
+		MessageHelper.addSuccessAttribute(
+				ra,
+				msg.getMessage("task.link.deleted", new Object[] { A, linkTXT,
+						B }, Utils.getCurrentLocale()));
+		return "redirect:" + request.getHeader("Referer");
+	}
 
 	@RequestMapping(value = "/getTasks", method = RequestMethod.GET)
 	public @ResponseBody

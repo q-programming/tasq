@@ -283,7 +283,7 @@
 						<span class="glyphicon glyphicon-link"></span>
 						<s:message code="task.related"/>
 					</h5>
-					<a class="btn btn-default btn-xxs a-tooltip pull-right linkButton" href="#" title="" data-placement="top" data-original-title="Powiaz">
+					<a class="btn btn-default btn-xxs a-tooltip pull-right linkButton" href="#" title="" data-placement="top" data-original-title="<s:message code="task.link"/>">
 						<span class="glyphicon glyphicon-plus"></span><span class="glyphicon glyphicon-link"></span>
 					</a>
 				</div>
@@ -314,15 +314,16 @@
 						</div>
 					</form>
 				</div>
+				<div style="max-height: 300px; overflow-y:auto;">
 				<div style="display:table;width:100%">
-				<c:forEach var="entry" items="${links}">
+				<c:forEach var="linkType" items="${links}">
 					<div style="display:table-row">
 						<div style="display:table-cell">
-							<s:message code="${entry.key.code}"/>
+							<s:message code="${linkType.key.code}"/>
 						</div>
 						<div style="display:table-cell;padding-left:20px">
-							<table class="table table-hover table-condensed">
-								<c:forEach var="linkTask" items="${entry.value}">
+							<table class="table table-hover table-condensed button-table">
+								<c:forEach var="linkTask" items="${linkType.value}">
 									<tr>
 										<td style="width: 30px"><t:type type="${linkTask.type}" list="true" /></td>
 										<td style="width: 30px"><t:priority priority="${linkTask.priority}" list="true" /></td>
@@ -331,12 +332,23 @@
 												<c:if test="${linkTask.state eq 'CLOSED' }">text-decoration: line-through;</c:if>">
 													[${linkTask.id}] ${linkTask.name}</a>
 										</td>
+										<c:if test="${can_edit && user.isUser || is_assignee}">
+										<td style="width: 30px">
+											<div class="buttons_panel pull-right">
+												<a href='<c:url value="/task/deletelink?taskA=${task.id}&taskB=${linkTask.id}&link=${linkType.key}"/>'>
+													<span class="glyphicon glyphicon-trash" style="color: gray"></span>
+												</a>
+											</div>
+										</td>
+										</c:if>
 									</tr>
+									
 								</c:forEach>
 							</table>							
 						</div>
 					</div>
 				</c:forEach>
+				</div>
 				</div>
 			</div>
 		</div>

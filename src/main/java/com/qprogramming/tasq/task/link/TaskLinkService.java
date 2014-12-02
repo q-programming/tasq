@@ -1,9 +1,11 @@
 package com.qprogramming.tasq.task.link;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,10 @@ public class TaskLinkService {
 		linkRepo.save(link);
 	}
 
+	public void delete(TaskLink link) {
+		linkRepo.delete(link);
+	}
+
 	/**
 	 * Searches for existing link
 	 * 
@@ -41,13 +47,18 @@ public class TaskLinkService {
 	}
 
 	public Map<TaskLinkType, List<DisplayTask>> findTaskLinks(String taskID) {
-		Map<TaskLinkType, List<DisplayTask>> result = new HashMap<TaskLinkType, List<DisplayTask>>();
+		Map<TaskLinkType, List<DisplayTask>> result = new LinkedHashMap<TaskLinkType, List<DisplayTask>>();
+		Map<TaskLinkType, List<DisplayTask>> finalResult = new LinkedHashMap<TaskLinkType, List<DisplayTask>>();
+		// Prepopulate map to maintain order
+		result.put(TaskLinkType.RELATES_TO, new LinkedList<DisplayTask>());
+		result.put(TaskLinkType.BLOCKS, new LinkedList<DisplayTask>());
+		result.put(TaskLinkType.IS_BLOCKED_BY, new LinkedList<DisplayTask>());
+		result.put(TaskLinkType.DUPLICATES, new LinkedList<DisplayTask>());
+		result.put(TaskLinkType.IS_DUPLICATED_BY, new LinkedList<DisplayTask>());
+
 		List<TaskLink> listA = linkRepo.findByTaskA(taskID);
 		for (TaskLink taskLink : listA) {
 			List<DisplayTask> tasks = result.get(taskLink.getLinkType());
-			if (tasks == null) {
-				tasks = new LinkedList<DisplayTask>();
-			}
 			DisplayTask displayTask = new DisplayTask(taskSrv.findById(taskLink
 					.getTaskB()));
 			tasks.add(displayTask);
@@ -55,7 +66,8 @@ public class TaskLinkService {
 		}
 		List<TaskLink> listB = linkRepo.findByTaskB(taskID);
 		for (TaskLink taskLink : listB) {
-			List<DisplayTask> tasks = result.get(switchType(taskLink.getLinkType()));
+			List<DisplayTask> tasks = result.get(switchType(taskLink
+					.getLinkType()));
 			if (tasks == null) {
 				tasks = new LinkedList<DisplayTask>();
 			}
@@ -64,7 +76,13 @@ public class TaskLinkService {
 			tasks.add(displayTask);
 			result.put(switchType(taskLink.getLinkType()), tasks);
 		}
-		return result;
+		// clean all potential empty results
+		for (Entry<TaskLinkType, List<DisplayTask>> entry : result.entrySet()) {
+			if (entry.getValue().size()!=0) {
+				finalResult.put(entry.getKey(),entry.getValue());
+			}
+		}
+		return finalResult;
 	}
 
 	/**
@@ -98,7 +116,7 @@ public class TaskLinkService {
 		case IS_BLOCKED_BY:
 			return TaskLinkType.BLOCKS;
 		case DUPLICATES:
-			return TaskLinkType.IS_BLOCKED_BY;
+			return TaskLinkType.IS_DUPLICATED_BY;
 		case IS_DUPLICATED_BY:
 			return TaskLinkType.DUPLICATES;
 		default:
