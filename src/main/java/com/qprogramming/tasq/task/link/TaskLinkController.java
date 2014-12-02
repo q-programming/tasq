@@ -55,7 +55,7 @@ public class TaskLinkController {
 		}
 		linkService.save(new TaskLink(A, B, linkType));
 		wlSrv.addWorkLogNoTask(A + " - " + B, task.getProject(),
-				LogType.TASK_LINK_DEL);
+				LogType.TASK_LINK);
 		MessageHelper.addSuccessAttribute(ra, msg.getMessage(
 				"task.link.linked", new Object[] { A, linkTXT, B },
 				Utils.getCurrentLocale()));
