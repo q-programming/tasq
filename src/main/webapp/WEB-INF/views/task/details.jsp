@@ -1,3 +1,4 @@
+<%@page import="com.qprogramming.tasq.task.link.TaskLinkType"%>
 <%@page import="com.qprogramming.tasq.task.TaskPriority"%>
 <%@page import="com.qprogramming.tasq.task.TaskState"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
@@ -140,7 +141,9 @@
 					</tr>
 					<tr>
 						<td><s:message code="task.storyPoints" /></td>
-						<td class="left-margin">${task.story_points}</td>
+						<td class="left-margin">
+							<span class="badge theme left">${task.story_points}</span>
+						</td>
 					</tr>
 				</table>
 			</div>
@@ -272,6 +275,81 @@
 						</tr>
 					</c:if>
 				</table>
+			</div>
+			<%-------------- RELATED TASKS ------------------%>
+			<div>
+				<div class="mod-header">
+					<h5 class="mod-header-title">
+						<span class="glyphicon glyphicon-link"></span>
+						<s:message code="task.related"/>
+					</h5>
+					<a class="btn btn-default btn-xxs a-tooltip pull-right linkButton" href="#" title="" data-placement="top" data-original-title="<s:message code="task.link"/>">
+						<span class="glyphicon glyphicon-plus"></span><span class="glyphicon glyphicon-link"></span>
+					</a>
+				</div>
+				<div id="linkDiv" style="display:none" class="form-group">
+					<form id="linkTask" name="mainForm" method="post" action="<c:url value="/task/link"/>">
+						<div class="form-group col-md-4">
+							<select id="link" name="link" class="form-control input-sm">
+								<%
+								pageContext.setAttribute("linkTypes",TaskLinkType.values());
+								%>
+								<c:forEach items="${linkTypes}" var="linkType">
+									<option value="${linkType}"><s:message code="${linkType.code}"/></option>
+								</c:forEach>
+							</select>
+						</div>
+						<div class="form-group col-md-6">
+							<input class="form-control input-sm" id="task_link" placeholder="<s:message code="task.link.task.help"/>">
+						</div>
+						<input type="hidden" name="taskA" value="${task.id}">
+						<input type="hidden" id="taskB" name="taskB">
+						<div class="form-group col-md-4"  style="padding-left:20px">
+							<button type="submit" class="btn btn-default a-tooltip btn-sm" title="" data-placement="top" data-original-title="<s:message code="task.link.help" arguments="${task.id}"/>">
+								<span class="glyphicon glyphicon-link"></span> <s:message code="task.link"/>
+							</button>
+							<a id="linkCancel" class="btn btn-sm linkButton">
+								<s:message code="main.cancel"/>
+							</a>
+						</div>
+					</form>
+				</div>
+				<div style="max-height: 300px; overflow-y:auto;">
+				<div style="display:table;width:100%">
+				<c:forEach var="linkType" items="${links}">
+					<div style="display:table-row">
+						<div style="display:table-cell">
+							<s:message code="${linkType.key.code}"/>
+						</div>
+						<div style="display:table-cell;padding-left:20px">
+							<table class="table table-hover table-condensed button-table">
+								<c:forEach var="linkTask" items="${linkType.value}">
+									<tr>
+										<td style="width: 30px"><t:type type="${linkTask.type}" list="true" /></td>
+										<td style="width: 30px"><t:priority priority="${linkTask.priority}" list="true" /></td>
+										<td>
+											<a href="<c:url value="task?id=${linkTask.id}"/>" style="color: inherit;
+												<c:if test="${linkTask.state eq 'CLOSED' }">text-decoration: line-through;</c:if>">
+													[${linkTask.id}] ${linkTask.name}</a>
+										</td>
+										<c:if test="${can_edit && user.isUser || is_assignee}">
+										<td style="width: 30px">
+											<div class="buttons_panel pull-right">
+												<a href='<c:url value="/task/deletelink?taskA=${task.id}&taskB=${linkTask.id}&link=${linkType.key}"/>'>
+													<span class="glyphicon glyphicon-trash" style="color: gray"></span>
+												</a>
+											</div>
+										</td>
+										</c:if>
+									</tr>
+									
+								</c:forEach>
+							</table>							
+						</div>
+					</div>
+				</c:forEach>
+				</div>
+				</div>
 			</div>
 		</div>
 		<%--------------------RIGHT SIDE DIV -------------------------------------%>
@@ -570,13 +648,19 @@ $(document).ready(function($) {
 			$('#comments_cancel').click(function() {
 						toggle_comment();
 			});
-
+			var cache = {};
 			$("#assignee").autocomplete({
 						minLength : 1,
 						delay : 500,
 						//define callback to format results
 						source : function(request, response) {
+							var term = request.term;
+							if ( term in cache ) {
+						          response( cache[ term ] );
+						          return;
+						    }
 							$.getJSON("<c:url value="/project/${task.project.id}/getParticipants"/>",request,function(result) {
+									cache[ term ] = result;
 									response($.map(result,function(item) {
 										return {
 											// following property gets displayed in drop down
@@ -597,6 +681,32 @@ $(document).ready(function($) {
 							}
 						}
 					});
+			$("#task_link").autocomplete({
+				minLength : 1,
+				delay : 500,
+				//define callback to format results
+				source : function(request, response) {
+					$.getJSON("<c:url value="/getTasks?projectID=${task.project.id}"/>",request,function(result) {
+							response($.map(result,function(item) {
+								return {
+									// following property gets displayed in drop down
+									label : item.id+ " "+ item.name,
+									value : item.id,
+									}
+								}));
+							});
+					},
+					//define select handler
+				select : function(event, ui) {
+					if (ui.item) {
+						event.preventDefault();
+						$("#task_link").val(ui.item.label);
+						$("#taskB").val(ui.item.value);
+						//$("#task_link").submit();
+						return false;
+					}
+				}
+			});
 
 			$("#assign_me").click(function() {
 						var current_email = "${user.email}";
@@ -628,7 +738,6 @@ $(document).ready(function($) {
 						}
 					});
 			});
-			
 // 			change state
 			$(".change_state").click(function() {
 	    	 var state = $(this).data('state');
@@ -650,6 +759,22 @@ $(document).ready(function($) {
 						}
 					});
 		    	}
+			});
+			
+			$(".linkButton").click(function() {
+				//clean regardles what is pressed
+				$("#task_link").val('');
+				$("#taskB").val('');
+				$("#task_link").parent().removeClass("has-error");
+				$("#linkDiv").slideToggle("slow");
+				
+			});
+			
+			$("#linkTask").submit(function(e) {
+			    if($("#taskB").val()==''){
+			    	$("#task_link").parent().addClass("has-error");
+			    	e.preventDefault();
+			    }
 			});
 			
 $(document).on("click",".delete_task",function(e) {

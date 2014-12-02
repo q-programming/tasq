@@ -3,7 +3,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
 <%@ attribute name="task" required="true"
-	type="com.qprogramming.tasq.task.Task"%>
+	type="com.qprogramming.tasq.task.DisplayTask"%>
 <%@ attribute name="can_edit" required="true"%>
 <div class="agile-card theme" data-id="${task.id}" state="${task.state}" id="${task.id}">
 	<div class="side-bar theme"></div>
