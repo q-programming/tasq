@@ -20,6 +20,7 @@ import javax.persistence.SequenceGenerator;
 import org.joda.time.Period;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.task.Task;
 
@@ -87,8 +88,8 @@ public class WorkLog implements Serializable {
 		return time;
 	}
 
-	public Account getAccount() {
-		return account;
+	public DisplayAccount getAccount() {
+		return new DisplayAccount(account);
 	}
 
 	public void setAccount(Account account) {

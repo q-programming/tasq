@@ -200,4 +200,7 @@ a.closed {
 }
 span.badge.left{
 	float:left
+}
+.export-hidden{
+	display: none;
 }   
