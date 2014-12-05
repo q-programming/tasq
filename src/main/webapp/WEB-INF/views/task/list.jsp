@@ -33,31 +33,29 @@
 		</select>
 	</div>
 	<%--------------FILTERS ----------------------------%>
-	<c:if
-		test="${not empty param.projectID || not empty param.state || not empty param.query || not empty param.priority}">
-		<c:if test="${not empty param.projectID}">
-			<c:set var="projID_url">
+	<div style="display: table-cell; padding-left: 20px; width: 100%">
+		<c:if
+			test="${not empty param.projectID || not empty param.state || not empty param.query || not empty param.priority}">
+			<c:if test="${not empty param.projectID}">
+				<c:set var="projID_url">
 								projectID=${param.projectID}&
 							</c:set>
-		</c:if>
-		<c:if test="${not empty param.state}">
-			<c:set var="state_url">
+			</c:if>
+			<c:if test="${not empty param.state}">
+				<c:set var="state_url">
 								state=${param.state}&
 				</c:set>
-		</c:if>
-		<c:if test="${not empty param.query}">
-			<c:set var="query_url">
+			</c:if>
+			<c:if test="${not empty param.query}">
+				<c:set var="query_url">
 								query=${param.query}&
 				</c:set>
-		</c:if>
-		<c:if test="${not empty param.priority}">
-			<c:set var="priority_url">
+			</c:if>
+			<c:if test="${not empty param.priority}">
+				<c:set var="priority_url">
 								priority=${param.priority}&
 				</c:set>
-		</c:if>
-
-
-		<div style="display: table-cell; padding-left: 20px; width: 100%">
+			</c:if>
 			<c:if test="${not empty param.projectID}">
 				<span><s:message code="project.project" />: <span
 					class="filter_span"> ${param.projectID}<a
@@ -74,29 +72,54 @@
 			</c:if>
 			<c:if test="${not empty param.priority}">
 				<span><s:message code="task.priority" />: <span
-					class="filter_span"><t:priority priority="${param.priority}" /> <a
+					class="filter_span"><t:priority priority="${param.priority}" />
+						<a
 						href="<c:url value="tasks?${projID_url}${query_url}${state_url}"/>"><span
 							class="glyphicon glyphicon-remove"
 							style="font-size: smaller; margin-left: 3px; color: lightgray"></span></a></span></span>
 			</c:if>
 			<c:if test="${not empty param.query}">
 				<c:set var="query_url">
-								query=${param.query}&
-				</c:set>
+							query=${param.query}&
+			</c:set>
 				<span><s:message code="main.search" />: <span
 					class="filter_span"> ${param.query}<a
 						href="<c:url value="tasks?${projID_url}${state_url}${priority_url}"/>"><span
 							class="glyphicon glyphicon-remove"
 							style="font-size: smaller; margin-left: 3px; color: lightgray"></span></a></span></span>
 			</c:if>
+		</c:if>
+	</div>
+	<div style="display: table-cell; padding-left: 20px;">
+		<div style="display:table-row">
+			<div id="buttDiv" style="display: table-cell">
+				<a class="btn btn-default export_startstop">
+					<span class="glyphicon glyphicon-export"></span>
+					<s:message code="task.export" />
+				</a>
+			</div>
+			<div id="fileDiv" style="display:none">
+				<div style="display: table-cell">
+					<a class="btn export_startstop"><s:message code="main.cancel"/></a>
+				</div>
+				<div style="display: table-cell">
+					<a id="fileExport" class="btn btn-default">
+						<span class='glyphicon glyphicon-download'></span> <s:message code="task.export.selected"/>
+					</a>
+				</div>
+			</div>
 		</div>
-	</c:if>
+	</div>
 </div>
+<%--------TASK LIST ----------%>
 <div class="white-frame">
 	<security:authentication property="principal" var="user" />
 	<table class="table table-condensed">
 		<thead class="theme">
 			<tr>
+				<th class="export_cell export-hidden" style="width: 30px"><input
+					id="select_all" type="checkbox" class="a-tooltip"
+					title="<s:message code="task.export.clickAll"/>"></th>
 				<th style="width: 30px"><s:message code="task.type" /></th>
 				<th style="width: 30px"><span class="dropdown a-tooltip"
 					title="<s:message code="task.priority" />"
@@ -104,9 +127,9 @@
 						class="dropdown-toggle theme" type="button" id="dropdownMenu2"
 						data-toggle="dropdown" style="color: black"> <span
 							class="caret theme"></span></a> 
-						<%
- 							pageContext.setAttribute("priorities", TaskPriority.values());
- 						%>
+							<%
+ 								pageContext.setAttribute("priorities", TaskPriority.values());
+ 							%>
 						<ul class="dropdown-menu">
 							<c:forEach items="${priorities}" var="priority">
 								<li><a
@@ -120,21 +143,23 @@
 				<th>
 					<div class="dropdown" style="padding-top: 5px; cursor: pointer;">
 						<a class="dropdown-toggle theme" type="button" id="dropdownMenu1"
-							data-toggle="dropdown"><s:message
-								code="task.state" /><span class="caret theme"></span></a>
+							data-toggle="dropdown"><s:message code="task.state" /><span
+							class="caret theme"></span></a>
 						<%
 							pageContext.setAttribute("states", TaskState.values());
 						%>
 						<ul class="dropdown-menu">
 							<c:forEach items="${states}" var="state">
-								<li><a 
+								<li><a
 									href="<c:url value="tasks?${projID_url}${query_url}${priority_url}state=${state}"/>"><t:state
 											state="${state}"></t:state></a></li>
 							</c:forEach>
-								<li class="divider"></li>
-								<li><a 
-									href="<c:url value="tasks?${projID_url}${query_url}${priority_url}state=OPEN"/>" class="a-tooltip" title="<s:message code="task.state.open.hint"/>"><t:state state="OPEN"></t:state>
-											</a></li>
+							<li class="divider"></li>
+							<li><a
+								href="<c:url value="tasks?${projID_url}${query_url}${priority_url}state=OPEN"/>"
+								class="a-tooltip"
+								title="<s:message code="task.state.open.hint"/>"><t:state
+										state="OPEN"></t:state> </a></li>
 						</ul>
 					</div>
 
@@ -143,6 +168,7 @@
 			</tr>
 		</thead>
 		<%----------------TASKS -----------------------------%>
+		<form id="exportTaskForm" method="POST"	enctype="multipart/form-data" action="<c:url value="/task/export"/>">
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.id eq user.active_task[0]}">
 				<tr style="background: #428bca; color: white">
@@ -154,7 +180,7 @@
 			<c:if test="${task.id ne user.active_task[0]}">
 				<c:set var="blinker" value="" />
 				<c:set var="tr_bg" value="" />
-				<c:set var="link" value=""/>
+				<c:set var="link" value="" />
 				<c:if test="${task.state eq 'CLOSED'}">
 					<c:set var="tr_bg" value="background: rgba(50, 205, 81, 0.12);" />
 				</c:if>
@@ -163,12 +189,15 @@
 				</c:if>
 				<tr style="${tr_bg}">
 			</c:if>
+			<td class="export_cell export-hidden"><input class="export"
+				type="checkbox" name="tasks" value="${task.id}"></td>
 			<td><t:type type="${task.type}" list="true" /></td>
 			<td><t:priority priority="${task.priority}" list="true" /></td>
 			<td><a href="<c:url value="task?id=${task.id}"/>"
 				style="color: inherit;<c:if test="${task.state eq 'CLOSED' }">
 							text-decoration: line-through;
-							</c:if>">[${task.id}] ${task.name}</a></td>
+							</c:if>">[${task.id}]
+					${task.name}</a></td>
 			<c:if test="${not task.estimated}">
 				<td>${task.logged_work}</td>
 			</c:if>
@@ -194,29 +223,74 @@
 			</c:if>
 			<td class="${blinker}"><t:state state="${task.state}"></t:state></td>
 			<td><c:if test="${empty task.assignee}">
-								<i><s:message
-										code="task.unassigned" /></i>
-							</c:if>
-							<c:if test="${not empty task.assignee}">
-								<img
-									data-src="holder.js/20x20"
-									style="height: 20px; padding-right: 5px;"
-									src="<c:url value="/userAvatar/${task.assignee.id}"/>" />
-								<a ${link} href="<c:url value="/user?id=${task.assignee.id}"/>">${task.assignee}</a>
-							</c:if></td>
+					<i><s:message code="task.unassigned" /></i>
+				</c:if> <c:if test="${not empty task.assignee}">
+					<img data-src="holder.js/20x20"
+						style="height: 20px; padding-right: 5px;"
+						src="<c:url value="/userAvatar/${task.assignee.id}"/>" />
+					<a ${link} href="<c:url value="/user?id=${task.assignee.id}"/>">${task.assignee}</a>
+				</c:if></td>
 			</tr>
 		</c:forEach>
+		</form>
 	</table>
+</div>
+<div id="loading" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+    	<div class="centerPadded">
+      		<img src="<c:url value="/resources/img/loading.gif"/>"></img>
+      		<br><s:message code="task.export.prepareFile"/>
+  	  	</div>
+  	  	<div class="centerPadded">
+  	  		<a href="<c:url value="/tasks"/>"><span class="glyphicon glyphicon-ok-circle"></span> <s:message code="task.export.goBack"/></a>
+  	  	</div>
+    </div>
+  </div>
 </div>
 <script>
 	$(document).ready(function($) {
 		$("#project").change(function(){
 			var query = "${query_url}";
 			var state = "${state_url}";
-			var link = "<c:url value="/tasks?projectID="/>" + $(this).val()+"&" + query + state;
+			var link = '<c:url value="/tasks?projectID="/>' + $(this).val()+"&" + query + state;
 			window.location = link + $(this).val();
 		});
+		$(".export_startstop").click(function(){
+				$(".export_cell").toggle('slow', function() {
+				    $(this).toggleClass('export-hidden');
+				});
+				$("#buttDiv").toggle();
+				$("#fileDiv").toggle();
+		});
+		$("#fileExport").click(function(){
+			var atLeastOnechecked = false;
+			$('.export').each(function() {
+                if(this.checked){
+                	atLeastOnechecked = true;
+                	return false;
+                }           
+            });
+		    if (atLeastOnechecked){
+				$("#exportTaskForm").submit();
+				$('#loading').modal({
+	 	            show: true,
+	 	            keyboard: false,
+	 	            backdrop: 'static'
+	 	     });
+		    }
+		});
+		
+		$("#select_all").click(function(){
+	        if(this.checked) {
+	            $('.export').each(function() {
+	                this.checked = true;               
+	            });
+	        }else{
+	            $('.export').each(function() {
+	                this.checked = false;                       
+	            });         
+	        }
+		});
 	});
-
-	
 </script>
