@@ -91,12 +91,27 @@
 		</c:if>
 	</div>
 	<div style="display: table-cell; padding-left: 20px;">
-		<button id="export_start" class="btn btn-default">
-			<span class="glyphicon glyphicon-export"></span>
-			<s:message code="task.export" />
-		</button>
+		<div style="display:table-row">
+			<div id="buttDiv" style="display: table-cell">
+				<a class="btn btn-default export_startstop">
+					<span class="glyphicon glyphicon-export"></span>
+					<s:message code="task.export" />
+				</a>
+			</div>
+			<div id="fileDiv" style="display:none">
+				<div style="display: table-cell">
+					<a class="btn export_startstop"><s:message code="main.cancel"/></a>
+				</div>
+				<div style="display: table-cell">
+					<a id="fileExport" class="btn btn-default">
+						<span class='glyphicon glyphicon-download'></span> <s:message code="task.export.selected"/>
+					</a>
+				</div>
+			</div>
+		</div>
 	</div>
 </div>
+<%--------TASK LIST ----------%>
 <div class="white-frame">
 	<security:authentication property="principal" var="user" />
 	<table class="table table-condensed">
@@ -104,17 +119,17 @@
 			<tr>
 				<th class="export_cell export-hidden" style="width: 30px"><input
 					id="select_all" type="checkbox" class="a-tooltip"
-					title="<s:message code="task.export.clickAll"/>">
-				</th>
+					title="<s:message code="task.export.clickAll"/>"></th>
 				<th style="width: 30px"><s:message code="task.type" /></th>
 				<th style="width: 30px"><span class="dropdown a-tooltip"
 					title="<s:message code="task.priority" />"
 					style="padding-top: 5px; cursor: pointer;"> <a
 						class="dropdown-toggle theme" type="button" id="dropdownMenu2"
 						data-toggle="dropdown" style="color: black"> <span
-							class="caret theme"></span></a> <%
- 	pageContext.setAttribute("priorities", TaskPriority.values());
- %>
+							class="caret theme"></span></a> 
+							<%
+ 								pageContext.setAttribute("priorities", TaskPriority.values());
+ 							%>
 						<ul class="dropdown-menu">
 							<c:forEach items="${priorities}" var="priority">
 								<li><a
@@ -153,6 +168,7 @@
 			</tr>
 		</thead>
 		<%----------------TASKS -----------------------------%>
+		<form id="exportTaskForm" method="POST"	enctype="multipart/form-data" action="<c:url value="/task/export"/>">
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.id eq user.active_task[0]}">
 				<tr style="background: #428bca; color: white">
@@ -174,7 +190,7 @@
 				<tr style="${tr_bg}">
 			</c:if>
 			<td class="export_cell export-hidden"><input class="export"
-				type="checkbox"></td>
+				type="checkbox" name="tasks" value="${task.id}"></td>
 			<td><t:type type="${task.type}" list="true" /></td>
 			<td><t:priority priority="${task.priority}" list="true" /></td>
 			<td><a href="<c:url value="task?id=${task.id}"/>"
@@ -216,40 +232,65 @@
 				</c:if></td>
 			</tr>
 		</c:forEach>
+		</form>
 	</table>
+</div>
+<div id="loading" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+    	<div class="centerPadded">
+      		<img src="<c:url value="/resources/img/loading.gif"/>"></img>
+      		<br><s:message code="task.export.prepareFile"/>
+  	  	</div>
+  	  	<div class="centerPadded">
+  	  		<a href="<c:url value="/tasks"/>"><span class="glyphicon glyphicon-ok-circle"></span> <s:message code="task.export.goBack"/></a>
+  	  	</div>
+    </div>
+  </div>
 </div>
 <script>
 	$(document).ready(function($) {
 		$("#project").change(function(){
 			var query = "${query_url}";
 			var state = "${state_url}";
-			var link = "<c:url value="/tasks?projectID="/>" + $(this).val()+"&" + query + state;
+			var link = '<c:url value="/tasks?projectID="/>' + $(this).val()+"&" + query + state;
 			window.location = link + $(this).val();
 		});
-		$("#export_start").click(function(){
-			if($("#export_start").attr( "operation")){
-				alert("go");
-			} else{
-				var title="<s:message code="task.export.selected"/>";
+		$(".export_startstop").click(function(){
 				$(".export_cell").toggle('slow', function() {
 				    $(this).toggleClass('export-hidden');
 				});
-				$("#export_start").html(title);
-				$("#export_start").attr( "operation","finish");
-			}
+				$("#buttDiv").toggle();
+				$("#fileDiv").toggle();
 		});
+		$("#fileExport").click(function(){
+			var atLeastOnechecked = false;
+			$('.export').each(function() {
+                if(this.checked){
+                	atLeastOnechecked = true;
+                	return false;
+                }           
+            });
+		    if (atLeastOnechecked){
+				$("#exportTaskForm").submit();
+				$('#loading').modal({
+	 	            show: true,
+	 	            keyboard: false,
+	 	            backdrop: 'static'
+	 	     });
+		    }
+		});
+		
 		$("#select_all").click(function(){
-	        if(this.checked) { // check select status
-	            $('.export').each(function() { //loop through each checkbox
-	                this.checked = true;  //select all checkboxes with class "checkbox1"               
+	        if(this.checked) {
+	            $('.export').each(function() {
+	                this.checked = true;               
 	            });
 	        }else{
-	            $('.export').each(function() { //loop through each checkbox
-	                this.checked = false; //deselect all checkboxes with class "checkbox1"                       
+	            $('.export').each(function() {
+	                this.checked = false;                       
 	            });         
 	        }
 		});
 	});
-
-	
 </script>

@@ -299,8 +299,8 @@ public class SprintController {
 				}
 				sprint.setTotalEstimate(total_estimate);
 				sprint.setTotalStoryPoints(totalStoryPoints);
-				sprint.setStart_date(Utils.convertDueDate(sprint_start));
-				sprint.setEnd_date(Utils.convertDueDate(sprint_end));
+				sprint.setStart_date(Utils.convertStringToDate(sprint_start));
+				sprint.setEnd_date(Utils.convertStringToDate(sprint_end));
 				sprint.setActive(true);
 				sprintRepo.save(sprint);
 				wrkLogSrv.addWorkLogNoTask(null, project, LogType.SPRINT_START);

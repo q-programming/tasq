@@ -2,8 +2,8 @@ package com.qprogramming.tasq.task.importexport;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
+import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -24,6 +25,10 @@ import org.apache.poi.ss.usermodel.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,17 +40,19 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
+import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.task.Task;
-import com.qprogramming.tasq.task.TaskController;
 import com.qprogramming.tasq.task.TaskForm;
 import com.qprogramming.tasq.task.TaskPriority;
 import com.qprogramming.tasq.task.TaskService;
-import com.qprogramming.tasq.task.TaskState;
 import com.qprogramming.tasq.task.TaskType;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
+@Controller
 public class ImportExportController {
+
+	private static final String TEMPLATE_XLS = "template.xls";
 
 	@Autowired
 	private ProjectService projectSrv;
@@ -70,24 +77,16 @@ public class ImportExportController {
 	private static final int DUE_DATE_CELL = 6;
 	private static final String BR = "<br>";
 	private static final Object ROW_SKIPPED = "Row was skipped</br>";
+	private static final String UNDERSCORE = "_";
 
 	@RequestMapping(value = "/task/getTemplateFile", method = RequestMethod.GET)
 	public @ResponseBody
 	String downloadTemplate(HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
-		URL fileURL = getClass().getResource("/template.xls");
-		File file;
-		try {
-			file = new File(fileURL.toURI());
-			if (file != null) {
-				response.setHeader("content-Disposition",
-						"attachment; filename=" + file.getName());
-				InputStream is = new FileInputStream(file);
-				IOUtils.copyLarge(is, response.getOutputStream());
-			}
-		} catch (URISyntaxException e) {
-			LOG.error(e.getMessage());
-		}
+		FileInputStream is = getExcelTemplate();
+		response.setHeader("content-Disposition", "attachment; filename="
+				+ TEMPLATE_XLS);
+		IOUtils.copyLarge(is, response.getOutputStream());
 		return "redirect:" + request.getHeader("Referer");
 	}
 
@@ -176,24 +175,88 @@ public class ImportExportController {
 					// TODO
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				LOG.error(e.getLocalizedMessage());
 			}
 		}
 		return "/task/importResults";
 	}
 
-	@RequestMapping(value = "/task/import", method = RequestMethod.POST)
-	public String exportTasks(
-			@RequestParam(value = "file") MultipartFile importFile,
-			@RequestParam(value = "project") String projectName,
+	@RequestMapping(value = "/task/export", method = RequestMethod.POST)
+	public HttpEntity<byte[]> exportTasks(
+			@RequestParam(value = "tasks") String[] idList,
 			RedirectAttributes ra, HttpServletRequest request,
-			HttpServletResponse response, Model model) {
-
-		//TODO
-		return "/task/exportResults";
+			HttpServletResponse response, Model model)
+			throws FileNotFoundException, IOException {
+		// Prepare task list
+		List<Task> taskList = new LinkedList<Task>();
+		Project project = null;
+		for (int i = 0; i < idList.length; i++) {
+			Task task = taskSrv.findById(idList[i]);
+			if (project == null) {
+				project = task.getProject();
+			}
+			if (task != null) {
+				taskList.add(task);
+			}
+		}
+		FileInputStream is = getExcelTemplate();
+		String filename = project.getProjectId() + UNDERSCORE
+				+ Utils.convertDateToString(new Date()) + UNDERSCORE
+				+ "export.xls";
+		// pack into excel
+		HSSFWorkbook workbook = new HSSFWorkbook(is);
+		HSSFSheet sheet = workbook.getSheetAt(0);
+		int rowNo = 1;
+		for (Task task : taskList) {
+			HSSFRow row = sheet.createRow(rowNo++);
+			row.createCell(NAME_CELL).setCellValue(task.getName());
+			row.createCell(DESCRIPTION_CELL)
+					.setCellValue(task.getDescription());
+			row.createCell(TYPE_CELL).setCellValue(task.getType().toString());
+			row.createCell(PRIORITY_CELL).setCellValue(
+					((TaskPriority) task.getPriority()).toString());
+			row.createCell(ESTIMATE_CELL).setCellValue(task.getEstimate());
+			row.createCell(SP_CELL).setCellValue(task.getStory_points());
+			row.createCell(DUE_DATE_CELL).setCellValue(task.getDue_date());
+		}
+		// Finish
+		byte[] documentBody = workbook.getBytes();
+		HttpHeaders respHeaders = new HttpHeaders();
+		respHeaders
+				.setContentType(new MediaType("application", "vnd.ms-excel"));
+		respHeaders.setContentDispositionFormData("attachment", filename);
+		respHeaders.setContentLength(documentBody.length);
+		return new HttpEntity<byte[]>(documentBody, respHeaders);
 	}
 
+	/**
+	 * Returns excel template
+	 * 
+	 * @return
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	private FileInputStream getExcelTemplate() throws FileNotFoundException,
+			IOException {
+		URL fileURL = getClass().getResource("/" + TEMPLATE_XLS);
+		File file;
+		try {
+			file = new File(fileURL.toURI());
+			if (file != null) {
+				return new FileInputStream(file);
+			}
+		} catch (URISyntaxException e) {
+			LOG.error(e.getMessage());
+		}
+		return null;
+	}
+
+	/**
+	 * Check if row is valid
+	 * 
+	 * @param row
+	 * @return
+	 */
 	private StringBuffer verifyRow(Row row) {
 		StringBuffer logger = new StringBuffer();
 		String log_header = "[Row " + row.getRowNum() + "]";
@@ -244,11 +307,25 @@ public class ImportExportController {
 		return logger;
 	}
 
+	/**
+	 * Check if cell in row is numeric type
+	 * 
+	 * @param row
+	 * @param cell
+	 * @return
+	 */
 	private boolean isNumericCellValid(Row row, int cell) {
 		return row.getCell(cell) != null
 				&& row.getCell(cell).getCellType() == Cell.CELL_TYPE_NUMERIC;
 	}
 
+	/**
+	 * Check if cell in row is Date type
+	 * 
+	 * @param row
+	 * @param cell
+	 * @return
+	 */
 	private boolean isDATECellValid(Row row, int cell) {
 		try {
 			if (row.getCell(cell) != null
@@ -263,6 +340,13 @@ public class ImportExportController {
 		return true;
 	}
 
+	/**
+	 * Check if cell in row is has correct TaskType value
+	 * 
+	 * @param row
+	 * @param cell
+	 * @return
+	 */
 	private boolean isTaskTypeValid(Row row) {
 		Cell cell = row.getCell(TYPE_CELL);
 		if (cell != null && cell.getCellType() != Cell.CELL_TYPE_BLANK) {
@@ -276,6 +360,13 @@ public class ImportExportController {
 		return true;
 	}
 
+	/**
+	 * Check if cell in row is has correct TaskPriority value
+	 * 
+	 * @param row
+	 * @param cell
+	 * @return
+	 */
 	private boolean isTaskPriorityValid(Row row) {
 		Cell cell = row.getCell(PRIORITY_CELL);
 		if (cell != null && cell.getCellType() != Cell.CELL_TYPE_BLANK) {

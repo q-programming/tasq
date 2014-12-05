@@ -171,6 +171,10 @@ form.form-search:before {
 .paddedleft40 {
 	padding-left: 40px
 }
+.centerPadded{
+	padding: 20px;
+	text-align: center;
+}
 
 a.closed {
 	text-decoration: line-through;

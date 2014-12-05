@@ -686,7 +686,8 @@ $(document).ready(function($) {
 				delay : 500,
 				//define callback to format results
 				source : function(request, response) {
-					$.getJSON("<c:url value="/getTasks?projectID=${task.project.id}"/>",request,function(result) {
+					var url = '<c:url value="/getTasks?projectID=${task.project.id}"/>';
+					$.getJSON(url,request,function(result) {
 							response($.map(result,function(item) {
 								return {
 									// following property gets displayed in drop down

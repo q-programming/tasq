@@ -92,7 +92,7 @@ public class Utils {
 		return s.substring(0, 1) + s.substring(1).toLowerCase();
 	}
 	
-	public static Date convertDueDate(String date) {
+	public static Date convertStringToDate(String date) {
 		Date result = null;
 		try {
 			result = new SimpleDateFormat("dd-M-yyyy").parse(date);
@@ -101,5 +101,11 @@ public class Utils {
 		}
 		return result;
 	}
+	public static String convertDateToString(Date date) {
+		String result = null;
+		result = new SimpleDateFormat("dd-M-yyyy").format(date);
+		return result;
+	}
+
 
 }
