@@ -3,6 +3,8 @@ package com.qprogramming.tasq.task.worklog;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,8 +19,12 @@ public interface WorkLogRepository extends JpaRepository<WorkLog, Integer> {
 
 	List<WorkLog> findByProjectId(Long id);
 
-	List<WorkLog> findByProjectIdAndTimeBetweenAndActivityNotNullOrderByTimeAsc(Long id, Date start, Date end);
-	
-	List<WorkLog> findByProjectIdAndTimeBetweenAndTypeOrTypeOrderByTimeAsc(Long id, Date start, Date end, LogType closed, LogType reopen);
+	Page<WorkLog> findByProjectId(Long id, Pageable page);
+
+	List<WorkLog> findByProjectIdAndTimeBetweenAndActivityNotNullOrderByTimeAsc(
+			Long id, Date start, Date end);
+
+	List<WorkLog> findByProjectIdAndTimeBetweenAndTypeOrTypeOrderByTimeAsc(
+			Long id, Date start, Date end, LogType closed, LogType reopen);
 
 }

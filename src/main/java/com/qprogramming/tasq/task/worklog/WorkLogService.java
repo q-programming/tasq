@@ -5,6 +5,7 @@ package com.qprogramming.tasq.task.worklog;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.hibernate.Hibernate;
@@ -146,10 +147,10 @@ public class WorkLogService {
 		wl = wlRepo.save(wl);
 	}
 
-	public List<WorkLog> getProjectEvents(Project project) {
+	public List<DisplayWorkLog> getProjectEvents(Project project) {
 		List<WorkLog> workLogs = wlRepo.findByProjectId(project.getId());
 		Collections.sort(workLogs, new WorkLogSorter(true));
-		return workLogs;
+		return packIntoDisplay(workLogs);
 	}
 
 	/**
@@ -166,6 +167,7 @@ public class WorkLogService {
 	public List<WorkLog> getSprintEvents(Sprint sprint, boolean timeTracked) {
 		LocalDate start = new LocalDate(sprint.getRawStart_date()).minusDays(1);
 		LocalDate end = new LocalDate(sprint.getRawEnd_date()).plusDays(1);
+
 		if (timeTracked) {
 			return wlRepo
 					.findByProjectIdAndTimeBetweenAndActivityNotNullOrderByTimeAsc(
@@ -184,6 +186,14 @@ public class WorkLogService {
 			task.setState(TaskState.ONGOING);
 		}
 		return task;
+	}
+
+	private List<DisplayWorkLog> packIntoDisplay(List<WorkLog> list) {
+		List<DisplayWorkLog> result = new LinkedList<DisplayWorkLog>();
+		for (WorkLog workLog : list) {
+			result.add(new DisplayWorkLog(workLog));
+		}
+		return result;
 	}
 
 }

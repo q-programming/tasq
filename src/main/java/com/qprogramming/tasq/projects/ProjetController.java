@@ -18,6 +18,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -35,18 +40,18 @@ import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.error.TasqAuthException;
-import com.qprogramming.tasq.error.TasqException;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.ProjectSorter;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
-import com.qprogramming.tasq.support.sorters.WorkLogSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskPriority;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
 import com.qprogramming.tasq.task.TaskType;
+import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLog;
+import com.qprogramming.tasq.task.worklog.WorkLogRepository;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
 @Controller
@@ -65,6 +70,9 @@ public class ProjetController {
 
 	@Autowired
 	private WorkLogService wrkLogSrv;
+
+	@Autowired
+	private WorkLogRepository wrkRepo;
 
 	@Autowired
 	MessageSource msg;
@@ -103,7 +111,7 @@ public class ProjetController {
 		current.setLast_visited_p(clean);
 		accSrv.update(current);
 		// get latest events for this project
-		List<WorkLog> workLogs = wrkLogSrv.getProjectEvents(project);
+		List<DisplayWorkLog> workLogs = wrkLogSrv.getProjectEvents(project);
 		// Check status of all projects
 		List<Task> tasks = project.getTasks();
 		Map<TaskState, Integer> state_count = new HashMap<TaskState, Integer>();
@@ -129,7 +137,7 @@ public class ProjetController {
 		List<Task> taskList = new LinkedList<Task>();
 		if (closed == null) {
 			taskList = taskSrv.findByProjectAndOpen(project);
-		}else{
+		} else {
 			taskList = taskSrv.findAllByProject(project);
 		}
 		Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID, false));
@@ -140,6 +148,32 @@ public class ProjetController {
 		model.addAttribute("project", project);
 		model.addAttribute("events", workLogs);
 		return "project/details";
+	}
+
+	@RequestMapping(value = "projectEvents", method = RequestMethod.GET)
+	public @ResponseBody
+	Page<DisplayWorkLog> getProjectEvents(@RequestParam(value = "id") Long id,
+			@RequestParam(value = "index", required = false) Integer pageIndex) {
+		Project project = projSrv.findById(id);
+		if (project == null) {
+			// NULL
+			msg.getMessage("project.notexists", null, Utils.getCurrentLocale());
+		}
+		if (!project.getParticipants().contains(Utils.getCurrentAccount())) {
+			throw new TasqAuthException(msg, "role.error.project.permission");
+		}
+		// Fetch events
+		if (pageIndex == null) {
+			pageIndex = 0;
+		}
+		Page<WorkLog> page = wrkRepo.findByProjectId(id,
+				constructPageSpecification(pageIndex));
+		List<DisplayWorkLog> list = new LinkedList<DisplayWorkLog>();
+		for (WorkLog workLog : page) {
+			list.add(new DisplayWorkLog(workLog));
+		}
+		Page<DisplayWorkLog> result = new PageImpl<DisplayWorkLog>(list);
+		return result;
 	}
 
 	@RequestMapping(value = "projects", method = RequestMethod.GET)
@@ -407,9 +441,24 @@ public class ProjetController {
 		project.setDefault_type(type);
 		project.setTimeTracked(timeTracked);
 		Account account = accSrv.findById(assigneId);
-		assigneId = account!=null ? account.getId():null;
+		assigneId = account != null ? account.getId() : null;
 		project.setDefaultAssigneeID(assigneId);
 		projSrv.save(project);
 		return "redirect:" + request.getHeader("Referer");
+	}
+
+	private Pageable constructPageSpecification(int pageIndex) {
+		Pageable pageSpecification = new PageRequest(pageIndex, 5, sortByDate());
+		return pageSpecification;
+	}
+
+	/**
+	 * Returns a Sort object which sorts persons in ascending order by using the
+	 * last name.
+	 * 
+	 * @return
+	 */
+	private Sort sortByDate() {
+		return new Sort(Sort.Direction.DESC, "time");
 	}
 }
