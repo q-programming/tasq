@@ -23,6 +23,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -72,10 +74,7 @@ public class ProjetController {
 	private WorkLogService wrkLogSrv;
 
 	@Autowired
-	private WorkLogRepository wrkRepo;
-
-	@Autowired
-	MessageSource msg;
+	private MessageSource msg;
 
 	@Transactional
 	@RequestMapping(value = "project", method = RequestMethod.GET)
@@ -152,8 +151,10 @@ public class ProjetController {
 
 	@RequestMapping(value = "projectEvents", method = RequestMethod.GET)
 	public @ResponseBody
-	Page<DisplayWorkLog> getProjectEvents(@RequestParam(value = "id") Long id,
-			@RequestParam(value = "index", required = false) Integer pageIndex) {
+	Page<DisplayWorkLog> getProjectEvents(
+			@RequestParam(value = "id") Long id,
+			@RequestParam(value = "closed", required = false) String closed,
+			@PageableDefault(size = 25, page = 0, sort = "time", direction = Direction.DESC) Pageable p) {
 		Project project = projSrv.findById(id);
 		if (project == null) {
 			// NULL
@@ -163,16 +164,13 @@ public class ProjetController {
 			throw new TasqAuthException(msg, "role.error.project.permission");
 		}
 		// Fetch events
-		if (pageIndex == null) {
-			pageIndex = 0;
-		}
-		Page<WorkLog> page = wrkRepo.findByProjectId(id,
-				constructPageSpecification(pageIndex));
+		Page<WorkLog> page = wrkLogSrv.findByProjectId(id, p);
 		List<DisplayWorkLog> list = new LinkedList<DisplayWorkLog>();
 		for (WorkLog workLog : page) {
 			list.add(new DisplayWorkLog(workLog));
 		}
-		Page<DisplayWorkLog> result = new PageImpl<DisplayWorkLog>(list);
+		Page<DisplayWorkLog> result = new PageImpl<DisplayWorkLog>(list, p,
+				page.getTotalElements());
 		return result;
 	}
 
@@ -445,20 +443,5 @@ public class ProjetController {
 		project.setDefaultAssigneeID(assigneId);
 		projSrv.save(project);
 		return "redirect:" + request.getHeader("Referer");
-	}
-
-	private Pageable constructPageSpecification(int pageIndex) {
-		Pageable pageSpecification = new PageRequest(pageIndex, 5, sortByDate());
-		return pageSpecification;
-	}
-
-	/**
-	 * Returns a Sort object which sorts persons in ascending order by using the
-	 * last name.
-	 * 
-	 * @return
-	 */
-	private Sort sortByDate() {
-		return new Sort(Sort.Direction.DESC, "time");
 	}
 }

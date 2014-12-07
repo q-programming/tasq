@@ -13,6 +13,8 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -181,6 +183,11 @@ public class WorkLogService {
 		}
 	}
 
+	public Page<WorkLog> findByProjectId(Long id, Pageable p) {
+		return wlRepo.findByProjectId(id, p);
+	}
+	
+
 	private Task checkState(Task task) {
 		if (task.getState().equals(TaskState.TO_DO)) {
 			task.setState(TaskState.ONGOING);
@@ -195,5 +202,6 @@ public class WorkLogService {
 		}
 		return result;
 	}
+
 
 }
