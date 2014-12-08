@@ -1,7 +1,5 @@
 package com.qprogramming.tasq.task.worklog;
 
-import java.util.Date;
-
 import org.joda.time.Period;
 import org.springframework.beans.BeanUtils;
 

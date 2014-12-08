@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -181,8 +182,7 @@ public class TaskController {
 	@RequestMapping(value = "/task/edit", method = RequestMethod.POST)
 	public String editTask(
 			@Valid @ModelAttribute("taskForm") TaskForm taskForm,
-			Errors errors, RedirectAttributes ra, HttpServletRequest request,
-			Model model) {
+			Errors errors, RedirectAttributes ra, HttpServletRequest request) {
 		if (errors.hasErrors()) {
 			return null;
 		}
@@ -202,7 +202,7 @@ public class TaskController {
 							Utils.getCurrentLocale()));
 			return "redirect:" + request.getHeader("Referer");
 		}
-		StringBuffer message = new StringBuffer();
+		StringBuilder message = new StringBuilder();
 		if (!task.getName().equalsIgnoreCase(taskForm.getName())) {
 			message.append("Name: ");
 			message.append(task.getName());
@@ -238,14 +238,14 @@ public class TaskController {
 			message.append(BR);
 			task.setEstimated(!Boolean.parseBoolean(taskForm.getNo_estimation()));
 		}
-		int story_points = taskForm.getStory_points().equals("") ? 0 : Integer
+		int storyPoints = ("").equals(taskForm.getStory_points()) ? 0 : Integer
 				.parseInt(taskForm.getStory_points());
-		if (task.getStory_points() != story_points) {
+		if (task.getStory_points() != storyPoints) {
 			message.append("Story points: ");
 			message.append(task.getStory_points());
 			message.append(CHANGE_TO);
-			message.append(story_points);
-			task.setStory_points(story_points);
+			message.append(storyPoints);
+			task.setStory_points(storyPoints);
 		}
 		if (!task.getDue_date().equalsIgnoreCase(taskForm.getDue_date())) {
 			message.append("Due date: ");
@@ -264,8 +264,8 @@ public class TaskController {
 	@Transactional
 	@RequestMapping(value = "task", method = RequestMethod.GET)
 	public String showDetails(@RequestParam(value = "id") String id,
-			@RequestParam(value = "tab", required = false) String tab,
-			Model model, RedirectAttributes ra, HttpServletRequest request) {
+			@RequestParam(value = "tab", required = false) Model model,
+			RedirectAttributes ra) {
 		Task task = taskSrv.findById(id);
 		if (task == null) {
 			MessageHelper.addErrorAttribute(
@@ -275,14 +275,14 @@ public class TaskController {
 			return "redirect:/tasks";
 		}
 		Account account = Utils.getCurrentAccount();
-		List<Task> last_visited = account.getLast_visited_t();
-		last_visited.add(0, task);
-		if (last_visited.size() > 4) {
-			last_visited = last_visited.subList(0, 4);
+		List<Task> lastVisited = account.getLast_visited_t();
+		lastVisited.add(0, task);
+		if (lastVisited.size() > 4) {
+			lastVisited = lastVisited.subList(0, 4);
 		}
 		List<Task> clean = new ArrayList<Task>();
-		HashSet<Task> lookup = new HashSet<Task>();
-		for (Task item : last_visited) {
+		Set<Task> lookup = new HashSet<Task>();
+		for (Task item : lastVisited) {
 			if (lookup.add(item)) {
 				clean.add(item);
 			}
@@ -304,11 +304,11 @@ public class TaskController {
 	@Transactional
 	@RequestMapping(value = "tasks", method = RequestMethod.GET)
 	public String listTasks(
-			@RequestParam(value = "projectID", required = false) String proj_id,
+			@RequestParam(value = "projectID", required = false) String projId,
 			@RequestParam(value = "state", required = false) String state,
 			@RequestParam(value = "query", required = false) String query,
 			@RequestParam(value = "priority", required = false) String priority,
-			Model model, HttpServletRequest request) {
+			Model model) {
 		List<Project> projects = projectSrv.findAllByUser();
 		Collections.sort(projects, new ProjectSorter(
 				ProjectSorter.SORTBY.LAST_VISIT, Utils.getCurrentAccount()
@@ -317,17 +317,17 @@ public class TaskController {
 
 		// Get active or choosen project
 		Project active = null;
-		if (proj_id == null) {
+		if (projId == null) {
 			active = projectSrv.findUserActiveProject();
 		} else {
-			active = projectSrv.findByProjectId(proj_id);
+			active = projectSrv.findByProjectId(projId);
 		}
 		if (active != null) {
 			List<Task> taskList = new LinkedList<Task>();
 			if (state == null || state == "") {
 				taskList = taskSrv.findAllByProject(active);
 			} else {
-				if (state.equals("OPEN")) {
+				if (("OPEN").equals(state)) {
 					taskList = taskSrv.findByProjectAndOpen(active);
 				} else {
 					taskList = taskSrv.findByProjectAndState(active,
@@ -374,7 +374,7 @@ public class TaskController {
 	 * 
 	 * @param taskID
 	 *            - ID of task for which work is logged
-	 * @param logged_work
+	 * @param loggedWork
 	 *            - amount of time spent
 	 * @param ra
 	 * @param request
@@ -384,10 +384,10 @@ public class TaskController {
 	@RequestMapping(value = "logwork", method = RequestMethod.POST)
 	public String logWork(
 			@RequestParam(value = "taskID") String taskID,
-			@RequestParam(value = "logged_work") String logged_work,
-			@RequestParam(value = "remaining", required = false) String remaining_txt,
-			@RequestParam("date_logged") String date_logged,
-			@RequestParam("time_logged") String time_logged,
+			@RequestParam(value = "logged_work") String loggedWork,
+			@RequestParam(value = "remaining", required = false) String remainingTxt,
+			@RequestParam("date_logged") String dateLogged,
+			@RequestParam("time_logged") String timeLogged,
 			RedirectAttributes ra, HttpServletRequest request, Model model) {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
@@ -400,37 +400,35 @@ public class TaskController {
 				return "redirect:" + request.getHeader("Referer");
 			}
 			try {
-				if (logged_work.matches("[0-9]+")) {
-					logged_work += "h";
+				if (loggedWork.matches("[0-9]+")) {
+					loggedWork += "h";
 				}
-				Period logged = PeriodHelper.inFormat(logged_work);
-				StringBuffer message = new StringBuffer(logged_work);
+				Period logged = PeriodHelper.inFormat(loggedWork);
+				StringBuilder message = new StringBuilder(loggedWork);
 				Period remaining = null;
-				if (remaining_txt != null && remaining_txt != "") {
-					if (remaining_txt.matches("[0-9]+")) {
-						remaining_txt += "h";
+				if (remainingTxt != null && remainingTxt != "") {
+					if (remainingTxt.matches("[0-9]+")) {
+						remainingTxt += "h";
 					}
-					remaining = PeriodHelper.inFormat(remaining_txt);
+					remaining = PeriodHelper.inFormat(remainingTxt);
 					message.append(BR);
 					message.append("Remaining: ");
-					message.append(remaining_txt);
+					message.append(remainingTxt);
 				}
 				Date when = new Date();
-				if (date_logged != "" && time_logged != "") {
+				if (dateLogged != "" && timeLogged != "") {
 					when = new SimpleDateFormat("dd-M-yyyy HH:mm")
-							.parse(date_logged + " " + time_logged);
+							.parse(dateLogged + " " + timeLogged);
 					message.append(BR);
 					message.append("Date: ");
-					message.append(date_logged + " " + time_logged);
+					message.append(dateLogged + " " + timeLogged);
 				}
 				wlSrv.addTimedWorkLog(task, message.toString(), when,
 						remaining, logged, LogType.LOG);
-				// wlSrv.addWorkLog(task, LogType.LOG, logged_work, logged,
-				// remaining);
 				MessageHelper.addSuccessAttribute(
 						ra,
 						msg.getMessage("task.logWork.logged", new Object[] {
-								logged_work, task.getId() },
+								loggedWork, task.getId() },
 								Utils.getCurrentLocale()));
 			} catch (IllegalArgumentException e) {
 				MessageHelper.addErrorAttribute(
@@ -440,7 +438,7 @@ public class TaskController {
 				return "redirect:" + request.getHeader("Referer");
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOG.error(e.getLocalizedMessage());
 			}
 		}
 		return "redirect:" + request.getHeader("Referer");
@@ -451,9 +449,9 @@ public class TaskController {
 	public String changeState(
 			@RequestParam(value = "taskID") String taskID,
 			@RequestParam(value = "state") TaskState state,
-			@RequestParam(value = "zero_checkbox", required = false) Boolean remaining_zero,
+			@RequestParam(value = "zero_checkbox", required = false) Boolean remainingZero,
 			@RequestParam(value = "message", required = false) String message,
-			RedirectAttributes ra, HttpServletRequest request, Model model) {
+			RedirectAttributes ra, HttpServletRequest request) {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			if (state.equals(task.getState())) {
@@ -465,17 +463,17 @@ public class TaskController {
 			}
 			// TODO eliminate this?
 			if (state.equals(TaskState.TO_DO)
-					&& !task.getLogged_work().equals("0m")) {
+					&& !("0m").equals(task.getLogged_work())) {
 				MessageHelper.addWarningAttribute(ra, msg.getMessage(
 						"task.alreadyStarted", new Object[] { task.getId() },
 						Utils.getCurrentLocale()));
 				return "redirect:" + request.getHeader("Referer");
 			}
 
-			TaskState old_state = (TaskState) task.getState();
+			TaskState oldState = (TaskState) task.getState();
 			task.setState(state);
 			// Zero remaining time
-			if (remaining_zero != null && remaining_zero) {
+			if (remainingZero != null && remainingZero) {
 				task.setRemaining(PeriodHelper.inFormat("0m"));
 			}
 			// add comment for task change state?
@@ -500,7 +498,7 @@ public class TaskController {
 			}
 			// Save all
 			taskSrv.save(task);
-			String resultMessage = worklogStateChange(state, old_state, task);
+			String resultMessage = worklogStateChange(state, oldState, task);
 			MessageHelper.addSuccessAttribute(ra, resultMessage);
 		}
 		return "redirect:" + request.getHeader("Referer");
@@ -512,7 +510,7 @@ public class TaskController {
 	public ResultData changeStatePOST(
 			@RequestParam(value = "id") String taskID,
 			@RequestParam(value = "state") TaskState state,
-			@RequestParam(value = "zero_checkbox", required = false) Boolean remaining_zero,
+			@RequestParam(value = "zero_checkbox", required = false) Boolean remainingZero,
 			@RequestParam(value = "message", required = false) String message) {
 		// check if not admin or user
 		Task task = taskSrv.findById(taskID);
@@ -523,13 +521,13 @@ public class TaskController {
 			}
 			if (state.equals(TaskState.TO_DO)) {
 				Hibernate.initialize(task.getLogged_work());
-				if (!task.getLogged_work().equals("0m")) {
+				if (!("0m").equals(task.getLogged_work())) {
 					return new ResultData(ResultData.ERROR, msg.getMessage(
 							"task.alreadyStarted", null,
 							Utils.getCurrentLocale()));
 				}
 			}
-			TaskState old_state = (TaskState) task.getState();
+			TaskState oldState = (TaskState) task.getState();
 			task.setState(state);
 			if (message != null && message != "") {
 				if (Utils.containsHTMLTags(message)) {
@@ -549,12 +547,12 @@ public class TaskController {
 			}
 
 			// Zero remaining time
-			if (remaining_zero != null && remaining_zero) {
+			if (remainingZero != null && remainingZero) {
 				task.setRemaining(PeriodHelper.inFormat("0m"));
 			}
 			taskSrv.save(task);
 			return new ResultData(ResultData.OK, worklogStateChange(state,
-					old_state, task));
+					oldState, task));
 		}
 		return new ResultData(ResultData.ERROR, msg.getMessage("error.unknown",
 				null, Utils.getCurrentLocale()));
@@ -563,7 +561,7 @@ public class TaskController {
 	@RequestMapping(value = "/task/time", method = RequestMethod.GET)
 	public String handleTimer(@RequestParam(value = "id") String taskID,
 			@RequestParam(value = "action") String action,
-			RedirectAttributes ra, HttpServletRequest request, Model model) {
+			RedirectAttributes ra, HttpServletRequest request) {
 		Utils.setHttpRequest(request);
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
@@ -579,7 +577,7 @@ public class TaskController {
 				Account account = Utils.getCurrentAccount();
 				if (account.getActive_task() != null
 						&& account.getActive_task().length > 0
-						&& !account.getActive_task()[0].equals("")) {
+						&& !("").equals(account.getActive_task()[0])) {
 					MessageHelper.addWarningAttribute(ra, msg.getMessage(
 							"task.stopTime.warning",
 							new Object[] { account.getActive_task()[0] },
@@ -595,18 +593,18 @@ public class TaskController {
 			} else if (action.equals(STOP)) {
 				Account account = Utils.getCurrentAccount();
 				DateTime now = new DateTime();
-				Period log_work = new Period(
+				Period logWork = new Period(
 						(DateTime) account.getActive_task_time(), now);
 				// Only log work if greater than 1 minute
-				if (log_work.toStandardDuration().getMillis() / 1000 / 60 < 1) {
-					log_work = new Period().plusMinutes(1);
+				if (logWork.toStandardDuration().getMillis() / 1000 / 60 < 1) {
+					logWork = new Period().plusMinutes(1);
 				}
-				wlSrv.addNormalWorkLog(task, PeriodHelper.outFormat(log_work),
-						log_work, LogType.LOG);
+				wlSrv.addNormalWorkLog(task, PeriodHelper.outFormat(logWork),
+						logWork, LogType.LOG);
 				account.clearActive_task();
 				MessageHelper.addSuccessAttribute(ra, msg.getMessage(
 						"task.logWork.logged",
-						new Object[] { PeriodHelper.outFormat(log_work),
+						new Object[] { PeriodHelper.outFormat(logWork),
 								task.getId() }, Utils.getCurrentLocale()));
 				accSrv.update(account);
 			}
@@ -619,7 +617,7 @@ public class TaskController {
 	@RequestMapping(value = "/task/assign", method = RequestMethod.POST)
 	public String assign(@RequestParam(value = "taskID") String taskID,
 			@RequestParam(value = "email") String email, RedirectAttributes ra,
-			HttpServletRequest request, Model model) {
+			HttpServletRequest request) {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			if (!Roles.isUser()) {
@@ -635,7 +633,7 @@ public class TaskController {
 				return "redirect:" + request.getHeader("Referer");
 
 			}
-			if (email.equals("") && task.getAssignee() != null) {
+			if (("").equals(email) && task.getAssignee() != null) {
 				task.setAssignee(null);
 				taskSrv.save(task);
 				wlSrv.addActivityLog(task, "Unassigned", LogType.ASSIGNED);
@@ -692,7 +690,7 @@ public class TaskController {
 	@RequestMapping(value = "/task/priority", method = RequestMethod.GET)
 	public String changePriority(@RequestParam(value = "id") String taskID,
 			@RequestParam(value = "priority") String priority,
-			RedirectAttributes ra, HttpServletRequest request, Model model) {
+			RedirectAttributes ra, HttpServletRequest request) {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			if (task.getState().equals(TaskState.CLOSED)) {
@@ -706,7 +704,7 @@ public class TaskController {
 
 			}
 			if (canEdit(task.getProject()) && Roles.isUser()) {
-				StringBuffer message = new StringBuffer();
+				StringBuilder message = new StringBuilder();
 				String oldPriority = "";
 				// TODO temporary due to old DB
 				if (task.getPriority() != null) {
@@ -728,7 +726,7 @@ public class TaskController {
 	@Transactional
 	@RequestMapping(value = "/task/delete", method = RequestMethod.GET)
 	public String deleteTask(@RequestParam(value = "id") String taskID,
-			RedirectAttributes ra, HttpServletRequest request, Model model) {
+			RedirectAttributes ra, HttpServletRequest request) {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			Project project = projectSrv.findById(task.getProject().getId());
@@ -766,7 +764,7 @@ public class TaskController {
 					}
 				}
 				// leave message and clear all
-				StringBuffer message = new StringBuffer();
+				StringBuilder message = new StringBuilder();
 				message.append("[");
 				message.append(task.getId());
 				message.append("]");
@@ -787,9 +785,9 @@ public class TaskController {
 			@RequestParam String term, HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projectSrv.findById(projectID);
-		List<Task> all_tasks = taskSrv.findAllByProject(project);
+		List<Task> allTasks = taskSrv.findAllByProject(project);
 		List<DisplayTask> result = new ArrayList<DisplayTask>();
-		for (Task task : all_tasks) {
+		for (Task task : allTasks) {
 			if (term == null) {
 				result.add(new DisplayTask(task));
 			} else {
@@ -802,18 +800,18 @@ public class TaskController {
 		return result;
 	}
 
-	private String worklogStateChange(TaskState state, TaskState old_state,
+	private String worklogStateChange(TaskState state, TaskState oldState,
 			Task task) {
 		if (state.equals(TaskState.CLOSED)) {
 			wlSrv.addActivityLog(task, "", LogType.CLOSED);
 			return msg.getMessage("task.state.changed.closed",
 					new Object[] { task.getId() }, Utils.getCurrentLocale());
-		} else if (old_state.equals(TaskState.CLOSED)) {
+		} else if (oldState.equals(TaskState.CLOSED)) {
 			wlSrv.addActivityLog(task, "", LogType.REOPEN);
 			return msg.getMessage("task.state.changed.reopened",
 					new Object[] { task.getId() }, Utils.getCurrentLocale());
 		} else {
-			wlSrv.addActivityLog(task, old_state.getDescription() + CHANGE_TO
+			wlSrv.addActivityLog(task, oldState.getDescription() + CHANGE_TO
 					+ state.getDescription(), LogType.STATUS);
 			String localised = msg.getMessage(state.getCode(), null,
 					Utils.getCurrentLocale());
@@ -824,9 +822,9 @@ public class TaskController {
 	}
 
 	private boolean isAdmin(Task task, Project project) {
-		Account current_account = Utils.getCurrentAccount();
-		return project.getAdministrators().contains(current_account)
-				|| task.getOwner().equals(current_account) || Roles.isAdmin();
+		Account currentAccount = Utils.getCurrentAccount();
+		return project.getAdministrators().contains(currentAccount)
+				|| task.getOwner().equals(currentAccount) || Roles.isAdmin();
 	}
 
 	/**
@@ -837,14 +835,14 @@ public class TaskController {
 	 * @return
 	 */
 	private boolean canEdit(Project project) {
-		Project repo_project = projectSrv.findById(project.getId());
-		if (repo_project == null) {
+		Project repoProject = projectSrv.findById(project.getId());
+		if (repoProject == null) {
 			return false;
 		}
-		Account current_account = Utils.getCurrentAccount();
-		return (repo_project.getAdministrators().contains(current_account)
-				|| repo_project.getParticipants().contains(current_account) || Roles
-					.isAdmin());
+		Account currentAccount = Utils.getCurrentAccount();
+		return repoProject.getAdministrators().contains(currentAccount)
+				|| repoProject.getParticipants().contains(currentAccount)
+				|| Roles.isAdmin();
 	}
 
 }

@@ -161,37 +161,83 @@ public class Sprint implements java.io.Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result
+				+ ((end_date == null) ? 0 : end_date.hashCode());
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((project == null) ? 0 : project.hashCode());
+		result = prime * result
+				+ ((sprintNo == null) ? 0 : sprintNo.hashCode());
+		result = prime * result
+				+ ((start_date == null) ? 0 : start_date.hashCode());
+		result = prime * result
+				+ ((totalEstimate == null) ? 0 : totalEstimate.hashCode());
+		result = prime
+				* result
+				+ ((totalStoryPoints == null) ? 0 : totalStoryPoints.hashCode());
 		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		Sprint other = (Sprint) obj;
+		if (end_date == null) {
+			if (other.end_date != null) {
+				return false;
+			}
+		} else if (!end_date.equals(other.end_date)) {
+			return false;
+		}
 		if (id == null) {
-			if (other.id != null)
+			if (other.id != null) {
 				return false;
-		} else if (!id.equals(other.id))
+			}
+		} else if (!id.equals(other.id)) {
 			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
+		}
 		if (project == null) {
-			if (other.project != null)
+			if (other.project != null) {
 				return false;
-		} else if (!project.equals(other.project))
+			}
+		} else if (!project.equals(other.project)) {
 			return false;
+		}
+		if (sprintNo == null) {
+			if (other.sprintNo != null) {
+				return false;
+			}
+		} else if (!sprintNo.equals(other.sprintNo)) {
+			return false;
+		}
+		if (start_date == null) {
+			if (other.start_date != null) {
+				return false;
+			}
+		} else if (!start_date.equals(other.start_date)) {
+			return false;
+		}
+		if (totalEstimate == null) {
+			if (other.totalEstimate != null) {
+				return false;
+			}
+		} else if (!totalEstimate.equals(other.totalEstimate)) {
+			return false;
+		}
+		if (totalStoryPoints == null) {
+			if (other.totalStoryPoints != null) {
+				return false;
+			}
+		} else if (!totalStoryPoints.equals(other.totalStoryPoints)) {
+			return false;
+		}
 		return true;
 	}
-
 }

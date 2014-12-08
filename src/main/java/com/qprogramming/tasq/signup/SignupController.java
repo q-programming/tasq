@@ -62,7 +62,7 @@ public class SignupController {
 		}
 		
 		Account account = signupForm.createAccount();
-		if(accountSrv.findAll().size()==0){
+		if(accountSrv.findAll().isEmpty()){
 			account.setRole(Roles.ROLE_ADMIN);
 		}
 		account = accountSrv.save(account);

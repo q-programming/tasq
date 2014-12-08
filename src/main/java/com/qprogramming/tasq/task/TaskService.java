@@ -58,7 +58,6 @@ public class TaskService {
 
 	public List<Task> findAllBySprint(Sprint sprint) {
 		return taskRepo.findByProjectAndSprintsId(sprint.getProject(), sprint.getId());
-//		return taskRepo.findByProjectAndSprint(sprint.getProject(), sprint);
 	}
 
 }

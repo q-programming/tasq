@@ -282,8 +282,8 @@
 			<artifactId>spring-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		
 	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -328,6 +328,11 @@
 				<configuration>
 					<encoding>UTF-8</encoding>
 				</configuration>
+			</plugin>
+			<plugin>
+  				<groupId>org.jacoco</groupId>
+  				<artifactId>jacoco-maven-plugin</artifactId>
+  				<version>0.7.3-SNAPSHOT</version>
 			</plugin>
 		</plugins>
 	</build>

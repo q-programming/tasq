@@ -44,11 +44,6 @@ public class UserService implements UserDetailsService {
 				Collections.singleton(createAuthority(account)));
 	}
 
-	// private User createUser(Account account) {
-	// return new User(account.getEmail(), account.getPassword(),
-	// Collections.singleton(createAuthority(account)));
-	// }
-
 	private GrantedAuthority createAuthority(Account account) {
 		return new SimpleGrantedAuthority(account.getRole().toString());
 	}

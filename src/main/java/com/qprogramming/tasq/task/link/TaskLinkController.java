@@ -36,58 +36,56 @@ public class TaskLinkController {
 
 	@Transactional
 	@RequestMapping(value = "/task/link", method = RequestMethod.POST)
-	public String linkTasks(@RequestParam(value = "taskA") String A,
-			@RequestParam(value = "taskB") String B,
+	public String linkTasks(@RequestParam(value = "taskA") String taskA,
+			@RequestParam(value = "taskB") String taskB,
 			@RequestParam(value = "link") TaskLinkType linkType,
-			RedirectAttributes ra, HttpServletRequest request,
-			HttpServletResponse response, Model model) {
+			RedirectAttributes ra, HttpServletRequest request) {
 		// get tasks
-		Task task = taskSrv.findById(A);
-		TaskLink link = linkService.findLink(A, B, linkType);
+		Task task = taskSrv.findById(taskA);
+		TaskLink link = linkService.findLink(taskA, taskB, linkType);
 		String linkTXT = msg.getMessage(linkType.getCode(), null,
 				Utils.getCurrentLocale());
 		if (link != null) {
 			MessageHelper.addErrorAttribute(
 					ra,
-					msg.getMessage("task.link.error.linked", new Object[] { A,
-							linkTXT, B }, Utils.getCurrentLocale()));
+					msg.getMessage("task.link.error.linked", new Object[] { taskA,
+							linkTXT, taskB }, Utils.getCurrentLocale()));
 			return "redirect:" + request.getHeader("Referer");
 		}
-		linkService.save(new TaskLink(A, B, linkType));
-		wlSrv.addWorkLogNoTask(A + " - " + B, task.getProject(),
+		linkService.save(new TaskLink(taskA, taskB, linkType));
+		wlSrv.addWorkLogNoTask(taskA + " - " + taskB, task.getProject(),
 				LogType.TASK_LINK);
 		MessageHelper.addSuccessAttribute(ra, msg.getMessage(
-				"task.link.linked", new Object[] { A, linkTXT, B },
+				"task.link.linked", new Object[] { taskA, linkTXT, taskB },
 				Utils.getCurrentLocale()));
 		return "redirect:" + request.getHeader("Referer");
 	}
 
 	@Transactional
 	@RequestMapping(value = "/task/deletelink", method = RequestMethod.GET)
-	public String deleteLinks(@RequestParam(value = "taskA") String A,
-			@RequestParam(value = "taskB") String B,
+	public String deleteLinks(@RequestParam(value = "taskA") String taskA,
+			@RequestParam(value = "taskB") String taskB,
 			@RequestParam(value = "link") TaskLinkType linkType,
-			RedirectAttributes ra, HttpServletRequest request,
-			HttpServletResponse response, Model model) {
+			RedirectAttributes ra, HttpServletRequest request) {
 		// get tasks
-		Task task = taskSrv.findById(A);
-		TaskLink link = linkService.findLink(A, B, linkType);
+		Task task = taskSrv.findById(taskA);
+		TaskLink link = linkService.findLink(taskA, taskB, linkType);
 		String linkTXT = msg.getMessage(linkType.getCode(), null,
 				Utils.getCurrentLocale());
 		if (link == null) {
 			MessageHelper.addErrorAttribute(
 					ra,
 					msg.getMessage("task.link.error.notFound", new Object[] {
-							A, linkTXT, B }, Utils.getCurrentLocale()));
+							taskA, linkTXT, taskB }, Utils.getCurrentLocale()));
 			return "redirect:" + request.getHeader("Referer");
 		}
 		linkService.delete(link);
-		wlSrv.addWorkLogNoTask(A + " - " + B, task.getProject(),
+		wlSrv.addWorkLogNoTask(taskA + " - " + taskB, task.getProject(),
 				LogType.TASK_LINK_DEL);
 		MessageHelper.addSuccessAttribute(
 				ra,
-				msg.getMessage("task.link.deleted", new Object[] { A, linkTXT,
-						B }, Utils.getCurrentLocale()));
+				msg.getMessage("task.link.deleted", new Object[] { taskA, linkTXT,
+						taskB }, Utils.getCurrentLocale()));
 		return "redirect:" + request.getHeader("Referer");
 	}
 

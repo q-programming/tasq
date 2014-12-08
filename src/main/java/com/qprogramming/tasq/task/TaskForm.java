@@ -69,7 +69,7 @@ public class TaskForm {
 		setPriority(task.getPriority().toString().toUpperCase());
 	}
 
-	public Task createTask() throws IllegalArgumentException {
+	public Task createTask() {
 		Task task = new Task();
 		task.setName(getName());
 		task.setCreate_date(new Date());

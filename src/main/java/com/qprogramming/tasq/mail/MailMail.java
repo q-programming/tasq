@@ -134,10 +134,10 @@ public class MailMail {
 		} catch (MailSendException e) {
 			return false;
 		} catch (MessagingException e) {
-			e.printStackTrace();
+			LOG.error(e.getLocalizedMessage());
 			return false;
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			LOG.error(e.getLocalizedMessage());
 			return false;
 		}
 		return true;

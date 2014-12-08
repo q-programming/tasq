@@ -31,6 +31,7 @@ public class Utils {
 	private String defaultLang;
 
 	public static Account getCurrentAccount() {
+		System.out.println();
 		return (Account) SecurityContextHolder.getContext().getAuthentication()
 				.getPrincipal();
 	}
@@ -87,11 +88,21 @@ public class Utils {
 			Hibernate.initialize(task.getRawWorkLog());
 		}
 	}
+	/**
+	 * Eliminates underscores and capitalizes first letter of given string
+	 * @param s
+	 * @return
+	 */
 	public static String capitalizeFirst(String s){
 		s = s.replaceAll("_", " ");
-		return s.substring(0, 1) + s.substring(1).toLowerCase();
+		return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
 	}
 	
+	/**
+	 * Returns date in simple format
+	 * @param date
+	 * @return
+	 */
 	public static Date convertStringToDate(String date) {
 		Date result = null;
 		try {
@@ -101,6 +112,7 @@ public class Utils {
 		}
 		return result;
 	}
+	
 	public static String convertDateToString(Date date) {
 		String result = null;
 		result = new SimpleDateFormat("dd-M-yyyy").format(date);

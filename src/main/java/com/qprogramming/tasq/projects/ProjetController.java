@@ -14,15 +14,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
@@ -53,14 +49,10 @@ import com.qprogramming.tasq.task.TaskState;
 import com.qprogramming.tasq.task.TaskType;
 import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLog;
-import com.qprogramming.tasq.task.worklog.WorkLogRepository;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
 @Controller
 public class ProjetController {
-	private static final Logger LOG = LoggerFactory
-			.getLogger(ProjetController.class);
-
 	@Autowired
 	private ProjectService projSrv;
 
@@ -80,7 +72,7 @@ public class ProjetController {
 	@RequestMapping(value = "project", method = RequestMethod.GET)
 	public String showDetails(@RequestParam(value = "id") Long id,
 			@RequestParam(value = "closed", required = false) String closed,
-			Model model, RedirectAttributes ra, HttpServletRequest request) {
+			Model model, RedirectAttributes ra) {
 		Project project = projSrv.findById(id);
 		if (project == null) {
 			MessageHelper.addErrorAttribute(
@@ -94,14 +86,14 @@ public class ProjetController {
 		}
 		// set last visited
 		Account current = Utils.getCurrentAccount();
-		List<Project> last_visited = current.getLast_visited_p();
-		last_visited.add(0, project);
-		if (last_visited.size() > 4) {
-			last_visited = last_visited.subList(0, 4);
+		List<Project> lastVisited = current.getLast_visited_p();
+		lastVisited.add(0, project);
+		if (lastVisited.size() > 4) {
+			lastVisited = lastVisited.subList(0, 4);
 		}
 		List<Project> clean = new ArrayList<Project>();
-		HashSet<Project> lookup = new HashSet<Project>();
-		for (Project item : last_visited) {
+		Set<Project> lookup = new HashSet<Project>();
+		for (Project item : lastVisited) {
 			if (lookup.add(item)) {
 				clean.add(item);
 			}
@@ -110,19 +102,19 @@ public class ProjetController {
 		accSrv.update(current);
 		// Check status of all projects
 		List<Task> tasks = project.getTasks();
-		Map<TaskState, Integer> state_count = new HashMap<TaskState, Integer>();
+		Map<TaskState, Integer> stateCount = new HashMap<TaskState, Integer>();
 		for (TaskState state : TaskState.values()) {
-			state_count.put(state, 0);
+			stateCount.put(state, 0);
 		}
 		for (Task task : tasks) {
-			Integer value = state_count.get(task.getState());
+			Integer value = stateCount.get(task.getState());
 			value++;
-			state_count.put((TaskState) task.getState(), value);
+			stateCount.put((TaskState) task.getState(), value);
 		}
-		model.addAttribute("TO_DO", state_count.get(TaskState.TO_DO));
-		model.addAttribute("ONGOING", state_count.get(TaskState.ONGOING));
-		model.addAttribute("CLOSED", state_count.get(TaskState.CLOSED));
-		model.addAttribute("BLOCKED", state_count.get(TaskState.BLOCKED));
+		model.addAttribute("TO_DO", stateCount.get(TaskState.TO_DO));
+		model.addAttribute("ONGOING", stateCount.get(TaskState.ONGOING));
+		model.addAttribute("CLOSED", stateCount.get(TaskState.CLOSED));
+		model.addAttribute("BLOCKED", stateCount.get(TaskState.BLOCKED));
 		List<Task> taskList = new LinkedList<Task>();
 		if (closed == null) {
 			taskList = taskSrv.findByProjectAndOpen(project);
@@ -142,7 +134,6 @@ public class ProjetController {
 	public @ResponseBody
 	Page<DisplayWorkLog> getProjectEvents(
 			@RequestParam(value = "id") Long id,
-			@RequestParam(value = "closed", required = false) String closed,
 			@PageableDefault(size = 25, page = 0, sort = "time", direction = Direction.DESC) Pageable p) {
 		Project project = projSrv.findById(id);
 		if (project == null) {
@@ -176,11 +167,11 @@ public class ProjetController {
 	@RequestMapping(value = "project/activate", method = RequestMethod.GET)
 	public String activate(@RequestParam(value = "id") Long id,
 			HttpServletRequest request, RedirectAttributes ra) {
-		Project activated_proj = projSrv.activate(id);
-		if (activated_proj != null) {
+		Project activatedProj = projSrv.activate(id);
+		if (activatedProj != null) {
 			MessageHelper.addSuccessAttribute(ra, msg.getMessage(
 					"project.activated",
-					new Object[] { activated_proj.getName() },
+					new Object[] { activatedProj.getName() },
 					Utils.getCurrentLocale()));
 		}
 		return "redirect:" + request.getHeader("Referer");
@@ -220,29 +211,29 @@ public class ProjetController {
 					Utils.getCurrentLocale()));
 			return "redirect:" + request.getHeader("Referer");
 		}
-		String project_id = newProjectForm.getProject_id();
-		if (null != projSrv.findByProjectId(project_id)) {
+		String projectId = newProjectForm.getProject_id();
+		if (null != projSrv.findByProjectId(projectId)) {
 			errors.rejectValue("project_id", "project.idunique",
-					new Object[] { project_id }, "");
+					new Object[] { projectId }, "");
 			return null;
 		}
-		Project new_project = newProjectForm.createProject();
-		new_project = projSrv.save(new_project);
+		Project newProject = newProjectForm.createProject();
+		newProject = projSrv.save(newProject);
 		if (projSrv.findAll().size() == 1) {
 			Account account = Utils.getCurrentAccount();
-			account.setActive_project(new_project.getId());
+			account.setActive_project(newProject.getId());
 			accSrv.update(account);
 		}
 		MessageHelper.addSuccessAttribute(
 				ra,
 				msg.getMessage("project.created", new Object[] { name },
 						Utils.getCurrentLocale()));
-		return "redirect:/project?id=" + new_project.getId();
+		return "redirect:/project?id=" + newProject.getId();
 	}
 
 	@RequestMapping(value = "project/manage", method = RequestMethod.GET)
 	public String manageProject(@RequestParam(value = "id") Long id,
-			Model model, RedirectAttributes ra, HttpServletRequest request) {
+			Model model, RedirectAttributes ra) {
 		if (!Roles.isUser()) {
 			throw new TasqAuthException(msg);
 		}
@@ -261,8 +252,8 @@ public class ProjetController {
 
 	@RequestMapping(value = "project/useradd", method = RequestMethod.POST)
 	public String addParticipant(@RequestParam(value = "id") Long id,
-			@RequestParam(value = "email") String email, Model model,
-			RedirectAttributes ra, HttpServletRequest request) {
+			@RequestParam(value = "email") String email, RedirectAttributes ra,
+			HttpServletRequest request) {
 		if (!Roles.isUser()) {
 			throw new TasqAuthException(msg);
 		}
@@ -289,15 +280,15 @@ public class ProjetController {
 	@Transactional
 	@RequestMapping(value = "project/userRemove", method = RequestMethod.POST)
 	public String removeParticipant(
-			@RequestParam(value = "project_id") Long project_id,
-			@RequestParam(value = "account_id") Long account_id, Model model,
+			@RequestParam(value = "project_id") Long projectId,
+			@RequestParam(value = "account_id") Long accountId,
 			RedirectAttributes ra, HttpServletRequest request) {
 		if (!Roles.isUser()) {
 			throw new TasqAuthException(msg);
 		}
-		Account account = accSrv.findById(account_id);
+		Account account = accSrv.findById(accountId);
 		if (account != null) {
-			Project project = projSrv.findById(project_id);
+			Project project = projSrv.findById(projectId);
 			if (project == null) {
 				MessageHelper.addErrorAttribute(
 						ra,
@@ -327,15 +318,15 @@ public class ProjetController {
 	@Transactional
 	@RequestMapping(value = "project/grantAdmin", method = RequestMethod.POST)
 	public String grantAdmin(
-			@RequestParam(value = "project_id") Long project_id,
-			@RequestParam(value = "account_id") Long account_id, Model model,
+			@RequestParam(value = "project_id") Long projectId,
+			@RequestParam(value = "account_id") Long accountId,
 			RedirectAttributes ra, HttpServletRequest request) {
 		if (!Roles.isUser()) {
 			throw new TasqAuthException(msg);
 		}
-		Account account = accSrv.findById(account_id);
+		Account account = accSrv.findById(accountId);
 		if (account != null) {
-			Project project = projSrv.findById(project_id);
+			Project project = projSrv.findById(projectId);
 			if (project == null) {
 				MessageHelper.addErrorAttribute(
 						ra,
@@ -352,15 +343,15 @@ public class ProjetController {
 	@Transactional
 	@RequestMapping(value = "project/removeAdmin", method = RequestMethod.POST)
 	public String removeAdmin(
-			@RequestParam(value = "project_id") Long project_id,
-			@RequestParam(value = "account_id") Long account_id, Model model,
+			@RequestParam(value = "project_id") Long projectId,
+			@RequestParam(value = "account_id") Long accountId,
 			RedirectAttributes ra, HttpServletRequest request) {
 		if (!Roles.isUser()) {
 			throw new TasqAuthException(msg);
 		}
-		Account account = accSrv.findById(account_id);
+		Account account = accSrv.findById(accountId);
 		if (account != null) {
-			Project project = projSrv.findById(project_id);
+			Project project = projSrv.findById(projectId);
 			if (project == null) {
 				MessageHelper.addErrorAttribute(
 						ra,
@@ -387,16 +378,16 @@ public class ProjetController {
 			@RequestParam String term, HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(id);
-		Set<Account> all_participants = project.getParticipants();
+		Set<Account> allParticipants = project.getParticipants();
 		List<DisplayAccount> result = new ArrayList<DisplayAccount>();
-		for (Account account : all_participants) {
+		for (Account account : allParticipants) {
 			if (term == null) {
-				DisplayAccount s_account = new DisplayAccount(account);
-				result.add(s_account);
+				DisplayAccount sAccount = new DisplayAccount(account);
+				result.add(sAccount);
 			} else {
 				if (StringUtils.containsIgnoreCase(account.toString(), term)) {
-					DisplayAccount s_account = new DisplayAccount(account);
-					result.add(s_account);
+					DisplayAccount sAccount = new DisplayAccount(account);
+					result.add(sAccount);
 				}
 			}
 		}
@@ -410,7 +401,7 @@ public class ProjetController {
 			@RequestParam(value = "default_priority") TaskPriority priority,
 			@RequestParam(value = "default_type") TaskType type,
 			@RequestParam(value = "defaultAssignee") Long assigneId,
-			Model model, RedirectAttributes ra, HttpServletRequest request) {
+			RedirectAttributes ra, HttpServletRequest request) {
 		if (!Roles.isUser()) {
 			throw new TasqAuthException(msg);
 		}

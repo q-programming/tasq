@@ -11,7 +11,7 @@ import com.qprogramming.tasq.projects.Project;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Integer> {
 
-	Task findByName(String Name);
+	Task findByName(String name);
 
 	Task findById(String id);
 

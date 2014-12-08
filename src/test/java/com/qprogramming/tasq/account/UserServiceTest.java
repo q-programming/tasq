@@ -20,7 +20,7 @@ public class UserServiceTest {
 	private UserService userService = new UserService();
 
 	@Mock
-	private AccountService accountRepositoryMock;
+	private AccountService accountServiceMock;
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -31,7 +31,7 @@ public class UserServiceTest {
 		thrown.expect(UsernameNotFoundException.class);
 		thrown.expectMessage("User not found or is not confirmed");
 
-		when(accountRepositoryMock.findByEmail("user@example.com")).thenReturn(
+		when(accountServiceMock.findByEmail("user@example.com")).thenReturn(
 				null);
 		// act
 		userService.loadUserByUsername("user@example.com");
@@ -43,7 +43,7 @@ public class UserServiceTest {
 		Account demoUser = new Account("user@example.com", "demo",
 				Roles.ROLE_USER);
 		demoUser.setConfirmed(true);
-		when(accountRepositoryMock.findByEmail("user@example.com")).thenReturn(
+		when(accountServiceMock.findByEmail("user@example.com")).thenReturn(
 				demoUser);
 
 		// act

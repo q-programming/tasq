@@ -78,7 +78,7 @@ public class TaskLinkService {
 		}
 		// clean all potential empty results
 		for (Entry<TaskLinkType, List<DisplayTask>> entry : result.entrySet()) {
-			if (entry.getValue().size()!=0) {
+			if (entry.getValue().isEmpty()) {
 				finalResult.put(entry.getKey(),entry.getValue());
 			}
 		}

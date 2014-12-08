@@ -33,8 +33,6 @@ import com.qprogramming.tasq.task.worklog.WorkLogService;
 @Controller
 public class CommentsController {
 
-	private static final String NEW_LINE = "\n";
-
 	@Autowired
 	private CommentsRepository commRepo;
 
@@ -42,16 +40,7 @@ public class CommentsController {
 	private TaskService taskSrv;
 
 	@Autowired
-	private ProjectService projServ;
-
-	// @Autowired TODO
-	// private WatchedTaskService watchedTaskServ;
-	//
-	@Autowired
 	private WorkLogService wlSrv;
-
-	@Autowired
-	private SessionLocaleResolver localeResolver;
 
 	@Autowired
 	private MessageSource msg;
@@ -91,12 +80,12 @@ public class CommentsController {
 	}
 
 	@RequestMapping(value = "/task/{task_id}/comment/delete", method = RequestMethod.GET)
-	public String deleteComment(@PathVariable String task_id,
+	public String deleteComment(@PathVariable String taskId,
 			@RequestParam(value = "id") Long id, HttpServletRequest request,
 			RedirectAttributes ra) {
 		Utils.setHttpRequest(request);
 		Locale locale = Utils.getCurrentLocale();
-		Task task = taskSrv.findById(task_id);
+		Task task = taskSrv.findById(taskId);
 		if (!isCommentAllowed(task)) {
 			MessageHelper.addWarningAttribute(ra, msg.getMessage(
 					"comment.editNotallowed", new Object[] { ((TaskState) task
@@ -119,13 +108,13 @@ public class CommentsController {
 	}
 
 	@RequestMapping(value = "/task/comment/edit", method = RequestMethod.POST)
-	public String editComment(@RequestParam(value = "task_id") String task_id,
+	public String editComment(@RequestParam(value = "task_id") String taskId,
 			@RequestParam(value = "comment_id") Long id,
 			@RequestParam(value = "message") String message,
 			HttpServletRequest request, RedirectAttributes ra) {
 		Utils.setHttpRequest(request);
 		Locale locale = Utils.getCurrentLocale();
-		Task task = taskSrv.findById(task_id);
+		Task task = taskSrv.findById(taskId);
 		if (!isCommentAllowed(task)) {
 			MessageHelper.addWarningAttribute(ra, msg.getMessage(
 					"comment.editNotallowed", new Object[] { ((TaskState) task
@@ -152,7 +141,7 @@ public class CommentsController {
 	 */
 	private boolean messageValid(String message, RedirectAttributes ra) {
 		Locale locale = Utils.getCurrentLocale();
-		if (message == null || message.equals("")) {
+		if (message == null || ("").equals(message)) {
 			MessageHelper.addErrorAttribute(ra,
 					msg.getMessage("comment.empty", null, locale));
 			return false;

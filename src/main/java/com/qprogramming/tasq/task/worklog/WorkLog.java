@@ -164,30 +164,40 @@ public class WorkLog implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		WorkLog other = (WorkLog) obj;
 		if (account == null) {
-			if (other.account != null)
+			if (other.account != null) {
 				return false;
-		} else if (!account.equals(other.account))
+			}
+		} else if (!account.equals(other.account)) {
 			return false;
+		}
 		if (id == null) {
-			if (other.id != null)
+			if (other.id != null) {
 				return false;
-		} else if (!id.equals(other.id))
+			}
+		} else if (!id.equals(other.id)) {
 			return false;
+		}
 		if (time == null) {
-			if (other.time != null)
+			if (other.time != null) {
 				return false;
-		} else if (!time.equals(other.time))
+			}
+		} else if (!time.equals(other.time)) {
 			return false;
-		if (type != other.type)
+		}
+		if (type != other.type) {
 			return false;
+		}
 		return true;
 	}
 }
