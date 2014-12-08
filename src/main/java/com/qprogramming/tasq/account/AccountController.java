@@ -170,7 +170,7 @@ public class AccountController {
 	}
 
 	@RequestMapping("/userAvatar")
-	public void getImage(HttpServletResponse response,
+	public void getCurrentAvatar(HttpServletResponse response,
 			HttpServletRequest request) throws IOException {
 
 		response.setContentType("image/png");
@@ -189,7 +189,7 @@ public class AccountController {
 	}
 
 	@RequestMapping("/userAvatar/{id}")
-	public void getImage(HttpServletResponse response,
+	public void getUserAvatar(HttpServletResponse response,
 			HttpServletRequest request, @PathVariable("id") final String id)
 			throws IOException {
 

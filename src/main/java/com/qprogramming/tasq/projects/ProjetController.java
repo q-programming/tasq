@@ -18,6 +18,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -35,18 +42,18 @@ import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.error.TasqAuthException;
-import com.qprogramming.tasq.error.TasqException;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.ProjectSorter;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
-import com.qprogramming.tasq.support.sorters.WorkLogSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskPriority;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
 import com.qprogramming.tasq.task.TaskType;
+import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLog;
+import com.qprogramming.tasq.task.worklog.WorkLogRepository;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
 @Controller
@@ -67,12 +74,11 @@ public class ProjetController {
 	private WorkLogService wrkLogSrv;
 
 	@Autowired
-	MessageSource msg;
+	private MessageSource msg;
 
 	@Transactional
 	@RequestMapping(value = "project", method = RequestMethod.GET)
 	public String showDetails(@RequestParam(value = "id") Long id,
-			@RequestParam(value = "show", required = false) Integer show,
 			@RequestParam(value = "closed", required = false) String closed,
 			Model model, RedirectAttributes ra, HttpServletRequest request) {
 		Project project = projSrv.findById(id);
@@ -102,8 +108,6 @@ public class ProjetController {
 		}
 		current.setLast_visited_p(clean);
 		accSrv.update(current);
-		// get latest events for this project
-		List<WorkLog> workLogs = wrkLogSrv.getProjectEvents(project);
 		// Check status of all projects
 		List<Task> tasks = project.getTasks();
 		Map<TaskState, Integer> state_count = new HashMap<TaskState, Integer>();
@@ -115,13 +119,6 @@ public class ProjetController {
 			value++;
 			state_count.put((TaskState) task.getState(), value);
 		}
-		show = show == null ? 0 : show;
-		show++;
-		int begin = (show - 1) * 25;
-		int end = show * 25;
-		begin = begin < 0 ? 0 : begin;
-		end = end > workLogs.size() ? workLogs.size() : end;
-		workLogs = workLogs.subList(begin, end);
 		model.addAttribute("TO_DO", state_count.get(TaskState.TO_DO));
 		model.addAttribute("ONGOING", state_count.get(TaskState.ONGOING));
 		model.addAttribute("CLOSED", state_count.get(TaskState.CLOSED));
@@ -129,7 +126,7 @@ public class ProjetController {
 		List<Task> taskList = new LinkedList<Task>();
 		if (closed == null) {
 			taskList = taskSrv.findByProjectAndOpen(project);
-		}else{
+		} else {
 			taskList = taskSrv.findAllByProject(project);
 		}
 		Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID, false));
@@ -138,8 +135,32 @@ public class ProjetController {
 		Utils.initializeWorkLogs(taskList);
 		model.addAttribute("tasks", taskList);
 		model.addAttribute("project", project);
-		model.addAttribute("events", workLogs);
 		return "project/details";
+	}
+
+	@RequestMapping(value = "projectEvents", method = RequestMethod.GET)
+	public @ResponseBody
+	Page<DisplayWorkLog> getProjectEvents(
+			@RequestParam(value = "id") Long id,
+			@RequestParam(value = "closed", required = false) String closed,
+			@PageableDefault(size = 25, page = 0, sort = "time", direction = Direction.DESC) Pageable p) {
+		Project project = projSrv.findById(id);
+		if (project == null) {
+			// NULL
+			msg.getMessage("project.notexists", null, Utils.getCurrentLocale());
+		}
+		if (!project.getParticipants().contains(Utils.getCurrentAccount())) {
+			throw new TasqAuthException(msg, "role.error.project.permission");
+		}
+		// Fetch events
+		Page<WorkLog> page = wrkLogSrv.findByProjectId(id, p);
+		List<DisplayWorkLog> list = new LinkedList<DisplayWorkLog>();
+		for (WorkLog workLog : page) {
+			list.add(new DisplayWorkLog(workLog));
+		}
+		Page<DisplayWorkLog> result = new PageImpl<DisplayWorkLog>(list, p,
+				page.getTotalElements());
+		return result;
 	}
 
 	@RequestMapping(value = "projects", method = RequestMethod.GET)
@@ -407,7 +428,7 @@ public class ProjetController {
 		project.setDefault_type(type);
 		project.setTimeTracked(timeTracked);
 		Account account = accSrv.findById(assigneId);
-		assigneId = account!=null ? account.getId():null;
+		assigneId = account != null ? account.getId() : null;
 		project.setDefaultAssigneeID(assigneId);
 		projSrv.save(project);
 		return "redirect:" + request.getHeader("Referer");

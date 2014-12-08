@@ -74,7 +74,7 @@ public class TaskForm {
 		task.setName(getName());
 		task.setCreate_date(new Date());
 		if (getDue_date() != null && !"".equals(getDue_date())) {
-			task.setDue_date(Utils.convertDueDate(getDue_date()));
+			task.setDue_date(Utils.convertStringToDate(getDue_date()));
 		}
 		task.setDescription(getDescription());
 		task.setState(TaskState.TO_DO);

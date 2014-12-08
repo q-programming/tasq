@@ -50,16 +50,15 @@ public class WorkLog implements Serializable {
 	private Account account;
 
 	@Column
-	
-	private Enum<LogType>type;
+	private Enum<LogType> type;
 
 	@Column
 	private Period activity;
 
 	@Column(length = 4000)
 	private String message;
-	
-	@Column 
+
+	@Column
 	private Long projectId;
 
 	@ManyToOne(fetch = FetchType.EAGER)
@@ -147,8 +146,8 @@ public class WorkLog implements Serializable {
 	public void setProject_id(Long project_id) {
 		this.projectId = project_id;
 	}
-	
-	public String getFormatedActivity(){
+
+	public String getFormatedActivity() {
 		return PeriodHelper.outFormat(activity);
 	}
 
