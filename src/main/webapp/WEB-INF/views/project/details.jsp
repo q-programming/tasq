@@ -100,82 +100,9 @@
 				<s:message code="project.latestEvents" />
 			</h3>
 			<div>
-				<div id="topNavigation"></div>
-				<table id="eventsTable" class="table">
+				<table id="eventsTable" class="table table-condensed">
 				</table>
-				<div id="navigation" class="col-centered"></div>
 			</div>
-			<%-- 				<c:choose> --%>
-			<%-- 					<c:when test="${fn:length(events) eq 25 && empty param['show']}"> --%>
-			<!-- 						<div class="pull-left"></div> -->
-			<!-- 						<div class="pull-right"> -->
-			<!-- 							<a class="btn btn-default btn-xxs" -->
-			<%-- 								href="<c:url value="/project?${closed_q}id=${project.id}&show=1"/>"><s:message --%>
-			<%-- 									code="project.next" /></a> --%>
-			<!-- 						</div> -->
-			<%-- 					</c:when> --%>
-			<%-- 					<c:when test="${fn:length(events) ge 25 && param['show'] gt 1}"> --%>
-			<!-- 						<div class="pull-left"> -->
-			<!-- 							<a class="btn btn-default btn-xxs" -->
-			<%-- 								href="<c:url value="/project?${closed_q}id=${project.id}"/>"><s:message --%>
-			<%-- 									code="project.previous" /></a> --%>
-			<!-- 						</div> -->
-			<!-- 						<div class="pull-right"> -->
-			<!-- 							<a class="btn btn-default btn-xxs" -->
-			<%-- 								href="<c:url value="/project?${closed_q}id=${project.id}&show=${param.show +1}"/>"><s:message --%>
-			<%-- 									code="project.next" /></a> --%>
-			<!-- 						</div> -->
-			<%-- 					</c:when> --%>
-			<%-- 					<c:when test="${fn:length(events) lt 25 && param['show'] eq 1}"> --%>
-			<!-- 						<div class="pull-left"> -->
-			<!-- 							<a class="btn btn-default btn-xxs" -->
-			<%-- 								href="<c:url value="/project?${closed_q}id=${project.id}"/>"><s:message --%>
-			<%-- 									code="project.previous" /></a> --%>
-			<!-- 						</div> -->
-			<!-- 						<div class="pull-right"></div> -->
-			<%-- 					</c:when> --%>
-			<%-- 					<c:when --%>
-			<%-- 						test="${fn:length(events) lt 25 && not empty param['show']}"> --%>
-			<!-- 						<div class="pull-left"> -->
-			<!-- 							<a class="btn btn-default btn-xxs" -->
-			<%-- 								href="<c:url value="/project?${closed_q}id=${project.id}&show=${param['show']-1}"/>"><s:message --%>
-			<%-- 									code="project.previous" /></a> --%>
-			<!-- 						</div> -->
-			<!-- 						<div class="pull-right"></div> -->
-			<%-- 					</c:when> --%>
-			<%-- 					<c:when --%>
-			<%-- 						test="${fn:length(events) eq 25 && not empty param['show']}"> --%>
-			<!-- 						<div class="pull-left"> -->
-			<!-- 							<a class="btn btn-default btn-xxs" -->
-			<%-- 								href="<c:url value="/project?${closed_q}id=${project.id}&show=${param['show']-1}"/>"><s:message --%>
-			<%-- 									code="project.previous" /></a> --%>
-			<!-- 						</div> -->
-			<!-- 						<div class="pull-right"> -->
-			<!-- 							<a class="btn btn-default btn-xxs" -->
-			<%-- 								href="<c:url value="/project?${closed_q}id=${project.id}&show=1"/>"><s:message --%>
-			<%-- 									code="project.next" /></a> --%>
-			<!-- 						</div> -->
-			<%-- 					</c:when> --%>
-			<%-- 				</c:choose> --%>
-			<!-- 			</div> -->
-			<%-- 			<table id="eventsTable" class="table"> --%>
-			<%-- 				<c:forEach items="${events}" var="worklog"> --%>
-			<%-- 					<tr> --%>
-			<%-- 						<td> --%>
-			<%-- 						</td> --%>
-			<%-- 						<td><img data-src="holder.js/30x30" --%>
-			<!-- 							style="height: 30px; float: left; padding-right: 10px;" -->
-			<%-- 							src="<c:url value="/userAvatar/${worklog.account.id}"/>" /> --%>
-			<%-- 							${worklog.account} <t:logType logType="${worklog.type}" /> <c:if --%>
-			<%-- 								test="${not empty worklog.task}"> --%>
-			<%-- 								<a href="<c:url value="/task?id=${worklog.task.id}"/>">[${worklog.task.id}] --%>
-			<%-- 									${worklog.task.name}</a> --%>
-			<%-- 							</c:if> --%>
-			<%-- 							<div class="pull-right">${worklog.timeLogged}</div> <c:if --%>
-			<%-- 								test="${not empty worklog.message}"> --%>
-			<%-- 								<div>${worklog.message}</div> --%>
-			<%-- 							</c:if></td> --%>
-			<%-- 				</c:forEach> --%>
 		</div>
 		<%------------------------TASKS -------------------------------%>
 		<div style="display: table-cell; padding-left: 30px">
@@ -200,7 +127,7 @@
 				</c:if>
 
 			</h3>
-			<table class="table">
+			<table class="table table-hover">
 				<c:forEach items="${tasks}" var="task">
 					<tr>
 						<td><t:type type="${task.type}" list="true" /></td>
@@ -258,8 +185,9 @@ function fetchWorkLogData(page) {
 
 	$.get(url, {id : projectID,	page: page}, function(data) {
 		printNavigation(page, data);
+		var rows = "";
 		for ( var j = 0; j < data.content.length; j++) {
-			var row = '<tr><td>';
+			var row = '<tr><td colspan="3">';
 			var content = data.content[j];
 			var timeLogged = '<div class="time-div">'+ content.time +'</div>';
 			var avatar = '<img data-src="holder.js/30x30" style="height: 30px; float: left; padding-right: 10px;" src="'+avatarURL + content.account.id +'"/>';
@@ -268,7 +196,6 @@ function fetchWorkLogData(page) {
 			var task = '';
 			if(content.task!=null){
 				task = '<a href="'+taskURL+content.task.id + '">[' + content.task.id +'] '+ content.task.name + '</a>';
-				
 			}
 			var message = '';
 			if(content.message!=null && content.message!=''){
@@ -276,18 +203,22 @@ function fetchWorkLogData(page) {
 			}
 			row+=timeLogged + avatar + account + event + task + message;
 			row+='</td></tr>';
-			$("#eventsTable").append(row);
+			rows+=row;
 		}
+		$(rows).insertAfter("#topNavigation");
 	});
 
 }
 function printNavigation(page,data){
+	var topRow='<tr id="topNavigation">';
+	var bottomRow='<tr>';
+	var prev = '<td style="width:30px"></td>';
 	if(!data.firstPage){
-		var prev = '<div style="display:table-cell"><a class="navBtn btn" data-page="'+ (page -1)+'"><span class="glyphicon glyphicon-chevron-left"></span></a></div>'
-		$("#navigation").append(prev);
-		$("#topNavigation").append('<div class="pull-left">'+prev+'</div>');
+		prev = '<td style="width:30px"><a class="navBtn btn" data-page="'+ (page -1)+'"><span class="glyphicon glyphicon-chevron-left"></span></a></td>';
 	}
-	$("#navigation").append('<div id="navNumbers" style="display:table-cell"></div>')
+	topRow+=prev;
+	bottomRow+=prev;
+	var numbers = '<td style="text-align:center">';
 	//print numbers
 	for (var i = 0; i < data.totalPages; i++) {
 		var btnClass = "navBtn btn";
@@ -297,13 +228,19 @@ function printNavigation(page,data){
 		}
 		var button = '<a class="'+btnClass+'" data-page="'+ i +'">'
 				+ (i + 1) + '</a>';
-		$("#navNumbers").append(button);
+				numbers+=button;
 	}
+	topRow+=numbers;
+	bottomRow+=numbers;
+	
+	var next = '<td style="width:30px"></td>';
 	if(!data.lastPage){
-		var next = '<div style="display:table-cell"><a class="navBtn btn" data-page="'+ (page +1) +'"><span class="glyphicon glyphicon-chevron-right"></span></a></div>'
-		$("#navigation").append(next);
-		$("#topNavigation").append('<div class="pull-right">'+next+'</div>');
+		next = '<td style="width:30px"><a class="navBtn btn" data-page="'+ (page +1) +'"><span class="glyphicon glyphicon-chevron-right"></span></a></td>';
 	}
+	topRow+=next+'</tr>';
+	bottomRow+=next+'</tr>';
+	$("#eventsTable").append(topRow);
+	$("#eventsTable").append(bottomRow);
 }
 
 function getEventTypeMsg(type){
@@ -314,8 +251,6 @@ function getEventTypeMsg(type){
 		</c:forEach>
 		default:
 			return 'not yet added ';
-	}
-}
-
-	
+	};
+};
 </script>
