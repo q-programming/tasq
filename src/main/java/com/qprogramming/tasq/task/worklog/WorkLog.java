@@ -20,7 +20,6 @@ import javax.persistence.SequenceGenerator;
 import org.joda.time.Period;
 
 import com.qprogramming.tasq.account.Account;
-import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.task.Task;
 
@@ -51,16 +50,15 @@ public class WorkLog implements Serializable {
 	private Account account;
 
 	@Column
-	
-	private Enum<LogType>type;
+	private Enum<LogType> type;
 
 	@Column
 	private Period activity;
 
 	@Column(length = 4000)
 	private String message;
-	
-	@Column 
+
+	@Column
 	private Long projectId;
 
 	@ManyToOne(fetch = FetchType.EAGER)
@@ -88,8 +86,8 @@ public class WorkLog implements Serializable {
 		return time;
 	}
 
-	public DisplayAccount getAccount() {
-		return new DisplayAccount(account);
+	public Account getAccount() {
+		return account;
 	}
 
 	public void setAccount(Account account) {
@@ -148,8 +146,8 @@ public class WorkLog implements Serializable {
 	public void setProject_id(Long project_id) {
 		this.projectId = project_id;
 	}
-	
-	public String getFormatedActivity(){
+
+	public String getFormatedActivity() {
 		return PeriodHelper.outFormat(activity);
 	}
 

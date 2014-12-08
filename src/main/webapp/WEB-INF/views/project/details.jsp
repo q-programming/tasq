@@ -1,3 +1,4 @@
+<%@page import="com.qprogramming.tasq.task.worklog.LogType"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
 <%@ taglib prefix="security"
@@ -10,10 +11,10 @@
 </security:authorize>
 <security:authentication property="principal" var="user" />
 <c:if test="${not empty param.show}">
-<c:set var="show_q">show=${param.show}&</c:set>
+	<c:set var="show_q">show=${param.show}&</c:set>
 </c:if>
 <c:if test="${not empty param.closed}">
-<c:set var="closed_q">closed=${param.closed}&</c:set>
+	<c:set var="closed_q">closed=${param.closed}&</c:set>
 </c:if>
 <c:forEach items="${project.administrators}" var="admin">
 	<c:if test="${admin.id == user.id || is_admin}">
@@ -98,79 +99,10 @@
 			<h3>
 				<s:message code="project.latestEvents" />
 			</h3>
-			<%-- Next previous div --%>
 			<div>
-				<c:choose>
-					<c:when test="${fn:length(events) eq 25 && empty param['show']}">
-						<div class="pull-left"></div>
-						<div class="pull-right">
-							<a class="btn btn-default btn-xxs"
-								href="<c:url value="/project?${closed_q}id=${project.id}&show=1"/>"><s:message
-									code="project.next" /></a>
-						</div>
-					</c:when>
-					<c:when test="${fn:length(events) ge 25 && param['show'] gt 1}">
-						<div class="pull-left">
-							<a class="btn btn-default btn-xxs"
-								href="<c:url value="/project?${closed_q}id=${project.id}"/>"><s:message
-									code="project.previous" /></a>
-						</div>
-						<div class="pull-right">
-							<a class="btn btn-default btn-xxs"
-								href="<c:url value="/project?${closed_q}id=${project.id}&show=${param.show +1}"/>"><s:message
-									code="project.next" /></a>
-						</div>
-					</c:when>
-					<c:when test="${fn:length(events) lt 25 && param['show'] eq 1}">
-						<div class="pull-left">
-							<a class="btn btn-default btn-xxs"
-								href="<c:url value="/project?${closed_q}id=${project.id}"/>"><s:message
-									code="project.previous" /></a>
-						</div>
-						<div class="pull-right"></div>
-					</c:when>
-					<c:when
-						test="${fn:length(events) lt 25 && not empty param['show']}">
-						<div class="pull-left">
-							<a class="btn btn-default btn-xxs"
-								href="<c:url value="/project?${closed_q}id=${project.id}&show=${param['show']-1}"/>"><s:message
-									code="project.previous" /></a>
-						</div>
-						<div class="pull-right"></div>
-					</c:when>
-					<c:when
-						test="${fn:length(events) eq 25 && not empty param['show']}">
-						<div class="pull-left">
-							<a class="btn btn-default btn-xxs"
-								href="<c:url value="/project?${closed_q}id=${project.id}&show=${param['show']-1}"/>"><s:message
-									code="project.previous" /></a>
-						</div>
-						<div class="pull-right">
-							<a class="btn btn-default btn-xxs"
-								href="<c:url value="/project?${closed_q}id=${project.id}&show=1"/>"><s:message
-									code="project.next" /></a>
-						</div>
-					</c:when>
-				</c:choose>
+				<table id="eventsTable" class="table table-condensed">
+				</table>
 			</div>
-			<table class="table">
-				<c:forEach items="${events}" var="worklog">
-					<tr>
-						<td><img data-src="holder.js/30x30"
-							style="height: 30px; float: left; padding-right: 10px;"
-							src="<c:url value="/userAvatar/${worklog.account.id}"/>" />
-							${worklog.account} <t:logType logType="${worklog.type}" /> <c:if
-								test="${not empty worklog.task}">
-								<a href="<c:url value="/task?id=${worklog.task.id}"/>">[${worklog.task.id}]
-									${worklog.task.name}</a>
-							</c:if>
-							<div class="pull-right">${worklog.timeLogged}</div> <c:if
-								test="${not empty worklog.message}">
-								<div>${worklog.message}</div>
-							</c:if></td>
-					</tr>
-				</c:forEach>
-			</table>
 		</div>
 		<%------------------------TASKS -------------------------------%>
 		<div style="display: table-cell; padding-left: 30px">
@@ -178,8 +110,9 @@
 				<a href="<c:url value="/tasks"/>" style="color: black"><s:message
 						code="task.tasks" /></a>
 				<c:if test="${empty param.closed}">
-					<a href="<s:url value="/project?${show_q}id=${project.id}&closed=yes"></s:url>"><span
-						style="display: inherit; font-size: small; font-weight: normal; color:black;float: right">
+					<a
+						href="<s:url value="/project?${show_q}id=${project.id}&closed=yes"></s:url>"><span
+						style="display: inherit; font-size: small; font-weight: normal; color: black; float: right">
 							<span class="glyphicon glyphicon-check"></span> <s:message
 								code="project.hideClosed"></s:message>
 					</span></a>
@@ -187,14 +120,14 @@
 				<c:if test="${not empty param.closed}">
 					<a
 						href="<s:url value="/project?${show_q}id=${project.id}"></s:url>"><span
-						style="display: inherit; font-size: small; font-weight: normal; color:black; float: right">
+						style="display: inherit; font-size: small; font-weight: normal; color: black; float: right">
 							<span class="glyphicon glyphicon-unchecked"></span> <s:message
 								code="project.hideClosed"></s:message>
 					</span></a>
 				</c:if>
 
 			</h3>
-			<table class="table">
+			<table class="table table-hover">
 				<c:forEach items="${tasks}" var="task">
 					<tr>
 						<td><t:type type="${task.type}" list="true" /></td>
@@ -225,9 +158,99 @@
 		</div>
 	</div>
 </div>
+	<%
+	pageContext.setAttribute("types",
+					LogType.values());
+	%>
 <script>
-	$(document).ready(function($) {
+$(document).ready(function($) {
+				var currentPage = 0
+				fetchWorkLogData(currentPage);
+});
+
+$(document).on("click",".navBtn",function(e) {
+	var page =  $(this).data('page');
+	//clear everything
+	$("#navigation").html('');
+	$("#topNavigation").html('');
+	$("#eventsTable tr").remove();
+	fetchWorkLogData(page);
+});
+
+function fetchWorkLogData(page) {
+	var projectID = '${project.id}';
+	var url = '<c:url value="/projectEvents"/>';
+	var avatarURL = '<c:url value="/userAvatar/"/>';
+	var taskURL = '<c:url value="/task?id="/>';
+
+	$.get(url, {id : projectID,	page: page}, function(data) {
+		printNavigation(page, data);
+		var rows = "";
+		for ( var j = 0; j < data.content.length; j++) {
+			var row = '<tr><td colspan="3">';
+			var content = data.content[j];
+			var timeLogged = '<div class="time-div">'+ content.time +'</div>';
+			var avatar = '<img data-src="holder.js/30x30" style="height: 30px; float: left; padding-right: 10px;" src="'+avatarURL + content.account.id +'"/>';
+			var account = content.account.name + " " + content.account.surname + " ";
+			var event = getEventTypeMsg(content.type);
+			var task = '';
+			if(content.task!=null){
+				task = '<a href="'+taskURL+content.task.id + '">[' + content.task.id +'] '+ content.task.name + '</a>';
+			}
+			var message = '';
+			if(content.message!=null && content.message!=''){
+				message ='<blockquote class="quote">' + content.message + '</blockquote>';
+			}
+			row+=timeLogged + avatar + account + event + task + message;
+			row+='</td></tr>';
+			rows+=row;
+		}
+		$(rows).insertAfter("#topNavigation");
 	});
 
+}
+function printNavigation(page,data){
+	var topRow='<tr id="topNavigation">';
+	var bottomRow='<tr>';
+	var prev = '<td style="width:30px"></td>';
+	if(!data.firstPage){
+		prev = '<td style="width:30px"><a class="navBtn btn" data-page="'+ (page -1)+'"><span class="glyphicon glyphicon-chevron-left"></span></a></td>';
+	}
+	topRow+=prev;
+	bottomRow+=prev;
+	var numbers = '<td style="text-align:center">';
+	//print numbers
+	for (var i = 0; i < data.totalPages; i++) {
+		var btnClass = "navBtn btn";
+		//active btn
+		if (i == data.number) {
+			btnClass += " btn-default";
+		}
+		var button = '<a class="'+btnClass+'" data-page="'+ i +'">'
+				+ (i + 1) + '</a>';
+				numbers+=button;
+	}
+	topRow+=numbers;
+	bottomRow+=numbers;
 	
+	var next = '<td style="width:30px"></td>';
+	if(!data.lastPage){
+		next = '<td style="width:30px"><a class="navBtn btn" data-page="'+ (page +1) +'"><span class="glyphicon glyphicon-chevron-right"></span></a></td>';
+	}
+	topRow+=next+'</tr>';
+	bottomRow+=next+'</tr>';
+	$("#eventsTable").append(topRow);
+	$("#eventsTable").append(bottomRow);
+}
+
+function getEventTypeMsg(type){
+	switch(type){
+		<c:forEach items="${types}" var="enum_type">
+		case "${enum_type}":
+			return '<s:message code="${enum_type.code}"/>';
+		</c:forEach>
+		default:
+			return 'not yet added ';
+	};
+};
 </script>

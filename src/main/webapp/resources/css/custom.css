@@ -171,7 +171,8 @@ form.form-search:before {
 .paddedleft40 {
 	padding-left: 40px
 }
-.centerPadded{
+
+.centerPadded {
 	padding: 20px;
 	text-align: center;
 }
@@ -197,14 +198,29 @@ a.closed {
 }
 /*make autocomplete maximum 300px tall*/
 .ui-autocomplete {
-    max-height: 300px;
-    overflow-y: auto;
-    /* prevent horizontal scrollbar */
-    overflow-x: hidden;
+	max-height: 300px;
+	overflow-y: auto;
+	/* prevent horizontal scrollbar */
+	overflow-x: hidden;
 }
-span.badge.left{
-	float:left
+
+span.badge.left {
+	float: left
 }
-.export-hidden{
+
+.export-hidden {
 	display: none;
-}   
+}
+
+.quote {
+	margin-bottom: 0;
+	font-size: smaller;
+	padding: 10px;
+}
+
+.time-div {
+	color: gray;
+	font-size: smaller;
+	float: right;
+	padding-left: 10px;
+}
