@@ -492,7 +492,7 @@
 										style="height: 30px; float: left; padding-right: 10px;"
 										src="<c:url value="/userAvatar/${comment.author.id}"/>" /> <a
 										href="<c:url value="/user?id=${comment.author.id}"/>">${comment.author}</a>
-									<span style="color: gray; font-size: smaller; float: right;">${comment.date}</span>
+									<div class="time-div">${comment.date}</div>
 								</div> <%-- Comment buttons --%>
 								<div class="buttons_panel" style="float: right">
 									<a href="<c:url value="/task?id=${task.id}#c${comment.id}"/>"
@@ -561,11 +561,10 @@
 						<tr>
 							<td><div style="font-size: smaller; color: dimgray;">${worklog.account}
 									<t:logType logType="${worklog.type}" />
-									<div class="pull-right">${worklog.timeLogged}</div>
+									<div class="time-div">${worklog.timeLogged}</div>
 								</div> <c:if test="${not empty worklog.message}">
 									<div>
-										<blockquote
-											style="margin-bottom: 0; font-size: smaller; padding: 10px;">${worklog.message}</blockquote>
+										<blockquote class="quote">${worklog.message}</blockquote>
 									</div>
 								</c:if></td>
 						</tr>

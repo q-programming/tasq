@@ -103,7 +103,7 @@
 				<div id="topNavigation"></div>
 				<table id="eventsTable" class="table">
 				</table>
-				<div id="navigation" style="text-align:center;float: none;margin: 0 auto;"></div>
+				<div id="navigation" class="col-centered"></div>
 			</div>
 			<%-- 				<c:choose> --%>
 			<%-- 					<c:when test="${fn:length(events) eq 25 && empty param['show']}"> --%>
@@ -238,55 +238,30 @@
 <script>
 $(document).ready(function($) {
 				var currentPage = 0
-				fetchData(currentPage);
+				fetchWorkLogData(currentPage);
 });
 
 $(document).on("click",".navBtn",function(e) {
-	console.log("nav pressed");
 	var page =  $(this).data('page');
 	//clear everything
 	$("#navigation").html('');
 	$("#topNavigation").html('');
 	$("#eventsTable tr").remove();
-	fetchData(page);
-	
-
+	fetchWorkLogData(page);
 });
 
-function fetchData(page) {
+function fetchWorkLogData(page) {
 	var projectID = '${project.id}';
 	var url = '<c:url value="/projectEvents"/>';
 	var avatarURL = '<c:url value="/userAvatar/"/>';
 	var taskURL = '<c:url value="/task?id="/>';
 
 	$.get(url, {id : projectID,	page: page}, function(data) {
-		if(!data.firstPage){
-			var prev = '<div style="display:table-cell"><a class="navBtn btn" data-page="'+ (page -1)+'"><span class="glyphicon glyphicon-chevron-left"></span></a></div>'
-			$("#navigation").append(prev);
-			$("#topNavigation").append('<div class="pull-left">'+prev+'</div>');
-		}
-		$("#navigation").append('<div id="navNumbers" style="display:table-cell"></div>')
-		//print numbers
-		for (var i = 0; i < data.totalPages; i++) {
-			var btnClass = "navBtn btn";
-			//active btn
-			if (i == data.number) {
-				btnClass += " btn-default";
-			}
-			var button = '<a class="'+btnClass+'" data-page="'+ i +'">'
-					+ (i + 1) + '</a>';
-			$("#navNumbers").append(button);
-		}
-		if(!data.lastPage){
-			var next = '<div style="display:table-cell"><a class="navBtn btn" data-page="'+ (page +1) +'"><span class="glyphicon glyphicon-chevron-right"></span></a></div>'
-			$("#navigation").append(next);
-			$("#topNavigation").append('<div class="pull-right">'+next+'</div>');
-		}
-		
+		printNavigation(page, data);
 		for ( var j = 0; j < data.content.length; j++) {
 			var row = '<tr><td>';
 			var content = data.content[j];
-// 			console.log(content);
+			var timeLogged = '<div class="time-div">'+ content.time +'</div>';
 			var avatar = '<img data-src="holder.js/30x30" style="height: 30px; float: left; padding-right: 10px;" src="'+avatarURL + content.account.id +'"/>';
 			var account = content.account.name + " " + content.account.surname + " ";
 			var event = getEventTypeMsg(content.type);
@@ -296,16 +271,41 @@ function fetchData(page) {
 				
 			}
 			var message = '';
-			if(content.message!=null){
-				message ="<br>" + content.message;
+			if(content.message!=null && content.message!=''){
+				message ='<blockquote class="quote">' + content.message + '</blockquote>';
 			}
-			row+=avatar + account + event + task + message;
+			row+=timeLogged + avatar + account + event + task + message;
 			row+='</td></tr>';
 			$("#eventsTable").append(row);
 		}
 	});
 
 }
+function printNavigation(page,data){
+	if(!data.firstPage){
+		var prev = '<div style="display:table-cell"><a class="navBtn btn" data-page="'+ (page -1)+'"><span class="glyphicon glyphicon-chevron-left"></span></a></div>'
+		$("#navigation").append(prev);
+		$("#topNavigation").append('<div class="pull-left">'+prev+'</div>');
+	}
+	$("#navigation").append('<div id="navNumbers" style="display:table-cell"></div>')
+	//print numbers
+	for (var i = 0; i < data.totalPages; i++) {
+		var btnClass = "navBtn btn";
+		//active btn
+		if (i == data.number) {
+			btnClass += " btn-default";
+		}
+		var button = '<a class="'+btnClass+'" data-page="'+ i +'">'
+				+ (i + 1) + '</a>';
+		$("#navNumbers").append(button);
+	}
+	if(!data.lastPage){
+		var next = '<div style="display:table-cell"><a class="navBtn btn" data-page="'+ (page +1) +'"><span class="glyphicon glyphicon-chevron-right"></span></a></div>'
+		$("#navigation").append(next);
+		$("#topNavigation").append('<div class="pull-right">'+next+'</div>');
+	}
+}
+
 function getEventTypeMsg(type){
 	switch(type){
 		<c:forEach items="${types}" var="enum_type">

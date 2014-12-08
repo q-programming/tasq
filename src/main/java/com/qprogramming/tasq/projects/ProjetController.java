@@ -79,7 +79,6 @@ public class ProjetController {
 	@Transactional
 	@RequestMapping(value = "project", method = RequestMethod.GET)
 	public String showDetails(@RequestParam(value = "id") Long id,
-			@RequestParam(value = "show", required = false) Integer show,
 			@RequestParam(value = "closed", required = false) String closed,
 			Model model, RedirectAttributes ra, HttpServletRequest request) {
 		Project project = projSrv.findById(id);
@@ -109,8 +108,6 @@ public class ProjetController {
 		}
 		current.setLast_visited_p(clean);
 		accSrv.update(current);
-		// get latest events for this project
-		List<DisplayWorkLog> workLogs = wrkLogSrv.getProjectEvents(project);
 		// Check status of all projects
 		List<Task> tasks = project.getTasks();
 		Map<TaskState, Integer> state_count = new HashMap<TaskState, Integer>();
@@ -122,13 +119,6 @@ public class ProjetController {
 			value++;
 			state_count.put((TaskState) task.getState(), value);
 		}
-		show = show == null ? 0 : show;
-		show++;
-		int begin = (show - 1) * 25;
-		int end = show * 25;
-		begin = begin < 0 ? 0 : begin;
-		end = end > workLogs.size() ? workLogs.size() : end;
-		workLogs = workLogs.subList(begin, end);
 		model.addAttribute("TO_DO", state_count.get(TaskState.TO_DO));
 		model.addAttribute("ONGOING", state_count.get(TaskState.ONGOING));
 		model.addAttribute("CLOSED", state_count.get(TaskState.CLOSED));
@@ -145,7 +135,6 @@ public class ProjetController {
 		Utils.initializeWorkLogs(taskList);
 		model.addAttribute("tasks", taskList);
 		model.addAttribute("project", project);
-		model.addAttribute("events", workLogs);
 		return "project/details";
 	}
 
