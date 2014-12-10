@@ -263,8 +263,7 @@ public class TaskController {
 
 	@Transactional
 	@RequestMapping(value = "task", method = RequestMethod.GET)
-	public String showDetails(@RequestParam(value = "id") String id,
-			@RequestParam(value = "tab", required = false) Model model,
+	public String showDetails(@RequestParam(value = "id") String id,Model model,
 			RedirectAttributes ra) {
 		Task task = taskSrv.findById(id);
 		if (task == null) {

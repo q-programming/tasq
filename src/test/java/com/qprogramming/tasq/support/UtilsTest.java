@@ -4,6 +4,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
@@ -102,5 +104,12 @@ public class UtilsTest {
 		Date testDate = Utils.convertStringToDate("01-12-2014");
 		Assert.assertEquals("01-12-2014",Utils.convertDateToString(testDate));
 	}
+	
+	@Test
+	public void containsTest(){
+		List<Account> test = new LinkedList<Account>();
+		test.add(testAccount);
+		Assert.assertTrue(Utils.contains(test, testAccount));
+}
 
 }

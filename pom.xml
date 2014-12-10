@@ -69,7 +69,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context-support</artifactId>
-			</dependency>
+		</dependency>
 		<!-- Security -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>
@@ -282,7 +282,7 @@
 			<artifactId>spring-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+
 	</dependencies>
 	<build>
 		<plugins>
@@ -330,9 +330,28 @@
 				</configuration>
 			</plugin>
 			<plugin>
-  				<groupId>org.jacoco</groupId>
-  				<artifactId>jacoco-maven-plugin</artifactId>
-  				<version>0.7.3-SNAPSHOT</version>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.7.2.201409121644</version>
+				<configuration>
+					<destfile>${basedir}/target/coverage-reports/jacoco-unit.exec</destfile>
+					<datafile>${basedir}/target/coverage-reports/jacoco-unit.exec</datafile>
+				</configuration>
+				<executions>
+					<execution>
+						<id>jacoco-initialize</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>jacoco-site</id>
+						<phase>package</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
