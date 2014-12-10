@@ -304,7 +304,7 @@
 						</div>
 						<input type="hidden" name="taskA" value="${task.id}">
 						<input type="hidden" id="taskB" name="taskB">
-						<div class="form-group col-md-4"  style="padding-left:20px">
+						<div class="form-group col-md-4"  style="padding-left:10px">
 							<button type="submit" class="btn btn-default a-tooltip btn-sm" title="" data-placement="top" data-original-title="<s:message code="task.link.help" arguments="${task.id}"/>">
 								<span class="glyphicon glyphicon-link"></span> <s:message code="task.link"/>
 							</button>
