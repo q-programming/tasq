@@ -29,7 +29,7 @@ import com.qprogramming.tasq.account.Roles;
 @RunWith(MockitoJUnitRunner.class)
 public class UtilsTest {
 
-	private Account testAccount = new Account("user@test.com", "", Roles.ROLE_USER);
+	private Account testAccount = new Account("user@test.com", "", Roles.ROLE_ADMIN);
 
 	@Mock
 	private MockSecurityContext securityMock;
@@ -111,5 +111,13 @@ public class UtilsTest {
 		test.add(testAccount);
 		Assert.assertTrue(Utils.contains(test, testAccount));
 }
+	@Test
+	public void rolesTest(){
+		Assert.assertTrue(Roles.isReporter());
+		Assert.assertTrue(Roles.isUser());
+		Assert.assertTrue(Roles.isAdmin());
+		Assert.assertEquals("role.admin",Roles.ROLE_ADMIN.getCode());
+	}
+	
 
 }
