@@ -1,16 +1,13 @@
 package com.qprogramming.tasq.support.web;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Matchers.*;
-
-import java.awt.TrayIcon.MessageType;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.ui.Model;
@@ -73,7 +70,8 @@ public class MessageHelperTest {
 	@Test
 	public void createMessageTest() {
 		Message message = new Message(MESSAGE, Message.Type.SUCCESS);
-		Message message2 = new Message(MESSAGE, Message.Type.SUCCESS,new Object[] {});
+		Message message2 = new Message(MESSAGE, Message.Type.SUCCESS,
+				new Object[] {});
 		Assert.assertEquals(Message.Type.SUCCESS, message.getType());
 		Assert.assertEquals(MESSAGE, message.getMessage());
 		Assert.assertNotNull(message2.getArgs());

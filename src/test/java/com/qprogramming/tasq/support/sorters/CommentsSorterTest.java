@@ -10,63 +10,42 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.qprogramming.tasq.account.Account;
-import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.support.Utils;
+import com.qprogramming.tasq.task.comments.Comment;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CommentsSorterTest {
 
-	private static final String LAMB = "Lamb";
-	private static final String ZOE = "Zoe";
-	private static final String ART = "Art";
-	private static final String DOE = "Doe";
-	private static final String KATE = "Kate";
-	private static final String JOHN = "John";
-	private static final String ADAM = "Adam";
-	private static final String MARRY = "Marry";
-	private List<Account> accountsList;
-	
+	private List<Comment> commentList;
+
 	@Before
-	public void setUp(){
-		accountsList = createList();
+	public void setUp() {
+		commentList = createList();
 	}
-	
+
 	@Test
 	public void sortCommentsTest() {
-		Collections.sort(accountsList, new AccountSorter(
-				AccountSorter.SORTBY.NAME, true));
-		Assert.assertEquals(MARRY, accountsList.get(0).getName());
-	}
-	@Test
-	public void sortAccountsSurnameTest() {
-		Collections.sort(accountsList, new AccountSorter(
-				AccountSorter.SORTBY.SURNAME, false));
-		Assert.assertEquals(ART, accountsList.get(0).getSurname());
-	}
-	@Test
-	public void sortAccountsEmailTest() {
-		Collections.sort(accountsList, new AccountSorter(
-				AccountSorter.SORTBY.EMAIL, true));
-		Assert.assertEquals(LAMB, accountsList.get(0).getSurname());
+		Collections.sort(commentList, new CommentsSorter(true));
+		Assert.assertEquals("1", commentList.get(0).getMessage());
+		Collections.sort(commentList, new CommentsSorter(false));
+		Assert.assertEquals("5", commentList.get(0).getMessage());
 	}
 
-
-
-	private List<Account> createList() {
-		List<Account> accountsList = new LinkedList<Account>();
-		accountsList.add(createAccount(JOHN, DOE));
-		accountsList.add(createAccount(ADAM, ART));
-		accountsList.add(createAccount(ADAM, ZOE));
-		accountsList.add(createAccount(MARRY, LAMB));
-		accountsList.add(createAccount(KATE, DOE));
-		return accountsList;
+	private List<Comment> createList() {
+		List<Comment> commentList = new LinkedList<Comment>();
+		commentList.add(createComment("03-12-2014", "3"));
+		commentList.add(createComment("02-12-2014", "2"));
+		commentList.add(createComment("01-12-2014", "1"));
+		commentList.add(createComment("04-12-2014", "4"));
+		commentList.add(createComment("05-12-2014", "5"));
+		return commentList;
 	}
 
-	private Account createAccount(String name, String surname) {
-		Account account = new Account(name + "@test.com", "", Roles.ROLE_USER);
-		account.setName(name);
-		account.setSurname(surname);
-		return account;
+	private Comment createComment(String date, String no) {
+		Comment comment = new Comment();
+		comment.setMessage(no);
+		comment.setDate(Utils.convertStringToDate(date));
+		return comment;
 
 	}
 }

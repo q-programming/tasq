@@ -2,6 +2,7 @@ package com.qprogramming.tasq.account;
 
 import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -45,7 +46,7 @@ import com.qprogramming.tasq.support.web.MessageHelper;
 public class AccountController {
 	private static final int DEFAULT_WIDTH_HEIGHT = 150;
 	private static final String SORT_BY_NAME = "name";
-	private static final Object SORT_BY_EMAIL = "email";
+	private static final String SORT_BY_EMAIL = "email";
 	private static final String SORT_BY_SURNAME = "surname";
 
 	@Autowired
@@ -62,14 +63,6 @@ public class AccountController {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(AccountController.class);
-
-	@RequestMapping(value = "account/current", method = RequestMethod.GET)
-	public String getAccount() {
-		Account principal = (Account) SecurityContextHolder.getContext()
-				.getAuthentication().getPrincipal();
-		LOG.info(principal.toString());
-		return "redirect:/";
-	}
 
 	@RequestMapping(value = "settings", method = RequestMethod.GET)
 	public String settings() {
@@ -172,41 +165,17 @@ public class AccountController {
 	@RequestMapping("/userAvatar")
 	public void getCurrentAvatar(HttpServletResponse response,
 			HttpServletRequest request) throws IOException {
-
-		response.setContentType("image/png");
 		byte[] imageBytes = Utils.getCurrentAccount().getAvatar();
-
-		if (imageBytes == null || imageBytes.length == 0) {
-			HttpSession session = request.getSession();
-			ServletContext sc = session.getServletContext();
-			InputStream is = new FileInputStream(
-					sc.getRealPath("/resources/img/avatar.png"));
-			imageBytes = IOUtils.toByteArray(is);
-			response.setContentType("image/png");
-		}
-		response.getOutputStream().write(imageBytes);
-		response.getOutputStream().flush();
+		loadImage(response, request, imageBytes);
 	}
 
 	@RequestMapping("/userAvatar/{id}")
 	public void getUserAvatar(HttpServletResponse response,
 			HttpServletRequest request, @PathVariable("id") final String id)
 			throws IOException {
-
 		Account acc = accountSrv.findById(Long.parseLong(id));
 		byte[] imageBytes = acc.getAvatar();
-		response.setContentType("image/jpeg");
-
-		if (imageBytes == null || imageBytes.length == 0) {
-			HttpSession session = request.getSession();
-			ServletContext sc = session.getServletContext();
-			InputStream is = new FileInputStream(
-					sc.getRealPath("/resources/img/avatar.png"));
-			imageBytes = IOUtils.toByteArray(is);
-			response.setContentType("image/png");
-		}
-		response.getOutputStream().write(imageBytes);
-		response.getOutputStream().flush();
+		loadImage(response, request, imageBytes);
 	}
 
 	@RequestMapping(value = "/getAccounts", method = RequestMethod.GET)
@@ -250,4 +219,29 @@ public class AccountController {
 		}
 		return null;
 	}
+
+	/**
+	 * Loads user image , if none is set, then returns default one
+	 * 
+	 * @param response
+	 * @param request
+	 * @param imageBytes
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	private void loadImage(HttpServletResponse response,
+			HttpServletRequest request, byte[] imageBytes)
+			throws FileNotFoundException, IOException {
+		if (imageBytes == null || imageBytes.length == 0) {
+			HttpSession session = request.getSession();
+			ServletContext sc = session.getServletContext();
+			InputStream is = new FileInputStream(
+					sc.getRealPath("/resources/img/avatar.png"));
+			imageBytes = IOUtils.toByteArray(is);
+			response.setContentType("image/png");
+		}
+		response.getOutputStream().write(imageBytes);
+		response.getOutputStream().flush();
+	}
+
 }

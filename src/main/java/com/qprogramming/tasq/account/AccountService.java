@@ -53,8 +53,8 @@ public class AccountService {
 		return accRepo.findByUsername(username);
 	}
 
-	public Account findByUuid(String id) {
-		return accRepo.findByUuid(id);
+	public Account findByUuid(String uiid) {
+		return accRepo.findByUuid(uiid);
 	}
 
 	/**
