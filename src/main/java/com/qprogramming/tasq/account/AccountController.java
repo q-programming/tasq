@@ -51,11 +51,7 @@ public class AccountController {
 
 	private AccountService accountSrv;
 	private ProjectService projSrv;
-
-	@Autowired
 	private SessionLocaleResolver localeResolver;
-
-	@Autowired
 	private MessageSource msg;
 
 	@Autowired

@@ -13,11 +13,15 @@ import com.qprogramming.tasq.support.Utils;
 @Service
 public class ProjectService {
 
-	@Autowired
 	private ProjectRepository projRepo;
+	private AccountService accSrv;
 
 	@Autowired
-	private AccountService accSrv;
+	public ProjectService(ProjectRepository projRepo, AccountService accSrv) {
+		this.projRepo = projRepo;
+		this.accSrv = accSrv;
+	}
+	
 
 	public Project findByName(String name) {
 		return projRepo.findByName(name);

@@ -1,9 +1,7 @@
 package com.qprogramming.tasq.home;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -20,11 +18,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.projects.Project;
-import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.ProjectSorter;
 import com.qprogramming.tasq.task.Task;
-import com.qprogramming.tasq.task.TaskService;
 
 @Secured("ROLE_USER")
 @ControllerAdvice
@@ -32,22 +28,23 @@ public class HomeControllerAdvice {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(HomeControllerAdvice.class);
 
+	private AccountService accSrv;
+
 	@Autowired
-	ProjectService projSrv;
-	@Autowired
-	TaskService taskSrv;
-	@Autowired
-	AccountService accSrv;
+	public HomeControllerAdvice(AccountService accSrv) {
+		this.accSrv = accSrv;
+
+	}
 
 	@ModelAttribute("last_projects")
-	public List<Project> getLastProjects(HttpServletRequest request) {
+	public List<Project> getLastProjects() {
 		Authentication authentication = SecurityContextHolder.getContext()
 				.getAuthentication();
 		if (!(authentication instanceof AnonymousAuthenticationToken)) {
 			// Get lasts 5 projects
-			Account current_account = Utils.getCurrentAccount();
-			current_account = accSrv.findByEmail(current_account.getEmail());
-			List<Project> projects = current_account.getLast_visited_p();
+			Account currentAccount = Utils.getCurrentAccount();
+			currentAccount = accSrv.findByEmail(currentAccount.getEmail());
+			List<Project> projects = currentAccount.getLast_visited_p();
 			Collections.sort(projects, new ProjectSorter(
 					ProjectSorter.SORTBY.LAST_VISIT, Utils.getCurrentAccount()
 							.getActive_project(), true));
@@ -57,7 +54,7 @@ public class HomeControllerAdvice {
 	}
 
 	@ModelAttribute("last_tasks")
-	public List<Task> getLastTasks(HttpServletRequest request) {
+	public List<Task> getLastTasks() {
 		Authentication authentication = SecurityContextHolder.getContext()
 				.getAuthentication();
 		if (!(authentication instanceof AnonymousAuthenticationToken)) {

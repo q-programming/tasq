@@ -1,6 +1,7 @@
 package com.qprogramming.tasq.account;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
@@ -93,7 +94,8 @@ public class AccountControllerTest {
 
 	@Before
 	public void setUp() {
-		accountCtr = new AccountController(accSrvMock, projSrvMock,msgMock,localeResolverMock);
+		accountCtr = new AccountController(accSrvMock, projSrvMock, msgMock,
+				localeResolverMock);
 		testAccount = new Account(EMAIL, "", Roles.ROLE_ADMIN);
 		testAccount.setLanguage("en");
 		when(securityMock.getAuthentication()).thenReturn(authMock);
@@ -160,6 +162,16 @@ public class AccountControllerTest {
 		Assert.assertEquals(5, list.size());
 		list = accountCtr.listAccounts("do", responseMock);
 		Assert.assertEquals(2, list.size());
+
+	}
+
+	@Test
+	public void setRoleTest() {
+		List<Account> admins = new LinkedList<Account>();
+		admins.add(testAccount);
+		when(accSrvMock.findById(anyLong())).thenReturn(testAccount);
+		when(accSrvMock.findAdmins()).thenReturn(admins);
+		Assert.assertNotEquals("OK", accountCtr.setRole(1L, Roles.ROLE_USER));
 
 	}
 
