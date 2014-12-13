@@ -360,23 +360,35 @@ public class SprintController {
 	public String showBurndown(@PathVariable String id,
 			@RequestParam(value = "sprint", required = false) Long sprintNo,
 			Model model, RedirectAttributes ra) {
-		Map<String, Integer> results_estimates = new LinkedHashMap<String, Integer>();
-		Map<String, Integer> results_burned = new LinkedHashMap<String, Integer>();
-		Map<String, Integer> results_ideal = new LinkedHashMap<String, Integer>();
+		Map<String, Integer> resultsEstimates = new LinkedHashMap<String, Integer>();
+		Map<String, Integer> resultsBurned = new LinkedHashMap<String, Integer>();
+		Map<String, Integer> resultsIdeal = new LinkedHashMap<String, Integer>();
 		Map<LocalDate, Integer> burndownMap = new HashMap<LocalDate, Integer>();
 		Map<LocalDate, Period> timeBurndownMap = new HashMap<LocalDate, Period>();
 		Project project = projSrv.findByProjectId(id);
 		if (project != null) {
+			if (sprintNo != null) {
+				Sprint sprint = sprintRepo.findByProjectIdAndSprintNo(
+						project.getId(), sprintNo);
+				if (sprint.getRawEnd_date() == null & !sprint.isActive()) {
+					MessageHelper.addWarningAttribute(ra,
+							msg.getMessage("agile.sprint.notStarted",
+									new Object[] { sprintNo },
+									Utils.getCurrentLocale()));
+					return "redirect:/" + project.getProjectId()
+							+ "/scrum/backlog";
+				}
+			}
+
 			Sprint lastSprint = sprintRepo.findByProjectIdAndActiveTrue(project
 					.getId());
 			if (lastSprint == null) {
 				List<Sprint> sprints = sprintRepo.findByProjectId(project
 						.getId());
 				if (sprints.size() == 0) {
-					MessageHelper.addWarningAttribute(
-							ra,
-							msg.getMessage("agile.sprint.noSprints", null,
-									Utils.getCurrentLocale()));
+					MessageHelper.addWarningAttribute(ra, msg.getMessage(
+							"agile.sprint.noSprints", null,
+							Utils.getCurrentLocale()));
 					return "redirect:/" + project.getProjectId()
 							+ "/scrum/backlog";
 				}
@@ -402,9 +414,9 @@ public class SprintController {
 				sprint = lastSprint;
 			}
 			// Fill maps based on time or story point driven board
-			LocalDate start_time = new LocalDate(sprint.getRawStart_date());
-			LocalDate end_time = new LocalDate(sprint.getRawEnd_date());
-			int sprint_days = Days.daysBetween(start_time, end_time).getDays() + 1;
+			LocalDate startTime = new LocalDate(sprint.getRawStart_date());
+			LocalDate endTime = new LocalDate(sprint.getRawEnd_date());
+			int sprint_days = Days.daysBetween(startTime, endTime).getDays() + 1;
 			boolean timeTracked = project.getTimeTracked();
 			List<WorkLog> worklogList = wrkLogSrv.getSprintEvents(sprint,
 					timeTracked);
@@ -413,49 +425,49 @@ public class SprintController {
 				Period remaining_estimate = sprint.getTotalEstimate();
 				Period burned = new Period();
 				// Fill ideal burndown
-				results_ideal.put(start_time.toString(), (int) sprint
+				resultsIdeal.put(startTime.toString(), (int) sprint
 						.getTotalEstimate().toStandardDuration()
 						.getStandardHours());
-				results_ideal.put(end_time.toString(), 0);
+				resultsIdeal.put(endTime.toString(), 0);
 				// Iterate over sprint days
 				for (int i = 0; i < sprint_days; i++) {
-					LocalDate date = start_time.plusDays(i);
+					LocalDate date = startTime.plusDays(i);
 					Period value = timeBurndownMap.get(date);
 					remaining_estimate = PeriodHelper.minusPeriods(
 							remaining_estimate, value);
 					burned = PeriodHelper.plusPeriods(burned, value);
 					if (date.isAfter(LocalDate.now())) {
-						results_estimates.put(date.toString(), null);
-						results_burned.put(date.toString(), null);
+						resultsEstimates.put(date.toString(), null);
+						resultsBurned.put(date.toString(), null);
 					} else {
-						results_estimates.put(date.toString(),
+						resultsEstimates.put(date.toString(),
 								(int) remaining_estimate.toStandardDuration()
 										.getStandardHours());
-						results_burned.put(date.toString(), (int) burned
+						resultsBurned.put(date.toString(), (int) burned
 								.toStandardDuration().getStandardHours());
 					}
 				}
 			} else {
 				burndownMap = fillBurndownMap(worklogList);
-				Integer remaining_estimate = sprint.getTotalStoryPoints();
+				Integer remainingEstimate = sprint.getTotalStoryPoints();
 				Integer burned = new Integer(0);
-				results_ideal.put(start_time.toString(), remaining_estimate);
-				results_ideal.put(end_time.toString(), 0);
+				resultsIdeal.put(startTime.toString(), remainingEstimate);
+				resultsIdeal.put(endTime.toString(), 0);
 				for (int i = 0; i < sprint_days; i++) {
-					LocalDate date = start_time.plusDays(i);
+					LocalDate date = startTime.plusDays(i);
 					Integer value = burndownMap.get(date);
 					if (value == null) {
 						value = 0;
 					}
-					remaining_estimate -= value;
+					remainingEstimate -= value;
 					burned += value;
 					if (date.isAfter(LocalDate.now())) {
-						results_estimates.put(date.toString(), null);
-						results_burned.put(date.toString(), null);
+						resultsEstimates.put(date.toString(), null);
+						resultsBurned.put(date.toString(), null);
 					} else {
-						results_estimates.put(date.toString(),
-								remaining_estimate);
-						results_burned.put(date.toString(), burned);
+						resultsEstimates
+								.put(date.toString(), remainingEstimate);
+						resultsBurned.put(date.toString(), burned);
 					}
 				}
 			}
@@ -463,9 +475,9 @@ public class SprintController {
 			model.addAttribute("lastSprint", lastSprint);
 			model.addAttribute("workLogList", worklogList);
 			model.addAttribute("project", project);
-			model.addAttribute("left", formatResults(results_estimates));
-			model.addAttribute("burned", formatResults(results_burned));
-			model.addAttribute("ideal", formatResults(results_ideal));
+			model.addAttribute("left", formatResults(resultsEstimates));
+			model.addAttribute("burned", formatResults(resultsBurned));
+			model.addAttribute("ideal", formatResults(resultsIdeal));
 		}
 		return "/scrum/burndown";
 	}
@@ -476,14 +488,15 @@ public class SprintController {
 			HttpServletResponse response) {
 		response.setContentType("application/json");
 		List<DisplaySprint> result = new LinkedList<DisplaySprint>();
-		List<Sprint> projectSprints = sprintRepo.findByProjectIdAndFinished(projectID, false);
+		List<Sprint> projectSprints = sprintRepo.findByProjectIdAndFinished(
+				projectID, false);
 		for (Sprint sprint : projectSprints) {
 			result.add(new DisplaySprint(sprint));
 		}
 		Collections.sort(result);
 		return result;
 	}
-	
+
 	/**
 	 * Fills burndown map with worklogs in format <Date, Period Burned> Only
 	 * events with before present day are added

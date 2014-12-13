@@ -31,7 +31,6 @@ public class Utils {
 	private String defaultLang;
 
 	public static Account getCurrentAccount() {
-		System.out.println();
 		return (Account) SecurityContextHolder.getContext().getAuthentication()
 				.getPrincipal();
 	}

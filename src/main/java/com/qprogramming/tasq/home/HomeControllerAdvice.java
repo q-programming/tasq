@@ -25,9 +25,6 @@ import com.qprogramming.tasq.task.Task;
 @Secured("ROLE_USER")
 @ControllerAdvice
 public class HomeControllerAdvice {
-	private static final Logger LOG = LoggerFactory
-			.getLogger(HomeControllerAdvice.class);
-
 	private AccountService accSrv;
 
 	@Autowired
