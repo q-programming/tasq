@@ -25,7 +25,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.context.MessageSource;
@@ -45,8 +44,8 @@ public class AccountControllerTest {
 
 	private static final String EMAIL = "user@test.com";
 
-	@InjectMocks
-	private AccountController accountCtr = new AccountController();
+	private AccountController accountCtr;
+
 	@Mock
 	private AccountService accSrvMock;
 	@Mock
@@ -72,7 +71,7 @@ public class AccountControllerTest {
 	@Mock
 	private ServletOutputStream outStreamMock;
 	@Mock
-	private SessionLocaleResolver localeResolver;
+	private SessionLocaleResolver localeResolverMock;
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -94,6 +93,7 @@ public class AccountControllerTest {
 
 	@Before
 	public void setUp() {
+		accountCtr = new AccountController(accSrvMock, projSrvMock,msgMock,localeResolverMock);
 		testAccount = new Account(EMAIL, "", Roles.ROLE_ADMIN);
 		testAccount.setLanguage("en");
 		when(securityMock.getAuthentication()).thenReturn(authMock);
@@ -174,7 +174,7 @@ public class AccountControllerTest {
 			accountCtr.saveSettings(mockMultipartFile, EMAIL, "en", "red",
 					raMock, requestMock, responseMock);
 			verify(accSrvMock, times(1)).update(any(Account.class));
-			verify(localeResolver, times(1)).setLocale(requestMock,
+			verify(localeResolverMock, times(1)).setLocale(requestMock,
 					responseMock, new Locale("en"));
 		} catch (IOException e) {
 			e.printStackTrace();

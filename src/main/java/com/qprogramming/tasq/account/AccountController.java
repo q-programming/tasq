@@ -49,10 +49,7 @@ public class AccountController {
 	private static final String SORT_BY_EMAIL = "email";
 	private static final String SORT_BY_SURNAME = "surname";
 
-	@Autowired
 	private AccountService accountSrv;
-
-	@Autowired
 	private ProjectService projSrv;
 
 	@Autowired
@@ -60,6 +57,15 @@ public class AccountController {
 
 	@Autowired
 	private MessageSource msg;
+
+	@Autowired
+	public AccountController(AccountService accountSrv, ProjectService projSrv,
+			MessageSource msg, SessionLocaleResolver localeResolver) {
+		this.accountSrv = accountSrv;
+		this.projSrv = projSrv;
+		this.msg = msg;
+		this.localeResolver = localeResolver;
+	}
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(AccountController.class);

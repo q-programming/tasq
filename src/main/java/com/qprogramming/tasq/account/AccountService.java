@@ -76,10 +76,6 @@ public class AccountService {
 		return accRepo.findAll();
 	}
 
-	public Account getCurrent() {
-		return accRepo.findByEmail(Utils.getCurrentAccount().getEmail());
-	}
-
 	public List<Account> findByNameStartingWith(String name) {
 		return accRepo.findByNameStartingWith(name);
 	}
