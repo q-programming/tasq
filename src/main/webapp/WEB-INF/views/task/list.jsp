@@ -5,6 +5,7 @@
 <%@ taglib prefix="security"
 	uri="http://www.springframework.org/security/tags"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
 <c:set var="tasks_text">
 	<s:message code="task.tasks" text="Tasks" />
@@ -33,7 +34,7 @@
 		</select>
 	</div>
 	<%--------------FILTERS ----------------------------%>
-	<div style="display: table-cell; padding-left: 20px; width: 100%">
+	<div style="display: table-cell; padding-left: 20px; width: 100%;line-height: 30px;">
 		<c:if
 			test="${not empty param.projectID || not empty param.state || not empty param.query || not empty param.priority}">
 			<c:if test="${not empty param.projectID}">
@@ -82,8 +83,8 @@
 				<c:set var="query_url">
 							query=${param.query}&
 			</c:set>
-				<span><s:message code="main.search" />: <span
-					class="filter_span"> ${param.query}<a
+				<span style="white-space:nowrap;"><s:message code="main.search" />: <span
+					class="filter_span"> ${fn:substring(param.query, 0, 40)}...<a
 						href="<c:url value="tasks?${projID_url}${state_url}${priority_url}"/>"><span
 							class="glyphicon glyphicon-remove"
 							style="font-size: smaller; margin-left: 3px; color: lightgray"></span></a></span></span>
