@@ -149,8 +149,10 @@ public class TaskController {
 			task.setProject(project);
 			project.getTasks().add(task);
 			// assigne
-			Account assignee = accSrv.findById(project.getDefaultAssigneeID());
-			task.setAssignee(assignee);
+			if(taskForm.getAssignee()!=null){
+				Account assignee = accSrv.findById(taskForm.getAssignee());
+				task.setAssignee(assignee);	
+			}
 			// lookup for sprint
 			if (taskForm.getAddToSprint() != null) {
 				task.addSprint(sprintRepository.findByProjectIdAndSprintNo(

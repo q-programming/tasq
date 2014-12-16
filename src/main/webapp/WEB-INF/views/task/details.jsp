@@ -658,7 +658,8 @@ $(document).ready(function($) {
 						          response( cache[ term ] );
 						          return;
 						    }
-							$.getJSON("<c:url value="/project/${task.project.id}/getParticipants"/>",request,function(result) {
+							var url='<c:url value="/project/getParticipants"/>';
+							$.get(url,{id:'${task.project.id}',term:term},function(result) {
 									cache[ term ] = result;
 									response($.map(result,function(item) {
 										return {

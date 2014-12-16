@@ -224,3 +224,7 @@ span.badge.left {
 	float: right;
 	padding-left: 10px;
 }
+.input-italic{
+	font-style: italic;
+	color: gray;
+}

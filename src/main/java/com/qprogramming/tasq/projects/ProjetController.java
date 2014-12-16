@@ -372,9 +372,9 @@ public class ProjetController {
 		return "redirect:" + request.getHeader("Referer");
 	}
 
-	@RequestMapping(value = "/project/{id}/getParticipants", method = RequestMethod.GET)
+	@RequestMapping(value = "/project/getParticipants", method = RequestMethod.GET)
 	public @ResponseBody
-	List<DisplayAccount> listParticipants(@PathVariable Long id,
+	List<DisplayAccount> listParticipants(@RequestParam Long id,
 			@RequestParam String term, HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(id);
@@ -392,6 +392,19 @@ public class ProjetController {
 			}
 		}
 		return result;
+	}
+
+	@RequestMapping(value = "/project/getDefaultAssignee", method = RequestMethod.GET)
+	public @ResponseBody
+	DisplayAccount getDefaultAssignee(@RequestParam Long id,HttpServletResponse response) {
+		response.setContentType("application/json");
+		Project project = projSrv.findById(id);
+		Account assignee = accSrv.findById(project.getDefaultAssigneeID());
+		if (assignee == null) {
+			return null;
+		} else {
+			return new DisplayAccount(assignee);
+		}
 	}
 
 	@Transactional
