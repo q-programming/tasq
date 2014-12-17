@@ -37,6 +37,8 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.agile.Sprint;
+import com.qprogramming.tasq.agile.SprintRepository;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.ProjectSorter;
@@ -53,20 +55,24 @@ import com.qprogramming.tasq.task.worklog.WorkLogService;
 
 @Controller
 public class ProjetController {
-	@Autowired
+
 	private ProjectService projSrv;
-
-	@Autowired
 	private AccountService accSrv;
-
-	@Autowired
 	private TaskService taskSrv;
-
-	@Autowired
+	private SprintRepository sprintRepo;
 	private WorkLogService wrkLogSrv;
-
-	@Autowired
 	private MessageSource msg;
+	
+	@Autowired
+	public ProjetController(ProjectService projSrv, AccountService accSrv,TaskService taskSrv, SprintRepository sprintRepo, WorkLogService wrklSrv, MessageSource msg) {
+		this.projSrv = projSrv;
+		this.accSrv = accSrv;
+		this.taskSrv = taskSrv;
+		this.sprintRepo = sprintRepo;
+		this.wrkLogSrv = wrklSrv;
+		this.msg = msg;
+	}
+	
 
 	@Transactional
 	@RequestMapping(value = "project", method = RequestMethod.GET)
@@ -206,10 +212,9 @@ public class ProjetController {
 		Utils.setHttpRequest(request);
 		String name = newProjectForm.getName();
 		if (null != projSrv.findByName(name)) {
-			MessageHelper.addErrorAttribute(ra, msg.getMessage(
-					"project.exists", new Object[] { name },
-					Utils.getCurrentLocale()));
-			return "redirect:" + request.getHeader("Referer");
+			errors.rejectValue("name", "project.exists",
+					new Object[] { name }, "");
+			return null;
 		}
 		String projectId = newProjectForm.getProject_id();
 		if (null != projSrv.findByProjectId(projectId)) {
@@ -219,7 +224,7 @@ public class ProjetController {
 		}
 		Project newProject = newProjectForm.createProject();
 		newProject = projSrv.save(newProject);
-		if (projSrv.findAll().size() == 1) {
+		if (projSrv.findAllByUser().size() == 1) {
 			Account account = Utils.getCurrentAccount();
 			account.setActive_project(newProject.getId());
 			accSrv.update(account);
@@ -430,6 +435,14 @@ public class ProjetController {
 			project.setDefault_priority(priority);
 		}
 		project.setDefault_type(type);
+		Sprint activeSprint = sprintRepo.findByProjectIdAndActiveTrue(id);
+		if(activeSprint !=null){
+			MessageHelper.addWarningAttribute(
+					ra,
+					msg.getMessage("project.sprintActive", null,
+							Utils.getCurrentLocale()));
+			return "redirect:" + request.getHeader("Referer");
+		}
 		project.setTimeTracked(timeTracked);
 		Account account = accSrv.findById(assigneId);
 		assigneId = account != null ? account.getId() : null;

@@ -58,7 +58,6 @@
 				<option value="SCRUM" selected>SCRUM</option>
 				<option value="KANBAN">Kanban</option>
 			</form:select>
-			<form:errors path="name" element="p" class="text-danger" />
 		</div>
 		<div class="form-group ${desc_class}">
 			<form:textarea path="description" class="form-control" rows="5"
