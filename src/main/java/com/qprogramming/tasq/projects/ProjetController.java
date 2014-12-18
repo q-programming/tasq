@@ -144,7 +144,7 @@ public class ProjetController {
 		Project project = projSrv.findById(id);
 		if (project == null) {
 			// NULL
-			msg.getMessage("project.notexists", null, Utils.getCurrentLocale());
+			return null;
 		}
 		if (!project.getParticipants().contains(Utils.getCurrentAccount())) {
 			throw new TasqAuthException(msg, "role.error.project.permission");
