@@ -1,5 +1,8 @@
 package com.qprogramming.tasq.task.worklog;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.joda.time.Period;
 import org.springframework.beans.BeanUtils;
 
@@ -100,6 +103,21 @@ public class DisplayWorkLog {
 
 	public void setTask(DisplayTask task) {
 		this.task = task;
+	}
+
+	/**
+	 * Static method to return list of more lightweight form of WorkLog
+	 * 
+	 * @param list
+	 * @return
+	 */
+	public static List<DisplayWorkLog> convertToDisplayWorkLogs(
+			List<WorkLog> list) {
+		List<DisplayWorkLog> result = new LinkedList<DisplayWorkLog>();
+		for (WorkLog workLog : list) {
+			result.add(new DisplayWorkLog(workLog));
+		}
+		return result;
 	}
 
 }

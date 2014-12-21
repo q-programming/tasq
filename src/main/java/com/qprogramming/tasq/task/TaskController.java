@@ -40,6 +40,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.agile.SprintRepository;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
@@ -155,8 +156,14 @@ public class TaskController {
 			}
 			// lookup for sprint
 			if (taskForm.getAddToSprint() != null) {
-				task.addSprint(sprintRepository.findByProjectIdAndSprintNo(
-						project.getId(), taskForm.getAddToSprint()));
+				Sprint sprint = sprintRepository.findByProjectIdAndSprintNo(
+						project.getId(), taskForm.getAddToSprint()); 
+				task.addSprint(sprint);
+				//increase scope
+				if(sprint.isActive()){
+					wlSrv.addActivityLog(task, null, LogType.TASKSPRINTADD);
+				}
+				//TODO
 			}
 			// Create log work
 			taskSrv.save(task);

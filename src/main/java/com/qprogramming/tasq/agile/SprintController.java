@@ -50,6 +50,7 @@ import com.qprogramming.tasq.task.DisplayTask;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
+import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
@@ -188,6 +189,9 @@ public class SprintController {
 			throw new TasqAuthException(msg);
 		}
 		Hibernate.initialize(task.getSprints());
+		if (sprint.isActive()) {
+			wrkLogSrv.addActivityLog(task, null, LogType.TASKSPRINTADD);
+		}
 		task.addSprint(sprint);
 		taskSrv.save(task);
 		MessageHelper.addSuccessAttribute(
@@ -211,21 +215,15 @@ public class SprintController {
 			throw new TasqAuthException(msg);
 		}
 		Sprint sprint = sprintRepo.findById(sprintID);
-		if (!sprint.isActive()) {
-			Hibernate.initialize(task.getSprints());
-			task.removeSprint(sprint);
-			taskSrv.save(task);
-			MessageHelper.addSuccessAttribute(
-					ra,
-					msg.getMessage("agile.taskRemoved",
-							new Object[] { task.getId() },
-							Utils.getCurrentLocale()));
-		} else {
-			MessageHelper.addErrorAttribute(
-					ra,
-					msg.getMessage("agile.cantRemove.active", null,
-							Utils.getCurrentLocale()));
+		if (sprint.isActive()) {
+			wrkLogSrv.addActivityLog(task, null, LogType.TASKSPRINTREMOVE);
 		}
+		Hibernate.initialize(task.getSprints());
+		task.removeSprint(sprint);
+		taskSrv.save(task);
+		MessageHelper.addSuccessAttribute(ra, msg.getMessage(
+				"agile.taskRemoved", new Object[] { task.getId() },
+				Utils.getCurrentLocale()));
 		return "redirect:" + request.getHeader("Referer");
 	}
 
@@ -261,13 +259,13 @@ public class SprintController {
 	@ResponseBody
 	@RequestMapping(value = "/scrum/start", method = RequestMethod.POST)
 	public ResultData startSprint(@RequestParam(value = "sprintID") Long id,
-			@RequestParam(value = "projectID") Long project_id,
-			@RequestParam(value = "sprintStart") String sprint_start,
-			@RequestParam(value = "sprintEnd") String sprint_end, Model model,
+			@RequestParam(value = "projectID") Long projectId,
+			@RequestParam(value = "sprintStart") String sprintStart,
+			@RequestParam(value = "sprintEnd") String sprintEnd, Model model,
 			HttpServletRequest request, RedirectAttributes ra) {
 		Sprint sprint = sprintRepo.findById(id);
-		Project project = projSrv.findById(project_id);
-		Sprint active = sprintRepo.findByProjectIdAndActiveTrue(project_id);
+		Project project = projSrv.findById(projectId);
+		Sprint active = sprintRepo.findByProjectIdAndActiveTrue(projectId);
 		if (sprint != null && !sprint.isActive() && active == null) {
 			if (canEdit(sprint.getProject()) || Roles.isAdmin()) {
 				Period total_estimate = new Period();
@@ -299,8 +297,8 @@ public class SprintController {
 				}
 				sprint.setTotalEstimate(total_estimate);
 				sprint.setTotalStoryPoints(totalStoryPoints);
-				sprint.setStart_date(Utils.convertStringToDate(sprint_start));
-				sprint.setEnd_date(Utils.convertStringToDate(sprint_end));
+				sprint.setStart_date(Utils.convertStringToDate(sprintStart));
+				sprint.setEnd_date(Utils.convertStringToDate(sprintEnd));
 				sprint.setActive(true);
 				sprintRepo.save(sprint);
 				wrkLogSrv.addWorkLogNoTask(null, project, LogType.SPRINT_START);
@@ -364,6 +362,7 @@ public class SprintController {
 		Map<String, Integer> resultsBurned = new LinkedHashMap<String, Integer>();
 		Map<String, Integer> resultsIdeal = new LinkedHashMap<String, Integer>();
 		Map<LocalDate, Integer> burndownMap = new HashMap<LocalDate, Integer>();
+		Map<LocalDate, Integer> burnedMap = new HashMap<LocalDate, Integer>();
 		Map<LocalDate, Period> timeBurndownMap = new HashMap<LocalDate, Period>();
 		Project project = projSrv.findByProjectId(id);
 		if (project != null) {
@@ -418,10 +417,10 @@ public class SprintController {
 			LocalDate endTime = new LocalDate(sprint.getRawEnd_date());
 			int sprint_days = Days.daysBetween(startTime, endTime).getDays() + 1;
 			boolean timeTracked = project.getTimeTracked();
-			List<WorkLog> worklogList = wrkLogSrv.getSprintEvents(sprint,
+			List<WorkLog> wrkList = wrkLogSrv.getSprintEvents(sprint,
 					timeTracked);
 			if (timeTracked) {
-				timeBurndownMap = fillTimeBurndownMap(worklogList);
+				timeBurndownMap = fillTimeBurndownMap(wrkList);
 				Period remaining_estimate = sprint.getTotalEstimate();
 				Period burned = new Period();
 				// Fill ideal burndown
@@ -448,7 +447,8 @@ public class SprintController {
 					}
 				}
 			} else {
-				burndownMap = fillBurndownMap(worklogList);
+				burndownMap = fillBurndownMap(wrkList);
+				burnedMap = fillBurnednMap(wrkList);
 				Integer remainingEstimate = sprint.getTotalStoryPoints();
 				Integer burned = new Integer(0);
 				resultsIdeal.put(startTime.toString(), remainingEstimate);
@@ -456,11 +456,13 @@ public class SprintController {
 				for (int i = 0; i < sprint_days; i++) {
 					LocalDate date = startTime.plusDays(i);
 					Integer value = burndownMap.get(date);
-					if (value == null) {
-						value = 0;
-					}
+					Integer valueBurned = burnedMap.get(date);
+					value=value==null?0:value;
+					valueBurned= valueBurned==null?0:valueBurned;
+					
 					remainingEstimate -= value;
-					burned += value;
+					burned += valueBurned;
+					
 					if (date.isAfter(LocalDate.now())) {
 						resultsEstimates.put(date.toString(), null);
 						resultsBurned.put(date.toString(), null);
@@ -473,7 +475,8 @@ public class SprintController {
 			}
 			model.addAttribute("sprint", sprint);
 			model.addAttribute("lastSprint", lastSprint);
-			model.addAttribute("workLogList", worklogList);
+			model.addAttribute("workLogList",
+					DisplayWorkLog.convertToDisplayWorkLogs(wrkList));
 			model.addAttribute("project", project);
 			model.addAttribute("left", formatResults(resultsEstimates));
 			model.addAttribute("burned", formatResults(resultsBurned));
@@ -498,6 +501,21 @@ public class SprintController {
 	}
 
 	/**
+	 * Checks if sprint with given id is active or not
+	 * 
+	 * @param sprintID
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping(value = "/scrum/isActive", method = RequestMethod.GET)
+	public @ResponseBody
+	boolean checkIfActive(@RequestParam(value = "id") Long sprintID,
+			HttpServletResponse response) {
+		Sprint sprint = sprintRepo.findById(sprintID);
+		return sprint.isActive();
+	}
+
+	/**
 	 * Fills burndown map with worklogs in format <Date, Period Burned> Only
 	 * events with before present day are added
 	 * 
@@ -506,18 +524,18 @@ public class SprintController {
 	 * @return
 	 **/
 	private Map<LocalDate, Period> fillTimeBurndownMap(List<WorkLog> worklogList) {
-		Map<LocalDate, Period> burndown_map = new LinkedHashMap<LocalDate, Period>();
+		Map<LocalDate, Period> burndownMap = new LinkedHashMap<LocalDate, Period>();
 		for (WorkLog workLog : worklogList) {
-			LocalDate date_logged = new LocalDate(workLog.getRawTime());
-			Period value = burndown_map.get(date_logged);
+			LocalDate dateLogged = new LocalDate(workLog.getRawTime());
+			Period value = burndownMap.get(dateLogged);
 			if (value == null) {
 				value = workLog.getActivity();
 			} else {
 				value = PeriodHelper.plusPeriods(value, workLog.getActivity());
 			}
-			burndown_map.put(date_logged, value);
+			burndownMap.put(dateLogged, value);
 		}
-		return burndown_map;
+		return burndownMap;
 	}
 
 	/**
@@ -528,24 +546,43 @@ public class SprintController {
 	 * @return
 	 */
 	private Map<LocalDate, Integer> fillBurndownMap(List<WorkLog> worklogList) {
-		Map<LocalDate, Integer> burndown_map = new LinkedHashMap<LocalDate, Integer>();
+		Map<LocalDate, Integer> burndownMap = new LinkedHashMap<LocalDate, Integer>();
 		for (WorkLog workLog : worklogList) {
-			LocalDate date_logged = new LocalDate(workLog.getRawTime());
-			Integer taskStoryPoints = workLog.getTask().getStory_points();
-			Integer value = burndown_map.get(date_logged);
-			// If task reopened then re-add SP
-			if (workLog.getType().equals(LogType.REOPEN)) {
-				taskStoryPoints *= -1;
-			}
-			if (value == null) {
-				value = taskStoryPoints;
-			} else {
-				value += taskStoryPoints;
-			}
-			burndown_map.put(date_logged, value);
+			LocalDate dateLogged = new LocalDate(workLog.getRawTime());
+			Integer value = burndownMap.get(dateLogged);
+			value = addOrSubstract(workLog, value);
+			burndownMap.put(dateLogged, value);
 		}
-		return burndown_map;
+		return burndownMap;
+	}
 
+	private Map<LocalDate, Integer> fillBurnednMap(List<WorkLog> worklogList) {
+		Map<LocalDate, Integer> burndedMap = new LinkedHashMap<LocalDate, Integer>();
+		for (WorkLog workLog : worklogList) {
+			if (!LogType.TASKSPRINTADD.equals(workLog.getType())
+					&& !LogType.TASKSPRINTREMOVE.equals(workLog.getType())) {
+				LocalDate dateLogged = new LocalDate(workLog.getRawTime());
+				Integer value = burndedMap.get(dateLogged);
+				// If task reopened then re-add SP
+				value = addOrSubstract(workLog, value);
+				burndedMap.put(dateLogged, value);
+			}
+		}
+		return burndedMap;
+	}
+
+	private Integer addOrSubstract(WorkLog workLog, Integer value) {
+		Integer taskStoryPoints = workLog.getTask().getStory_points();
+		if (LogType.REOPEN.equals(workLog.getType())
+				|| LogType.TASKSPRINTADD.equals(workLog.getType())) {
+			taskStoryPoints *= -1;
+		}
+		if (value == null) {
+			value = taskStoryPoints;
+		} else {
+			value += taskStoryPoints;
+		}
+		return value;
 	}
 
 	/**

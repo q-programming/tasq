@@ -167,17 +167,25 @@ public class WorkLogService {
 							sprint.getProject().getId(), start.toDate(),
 							end.toDate());
 		} else {
-			return wlRepo
-					.findByProjectIdAndTimeBetweenAndTypeOrTypeOrderByTimeAsc(
-							sprint.getProject().getId(), start.toDate(),
-							end.toDate(), LogType.CLOSED, LogType.REOPEN);
+			List<WorkLog> list = wlRepo
+					.findByProjectIdAndTimeBetweenOrderByTimeAsc(sprint
+							.getProject().getId(), start.toDate(), end.toDate());
+			List<WorkLog> result = new LinkedList<WorkLog>();
+			for (WorkLog workLog : list) {
+				if (LogType.CLOSED.equals(workLog.getType())
+						|| LogType.REOPEN.equals(workLog.getType())
+						|| LogType.TASKSPRINTADD.equals(workLog.getType())
+						|| LogType.TASKSPRINTREMOVE.equals(workLog.getType())) {
+					result.add(workLog);
+				}
+			}
+			return result;
 		}
 	}
 
 	public Page<WorkLog> findByProjectId(Long id, Pageable p) {
 		return wlRepo.findByProjectId(id, p);
 	}
-	
 
 	private Task checkState(Task task) {
 		if (task.getState().equals(TaskState.TO_DO)) {
@@ -193,6 +201,5 @@ public class WorkLogService {
 		}
 		return result;
 	}
-
 
 }
