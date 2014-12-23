@@ -392,6 +392,7 @@ public class SprintController {
 							+ "/scrum/backlog";
 				}
 				int counter = 1;
+				Collections.sort(sprints, new SprintSorter());
 				lastSprint = sprints.get(sprints.size() - counter);
 				while (lastSprint.getStart_date() == "") {
 					counter++;

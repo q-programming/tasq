@@ -49,6 +49,7 @@
 				showError(result.message);
 			} else {
 				showSuccess(result.message);
+				location.reload();
 			}
 		});
 	});
