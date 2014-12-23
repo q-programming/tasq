@@ -9,7 +9,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.hibernate.Hibernate;
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,11 +45,11 @@ public class WorkLogService {
 	@Transactional
 	public void addTimedWorkLog(Task task, String msg, Date when,
 			Period remaining, Period activity, LogType type) {
-		task = taskSrv.findById(task.getId());
-		if (task != null) {
+		Task loggedTask = taskSrv.findById(task.getId());
+		if (loggedTask != null) {
 			WorkLog wl = new WorkLog();
-			wl.setTask(task);
-			wl.setProject_id(task.getProject().getId());
+			wl.setTask(loggedTask);
+			wl.setProject_id(loggedTask.getProject().getId());
 			wl.setAccount(Utils.getCurrentAccount());
 			wl.setTimeLogged(new Date());
 			wl.setTime(when);
@@ -58,23 +57,15 @@ public class WorkLogService {
 			wl.setMessage(msg);
 			wl.setActivity(activity);
 			wl = wlRepo.save(wl);
-			Hibernate.initialize(task.getWorklog());
-			task.addWorkLog(wl);
+			Hibernate.initialize(loggedTask.getWorklog());
+			loggedTask.addWorkLog(wl);
 			if (remaining == null) {
-				task.reduceRemaining(activity);
+				loggedTask.reduceRemaining(activity);
 			} else {
-				task.setRemaining(remaining);
+				loggedTask.setRemaining(remaining);
 			}
-			taskSrv.save(checkState(task));
+			taskSrv.save(checkState(loggedTask));
 		}
-	}
-
-	/**
-	 * @param task
-	 */
-	public void findAllByTask(Task task) {
-		// TODO Auto-generated method stub
-
 	}
 
 	/**
@@ -84,19 +75,19 @@ public class WorkLogService {
 	 */
 	@Transactional
 	public void addActivityLog(Task task, String msg, LogType type) {
-		task = taskSrv.findById(task.getId());
-		if (task != null) {
+		Task loggedTask = taskSrv.findById(task.getId());
+		if (loggedTask != null) {
 			WorkLog wl = new WorkLog();
-			wl.setTask(task);
-			wl.setProject_id(task.getProject().getId());
+			wl.setTask(loggedTask);
+			wl.setProject_id(loggedTask.getProject().getId());
 			wl.setAccount(Utils.getCurrentAccount());
 			wl.setTime(new Date());
 			wl.setTimeLogged(new Date());
 			wl.setType(type);
 			wl.setMessage(msg);
 			wl = wlRepo.save(wl);
-			Hibernate.initialize(task.getWorklog());
-			task.addWorkLog(wl);
+			Hibernate.initialize(loggedTask.getWorklog());
+			loggedTask.addWorkLog(wl);
 			taskSrv.save(task);
 		}
 
@@ -111,11 +102,11 @@ public class WorkLogService {
 	@Transactional
 	public void addNormalWorkLog(Task task, String msg, Period activity,
 			LogType type) {
-		task = taskSrv.findById(task.getId());
-		if (task != null) {
+		Task loggedTask = taskSrv.findById(task.getId());
+		if (loggedTask != null) {
 			WorkLog wl = new WorkLog();
-			wl.setTask(task);
-			wl.setProject_id(task.getProject().getId());
+			wl.setTask(loggedTask);
+			wl.setProject_id(loggedTask.getProject().getId());
 			wl.setAccount(Utils.getCurrentAccount());
 			wl.setTimeLogged(new Date());
 			wl.setTime(new Date());
@@ -123,10 +114,10 @@ public class WorkLogService {
 			wl.setMessage(msg);
 			wl.setActivity(activity);
 			wl = wlRepo.save(wl);
-			Hibernate.initialize(task.getWorklog());
-			task.addWorkLog(wl);
-			task.reduceRemaining(activity);
-			taskSrv.save(checkState(task));
+			Hibernate.initialize(loggedTask.getWorklog());
+			loggedTask.addWorkLog(wl);
+			loggedTask.reduceRemaining(activity);
+			taskSrv.save(checkState(loggedTask));
 		}
 	}
 
@@ -176,17 +167,25 @@ public class WorkLogService {
 							sprint.getProject().getId(), start.toDate(),
 							end.toDate());
 		} else {
-			return wlRepo
-					.findByProjectIdAndTimeBetweenAndTypeOrTypeOrderByTimeAsc(
-							sprint.getProject().getId(), start.toDate(),
-							end.toDate(), LogType.CLOSED, LogType.REOPEN);
+			List<WorkLog> list = wlRepo
+					.findByProjectIdAndTimeBetweenOrderByTimeAsc(sprint
+							.getProject().getId(), start.toDate(), end.toDate());
+			List<WorkLog> result = new LinkedList<WorkLog>();
+			for (WorkLog workLog : list) {
+				if (LogType.CLOSED.equals(workLog.getType())
+						|| LogType.REOPEN.equals(workLog.getType())
+						|| LogType.TASKSPRINTADD.equals(workLog.getType())
+						|| LogType.TASKSPRINTREMOVE.equals(workLog.getType())) {
+					result.add(workLog);
+				}
+			}
+			return result;
 		}
 	}
 
 	public Page<WorkLog> findByProjectId(Long id, Pageable p) {
 		return wlRepo.findByProjectId(id, p);
 	}
-	
 
 	private Task checkState(Task task) {
 		if (task.getState().equals(TaskState.TO_DO)) {
@@ -202,6 +201,5 @@ public class WorkLogService {
 		}
 		return result;
 	}
-
 
 }

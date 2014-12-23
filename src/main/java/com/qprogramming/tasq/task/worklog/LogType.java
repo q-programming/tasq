@@ -11,7 +11,9 @@ public enum LogType {
 			"log.type.assign"), PRIORITY("log.type.priority"), DELETED(
 			"log.type.delete"), SPRINT_START("log.type.sprintstart"), SPRINT_STOP(
 			"log.type.sprintstop"), TASK_LINK("log.type.taskLink"), TASK_LINK_DEL(
-			"log.type.taskLink.delete");
+			"log.type.taskLink.delete"), TASKSPRINTADD(
+			"log.type.taskSprintAdd"), TASKSPRINTREMOVE(
+			"log.type.taskSprintRemove");
 
 	private String code;
 
@@ -34,6 +36,6 @@ public enum LogType {
 	}
 
 	public String getString() {
-		return super.toString().toLowerCase();
+		return super.toString().toLowerCase().replaceAll("_", "");
 	}
 }

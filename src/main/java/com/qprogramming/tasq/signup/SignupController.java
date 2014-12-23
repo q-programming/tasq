@@ -18,7 +18,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
-import com.qprogramming.tasq.account.UserService;
 import com.qprogramming.tasq.mail.MailMail;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.web.MessageHelper;
@@ -28,17 +27,19 @@ public class SignupController {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SignupController.class);
 
-	@Autowired
 	private AccountService accountSrv;
-
-	@Autowired
-	private UserService userService;
-
-	@Autowired
+	// private UserService userService;
 	private MailMail mailer;
+	private MessageSource msg;
 
 	@Autowired
-	private MessageSource msg;
+	public SignupController(AccountService accountSrv, MessageSource msg,
+			MailMail mailer) {
+		this.accountSrv = accountSrv;
+		this.msg = msg;
+		this.mailer = mailer;
+		// this.userService = userService;
+	}
 
 	@RequestMapping(value = "signup")
 	public SignupForm signup() {
@@ -52,17 +53,17 @@ public class SignupController {
 			return null;
 		}
 		if (!signupForm.isPasswordConfirmed()) {
-			errors.reject("error.notMatchedPasswords");
+			errors.rejectValue("password", "error.notMatchedPasswords");
 			return null;
 		}
 		Utils.setHttpRequest(request);
 		if (null != accountSrv.findByEmail(signupForm.getEmail())) {
-			errors.reject("error.email.notunique");
+			errors.rejectValue("email","error.email.notunique");
 			return null;
 		}
-		
+
 		Account account = signupForm.createAccount();
-		if(accountSrv.findAll().size()==0){
+		if (accountSrv.findAll().isEmpty()) {
 			account.setRole(Roles.ROLE_ADMIN);
 		}
 		account = accountSrv.save(account);
@@ -76,7 +77,8 @@ public class SignupController {
 				new Object[] { account.getName(), confirmlink,
 						Utils.getBaseURL() }, Utils.getDefaultLocale());
 		LOG.debug(confirmlink);
-		//mailer.sendMail(MailMail.REGISTER, account.getEmail(), subject, message);
+		// mailer.sendMail(MailMail.REGISTER, account.getEmail(), subject,
+		// message);
 		MessageHelper.addSuccessAttribute(ra, msg.getMessage("signup.success",
 				null, Utils.getDefaultLocale()));
 

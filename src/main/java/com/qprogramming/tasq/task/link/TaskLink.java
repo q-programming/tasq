@@ -56,5 +56,11 @@ public class TaskLink {
 	public void setLinkType(TaskLinkType linkType) {
 		this.linkType = linkType;
 	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
 
 }

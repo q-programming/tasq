@@ -1,6 +1,5 @@
 package com.qprogramming.tasq.home;
 
-import java.security.Principal;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,7 +15,6 @@ import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.Utils;
-import com.qprogramming.tasq.support.sorters.ProjectSorter;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
@@ -25,11 +23,14 @@ import com.qprogramming.tasq.task.TaskState;
 @Controller
 public class HomeController {
 
-	@Autowired
-	TaskService taskSrv;
+	private TaskService taskSrv;
+	private ProjectService projSrv;
 
 	@Autowired
-	ProjectService projSrv;
+	public HomeController(TaskService taskSrv, ProjectService projSrv) {
+		this.taskSrv = taskSrv;
+		this.projSrv = projSrv;
+	}
 
 	int week = 7 * 24 * 60 * 60 * 1000;
 
@@ -44,27 +45,28 @@ public class HomeController {
 							.getRole().equals(Roles.ROLE_REPORTER))) {
 				return "homeNewUser";
 			}
-			List<Task> allTasks = taskSrv.findAll();
+			List<Task> allTasks = new LinkedList<Task>();
+			for (Project project : usersProjects) {
+				allTasks.addAll(taskSrv.findAllByProject(project));
+			}
 			List<Task> dueTasks = new LinkedList<Task>();
 			List<Task> currentAccTasks = new LinkedList<Task>();
 			List<Task> unassignedTasks = new LinkedList<Task>();
 			for (Task task : allTasks) {
-				if (usersProjects.contains(task.getProject())) {
-					TaskState state = (TaskState) task.getState();
-					if (task.getRawDue_date() != null
-							&& (task.getRawDue_date().getTime()
-									- System.currentTimeMillis() < week)
-							& !state.equals(TaskState.CLOSED)) {
-						dueTasks.add(task);
-					}
-					if (task.getAssignee() == null
-							& !state.equals(TaskState.CLOSED)) {
-						unassignedTasks.add(task);
-					}
-					if (Utils.getCurrentAccount().equals(task.getAssignee())
-							&& !state.equals(TaskState.CLOSED)) {
-						currentAccTasks.add(task);
-					}
+				TaskState state = (TaskState) task.getState();
+				if (task.getRawDue_date() != null
+						&& (task.getRawDue_date().getTime()
+								- System.currentTimeMillis() < week)
+						& !TaskState.CLOSED.equals(state)) {
+					dueTasks.add(task);
+				}
+				if (task.getAssignee() == null
+						& !TaskState.CLOSED.equals(state)) {
+					unassignedTasks.add(task);
+				}
+				if (Utils.getCurrentAccount().equals(task.getAssignee())
+						&& !TaskState.CLOSED.equals(state)) {
+					currentAccTasks.add(task);
 				}
 			}
 			Collections.sort(dueTasks, new TaskSorter(

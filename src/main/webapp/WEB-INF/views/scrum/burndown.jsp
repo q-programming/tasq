@@ -48,13 +48,14 @@
 	<div style="display:table-row;">
 		<div style="display:table-cell;"></div>
 		<div style="display:table-cell;">
-			<table class="table" style="width:100%">
+			<table class="table table-bordered" style="width:100%">
 				<thead class="theme">
 					<tr>
 						<th style="width: 300px"><s:message code="task.name" /></th>
 						<th style="width: 100px"><s:message code="main.date" /></th>
+						<th style="width: 60px;text-align:center" colspan="2">Change</th>
 						<th style="width: 90px"><s:message code="task.activeLog" /></th>
-						<th style="width: 100px"><s:message code="agile.user" /></th>
+						<th style="width: 100px"><s:message code="agile.user"/></th>
 <!-- 						TODO -->
 					</tr>
 				</thead>
@@ -69,8 +70,16 @@
 							<td style="text-align:center">${worklog.formatedActivity}</td>
 						</c:if>
 						<c:if test="${empty worklog.activity}">
-							<td style="text-align:center"><s:message code="task.state.${worklog.type.string}"/></td>
+							<c:choose>
+								<c:when test="${worklog.type.string eq 'tasksprintremove' || worklog.type.string eq 'reopen'}">
+									<td style="width: 30px"></td><td style="width: 30px;text-align:center">${worklog.task.story_points}</td>
+								</c:when>
+								<c:otherwise>
+									<td style="width: 30px;text-align:center">${worklog.task.story_points}</td><td style="width: 30px"></td>
+								</c:otherwise>
+							</c:choose>														
 						</c:if>
+						<td style="text-align:center"><s:message code="task.state.${worklog.type.string}"/></td>
 						<td rel="popover" data-container="body" data-placement="top" data-account="${worklog.account}" data-account_email="${worklog.account.email}" data-account_img="<c:url value="/userAvatar/${worklog.account.id}"/>">${worklog.account}</td>
 					</tr>
 				</c:forEach>

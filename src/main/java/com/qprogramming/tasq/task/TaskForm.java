@@ -49,6 +49,8 @@ public class TaskForm {
 	private String due_date;
 	
 	private Long addToSprint;
+	
+	private Long assignee;
 
 	public TaskForm() {
 		// TODO Auto-generated constructor stub
@@ -69,7 +71,7 @@ public class TaskForm {
 		setPriority(task.getPriority().toString().toUpperCase());
 	}
 
-	public Task createTask() throws IllegalArgumentException {
+	public Task createTask() {
 		Task task = new Task();
 		task.setName(getName());
 		task.setCreate_date(new Date());
@@ -193,5 +195,13 @@ public class TaskForm {
 
 	public void setAddToSprint(Long addToSprint) {
 		this.addToSprint = addToSprint;
+	}
+
+	public Long getAssignee() {
+		return assignee;
+	}
+
+	public void setAssignee(Long assignee) {
+		this.assignee = assignee;
 	}
 }

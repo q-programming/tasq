@@ -15,11 +15,11 @@ public interface SprintRepository extends JpaRepository<Sprint, Integer> {
 	/**
 	 * Lists sprints that are belonging to Project and are finished
 	 * 
-	 * @param project_id
+	 * @param projectId
 	 * @param finished
 	 * @return
 	 */
-	List<Sprint> findByProjectIdAndFinished(Long project_id, boolean finished);
+	List<Sprint> findByProjectIdAndFinished(Long projectId, boolean finished);
 
 	/**
 	 * Returns active sprint from project (by default only one sprint per
@@ -29,9 +29,9 @@ public interface SprintRepository extends JpaRepository<Sprint, Integer> {
 	 * @param active
 	 * @return
 	 */
-	Sprint findByProjectIdAndActiveTrue(Long project_id);
+	Sprint findByProjectIdAndActiveTrue(Long projectId);
 
-	Sprint findByProjectIdAndSprintNo(Long project_id, Long sprintNo);
+	Sprint findByProjectIdAndSprintNo(Long projectId, Long sprintNo);
 
-	List<Sprint> findByProjectId(Long project_id);
+	List<Sprint> findByProjectId(Long projectId);
 }

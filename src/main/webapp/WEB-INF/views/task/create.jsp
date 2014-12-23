@@ -67,6 +67,17 @@
  				</c:forEach> 
 			</form:select>
 			<span class="help-block"><s:message code="task.project.help" /></span>
+			<%--------------------	Assign to -------------------------------%>
+			<div class="mod-header">
+				<h5 class="mod-header-title">
+					<s:message code="task.assign" />
+				</h5>
+			</div>
+			<div class="form-group">
+				<input id="assignee_auto" class="form-control" type="text" value="" style="width:300px;">
+				<input id="assignee" type="hidden" name="assignee">
+			</div>
+			<span class="help-block"><s:message code="task.assign.help" /></span>
 		</div>
 		<c:set var="type_error">
 			<form:errors path="type" />
@@ -225,9 +236,82 @@ $(document).ready(function($) {
 	var currentDue = "${taskForm.due_date}";
 	$("#due_date").val(currentDue);
 	$("#projects_list").change(function(){
+		getDefaultAssignee();
 		fillSprints();
 	});
 	fillSprints();
+	getDefaultAssignee();
+	$("#assignee_auto").click(function(){
+		 $(this).select();
+	});
+	$("#assignee_auto").change(function(){
+		 if(!$("#assignee_auto").val()){
+			 $("#assignee").val(null);
+		 }
+		 checkIfEmpty();
+	});
+	var cache = {};
+	//Assignee
+	$("#assignee_auto").autocomplete({
+		minLength : 1,
+		delay : 500,
+		//define callback to format results
+		source : function(request, response) {
+			var term = request.term;
+			if ( term in cache ) {
+		          response( cache[ term ] );
+		          return;
+		    }
+			var url='<c:url value="/project/getParticipants"/>';
+			var projectID = $("#projects_list").val();
+			$.get(url,{id:projectID,term:term},function(result) {
+					cache[ term ] = result;
+					response($.map(result,function(item) {
+						return {
+							// following property gets displayed in drop down
+							label : item.name+ " "+ item.surname,
+							value : item.id,
+						}
+					}));
+				});
+			},
+			//define select handler
+			select : function(event, ui) {
+				if (ui.item) {
+					event.preventDefault();
+					$("#assignee").val(ui.item.value);
+					$("#assignee_auto").val(ui.item.label);
+					$("#assignee_auto").removeClass("input-italic");
+					checkIfEmpty();
+				return false;
+			}
+		}
+	});
+	
+	function getDefaultAssignee(){
+		$("#assignee").val(null);
+		$("#assignee_auto").val(null);
+		var url='<c:url value="/project/getDefaultAssignee"/>';
+		$.get(url,{id:$("#projects_list").val()},function(result,status){
+			if(!result){
+				$("#assignee").val(null);
+			}
+			else{
+				$("#assignee_auto").val(result.name + " " + result.surname);
+				$("#assignee").val(result.id);
+				$("#assignee_auto").removeClass("input-italic");
+				
+			}
+		});
+		checkIfEmpty();
+	}
+	function checkIfEmpty(){
+		if(!$("#assignee").val()){
+			var unassign = '<s:message code="task.unassigned" />';
+			$("#assignee_auto").val(unassign);
+			$("#assignee_auto").addClass("input-italic");
+		}
+	}
 	
 	function fillSprints(){
 		$.get('<c:url value="/getSprints"/>',{projectID:$("#projects_list").val()},function(result){

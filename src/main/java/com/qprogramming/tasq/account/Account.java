@@ -79,33 +79,29 @@ public class Account implements java.io.Serializable, UserDetails {
 	@IndexColumn(name = "INDEX_COL")
 	@JoinTable(name = "last_visited_t")
 	private List<Task> last_visited_t = new LinkedList<Task>();
-	
+
 	@ManyToMany(fetch = FetchType.EAGER)
 	@IndexColumn(name = "INDEX_COL")
 	@JoinTable(name = "last_visited_p")
 	private List<Project> last_visited_p = new LinkedList<Project>();
-	
+
 	@Column
 	private String theme;
-	
+
 	@Transient
 	private Collection<GrantedAuthority> authorities;
 
 	/**
-	 * [0] Task ID
-	 * [1] active task start time
+	 * [0] Task ID [1] active task start time
 	 */
 	@Column
 	private Object[] active_task;
-	
+
 	@Column
 	private Long active_project;
 
-	// @Transient
-	// private long active_task_seconds;
-
 	public enum Role {
-		ROLE_USER, ROLE_ADMIN, ROLE_REPORTER,ROLE_VIEWER
+		ROLE_USER, ROLE_ADMIN, ROLE_REPORTER, ROLE_VIEWER
 	};
 
 	protected Account() {
@@ -198,17 +194,17 @@ public class Account implements java.io.Serializable, UserDetails {
 	public void setAuthorities(Collection<GrantedAuthority> authorities) {
 		this.authorities = authorities;
 	}
+
 	public void setAuthority(Roles role) {
-		if(this.authorities==null){
+		if (this.authorities == null) {
 			this.authorities = new ArrayList<GrantedAuthority>();
 		}
 		this.authorities.add(createAuthority(role));
 	}
-	
+
 	private GrantedAuthority createAuthority(Roles role) {
 		return new SimpleGrantedAuthority(role.toString());
 	}
-
 
 	public byte[] getAvatar() {
 		return avatar;
@@ -300,27 +296,28 @@ public class Account implements java.io.Serializable, UserDetails {
 	public void setActive_project(Long active_project) {
 		this.active_project = active_project;
 	}
-	
 
-	public boolean getIsReporter(){
-		return getIsUser() || role.equals(Roles.ROLE_REPORTER); 
+	public boolean getIsReporter() {
+		return getIsUser() || role.equals(Roles.ROLE_REPORTER);
 	}
-	
+
 	/**
-	 * Checks if currently logged user have ROLE_USER authority 
+	 * Checks if currently logged user have ROLE_USER authority
+	 * 
 	 * @return
 	 */
-	public boolean getIsUser(){
-		return getIsAdmin() || role.equals(Roles.ROLE_USER); 
+	public boolean getIsUser() {
+		return getIsAdmin() || role.equals(Roles.ROLE_USER);
 	}
+
 	/**
-	 * Checks if currently logged user have ROLE_ADMIN authority 
+	 * Checks if currently logged user have ROLE_ADMIN authority
+	 * 
 	 * @return
 	 */
-	public boolean getIsAdmin(){
-		return role.equals(Roles.ROLE_ADMIN); 
+	public boolean getIsAdmin() {
+		return role.equals(Roles.ROLE_ADMIN);
 	}
-	
 
 	/*
 	 * (non-Javadoc)
@@ -401,26 +398,34 @@ public class Account implements java.io.Serializable, UserDetails {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		Account other = (Account) obj;
 		if (email == null) {
-			if (other.email != null)
+			if (other.email != null) {
 				return false;
-		} else if (!email.equals(other.email))
+			}
+		} else if (!email.equals(other.email)) {
 			return false;
+		}
 		if (id == null) {
-			if (other.id != null)
+			if (other.id != null) {
 				return false;
-		} else if (!id.equals(other.id))
+			}
+		} else if (!id.equals(other.id)) {
 			return false;
+		}
 		if (username == null) {
-			if (other.username != null)
+			if (other.username != null) {
 				return false;
-		} else if (!username.equals(other.username))
+			}
+		} else if (!username.equals(other.username)) {
 			return false;
+		}
 		return true;
 	}
 

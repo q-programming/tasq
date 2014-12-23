@@ -100,9 +100,7 @@ public class ImportExportController {
 	@RequestMapping(value = "/task/import", method = RequestMethod.POST)
 	public String importTasks(
 			@RequestParam(value = "file") MultipartFile importFile,
-			@RequestParam(value = "project") String projectName,
-			RedirectAttributes ra, HttpServletRequest request,
-			HttpServletResponse response, Model model) {
+			@RequestParam(value = "project") String projectName, Model model) {
 
 		if (importFile.getSize() != 0) {
 			try {
@@ -114,18 +112,18 @@ public class ImportExportController {
 					HSSFWorkbook workbook = new HSSFWorkbook(
 							importFile.getInputStream());
 					HSSFSheet sheet = workbook.getSheetAt(0);
-					StringBuffer logger = new StringBuffer();
+					StringBuilder logger = new StringBuilder();
 					for (Iterator<Row> rowIterator = sheet.iterator(); rowIterator
 							.hasNext();) {
 						Row row = rowIterator.next();
 						if (row.getRowNum() == 0) {
 							continue;
 						}
-						StringBuffer log_row = verifyRow(row);
+						StringBuilder logRow = verifyRow(row);
 						// If there was at least one error with row , add it to
 						// logger and move to next row
-						if (log_row.length() > 0) {
-							logger.append(log_row);
+						if (logRow.length() > 0) {
+							logger.append(logRow);
 							continue;
 						}
 						// validation finished
@@ -163,8 +161,8 @@ public class ImportExportController {
 						task = taskSrv.save(task);
 						projectSrv.save(project);
 						wlSrv.addActivityLog(task, "", LogType.CREATE);
-						String log_header = "[Row " + row.getRowNum() + "]";
-						logger.append(log_header);
+						String logHeader = "[Row " + row.getRowNum() + "]";
+						logger.append(logHeader);
 						logger.append("Task ");
 						logger.append(task);
 						logger.append(" succesfully created");
@@ -183,9 +181,7 @@ public class ImportExportController {
 
 	@RequestMapping(value = "/task/export", method = RequestMethod.POST)
 	public HttpEntity<byte[]> exportTasks(
-			@RequestParam(value = "tasks") String[] idList,
-			RedirectAttributes ra, HttpServletRequest request,
-			HttpServletResponse response, Model model)
+			@RequestParam(value = "tasks") String[] idList)
 			throws FileNotFoundException, IOException {
 		// Prepare task list
 		List<Task> taskList = new LinkedList<Task>();
@@ -257,14 +253,14 @@ public class ImportExportController {
 	 * @param row
 	 * @return
 	 */
-	private StringBuffer verifyRow(Row row) {
-		StringBuffer logger = new StringBuffer();
-		String log_header = "[Row " + row.getRowNum() + "]";
+	private StringBuilder verifyRow(Row row) {
+		StringBuilder logger = new StringBuilder();
+		String logHeader = "[Row " + row.getRowNum() + "]";
 		for (int i = 0; i < 7; i++) {
 			Cell cell = row.getCell(i);
 			if ((cell == null || cell.getCellType() == Cell.CELL_TYPE_BLANK)
 					&& (i != ESTIMATE_CELL & i != SP_CELL & i != DUE_DATE_CELL)) {
-				logger.append(log_header);
+				logger.append(logHeader);
 				logger.append("Cell ");
 				logger.append(COLS.charAt(i));
 				logger.append(row.getRowNum());
@@ -273,35 +269,35 @@ public class ImportExportController {
 			}
 		}
 		if (!isNumericCellValid(row, SP_CELL)) {
-			logger.append(log_header);
+			logger.append(logHeader);
 			logger.append("Story points must be blank or numeric in cell ");
 			logger.append(COLS.charAt(SP_CELL));
 			logger.append(row.getRowNum());
 			logger.append(BR);
 		}
 		if (!isTaskTypeValid(row)) {
-			logger.append(log_header);
+			logger.append(logHeader);
 			logger.append("Wrong Task Priority in cell ");
 			logger.append(COLS.charAt(TYPE_CELL));
 			logger.append(row.getRowNum());
 			logger.append(BR);
 		}
 		if (!isTaskPriorityValid(row)) {
-			logger.append(log_header);
+			logger.append(logHeader);
 			logger.append("Wrong Task Priority in cell ");
 			logger.append(COLS.charAt(PRIORITY_CELL));
 			logger.append(row.getRowNum());
 			logger.append(BR);
 		}
 		if (!isDATECellValid(row, DUE_DATE_CELL)) {
-			logger.append(log_header);
+			logger.append(logHeader);
 			logger.append("Due date must be blank or date formated in cell ");
 			logger.append(COLS.charAt(DUE_DATE_CELL));
 			logger.append(row.getRowNum());
 			logger.append(BR);
 		}
 		if (logger.length() > 0) {
-			logger.append(log_header);
+			logger.append(logHeader);
 			logger.append(ROW_SKIPPED);
 		}
 		return logger;
@@ -328,13 +324,12 @@ public class ImportExportController {
 	 */
 	private boolean isDATECellValid(Row row, int cell) {
 		try {
-			if (row.getCell(cell) != null
-					&& row.getCell(cell).getCellType() != Cell.CELL_TYPE_BLANK) {
-				if (!HSSFDateUtil.isCellDateFormatted(row.getCell(cell))) {
-					return false;
-				}
+			if ((row.getCell(cell) != null && row.getCell(cell).getCellType() != Cell.CELL_TYPE_BLANK)
+					&& (!HSSFDateUtil.isCellDateFormatted(row.getCell(cell)))) {
+				return false;
 			}
 		} catch (java.lang.IllegalStateException e) {
+			LOG.error(e.getLocalizedMessage());
 			return false;
 		}
 		return true;
@@ -354,6 +349,7 @@ public class ImportExportController {
 				TaskType.toType(row.getCell(TYPE_CELL).getStringCellValue());
 				return true;
 			} catch (IllegalArgumentException e) {
+				LOG.error(e.getLocalizedMessage());
 				return false;
 			}
 		}
@@ -374,6 +370,7 @@ public class ImportExportController {
 				TaskPriority.toPriority(cell.getStringCellValue());
 				return true;
 			} catch (IllegalArgumentException e) {
+				LOG.error(e.getLocalizedMessage());
 				return false;
 			}
 		}

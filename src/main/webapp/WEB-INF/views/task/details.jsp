@@ -304,7 +304,7 @@
 						</div>
 						<input type="hidden" name="taskA" value="${task.id}">
 						<input type="hidden" id="taskB" name="taskB">
-						<div class="form-group col-md-4"  style="padding-left:20px">
+						<div class="form-group col-md-4"  style="padding-left:10px">
 							<button type="submit" class="btn btn-default a-tooltip btn-sm" title="" data-placement="top" data-original-title="<s:message code="task.link.help" arguments="${task.id}"/>">
 								<span class="glyphicon glyphicon-link"></span> <s:message code="task.link"/>
 							</button>
@@ -658,7 +658,8 @@ $(document).ready(function($) {
 						          response( cache[ term ] );
 						          return;
 						    }
-							$.getJSON("<c:url value="/project/${task.project.id}/getParticipants"/>",request,function(result) {
+							var url='<c:url value="/project/getParticipants"/>';
+							$.get(url,{id:'${task.project.id}',term:term},function(result) {
 									cache[ term ] = result;
 									response($.map(result,function(item) {
 										return {
@@ -685,7 +686,7 @@ $(document).ready(function($) {
 				delay : 500,
 				//define callback to format results
 				source : function(request, response) {
-					var url = '<c:url value="/getTasks?projectID=${task.project.id}"/>';
+					var url = '<c:url value="/getTasks?taskID=${task.id}&projectID=${task.project.id}"/>';
 					$.getJSON(url,request,function(result) {
 							response($.map(result,function(item) {
 								return {

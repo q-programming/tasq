@@ -24,7 +24,8 @@ public class TaskSorter implements Comparator<Task> {
 		switch (sortBy) {
 		case NAME:
 			result = a.getName().compareTo(b.getName());
-			return isDescending ? -result : result;
+			break;
+			//return isDescending ? -result : result;
 		case ID:
 			String a_id = a.getId().split("-")[1];
 			String b_id = b.getId().split("-")[1];
@@ -33,14 +34,16 @@ public class TaskSorter implements Comparator<Task> {
 			} else {
 				result = -1;
 			}
-			return isDescending ? -result : result;
+			break;
+			//return isDescending ? -result : result;
 		case DUE_DATE:
 			if (a.getRawDue_date().before(b.getRawDue_date())) {
 				result = -1;
 			} else {
 				result = 1;
 			}
-			return isDescending ? -result : result;
+			break;
+			//return isDescending ? -result : result;
 		case PRIORITY:
 			if (((TaskPriority) a.getPriority()).getPriority() == ((TaskPriority) b
 					.getPriority()).getPriority()) {
@@ -51,7 +54,8 @@ public class TaskSorter implements Comparator<Task> {
 			} else {
 				result = -1;
 			}
-			return isDescending ? -result : result;
+			break;
+			//return isDescending ? -result : result;
 		default:
 			result = 0;
 			break;
