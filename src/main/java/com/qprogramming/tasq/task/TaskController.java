@@ -150,20 +150,20 @@ public class TaskController {
 			task.setProject(project);
 			project.getTasks().add(task);
 			// assigne
-			if(taskForm.getAssignee()!=null){
+			if (taskForm.getAssignee() != null) {
 				Account assignee = accSrv.findById(taskForm.getAssignee());
-				task.setAssignee(assignee);	
+				task.setAssignee(assignee);
 			}
 			// lookup for sprint
 			if (taskForm.getAddToSprint() != null) {
 				Sprint sprint = sprintRepository.findByProjectIdAndSprintNo(
-						project.getId(), taskForm.getAddToSprint()); 
+						project.getId(), taskForm.getAddToSprint());
 				task.addSprint(sprint);
-				//increase scope
-				if(sprint.isActive()){
+				// increase scope
+				if (sprint.isActive()) {
 					wlSrv.addActivityLog(task, null, LogType.TASKSPRINTADD);
 				}
-				//TODO
+				// TODO
 			}
 			// Create log work
 			taskSrv.save(task);
@@ -272,8 +272,8 @@ public class TaskController {
 
 	@Transactional
 	@RequestMapping(value = "task", method = RequestMethod.GET)
-	public String showDetails(@RequestParam(value = "id") String id,Model model,
-			RedirectAttributes ra) {
+	public String showDetails(@RequestParam(value = "id") String id,
+			Model model, RedirectAttributes ra) {
 		Task task = taskSrv.findById(id);
 		if (task == null) {
 			MessageHelper.addErrorAttribute(
@@ -790,10 +790,15 @@ public class TaskController {
 	@RequestMapping(value = "/getTasks", method = RequestMethod.GET)
 	public @ResponseBody
 	List<DisplayTask> showTasks(@RequestParam Long projectID,
+			@RequestParam(required = false) String taskID,
 			@RequestParam String term, HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projectSrv.findById(projectID);
 		List<Task> allTasks = taskSrv.findAllByProject(project);
+		if(taskID!=null){
+			Task task = taskSrv.findById(taskID);
+			allTasks.remove(task);
+		}
 		List<DisplayTask> result = new ArrayList<DisplayTask>();
 		for (Task task : allTasks) {
 			if (term == null) {

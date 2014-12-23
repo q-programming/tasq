@@ -686,7 +686,7 @@ $(document).ready(function($) {
 				delay : 500,
 				//define callback to format results
 				source : function(request, response) {
-					var url = '<c:url value="/getTasks?projectID=${task.project.id}"/>';
+					var url = '<c:url value="/getTasks?taskID=${task.id}&projectID=${task.project.id}"/>';
 					$.getJSON(url,request,function(result) {
 							response($.map(result,function(item) {
 								return {
