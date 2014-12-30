@@ -111,7 +111,7 @@
 					</c:forEach>
 				</ul>
 			</div>
-			<span class="help-block"><s:message code="task.type.help" /> <a href="#"><span class="glyphicon glyphicon-question-sign"></span></a></span>
+			<span class="help-block"><s:message code="task.type.help" /> <a href="#" style="color:black"><span class="glyphicon glyphicon-question-sign"></span></a></span>
 			<form:hidden path="type" id="type" value="${fn:toUpperCase(project.default_type)}"/>
 			<form:errors path="type" element="p" class="text-danger" />
 		</div>
@@ -152,6 +152,7 @@
 			</div>
 		<select class="form-control" id="addToSprint" name="addToSprint" style="width:300px;">
 		</select>
+		<div id="sprintWarning" style="color: darkorange;margin-top: 10px;"></div>
 		</div>
 		<%-- Estimate --%>
 		<div class="mod-header">
@@ -239,6 +240,17 @@ $(document).ready(function($) {
 		getDefaultAssignee();
 		fillSprints();
 	});
+	
+	$("#addToSprint").change(function(){
+		$("#sprintWarning").html('');
+		var active = $('#addToSprint option:selected').data('active');
+		if(active){
+			var message = '<span class="glyphicon glyphicon-exclamation-sign"></span>'
+						+ ' <s:message code="task.sprint.add.warning"/>';
+			$("#sprintWarning").html(message);
+		}
+	});
+	
 	fillSprints();
 	getDefaultAssignee();
 	$("#assignee_auto").click(function(){
@@ -316,6 +328,7 @@ $(document).ready(function($) {
 	function fillSprints(){
 		$.get('<c:url value="/getSprints"/>',{projectID:$("#projects_list").val()},function(result){
 			$('#addToSprint').empty();
+			$('#addToSprint').append("<option></option>");
 			$.each(result, function(key, sprint) {
 				var isActive = "";
 				if (sprint.active){
@@ -324,6 +337,7 @@ $(document).ready(function($) {
 			    $('#addToSprint')
 			         .append($("<option></option>")
 			         .attr("value",sprint.sprintNo)
+			         .attr("data-active",sprint.active)
 			         .text("Sprint " + sprint.sprintNo + isActive));
 			     $('#addToSprint').val('');
 			});
