@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
@@ -22,6 +23,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -36,10 +42,14 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.qprogramming.tasq.error.TasqAuthException;
+import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.AccountSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
+import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
+import com.qprogramming.tasq.task.worklog.WorkLog;
 
 @Controller
 @Secured("ROLE_USER")
@@ -111,43 +121,6 @@ public class AccountController {
 		return "redirect:/settings";
 	}
 
-	@RequestMapping(value = "/users", method = RequestMethod.GET)
-	public String listUsers(
-			@RequestParam(value = "name", required = false) String name,
-			@RequestParam(value = "sort", required = false) String sortBy,
-			@RequestParam(value = "desc", required = false) String desc,
-			Model model) {
-		List<Account> accountsList;
-
-		if (name != null && name != "") {
-			accountsList = accountSrv.findByNameStartingWith(name);
-			accountsList.addAll(accountSrv.findBySurnameStartingWith(name));
-		} else {
-			accountsList = accountSrv.findAll();
-		}
-
-		// Accounts sorting
-		boolean descending = Boolean.parseBoolean(desc);
-		sortBy = sortBy != null ? sortBy : "";
-		if (SORT_BY_NAME.equals(sortBy)) {
-			Collections.sort(accountsList, new AccountSorter(
-					AccountSorter.SORTBY.NAME, descending));
-		} else if (SORT_BY_EMAIL.equals(sortBy)) {
-			Collections.sort(accountsList, new AccountSorter(
-					AccountSorter.SORTBY.EMAIL, descending));
-		} else {
-			Collections.sort(accountsList, new AccountSorter(
-					AccountSorter.SORTBY.SURNAME, descending));
-			sortBy = SORT_BY_SURNAME;
-		}
-
-		model.addAttribute("sort", sortBy);
-		model.addAttribute("desc", descending);
-		model.addAttribute("name", name);
-		model.addAttribute("accountsList", accountsList);
-		return "user/list";
-	}
-
 	@RequestMapping(value = "/user", method = RequestMethod.GET)
 	public String getUser(@RequestParam(value = "id") Long id, Model model,
 			RedirectAttributes ra) {
@@ -200,6 +173,25 @@ public class AccountController {
 		}
 		return result;
 	}
+	@RequestMapping(value = "/users", method = RequestMethod.GET)
+	public @ResponseBody
+	Page<DisplayAccount> listUsers(@RequestParam(required=false) String term,
+			@PageableDefault(size = 25, page = 0, sort = "surname", direction = Direction.ASC) Pageable p) {
+		Page<Account> page;
+		if(term!=null){
+			page = accountSrv.findByStartingWith(term, p);	
+		}else{
+			page = accountSrv.findAll(p);
+		}
+		List<DisplayAccount> list = new LinkedList<DisplayAccount>();
+		for (Account account : page) {
+			list.add(new DisplayAccount(account));
+		}
+		Page<DisplayAccount> result = new PageImpl<DisplayAccount>(list, p,
+				page.getTotalElements());
+		return result;
+	}
+	
 
 	@RequestMapping(value = "role", method = RequestMethod.POST, produces = "text/plain;charset=UTF-8")
 	@ResponseBody

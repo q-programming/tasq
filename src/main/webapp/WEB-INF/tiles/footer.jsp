@@ -16,6 +16,7 @@
 		</div>
 	</div>
 </c:if>
+<jsp:include page="../views/modals/users.jsp" />
 </security:authorize>
 <script>
 	$(function() {
