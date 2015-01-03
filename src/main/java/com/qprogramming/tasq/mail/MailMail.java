@@ -33,10 +33,10 @@ public class MailMail {
 	private String pass;
 
 	@Value("${email.smtp.auth}")
-	private String smtp_auth;
+	private String smtpAuth;
 
 	@Value("${email.smtp.starttls}")
-	private String smtp_starttls;
+	private String smtpStarttls;
 
 	@Value("${email.encoding}")
 	private String encoding;
@@ -81,9 +81,9 @@ public class MailMail {
 		jmsi.setPassword(pass);
 
 		Properties javaMailProperties = new Properties();
-		javaMailProperties.setProperty("mail.smtp.auth", smtp_auth);
+		javaMailProperties.setProperty("mail.smtp.auth", smtpAuth);
 		javaMailProperties.setProperty("mail.smtp.starttls.enable",
-				smtp_starttls);
+				smtpStarttls);
 		jmsi.setJavaMailProperties(javaMailProperties);
 		mailSender = jmsi;
 		return mailSender;
@@ -107,7 +107,6 @@ public class MailMail {
 		MimeMessage message = ((JavaMailSenderImpl) mailSender)
 				.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message, encoding);
-		// SimpleMailMessage message = new SimpleMailMessage();
 		try {
 			switch (type) {
 			case NOTIFICATION:

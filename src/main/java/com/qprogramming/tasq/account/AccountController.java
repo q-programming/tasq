@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -29,7 +28,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -42,23 +40,14 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.qprogramming.tasq.error.TasqAuthException;
-import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.Utils;
-import com.qprogramming.tasq.support.sorters.AccountSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
-import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
-import com.qprogramming.tasq.task.worklog.WorkLog;
 
 @Controller
 @Secured("ROLE_USER")
 public class AccountController {
 	private static final int DEFAULT_WIDTH_HEIGHT = 150;
-	private static final String SORT_BY_NAME = "name";
-	private static final String SORT_BY_EMAIL = "email";
-	private static final String SORT_BY_SURNAME = "surname";
-
 	private AccountService accountSrv;
 	private ProjectService projSrv;
 	private SessionLocaleResolver localeResolver;
@@ -173,14 +162,16 @@ public class AccountController {
 		}
 		return result;
 	}
+
 	@RequestMapping(value = "/users", method = RequestMethod.GET)
 	public @ResponseBody
-	Page<DisplayAccount> listUsers(@RequestParam(required=false) String term,
+	Page<DisplayAccount> listUsers(
+			@RequestParam(required = false) String term,
 			@PageableDefault(size = 25, page = 0, sort = "surname", direction = Direction.ASC) Pageable p) {
 		Page<Account> page;
-		if(term!=null){
-			page = accountSrv.findByStartingWith(term, p);	
-		}else{
+		if (term != null) {
+			page = accountSrv.findByStartingWith(term, p);
+		} else {
 			page = accountSrv.findAll(p);
 		}
 		List<DisplayAccount> list = new LinkedList<DisplayAccount>();
@@ -191,7 +182,6 @@ public class AccountController {
 				page.getTotalElements());
 		return result;
 	}
-	
 
 	@RequestMapping(value = "role", method = RequestMethod.POST, produces = "text/plain;charset=UTF-8")
 	@ResponseBody

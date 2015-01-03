@@ -315,7 +315,7 @@ public class SprintController {
 	@Transactional
 	@RequestMapping(value = "/scrum/stop", method = RequestMethod.GET)
 	public String finishSprint(@RequestParam(value = "id") Long id,
-			Model model, HttpServletRequest request, RedirectAttributes ra) {
+			HttpServletRequest request, RedirectAttributes ra) {
 		Sprint sprint = sprintRepo.findById(id);
 		if (sprint != null) {
 			Project project = projSrv.findById(sprint.getProject().getId());
@@ -378,13 +378,12 @@ public class SprintController {
 							+ "/scrum/backlog";
 				}
 			}
-
 			Sprint lastSprint = sprintRepo.findByProjectIdAndActiveTrue(project
 					.getId());
 			if (lastSprint == null) {
 				List<Sprint> sprints = sprintRepo.findByProjectId(project
 						.getId());
-				if (sprints.size() == 0) {
+				if (sprints.isEmpty()) {
 					MessageHelper.addWarningAttribute(ra, msg.getMessage(
 							"agile.sprint.noSprints", null,
 							Utils.getCurrentLocale()));
@@ -416,7 +415,7 @@ public class SprintController {
 			// Fill maps based on time or story point driven board
 			LocalDate startTime = new LocalDate(sprint.getRawStart_date());
 			LocalDate endTime = new LocalDate(sprint.getRawEnd_date());
-			int sprint_days = Days.daysBetween(startTime, endTime).getDays() + 1;
+			int sprintDays = Days.daysBetween(startTime, endTime).getDays() + 1;
 			boolean timeTracked = project.getTimeTracked();
 			List<WorkLog> wrkList = wrkLogSrv.getSprintEvents(sprint,
 					timeTracked);
@@ -430,7 +429,7 @@ public class SprintController {
 						.getStandardHours());
 				resultsIdeal.put(endTime.toString(), 0);
 				// Iterate over sprint days
-				for (int i = 0; i < sprint_days; i++) {
+				for (int i = 0; i < sprintDays; i++) {
 					LocalDate date = startTime.plusDays(i);
 					Period value = timeBurndownMap.get(date);
 					remaining_estimate = PeriodHelper.minusPeriods(
@@ -454,7 +453,7 @@ public class SprintController {
 				Integer burned = new Integer(0);
 				resultsIdeal.put(startTime.toString(), remainingEstimate);
 				resultsIdeal.put(endTime.toString(), 0);
-				for (int i = 0; i < sprint_days; i++) {
+				for (int i = 0; i < sprintDays; i++) {
 					LocalDate date = startTime.plusDays(i);
 					Integer value = burndownMap.get(date);
 					Integer valueBurned = burnedMap.get(date);
@@ -573,17 +572,18 @@ public class SprintController {
 	}
 
 	private Integer addOrSubstract(WorkLog workLog, Integer value) {
+		Integer result = value;
 		Integer taskStoryPoints = workLog.getTask().getStory_points();
 		if (LogType.REOPEN.equals(workLog.getType())
 				|| LogType.TASKSPRINTADD.equals(workLog.getType())) {
 			taskStoryPoints *= -1;
 		}
 		if (value == null) {
-			value = taskStoryPoints;
+			result = taskStoryPoints;
 		} else {
-			value += taskStoryPoints;
+			result += taskStoryPoints;
 		}
-		return value;
+		return result;
 	}
 
 	/**
