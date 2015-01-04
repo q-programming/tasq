@@ -89,8 +89,135 @@
 		</div>
 	</div>
 </div>
+<div id="chartdiv2" style="height:500px;width:90%"></div>
+<div id="chartdiv3" style="height:500px;width:90%"></div>
 <script>
-	$(document).ready(function() {
+$(document).ready(function() {
+		var timeTracked = ${project.timeTracked};
+		var labelFormat = '%s SP';
+		if (timeTracked){
+			labelFormat = '%s h';
+		}
+		//init arrays and remove first element via pop()
+	    time = new Array([]);
+	    left = new Array([]);
+	    burned = new Array([]);
+	    ideal = new Array([]);
+	    time.pop();
+	    left.pop();
+	    burned.pop();
+	    ideal.pop();
+	    $.get('<c:url value="/${project.projectId}/sprint/burndown"/>',{sprint:4},function(result){
+// 	    	console.log(result);
+	    	$.each(result.timeBurned, function(key,val){
+	    		time.push([key, val]);
+	    	});
+	    	$.each(result.left, function(key,val){
+	    		left.push([key, val]);
+	    	});
+	    	$.each(result.pointsBurned, function(key,val){
+	    		burned.push([key, val]);
+	    	});
+	    	$.each(result.ideal, function(key,val){
+	    		ideal.push([key, val]);
+	    	});
+	    	console.log(time);
+	    	console.log("Left:");
+	    	console.log(left);
+	    	console.log("Burned:");
+	    	console.log(burned);
+	    	console.log("Ideal:");
+	    	console.log(ideal);
+			var plot = $.jqplot('chartdiv', [ left,burned,ideal ], {
+				title : 'Sprint ${sprint.sprintNo}<p style="font-size: xx-small;">${sprint.start_date} - ${sprint.end_date}</p>',
+				animate: true,
+				highlighter : {
+					show : true,
+					sizeAdjust : 7.5
+				},
+				axesDefaults : {
+					labelRenderer : $.jqplot.CanvasAxisLabelRenderer
+				},
+				axes : {
+					xaxis : {
+						renderer:$.jqplot.DateAxisRenderer, 
+				        tickOptions:{formatString:'%#d-%m'},
+						pad : 0
+					},
+					yaxis : {
+						pad : 0,
+						tickOptions : {
+							formatString : labelFormat,
+							show : true
+						}
+					}
+				},
+				series:[
+				    {
+					    label: '<s:message code="agile.remaining"/>',
+				    },
+				    {
+					    label: '<s:message code="agile.burned"/>',
+				    },
+				    {
+					    color: '#B34202',
+					    label: '<s:message code="agile.ideal"/>',
+					    lineWidth:1, 
+					    markerOptions: {
+				            show: false,  
+				        }
+				    }],
+				legend: {
+				        show: true,
+				        location: 'ne',     
+				        xoffset: 12,        
+				        yoffset: 12,        
+				    }
+			});
+			var plot2 = $.jqplot('chartdiv2', [ time ], {
+				title : 'Time',
+				highlighter : {
+					show : true,
+					sizeAdjust : 7.5
+				},
+				animate: true,
+				axesDefaults : {
+					labelRenderer : $.jqplot.CanvasAxisLabelRenderer
+				},
+				axes : {
+					xaxis : {
+						renderer:$.jqplot.DateAxisRenderer, 
+				        tickOptions:{formatString:'%#d-%m'},
+						pad : 0
+					},
+					yaxis : {
+						pad : 0,
+						tickOptions : {
+							formatString : '%s h',
+							show : true
+						}
+					}
+				},
+				seriesDefaults: {
+			           fill: true,
+			    },
+				series:[
+				    {
+					    label: 'Time',
+					    rendererOptions: {
+			                smooth: true
+			            },
+					    color:'#5FAB78'
+				    }],
+				legend: {
+				        show: true,
+				        location: 'ne',     
+				        xoffset: 12,        
+				        yoffset: 12,        
+				    }
+			});
+	    });
+		
 		$('td[rel=popover]').popover({
 			html : true,
 			trigger : 'hover',
@@ -103,58 +230,54 @@
 				return html;
 			}});
 // 		jqPlot
-		var timeTracked = ${project.timeTracked};
-		var labelFormat = '%s SP';
-		if (timeTracked){
-			labelFormat = '%s h';
-		}		
-		var burned = [${burned}];
-		var left = [${left}];
-		var ideal = [${ideal}];
-		var plot = $.jqplot('chartdiv', [ left,burned,ideal ], {
-			title : 'Sprint ${sprint.sprintNo}<p style="font-size: xx-small;">${sprint.start_date} - ${sprint.end_date}</p>',
-			highlighter : {
-				show : true,
-				sizeAdjust : 7.5
-			},
-			axesDefaults : {
-				labelRenderer : $.jqplot.CanvasAxisLabelRenderer
-			},
-			axes : {
-				xaxis : {
-					renderer:$.jqplot.DateAxisRenderer, 
-			        tickOptions:{formatString:'%#d-%m'},
-					pad : 0
-				},
-				yaxis : {
-					pad : 0,
-					tickOptions : {
-						formatString : labelFormat,
-						show : true
-					}
-				}
-			},
-			series:[
-			    {
-				    label: '<s:message code="agile.remaining"/>',
-			    },
-			    {
-				    label: '<s:message code="agile.burned"/>',
-			    },
-			    {
-				    color: '#B34202',
-				    label: '<s:message code="agile.ideal"/>',
-				    lineWidth:1, 
-				    markerOptions: {
-			            show: false,  
-			        }
-			    }],
-			legend: {
-			        show: true,
-			        location: 'ne',     
-			        xoffset: 12,        
-			        yoffset: 12,        
-			    }
-		});
+		
+// 		var burned = [${burned}];
+// 		var left = [${left}];
+// 		var ideal = [${ideal}];
+// 		var plot = $.jqplot('chartdiv', [ left,burned,ideal ], {
+// 			title : 'Sprint ${sprint.sprintNo}<p style="font-size: xx-small;">${sprint.start_date} - ${sprint.end_date}</p>',
+// 			highlighter : {
+// 				show : true,
+// 				sizeAdjust : 7.5
+// 			},
+// 			axesDefaults : {
+// 				labelRenderer : $.jqplot.CanvasAxisLabelRenderer
+// 			},
+// 			axes : {
+// 				xaxis : {
+// 					renderer:$.jqplot.DateAxisRenderer, 
+// 			        tickOptions:{formatString:'%#d-%m'},
+// 					pad : 0
+// 				},
+// 				yaxis : {
+// 					pad : 0,
+// 					tickOptions : {
+// 						formatString : labelFormat,
+// 						show : true
+// 					}
+// 				}
+// 			},
+// 			series:[
+// 			    {
+// 				    label: '<s:message code="agile.remaining"/>',
+// 			    },
+// 			    {
+// 				    label: '<s:message code="agile.burned"/>',
+// 			    },
+// 			    {
+// 				    color: '#B34202',
+// 				    label: '<s:message code="agile.ideal"/>',
+// 				    lineWidth:1, 
+// 				    markerOptions: {
+// 			            show: false,  
+// 			        }
+// 			    }],
+// 			legend: {
+// 			        show: true,
+// 			        location: 'ne',     
+// 			        xoffset: 12,        
+// 			        yoffset: 12,        
+// 			    }
+// 		});
 	});
 </script>

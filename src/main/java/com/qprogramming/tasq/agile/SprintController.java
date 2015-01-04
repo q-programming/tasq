@@ -495,7 +495,7 @@ public class SprintController {
 	 * @param ra
 	 * @return
 	 */
-	@RequestMapping(value = "/{id}/scrum/sprint/burndown", method = RequestMethod.GET, produces = "application/json")
+	@RequestMapping(value = "/{id}/sprint/burndown", method = RequestMethod.GET, produces = "application/json")
 	public @ResponseBody
 	BurndownChart showBurndownChart(@PathVariable String id,
 			@RequestParam(value = "sprint") Long sprintNo) {
