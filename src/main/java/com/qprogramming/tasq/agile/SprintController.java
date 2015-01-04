@@ -361,7 +361,7 @@ public class SprintController {
 		Map<String, Integer> resultsEstimates = new LinkedHashMap<String, Integer>();
 		Map<String, Integer> resultsBurned = new LinkedHashMap<String, Integer>();
 		Map<String, Integer> resultsIdeal = new LinkedHashMap<String, Integer>();
-		Map<LocalDate, Integer> burndownMap = new HashMap<LocalDate, Integer>();
+		Map<LocalDate, Integer> leftMap = new HashMap<LocalDate, Integer>();
 		Map<LocalDate, Integer> burnedMap = new HashMap<LocalDate, Integer>();
 		Map<LocalDate, Period> timeBurndownMap = new HashMap<LocalDate, Period>();
 		Project project = projSrv.findByProjectId(id);
@@ -420,7 +420,7 @@ public class SprintController {
 			List<WorkLog> wrkList = wrkLogSrv.getSprintEvents(sprint,
 					timeTracked);
 			if (timeTracked) {
-				timeBurndownMap = fillTimeBurndownMap(wrkList);
+				timeBurndownMap = fillTimeMap(wrkList);
 				Period remaining_estimate = sprint.getTotalEstimate();
 				Period burned = new Period();
 				// Fill ideal burndown
@@ -447,22 +447,22 @@ public class SprintController {
 					}
 				}
 			} else {
-				burndownMap = fillBurndownMap(wrkList);
-				burnedMap = fillBurnednMap(wrkList);
+				leftMap = fillLeftMap(wrkList, false);
+				burnedMap = fillBurnednMap(wrkList,false);
 				Integer remainingEstimate = sprint.getTotalStoryPoints();
 				Integer burned = new Integer(0);
 				resultsIdeal.put(startTime.toString(), remainingEstimate);
 				resultsIdeal.put(endTime.toString(), 0);
 				for (int i = 0; i < sprintDays; i++) {
 					LocalDate date = startTime.plusDays(i);
-					Integer value = burndownMap.get(date);
+					Integer value = leftMap.get(date);
 					Integer valueBurned = burnedMap.get(date);
-					value=value==null?0:value;
-					valueBurned= valueBurned==null?0:valueBurned;
-					
+					value = value == null ? 0 : value;
+					valueBurned = valueBurned == null ? 0 : valueBurned;
+
 					remainingEstimate -= value;
 					burned += valueBurned;
-					
+
 					if (date.isAfter(LocalDate.now())) {
 						resultsEstimates.put(date.toString(), null);
 						resultsBurned.put(date.toString(), null);
@@ -483,6 +483,93 @@ public class SprintController {
 			model.addAttribute("ideal", formatResults(resultsIdeal));
 		}
 		return "/scrum/burndown";
+	}
+
+	/**
+	 * Retrieves burndown map for sprint. No extra checking, only if exists and
+	 * if is started;
+	 * 
+	 * @param id
+	 * @param sprintNo
+	 * @param model
+	 * @param ra
+	 * @return
+	 */
+	@RequestMapping(value = "/{id}/scrum/sprint/burndown", method = RequestMethod.GET, produces = "application/json")
+	public @ResponseBody
+	BurndownChart showBurndownChart(@PathVariable String id,
+			@RequestParam(value = "sprint") Long sprintNo) {
+		BurndownChart result = new BurndownChart();
+		Map<LocalDate, Integer> leftMap = new HashMap<LocalDate, Integer>();
+		Map<LocalDate, Integer> burnedMap = new HashMap<LocalDate, Integer>();
+		Map<LocalDate, Period> timeBurndownMap = new HashMap<LocalDate, Period>();
+		Project project = projSrv.findByProjectId(id);
+		if (project != null) {
+			Sprint sprint = sprintRepo.findByProjectIdAndSprintNo(
+					project.getId(), sprintNo);
+			if (sprint == null
+					|| (sprint.getRawEnd_date() == null & !sprint.isActive())) {
+				String message = msg.getMessage("agile.sprint.notStarted",
+						new Object[] { sprintNo }, Utils.getCurrentLocale());
+				result.setMessage(message);
+				return result;
+			}
+			// Fill maps based on time or story point driven board
+			LocalDate startTime = new LocalDate(sprint.getRawStart_date());
+			LocalDate endTime = new LocalDate(sprint.getRawEnd_date());
+			int sprintDays = Days.daysBetween(startTime, endTime).getDays() + 1;
+			boolean timeTracked = project.getTimeTracked();
+			List<WorkLog> wrkList = wrkLogSrv.getAllSprintEvents(sprint);
+			result.setTimeBurned(fillTimeBurndownMap(wrkList, startTime,
+					endTime));
+			if (timeTracked) {
+				Period remaining_estimate = sprint.getTotalEstimate();
+				Period burned = new Period();
+				// Fill ideal burndown
+				result.createIdeal(startTime.toString(), (int) sprint
+						.getTotalEstimate().toStandardDuration()
+						.getStandardHours(), endTime.toString());
+				// Iterate over sprint days
+				for (int i = 0; i < sprintDays; i++) {
+					LocalDate date = startTime.plusDays(i);
+					Period value = timeBurndownMap.get(date);
+					remaining_estimate = PeriodHelper.minusPeriods(
+							remaining_estimate, value);
+					burned = PeriodHelper.plusPeriods(burned, value);
+					if (date.isAfter(LocalDate.now())) {
+						result.putToLeft(date.toString(), null);
+					} else {
+						result.putToLeft(date.toString(),
+								(int) remaining_estimate.toStandardDuration()
+										.getStandardHours());
+					}
+				}
+			} else {
+				leftMap = fillLeftMap(wrkList, false);
+				burnedMap = fillBurnednMap(wrkList,false);
+				Integer remainingEstimate = sprint.getTotalStoryPoints();
+				Integer burned = new Integer(0);
+				result.createIdeal(startTime.toString(), remainingEstimate,
+						endTime.toString());
+				for (int i = 0; i < sprintDays; i++) {
+					LocalDate date = startTime.plusDays(i);
+					Integer value = leftMap.get(date);
+					Integer valueBurned = burnedMap.get(date);
+					value = value == null ? 0 : value;
+					valueBurned = valueBurned == null ? 0 : valueBurned;
+					remainingEstimate -= value;
+					burned += valueBurned;
+					if (date.isAfter(LocalDate.now())) {
+						result.putToLeft(date.toString(), null);
+						result.getPointsBurned().put(date.toString(), null);
+					} else {
+						result.putToLeft(date.toString(), remainingEstimate);
+						result.getPointsBurned().put(date.toString(), burned);
+					}
+				}
+			}
+		}
+		return result;
 	}
 
 	@RequestMapping(value = "/getSprints", method = RequestMethod.GET)
@@ -515,6 +602,26 @@ public class SprintController {
 		return sprint.isActive();
 	}
 
+	private Map<String, Integer> fillTimeBurndownMap(List<WorkLog> wrkList,
+			LocalDate startTime, LocalDate endTime) {
+		int sprintDays = Days.daysBetween(startTime, endTime).getDays() + 1;
+		Map<LocalDate, Period> timeBurndownMap = fillTimeMap(wrkList);
+		Map<String, Integer> resultsBurned = new LinkedHashMap<String, Integer>();
+		Period burned = new Period();
+		for (int i = 0; i < sprintDays; i++) {
+			LocalDate date = startTime.plusDays(i);
+			Period value = timeBurndownMap.get(date);
+			burned = PeriodHelper.plusPeriods(burned, value);
+			if (date.isAfter(LocalDate.now())) {
+				resultsBurned.put(date.toString(), null);
+			} else {
+				resultsBurned.put(date.toString(), (int) burned
+						.toStandardDuration().getStandardHours());
+			}
+		}
+		return resultsBurned;
+	}
+
 	/**
 	 * Fills burndown map with worklogs in format <Date, Period Burned> Only
 	 * events with before present day are added
@@ -523,17 +630,20 @@ public class SprintController {
 	 * 
 	 * @return
 	 **/
-	private Map<LocalDate, Period> fillTimeBurndownMap(List<WorkLog> worklogList) {
+	private Map<LocalDate, Period> fillTimeMap(List<WorkLog> worklogList) {
 		Map<LocalDate, Period> burndownMap = new LinkedHashMap<LocalDate, Period>();
 		for (WorkLog workLog : worklogList) {
-			LocalDate dateLogged = new LocalDate(workLog.getRawTime());
-			Period value = burndownMap.get(dateLogged);
-			if (value == null) {
-				value = workLog.getActivity();
-			} else {
-				value = PeriodHelper.plusPeriods(value, workLog.getActivity());
+			if (workLog.getActivity() != null) {
+				LocalDate dateLogged = new LocalDate(workLog.getRawTime());
+				Period value = burndownMap.get(dateLogged);
+				if (value == null) {
+					value = workLog.getActivity();
+				} else {
+					value = PeriodHelper.plusPeriods(value,
+							workLog.getActivity());
+				}
+				burndownMap.put(dateLogged, value);
 			}
-			burndownMap.put(dateLogged, value);
 		}
 		return burndownMap;
 	}
@@ -545,33 +655,69 @@ public class SprintController {
 	 *            list of events with task closed event
 	 * @return
 	 */
-	private Map<LocalDate, Integer> fillBurndownMap(List<WorkLog> worklogList) {
+	private Map<LocalDate, Integer> fillLeftMap(List<WorkLog> worklogList,
+			boolean time) {
 		Map<LocalDate, Integer> burndownMap = new LinkedHashMap<LocalDate, Integer>();
 		for (WorkLog workLog : worklogList) {
 			LocalDate dateLogged = new LocalDate(workLog.getRawTime());
-			Integer value = burndownMap.get(dateLogged);
-			value = addOrSubstract(workLog, value);
-			burndownMap.put(dateLogged, value);
+			if (time) {
+				Integer value = burndownMap.get(dateLogged);
+				value = addOrSubstractTime(workLog, value);
+				burndownMap.put(dateLogged, value);
+			} else {
+				if (workLog.getActivity() == null) {
+					Integer value = burndownMap.get(dateLogged);
+					value = addOrSubstractPoints(workLog, value);
+					burndownMap.put(dateLogged, value);
+				}
+			}
 		}
 		return burndownMap;
 	}
 
-	private Map<LocalDate, Integer> fillBurnednMap(List<WorkLog> worklogList) {
+	private Map<LocalDate, Integer> fillBurnednMap(List<WorkLog> worklogList,
+			boolean time) {
 		Map<LocalDate, Integer> burndedMap = new LinkedHashMap<LocalDate, Integer>();
 		for (WorkLog workLog : worklogList) {
-			if (!LogType.TASKSPRINTADD.equals(workLog.getType())
+			if (!LogType.ESTIMATE.equals(workLog.getType())
+					&& !LogType.TASKSPRINTADD.equals(workLog.getType())
 					&& !LogType.TASKSPRINTREMOVE.equals(workLog.getType())) {
 				LocalDate dateLogged = new LocalDate(workLog.getRawTime());
-				Integer value = burndedMap.get(dateLogged);
-				// If task reopened then re-add SP
-				value = addOrSubstract(workLog, value);
-				burndedMap.put(dateLogged, value);
+				if (time) {
+					Integer value = burndedMap.get(dateLogged);
+					// If task reopened then re-add SP
+					value = addOrSubstractTime(workLog, value);
+					burndedMap.put(dateLogged, value);
+				} else {
+					if (workLog.getActivity() == null) {
+						Integer value = burndedMap.get(dateLogged);
+						// If task reopened then re-add SP
+						value = addOrSubstractPoints(workLog, value);
+						burndedMap.put(dateLogged, value);
+					}
+				}
 			}
 		}
 		return burndedMap;
 	}
 
-	private Integer addOrSubstract(WorkLog workLog, Integer value) {
+	// TODO check if estimate left was changed!!!!
+	private Integer addOrSubstractTime(WorkLog workLog, Integer value) {
+		Integer result = value;
+		Integer taskStoryPoints = workLog.getTask().getStory_points();
+		if (LogType.REOPEN.equals(workLog.getType())
+				|| LogType.TASKSPRINTADD.equals(workLog.getType())) {
+			taskStoryPoints *= -1;
+		}
+		if (value == null) {
+			result = taskStoryPoints;
+		} else {
+			result += taskStoryPoints;
+		}
+		return result;
+	}
+
+	private Integer addOrSubstractPoints(WorkLog workLog, Integer value) {
 		Integer result = value;
 		Integer taskStoryPoints = workLog.getTask().getStory_points();
 		if (LogType.REOPEN.equals(workLog.getType())
@@ -624,5 +770,69 @@ public class SprintController {
 		return (repo_project.getAdministrators().contains(current_account)
 				|| repo_project.getParticipants().contains(current_account) || Roles
 					.isAdmin());
+	}
+
+	class BurndownChart {
+		private Map<String, Integer> left;
+		private Map<String, Integer> pointsBurned;
+		private Map<String, Integer> ideal;
+		private Map<String, Integer> timeBurned;
+		private String message;
+
+		public BurndownChart() {
+			left = new LinkedHashMap<String, Integer>();
+			pointsBurned = new LinkedHashMap<String, Integer>();
+			ideal = new LinkedHashMap<String, Integer>();
+			timeBurned = new LinkedHashMap<String, Integer>();
+		}
+
+		public String getMessage() {
+			return message;
+		}
+
+		public void setMessage(String message) {
+			this.message = message;
+		}
+
+		public Map<String, Integer> getLeft() {
+			return left;
+		}
+
+		public Map<String, Integer> getIdeal() {
+			return ideal;
+		}
+
+		public void setLeft(Map<String, Integer> left) {
+			this.left = left;
+		}
+
+		public void setIdeal(Map<String, Integer> ideal) {
+			this.ideal = ideal;
+		}
+
+		public Map<String, Integer> getPointsBurned() {
+			return pointsBurned;
+		}
+
+		public Map<String, Integer> getTimeBurned() {
+			return timeBurned;
+		}
+
+		public void setPointsBurned(Map<String, Integer> pointsBurned) {
+			this.pointsBurned = pointsBurned;
+		}
+
+		public void setTimeBurned(Map<String, Integer> timeBurned) {
+			this.timeBurned = timeBurned;
+		}
+
+		public void createIdeal(String startTime, int value, String endTime) {
+			ideal.put(startTime, value);
+			ideal.put(endTime, 0);
+		}
+
+		public void putToLeft(String time, Integer value) {
+			left.put(time, value);
+		}
 	}
 }

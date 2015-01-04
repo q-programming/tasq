@@ -183,6 +183,24 @@ public class WorkLogService {
 		}
 	}
 
+	public List<WorkLog> getAllSprintEvents(Sprint sprint) {
+		LocalDate start = new LocalDate(sprint.getRawStart_date()).minusDays(1);
+		LocalDate end = new LocalDate(sprint.getRawEnd_date()).plusDays(1);
+		List<WorkLog> list = wlRepo
+				.findByProjectIdAndTimeBetweenAndWorklogtaskNotNullOrderByTimeAsc(
+						sprint.getProject().getId(), start.toDate(),
+						end.toDate());
+		List<WorkLog> result = new LinkedList<WorkLog>();
+		// Filterout not important events
+		for (WorkLog workLog : list) {
+			if (isSprintRelevant(workLog)) {
+				result.add(workLog);
+			}
+		}
+
+		return result;
+	}
+
 	public Page<WorkLog> findByProjectId(Long id, Pageable p) {
 		return wlRepo.findByProjectId(id, p);
 	}
@@ -200,6 +218,15 @@ public class WorkLogService {
 			result.add(new DisplayWorkLog(workLog));
 		}
 		return result;
+	}
+
+	private boolean isSprintRelevant(WorkLog workLog) {
+		LogType type = (LogType) workLog.getType();
+		return type.equals(LogType.DELETED) || type.equals(LogType.LOG)
+				|| type.equals(LogType.TASKSPRINTREMOVE)
+				|| type.equals(LogType.TASKSPRINTADD)
+				|| type.equals(LogType.ESTIMATE) || type.equals(LogType.CLOSED)
+				|| type.equals(LogType.REOPEN);
 	}
 
 }
