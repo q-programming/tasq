@@ -1,7 +1,5 @@
 package com.qprogramming.tasq.agile;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -11,13 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.persistence.Column;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
 import org.hibernate.Hibernate;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
@@ -35,7 +29,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.account.Account;
-import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
@@ -354,7 +347,7 @@ public class SprintController {
 	}
 
 	@Transactional
-	@RequestMapping(value = "/{id}/scrum/burndown", method = RequestMethod.GET, produces = "application/json")
+	@RequestMapping(value = "/{id}/scrum/reports", method = RequestMethod.GET, produces = "application/json")
 	public String showBurndown(@PathVariable String id,
 			@RequestParam(value = "sprint", required = false) Long sprintNo,
 			Model model, RedirectAttributes ra) {
@@ -448,7 +441,7 @@ public class SprintController {
 				}
 			} else {
 				leftMap = fillLeftMap(wrkList, false);
-				burnedMap = fillBurnednMap(wrkList,false);
+				burnedMap = fillBurnednMap(wrkList, false);
 				Integer remainingEstimate = sprint.getTotalStoryPoints();
 				Integer burned = new Integer(0);
 				resultsIdeal.put(startTime.toString(), remainingEstimate);
@@ -482,7 +475,7 @@ public class SprintController {
 			model.addAttribute("burned", formatResults(resultsBurned));
 			model.addAttribute("ideal", formatResults(resultsIdeal));
 		}
-		return "/scrum/burndown";
+		return "/scrum/reports";
 	}
 
 	/**
@@ -495,11 +488,11 @@ public class SprintController {
 	 * @param ra
 	 * @return
 	 */
-	@RequestMapping(value = "/{id}/sprint/burndown", method = RequestMethod.GET, produces = "application/json")
+	@RequestMapping(value = "/{id}/sprint-data", method = RequestMethod.GET, produces = "application/json")
 	public @ResponseBody
-	BurndownChart showBurndownChart(@PathVariable String id,
+	SprintData showBurndownChart(@PathVariable String id,
 			@RequestParam(value = "sprint") Long sprintNo) {
-		BurndownChart result = new BurndownChart();
+		SprintData result = new SprintData();
 		Map<LocalDate, Integer> leftMap = new HashMap<LocalDate, Integer>();
 		Map<LocalDate, Integer> burnedMap = new HashMap<LocalDate, Integer>();
 		Map<LocalDate, Period> timeBurndownMap = new HashMap<LocalDate, Period>();
@@ -520,6 +513,7 @@ public class SprintController {
 			int sprintDays = Days.daysBetween(startTime, endTime).getDays() + 1;
 			boolean timeTracked = project.getTimeTracked();
 			List<WorkLog> wrkList = wrkLogSrv.getAllSprintEvents(sprint);
+			result.setWorklogs(DisplayWorkLog.convertToDisplayWorkLogs(wrkList));
 			result.setTimeBurned(fillTimeBurndownMap(wrkList, startTime,
 					endTime));
 			if (timeTracked) {
@@ -546,7 +540,7 @@ public class SprintController {
 				}
 			} else {
 				leftMap = fillLeftMap(wrkList, false);
-				burnedMap = fillBurnednMap(wrkList,false);
+				burnedMap = fillBurnednMap(wrkList, false);
 				Integer remainingEstimate = sprint.getTotalStoryPoints();
 				Integer burned = new Integer(0);
 				result.createIdeal(startTime.toString(), remainingEstimate,
@@ -567,6 +561,7 @@ public class SprintController {
 						result.getPointsBurned().put(date.toString(), burned);
 					}
 				}
+				result.addPoints(burned);
 			}
 		}
 		return result;
@@ -607,16 +602,20 @@ public class SprintController {
 		int sprintDays = Days.daysBetween(startTime, endTime).getDays() + 1;
 		Map<LocalDate, Period> timeBurndownMap = fillTimeMap(wrkList);
 		Map<String, Integer> resultsBurned = new LinkedHashMap<String, Integer>();
-		Period burned = new Period();
+		// Period burned = new Period();
 		for (int i = 0; i < sprintDays; i++) {
 			LocalDate date = startTime.plusDays(i);
 			Period value = timeBurndownMap.get(date);
-			burned = PeriodHelper.plusPeriods(burned, value);
+			// burned = PeriodHelper.plusPeriods(burned, value);
 			if (date.isAfter(LocalDate.now())) {
-				resultsBurned.put(date.toString(), null);
+				resultsBurned.put(date.toString(), 0);
 			} else {
-				resultsBurned.put(date.toString(), (int) burned
-						.toStandardDuration().getStandardHours());
+				if (value != null) {
+					resultsBurned.put(date.toString(), (int) value
+							.toStandardDuration().getStandardHours());
+				}else{
+					resultsBurned.put(date.toString(), 0);
+				}
 			}
 		}
 		return resultsBurned;
@@ -772,67 +771,4 @@ public class SprintController {
 					.isAdmin());
 	}
 
-	class BurndownChart {
-		private Map<String, Integer> left;
-		private Map<String, Integer> pointsBurned;
-		private Map<String, Integer> ideal;
-		private Map<String, Integer> timeBurned;
-		private String message;
-
-		public BurndownChart() {
-			left = new LinkedHashMap<String, Integer>();
-			pointsBurned = new LinkedHashMap<String, Integer>();
-			ideal = new LinkedHashMap<String, Integer>();
-			timeBurned = new LinkedHashMap<String, Integer>();
-		}
-
-		public String getMessage() {
-			return message;
-		}
-
-		public void setMessage(String message) {
-			this.message = message;
-		}
-
-		public Map<String, Integer> getLeft() {
-			return left;
-		}
-
-		public Map<String, Integer> getIdeal() {
-			return ideal;
-		}
-
-		public void setLeft(Map<String, Integer> left) {
-			this.left = left;
-		}
-
-		public void setIdeal(Map<String, Integer> ideal) {
-			this.ideal = ideal;
-		}
-
-		public Map<String, Integer> getPointsBurned() {
-			return pointsBurned;
-		}
-
-		public Map<String, Integer> getTimeBurned() {
-			return timeBurned;
-		}
-
-		public void setPointsBurned(Map<String, Integer> pointsBurned) {
-			this.pointsBurned = pointsBurned;
-		}
-
-		public void setTimeBurned(Map<String, Integer> timeBurned) {
-			this.timeBurned = timeBurned;
-		}
-
-		public void createIdeal(String startTime, int value, String endTime) {
-			ideal.put(startTime, value);
-			ideal.put(endTime, 0);
-		}
-
-		public void putToLeft(String time, Integer value) {
-			left.put(time, value);
-		}
-	}
 }

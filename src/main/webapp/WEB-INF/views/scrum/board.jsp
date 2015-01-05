@@ -29,7 +29,7 @@
 					Backlog</a></li>
 			<li class="active"><a style="color: black" href="#"><span class="glyphicon glyphicon-list-alt"></span> <s:message
 						code="agile.board" /></a></li>
-			<li><a style="color: black" href="<c:url value="/${project.projectId}/scrum/burndown"/>"><span class="glyphicon glyphicon-bullhorn"></span>
+			<li><a style="color: black" href="<c:url value="/${project.projectId}/scrum/reports"/>"><span class="glyphicon glyphicon-bullhorn"></span>
 			 <s:message code="agile.reports" /></a></li>
 	</ul>
 </div>

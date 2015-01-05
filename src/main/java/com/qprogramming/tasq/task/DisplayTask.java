@@ -8,6 +8,7 @@ import com.qprogramming.tasq.account.DisplayAccount;
 public class DisplayTask implements Comparable<DisplayTask> {
 	private String id;
 	private String name;
+	private String description;
 	private String projectID;
 	private Integer story_points;
 	private Period estimate;
@@ -97,6 +98,14 @@ public class DisplayTask implements Comparable<DisplayTask> {
 
 	public void setState(Enum<TaskState> state) {
 		this.state = state;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public void setType(Enum<TaskType> type) {
