@@ -55,3 +55,8 @@ span.badge.theme.zero{
 .side-bar.theme{
 	background-color: #a12829;
 }
+.nav-pills>li.active>a,.nav-pills>li.active>a:hover,.nav-pills>li.active>a:focus
+	{
+	color: #fff;
+	background-color: #DD6264;
+}

@@ -8,11 +8,20 @@
 <script language="javascript" type="text/javascript"
 	src="<c:url value="/resources/js/jqplot.highlighter.js"/>"></script>
 <script language="javascript" type="text/javascript"
+	src="<c:url value="/resources/js/jqplot.enhancedLegendRenderer.min.js"/>"></script>
+<script language="javascript" type="text/javascript"
 	src="<c:url value="/resources/js/jqplot.dateAxisRenderer.js"/>"></script>
 <%-- <link href="<c:url value="/resources/css/docs.min.css" />" --%>
 <!-- 	rel="stylesheet" media="screen" /> -->
 <link rel="stylesheet" type="text/css"
 	href="<c:url value="/resources/css/jquery.jqplot.css"/>" />
+<c:if test="${empty param.sprint}">
+	<c:set var="ActiveSprint">${lastSprint.sprintNo }</c:set>
+</c:if>
+<c:if test="${not empty param.sprint}">
+	<c:set var="ActiveSprint">${param.sprint}</c:set>
+</c:if>
+	
 <h3>[${project.projectId}] ${project}</h3>
 <div class="white-frame" style="display: table; width: 100%;">
 	<div style="display: table-caption; margin-left: 10px;">
@@ -29,76 +38,58 @@
 						code="agile.reports" /></a></li>
 		</ul>
 	</div>
-	<div style="display: table-row;">
-		<div style="display: table-cell;"></div>
-		<div style="display: table-cell;">
-			<a class="anchor" id="sprint"></a>
-			<c:if test="${empty param.sprint}">
-				<c:set var="ActiveSprint">${lastSprint.sprintNo }</c:set>
-			</c:if>
-			<c:if test="${not empty param.sprint}">
-				<c:set var="ActiveSprint">${param.sprint}</c:set>
-			</c:if>
-			<select id="sprintNumber" class="form-control">
-				<c:forEach var="i" begin="1" end="${lastSprint.sprintNo }">
-					<option value="${i}">Sprint ${i}</option>
-				</c:forEach>
-			</select>
-		</div>
-	</div>
-	<div style="display: table-row;">
-		<div id="menu" 
-			style="display: table-cell; width: 100px; padding: 10px; padding-left: 0px;padding-right: 10px">
-			<nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix">
-				<ul class="nav bs-docs-sidenav">
-					<li><a href="#sprint">Sprint</a>
-					<li><a href="#burndown_chart">Burndown</a></li>
-					<li><a href="#time_chart">Time Logged</a></li>
-					<li><a href="#events">Events</a></li>
-				</ul>
-			</nav>
-			<a class="anchor" id="burndown_chart"></a>
-		</div>
-		<div id="chartdiv"
-			style="display: table-cell; height: 500px; width: 90%">
+	<div class="row">
+		<a class="anchor" id="sprint"></a>
+		<div class="col-lg-2 col-md-3 col-sm-4">
+			<div id="menu" style="position: fixed;">
+				<nav>
+					<ul class="nav nav-pills nav-stacked">
+						<li>
+							<a href="#" id="sprintNoMenu" class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-expanded="false">
+								<b>Sprint ${lastSprint.sprintNo }</b> <span class="caret"></span>
+    						</a>
+							<ul class="dropdown-menu" role="menu">
+								<c:forEach var="i" begin="1" end="${lastSprint.sprintNo }">
+									<li><a href="#" class="sprintMenuNo" data-number="${i}"> Sprint ${i}</a></li>
+								</c:forEach>
+   							</ul>
+						<li><a href="#burndown_chart"><div class="side-bar theme"></div><s:message code="agile.burndown"/></a></li>
+						<li><a href="#time_chart"><div class="side-bar theme"></div><s:message code="agile.timelogged"/></a></li>
+						<li><a href="#events"><div class="side-bar theme"></div><s:message code="agile.events"/></a></li>
+					</ul>
+				</nav>
 			</div>
-	</div>
-	<div style="display: table-row;">
-		<div style="display: table-cell;">
-			<a class="anchor" id="time_chart"></a>
-		</div>
-		<div id="chartdiv2"
-			style="display: table-cell; height: 500px; width: 90%">
-			
 		</div>
 	</div>
-	<a class="anchor" id="events"></a>
-	<div style="display: table-row;">
-		<div style="display: table-cell;"></div>
-		<div style="display: table-cell;">
-			<c:if test="${not empty workLogList}">
-				<table id="eventsTable" class="table table-bordered"
-					style="width: 100%">
-					<thead class="theme">
-						<tr>
-							<th style="width: 300px"><s:message code="task.name" /></th>
-							<th style="width: 100px"><s:message code="main.date" /></th>
-							<th style="width: 60px; text-align: center" colspan="2">Change</th>
-							<th style="width: 60px; text-align: center">Time</th>
-							<th style="width: 90px"><s:message code="task.activeLog" /></th>
-							<th style="width: 100px"><s:message code="agile.user" /></th>
-							<!-- 						TODO -->
-						</tr>
-					</thead>
-				</table>
-			</c:if>
+	<div class="row" style="height: 500px;">
+		<a class="anchor" id="burndown_chart"></a>
+		<div class="col-lg-10 col-md-9 col-sm-8 col-lg-offset-2 col-md-offset-3 col-sm-offset-4" id="chartdiv"  style="height: 500px;"></div>
+	</div>
+	<div class="row" style="height: 500px;">
+		<a class="anchor" id="time_chart"></a>
+		<div id="chartdiv2"	class="col-lg-10 col-md-9 col-sm-8 col-lg-offset-2 col-md-offset-3 col-sm-offset-4" style="height: 500px;"></div>
+	</div>
+	<div class="row">
+		<a class="anchor" id="events"></a>
+		<div class="col-lg-10 col-md-9 col-sm-8 col-lg-offset-2 col-md-offset-3 col-sm-offset-4">
+			<h4 style="text-align: center;"><s:message code="agile.events.sprint"/></h4>
+			<table id="eventsTable" class="table table-bordered"
+				style="width: 100%">
+				<thead class="theme">
+					<tr>
+						<th style="width: 300px"><s:message code="task.name" /></th>
+						<th style="width: 100px"><s:message code="main.date" /></th>
+						<th style="width: 60px; text-align: center" colspan="2">Change</th>
+						<th style="width: 60px; text-align: center">Time</th>
+						<th style="width: 90px"><s:message code="task.activeLog" /></th>
+						<th style="width: 100px"><s:message code="agile.user" /></th>
+						<!-- 						TODO -->
+					</tr>
+				</thead>
+			</table>
 		</div>
 	</div>
 </div>
-<%
-	pageContext.setAttribute("types", LogType.values());
-%>
-
 <script>
 $(document).ready(function() {
 	var plot;
@@ -107,13 +98,18 @@ $(document).ready(function() {
 	var avatarURL = '<c:url value="/userAvatar/"/>';
 	var taskURL = '<c:url value="/task?id="/>';
 	var loading_indicator = '<div id="loading" class="centerPadded"><img src="<c:url value="/resources/img/loading.gif"/>"></img></td>';
-
-		$("#sprintNumber").val(lastSprint);
-		renderSprintData(lastSprint);
+	
+	$(".sprintMenuNo").click(function(){
+		var number = $(this).data('number');
+		renderSprintData(number);
+	});
+	
+	$("#sprintNumber").val(lastSprint);
+	renderSprintData(lastSprint);
 		
-		$("#sprintNumber").change(function(){
-			renderSprintData(this.value);
-		});
+	$("#sprintNumber").change(function(){
+		renderSprintData(this.value);
+	});
 		
 		var timeTracked = ${project.timeTracked};
 		var labelFormat = '%s SP';
@@ -151,6 +147,7 @@ $(document).ready(function() {
 	    }
 	    $("#chartdiv").append(loading_indicator);
 	    $('#eventsTable tbody').html('');
+	    $("#sprintNoMenu").html('<b>Sprint '+ sprintNo + '</b> <span class="caret"></span>')
 	    $.get('<c:url value="/${project.projectId}/sprint-data"/>',{sprint:sprintNo},function(result){
  	    	//Fill arrays of data
 	    	console.log(result);
@@ -163,11 +160,15 @@ $(document).ready(function() {
 	    	$.each(result.pointsBurned, function(key,val){
 	    		burned.push([key, val]);
 	    	});
+	    	var startStop ='';
 	    	$.each(result.ideal, function(key,val){
 	    		ideal.push([key, val]);
+	    		startStop+=key;
+	    		startStop+=" - "
 	    	});
+	    	startStop = startStop.slice(0,-3);
+			  	    	
 			//Render worklog events
-			console.log("Worklogs");
 			$.each(result.worklogs, function(key,val){
 	    		var task = '<td><a class="a-tooltip" href="'+ taskURL + val.task.id + '"data-html="true" title=\''+ val.task.description+'\'>[' + val.task.id + '] ' + val.task.name + '</a></td>'; 
 	    		var date = "<td>" +val.time + "</td>";
@@ -194,16 +195,17 @@ $(document).ready(function() {
 								+'</td>';
 				var row = task + date + change + timeLogged + event + accountTd;
 				$("#eventsTable").append("<tr>"+row+"</tr>");
-				$('.a-tooltip').tooltip();
-				$('body').scrollspy({
-					target : '#menu'
-				});
 	    	});
+			//Add effects etc
+			$('.a-tooltip').tooltip();
+			$('body').scrollspy({
+				target : '#menu'
+			});
 			//remove loading
 			$("#loading").remove();
 	    	//render chart
 			plot = $.jqplot('chartdiv', [ left,burned,ideal ], {
-				title : '<p style="font-size: x-small;">${sprint.start_date} - ${sprint.end_date}</p>',
+				title : '<s:message code="agile.burndown.chart"/><p style="font-size: x-small;">'+startStop+'</p>',
 				animate: true,
 				highlighter : {
 					show : true,
@@ -242,17 +244,20 @@ $(document).ready(function() {
 				        }
 				    }],
 				legend: {
+						renderer: jQuery.jqplot.EnhancedLegendRenderer,
+						rendererOptions: {
+					          numberRows: '1',
+					    },
+					    marginLeft: '50px',
 				        show: true,
-				        location: 'ne',     
-				        xoffset: 12,        
-				        yoffset: 12,        
+			        	location: 's',
+			        	placement: 'outsideGrid'
 				    }
 			});
 			//	render time chart
 			plot2 = $.jqplot('chartdiv2', [ time ], {
-				title : 'Time',
+				title : '<s:message code="agile.timelogged.day"/><p style="font-size: x-small;">'+startStop+'</p>',
 				animate: true,
-				autoscale: true,
 				axesDefaults : {
 					labelRenderer : $.jqplot.CanvasAxisLabelRenderer
 				},
@@ -269,9 +274,13 @@ $(document).ready(function() {
 						}
 					}
 				},
+				highlighter: {
+				      show: true,
+				      sizeAdjust: 10
+				},
 				series:[
 				    {
-					    label: 'Time',
+					    label: '<s:message code="agile.timelogged"/>',
 					    rendererOptions: {
 			                smooth: true
 			            },
@@ -280,9 +289,8 @@ $(document).ready(function() {
 				    }],
 				legend: {
 				        show: true,
-				        location: 'ne',     
-				        xoffset: 12,        
-				        yoffset: 12,        
+				        location: 's',
+				        placement: 'outsideGrid'
 				    }
 			});
 	    });
