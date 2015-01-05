@@ -55,8 +55,8 @@ public class WorkLogService {
 			wl.setTime(when);
 			wl.setType(type);
 			wl.setMessage(msg);
-			wl.setActivity(activity);
 			wl = wlRepo.save(wl);
+			wl.setActivity(activity);
 			Hibernate.initialize(loggedTask.getWorklog());
 			loggedTask.addWorkLog(wl);
 			if (remaining == null) {
@@ -65,6 +65,24 @@ public class WorkLogService {
 				loggedTask.setRemaining(remaining);
 			}
 			taskSrv.save(checkState(loggedTask));
+		}
+	}
+	@Transactional
+	public void addDatedWorkLog(Task task, String msg, Date when,LogType type) {
+		Task loggedTask = taskSrv.findById(task.getId());
+		if (loggedTask != null) {
+			WorkLog wl = new WorkLog();
+			wl.setTask(loggedTask);
+			wl.setProject_id(loggedTask.getProject().getId());
+			wl.setAccount(Utils.getCurrentAccount());
+			wl.setTimeLogged(new Date());
+			wl.setTime(when);
+			wl.setType(type);
+			wl.setMessage(msg);
+			wl = wlRepo.save(wl);
+			Hibernate.initialize(loggedTask.getWorklog());
+			loggedTask.addWorkLog(wl);
+			taskSrv.save(task);
 		}
 	}
 
@@ -183,6 +201,24 @@ public class WorkLogService {
 		}
 	}
 
+	public List<WorkLog> getAllSprintEvents(Sprint sprint) {
+		LocalDate start = new LocalDate(sprint.getRawStart_date()).minusDays(1);
+		LocalDate end = new LocalDate(sprint.getRawEnd_date()).plusDays(1);
+		List<WorkLog> list = wlRepo
+				.findByProjectIdAndTimeBetweenAndWorklogtaskNotNullOrderByTimeAsc(
+						sprint.getProject().getId(), start.toDate(),
+						end.toDate());
+		List<WorkLog> result = new LinkedList<WorkLog>();
+		// Filterout not important events
+		for (WorkLog workLog : list) {
+			if (isSprintRelevant(workLog)) {
+				result.add(workLog);
+			}
+		}
+
+		return result;
+	}
+
 	public Page<WorkLog> findByProjectId(Long id, Pageable p) {
 		return wlRepo.findByProjectId(id, p);
 	}
@@ -200,6 +236,15 @@ public class WorkLogService {
 			result.add(new DisplayWorkLog(workLog));
 		}
 		return result;
+	}
+
+	private boolean isSprintRelevant(WorkLog workLog) {
+		LogType type = (LogType) workLog.getType();
+		return type.equals(LogType.DELETED) || type.equals(LogType.LOG)
+				|| type.equals(LogType.TASKSPRINTREMOVE)
+				|| type.equals(LogType.TASKSPRINTADD)
+				|| type.equals(LogType.ESTIMATE) || type.equals(LogType.CLOSED)
+				|| type.equals(LogType.REOPEN);
 	}
 
 }

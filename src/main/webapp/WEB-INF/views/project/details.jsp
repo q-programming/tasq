@@ -186,7 +186,7 @@ function fetchWorkLogData(page) {
 	$("#eventsTable").append(loading_indicator);
 	$.get(url, {id : projectID,	page: page}, function(data) {
 		$("#eventsTable tr").remove();
-		printNavigation(page, data);
+		printWorkLogNavigation(page, data);
 		var rows = "";
 		for ( var j = 0; j < data.content.length; j++) {
 			var row = '<tr class="projEvent"><td colspan="3">';
@@ -211,7 +211,7 @@ function fetchWorkLogData(page) {
 	});
 
 }
-function printNavigation(page,data){
+function printWorkLogNavigation(page,data){
 	var topRow='<tr id="topNavigation">';
 	var bottomRow='<tr>';
 	var prev = '<td style="width:30px"></td>';
@@ -249,7 +249,7 @@ function getEventTypeMsg(type){
 	switch(type){
 		<c:forEach items="${types}" var="enum_type">
 		case "${enum_type}":
-			return '<s:message code="${enum_type.code}"/>';
+			return '<s:message code="${enum_type.code}"/> ';
 		</c:forEach>
 		default:
 			return 'not yet added ';

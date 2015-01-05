@@ -231,14 +231,17 @@ public class TaskController {
 		if ((taskForm.getEstimate() != null)
 				&& (!task.getEstimate()
 						.equalsIgnoreCase(taskForm.getEstimate()))) {
-			message.append("Estimate:");
-			message.append(task.getEstimate());
-			message.append(CHANGE_TO);
-			message.append(taskForm.getEstimate());
-			message.append(BR);
+			StringBuilder messageEstimate = new StringBuilder();
+			messageEstimate.append("Estimate:");
+			messageEstimate.append(task.getEstimate());
+			messageEstimate.append(CHANGE_TO);
+			messageEstimate.append(taskForm.getEstimate());
 			Period estimate = PeriodHelper.inFormat(taskForm.getEstimate());
 			task.setEstimate(estimate);
 			task.setRemaining(estimate);
+			wlSrv.addActivityLog(task, messageEstimate.toString(),
+					LogType.ESTIMATE);
+
 		}
 		if (!task.getEstimated().equals(
 				!Boolean.parseBoolean(taskForm.getNo_estimation()))) {
@@ -413,23 +416,26 @@ public class TaskController {
 				}
 				Period logged = PeriodHelper.inFormat(loggedWork);
 				StringBuilder message = new StringBuilder(loggedWork);
+				Date when = new Date();
+				if (dateLogged != "" && timeLogged != "") {
+					try {
+						when = new SimpleDateFormat("dd-M-yyyy HH:mm")
+								.parse(dateLogged + " " + timeLogged);
+					} catch (ParseException e) {
+						LOG.error(e.getLocalizedMessage());
+					}
+					message.append(BR);
+					message.append("Date: ");
+					message.append(dateLogged + " " + timeLogged);
+				}
 				Period remaining = null;
 				if (remainingTxt != null && remainingTxt != "") {
 					if (remainingTxt.matches("[0-9]+")) {
 						remainingTxt += "h";
 					}
 					remaining = PeriodHelper.inFormat(remainingTxt);
-					message.append(BR);
-					message.append("Remaining: ");
-					message.append(remainingTxt);
-				}
-				Date when = new Date();
-				if (dateLogged != "" && timeLogged != "") {
-					when = new SimpleDateFormat("dd-M-yyyy HH:mm")
-							.parse(dateLogged + " " + timeLogged);
-					message.append(BR);
-					message.append("Date: ");
-					message.append(dateLogged + " " + timeLogged);
+					wlSrv.addDatedWorkLog(task, remainingTxt, when,
+							LogType.ESTIMATE);
 				}
 				wlSrv.addTimedWorkLog(task, message.toString(), when,
 						remaining, logged, LogType.LOG);
@@ -444,9 +450,6 @@ public class TaskController {
 						msg.getMessage("error.estimateFormat", null,
 								Utils.getCurrentLocale()));
 				return "redirect:" + request.getHeader("Referer");
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				LOG.error(e.getLocalizedMessage());
 			}
 		}
 		return "redirect:" + request.getHeader("Referer");
@@ -795,7 +798,7 @@ public class TaskController {
 		response.setContentType("application/json");
 		Project project = projectSrv.findById(projectID);
 		List<Task> allTasks = taskSrv.findAllByProject(project);
-		if(taskID!=null){
+		if (taskID != null) {
 			Task task = taskSrv.findById(taskID);
 			allTasks.remove(task);
 		}

@@ -25,17 +25,15 @@ public class TaskSorter implements Comparator<Task> {
 		case NAME:
 			result = a.getName().compareTo(b.getName());
 			break;
-			//return isDescending ? -result : result;
 		case ID:
-			String a_id = a.getId().split("-")[1];
-			String b_id = b.getId().split("-")[1];
-			if (Integer.parseInt(a_id) > Integer.parseInt(b_id)) {
+			String aId = a.getId().split("-")[1];
+			String bId = b.getId().split("-")[1];
+			if (Integer.parseInt(aId) > Integer.parseInt(bId)) {
 				result = 1;
 			} else {
 				result = -1;
 			}
 			break;
-			//return isDescending ? -result : result;
 		case DUE_DATE:
 			if (a.getRawDue_date().before(b.getRawDue_date())) {
 				result = -1;
@@ -43,7 +41,6 @@ public class TaskSorter implements Comparator<Task> {
 				result = 1;
 			}
 			break;
-			//return isDescending ? -result : result;
 		case PRIORITY:
 			if (((TaskPriority) a.getPriority()).getPriority() == ((TaskPriority) b
 					.getPriority()).getPriority()) {
@@ -55,12 +52,10 @@ public class TaskSorter implements Comparator<Task> {
 				result = -1;
 			}
 			break;
-			//return isDescending ? -result : result;
 		default:
 			result = 0;
 			break;
 		}
 		return isDescending ? -result : result;
-
 	}
 }
