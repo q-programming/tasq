@@ -8,9 +8,9 @@ import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
 
 class SprintData {
 	private Map<String, Integer> left;
-	private Map<String, Integer> pointsBurned;
+	private Map<String, Float> burned;
 	private Map<String, Integer> ideal;
-	private Map<String, Integer> timeBurned;
+	private Map<String, Float> timeBurned;
 	private String message;
 	private List<DisplayWorkLog> worklogs;
 	private Integer totalPoints = 0;
@@ -18,9 +18,9 @@ class SprintData {
 
 	public SprintData() {
 		left = new LinkedHashMap<String, Integer>();
-		pointsBurned = new LinkedHashMap<String, Integer>();
+		burned = new LinkedHashMap<String, Float>();
 		ideal = new LinkedHashMap<String, Integer>();
-		timeBurned = new LinkedHashMap<String, Integer>();
+		timeBurned = new LinkedHashMap<String, Float>();
 	}
 
 	public String getMessage() {
@@ -47,11 +47,11 @@ class SprintData {
 		this.ideal = ideal;
 	}
 
-	public Map<String, Integer> getPointsBurned() {
-		return pointsBurned;
+	public Map<String, Float> getBurned() {
+		return burned;
 	}
 
-	public Map<String, Integer> getTimeBurned() {
+	public Map<String, Float> getTimeBurned() {
 		return timeBurned;
 	}
 
@@ -63,11 +63,11 @@ class SprintData {
 		this.worklogs = worklogs;
 	}
 
-	public void setPointsBurned(Map<String, Integer> pointsBurned) {
-		this.pointsBurned = pointsBurned;
+	public void setBurned(Map<String, Float> pointsBurned) {
+		this.burned = pointsBurned;
 	}
 
-	public void setTimeBurned(Map<String, Integer> timeBurned) {
+	public void setTimeBurned(Map<String, Float> timeBurned) {
 		this.timeBurned = timeBurned;
 	}
 
@@ -95,11 +95,9 @@ class SprintData {
 	public void putToLeft(String time, Integer value) {
 		left.put(time, value);
 	}
-	public void addPoints(Integer points){
-		totalPoints+=points;
+
+	public void addTime(Integer time) {
+		totalTime += time;
 	}
-	public void addTime(Integer time){
-		totalTime+= time;
-	}
-	
+
 }

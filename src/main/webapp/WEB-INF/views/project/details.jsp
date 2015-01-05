@@ -249,7 +249,7 @@ function getEventTypeMsg(type){
 	switch(type){
 		<c:forEach items="${types}" var="enum_type">
 		case "${enum_type}":
-			return '<s:message code="${enum_type.code}"/>';
+			return '<s:message code="${enum_type.code}"/> ';
 		</c:forEach>
 		default:
 			return 'not yet added ';

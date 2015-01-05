@@ -55,8 +55,8 @@ public class WorkLogService {
 			wl.setTime(when);
 			wl.setType(type);
 			wl.setMessage(msg);
-			wl.setActivity(activity);
 			wl = wlRepo.save(wl);
+			wl.setActivity(activity);
 			Hibernate.initialize(loggedTask.getWorklog());
 			loggedTask.addWorkLog(wl);
 			if (remaining == null) {
@@ -65,6 +65,24 @@ public class WorkLogService {
 				loggedTask.setRemaining(remaining);
 			}
 			taskSrv.save(checkState(loggedTask));
+		}
+	}
+	@Transactional
+	public void addDatedWorkLog(Task task, String msg, Date when,LogType type) {
+		Task loggedTask = taskSrv.findById(task.getId());
+		if (loggedTask != null) {
+			WorkLog wl = new WorkLog();
+			wl.setTask(loggedTask);
+			wl.setProject_id(loggedTask.getProject().getId());
+			wl.setAccount(Utils.getCurrentAccount());
+			wl.setTimeLogged(new Date());
+			wl.setTime(when);
+			wl.setType(type);
+			wl.setMessage(msg);
+			wl = wlRepo.save(wl);
+			Hibernate.initialize(loggedTask.getWorklog());
+			loggedTask.addWorkLog(wl);
+			taskSrv.save(task);
 		}
 	}
 

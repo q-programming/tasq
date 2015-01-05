@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hibernate.Hibernate;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
@@ -52,7 +53,7 @@ import com.qprogramming.tasq.task.worklog.WorkLogService;
 public class SprintController {
 
 	private static final String SPACE = " ";
-
+	private static final int SECONDS_PER_HOUR = DateTimeConstants.SECONDS_PER_HOUR;
 	private static final String NEW_LINE = "\n";
 
 	@Autowired
@@ -351,12 +352,6 @@ public class SprintController {
 	public String showBurndown(@PathVariable String id,
 			@RequestParam(value = "sprint", required = false) Long sprintNo,
 			Model model, RedirectAttributes ra) {
-		Map<String, Integer> resultsEstimates = new LinkedHashMap<String, Integer>();
-		Map<String, Integer> resultsBurned = new LinkedHashMap<String, Integer>();
-		Map<String, Integer> resultsIdeal = new LinkedHashMap<String, Integer>();
-		Map<LocalDate, Integer> leftMap = new HashMap<LocalDate, Integer>();
-		Map<LocalDate, Integer> burnedMap = new HashMap<LocalDate, Integer>();
-		Map<LocalDate, Period> timeBurndownMap = new HashMap<LocalDate, Period>();
 		Project project = projSrv.findByProjectId(id);
 		if (project != null) {
 			if (sprintNo != null) {
@@ -398,82 +393,8 @@ public class SprintController {
 					lastSprint = sprints.get(sprints.size() - counter);
 				}
 			}
-			Sprint sprint;
-			if (sprintNo != null) {
-				sprint = sprintRepo.findByProjectIdAndSprintNo(project.getId(),
-						sprintNo);
-			} else {
-				sprint = lastSprint;
-			}
-			// Fill maps based on time or story point driven board
-			LocalDate startTime = new LocalDate(sprint.getRawStart_date());
-			LocalDate endTime = new LocalDate(sprint.getRawEnd_date());
-			int sprintDays = Days.daysBetween(startTime, endTime).getDays() + 1;
-			boolean timeTracked = project.getTimeTracked();
-			List<WorkLog> wrkList = wrkLogSrv.getSprintEvents(sprint,
-					timeTracked);
-			if (timeTracked) {
-				timeBurndownMap = fillTimeMap(wrkList);
-				Period remaining_estimate = sprint.getTotalEstimate();
-				Period burned = new Period();
-				// Fill ideal burndown
-				resultsIdeal.put(startTime.toString(), (int) sprint
-						.getTotalEstimate().toStandardDuration()
-						.getStandardHours());
-				resultsIdeal.put(endTime.toString(), 0);
-				// Iterate over sprint days
-				for (int i = 0; i < sprintDays; i++) {
-					LocalDate date = startTime.plusDays(i);
-					Period value = timeBurndownMap.get(date);
-					remaining_estimate = PeriodHelper.minusPeriods(
-							remaining_estimate, value);
-					burned = PeriodHelper.plusPeriods(burned, value);
-					if (date.isAfter(LocalDate.now())) {
-						resultsEstimates.put(date.toString(), null);
-						resultsBurned.put(date.toString(), null);
-					} else {
-						resultsEstimates.put(date.toString(),
-								(int) remaining_estimate.toStandardDuration()
-										.getStandardHours());
-						resultsBurned.put(date.toString(), (int) burned
-								.toStandardDuration().getStandardHours());
-					}
-				}
-			} else {
-				leftMap = fillLeftMap(wrkList, false);
-				burnedMap = fillBurnednMap(wrkList, false);
-				Integer remainingEstimate = sprint.getTotalStoryPoints();
-				Integer burned = new Integer(0);
-				resultsIdeal.put(startTime.toString(), remainingEstimate);
-				resultsIdeal.put(endTime.toString(), 0);
-				for (int i = 0; i < sprintDays; i++) {
-					LocalDate date = startTime.plusDays(i);
-					Integer value = leftMap.get(date);
-					Integer valueBurned = burnedMap.get(date);
-					value = value == null ? 0 : value;
-					valueBurned = valueBurned == null ? 0 : valueBurned;
-
-					remainingEstimate -= value;
-					burned += valueBurned;
-
-					if (date.isAfter(LocalDate.now())) {
-						resultsEstimates.put(date.toString(), null);
-						resultsBurned.put(date.toString(), null);
-					} else {
-						resultsEstimates
-								.put(date.toString(), remainingEstimate);
-						resultsBurned.put(date.toString(), burned);
-					}
-				}
-			}
-			model.addAttribute("sprint", sprint);
 			model.addAttribute("lastSprint", lastSprint);
-			model.addAttribute("workLogList",
-					DisplayWorkLog.convertToDisplayWorkLogs(wrkList));
 			model.addAttribute("project", project);
-			model.addAttribute("left", formatResults(resultsEstimates));
-			model.addAttribute("burned", formatResults(resultsBurned));
-			model.addAttribute("ideal", formatResults(resultsIdeal));
 		}
 		return "/scrum/reports";
 	}
@@ -517,6 +438,9 @@ public class SprintController {
 			result.setTimeBurned(fillTimeBurndownMap(wrkList, startTime,
 					endTime));
 			if (timeTracked) {
+				// leftMap = fillLeftMap(wrkList, true);
+				// burnedMap = fillBurnednMap(wrkList, true);
+
 				Period remaining_estimate = sprint.getTotalEstimate();
 				Period burned = new Period();
 				// Fill ideal burndown
@@ -526,23 +450,31 @@ public class SprintController {
 				// Iterate over sprint days
 				for (int i = 0; i < sprintDays; i++) {
 					LocalDate date = startTime.plusDays(i);
-					Period value = timeBurndownMap.get(date);
-					remaining_estimate = PeriodHelper.minusPeriods(
-							remaining_estimate, value);
-					burned = PeriodHelper.plusPeriods(burned, value);
+					Float timelogged = result.getTimeBurned().get(
+							date.toString());
+					if (timelogged != null) {
+						Period value = new Period(0, 0,
+								(int) (timelogged * SECONDS_PER_HOUR), 0);
+						burned = PeriodHelper.plusPeriods(burned, value);
+						remaining_estimate = PeriodHelper.minusPeriods(
+								remaining_estimate, value);
+					}
 					if (date.isAfter(LocalDate.now())) {
 						result.putToLeft(date.toString(), null);
+						result.getBurned().put(date.toString(), null);
 					} else {
 						result.putToLeft(date.toString(),
 								(int) remaining_estimate.toStandardDuration()
 										.getStandardHours());
+						result.getBurned().put(date.toString(),
+								getFloatValue(burned));
 					}
 				}
 			} else {
 				leftMap = fillLeftMap(wrkList, false);
 				burnedMap = fillBurnednMap(wrkList, false);
 				Integer remainingEstimate = sprint.getTotalStoryPoints();
-				Integer burned = new Integer(0);
+				Float burned = new Float(0);
 				result.createIdeal(startTime.toString(), remainingEstimate,
 						endTime.toString());
 				for (int i = 0; i < sprintDays; i++) {
@@ -555,13 +487,12 @@ public class SprintController {
 					burned += valueBurned;
 					if (date.isAfter(LocalDate.now())) {
 						result.putToLeft(date.toString(), null);
-						result.getPointsBurned().put(date.toString(), null);
+						result.getBurned().put(date.toString(), null);
 					} else {
 						result.putToLeft(date.toString(), remainingEstimate);
-						result.getPointsBurned().put(date.toString(), burned);
+						result.getBurned().put(date.toString(), burned);
 					}
 				}
-				result.addPoints(burned);
 			}
 		}
 		return result;
@@ -597,28 +528,34 @@ public class SprintController {
 		return sprint.isActive();
 	}
 
-	private Map<String, Integer> fillTimeBurndownMap(List<WorkLog> wrkList,
+	private Map<String, Float> fillTimeBurndownMap(List<WorkLog> wrkList,
 			LocalDate startTime, LocalDate endTime) {
 		int sprintDays = Days.daysBetween(startTime, endTime).getDays() + 1;
 		Map<LocalDate, Period> timeBurndownMap = fillTimeMap(wrkList);
-		Map<String, Integer> resultsBurned = new LinkedHashMap<String, Integer>();
+		Map<String, Float> resultsBurned = new LinkedHashMap<String, Float>();
 		// Period burned = new Period();
 		for (int i = 0; i < sprintDays; i++) {
 			LocalDate date = startTime.plusDays(i);
 			Period value = timeBurndownMap.get(date);
 			// burned = PeriodHelper.plusPeriods(burned, value);
 			if (date.isAfter(LocalDate.now())) {
-				resultsBurned.put(date.toString(), 0);
+				resultsBurned.put(date.toString(), new Float(0));
 			} else {
 				if (value != null) {
-					resultsBurned.put(date.toString(), (int) value
-							.toStandardDuration().getStandardHours());
-				}else{
-					resultsBurned.put(date.toString(), 0);
+					Float result = getFloatValue(value);
+					resultsBurned.put(date.toString(), result);
+				} else {
+					resultsBurned.put(date.toString(), new Float(0));
 				}
 			}
 		}
 		return resultsBurned;
+	}
+
+	private Float getFloatValue(Period value) {
+		Float result = Float.valueOf((float) value.toStandardSeconds()
+				.getSeconds() / SECONDS_PER_HOUR);
+		return result;
 	}
 
 	/**
@@ -703,15 +640,15 @@ public class SprintController {
 	// TODO check if estimate left was changed!!!!
 	private Integer addOrSubstractTime(WorkLog workLog, Integer value) {
 		Integer result = value;
-		Integer taskStoryPoints = workLog.getTask().getStory_points();
-		if (LogType.REOPEN.equals(workLog.getType())
-				|| LogType.TASKSPRINTADD.equals(workLog.getType())) {
-			taskStoryPoints *= -1;
+		Integer taskLogged = (int) workLog.getActivity().toStandardDuration()
+				.getStandardHours();
+		if (LogType.ESTIMATE.equals(workLog.getType())) {
+			taskLogged *= -1;
 		}
 		if (value == null) {
-			result = taskStoryPoints;
+			result = taskLogged;
 		} else {
-			result += taskStoryPoints;
+			result += taskLogged;
 		}
 		return result;
 	}

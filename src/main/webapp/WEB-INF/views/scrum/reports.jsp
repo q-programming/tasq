@@ -46,7 +46,7 @@
 					<ul class="nav nav-pills nav-stacked">
 						<li>
 							<a href="#" id="sprintNoMenu" class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-expanded="false">
-								<b>Sprint ${lastSprint.sprintNo }</b> <span class="caret"></span>
+								<h4><b>Sprint ${lastSprint.sprintNo }</b> <span class="caret"></h4></span>
     						</a>
 							<ul class="dropdown-menu" role="menu">
 								<c:forEach var="i" begin="1" end="${lastSprint.sprintNo }">
@@ -114,7 +114,7 @@ $(document).ready(function() {
 		var timeTracked = ${project.timeTracked};
 		var labelFormat = '%s SP';
 		if (timeTracked){
-			labelFormat = '%s h';
+			labelFormat = '%#.1f h';
 		}
 		
 		$('td[rel=popover]').popover({
@@ -125,7 +125,7 @@ $(document).ready(function() {
 				var account_email = $(this).data('account_email');
 				var account_img = $(this).data('account_img');
 				var img = '<img data-src="holder.js/30x30"	style="height: 30px; float: left; padding-right: 10px;"	src="'+ account_img +'" />';
-				var html = '<div>'+img + account_name+'</div><div><a style="font-size: xx-small;float:right"href="mailto:"'+account_email+'">'+account_email+'</a>';
+				var html = '<div>'+img + account_name+'</div><div><a style="font-size: xx-small;float:right"href="mailto:"'+ account_email +'">'+account_email+'</a>';
 				return html;
 			}});
 
@@ -147,7 +147,7 @@ $(document).ready(function() {
 	    }
 	    $("#chartdiv").append(loading_indicator);
 	    $('#eventsTable tbody').html('');
-	    $("#sprintNoMenu").html('<b>Sprint '+ sprintNo + '</b> <span class="caret"></span>')
+	    $("#sprintNoMenu").html('<h4><b>Sprint '+ sprintNo + '</b> <span class="caret"></span></h4>')
 	    $.get('<c:url value="/${project.projectId}/sprint-data"/>',{sprint:sprintNo},function(result){
  	    	//Fill arrays of data
 	    	console.log(result);
@@ -157,14 +157,14 @@ $(document).ready(function() {
 	    	$.each(result.left, function(key,val){
 	    		left.push([key, val]);
 	    	});
-	    	$.each(result.pointsBurned, function(key,val){
+	    	$.each(result.burned, function(key,val){
 	    		burned.push([key, val]);
 	    	});
 	    	var startStop ='';
 	    	$.each(result.ideal, function(key,val){
 	    		ideal.push([key, val]);
 	    		startStop+=key;
-	    		startStop+=" - "
+	    		startStop+=" - ";
 	    	});
 	    	startStop = startStop.slice(0,-3);
 			  	    	
@@ -173,7 +173,6 @@ $(document).ready(function() {
 	    		var task = '<td><a class="a-tooltip" href="'+ taskURL + val.task.id + '"data-html="true" title=\''+ val.task.description+'\'>[' + val.task.id + '] ' + val.task.name + '</a></td>'; 
 	    		var date = "<td>" +val.time + "</td>";
 	    		var event = "<td>" +getEventTypeMsg(val.type) + "</td>";
-	    		//Points based project
 	    		var change;
 	    		if  (val.type=='REOPEN' || val.type=='TASKSPRINTADD'){
 	    			change = '<td style="width:30px">' + val.task.story_points + '</td><td style="width:30px"></td>';
@@ -183,7 +182,7 @@ $(document).ready(function() {
 	    		else{
 	    			change = '<td style="width:30px"></td><td style="width:30px">' + val.task.story_points + '</td>';
 	    		}
-	    		var timeLogged = "<td>"
+	    		var timeLogged = "<td>";
 	    		if(val.activity){
 	    			timeLogged+=val.message;
 	    		}
@@ -248,7 +247,6 @@ $(document).ready(function() {
 						rendererOptions: {
 					          numberRows: '1',
 					    },
-					    marginLeft: '50px',
 				        show: true,
 			        	location: 's',
 			        	placement: 'outsideGrid'
@@ -270,7 +268,7 @@ $(document).ready(function() {
 					yaxis : {
 						pad : -1,
 						tickOptions : {
-							formatString : '%d h',
+							formatString : '%#.1f h',
 						}
 					}
 				},
