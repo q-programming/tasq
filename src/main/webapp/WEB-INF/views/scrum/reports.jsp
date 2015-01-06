@@ -79,8 +79,8 @@
 					<tr>
 						<th style="width: 300px"><s:message code="task.name" /></th>
 						<th style="width: 100px"><s:message code="main.date" /></th>
-						<th style="width: 60px; text-align: center" colspan="2">Change</th>
-						<th style="width: 60px; text-align: center">Time</th>
+						<th style="width: 60px; text-align: center" colspan="2"><s:message code="agile.change"/></th>
+						<th id="timeColumn" style="width: 60px; text-align: center"><s:message code="agile.time"/></th>
 						<th style="width: 90px"><s:message code="task.activeLog" /></th>
 						<th style="width: 100px"><s:message code="agile.user" /></th>
 						<!-- 						TODO -->
@@ -98,7 +98,7 @@ $(document).ready(function() {
 	var avatarURL = '<c:url value="/userAvatar/"/>';
 	var taskURL = '<c:url value="/task?id="/>';
 	var loading_indicator = '<div id="loading" class="centerPadded"><img src="<c:url value="/resources/img/loading.gif"/>"></img></td>';
-	
+	var timeTracked = ${project.timeTracked};
 	$(".sprintMenuNo").click(function(){
 		var number = $(this).data('number');
 		renderSprintData(number);
@@ -111,7 +111,7 @@ $(document).ready(function() {
 		renderSprintData(this.value);
 	});
 		
-		var timeTracked = ${project.timeTracked};
+		
 		var labelFormat = '%s SP';
 		if (timeTracked){
 			labelFormat = '%#.1f h';
@@ -147,6 +147,11 @@ $(document).ready(function() {
 	    }
 	    $("#chartdiv").append(loading_indicator);
 	    $('#eventsTable tbody').html('');
+	    if(timeTracked){
+	    	$('th:nth-child(4)').hide();
+	    }else{
+	    	$('th:nth-child(4)').show();
+	    }
 	    $("#sprintNoMenu").html('<h4><b>Sprint '+ sprintNo + '</b> <span class="caret"></span></h4>')
 	    $.get('<c:url value="/${project.projectId}/sprint-data"/>',{sprint:sprintNo},function(result){
  	    	//Fill arrays of data
@@ -174,19 +179,29 @@ $(document).ready(function() {
 	    		var date = "<td>" +val.time + "</td>";
 	    		var event = "<td>" +getEventTypeMsg(val.type) + "</td>";
 	    		var change;
-	    		if  (val.type=='REOPEN' || val.type=='TASKSPRINTADD'){
-	    			change = '<td style="width:30px">' + val.task.story_points + '</td><td style="width:30px"></td>';
-	    		}else if(val.type=='LOG'){
-	    			change = '<td style="width:30px"></td><td style="width:30px"></td>';
+	    		var timeLogged;
+	    		if(timeTracked){
+	    			if  (val.type=='ESTIMATE' || val.type=='TASKSPRINTADD'){
+		    			change = '<td style="width:30px">' + val.message + '</td><td style="width:30px"></td>';
+	    			}else if(val.type=='LOG'){
+		    			change = '<td style="width:30px"></td><td style="width:30px">' + val.message + '</td>';
+	    			}
+	    		}else{
+		    		if  (val.type=='REOPEN' || val.type=='TASKSPRINTADD'){
+		    			change = '<td style="width:30px">' + val.task.story_points + '</td><td style="width:30px"></td>';
+	    			}else if(val.type=='LOG' && timeTracked == false ){
+		    			change = '<td style="width:30px"></td><td style="width:30px"></td>';
+	    			}
+	    			else{
+		    			change = '<td style="width:30px"></td><td style="width:30px">' + val.task.story_points + '</td>';
+	    			}
+		    		var timeLogged = "<td>";
+		    		if(val.activity){
+	    				timeLogged = "<td>";
+	    				timeLogged+=val.message;
+		    		}
+	    			timeLogged+="</td>";
 	    		}
-	    		else{
-	    			change = '<td style="width:30px"></td><td style="width:30px">' + val.task.story_points + '</td>';
-	    		}
-	    		var timeLogged = "<td>";
-	    		if(val.activity){
-	    			timeLogged+=val.message;
-	    		}
-	    		timeLogged+="</td>";
 	    		var account = val.account.name +" " + val.account.surname; 
 				var accountTd = '<td rel="popover" data-container="body" data-placement="top" data-account="'
 									+ account + '" data-account_email="' + val.account.email + '" data-account_img="' + avatarURL + val.account.id + '">'
@@ -305,6 +320,8 @@ $(document).ready(function() {
 				return '<s:message code="task.state.tasksprintadd"/>';
 			case "TASKSPRINTREMOVE":
 				return '<s:message code="task.state.tasksprintremove"/>';
+			case "ESTIMATE":
+				return '<s:message code="task.state.estimatechange"/>';
 			default:
 				return 'not yet added ';
 		};
