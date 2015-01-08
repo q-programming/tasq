@@ -257,6 +257,19 @@ public class SprintController {
 			@RequestParam(value = "sprintStart") String sprintStart,
 			@RequestParam(value = "sprintEnd") String sprintEnd, Model model,
 			HttpServletRequest request, RedirectAttributes ra) {
+		// check if other sprints are not ending when this new is starting
+		List<Sprint> allSprints = sprintRepo.findByProjectId(projectId);
+		for (Sprint sprint : allSprints) {
+			LocalDate enddate = new LocalDate(sprint.getRawEnd_date());
+			LocalDate startDate = new LocalDate(
+					Utils.convertStringToDate(sprintStart));
+			if (enddate.equals(startDate)) {
+				return new ResultData(ResultData.WARNING, msg.getMessage(
+						"agile.sprint.startOnEnd",
+						new Object[] { sprint.getSprintNo(), sprintStart },
+						Utils.getCurrentLocale()));
+			}
+		}
 		Sprint sprint = sprintRepo.findById(id);
 		Project project = projSrv.findById(projectId);
 		Sprint active = sprintRepo.findByProjectIdAndActiveTrue(projectId);

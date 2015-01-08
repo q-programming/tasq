@@ -117,17 +117,6 @@ $(document).ready(function() {
 			labelFormat = '%#.1f h';
 		}
 		
-		$('td[rel=popover]').popover({
-			html : true,
-			trigger : 'hover',
-			content : function() {
-				var account_name = $(this).data('account');
-				var account_email = $(this).data('account_email');
-				var account_img = $(this).data('account_img');
-				var img = '<img data-src="holder.js/30x30"	style="height: 30px; float: left; padding-right: 10px;"	src="'+ account_img +'" />';
-				var html = '<div>'+img + account_name+'</div><div><a style="font-size: xx-small;float:right"href="mailto:"'+ account_email +'">'+account_email+'</a>';
-				return html;
-			}});
 
 	function renderSprintData(sprintNo){
 		//init arrays and remove first element via pop()
@@ -155,7 +144,7 @@ $(document).ready(function() {
 	    $("#sprintNoMenu").html('<h4><b>Sprint '+ sprintNo + '</b> <span class="caret"></span></h4>')
 	    $.get('<c:url value="/${project.projectId}/sprint-data"/>',{sprint:sprintNo},function(result){
  	    	//Fill arrays of data
-	    	console.log(result);
+	    	//console.log(result);
 	    	$.each(result.timeBurned, function(key,val){
 	    		time.push([key, val]);
 	    	});
@@ -210,11 +199,23 @@ $(document).ready(function() {
 				var row = task + date + change + timeLogged + event + accountTd;
 				$("#eventsTable").append("<tr>"+row+"</tr>");
 	    	});
-			//Add effects etc
+			//-----------------------------Add effects etc-------------------------------
 			$('.a-tooltip').tooltip();
 			$('body').scrollspy({
 				target : '#menu'
 			});
+			$('td[rel=popover]').popover({
+				html : true,
+				trigger : 'hover',
+				content : function() {
+					var account_name = $(this).data('account');
+					var account_email = $(this).data('account_email');
+					var account_img = $(this).data('account_img');
+					var img = '<img data-src="holder.js/30x30"	style="height: 30px; float: left; padding-right: 10px;"	src="'+ account_img +'" />';
+					var html = '<div>'+img + account_name+'</div><div><a style="font-size: xx-small;float:right"href="mailto:"'+ account_email +'">'+account_email+'</a>';
+					return html;
+				}});
+
 			//remove loading
 			$("#loading").remove();
 	    	//render chart
