@@ -29,4 +29,12 @@ window.setTimeout(function() {
 ,15000);
 window.setTimeout(function() { $(".alert-warning").alert('close'); }, 20000);
 
+function showWait(show){
+	if(show){
+		$("body").css("cursor", "wait");
+	}else{
+		$("body").css("cursor", "auto");
+	}
+}
+
 

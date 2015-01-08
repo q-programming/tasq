@@ -79,6 +79,7 @@
 		<c:if test="${can_edit}">
 		$(".assign_me").click(function(){
 			var taskID = $(this).data('taskid');
+			showWait(true);
 			//assignMe
 			$.post('<c:url value="/task/assignMe"/>',{id:taskID},function(result){
 				console.log(result);
@@ -90,6 +91,7 @@
 									+'<a href="<c:url value="/user?id=${user.id}"/>">${user}</a>';
 					$("#assignee_"+taskID).html(assignee);
 					showSuccess(result.message);
+					showWait(false);
 				}
 			});
 		});
@@ -118,6 +120,7 @@
 			    		 $('#'+taskID + ' a[href]').toggleClass('closed');
 		    	 	}
 			    	else{
+			    		showWait(true);
 						$.post('<c:url value="/task/changeState"/>',{id:taskID,state:state},function(result){
 							if(result.code == 'Error'){
 								showError(result.message);
@@ -128,6 +131,7 @@
 									$('#'+taskID + ' a[href]').toggleClass('closed');
 								}
 							}
+							showWait(false);
 						});
 			    	}
 		    	 }

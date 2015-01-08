@@ -258,9 +258,7 @@
 			window.location = link + $(this).val();
 		});
 		$(".export_startstop").click(function(){
-				$(".export_cell").toggle('slow', function() {
-				    $(this).toggleClass('export-hidden');
-				});
+				$(".export_cell").toggleClass('export-hidden');
 				$("#buttDiv").toggle();
 				$("#fileDiv").toggle();
 		});
