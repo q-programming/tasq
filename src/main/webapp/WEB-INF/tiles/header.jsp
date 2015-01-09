@@ -171,7 +171,7 @@
 					<li>
 						<div>
 							<a class="btn btn-default btn-xxs a-tooltip"
-								href='<s:url value="/users"></s:url>'
+								data-toggle="modal" data-target="#show_users"
 								title="<s:message
 									code="menu.users" text="Settings" />"
 								data-placement="bottom"><span

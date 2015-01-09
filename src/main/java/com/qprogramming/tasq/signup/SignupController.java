@@ -28,7 +28,6 @@ public class SignupController {
 			.getLogger(SignupController.class);
 
 	private AccountService accountSrv;
-	// private UserService userService;
 	private MailMail mailer;
 	private MessageSource msg;
 
@@ -38,7 +37,6 @@ public class SignupController {
 		this.accountSrv = accountSrv;
 		this.msg = msg;
 		this.mailer = mailer;
-		// this.userService = userService;
 	}
 
 	@RequestMapping(value = "signup")
@@ -58,7 +56,7 @@ public class SignupController {
 		}
 		Utils.setHttpRequest(request);
 		if (null != accountSrv.findByEmail(signupForm.getEmail())) {
-			errors.rejectValue("email","error.email.notunique");
+			errors.rejectValue("email", "error.email.notunique");
 			return null;
 		}
 

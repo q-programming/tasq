@@ -96,8 +96,7 @@
 				<button id="type_button" class="btn btn-default "
 					style="${type_error}" type="button" id="dropdownMenu1"
 					data-toggle="dropdown">
-					<div id="task_type" class="image-combo">
-						<t:type	type="${project.default_type}" show_text="true" list="true" /></div>
+					<div id="task_type" class="image-combo"></div>
 					<span class="caret"></span>
 				</button>
 				<ul class="dropdown-menu" role="menu"
@@ -106,13 +105,13 @@
 						pageContext.setAttribute("types", TaskType.values());
 					%>
 					<c:forEach items="${types}" var="enum_type">
-						<li><a tabindex="-1" href="#" id="${enum_type.code}"><t:type
+						<li><a class="taskType" tabindex="-1" href="#" id="${enum_type}" data-type="${enum_type}"><t:type
 									type="${enum_type}" show_text="true" list="true" /></a></li>
 					</c:forEach>
 				</ul>
 			</div>
-			<span class="help-block"><s:message code="task.type.help" /> <a href="#"><span class="glyphicon glyphicon-question-sign"></span></a></span>
-			<form:hidden path="type" id="type" value="${fn:toUpperCase(project.default_type)}"/>
+			<span class="help-block"><s:message code="task.type.help" /> <a href="#" style="color:black"><span class="glyphicon glyphicon-question-sign"></span></a></span>
+			<form:hidden path="type" id="type"/>
 			<form:errors path="type" element="p" class="text-danger" />
 		</div>
 		<%------------PRIORITY --------------------%>
@@ -130,17 +129,19 @@
 				<button id="priority_button" class="btn btn-default "
 					type="button" id="dropdownMenu2"
 					data-toggle="dropdown">
-					<div id="task_priority" class="image-combo"><t:priority	priority="${project.default_priority}"/></div>
+					<div id="task_priority" class="image-combo"></div>
 					<span class="caret"></span>
 				</button>
 				<ul class="dropdown-menu" role="menu"
 					aria-labelledby="dropdownMenu2">
 					<c:forEach items="${priorities}" var="enum_priority">
-						<li><a tabindex="-1" href="#" id="${enum_priority}"><t:priority	priority="${enum_priority}"/></a></li>
+						<li><a class="taskPriority" tabindex="-1" href="#" data-priority="${enum_priority}" id="${enum_priority}">
+							<t:priority priority="${enum_priority}"/></a>
+						</li>
 					</c:forEach>
 				</ul>
 			</div>
-			<form:hidden path="priority" id="priority" value="${fn:toUpperCase(project.default_priority)}" />
+			<form:hidden path="priority" id="priority"/>
 			<form:errors path="priority" element="p"/>
 		</div>
 		<%-----------SPRINT---------------------------%>
@@ -152,6 +153,7 @@
 			</div>
 		<select class="form-control" id="addToSprint" name="addToSprint" style="width:300px;">
 		</select>
+		<div id="sprintWarning" style="color: darkorange;margin-top: 10px;"></div>
 		</div>
 		<%-- Estimate --%>
 		<div class="mod-header">
@@ -205,21 +207,18 @@
 </div>
 <script>
 $(document).ready(function($) {
-	<c:forEach items="${types}" var="enum_type">
-		$("#${enum_type.code}").click(function() {
-			var type = '<img src="<c:url value="/resources/img/${enum_type.code}.png"/>"> <s:message code="task.type.${enum_type.code}"/>';
-			$("#task_type").html(type);
-			$("#type").val("${enum_type}");
-		});
-	</c:forEach>
-
-	<c:forEach items="${priorities}" var="enum_priority">
-	$("#${enum_priority}").click(function() {
-		var priority = '<img src="<c:url value="/resources/img/${enum_priority.imgcode}.png"/>"> <s:message code="${enum_priority.code}"></s:message>';
-		$("#task_priority").html(priority);
-		$("#priority").val("${enum_priority}");
+	$(".taskType").click(function(){
+		var type = $(this).data('type');
+   	 	$("#task_type").html($(this).html());
+   		$("#type").val(type);
 	});
-	</c:forEach>
+	
+	$(".taskPriority").click(function(){
+		var priority = $(this).data('priority');
+   	 	$("#task_priority").html($(this).html());
+   		$("#priority").val(priority);
+	});
+	
 	//Projects
 	
 	$("#no_estimation").change(function() {
@@ -237,10 +236,27 @@ $(document).ready(function($) {
 	$("#due_date").val(currentDue);
 	$("#projects_list").change(function(){
 		getDefaultAssignee();
+		getDefaultTaskType();
+		getDefaultTaskPriority();
 		fillSprints();
 	});
+	
+	$("#addToSprint").change(function(){
+		$("#sprintWarning").html('');
+		var active = $('#addToSprint option:selected').data('active');
+		if(active){
+			var message = '<span class="glyphicon glyphicon-exclamation-sign"></span>'
+						+ ' <s:message code="task.sprint.add.warning"/>';
+			$("#sprintWarning").html(message);
+		}
+	});
+	
+	//INIT ALL
 	fillSprints();
 	getDefaultAssignee();
+	getDefaultTaskType();
+	getDefaultTaskPriority();
+	
 	$("#assignee_auto").click(function(){
 		 $(this).select();
 	});
@@ -287,6 +303,24 @@ $(document).ready(function($) {
 			}
 		}
 	});
+	function getDefaultTaskType(){
+		var url='<c:url value="/project/getDefaultTaskType"/>';
+		$.get(url,{id:$("#projects_list").val()},function(result,status){
+				var thisType = $("#"+result);
+				var type = thisType.data('type');
+		   	 	$("#task_type").html(thisType.html());
+		   		$("#type").val(type);
+		});
+	}
+	function getDefaultTaskPriority(){
+		var url='<c:url value="/project/getDefaultTaskPriority"/>';
+		$.get(url,{id:$("#projects_list").val()},function(result,status){
+				var thisPriority = $("#"+result);
+				var priority = thisPriority.data('priority');
+		   	 	$("#task_priority").html(thisPriority.html());
+		   		$("#priority").val(priority);
+		});
+	}
 	
 	function getDefaultAssignee(){
 		$("#assignee").val(null);
@@ -305,6 +339,7 @@ $(document).ready(function($) {
 		});
 		checkIfEmpty();
 	}
+	
 	function checkIfEmpty(){
 		if(!$("#assignee").val()){
 			var unassign = '<s:message code="task.unassigned" />';
@@ -316,6 +351,7 @@ $(document).ready(function($) {
 	function fillSprints(){
 		$.get('<c:url value="/getSprints"/>',{projectID:$("#projects_list").val()},function(result){
 			$('#addToSprint').empty();
+			$('#addToSprint').append("<option></option>");
 			$.each(result, function(key, sprint) {
 				var isActive = "";
 				if (sprint.active){
@@ -324,12 +360,11 @@ $(document).ready(function($) {
 			    $('#addToSprint')
 			         .append($("<option></option>")
 			         .attr("value",sprint.sprintNo)
+			         .attr("data-active",sprint.active)
 			         .text("Sprint " + sprint.sprintNo + isActive));
 			     $('#addToSprint').val('');
 			});
 		});
 	}
 });
-
-	
 </script>

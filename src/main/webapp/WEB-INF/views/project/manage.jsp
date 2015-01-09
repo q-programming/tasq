@@ -176,7 +176,7 @@
 				</div>
 			</div>
 			<div style="display: table-cell; padding-left: 5px;">
-				<a href="<c:url value="/users"></c:url>" target="_blank"><span
+				<a data-toggle="modal" data-target="#show_users"><span
 					class="btn btn-default btn-sm a-tooltip"
 					title="<s:message
 					code="menu.users" />"><b>?</b> <span

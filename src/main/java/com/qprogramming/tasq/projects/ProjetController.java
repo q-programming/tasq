@@ -62,9 +62,11 @@ public class ProjetController {
 	private SprintRepository sprintRepo;
 	private WorkLogService wrkLogSrv;
 	private MessageSource msg;
-	
+
 	@Autowired
-	public ProjetController(ProjectService projSrv, AccountService accSrv,TaskService taskSrv, SprintRepository sprintRepo, WorkLogService wrklSrv, MessageSource msg) {
+	public ProjetController(ProjectService projSrv, AccountService accSrv,
+			TaskService taskSrv, SprintRepository sprintRepo,
+			WorkLogService wrklSrv, MessageSource msg) {
 		this.projSrv = projSrv;
 		this.accSrv = accSrv;
 		this.taskSrv = taskSrv;
@@ -72,7 +74,6 @@ public class ProjetController {
 		this.wrkLogSrv = wrklSrv;
 		this.msg = msg;
 	}
-	
 
 	@Transactional
 	@RequestMapping(value = "project", method = RequestMethod.GET)
@@ -212,8 +213,8 @@ public class ProjetController {
 		Utils.setHttpRequest(request);
 		String name = newProjectForm.getName();
 		if (null != projSrv.findByName(name)) {
-			errors.rejectValue("name", "project.exists",
-					new Object[] { name }, "");
+			errors.rejectValue("name", "project.exists", new Object[] { name },
+					"");
 			return null;
 		}
 		String projectId = newProjectForm.getProject_id();
@@ -401,7 +402,8 @@ public class ProjetController {
 
 	@RequestMapping(value = "/project/getDefaultAssignee", method = RequestMethod.GET)
 	public @ResponseBody
-	DisplayAccount getDefaultAssignee(@RequestParam Long id,HttpServletResponse response) {
+	DisplayAccount getDefaultAssignee(@RequestParam Long id,
+			HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(id);
 		Account assignee = accSrv.findById(project.getDefaultAssigneeID());
@@ -410,6 +412,24 @@ public class ProjetController {
 		} else {
 			return new DisplayAccount(assignee);
 		}
+	}
+
+	@RequestMapping(value = "/project/getDefaultTaskType", method = RequestMethod.GET)
+	public @ResponseBody
+	TaskType getDefaultTaskType(@RequestParam Long id,
+			HttpServletResponse response) {
+		response.setContentType("application/json");
+		Project project = projSrv.findById(id);
+		return (TaskType) project.getDefault_type();
+	}
+
+	@RequestMapping(value = "/project/getDefaultTaskPriority", method = RequestMethod.GET)
+	public @ResponseBody
+	TaskPriority getDefaultTaskPriority(@RequestParam Long id,
+			HttpServletResponse response) {
+		response.setContentType("application/json");
+		Project project = projSrv.findById(id);
+		return (TaskPriority) project.getDefault_priority();
 	}
 
 	@Transactional
@@ -436,7 +456,7 @@ public class ProjetController {
 		}
 		project.setDefault_type(type);
 		Sprint activeSprint = sprintRepo.findByProjectIdAndActiveTrue(id);
-		if(activeSprint !=null){
+		if (activeSprint != null) {
 			MessageHelper.addWarningAttribute(
 					ra,
 					msg.getMessage("project.sprintActive", null,

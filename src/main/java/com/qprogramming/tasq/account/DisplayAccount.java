@@ -11,6 +11,7 @@ public class DisplayAccount {
 	private String email;
 	private String username;
 	private Long id;
+	private Roles role;
 
 	public DisplayAccount(Account account) {
 		BeanUtils.copyProperties(account, this);
@@ -54,6 +55,14 @@ public class DisplayAccount {
 
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	public Roles getRole() {
+		return role;
+	}
+
+	public void setRole(Roles role) {
+		this.role = role;
 	}
 
 	@Override

@@ -29,6 +29,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -105,17 +110,6 @@ public class AccountControllerTest {
 	}
 
 	@Test
-	public void listUsersTest() {
-		when(accSrvMock.findAll()).thenReturn(accountsList);
-		accountCtr.listUsers(null, null, null, modelMock);
-		accountCtr.listUsers("Do", null, null, modelMock);
-		accountCtr.listUsers("", SORT_BY_NAME, null, modelMock);
-		accountCtr.listUsers(null, SORT_BY_SURNAME, null, modelMock);
-		accountCtr.listUsers(null, SORT_BY_EMAIL, null, modelMock);
-		verify(modelMock, times(20)).addAttribute(anyString(), anyObject());
-	}
-
-	@Test
 	public void getUserTest() {
 		when(accSrvMock.findById(1L)).thenReturn(testAccount);
 		when(projSrvMock.findAllByUser(1L)).thenReturn(null);
@@ -154,6 +148,20 @@ public class AccountControllerTest {
 			Assert.fail(e.getMessage());
 		}
 	}
+
+	@Test
+	public void listUsersTest() {
+		List<Account> single = new LinkedList<Account>();
+		single.add(testAccount);
+		Page<Account> result = new PageImpl<Account>(accountsList);
+		Page<Account> singleResult = new PageImpl<Account>(single);
+		Pageable p = new PageRequest(0, 5, new Sort(Sort.Direction.ASC, "surname"));
+		when(accSrvMock.findByStartingWith("Do", p)).thenReturn(singleResult);
+		when(accSrvMock.findAll(p)).thenReturn(result);
+		Assert.assertEquals(5, accountCtr.listUsers(null, p).getTotalElements());  accountCtr.listUsers(null, p);
+		Assert.assertEquals(1, accountCtr.listUsers("Do", p).getTotalElements());  accountCtr.listUsers(null, p);
+	}
+
 
 	@Test
 	public void getAccountsTest() {

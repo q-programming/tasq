@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
+import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.support.Utils;
 
 @Service
@@ -21,7 +22,6 @@ public class ProjectService {
 		this.projRepo = projRepo;
 		this.accSrv = accSrv;
 	}
-	
 
 	public Project findByName(String name) {
 		return projRepo.findByName(name);
@@ -49,7 +49,6 @@ public class ProjectService {
 		return projRepo.findByParticipants_Id(id);
 	}
 
-
 	public Project activate(Long id) {
 		Project project = projRepo.findById(id);
 		if (project != null) {
@@ -74,5 +73,27 @@ public class ProjectService {
 			return projRepo.findById(account.getActive_project());
 		}
 		return null;
+	}
+
+	/**
+	 * Checks if currently logged in user have privileges to change anything in
+	 * project
+	 * 
+	 * @param task
+	 * @return
+	 */
+	public boolean canEdit(Long projectID) {
+		Project repoProject = projRepo.findById(projectID);
+		if (repoProject == null) {
+			return false;
+		}
+		Account currentAccount = Utils.getCurrentAccount();
+		return repoProject.getAdministrators().contains(currentAccount)
+				|| repoProject.getParticipants().contains(currentAccount)
+				|| Roles.isAdmin();
+	}
+
+	public boolean canEdit(Project project) {
+		return canEdit(project.getId());
 	}
 }

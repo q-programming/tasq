@@ -82,7 +82,7 @@ public class Task implements java.io.Serializable {
 	@Column
 	private Enum<TaskPriority> priority;
 
-	@OneToMany(cascade = CascadeType.REMOVE, mappedBy = "task")
+	@OneToMany(cascade = CascadeType.REMOVE, mappedBy = "worklogtask")
 	private Set<WorkLog> worklog;
 
 	@Column

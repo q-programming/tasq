@@ -173,7 +173,7 @@ $(document).on("click",".navBtn",function(e) {
 	//clear everything
 	$("#navigation").html('');
 	$("#topNavigation").html('');
-	$("#eventsTable tr").remove();
+	$("#eventsTable .projEvent").remove();
 	fetchWorkLogData(page);
 });
 
@@ -182,15 +182,17 @@ function fetchWorkLogData(page) {
 	var url = '<c:url value="/projectEvents"/>';
 	var avatarURL = '<c:url value="/userAvatar/"/>';
 	var taskURL = '<c:url value="/task?id="/>';
-
+	var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
+	$("#eventsTable").append(loading_indicator);
 	$.get(url, {id : projectID,	page: page}, function(data) {
-		printNavigation(page, data);
+		$("#eventsTable tr").remove();
+		printWorkLogNavigation(page, data);
 		var rows = "";
 		for ( var j = 0; j < data.content.length; j++) {
-			var row = '<tr><td colspan="3">';
+			var row = '<tr class="projEvent"><td colspan="3">';
 			var content = data.content[j];
 			var timeLogged = '<div class="time-div">'+ content.time +'</div>';
-			var avatar = '<img data-src="holder.js/30x30" style="height: 30px; float: left; padding-right: 10px;" src="'+avatarURL + content.account.id +'"/>';
+			var avatar = '<img data-src="holder.js/30x30" style="height: 30px; float: left; padding-right: 10px;" src="' + avatarURL + content.account.id +'"/>';
 			var account = content.account.name + " " + content.account.surname + " ";
 			var event = getEventTypeMsg(content.type);
 			var task = '';
@@ -209,7 +211,7 @@ function fetchWorkLogData(page) {
 	});
 
 }
-function printNavigation(page,data){
+function printWorkLogNavigation(page,data){
 	var topRow='<tr id="topNavigation">';
 	var bottomRow='<tr>';
 	var prev = '<td style="width:30px"></td>';
@@ -247,7 +249,7 @@ function getEventTypeMsg(type){
 	switch(type){
 		<c:forEach items="${types}" var="enum_type">
 		case "${enum_type}":
-			return '<s:message code="${enum_type.code}"/>';
+			return '<s:message code="${enum_type.code}"/> ';
 		</c:forEach>
 		default:
 			return 'not yet added ';

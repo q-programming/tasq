@@ -126,7 +126,7 @@ public class TaskController {
 		Project project = projectSrv.findById(taskForm.getProject());
 		if (project != null) {
 			// check if can edit
-			if (!canEdit(project)) {
+			if (!projectSrv.canEdit(project)) {
 				MessageHelper.addErrorAttribute(
 						ra,
 						msg.getMessage("error.accesRights", null,
@@ -202,7 +202,7 @@ public class TaskController {
 			return null;
 		}
 		// check if can edit
-		if (!canEdit(task.getProject())
+		if (!projectSrv.canEdit(task.getProject())
 				&& (!Roles.isReporter() || !task.getOwner().equals(
 						Utils.getCurrentAccount()))) {
 			MessageHelper.addErrorAttribute(
@@ -231,14 +231,17 @@ public class TaskController {
 		if ((taskForm.getEstimate() != null)
 				&& (!task.getEstimate()
 						.equalsIgnoreCase(taskForm.getEstimate()))) {
-			message.append("Estimate:");
-			message.append(task.getEstimate());
-			message.append(CHANGE_TO);
-			message.append(taskForm.getEstimate());
-			message.append(BR);
+			StringBuilder messageEstimate = new StringBuilder();
+			messageEstimate.append("Estimate:");
+			messageEstimate.append(task.getEstimate());
+			messageEstimate.append(CHANGE_TO);
+			messageEstimate.append(taskForm.getEstimate());
 			Period estimate = PeriodHelper.inFormat(taskForm.getEstimate());
 			task.setEstimate(estimate);
 			task.setRemaining(estimate);
+			wlSrv.addActivityLog(task, messageEstimate.toString(),
+					LogType.ESTIMATE);
+
 		}
 		if (!task.getEstimated().equals(
 				!Boolean.parseBoolean(taskForm.getNo_estimation()))) {
@@ -400,7 +403,7 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
-			if (!canEdit(task.getProject()) && !Roles.isUser()) {
+			if (!projectSrv.canEdit(task.getProject()) && !Roles.isUser()) {
 				MessageHelper.addErrorAttribute(
 						ra,
 						msg.getMessage("error.accesRights", null,
@@ -413,23 +416,26 @@ public class TaskController {
 				}
 				Period logged = PeriodHelper.inFormat(loggedWork);
 				StringBuilder message = new StringBuilder(loggedWork);
+				Date when = new Date();
+				if (dateLogged != "" && timeLogged != "") {
+					try {
+						when = new SimpleDateFormat("dd-M-yyyy HH:mm")
+								.parse(dateLogged + " " + timeLogged);
+					} catch (ParseException e) {
+						LOG.error(e.getLocalizedMessage());
+					}
+					message.append(BR);
+					message.append("Date: ");
+					message.append(dateLogged + " " + timeLogged);
+				}
 				Period remaining = null;
 				if (remainingTxt != null && remainingTxt != "") {
 					if (remainingTxt.matches("[0-9]+")) {
 						remainingTxt += "h";
 					}
 					remaining = PeriodHelper.inFormat(remainingTxt);
-					message.append(BR);
-					message.append("Remaining: ");
-					message.append(remainingTxt);
-				}
-				Date when = new Date();
-				if (dateLogged != "" && timeLogged != "") {
-					when = new SimpleDateFormat("dd-M-yyyy HH:mm")
-							.parse(dateLogged + " " + timeLogged);
-					message.append(BR);
-					message.append("Date: ");
-					message.append(dateLogged + " " + timeLogged);
+					wlSrv.addDatedWorkLog(task, remainingTxt, when,
+							LogType.ESTIMATE);
 				}
 				wlSrv.addTimedWorkLog(task, message.toString(), when,
 						remaining, logged, LogType.LOG);
@@ -444,9 +450,6 @@ public class TaskController {
 						msg.getMessage("error.estimateFormat", null,
 								Utils.getCurrentLocale()));
 				return "redirect:" + request.getHeader("Referer");
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				LOG.error(e.getLocalizedMessage());
 			}
 		}
 		return "redirect:" + request.getHeader("Referer");
@@ -466,7 +469,7 @@ public class TaskController {
 				return "redirect:" + request.getHeader("Referer");
 			}
 			// check if can edit
-			if (!canEdit(task.getProject()) && !Roles.isUser()) {
+			if (!projectSrv.canEdit(task.getProject()) && !Roles.isUser()) {
 				throw new TasqAuthException(msg);
 			}
 			// TODO eliminate this?
@@ -524,7 +527,7 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
-			if (!canEdit(task.getProject()) && !Roles.isUser()) {
+			if (!projectSrv.canEdit(task.getProject()) && !Roles.isUser()) {
 				throw new TasqAuthException(msg, "role.error.task.permission");
 			}
 			if (state.equals(TaskState.TO_DO)) {
@@ -534,6 +537,8 @@ public class TaskController {
 							"task.alreadyStarted", null,
 							Utils.getCurrentLocale()));
 				}
+			}else if(state.equals(TaskState.CLOSED)){
+				stopTimer(task);
 			}
 			TaskState oldState = (TaskState) task.getState();
 			task.setState(state);
@@ -574,7 +579,7 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
-			if (!canEdit(task.getProject()) && !Roles.isUser()) {
+			if (!projectSrv.canEdit(task.getProject()) && !Roles.isUser()) {
 				MessageHelper.addErrorAttribute(
 						ra,
 						msg.getMessage("error.accesRights", null,
@@ -599,22 +604,11 @@ public class TaskController {
 					taskSrv.save(task);
 				}
 			} else if (action.equals(STOP)) {
-				Account account = Utils.getCurrentAccount();
-				DateTime now = new DateTime();
-				Period logWork = new Period(
-						(DateTime) account.getActive_task_time(), now);
-				// Only log work if greater than 1 minute
-				if (logWork.toStandardDuration().getMillis() / 1000 / 60 < 1) {
-					logWork = new Period().plusMinutes(1);
-				}
-				wlSrv.addNormalWorkLog(task, PeriodHelper.outFormat(logWork),
-						logWork, LogType.LOG);
-				account.clearActive_task();
+				Period logWork = stopTimer(task);
 				MessageHelper.addSuccessAttribute(ra, msg.getMessage(
 						"task.logWork.logged",
 						new Object[] { PeriodHelper.outFormat(logWork),
 								task.getId() }, Utils.getCurrentLocale()));
-				accSrv.update(account);
 			}
 		} else {
 			return "redirect:" + request.getHeader("Referer");
@@ -650,7 +644,7 @@ public class TaskController {
 				Account assignee = accSrv.findByEmail(email);
 				if (assignee != null && !assignee.equals(task.getAssignee())) {
 					// check if can edit
-					if (!canEdit(task.getProject())) {
+					if (!projectSrv.canEdit(task.getProject())) {
 						MessageHelper.addErrorAttribute(
 								ra,
 								msg.getMessage("error.accesRights", null,
@@ -682,7 +676,7 @@ public class TaskController {
 			throw new TasqAuthException(msg);
 		}
 		Task task = taskSrv.findById(id);
-		if (!canEdit(task.getProject())) {
+		if (!projectSrv.canEdit(task.getProject())) {
 			return new ResultData(ResultData.ERROR, msg.getMessage(
 					"role.error.task.permission", null,
 					Utils.getCurrentLocale()));
@@ -711,7 +705,7 @@ public class TaskController {
 				return "redirect:" + request.getHeader("Referer");
 
 			}
-			if (canEdit(task.getProject()) && Roles.isUser()) {
+			if (projectSrv.canEdit(task.getProject()) && Roles.isUser()) {
 				StringBuilder message = new StringBuilder();
 				String oldPriority = "";
 				// TODO temporary due to old DB
@@ -795,7 +789,7 @@ public class TaskController {
 		response.setContentType("application/json");
 		Project project = projectSrv.findById(projectID);
 		List<Task> allTasks = taskSrv.findAllByProject(project);
-		if(taskID!=null){
+		if (taskID != null) {
 			Task task = taskSrv.findById(taskID);
 			allTasks.remove(task);
 		}
@@ -834,28 +828,39 @@ public class TaskController {
 		}
 	}
 
+	/**
+	 * Stops currently running timer on task
+	 * 
+	 * @param task 
+	 * @return Period logged as worklog
+	 */
+	private Period stopTimer(Task task) {
+		Account account = Utils.getCurrentAccount();
+		DateTime now = new DateTime();
+		Period logWork = new Period((DateTime) account.getActive_task_time(),
+				now);
+		// Only log work if greater than 1 minute
+		if (logWork.toStandardDuration().getMillis() / 1000 / 60 < 1) {
+			logWork = new Period().plusMinutes(1);
+		}
+		wlSrv.addNormalWorkLog(task, PeriodHelper.outFormat(logWork), logWork,
+				LogType.LOG);
+		account.clearActive_task();
+		accSrv.update(account);
+		return logWork;
+	}
+
+	/**
+	 * Check if is project admin or admin
+	 * 
+	 * @param task
+	 * @param project
+	 * @return
+	 */
 	private boolean isAdmin(Task task, Project project) {
 		Account currentAccount = Utils.getCurrentAccount();
 		return project.getAdministrators().contains(currentAccount)
 				|| task.getOwner().equals(currentAccount) || Roles.isAdmin();
-	}
-
-	/**
-	 * Checks if currently logged in user have privileges to change anything in
-	 * project
-	 * 
-	 * @param task
-	 * @return
-	 */
-	private boolean canEdit(Project project) {
-		Project repoProject = projectSrv.findById(project.getId());
-		if (repoProject == null) {
-			return false;
-		}
-		Account currentAccount = Utils.getCurrentAccount();
-		return repoProject.getAdministrators().contains(currentAccount)
-				|| repoProject.getParticipants().contains(currentAccount)
-				|| Roles.isAdmin();
 	}
 
 }

@@ -62,8 +62,8 @@ public class WorkLog implements Serializable {
 	private Long projectId;
 
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "task_worklog")
-	private Task task;
+	@JoinColumn(name = "worklogtask")
+	private Task worklogtask;
 
 	public Long getId() {
 		return id;
@@ -124,11 +124,11 @@ public class WorkLog implements Serializable {
 	}
 
 	public Task getTask() {
-		return task;
+		return worklogtask;
 	}
 
 	public void setTask(Task task) {
-		this.task = task;
+		this.worklogtask = task;
 	}
 
 	public Enum<LogType> getType() {
@@ -149,6 +149,27 @@ public class WorkLog implements Serializable {
 
 	public String getFormatedActivity() {
 		return PeriodHelper.outFormat(activity);
+	}
+
+	public Long getProjectId() {
+		return projectId;
+	}
+
+	public Task getWorklogtask() {
+		return worklogtask;
+	}
+
+	public void setProjectId(Long projectId) {
+		this.projectId = projectId;
+	}
+
+	public void setWorklogtask(Task worklogtask) {
+		this.worklogtask = worklogtask;
+	}
+
+	@Override
+	public String toString() {
+		return time + " " + worklogtask.getId() + " " + type;
 	}
 
 	@Override

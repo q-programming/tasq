@@ -12,11 +12,11 @@ import javax.persistence.PersistenceContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.qprogramming.tasq.support.Utils;
 
 /**
  * @author romanjak
@@ -75,13 +75,11 @@ public class AccountService {
 	public List<Account> findAll() {
 		return accRepo.findAll();
 	}
-
-	public List<Account> findByNameStartingWith(String name) {
-		return accRepo.findByNameStartingWith(name);
+	public Page<Account> findAll(Pageable p) {
+		return accRepo.findAll(p);
 	}
-
-	public List<Account> findBySurnameStartingWith(String name) {
-		return accRepo.findBySurnameStartingWith(name);
+	public Page<Account> findByStartingWith(String term,Pageable p) {
+		return accRepo.findBySurnameStartingWithIgnoreCaseOrNameStartingWithIgnoreCase(term,term, p);
 	}
 
 	public List<Account> findAdmins() {

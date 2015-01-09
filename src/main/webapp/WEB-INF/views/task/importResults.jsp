@@ -22,8 +22,7 @@
 		<samp>
 			${logger}
 		</samp>
-		<span class="btn pull-right" onclick="location.href='<c:url value="/"/>';"><s:message
-					code="main.cancel" text="Ok" /></span>
+		<span class="btn btn-default pull-right" onclick="location.href='<c:url value="/"/>';">Ok</span>
 	</div>
 </div>
 	
