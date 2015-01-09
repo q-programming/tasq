@@ -26,9 +26,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -37,8 +35,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.Utils;
@@ -63,6 +62,9 @@ public class ImportExportController {
 
 	@Autowired
 	private WorkLogService wlSrv;
+
+	@Autowired
+	private MessageSource msg;
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ImportExportController.class);
@@ -93,7 +95,11 @@ public class ImportExportController {
 
 	@RequestMapping(value = "/task/import", method = RequestMethod.GET)
 	public String startImportTasks(Model model) {
-		model.addAttribute("projects", projectSrv.findAll());
+		// check if can import/create!
+		if (!Roles.isReporter()) {
+			throw new TasqAuthException(msg);
+		}
+		model.addAttribute("projects", projectSrv.findAllByUser());
 		return "/task/import";
 	}
 
@@ -150,7 +156,8 @@ public class ImportExportController {
 					if (row.getCell(DUE_DATE_CELL) != null
 							&& !"".equals(row.getCell(DUE_DATE_CELL)
 									.getStringCellValue())) {
-						Date date = row.getCell(DUE_DATE_CELL).getDateCellValue();
+						Date date = row.getCell(DUE_DATE_CELL)
+								.getDateCellValue();
 						task.setDue_date(date);
 					}
 					// Create ID
@@ -179,7 +186,8 @@ public class ImportExportController {
 
 	@RequestMapping(value = "/task/export", method = RequestMethod.POST)
 	public void exportTasks(@RequestParam(value = "tasks") String[] idList,
-			HttpServletResponse response) throws FileNotFoundException, IOException {
+			HttpServletResponse response) throws FileNotFoundException,
+			IOException {
 		// Prepare task list
 		List<Task> taskList = new LinkedList<Task>();
 		Project project = null;

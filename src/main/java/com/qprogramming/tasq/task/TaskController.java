@@ -126,7 +126,7 @@ public class TaskController {
 		Project project = projectSrv.findById(taskForm.getProject());
 		if (project != null) {
 			// check if can edit
-			if (!canEdit(project)) {
+			if (!projectSrv.canEdit(project)) {
 				MessageHelper.addErrorAttribute(
 						ra,
 						msg.getMessage("error.accesRights", null,
@@ -202,7 +202,7 @@ public class TaskController {
 			return null;
 		}
 		// check if can edit
-		if (!canEdit(task.getProject())
+		if (!projectSrv.canEdit(task.getProject())
 				&& (!Roles.isReporter() || !task.getOwner().equals(
 						Utils.getCurrentAccount()))) {
 			MessageHelper.addErrorAttribute(
@@ -403,7 +403,7 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
-			if (!canEdit(task.getProject()) && !Roles.isUser()) {
+			if (!projectSrv.canEdit(task.getProject()) && !Roles.isUser()) {
 				MessageHelper.addErrorAttribute(
 						ra,
 						msg.getMessage("error.accesRights", null,
@@ -469,7 +469,7 @@ public class TaskController {
 				return "redirect:" + request.getHeader("Referer");
 			}
 			// check if can edit
-			if (!canEdit(task.getProject()) && !Roles.isUser()) {
+			if (!projectSrv.canEdit(task.getProject()) && !Roles.isUser()) {
 				throw new TasqAuthException(msg);
 			}
 			// TODO eliminate this?
@@ -527,7 +527,7 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
-			if (!canEdit(task.getProject()) && !Roles.isUser()) {
+			if (!projectSrv.canEdit(task.getProject()) && !Roles.isUser()) {
 				throw new TasqAuthException(msg, "role.error.task.permission");
 			}
 			if (state.equals(TaskState.TO_DO)) {
@@ -537,6 +537,8 @@ public class TaskController {
 							"task.alreadyStarted", null,
 							Utils.getCurrentLocale()));
 				}
+			}else if(state.equals(TaskState.CLOSED)){
+				stopTimer(task);
 			}
 			TaskState oldState = (TaskState) task.getState();
 			task.setState(state);
@@ -577,7 +579,7 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
-			if (!canEdit(task.getProject()) && !Roles.isUser()) {
+			if (!projectSrv.canEdit(task.getProject()) && !Roles.isUser()) {
 				MessageHelper.addErrorAttribute(
 						ra,
 						msg.getMessage("error.accesRights", null,
@@ -602,22 +604,11 @@ public class TaskController {
 					taskSrv.save(task);
 				}
 			} else if (action.equals(STOP)) {
-				Account account = Utils.getCurrentAccount();
-				DateTime now = new DateTime();
-				Period logWork = new Period(
-						(DateTime) account.getActive_task_time(), now);
-				// Only log work if greater than 1 minute
-				if (logWork.toStandardDuration().getMillis() / 1000 / 60 < 1) {
-					logWork = new Period().plusMinutes(1);
-				}
-				wlSrv.addNormalWorkLog(task, PeriodHelper.outFormat(logWork),
-						logWork, LogType.LOG);
-				account.clearActive_task();
+				Period logWork = stopTimer(task);
 				MessageHelper.addSuccessAttribute(ra, msg.getMessage(
 						"task.logWork.logged",
 						new Object[] { PeriodHelper.outFormat(logWork),
 								task.getId() }, Utils.getCurrentLocale()));
-				accSrv.update(account);
 			}
 		} else {
 			return "redirect:" + request.getHeader("Referer");
@@ -653,7 +644,7 @@ public class TaskController {
 				Account assignee = accSrv.findByEmail(email);
 				if (assignee != null && !assignee.equals(task.getAssignee())) {
 					// check if can edit
-					if (!canEdit(task.getProject())) {
+					if (!projectSrv.canEdit(task.getProject())) {
 						MessageHelper.addErrorAttribute(
 								ra,
 								msg.getMessage("error.accesRights", null,
@@ -685,7 +676,7 @@ public class TaskController {
 			throw new TasqAuthException(msg);
 		}
 		Task task = taskSrv.findById(id);
-		if (!canEdit(task.getProject())) {
+		if (!projectSrv.canEdit(task.getProject())) {
 			return new ResultData(ResultData.ERROR, msg.getMessage(
 					"role.error.task.permission", null,
 					Utils.getCurrentLocale()));
@@ -714,7 +705,7 @@ public class TaskController {
 				return "redirect:" + request.getHeader("Referer");
 
 			}
-			if (canEdit(task.getProject()) && Roles.isUser()) {
+			if (projectSrv.canEdit(task.getProject()) && Roles.isUser()) {
 				StringBuilder message = new StringBuilder();
 				String oldPriority = "";
 				// TODO temporary due to old DB
@@ -837,28 +828,39 @@ public class TaskController {
 		}
 	}
 
+	/**
+	 * Stops currently running timer on task
+	 * 
+	 * @param task 
+	 * @return Period logged as worklog
+	 */
+	private Period stopTimer(Task task) {
+		Account account = Utils.getCurrentAccount();
+		DateTime now = new DateTime();
+		Period logWork = new Period((DateTime) account.getActive_task_time(),
+				now);
+		// Only log work if greater than 1 minute
+		if (logWork.toStandardDuration().getMillis() / 1000 / 60 < 1) {
+			logWork = new Period().plusMinutes(1);
+		}
+		wlSrv.addNormalWorkLog(task, PeriodHelper.outFormat(logWork), logWork,
+				LogType.LOG);
+		account.clearActive_task();
+		accSrv.update(account);
+		return logWork;
+	}
+
+	/**
+	 * Check if is project admin or admin
+	 * 
+	 * @param task
+	 * @param project
+	 * @return
+	 */
 	private boolean isAdmin(Task task, Project project) {
 		Account currentAccount = Utils.getCurrentAccount();
 		return project.getAdministrators().contains(currentAccount)
 				|| task.getOwner().equals(currentAccount) || Roles.isAdmin();
-	}
-
-	/**
-	 * Checks if currently logged in user have privileges to change anything in
-	 * project
-	 * 
-	 * @param task
-	 * @return
-	 */
-	private boolean canEdit(Project project) {
-		Project repoProject = projectSrv.findById(project.getId());
-		if (repoProject == null) {
-			return false;
-		}
-		Account currentAccount = Utils.getCurrentAccount();
-		return repoProject.getAdministrators().contains(currentAccount)
-				|| repoProject.getParticipants().contains(currentAccount)
-				|| Roles.isAdmin();
 	}
 
 }
