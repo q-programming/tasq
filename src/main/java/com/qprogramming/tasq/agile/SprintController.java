@@ -56,20 +56,22 @@ public class SprintController {
 	private static final int SECONDS_PER_HOUR = DateTimeConstants.SECONDS_PER_HOUR;
 	private static final String NEW_LINE = "\n";
 
-	@Autowired
-	ProjectService projSrv;
-
-	@Autowired
-	TaskService taskSrv;
-
-	@Autowired
-	SprintRepository sprintRepo;
-
-	@Autowired
-	WorkLogService wrkLogSrv;
-
-	@Autowired
+	private ProjectService projSrv;
+	private TaskService taskSrv;
+	private SprintRepository sprintRepo;
+	private WorkLogService wrkLogSrv;
 	private MessageSource msg;
+
+	@Autowired
+	public SprintController(ProjectService prjSrv, TaskService taskSrv,
+			SprintRepository sprintRepo, WorkLogService wrkLogSrv,
+			MessageSource msg) {
+		this.projSrv = prjSrv;
+		this.taskSrv = taskSrv;
+		this.sprintRepo = sprintRepo;
+		this.wrkLogSrv = wrkLogSrv;
+		this.msg = msg;
+	}
 
 	@RequestMapping(value = "{id}/scrum/board", method = RequestMethod.GET)
 	public String showBoard(@PathVariable String id, Model model,

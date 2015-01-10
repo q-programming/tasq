@@ -174,7 +174,7 @@ $(document).on("click",".navBtn",function(e) {
 	$("#navigation").html('');
 	$("#topNavigation").html('');
 	$("#eventsTable .projEvent").remove();
-	fetchWorkLogData(page);
+	fetchWorkLogData(page); 
 });
 
 function fetchWorkLogData(page) {
@@ -182,7 +182,7 @@ function fetchWorkLogData(page) {
 	var url = '<c:url value="/projectEvents"/>';
 	var avatarURL = '<c:url value="/userAvatar/"/>';
 	var taskURL = '<c:url value="/task?id="/>';
-	var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
+	var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
 	$("#eventsTable").append(loading_indicator);
 	$.get(url, {id : projectID,	page: page}, function(data) {
 		$("#eventsTable tr").remove();
