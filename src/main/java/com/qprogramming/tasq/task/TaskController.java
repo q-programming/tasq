@@ -537,8 +537,11 @@ public class TaskController {
 							"task.alreadyStarted", null,
 							Utils.getCurrentLocale()));
 				}
-			}else if(state.equals(TaskState.CLOSED)){
-				stopTimer(task);
+			} else if (state.equals(TaskState.CLOSED)) {
+				ResultData result = checkForTimers(taskID, task, false);
+				if (result.code.equals(ResultData.ERROR)) {
+					return result;
+				}
 			}
 			TaskState oldState = (TaskState) task.getState();
 			task.setState(state);
@@ -738,32 +741,11 @@ public class TaskController {
 				task.setAssignee(null);
 				task.setProject(null);
 				// clear last and potential actives
-				List<Account> accounts = accSrv.findAll();
-				for (Account account : accounts) {
-					boolean update = false;
-					if (account.getActive_task() != null
-							&& account.getActive_task().length > 0
-							&& account.getActive_task()[0].equals(taskID)) {
-						if (account.equals(Utils.getCurrentAccount())) {
-							account.clearActive_task();
-							update = true;
-						} else {
-							MessageHelper.addErrorAttribute(ra, msg.getMessage(
-									"task.delete.work",
-									new Object[] { account },
-									Utils.getCurrentLocale()));
-							return "redirect:" + request.getHeader("Referer");
-						}
-					}
-					List<Task> lastVisited = account.getLast_visited_t();
-					if (lastVisited.contains(task)) {
-						lastVisited.remove(task);
-						account.setLast_visited_t(lastVisited);
-						update = true;
-					}
-					if (update) {
-						accSrv.update(account);
-					}
+				ResultData result = checkForTimers(taskID, task, true);
+				if (result.code.equals(ResultData.ERROR)) {
+					MessageHelper.addWarningAttribute(ra, result.message,
+							Utils.getCurrentLocale());
+					return "redirect:" + request.getHeader("Referer");
 				}
 				// leave message and clear all
 				StringBuilder message = new StringBuilder();
@@ -807,6 +789,50 @@ public class TaskController {
 		return result;
 	}
 
+	private ResultData checkForTimers(String taskID, Task task, boolean remove) {
+		List<Account> accounts = accSrv.findAll();
+		StringBuilder accountsWorking = new StringBuilder();
+		String separator = "";
+
+		for (Account account : accounts) {
+			boolean update = false;
+			if (account.getActive_task() != null
+					&& account.getActive_task().length > 0
+					&& account.getActive_task()[0].equals(taskID)) {
+				if (account.equals(Utils.getCurrentAccount())) {
+					if (remove) {
+						account.clearActive_task();
+					} else {
+						stopTimer(task);
+					}
+					update = true;
+				} else {
+					accountsWorking.append(separator);
+					accountsWorking.append(account.toString());
+					separator = ", ";
+				}
+			}
+			if (accountsWorking.length() > 0) {
+				return new ResultData(ResultData.ERROR, msg.getMessage(
+						"task.changeState.change.working",
+						new Object[] { accountsWorking.toString() },
+						Utils.getCurrentLocale()));
+			}
+			if (remove) {
+				List<Task> lastVisited = account.getLast_visited_t();
+				if (lastVisited.contains(task)) {
+					lastVisited.remove(task);
+					account.setLast_visited_t(lastVisited);
+					update = true;
+				}
+			}
+			if (update) {
+				accSrv.update(account);
+			}
+		}
+		return new ResultData(ResultData.OK, null);
+	}
+
 	private String worklogStateChange(TaskState state, TaskState oldState,
 			Task task) {
 		if (state.equals(TaskState.CLOSED)) {
@@ -831,7 +857,7 @@ public class TaskController {
 	/**
 	 * Stops currently running timer on task
 	 * 
-	 * @param task 
+	 * @param task
 	 * @return Period logged as worklog
 	 */
 	private Period stopTimer(Task task) {

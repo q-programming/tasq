@@ -12,7 +12,7 @@
 	<s:message code="task.tasks" text="Tasks" />
 </c:set>
 <c:set var="taskDesc_text">
-	<s:message code="task.description" text="Description" />
+	<s:message code="task.description" text="Description" arguments=""/>
 </c:set>
 <security:authentication property="principal" var="user" />
 <security:authorize access="hasRole('ROLE_ADMIN')">
@@ -123,7 +123,9 @@
 			    		showWait(true);
 						$.post('<c:url value="/task/changeState"/>',{id:taskID,state:state},function(result){
 							if(result.code == 'Error'){
-								showError(result.message);
+								reloadmsg = ' <s:message code="main.pageReload" arguments="10"/>';
+								showError(result.message + reloadmsg);
+								window.setTimeout('location.reload()', 10000);
 							}
 							else{
 								showSuccess(result.message);
