@@ -97,7 +97,7 @@ $(document).ready(function() {
 	var lastSprint = "${lastSprint.sprintNo}";
 	var avatarURL = '<c:url value="/userAvatar/"/>';
 	var taskURL = '<c:url value="/task?id="/>';
-	var loading_indicator = '<div id="loading" class="centerPadded"><img src="<c:url value="/resources/img/loading.gif"/>"></img></td>';
+	var loading_indicator = '<div id="loading" class="centerPadded"><s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td>';
 	var timeTracked = ${project.timeTracked};
 	$(".sprintMenuNo").click(function(){
 		var number = $(this).data('number');

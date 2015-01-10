@@ -458,11 +458,10 @@
 						<s:message code="task.sprints" />
 					</h5>
 				</div>
-
 				<c:forEach items="${task.sprints}" var="sprint">
 					<div>
 						<a
-							href="<c:url value="/${task.project.projectId}/${fn:toLowerCase(task.project.agile_type)}/burndown?sprint=${sprint.sprintNo}"/>">Sprint
+							href="<c:url value="/${task.project.projectId}/${fn:toLowerCase(task.project.agile_type)}/reports?sprint=${sprint.sprintNo}"/>">Sprint
 							${sprint.sprintNo}</a>
 					</div>
 				</c:forEach>
