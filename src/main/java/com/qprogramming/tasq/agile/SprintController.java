@@ -175,7 +175,7 @@ public class SprintController {
 	@RequestMapping(value = "/{id}/scrum/sprintAssign", method = RequestMethod.POST)
 	public String assignSprint(@PathVariable String id,
 			@RequestParam(value = "taskID") String taskID,
-			@RequestParam(value = "sprintID") Long sprintID, Model model,
+			@RequestParam(value = "sprintID") Long sprintID,
 			HttpServletRequest request, RedirectAttributes ra) {
 		Sprint sprint = sprintRepo.findById(sprintID);
 		Task task = taskSrv.findById(taskID);
@@ -186,6 +186,13 @@ public class SprintController {
 		}
 		Hibernate.initialize(task.getSprints());
 		if (sprint.isActive()) {
+			if (checkIfNotEstimated(task, project)) {
+				MessageHelper.addWarningAttribute(ra, msg.getMessage(
+						"agile.task2Sprint.Notestimated",
+						new Object[] { task.getId(), sprint.getSprintNo() },
+						Utils.getCurrentLocale()));
+				return "redirect:" + request.getHeader("Referer");
+			}
 			wrkLogSrv.addActivityLog(task, null, LogType.TASKSPRINTADD);
 		}
 		task.addSprint(sprint);
@@ -543,6 +550,29 @@ public class SprintController {
 			HttpServletResponse response) {
 		Sprint sprint = sprintRepo.findById(sprintID);
 		return sprint.isActive();
+	}
+
+	/**
+	 * Checks if task is properly estimated based on project settings (
+	 * Estimated time not 0m for time based or story points not 0 for story
+	 * points driven
+	 * 
+	 * @param task
+	 * @param project
+	 * @return
+	 */
+	private boolean checkIfNotEstimated(Task task, Project project) {
+		if (!project.getTimeTracked()) {
+			if (task.getStory_points() == 0) {
+				return true;
+			}
+		} else {
+			if (task.getEstimate().equals("0m")) {
+				return true;
+			}
+
+		}
+		return false;
 	}
 
 	private Map<String, Float> fillTimeBurndownMap(List<WorkLog> wrkList,

@@ -98,15 +98,7 @@ public class TaskController {
 
 	@RequestMapping(value = "task/create", method = RequestMethod.GET)
 	public TaskForm startTaskCreate(Model model) {
-		if (!Roles.isReporter()) {
-			throw new TasqAuthException(msg);
-		}
-		Project project = projectSrv.findUserActiveProject();
-		if (project == null) {
-			throw new TasqAuthException(msg, "error.noProjects");
-		}
-		model.addAttribute("project", projectSrv.findUserActiveProject());
-		model.addAttribute("projects_list", projectSrv.findAllByUser());
+		fillCreateTaskModel(model);
 		return new TaskForm();
 	}
 
@@ -119,8 +111,7 @@ public class TaskController {
 			throw new TasqAuthException(msg);
 		}
 		if (errors.hasErrors()) {
-			model.addAttribute("projects_list", projectSrv.findAllByUser());
-			model.addAttribute("project", projectSrv.findUserActiveProject());
+			fillCreateTaskModel(model);
 			return null;
 		}
 		Project project = projectSrv.findById(taskForm.getProject());
@@ -139,7 +130,7 @@ public class TaskController {
 
 			} catch (IllegalArgumentException e) {
 				errors.rejectValue("estimate", "error.estimateFormat");
-				model.addAttribute("projects", projectSrv.findAllByUser());
+				fillCreateTaskModel(model);
 				return null;
 			}
 			// build ID
@@ -161,6 +152,14 @@ public class TaskController {
 				task.addSprint(sprint);
 				// increase scope
 				if (sprint.isActive()) {
+					if (checkIfNotEstimated(task, project)) {
+						errors.rejectValue("addToSprint",
+								"agile.task2Sprint.Notestimated", new Object[] {
+										"", sprint.getSprintNo() },
+								"Unable to add not estimated task to active sprint");
+						fillCreateTaskModel(model);
+						return null;
+					}
 					wlSrv.addActivityLog(task, null, LogType.TASKSPRINTADD);
 				}
 				// TODO
@@ -789,6 +788,23 @@ public class TaskController {
 		return result;
 	}
 
+	/**
+	 * Fills model with project list and user's active project
+	 * 
+	 * @param model
+	 */
+	private void fillCreateTaskModel(Model model) {
+		if (!Roles.isReporter()) {
+			throw new TasqAuthException(msg);
+		}
+		Project project = projectSrv.findUserActiveProject();
+		if (project == null) {
+			throw new TasqAuthException(msg, "error.noProjects");
+		}
+		model.addAttribute("project", projectSrv.findUserActiveProject());
+		model.addAttribute("projects_list", projectSrv.findAllByUser());
+	}
+
 	private ResultData checkForTimers(String taskID, Task task, boolean remove) {
 		List<Account> accounts = accSrv.findAll();
 		StringBuilder accountsWorking = new StringBuilder();
@@ -831,6 +847,20 @@ public class TaskController {
 			}
 		}
 		return new ResultData(ResultData.OK, null);
+	}
+
+	private boolean checkIfNotEstimated(Task task, Project project) {
+		if (!project.getTimeTracked()) {
+			if (task.getStory_points() == 0) {
+				return true;
+			}
+		} else {
+			if (task.getEstimate().equals("0m")) {
+				return true;
+			}
+
+		}
+		return false;
 	}
 
 	private String worklogStateChange(TaskState state, TaskState oldState,
