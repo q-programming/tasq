@@ -222,6 +222,9 @@ $(document).ready(function() {
 			plot = $.jqplot('chartdiv', [ left,burned,ideal ], {
 				title : '<s:message code="agile.burndown.chart"/><p style="font-size: x-small;">'+startStop+'</p>',
 				animate: true,
+				grid: {
+	                background: '#ffffff',
+	            },
 				highlighter : {
 					show : true,
 					sizeAdjust : 7.5
@@ -272,6 +275,9 @@ $(document).ready(function() {
 			plot2 = $.jqplot('chartdiv2', [ time ], {
 				title : '<s:message code="agile.timelogged.day"/><p style="font-size: x-small;">'+startStop+'</p>',
 				animate: true,
+				grid: {
+	                background: '#ffffff',
+	            },
 				axesDefaults : {
 					labelRenderer : $.jqplot.CanvasAxisLabelRenderer
 				},

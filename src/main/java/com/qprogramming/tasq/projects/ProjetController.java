@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
@@ -50,6 +51,7 @@ import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
 import com.qprogramming.tasq.task.TaskType;
 import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
+import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
@@ -396,6 +398,67 @@ public class ProjetController {
 					result.add(sAccount);
 				}
 			}
+		}
+		return result;
+	}
+
+	@RequestMapping(value = "/project/getChart", method = RequestMethod.GET)
+	public @ResponseBody
+	ProjectChart getProjectChart(@RequestParam Long id,
+			HttpServletResponse response) {
+		response.setContentType("application/json");
+		Project project = projSrv.findById(id);
+		Map<String, Integer> created = new HashMap<String, Integer>();
+		Map<String, Integer> closed = new HashMap<String, Integer>();
+		ProjectChart result = new ProjectChart();
+		List<WorkLog> events = wrkLogSrv.findProjectCreateCloseEvents(project);
+		// Fill maps
+		for (WorkLog workLog : events) {
+			LocalDate date = new LocalDate(workLog.getRawTime());
+			if (LogType.CREATE.equals(workLog.getType())) {
+				Integer value = created.get(date.toString());
+				if (value == null) {
+					value = 0;
+				}
+				value++;
+				created.put(date.toString(), value);
+			} else if (LogType.REOPEN.equals(workLog.getType())) {
+				Integer value = closed.get(date.toString());
+				if (value == null) {
+					value = 0;
+				}
+				value--;
+				closed.put(date.toString(), value);
+			} else {
+				Integer value = closed.get(date.toString());
+				if (value == null) {
+					value = 0;
+				}
+				value++;
+				closed.put(date.toString(), value);
+			}
+		}
+		// Look for the first event ever (they are sorted)
+		LocalDate start = new LocalDate(events.get(0).getRawTime());
+		LocalDate end = new LocalDate().plusDays(1);
+		LocalDate counter = start;
+		Integer taskCreated = 0;
+		Integer taskClosed = 0;
+		while (counter.isBefore(end)) {
+			Integer createValue = created.get(counter.toString());
+			if(createValue==null){
+				createValue = 0;
+			}
+			taskCreated += createValue;
+			result.getCreated().put(counter.toString(), taskCreated);
+			
+			Integer closeValue = closed.get(counter.toString());
+			if(closeValue == null){
+				closeValue = 0;
+			}
+			taskClosed += closeValue;
+			result.getClosed().put(counter.toString(), taskClosed);
+			counter = counter.plusDays(1);
 		}
 		return result;
 	}

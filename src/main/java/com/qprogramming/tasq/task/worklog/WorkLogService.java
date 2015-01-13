@@ -67,8 +67,9 @@ public class WorkLogService {
 			taskSrv.save(checkState(loggedTask));
 		}
 	}
+
 	@Transactional
-	public void addDatedWorkLog(Task task, String msg, Date when,LogType type) {
+	public void addDatedWorkLog(Task task, String msg, Date when, LogType type) {
 		Task loggedTask = taskSrv.findById(task.getId());
 		if (loggedTask != null) {
 			WorkLog wl = new WorkLog();
@@ -223,6 +224,17 @@ public class WorkLogService {
 		return wlRepo.findByProjectId(id, p);
 	}
 
+	public List<WorkLog> findProjectCreateCloseEvents(Project project) {
+		List<WorkLog> list = wlRepo.findByProjectIdOrderByTimeAsc(project.getId());
+		List<WorkLog> result = new LinkedList<WorkLog>();
+		for (WorkLog workLog : list) {
+			if (LogType.CREATE.equals(workLog.getType())|| LogType.REOPEN.equals(workLog.getType()) || LogType.CLOSED.equals(workLog.getType())){
+				result.add(workLog);
+			}
+		}
+		return result;
+	}
+
 	private Task checkState(Task task) {
 		if (task.getState().equals(TaskState.TO_DO)) {
 			task.setState(TaskState.ONGOING);
@@ -246,5 +258,4 @@ public class WorkLogService {
 				|| type.equals(LogType.ESTIMATE) || type.equals(LogType.CLOSED)
 				|| type.equals(LogType.REOPEN);
 	}
-
 }

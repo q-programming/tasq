@@ -14,6 +14,8 @@ public interface WorkLogRepository extends JpaRepository<WorkLog, Integer> {
 	WorkLog findById(Long id);
 
 	List<WorkLog> findByProjectId(Long id);
+	
+	List<WorkLog> findByProjectIdOrderByTimeAsc(Long id);
 
 	Page<WorkLog> findByProjectId(Long id, Pageable page);
 
@@ -22,9 +24,9 @@ public interface WorkLogRepository extends JpaRepository<WorkLog, Integer> {
 
 	List<WorkLog> findByProjectIdAndTimeBetweenAndTypeOrTypeOrderByTimeAsc(
 			Long id, Date start, Date end, LogType closed, LogType reopen);
-	
-	List<WorkLog> findByProjectIdAndTimeBetweenOrderByTimeAsc(
-			Long id, Date start, Date end);
+
+	List<WorkLog> findByProjectIdAndTimeBetweenOrderByTimeAsc(Long id,
+			Date start, Date end);
 
 	List<WorkLog> findByProjectIdAndTimeBetweenAndWorklogtaskNotNullOrderByTimeAsc(
 			Long id, Date start, Date end);

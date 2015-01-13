@@ -17,6 +17,7 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -48,6 +49,7 @@ import com.qprogramming.tasq.agile.SprintRepository;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.NewProjectForm;
 import com.qprogramming.tasq.projects.Project;
+import com.qprogramming.tasq.projects.ProjectChart;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.projects.ProjetController;
 import com.qprogramming.tasq.support.web.Message;
@@ -177,7 +179,7 @@ public class ProjectControllerTest {
 	}
 
 	@Test
-	public void getProjectEventsTest() {
+	public void getProjectEventsAndChartTest() {
 		Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
 		project.addParticipant(testAccount);
 		when(projSrv.findById(1L)).thenReturn(project);
@@ -188,19 +190,42 @@ public class ProjectControllerTest {
 		wl.setMessage("msg");
 		wl.setTime(new Date());
 		wl.setTimeLogged(new Date());
+		WorkLog w2 = new WorkLog();
+		w2.setAccount(testAccount);
+		w2.setType(LogType.CLOSED);
+		w2.setMessage("msg");
+		w2.setTime(new Date());
+		w2.setTimeLogged(new Date());
+		WorkLog w3 = new WorkLog();
+		w3.setAccount(testAccount);
+		w3.setType(LogType.REOPEN);
+		w3.setMessage("msg");
+		w3.setTime(new Date());
+		w3.setTimeLogged(new Date());
+		WorkLog w4 = new WorkLog();
+		w4.setAccount(testAccount);
+		w4.setType(LogType.CLOSED);
+		w4.setMessage("msg");
+		w4.setTime(new Date());
+		w4.setTimeLogged(new Date());
 		list.add(wl);
 		list.add(wl);
 		list.add(wl);
 		list.add(wl);
 		list.add(wl);
-		list.add(wl);
-		list.add(wl);
-		list.add(wl);
+		list.add(w2);
+		list.add(w3);
+		list.add(w4);
 		Page<WorkLog> page = new PageImpl<WorkLog>(list);
 		when(wrkLogSrv.findByProjectId(anyLong(), any(Pageable.class)))
 				.thenReturn(page);
+		when(wrkLogSrv.findProjectCreateCloseEvents(project)).thenReturn(list);
 		Pageable p = new PageRequest(0, 5, new Sort(Sort.Direction.ASC, "time"));
 		Page<DisplayWorkLog> result = projectCtr.getProjectEvents(1L, p);
+		ProjectChart chart = projectCtr.getProjectChart(1L, responseMock);
+		String today = new LocalDate().toString();
+		Assert.assertEquals(Integer.valueOf(1), chart.getClosed().get(today));
+		Assert.assertEquals(Integer.valueOf(5), chart.getCreated().get(today));
 		Assert.assertEquals(8L, result.getTotalElements());
 
 	}
