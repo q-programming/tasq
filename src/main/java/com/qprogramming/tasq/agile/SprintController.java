@@ -461,6 +461,14 @@ public class SprintController {
 			result.setWorklogs(DisplayWorkLog.convertToDisplayWorkLogs(wrkList));
 			result.setTimeBurned(fillTimeBurndownMap(wrkList, startTime,
 					endTime));
+			Period totalTime = new Period();
+			for (Map.Entry<String, Float> entry : result.getTimeBurned()
+					.entrySet()) {
+				totalTime = PeriodHelper.plusPeriods(totalTime,
+						getPeriodValue(entry.getValue()));
+			}
+			result.setTotalTime(PeriodHelper.outFormat(totalTime
+					.toStandardHours().toPeriod()));
 			if (timeTracked) {
 				// leftMap = fillLeftMap(wrkList, true);
 				// burnedMap = fillBurnednMap(wrkList, true);
@@ -477,8 +485,7 @@ public class SprintController {
 					Float timelogged = result.getTimeBurned().get(
 							date.toString());
 					if (timelogged != null) {
-						Period value = new Period(0, 0,
-								(int) (timelogged * SECONDS_PER_HOUR), 0);
+						Period value = getPeriodValue(timelogged);
 						burned = PeriodHelper.plusPeriods(burned, value);
 						remaining_estimate = PeriodHelper.minusPeriods(
 								remaining_estimate, value);
@@ -495,6 +502,7 @@ public class SprintController {
 					}
 				}
 			} else {
+				Integer totalPoints = new Integer(0);
 				leftMap = fillLeftMap(wrkList, false);
 				burnedMap = fillBurnednMap(wrkList, false);
 				Integer remainingEstimate = sprint.getTotalStoryPoints();
@@ -515,8 +523,10 @@ public class SprintController {
 					} else {
 						result.putToLeft(date.toString(), remainingEstimate);
 						result.getBurned().put(date.toString(), burned);
+						totalPoints = burned.intValue();
 					}
 				}
+				result.setTotalPoints(totalPoints);
 			}
 		}
 		return result;
@@ -603,6 +613,12 @@ public class SprintController {
 		Float result = Float.valueOf((float) value.toStandardSeconds()
 				.getSeconds() / SECONDS_PER_HOUR);
 		return result;
+	}
+
+	private Period getPeriodValue(Float timelogged) {
+		Period value = new Period(0, 0, (int) (timelogged * SECONDS_PER_HOUR),
+				0);
+		return value;
 	}
 
 	/**

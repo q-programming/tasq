@@ -14,7 +14,7 @@ class SprintData {
 	private String message;
 	private List<DisplayWorkLog> worklogs;
 	private Integer totalPoints = 0;
-	private Integer totalTime = 0;
+	private String totalTime;
 
 	public SprintData() {
 		left = new LinkedHashMap<String, Integer>();
@@ -75,16 +75,16 @@ class SprintData {
 		return totalPoints;
 	}
 
-	public Integer getTotalTime() {
+	public String getTotalTime() {
 		return totalTime;
+	}
+
+	public void setTotalTime(String totalTime) {
+		this.totalTime = totalTime;
 	}
 
 	public void setTotalPoints(Integer totalPoints) {
 		this.totalPoints = totalPoints;
-	}
-
-	public void setTotalTime(Integer totalTime) {
-		this.totalTime = totalTime;
 	}
 
 	public void createIdeal(String startTime, int value, String endTime) {
