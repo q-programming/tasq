@@ -29,6 +29,7 @@ import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.support.sorters.CommentsSorter;
 import com.qprogramming.tasq.support.sorters.WorkLogSorter;
 import com.qprogramming.tasq.task.comments.Comment;
+import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 
 @Entity
@@ -236,8 +237,10 @@ public class Task implements java.io.Serializable {
 		logged_work = new Period();
 		Set<WorkLog> worklg = getRawWorkLog();
 		for (WorkLog activity : worklg) {
-			logged_work = PeriodHelper.plusPeriods(logged_work,
-					activity.getActivity());
+			if (!LogType.ESTIMATE.equals(activity.getType())) {
+				logged_work = PeriodHelper.plusPeriods(logged_work,
+						activity.getActivity());
+			}
 		}
 		return logged_work;
 	}

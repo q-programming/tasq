@@ -723,6 +723,9 @@ public class SprintController {
 				|| LogType.TASKSPRINTADD.equals(workLog.getType())) {
 			taskStoryPoints *= -1;
 		}
+		if (LogType.ESTIMATE.equals(workLog.getType())) {
+			taskStoryPoints = -1 * Integer.valueOf(workLog.getMessage());
+		}
 		if (value == null) {
 			result = taskStoryPoints;
 		} else {

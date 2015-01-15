@@ -28,7 +28,7 @@
 		<div>
 			<h4>
 				<s:message code="project.project" />
-				: ${taskForm.project}
+				: [${project.projectId}] ${project.name}
 				<form:hidden path="project" />
 			</h4>
 		</div>

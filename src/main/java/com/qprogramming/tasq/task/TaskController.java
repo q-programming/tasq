@@ -146,6 +146,8 @@ public class TaskController {
 				task.setAssignee(assignee);
 			}
 			// lookup for sprint
+			// Create log work
+			taskSrv.save(task);
 			if (taskForm.getAddToSprint() != null) {
 				Sprint sprint = sprintRepository.findByProjectIdAndSprintNo(
 						project.getId(), taskForm.getAddToSprint());
@@ -155,7 +157,7 @@ public class TaskController {
 					if (checkIfNotEstimated(task, project)) {
 						errors.rejectValue("addToSprint",
 								"agile.task2Sprint.Notestimated", new Object[] {
-										"", sprint.getSprintNo() },
+								"", sprint.getSprintNo() },
 								"Unable to add not estimated task to active sprint");
 						fillCreateTaskModel(model);
 						return null;
@@ -164,8 +166,6 @@ public class TaskController {
 				}
 				// TODO
 			}
-			// Create log work
-			taskSrv.save(task);
 			projectSrv.save(project);
 			wlSrv.addActivityLog(task, "", LogType.CREATE);
 			return "redirect:/task?id=" + taskID;
@@ -183,6 +183,7 @@ public class TaskController {
 		}
 		Hibernate.initialize(task.getRawWorkLog());
 		model.addAttribute("task", task);
+		model.addAttribute("project", task.getProject());
 		return new TaskForm(task);
 	}
 
@@ -208,6 +209,12 @@ public class TaskController {
 					ra,
 					msg.getMessage("error.accesRights", null,
 							Utils.getCurrentLocale()));
+			return "redirect:" + request.getHeader("Referer");
+		}
+		if (task.getState().equals(TaskState.CLOSED)) {
+			ResultData result = taskIsClosed(ra, request, task);
+			MessageHelper.addWarningAttribute(ra, result.message,
+					Utils.getCurrentLocale());
 			return "redirect:" + request.getHeader("Referer");
 		}
 		StringBuilder message = new StringBuilder();
@@ -236,11 +243,16 @@ public class TaskController {
 			messageEstimate.append(CHANGE_TO);
 			messageEstimate.append(taskForm.getEstimate());
 			Period estimate = PeriodHelper.inFormat(taskForm.getEstimate());
+			int compare = estimate.toStandardDuration().compareTo(
+					task.getRawEstimate().toStandardDuration());
+			Period difference = PeriodHelper.minusPeriods(estimate,
+					task.getRawEstimate());
 			task.setEstimate(estimate);
 			task.setRemaining(estimate);
-			wlSrv.addActivityLog(task, messageEstimate.toString(),
-					LogType.ESTIMATE);
-
+			// TODO Refactor charst first
+			wlSrv.addActivityPeriodLog(task, PeriodHelper.outFormat(difference),
+					difference, LogType.ESTIMATE);
+			
 		}
 		if (!task.getEstimated().equals(
 				!Boolean.parseBoolean(taskForm.getNo_estimation()))) {
@@ -252,6 +264,11 @@ public class TaskController {
 		int storyPoints = ("").equals(taskForm.getStory_points()) ? 0 : Integer
 				.parseInt(taskForm.getStory_points());
 		if (task.getStory_points() != storyPoints) {
+			wlSrv.addActivityLog(
+					task,
+					Integer.toString(-1
+							* (task.getStory_points() - storyPoints)),
+					LogType.ESTIMATE);
 			message.append("Story points: ");
 			message.append(task.getStory_points());
 			message.append(CHANGE_TO);
@@ -268,7 +285,9 @@ public class TaskController {
 		}
 		LOG.debug(message.toString());
 		taskSrv.save(task);
-		wlSrv.addActivityLog(task, message.toString(), LogType.EDITED);
+		if (message.length() > 0) {
+			wlSrv.addActivityLog(task, message.toString(), LogType.EDITED);
+		}
 		return "redirect:/task?id=" + taskID;
 	}
 
@@ -628,12 +647,9 @@ public class TaskController {
 				throw new TasqAuthException(msg);
 			}
 			if (task.getState().equals(TaskState.CLOSED)) {
-				String localized = msg.getMessage(
-						((TaskState) task.getState()).getCode(), null,
+				ResultData result = taskIsClosed(ra, request, task);
+				MessageHelper.addWarningAttribute(ra, result.message,
 						Utils.getCurrentLocale());
-				MessageHelper.addWarningAttribute(ra, msg.getMessage(
-						"task.closed", new Object[] { localized },
-						Utils.getCurrentLocale()));
 				return "redirect:" + request.getHeader("Referer");
 
 			}
@@ -698,14 +714,10 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			if (task.getState().equals(TaskState.CLOSED)) {
-				String localized = msg.getMessage(
-						((TaskState) task.getState()).getCode(), null,
+				ResultData result = taskIsClosed(ra, request, task);
+				MessageHelper.addWarningAttribute(ra, result.message,
 						Utils.getCurrentLocale());
-				MessageHelper.addWarningAttribute(ra, msg.getMessage(
-						"task.closed", new Object[] { localized },
-						Utils.getCurrentLocale()));
 				return "redirect:" + request.getHeader("Referer");
-
 			}
 			if (projectSrv.canEdit(task.getProject()) && Roles.isUser()) {
 				StringBuilder message = new StringBuilder();
@@ -786,6 +798,15 @@ public class TaskController {
 			}
 		}
 		return result;
+	}
+
+	private ResultData taskIsClosed(RedirectAttributes ra,
+			HttpServletRequest request, Task task) {
+		String localized = msg.getMessage(
+				((TaskState) task.getState()).getCode(), null,
+				Utils.getCurrentLocale());
+		return new ResultData(ResultData.ERROR, msg.getMessage("task.closed",
+				new Object[] { localized }, Utils.getCurrentLocale()));
 	}
 
 	/**

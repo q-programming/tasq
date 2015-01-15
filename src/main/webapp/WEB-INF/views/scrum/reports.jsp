@@ -147,7 +147,7 @@ $(document).ready(function() {
 	    $("#sprintNoMenu").html('<h4><b>Sprint '+ sprintNo + '</b> <span class="caret"></span></h4>')
 	    $.get('<c:url value="/${project.projectId}/sprint-data"/>',{sprint:sprintNo},function(result){
  	    	//Fill arrays of data
-	    	//console.log(result);
+	    	console.log(result);
 	    	$.each(result.timeBurned, function(key,val){
 	    		time.push([key, val]);
 	    	});
@@ -181,7 +181,10 @@ $(document).ready(function() {
 	    		}else{
 		    		if  (val.type=='REOPEN' || val.type=='TASKSPRINTADD'){
 		    			change = '<td style="width:30px">' + val.task.story_points + '</td><td style="width:30px"></td>';
-	    			}else if(val.type=='LOG' && timeTracked == false ){
+	    			}else if (val.type=='ESTIMATE'){
+		    			change = '<td style="width:30px">' + val.message + '</td><td style="width:30px"></td>';
+		    		}
+		    		else if(val.type=='LOG' && timeTracked == false ){
 		    			change = '<td style="width:30px"></td><td style="width:30px"></td>';
 	    			}
 	    			else{
