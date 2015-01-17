@@ -1,9 +1,14 @@
 package com.qprogramming.tasq.task;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.joda.time.Period;
 import org.springframework.beans.BeanUtils;
 
 import com.qprogramming.tasq.account.DisplayAccount;
+import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
+import com.qprogramming.tasq.task.worklog.WorkLog;
 
 public class DisplayTask implements Comparable<DisplayTask> {
 	private String id;
@@ -19,6 +24,7 @@ public class DisplayTask implements Comparable<DisplayTask> {
 	private Enum<TaskPriority> priority;
 	private DisplayAccount assignee;
 	private Boolean estimated = false;
+	private boolean inSprint;
 
 	public DisplayTask(Task task) {
 		BeanUtils.copyProperties(task, this);
@@ -132,6 +138,14 @@ public class DisplayTask implements Comparable<DisplayTask> {
 		this.assignee = assignee;
 	}
 
+	public boolean isInSprint() {
+		return inSprint;
+	}
+
+	public void setInSprint(boolean inSprint) {
+		this.inSprint = inSprint;
+	}
+
 	@Override
 	public String toString() {
 		return getId() + " " + getName();
@@ -187,5 +201,19 @@ public class DisplayTask implements Comparable<DisplayTask> {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Static method to return list of more lightweight form of Task
+	 * 
+	 * @param list
+	 * @return
+	 */
+	public static List<DisplayTask> convertToDisplayTasks(List<Task> list) {
+		List<DisplayTask> result = new LinkedList<DisplayTask>();
+		for (Task task : list) {
+			result.add(new DisplayTask(task));
+		}
+		return result;
 	}
 }

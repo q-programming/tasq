@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -56,6 +57,7 @@ import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskPriority;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskType;
+import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -86,7 +88,7 @@ public class SprintControllerTest {
 	@Mock
 	private SprintRepository sprintRepoMock;
 	@Mock
-	private WorkLogService wrkLogSrv;
+	private WorkLogService wrkLogSrvMock;
 
 	@Mock
 	private Authentication authMock;
@@ -116,7 +118,7 @@ public class SprintControllerTest {
 		Set<Account> participants = new HashSet<Account>(createList());
 		project.setParticipants(participants);
 		sprintCtrl = new SprintController(projSrvMock, taskSrvMock,
-				sprintRepoMock, wrkLogSrv, msgMock);
+				sprintRepoMock, wrkLogSrvMock, msgMock);
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
@@ -176,12 +178,140 @@ public class SprintControllerTest {
 				sprintCtrl.showBoard(TEST, modelMock, requestMock, raMock));
 		verify(modelMock, times(3)).addAttribute(anyString(), anyObject());
 	}
-	
-	
-	
-	
-	
-	
+
+	@Test
+	public void showBacklogTest() {
+		project.addParticipant(testAccount);
+		List<Sprint> sprintList = createSprints();
+		List<Task> taskList = createTaskList(project);
+		taskList.get(0).addSprint(sprintList.get(1));
+		taskList.get(1).addSprint(sprintList.get(1));
+		when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
+		when(sprintRepoMock.findByProjectIdAndFinished(project.getId(), false))
+				.thenReturn(sprintList);
+		when(taskSrvMock.findByProjectAndOpen(project)).thenReturn(taskList);
+		when(
+				msgMock.getMessage(anyString(), any(Object[].class),
+						any(Locale.class))).thenReturn("TEST");
+		Assert.assertEquals("/scrum/backlog",
+				sprintCtrl.showBacklog(TEST, modelMock, requestMock));
+		verify(modelMock, times(4)).addAttribute(anyString(), anyObject());
+	}
+
+	@Test
+	public void createSprintNotAdminAuthTest() {
+		boolean catched = false;
+		project.setAdministrators(new HashSet<Account>());
+		when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
+		testAccount.setRole(Roles.ROLE_VIEWER);
+		try {
+			sprintCtrl.createSprint(TEST, modelMock, requestMock, raMock);
+		} catch (TasqAuthException e) {
+			catched = true;
+		}
+		Assert.assertTrue(catched);
+	}
+
+	@Test
+	public void createSprintTest() {
+		project.setAdministrators(new HashSet<Account>());
+		testAccount.setRole(Roles.ROLE_ADMIN);
+		List<Sprint> sprintList = createSprints();
+		when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
+		when(sprintRepoMock.findByProjectId(1L)).thenReturn(sprintList);
+		sprintCtrl.createSprint(TEST, modelMock, requestMock, raMock);
+		verify(sprintRepoMock, times(1)).save(any(Sprint.class));
+	}
+
+	@Test
+	public void assignToSprintBadAuthTest() {
+		boolean catched = false;
+		project.setAdministrators(new HashSet<Account>());
+		testAccount.setRole(Roles.ROLE_USER);
+		when(sprintRepoMock.findById(1L)).thenReturn(null);
+		Task task = createTask(TEST, 1, project);
+		when(taskSrvMock.findById(TEST)).thenReturn(task);
+		try {
+			sprintCtrl.assignSprint(TEST, TEST, 1L, requestMock, raMock);
+		} catch (TasqAuthException e) {
+			catched = true;
+		}
+		Assert.assertTrue(catched);
+	}
+
+	@Test
+	public void assignToSprintTest() {
+		Sprint sprint = new Sprint();
+		sprint.setProject(project);
+		testAccount.setRole(Roles.ROLE_ADMIN);
+		project.setAdministrators(new HashSet<Account>());
+		when(sprintRepoMock.findById(1L)).thenReturn(sprint);
+		when(
+				msgMock.getMessage(anyString(), any(Object[].class),
+						any(Locale.class))).thenReturn("TEST");
+		Task task = createTask(TEST, 1, project);
+		task.setStory_points(1);
+		Task resultTask = task;
+
+		resultTask.addSprint(sprint);
+		when(taskSrvMock.findById(TEST)).thenReturn(task);
+		sprintCtrl.assignSprint(TEST, TEST, 1L, requestMock, raMock);
+
+		verify(raMock, times(1))
+				.addFlashAttribute(
+						anyString(),
+						new Message(anyString(), Message.Type.SUCCESS,
+								new Object[] {}));
+		verify(taskSrvMock, times(1)).save(resultTask);
+		// Add to active sprint
+		sprint.setActive(true);
+		sprintCtrl.assignSprint(TEST, TEST, 1L, requestMock, raMock);
+		verify(wrkLogSrvMock, times(1)).addActivityLog(task, null,
+				LogType.TASKSPRINTADD);
+		// Task not esstimated when adding to active
+		task.setStory_points(0);
+		sprintCtrl.assignSprint(TEST, TEST, 1L, requestMock, raMock);
+		verify(raMock, times(3))
+				.addFlashAttribute(
+						anyString(),
+						new Message(anyString(), Message.Type.WARNING,
+								new Object[] {}));
+	}
+
+	@Test
+	public void deleteSprintBadAuthTest() {
+		boolean catched = false;
+		project.setAdministrators(new HashSet<Account>());
+		testAccount.setRole(Roles.ROLE_USER);
+		Sprint sprint = new Sprint();
+		sprint.setProject(project);
+		when(sprintRepoMock.findById(1L)).thenReturn(sprint);
+		try {
+			sprintCtrl.deleteSprint(1L, modelMock, requestMock, raMock);
+		} catch (TasqAuthException e) {
+			catched = true;
+		}
+		Assert.assertTrue(catched);
+	}
+
+	@Test
+	public void deleteSprintTest() {
+		project.setAdministrators(new HashSet<Account>());
+		testAccount.setRole(Roles.ROLE_ADMIN);
+		project.addParticipant(testAccount);
+		List<Sprint> sprintList = createSprints();
+		List<Task> taskList = createTaskList(project);
+		Sprint removedSprint = sprintList.get(1);
+		taskList.get(0).addSprint(removedSprint);
+		taskList.get(1).addSprint(removedSprint);
+		when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
+		when(projSrvMock.findById(1L)).thenReturn(project);
+		when(sprintRepoMock.findById(1l)).thenReturn(sprintList.get(1));
+		when(taskSrvMock.findAllBySprint(removedSprint)).thenReturn(taskList);
+		sprintCtrl.deleteSprint(1L, modelMock, requestMock, raMock);
+
+		verify(taskSrvMock, times(2)).save(any(Task.class));
+	}
 
 	private List<Account> createList() {
 		List<Account> accountsList = new LinkedList<Account>();
@@ -217,6 +347,29 @@ public class SprintControllerTest {
 		task.setPriority(TaskPriority.MAJOR);
 		task.setType(TaskType.USER_STORY);
 		return task;
+	}
+
+	private List<Sprint> createSprints() {
+		Sprint sprint = new Sprint();
+		sprint.setProject(project);
+		sprint.setId(1L);
+		LocalDate startDate = new LocalDate();
+		startDate = startDate.minusDays(7);
+		LocalDate endDate = new LocalDate();
+		endDate = endDate.minusDays(3);
+		sprint.setStart_date(startDate.toDate());
+		sprint.setEnd_date(endDate.toDate());
+		sprint.setSprint_no(1L);
+		Sprint sprint2 = new Sprint();
+		sprint2.setProject(project);
+		sprint2.setId(2L);
+		sprint2.setStart_date(endDate.plusDays(1).toDate());
+		sprint2.setSprint_no(2L);
+		sprint2.setActive(true);
+		List<Sprint> sprintList = new LinkedList<Sprint>();
+		sprintList.add(sprint);
+		sprintList.add(sprint2);
+		return sprintList;
 	}
 
 }

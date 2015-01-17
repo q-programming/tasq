@@ -118,20 +118,15 @@ public class SprintController {
 				throw new TasqAuthException(msg);
 			}
 			model.addAttribute("project", project);
-			List<DisplayTask> resultList = new LinkedList<DisplayTask>();
-			List<Task> taskList = taskSrv.findAllByProject(project);
 			// Don't show closed tasks in backlog view
-			for (Task task : taskList) {
-				if (!task.getState().equals(TaskState.CLOSED)) {
-					resultList.add(new DisplayTask(task));
-				}
-			}
-			Map<Sprint, List<DisplayTask>> sprint_result = new LinkedHashMap<Sprint, List<DisplayTask>>();
-
-			List<Sprint> sprintList = sprintRepo.findByProjectIdAndFinished(
-					project.getId(), false);
+			List<Task> taskList = taskSrv.findByProjectAndOpen(project);
 			Collections.sort(taskList, new TaskSorter(
 					TaskSorter.SORTBY.PRIORITY, true));
+			List<DisplayTask> resultList = DisplayTask
+					.convertToDisplayTasks(taskList);
+			Map<Sprint, List<DisplayTask>> sprint_result = new LinkedHashMap<Sprint, List<DisplayTask>>();
+			List<Sprint> sprintList = sprintRepo.findByProjectIdAndFinished(
+					project.getId(), false);
 			Collections.sort(sprintList, new SprintSorter());
 			// Assign tasks to sprints in order to display them
 			for (Sprint sprint : sprintList) {
@@ -145,7 +140,7 @@ public class SprintController {
 				sprint_result.put(sprint, sprint_tasks);
 			}
 			model.addAttribute("sprint_result", sprint_result);
-			model.addAttribute("tasks", taskList);
+			model.addAttribute("tasks", resultList);
 			model.addAttribute("sprints", sprintList);
 		}
 		return "/scrum/backlog";
@@ -240,13 +235,16 @@ public class SprintController {
 				&& !Roles.isAdmin()) {
 			throw new TasqAuthException(msg);
 		}
-		if (sprint != null && !sprint.isActive()) {
+		// consider checking if is active?
+		if (sprint != null) {
 			if (canEdit(sprint.getProject())) {
 				List<Task> taskList = taskSrv.findAllBySprint(sprint);
 				for (Task task : taskList) {
 					Hibernate.initialize(task.getSprints());
-					task.removeSprint(sprint);
-					taskSrv.save(task);
+					if (task.getSprints().contains(sprint)) {
+						task.removeSprint(sprint);
+						taskSrv.save(task);
+					}
 				}
 			}
 		}
@@ -434,8 +432,7 @@ public class SprintController {
 	 * @return
 	 */
 	@RequestMapping(value = "/{id}/sprint-data", method = RequestMethod.GET, produces = "application/json")
-	public @ResponseBody
-	SprintData showBurndownChart(@PathVariable String id,
+	public @ResponseBody SprintData showBurndownChart(@PathVariable String id,
 			@RequestParam(value = "sprint") Long sprintNo) {
 		SprintData result = new SprintData();
 		Map<LocalDate, Integer> leftMap = new HashMap<LocalDate, Integer>();
@@ -533,9 +530,8 @@ public class SprintController {
 	}
 
 	@RequestMapping(value = "/getSprints", method = RequestMethod.GET)
-	public @ResponseBody
-	List<DisplaySprint> showProjectSprints(@RequestParam Long projectID,
-			HttpServletResponse response) {
+	public @ResponseBody List<DisplaySprint> showProjectSprints(
+			@RequestParam Long projectID, HttpServletResponse response) {
 		response.setContentType("application/json");
 		List<DisplaySprint> result = new LinkedList<DisplaySprint>();
 		List<Sprint> projectSprints = sprintRepo.findByProjectIdAndFinished(
@@ -555,8 +551,8 @@ public class SprintController {
 	 * @return
 	 */
 	@RequestMapping(value = "/scrum/isActive", method = RequestMethod.GET)
-	public @ResponseBody
-	boolean checkIfActive(@RequestParam(value = "id") Long sprintID,
+	public @ResponseBody boolean checkIfActive(
+			@RequestParam(value = "id") Long sprintID,
 			HttpServletResponse response) {
 		Sprint sprint = sprintRepo.findById(sprintID);
 		return sprint.isActive();

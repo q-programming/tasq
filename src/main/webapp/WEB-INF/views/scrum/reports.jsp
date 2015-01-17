@@ -15,6 +15,7 @@
 <!-- 	rel="stylesheet" media="screen" /> -->
 <link rel="stylesheet" type="text/css"
 	href="<c:url value="/resources/css/jquery.jqplot.css"/>" />
+	
 <c:if test="${empty param.sprint}">
 	<c:set var="ActiveSprint">${lastSprint.sprintNo }</c:set>
 </c:if>
@@ -46,7 +47,7 @@
 					<ul class="nav nav-pills nav-stacked">
 						<li>
 							<a href="#" id="sprintNoMenu" class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-expanded="false">
-								<h4><b>Sprint ${lastSprint.sprintNo }</b> <span class="caret"></h4></span>
+								<h4><b>Sprint ${ActiveSprint}</b> <span class="caret"></h4></span>
     						</a>
 							<ul class="dropdown-menu" role="menu">
 								<c:forEach var="i" begin="1" end="${lastSprint.sprintNo }">
@@ -96,7 +97,7 @@
 $(document).ready(function() {
 	var plot;
 	var plot2;
-	var lastSprint = "${lastSprint.sprintNo}";
+	var lastSprint = "${ActiveSprint}";
 	var avatarURL = '<c:url value="/userAvatar/"/>';
 	var taskURL = '<c:url value="/task?id="/>';
 	var loading_indicator = '<div id="loading" class="centerPadded"><s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td>';
