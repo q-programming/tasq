@@ -90,7 +90,8 @@ public class ProjetController {
 							Utils.getCurrentLocale()));
 			return "redirect:/projects";
 		}
-		if (!project.getParticipants().contains(Utils.getCurrentAccount())) {
+		if (!project.getParticipants().contains(Utils.getCurrentAccount())
+				&& !Roles.isAdmin()) {
 			throw new TasqAuthException(msg, "role.error.project.permission");
 		}
 		// set last visited
@@ -140,8 +141,7 @@ public class ProjetController {
 	}
 
 	@RequestMapping(value = "projectEvents", method = RequestMethod.GET)
-	public @ResponseBody
-	Page<DisplayWorkLog> getProjectEvents(
+	public @ResponseBody Page<DisplayWorkLog> getProjectEvents(
 			@RequestParam(value = "id") Long id,
 			@PageableDefault(size = 25, page = 0, sort = "time", direction = Direction.DESC) Pageable p) {
 		Project project = projSrv.findById(id);
@@ -149,7 +149,7 @@ public class ProjetController {
 			// NULL
 			return null;
 		}
-		if (!project.getParticipants().contains(Utils.getCurrentAccount())) {
+		if (!project.getParticipants().contains(Utils.getCurrentAccount())&& !Roles.isAdmin()) {
 			throw new TasqAuthException(msg, "role.error.project.permission");
 		}
 		// Fetch events
@@ -381,9 +381,9 @@ public class ProjetController {
 	}
 
 	@RequestMapping(value = "/project/getParticipants", method = RequestMethod.GET)
-	public @ResponseBody
-	List<DisplayAccount> listParticipants(@RequestParam Long id,
-			@RequestParam String term, HttpServletResponse response) {
+	public @ResponseBody List<DisplayAccount> listParticipants(
+			@RequestParam Long id, @RequestParam String term,
+			HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(id);
 		Set<Account> allParticipants = project.getParticipants();
@@ -403,8 +403,7 @@ public class ProjetController {
 	}
 
 	@RequestMapping(value = "/project/getChart", method = RequestMethod.GET)
-	public @ResponseBody
-	ProjectChart getProjectChart(@RequestParam Long id,
+	public @ResponseBody ProjectChart getProjectChart(@RequestParam Long id,
 			HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(id);
@@ -446,14 +445,14 @@ public class ProjetController {
 		Integer taskClosed = 0;
 		while (counter.isBefore(end)) {
 			Integer createValue = created.get(counter.toString());
-			if(createValue==null){
+			if (createValue == null) {
 				createValue = 0;
 			}
 			taskCreated += createValue;
 			result.getCreated().put(counter.toString(), taskCreated);
-			
+
 			Integer closeValue = closed.get(counter.toString());
-			if(closeValue == null){
+			if (closeValue == null) {
 				closeValue = 0;
 			}
 			taskClosed += closeValue;
@@ -464,9 +463,8 @@ public class ProjetController {
 	}
 
 	@RequestMapping(value = "/project/getDefaultAssignee", method = RequestMethod.GET)
-	public @ResponseBody
-	DisplayAccount getDefaultAssignee(@RequestParam Long id,
-			HttpServletResponse response) {
+	public @ResponseBody DisplayAccount getDefaultAssignee(
+			@RequestParam Long id, HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(id);
 		Account assignee = accSrv.findById(project.getDefaultAssigneeID());
@@ -478,8 +476,7 @@ public class ProjetController {
 	}
 
 	@RequestMapping(value = "/project/getDefaultTaskType", method = RequestMethod.GET)
-	public @ResponseBody
-	TaskType getDefaultTaskType(@RequestParam Long id,
+	public @ResponseBody TaskType getDefaultTaskType(@RequestParam Long id,
 			HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(id);
@@ -487,9 +484,8 @@ public class ProjetController {
 	}
 
 	@RequestMapping(value = "/project/getDefaultTaskPriority", method = RequestMethod.GET)
-	public @ResponseBody
-	TaskPriority getDefaultTaskPriority(@RequestParam Long id,
-			HttpServletResponse response) {
+	public @ResponseBody TaskPriority getDefaultTaskPriority(
+			@RequestParam Long id, HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(id);
 		return (TaskPriority) project.getDefault_priority();

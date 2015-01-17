@@ -195,7 +195,7 @@ function printChart(){
 	$.get('<c:url value="/project/getChart"/>',{id:projectId},function(result){
 	    	//Fill arrays of data
 	    	$("#loading").remove();
-	    	console.log(result);
+	    	//console.log(result);
    		    createdData = new Array([]);
    		 	closedData = new Array([]);
 		    createdData.pop();
@@ -210,11 +210,6 @@ function printChart(){
 	    		title : '<s:message code="task.state.todo"/>/<s:message code="task.state.closed"/>',
 	            seriesDefaults: {
 	                rendererOptions: {
-	                    //////
-	                    // Turn on line smoothing.  By default, a constrained cubic spline
-	                    // interpolation algorithm is used which will not overshoot or
-	                    // undershoot any data points.
-	                    //////
 	                    smooth: true
 	                }
 	            },
@@ -273,6 +268,7 @@ function fetchWorkLogData(page) {
 	var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
 	$("#eventsTable").append(loading_indicator);
 	$.get(url, {id : projectID,	page: page}, function(data) {
+		console.log(data)
 		$("#eventsTable tr").remove();
 		printWorkLogNavigation(page, data);
 		var rows = "";
