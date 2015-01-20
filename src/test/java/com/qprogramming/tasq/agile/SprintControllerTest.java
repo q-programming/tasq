@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,6 +25,7 @@ import javax.servlet.http.HttpSession;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.joda.time.Period;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -53,6 +55,7 @@ import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.ResultData;
+import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.web.Message;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskPriority;
@@ -60,6 +63,7 @@ import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
 import com.qprogramming.tasq.task.TaskType;
 import com.qprogramming.tasq.task.worklog.LogType;
+import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -505,6 +509,104 @@ public class SprintControllerTest {
 				responseMock);
 		Assert.assertEquals(1, result.size());
 	}
+
+	@Test
+	public void showBurdownChartNotStartedTest() {
+		when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
+		when(sprintRepoMock.findByProjectIdAndSprintNo(project.getId(), 1L))
+				.thenReturn(null);
+		when(
+				msgMock.getMessage(anyString(), any(Object[].class),
+						any(Locale.class))).thenReturn("TEST");
+		SprintData result = sprintCtrl.showBurndownChart(TEST, 1L);
+		Assert.assertNotNull(result.getMessage());
+	}
+
+	@Test
+	public void showBurdownChartTimedTest() {
+		project.setTimeTracked(true);
+		Sprint sprint = createSingleSprint();
+		sprint.setStart_date(new LocalDate().minusDays(5).toDate());
+		sprint.setEnd_date(new LocalDate().plusDays(5).toDate());
+		sprint.setTotalEstimate(new Period(10, 0, 0, 0));
+		Task task = createTask(TEST, 1, project);
+		task.setEstimate(new Period(10,0,0,0));
+		WorkLog wrk = new WorkLog();
+		wrk.setActivity(new Period(1,0,0,0));
+		wrk.setTask(task);
+		wrk.setTime(new LocalDate().minusDays(2).toDate());
+		wrk.setTimeLogged(wrk.getRawTime());
+		wrk.setAccount(testAccount);
+		List<WorkLog> workLogs = new LinkedList<WorkLog>();
+		workLogs.add(wrk);
+		when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
+		when(sprintRepoMock.findByProjectIdAndSprintNo(project.getId(), 1L))
+				.thenReturn(sprint);
+		when(
+				msgMock.getMessage(anyString(), any(Object[].class),
+						any(Locale.class))).thenReturn("TEST");
+		when(wrkLogSrvMock.getAllSprintEvents(sprint)).thenReturn(workLogs);
+		SprintData result = sprintCtrl.showBurndownChart(TEST, 1L);
+		Assert.assertNull(result.getMessage());
+	}
+	
+	@Test
+	public void showBurdownChartTest() {
+		Sprint sprint = createSingleSprint();
+		sprint.setStart_date(new LocalDate().minusDays(5).toDate());
+		sprint.setEnd_date(new LocalDate().plusDays(5).toDate());
+		sprint.setTotalStoryPoints(4);
+		Task task = createTask(TEST, 1, project);
+		task.setEstimate(new Period(10,0,0,0));
+		task.setState(TaskState.CLOSED);
+		WorkLog wrk = new WorkLog();
+		wrk.setActivity(new Period(1,0,0,0));
+		wrk.setTask(task);
+		wrk.setTime(new LocalDate().minusDays(2).toDate());
+		wrk.setTimeLogged(wrk.getRawTime());
+		wrk.setAccount(testAccount);
+		WorkLog wl = new WorkLog();
+		wl.setTask(task);
+		wl.setAccount(testAccount);
+		wl.setTime(new LocalDate().minusDays(1).toDate());
+		wl.setTimeLogged(wl.getRawTime());
+		wl.setType(LogType.CLOSED);
+		Task task2 = createTask(TEST, 2, project);
+		WorkLog wl2 = new WorkLog();
+		wl2.setTask(task2);
+		wl2.setAccount(testAccount);
+		wl2.setTime(new LocalDate().minusDays(1).toDate());
+		wl2.setTimeLogged(wl2.getRawTime());
+		wl2.setType(LogType.TASKSPRINTADD);
+		List<WorkLog> workLogs = new LinkedList<WorkLog>();
+		workLogs.add(wrk);
+		workLogs.add(wl);
+		workLogs.add(wl2);
+		when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
+		when(sprintRepoMock.findByProjectIdAndSprintNo(project.getId(), 1L))
+				.thenReturn(sprint);
+		when(
+				msgMock.getMessage(anyString(), any(Object[].class),
+						any(Locale.class))).thenReturn("TEST");
+		when(wrkLogSrvMock.getAllSprintEvents(sprint)).thenReturn(workLogs);
+		SprintData result = sprintCtrl.showBurndownChart(TEST, 1L);
+		Assert.assertNull(result.getMessage());
+	}
+	@Test
+	public void equalsSprintTest(){
+		Sprint sprint = createSingleSprint();
+		Sprint sprint2 = createSingleSprint();
+		DisplaySprint ds = new DisplaySprint(sprint);
+		DisplaySprint ds2 = new DisplaySprint(sprint2);
+		Assert.assertEquals(ds, ds2);
+		Assert.assertEquals(ds.hashCode(), ds2.hashCode());
+		Assert.assertEquals(ds.getName(), ds2.getName());
+		Assert.assertEquals(sprint, sprint2);
+		ds.setSprintNo(2L);
+		Assert.assertEquals(1, ds.compareTo(ds2));
+		
+	}
+	
 
 	private Sprint createSingleSprint() {
 		Sprint sprint = new Sprint();

@@ -731,28 +731,6 @@ public class SprintController {
 	}
 
 	/**
-	 * For purpose of jqPlot charts result formated into Array-like result.
-	 * Could be produced as JSON but this way it's quicker
-	 * 
-	 * @param input
-	 * @return
-	 */
-	private String formatResults(Map<String, Integer> input) {
-		StringBuffer result = new StringBuffer();
-		String separator = "";
-		for (Entry<String, Integer> entry : input.entrySet()) {
-			result.append(separator);
-			result.append("[\'");
-			result.append(entry.getKey());
-			result.append("\',");
-			result.append(entry.getValue());
-			result.append("]");
-			separator = ",";
-		}
-		return result.toString();
-	}
-
-	/**
 	 * Checks if currently logged in user have privileges to change anything in
 	 * project
 	 * 
