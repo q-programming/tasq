@@ -14,7 +14,7 @@
 </security:authorize>
 <security:authentication property="principal" var="user" />
 <c:if
-	test="${myfn:contains(task.project.administrators,user) || is_admin || task.owner.id == user.id}">
+	test="${(myfn:contains(task.project.administrators,user) || is_admin || task.owner.id == user.id) && task.state ne'CLOSED'}">
 	<c:set var="can_edit" value="true" />
 </c:if>
 <c:if test="${task.assignee.id == user.id}">

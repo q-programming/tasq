@@ -46,7 +46,7 @@ public class Sprint implements java.io.Serializable {
 	private Date end_date;
 
 	@Column
-	private boolean active;
+	private boolean active = false;;
 
 	@Column
 	private boolean finished;

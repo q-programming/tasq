@@ -67,8 +67,9 @@ public class WorkLogService {
 			taskSrv.save(checkState(loggedTask));
 		}
 	}
+
 	@Transactional
-	public void addDatedWorkLog(Task task, String msg, Date when,LogType type) {
+	public void addDatedWorkLog(Task task, String msg, Date when, LogType type) {
 		Task loggedTask = taskSrv.findById(task.getId());
 		if (loggedTask != null) {
 			WorkLog wl = new WorkLog();
@@ -108,7 +109,27 @@ public class WorkLogService {
 			loggedTask.addWorkLog(wl);
 			taskSrv.save(task);
 		}
+	}
 
+	@Transactional
+	public void addActivityPeriodLog(Task task, String msg, Period activity,
+			LogType type) {
+		Task loggedTask = taskSrv.findById(task.getId());
+		if (loggedTask != null) {
+			WorkLog wl = new WorkLog();
+			wl.setTask(loggedTask);
+			wl.setProject_id(loggedTask.getProject().getId());
+			wl.setAccount(Utils.getCurrentAccount());
+			wl.setTime(new Date());
+			wl.setTimeLogged(new Date());
+			wl.setType(type);
+			wl.setMessage(msg);
+			wl.setActivity(activity);
+			wl = wlRepo.save(wl);
+			Hibernate.initialize(loggedTask.getWorklog());
+			loggedTask.addWorkLog(wl);
+			taskSrv.save(task);
+		}
 	}
 
 	/**
@@ -135,7 +156,11 @@ public class WorkLogService {
 			Hibernate.initialize(loggedTask.getWorklog());
 			loggedTask.addWorkLog(wl);
 			loggedTask.reduceRemaining(activity);
-			taskSrv.save(checkState(loggedTask));
+			if (!type.equals(LogType.ESTIMATE)) {
+				taskSrv.save(checkState(loggedTask));
+			} else {
+				taskSrv.save(loggedTask);
+			}
 		}
 	}
 
@@ -202,7 +227,7 @@ public class WorkLogService {
 	}
 
 	public List<WorkLog> getAllSprintEvents(Sprint sprint) {
-		LocalDate start = new LocalDate(sprint.getRawStart_date()).minusDays(1);
+		LocalDate start = new LocalDate(sprint.getRawStart_date());
 		LocalDate end = new LocalDate(sprint.getRawEnd_date()).plusDays(1);
 		List<WorkLog> list = wlRepo
 				.findByProjectIdAndTimeBetweenAndWorklogtaskNotNullOrderByTimeAsc(
@@ -221,6 +246,20 @@ public class WorkLogService {
 
 	public Page<WorkLog> findByProjectId(Long id, Pageable p) {
 		return wlRepo.findByProjectId(id, p);
+	}
+
+	public List<WorkLog> findProjectCreateCloseEvents(Project project) {
+		List<WorkLog> list = wlRepo.findByProjectIdOrderByTimeAsc(project
+				.getId());
+		List<WorkLog> result = new LinkedList<WorkLog>();
+		for (WorkLog workLog : list) {
+			if (LogType.CREATE.equals(workLog.getType())
+					|| LogType.REOPEN.equals(workLog.getType())
+					|| LogType.CLOSED.equals(workLog.getType())) {
+				result.add(workLog);
+			}
+		}
+		return result;
 	}
 
 	private Task checkState(Task task) {
@@ -246,5 +285,4 @@ public class WorkLogService {
 				|| type.equals(LogType.ESTIMATE) || type.equals(LogType.CLOSED)
 				|| type.equals(LogType.REOPEN);
 	}
-
 }

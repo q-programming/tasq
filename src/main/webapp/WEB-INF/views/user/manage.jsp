@@ -12,7 +12,7 @@
 	<s:message code="role.role" text="Role" />
 </c:set>
 <c:set var="userList_text">
-	<s:message code="user.users" text="User List" />
+	<s:message code="menu.manage.users " text="Manage users" />
 </c:set>
 <c:set var="action_text">
 	<s:message code="main.action" text="Action" />
@@ -20,7 +20,7 @@
 <!-- <div id="messages_div"></div> -->
 <h3>${userList_text}</h3>
 <div class="white-frame" style="display: table; width: 100%;height:85vh">
-	<table id="user_table" class="table table-hover table-condensed">
+	<table id="manage_user_table" class="table table-hover table-condensed">
 		<thead>
 			<tr style="color: #428bca">
 				<th style="cursor: pointer;" class="sorter a-tooltip"
@@ -28,7 +28,7 @@
 					title="<s:message
 							code="user.sort.surname" text="Sort by name" />">${name_text}</th>
 				<th>${role_text}</th>
-				<th>${action_text}<button id="search" class="btn btn-default btn-xs pull-right"><span class="glyphicon glyphicon-search"></span></button></th>
+				<th>${action_text}<button id="manage_search" class="btn btn-default btn-xs pull-right"><span class="glyphicon glyphicon-search"></span></button></th>
 			</tr>
 		</thead>
 		<c:forEach items="${accountsList}" var="p">
@@ -98,15 +98,15 @@ $(".change_role")
 	
 });
 
-$('#search').click(function() {
+$('#manage_search').click(function() {
 	if($(this).attr("shown")){
-		$('#search_field').val('').toggleClass('filtered',false);
-	 	$('#user_table').find('tr').show();
+		$('#manage_search_field').val('').toggleClass('manage_filtered',false);
+	 	$('#manage_user_table').find('tr').show();
 	 	$(this).removeAttr("shown");
 	}else{
 		$(this).attr("shown",true);
 	}
-	$('#filterrow').toggle();
+	$('#manage_filterrow').toggle();
 });
 $('a[rel=popover]').popover({
 	  html: true,
@@ -116,7 +116,7 @@ $('a[rel=popover]').popover({
 	  }
 	});
 
-	$('.sorter').click(function() {
+	$('.manage_sorter').click(function() {
 		var table = $(this).parents('table').eq(0)
 		var rows = table.find("tr:not(:has('th'))").toArray().sort(comparer($(this).index()))
 		this.asc = !this.asc
@@ -148,16 +148,16 @@ function() {
 	var placeholder = "<s:message code="user.search.placeholder"/>";
 	var table = $(this);
 	//var headers = table.find('th').length
-	var filterrow = $('<tr  id="filterrow" style="display:none;">').insertAfter($(this).find('th:last()').parent());
+	var filterrow = $('<tr  id="manage_filterrow" style="display:none;">').insertAfter($(this).find('th:last()').parent());
 	//Add to only first collumns
-	filterrow.append($('<th>').append($('<input id="search_field" class="form-control" style="height:25px" placeholder="'+placeholder+'">')	.attr('type','text').keyup(
+	filterrow.append($('<th colspan="3">').append($('<input id="manage_search_field" class="form-control" style="height:25px" placeholder="'+placeholder+'">')	.attr('type','text').keyup(
 		function() {
 			table.find('tr').show();
 			filterrow.find('input[type=text]').each(
 					function() {
 						var index = $(this).parent().index() + 1;
 						var filter = $(this).val() != '';
-						$(this).toggleClass('filtered',filter);
+						$(this).toggleClass('manage_filtered',filter);
 						if (filter) {
 							var el = 'td:nth-child('+ index	+ ')';
 							var criteria = ":contains('"+ $(this).val()	+ "')";

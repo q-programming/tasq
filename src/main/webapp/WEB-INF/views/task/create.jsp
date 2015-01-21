@@ -35,12 +35,21 @@
 		<c:set var="desc_error">
 			<form:errors path="description" />
 		</c:set>
+		<c:set var="sprint_error">
+			<form:errors path="addToSprint" />
+		</c:set>
+		
 		<c:if test="${not empty name_error}">
 			<c:set var="name_class" value="has-error" />
 		</c:if>
 		<c:if test="${not empty desc_error}">
 			<c:set var="desc_class" value="has-error" />
 		</c:if>
+		<c:if test="${not empty sprint_error}">
+			<c:set var="sprint_class" value="has-error" />
+		</c:if>
+		
+		
 		<div class="form-group ${name_class }">
 			<form:input path="name" class="form-control"
 				placeholder="${taskName_text}" />
@@ -151,9 +160,12 @@
 					Sprint
 				</h5>
 			</div>
-		<select class="form-control" id="addToSprint" name="addToSprint" style="width:300px;">
-		</select>
-		<div id="sprintWarning" style="color: darkorange;margin-top: 10px;"></div>
+			<div class="form-group ${sprint_class}">
+				<select class="form-control ${sprint_class}" id="addToSprint" name="addToSprint" style="width:300px;">
+				</select>
+				<form:errors path="addToSprint" element="p" class="text-danger"/>
+				<div id="sprintWarning" style="color: darkorange;margin-top: 10px;"></div>
+			</div>
 		</div>
 		<%-- Estimate --%>
 		<div class="mod-header">
@@ -162,15 +174,15 @@
 				</h5>
 		</div>
 		<div id="estimate_div">
-			<div class="form-group">
+			<div class="form-group ${sprint_class}">
 				<form:input path="estimate" class="form-control" style="width:150px" />
 				<form:errors path="estimate" element="p" class="text-danger" />
 				<span class="help-block"><s:message code="task.estimate.help" /><br>
 					<s:message code="task.estimate.help.pattern" /> </span>
 			</div>
-			<div>
+			<div class="form-group ${sprint_class}">
 				<label><s:message code="task.storyPoints" /></label>
-				<form:input path="story_points" class="form-control"
+				<form:input path="story_points" class="form-control "
 					style="width:150px" />
 				<span class="help-block"><s:message
 						code="task.storyPoints.help" /></span>

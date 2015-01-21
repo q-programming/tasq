@@ -56,7 +56,7 @@
 			<label><s:message code="project.agile.type" /></label>
 			<form:select path="agile_type" class="form-control">
 				<option value="SCRUM" selected>SCRUM</option>
-				<option value="KANBAN">Kanban</option>
+<!-- 				<option value="KANBAN">Kanban</option> -->
 			</form:select>
 		</div>
 		<div class="form-group ${desc_class}">

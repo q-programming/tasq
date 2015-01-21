@@ -143,9 +143,8 @@ public class AccountController {
 	}
 
 	@RequestMapping(value = "/getAccounts", method = RequestMethod.GET)
-	public @ResponseBody
-	List<DisplayAccount> listAccounts(@RequestParam String term,
-			HttpServletResponse response) {
+	public @ResponseBody List<DisplayAccount> listAccounts(
+			@RequestParam String term, HttpServletResponse response) {
 		response.setContentType("application/json");
 		List<Account> all_accountr = accountSrv.findAll();
 		List<DisplayAccount> result = new ArrayList<DisplayAccount>();
@@ -164,8 +163,7 @@ public class AccountController {
 	}
 
 	@RequestMapping(value = "/users", method = RequestMethod.GET)
-	public @ResponseBody
-	Page<DisplayAccount> listUsers(
+	public @ResponseBody Page<DisplayAccount> listUsers(
 			@RequestParam(required = false) String term,
 			@PageableDefault(size = 25, page = 0, sort = "surname", direction = Direction.ASC) Pageable p) {
 		Page<Account> page;
@@ -181,6 +179,16 @@ public class AccountController {
 		Page<DisplayAccount> result = new PageImpl<DisplayAccount>(list, p,
 				page.getTotalElements());
 		return result;
+	}
+
+	@RequestMapping(value = "/users/manage", method = RequestMethod.GET)
+	public String manageUsers(
+
+	Model model) {
+		List<Account> accountsList;
+		accountsList = accountSrv.findAll();
+		model.addAttribute("accountsList", accountsList);
+		return "user/manage";
 	}
 
 	@RequestMapping(value = "role", method = RequestMethod.POST, produces = "text/plain;charset=UTF-8")

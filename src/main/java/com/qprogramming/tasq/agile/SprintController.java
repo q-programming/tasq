@@ -118,20 +118,15 @@ public class SprintController {
 				throw new TasqAuthException(msg);
 			}
 			model.addAttribute("project", project);
-			List<DisplayTask> resultList = new LinkedList<DisplayTask>();
-			List<Task> taskList = taskSrv.findAllByProject(project);
 			// Don't show closed tasks in backlog view
-			for (Task task : taskList) {
-				if (!task.getState().equals(TaskState.CLOSED)) {
-					resultList.add(new DisplayTask(task));
-				}
-			}
-			Map<Sprint, List<DisplayTask>> sprint_result = new LinkedHashMap<Sprint, List<DisplayTask>>();
-
-			List<Sprint> sprintList = sprintRepo.findByProjectIdAndFinished(
-					project.getId(), false);
+			List<Task> taskList = taskSrv.findByProjectAndOpen(project);
 			Collections.sort(taskList, new TaskSorter(
 					TaskSorter.SORTBY.PRIORITY, true));
+			List<DisplayTask> resultList = DisplayTask
+					.convertToDisplayTasks(taskList);
+			Map<Sprint, List<DisplayTask>> sprint_result = new LinkedHashMap<Sprint, List<DisplayTask>>();
+			List<Sprint> sprintList = sprintRepo.findByProjectIdAndFinished(
+					project.getId(), false);
 			Collections.sort(sprintList, new SprintSorter());
 			// Assign tasks to sprints in order to display them
 			for (Sprint sprint : sprintList) {
@@ -145,7 +140,7 @@ public class SprintController {
 				sprint_result.put(sprint, sprint_tasks);
 			}
 			model.addAttribute("sprint_result", sprint_result);
-			model.addAttribute("tasks", taskList);
+			model.addAttribute("tasks", resultList);
 			model.addAttribute("sprints", sprintList);
 		}
 		return "/scrum/backlog";
@@ -175,7 +170,7 @@ public class SprintController {
 	@RequestMapping(value = "/{id}/scrum/sprintAssign", method = RequestMethod.POST)
 	public String assignSprint(@PathVariable String id,
 			@RequestParam(value = "taskID") String taskID,
-			@RequestParam(value = "sprintID") Long sprintID, Model model,
+			@RequestParam(value = "sprintID") Long sprintID,
 			HttpServletRequest request, RedirectAttributes ra) {
 		Sprint sprint = sprintRepo.findById(sprintID);
 		Task task = taskSrv.findById(taskID);
@@ -186,6 +181,13 @@ public class SprintController {
 		}
 		Hibernate.initialize(task.getSprints());
 		if (sprint.isActive()) {
+			if (checkIfNotEstimated(task, project)) {
+				MessageHelper.addWarningAttribute(ra, msg.getMessage(
+						"agile.task2Sprint.Notestimated",
+						new Object[] { task.getId(), sprint.getSprintNo() },
+						Utils.getCurrentLocale()));
+				return "redirect:" + request.getHeader("Referer");
+			}
 			wrkLogSrv.addActivityLog(task, null, LogType.TASKSPRINTADD);
 		}
 		task.addSprint(sprint);
@@ -233,13 +235,16 @@ public class SprintController {
 				&& !Roles.isAdmin()) {
 			throw new TasqAuthException(msg);
 		}
-		if (sprint != null && !sprint.isActive()) {
+		// consider checking if is active?
+		if (sprint != null) {
 			if (canEdit(sprint.getProject())) {
 				List<Task> taskList = taskSrv.findAllBySprint(sprint);
 				for (Task task : taskList) {
 					Hibernate.initialize(task.getSprints());
-					task.removeSprint(sprint);
-					taskSrv.save(task);
+					if (task.getSprints().contains(sprint)) {
+						task.removeSprint(sprint);
+						taskSrv.save(task);
+					}
 				}
 			}
 		}
@@ -262,11 +267,11 @@ public class SprintController {
 		// check if other sprints are not ending when this new is starting
 		List<Sprint> allSprints = sprintRepo.findByProjectId(projectId);
 		for (Sprint sprint : allSprints) {
-			if (sprint.getRawEnd_date() != null) {
+			if (sprint.getRawEnd_date() != null) { 
 				LocalDate enddate = new LocalDate(sprint.getRawEnd_date());
 				LocalDate startDate = new LocalDate(
 						Utils.convertStringToDate(sprintStart));
-				if (enddate.equals(startDate)) {
+				if (enddate.equals(startDate) || startDate.isBefore(enddate)) {
 					return new ResultData(ResultData.WARNING, msg.getMessage(
 							"agile.sprint.startOnEnd",
 							new Object[] { sprint.getSprintNo(), sprintStart },
@@ -427,8 +432,7 @@ public class SprintController {
 	 * @return
 	 */
 	@RequestMapping(value = "/{id}/sprint-data", method = RequestMethod.GET, produces = "application/json")
-	public @ResponseBody
-	SprintData showBurndownChart(@PathVariable String id,
+	public @ResponseBody SprintData showBurndownChart(@PathVariable String id,
 			@RequestParam(value = "sprint") Long sprintNo) {
 		SprintData result = new SprintData();
 		Map<LocalDate, Integer> leftMap = new HashMap<LocalDate, Integer>();
@@ -454,6 +458,14 @@ public class SprintController {
 			result.setWorklogs(DisplayWorkLog.convertToDisplayWorkLogs(wrkList));
 			result.setTimeBurned(fillTimeBurndownMap(wrkList, startTime,
 					endTime));
+			Period totalTime = new Period();
+			for (Map.Entry<String, Float> entry : result.getTimeBurned()
+					.entrySet()) {
+				totalTime = PeriodHelper.plusPeriods(totalTime,
+						getPeriodValue(entry.getValue()));
+			}
+			result.setTotalTime(PeriodHelper.outFormat(totalTime
+					.toStandardHours().toPeriod()));
 			if (timeTracked) {
 				// leftMap = fillLeftMap(wrkList, true);
 				// burnedMap = fillBurnednMap(wrkList, true);
@@ -470,8 +482,7 @@ public class SprintController {
 					Float timelogged = result.getTimeBurned().get(
 							date.toString());
 					if (timelogged != null) {
-						Period value = new Period(0, 0,
-								(int) (timelogged * SECONDS_PER_HOUR), 0);
+						Period value = getPeriodValue(timelogged);
 						burned = PeriodHelper.plusPeriods(burned, value);
 						remaining_estimate = PeriodHelper.minusPeriods(
 								remaining_estimate, value);
@@ -488,6 +499,7 @@ public class SprintController {
 					}
 				}
 			} else {
+				Integer totalPoints = new Integer(0);
 				leftMap = fillLeftMap(wrkList, false);
 				burnedMap = fillBurnednMap(wrkList, false);
 				Integer remainingEstimate = sprint.getTotalStoryPoints();
@@ -508,17 +520,18 @@ public class SprintController {
 					} else {
 						result.putToLeft(date.toString(), remainingEstimate);
 						result.getBurned().put(date.toString(), burned);
+						totalPoints = burned.intValue();
 					}
 				}
+				result.setTotalPoints(totalPoints);
 			}
 		}
 		return result;
 	}
 
 	@RequestMapping(value = "/getSprints", method = RequestMethod.GET)
-	public @ResponseBody
-	List<DisplaySprint> showProjectSprints(@RequestParam Long projectID,
-			HttpServletResponse response) {
+	public @ResponseBody List<DisplaySprint> showProjectSprints(
+			@RequestParam Long projectID, HttpServletResponse response) {
 		response.setContentType("application/json");
 		List<DisplaySprint> result = new LinkedList<DisplaySprint>();
 		List<Sprint> projectSprints = sprintRepo.findByProjectIdAndFinished(
@@ -538,11 +551,34 @@ public class SprintController {
 	 * @return
 	 */
 	@RequestMapping(value = "/scrum/isActive", method = RequestMethod.GET)
-	public @ResponseBody
-	boolean checkIfActive(@RequestParam(value = "id") Long sprintID,
+	public @ResponseBody boolean checkIfActive(
+			@RequestParam(value = "id") Long sprintID,
 			HttpServletResponse response) {
 		Sprint sprint = sprintRepo.findById(sprintID);
 		return sprint.isActive();
+	}
+
+	/**
+	 * Checks if task is properly estimated based on project settings (
+	 * Estimated time not 0m for time based or story points not 0 for story
+	 * points driven
+	 * 
+	 * @param task
+	 * @param project
+	 * @return
+	 */
+	private boolean checkIfNotEstimated(Task task, Project project) {
+		if (!project.getTimeTracked()) {
+			if (task.getStory_points() == 0) {
+				return true;
+			}
+		} else {
+			if (task.getEstimate().equals("0m")) {
+				return true;
+			}
+
+		}
+		return false;
 	}
 
 	private Map<String, Float> fillTimeBurndownMap(List<WorkLog> wrkList,
@@ -573,6 +609,12 @@ public class SprintController {
 		Float result = Float.valueOf((float) value.toStandardSeconds()
 				.getSeconds() / SECONDS_PER_HOUR);
 		return result;
+	}
+
+	private Period getPeriodValue(Float timelogged) {
+		Period value = new Period(0, 0, (int) (timelogged * SECONDS_PER_HOUR),
+				0);
+		return value;
 	}
 
 	/**
@@ -677,34 +719,15 @@ public class SprintController {
 				|| LogType.TASKSPRINTADD.equals(workLog.getType())) {
 			taskStoryPoints *= -1;
 		}
+		if (LogType.ESTIMATE.equals(workLog.getType())) {
+			taskStoryPoints = -1 * Integer.valueOf(workLog.getMessage());
+		}
 		if (value == null) {
 			result = taskStoryPoints;
 		} else {
 			result += taskStoryPoints;
 		}
 		return result;
-	}
-
-	/**
-	 * For purpose of jqPlot charts result formated into Array-like result.
-	 * Could be produced as JSON but this way it's quicker
-	 * 
-	 * @param input
-	 * @return
-	 */
-	private String formatResults(Map<String, Integer> input) {
-		StringBuffer result = new StringBuffer();
-		String separator = "";
-		for (Entry<String, Integer> entry : input.entrySet()) {
-			result.append(separator);
-			result.append("[\'");
-			result.append(entry.getKey());
-			result.append("\',");
-			result.append(entry.getValue());
-			result.append("]");
-			separator = ",";
-		}
-		return result.toString();
 	}
 
 	/**

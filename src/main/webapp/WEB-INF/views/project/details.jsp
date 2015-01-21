@@ -6,6 +6,12 @@
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
+<script language="javascript" type="text/javascript"
+	src="<c:url value="/resources/js/jquery.jqplot.js"/>"></script>
+<script language="javascript" type="text/javascript"
+	src="<c:url value="/resources/js/jqplot.highlighter.js"/>"></script>
+<script language="javascript" type="text/javascript"
+	src="<c:url value="/resources/js/jqplot.dateAxisRenderer.js"/>"></script>
 <security:authorize access="hasRole('ROLE_ADMIN')">
 	<c:set var="is_admin" value="true" />
 </security:authorize>
@@ -93,6 +99,10 @@
 			</c:if>
 		</div>
 	</div>
+	<%----------CHART -----------%>
+	<div class="row" style="height: 300px;width:90%;margin:0 auto">
+		<div id="chartdiv"></div>
+	</div>
 	<div style="display: table; width: 100%">
 		<div style="display: table-cell; width: 600px">
 			<%------------------------------ EVENTS ------------------------%>
@@ -166,6 +176,7 @@
 $(document).ready(function($) {
 				var currentPage = 0
 				fetchWorkLogData(currentPage);
+				printChart();
 });
 
 $(document).on("click",".navBtn",function(e) {
@@ -177,6 +188,78 @@ $(document).on("click",".navBtn",function(e) {
 	fetchWorkLogData(page); 
 });
 
+function printChart(){
+	var loading_indicator = '<div id="loading" class="centerPadded"><s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td>';
+	$("#chartdiv").append(loading_indicator);
+	projectId = '${project.id}';
+	$.get('<c:url value="/project/getChart"/>',{id:projectId},function(result){
+	    	//Fill arrays of data
+	    	$("#loading").remove();
+	    	//console.log(result);
+   		    createdData = new Array([]);
+   		 	closedData = new Array([]);
+		    createdData.pop();
+		    closedData.pop();
+	    	$.each(result.created, function(key,val){
+	    		createdData.push([key, val]);
+	    	});
+	    	$.each(result.closed, function(key,val){
+	    		closedData.push([key, val]);
+	    	});
+	    	plot = $.jqplot('chartdiv', [ createdData , closedData ], {
+	    		title : '<s:message code="task.state.todo"/>/<s:message code="task.state.closed"/>',
+	            seriesDefaults: {
+	                rendererOptions: {
+	                    smooth: true
+	                }
+	            },
+	    		fillBetween: {
+	                series1: 0,
+	                series2: 1,
+	                color: "rgba(66, 139, 202, 0.18)",
+	                baseSeries: 0,
+	                fill: true
+	            },
+	            grid: {
+	                background: '#ffffff',
+	            },
+	    		animate: true,
+	    		axesDefaults : {
+	    			labelRenderer : $.jqplot.CanvasAxisLabelRenderer
+	    		},
+	    		axes : {
+	    			xaxis : {
+	    				renderer:$.jqplot.DateAxisRenderer, 
+	    		        pad : 0,
+	    		        tickOptions:{formatString:'%#d-%m'}
+	    			},
+	    			yaxis : {
+	    				pad : -2.05,
+	    				tickOptions : {
+	    					formatString : '%#d',
+	    				}
+	    			}
+	    		},
+	    		highlighter: {
+	    		      show: true,
+	    		      sizeAdjust: 10
+	    		},
+	    		series:[
+	    		    {
+	    			    color: '#f0ad4e',
+	    			    highlighter: { formatString: '[%s] %s <s:message code="task.state.todo"/>'}
+	    		    },
+	    		    {
+	    			    color:'#5cb85c',
+	    			    highlighter: { formatString: '[%s] %s <s:message code="task.state.closed"/>'}
+	    		    }],
+	    		legend: {
+			        show: false,
+			    }
+	    	});
+	});
+}
+
 function fetchWorkLogData(page) {
 	var projectID = '${project.id}';
 	var url = '<c:url value="/projectEvents"/>';
@@ -185,6 +268,7 @@ function fetchWorkLogData(page) {
 	var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
 	$("#eventsTable").append(loading_indicator);
 	$.get(url, {id : projectID,	page: page}, function(data) {
+		console.log(data)
 		$("#eventsTable tr").remove();
 		printWorkLogNavigation(page, data);
 		var rows = "";
