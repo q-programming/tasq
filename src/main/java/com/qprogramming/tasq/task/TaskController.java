@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -157,7 +158,7 @@ public class TaskController {
 					if (checkIfNotEstimated(task, project)) {
 						errors.rejectValue("addToSprint",
 								"agile.task2Sprint.Notestimated", new Object[] {
-								"", sprint.getSprintNo() },
+										"", sprint.getSprintNo() },
 								"Unable to add not estimated task to active sprint");
 						fillCreateTaskModel(model);
 						return null;
@@ -250,9 +251,10 @@ public class TaskController {
 			task.setEstimate(estimate);
 			task.setRemaining(estimate);
 			// TODO Refactor charst first
-			wlSrv.addActivityPeriodLog(task, PeriodHelper.outFormat(difference),
-					difference, LogType.ESTIMATE);
-			
+			wlSrv.addActivityPeriodLog(task,
+					PeriodHelper.outFormat(difference), difference,
+					LogType.ESTIMATE);
+
 		}
 		if (!task.getEstimated().equals(
 				!Boolean.parseBoolean(taskForm.getNo_estimation()))) {
@@ -325,8 +327,10 @@ public class TaskController {
 		task.setDescription(task.getDescription().replaceAll("\n", "<br>"));
 		Map<TaskLinkType, List<DisplayTask>> links = linkService
 				.findTaskLinks(id);
+		List<SubTask> subtasks = taskSrv.findSubtasks(task);
 		model.addAttribute("task", task);
 		model.addAttribute("links", links);
+		model.addAttribute("subtasks", subtasks);
 		return "task/details";
 	}
 
@@ -395,6 +399,60 @@ public class TaskController {
 			model.addAttribute("active_project", active);
 		}
 		return "task/list";
+	}
+
+	@RequestMapping(value = "task/{id}/subtask", method = RequestMethod.GET)
+	public TaskForm startSubTaskCreate(@PathVariable String id, Model model) {
+		Task task = taskSrv.findById(id);
+		if (task != null) {
+			model.addAttribute("project", task.getProject());
+			model.addAttribute("task", task);
+			return new TaskForm();
+		}
+		return null;
+	}
+
+	@Transactional
+	@RequestMapping(value = "task/{id}/subtask", method = RequestMethod.POST)
+	public String createSubTask(@PathVariable String id,
+			@Valid @ModelAttribute("taskForm") TaskForm taskForm,
+			Errors errors, RedirectAttributes ra, HttpServletRequest request,
+			Model model) {
+		if (!Roles.isReporter()) {
+			throw new TasqAuthException(msg);
+		}
+		Task task = taskSrv.findById(id);
+		Project project = projectSrv.findById(taskForm.getProject());
+		if (errors.hasErrors()) {
+			model.addAttribute("project", project);
+			model.addAttribute("task", task);
+			return null;
+		}
+		if (!projectSrv.canEdit(project)) {
+			MessageHelper.addErrorAttribute(
+					ra,
+					msg.getMessage("error.accesRights", null,
+							Utils.getCurrentLocale()));
+			return "redirect:" + request.getHeader("Referer");
+		}
+		SubTask subTask = taskForm.createSubTask();
+		// build ID
+		int taskCount = task.getSubtasks().size();
+		taskCount++;
+		String taskID = task.getId() + "/" + taskCount;
+		subTask.setId(taskID);
+		subTask.setTask(task);
+		// assigne
+		if (taskForm.getAssignee() != null) {
+			Account assignee = accSrv.findById(taskForm.getAssignee());
+			subTask.setAssignee(assignee);
+		}
+		Hibernate.initialize(task.getSubtasks());
+		task.addSubTask(taskSrv.save(subTask));
+		taskSrv.save(task);
+		// TODO save log
+		// wlSrv.addActivityLog(subTask, "", LogType.CREATE);
+		return "redirect:/task?id=" + id;
 	}
 
 	/**

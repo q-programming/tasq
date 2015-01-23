@@ -17,6 +17,7 @@ import javax.persistence.OneToMany;
 
 import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.projects.Project;
+import com.qprogramming.tasq.task.comments.Comment;
 
 @Entity
 @Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
@@ -43,7 +44,7 @@ public class Task extends AbstractTask implements java.io.Serializable {
 	@Column
 	private boolean inSprint;
 	
-	@OneToMany(cascade = CascadeType.REMOVE, mappedBy = "task")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "task")
 	private Set<SubTask> subtasks;
 
 	public Project getProject() {
@@ -111,5 +112,12 @@ public class Task extends AbstractTask implements java.io.Serializable {
 			this.sprints.remove(sprint);
 			setInSprint(false);
 		}
+	}
+	
+	public void addSubTask(SubTask subtask) {
+		if (subtasks == null) {
+			subtasks = new HashSet<SubTask>();
+		}
+		subtasks.add(subtask);
 	}
 }

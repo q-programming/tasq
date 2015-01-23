@@ -284,7 +284,7 @@
 						<s:message code="task.related"/>
 					</h5>
 					<a class="btn btn-default btn-xxs a-tooltip pull-right linkButton" href="#" title="" data-placement="top" data-original-title="<s:message code="task.link"/>">
-						<span class="glyphicon glyphicon-plus"></span><span class="glyphicon glyphicon-link"></span>
+						<span class="glyphicon glyphicon-plus"></span> <span class="glyphicon glyphicon-link"></span>
 					</a>
 				</div>
 				<div id="linkDiv" style="display:none" class="form-group">
@@ -351,6 +351,26 @@
 				</div>
 				</div>
 			</div>
+			<%---------------------SUBTASKS -------------%>
+			<div>
+				<div class="mod-header">
+					<h5 class="mod-header-title">
+						<span class="glyphicon glyphicon-list"></span>
+						SubTasks
+					</h5>
+					<a class="btn btn-default btn-xxs a-tooltip pull-right" href="<c:url value="task/${task.id}/subtask"/>" data-placement="top" data-original-title="<s:message code="task.link"/>">
+						<span class="glyphicon glyphicon-plus"></span> <span class="glyphicon glyphicon-list"></span>
+					</a>
+				</div>
+				<div id="subTask" class="form-group">
+					<table class="table table-hover table-condensed button-table">
+						<c:forEach var="subTask" items="${subtasks}">
+							<tr><td>${subTask}</td></tr>
+						</c:forEach>
+					</table>
+				</div>
+			</div>
+			
 		</div>
 		<%--------------------RIGHT SIDE DIV -------------------------------------%>
 		<div class="left-margin" style="display: table-cell; width: 400px">

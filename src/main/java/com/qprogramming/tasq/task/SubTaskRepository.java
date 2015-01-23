@@ -12,6 +12,6 @@ public interface SubTaskRepository extends JpaRepository<SubTask, Integer> {
 
 	SubTask findById(String id);
 
-	List<SubTask> findByParentTaskId(String taskID);
+	List<SubTask> findByTaskId(String taskID);
 
 }
