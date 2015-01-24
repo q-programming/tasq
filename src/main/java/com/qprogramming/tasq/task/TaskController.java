@@ -271,10 +271,6 @@ public class TaskController {
 					Integer.toString(-1
 							* (task.getStory_points() - storyPoints)),
 					LogType.ESTIMATE);
-			message.append("Story points: ");
-			message.append(task.getStory_points());
-			message.append(CHANGE_TO);
-			message.append(storyPoints);
 			task.setStory_points(storyPoints);
 		}
 		if (!task.getDue_date().equalsIgnoreCase(taskForm.getDue_date())) {

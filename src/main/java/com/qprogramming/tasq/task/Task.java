@@ -15,12 +15,14 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import org.hibernate.Hibernate;
+
 import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.task.comments.Comment;
 
 @Entity
-@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class Task extends AbstractTask implements java.io.Serializable {
 
 	/**
@@ -43,7 +45,7 @@ public class Task extends AbstractTask implements java.io.Serializable {
 
 	@Column
 	private boolean inSprint;
-	
+
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "task")
 	private Set<SubTask> subtasks;
 
@@ -72,6 +74,9 @@ public class Task extends AbstractTask implements java.io.Serializable {
 	}
 
 	public Set<Sprint> getSprints() {
+		if (sprints == null) {
+			sprints = new HashSet<Sprint>();
+		}
 		return sprints;
 	}
 
@@ -100,10 +105,7 @@ public class Task extends AbstractTask implements java.io.Serializable {
 	 */
 
 	public void addSprint(Sprint sprint) {
-		if (this.sprints == null) {
-			this.sprints = new LinkedHashSet<Sprint>();
-		}
-		this.sprints.add(sprint);
+		getSprints().add(sprint);
 		setInSprint(true);
 	}
 
@@ -113,11 +115,22 @@ public class Task extends AbstractTask implements java.io.Serializable {
 			setInSprint(false);
 		}
 	}
-	
+
 	public void addSubTask(SubTask subtask) {
 		if (subtasks == null) {
 			subtasks = new HashSet<SubTask>();
 		}
 		subtasks.add(subtask);
+	}
+
+	/**
+	 * Reqieres session and initialize
+	 * 
+	 * @param sprint
+	 * @return
+	 */
+	public boolean inSprint(Sprint sprint) {
+		Hibernate.initialize(getSprints());
+		return getSprints().contains(sprint);
 	}
 }
