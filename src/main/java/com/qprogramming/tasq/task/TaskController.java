@@ -254,7 +254,6 @@ public class TaskController {
 			wlSrv.addActivityPeriodLog(task,
 					PeriodHelper.outFormat(difference), difference,
 					LogType.ESTIMATE);
-
 		}
 		if (!task.getEstimated().equals(
 				!Boolean.parseBoolean(taskForm.getNo_estimation()))) {
@@ -280,6 +279,15 @@ public class TaskController {
 			message.append(taskForm.getDue_date());
 			message.append(BR);
 			task.setDue_date(Utils.convertStringToDate(taskForm.getDue_date()));
+		}
+		TaskType type = TaskType.toType(taskForm.getType());
+		if(!task.getType().equals(type)){
+			message.append("Type: ");
+			message.append(task.getType().toString());
+			message.append(CHANGE_TO);
+			message.append(type.toString());
+			message.append(BR);
+			task.setType(type);
 		}
 		LOG.debug(message.toString());
 		taskSrv.save(task);
