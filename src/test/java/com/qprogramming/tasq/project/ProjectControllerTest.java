@@ -1,10 +1,10 @@
 package com.qprogramming.tasq.project;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.times;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -53,7 +53,6 @@ import com.qprogramming.tasq.projects.ProjectChart;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.projects.ProjetController;
 import com.qprogramming.tasq.support.web.Message;
-import com.qprogramming.tasq.task.AbstractTask;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskPriority;
 import com.qprogramming.tasq.task.TaskService;
@@ -124,7 +123,7 @@ public class ProjectControllerTest {
 	@Test
 	public void showDetailsTest() {
 		Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
-		List<AbstractTask> taskList = new LinkedList<AbstractTask>();
+		List<Task> taskList = new LinkedList<Task>();
 		List<Task> openTaskList = new LinkedList<Task>();
 		Task task = new Task();
 		task.setId("TEST-1");

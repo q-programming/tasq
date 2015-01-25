@@ -49,11 +49,11 @@
 		</div>
 		<h3>
 			<t:type type="${task.type}" />
-			<c:if test="${subtask}">
-			<a href='<c:url value="/task?id=${task.task.id}"/>'>[${task.task.id}]</a>
+			<c:if test="${task.subtask}">
+			<a href='<c:url value="/task?id=${task.parentID}"/>'>[${task.parentID}]</a>
 			\ [${task.id}] ${task.name}
 			</c:if>
-			<c:if test="${not subtask}">
+			<c:if test="${not task.subtask}">
 			<a href='<c:url value="/project?id=${task.project.id}"/>'>${task.project.projectId}</a>
 			\ [${task.id}] ${task.name}
 			</c:if>
@@ -81,7 +81,7 @@
 											pageContext.setAttribute("states",
 															TaskState.values());
 										%>
-										<div id="task_priority" class="image-combo a-tooltip"
+										<div id="task_state" class="image-combo a-tooltip"
 											data-toggle="dropdown" data-placement="top"
 											title="<s:message code="main.click"/>">
 											<div id="current_state" style = "float: left;padding-right: 5px;">
@@ -145,7 +145,7 @@
 								code="task.description" /></td>
 						<td class="left-margin">${task.description}</td>
 					</tr>
-					<c:if test="${not subtask}">
+					<c:if test="${not task.subtask}">
 						<tr>
 							<td><s:message code="task.storyPoints" /></td>
 							<td class="left-margin">
@@ -285,15 +285,15 @@
 				</table>
 			</div>
 			<%-------------- RELATED TASKS ------------------%>
-			<c:if test="${not subtask}">
+			<c:if test="${not task.subtask}">
 			<div>
 				<div class="mod-header">
 					<h5 class="mod-header-title">
-						<span class="glyphicon glyphicon-link"></span>
+						<i class="fa fa-lg fa-link fa-flip-horizontal"></i>
 						<s:message code="task.related"/>
 					</h5>
 					<a class="btn btn-default btn-xxs a-tooltip pull-right linkButton" href="#" title="" data-placement="top" data-original-title="<s:message code="task.link"/>">
-						<span class="glyphicon glyphicon-plus"></span> <span class="glyphicon glyphicon-link"></span>
+						<i class="fa fa-plus"></i><i class="fa fa-lg fa-link fa-flip-horizontal"></i>
 					</a>
 				</div>
 				<div id="linkDiv" style="display:none" class="form-group">
@@ -315,7 +315,7 @@
 						<input type="hidden" id="taskB" name="taskB">
 						<div class="form-group col-md-4"  style="padding-left:10px">
 							<button type="submit" class="btn btn-default a-tooltip btn-sm" title="" data-placement="top" data-original-title="<s:message code="task.link.help" arguments="${task.id}"/>">
-								<span class="glyphicon glyphicon-link"></span> <s:message code="task.link"/>
+								<i class="fa fa-link fa-flip-horizontal"></i> <s:message code="task.link"/>
 							</button>
 							<a id="linkCancel" class="btn btn-sm linkButton">
 								<s:message code="main.cancel"/>
@@ -364,11 +364,11 @@
 			<div>
 				<div class="mod-header">
 					<h5 class="mod-header-title">
-						<i class="fa fa-sitemap"></i>
+						<i class="fa fa-lg fa-sitemap"></i>
 						SubTasks
 					</h5>
 					<a class="btn btn-default btn-xxs a-tooltip pull-right" href="<c:url value="task/${task.id}/subtask"/>" data-placement="top" data-original-title="<s:message code="task.link"/>">
-						<span class="glyphicon glyphicon-plus"></span> <span class="glyphicon glyphicon-list"></span>
+						<i class="fa fa-plus"></i> <i class="fa fa-lg fa-sitemap"></i>
 					</a>
 				</div>
 				<div id="subTask" class="form-group">
@@ -486,7 +486,7 @@
 				</table>
 			</div>
 			<%----------------SPRITNS ----------------------%>
-			<c:if test="${not subtask}">
+			<c:if test="${not task.subtask}">
 			<div>
 				<div class="mod-header">
 					<h5 class="mod-header-title">

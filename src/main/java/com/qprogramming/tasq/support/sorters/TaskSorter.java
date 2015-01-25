@@ -21,13 +21,14 @@ public class TaskSorter implements Comparator<Task> {
 
 	public int compare(Task a, Task b) {
 		int result = 0;
+
 		switch (sortBy) {
 		case NAME:
 			result = a.getName().compareTo(b.getName());
 			break;
 		case ID:
-			String aId = a.getId().split("-")[1];
-			String bId = b.getId().split("-")[1];
+			String aId = a.getId().split("-")[1].split("/")[0];
+			String bId = b.getId().split("-")[1].split("/")[0];
 			if (Integer.parseInt(aId) > Integer.parseInt(bId)) {
 				result = 1;
 			} else {

@@ -264,7 +264,8 @@ public class TaskController {
 		}
 		int storyPoints = ("").equals(taskForm.getStory_points()) ? 0 : Integer
 				.parseInt(taskForm.getStory_points());
-		if (task.getStory_points() != storyPoints) {
+		if (task.getStory_points() != null
+				&& task.getStory_points() != storyPoints) {
 			wlSrv.addActivityLog(
 					task,
 					Integer.toString(-1
@@ -281,7 +282,7 @@ public class TaskController {
 			task.setDue_date(Utils.convertStringToDate(taskForm.getDue_date()));
 		}
 		TaskType type = TaskType.toType(taskForm.getType());
-		if(!task.getType().equals(type)){
+		if (!task.getType().equals(type)) {
 			message.append("Type: ");
 			message.append(task.getType().toString());
 			message.append(CHANGE_TO);
@@ -296,27 +297,12 @@ public class TaskController {
 		}
 		return "redirect:/task?id=" + taskID;
 	}
+	
 	@Transactional
 	@RequestMapping(value = "subtask", method = RequestMethod.GET)
-	public String showSubTaskDetails(@RequestParam(value = "id") String id,
-			Model model, RedirectAttributes ra) {
-		SubTask subtask = taskSrv.findSubTaskById(id);
-		if (subtask == null) {
-			MessageHelper.addErrorAttribute(
-					ra,
-					msg.getMessage("task.notexists", null,
-							Utils.getCurrentLocale()));
-			return "redirect:/tasks";
-		}
-		Hibernate.initialize(subtask.getComments());
-		Hibernate.initialize(subtask.getWorklog());
-		subtask.setDescription(subtask.getDescription().replaceAll("\n", "<br>"));
-		model.addAttribute("task", subtask);
-		model.addAttribute("subtask", true);
-		return "task/details";
+	public String showSubTaskDetails(@RequestParam(value = "id") String id, Model model, RedirectAttributes ra) {
+		return showTaskDetails(id, model, ra);
 	}
-
-	
 
 	@Transactional
 	@RequestMapping(value = "task", method = RequestMethod.GET)
@@ -348,14 +334,16 @@ public class TaskController {
 		// TASK
 		Hibernate.initialize(task.getComments());
 		Hibernate.initialize(task.getWorklog());
-		Hibernate.initialize(task.getSprints());
 		task.setDescription(task.getDescription().replaceAll("\n", "<br>"));
 		Map<TaskLinkType, List<DisplayTask>> links = linkService
 				.findTaskLinks(id);
-		List<SubTask> subtasks = taskSrv.findSubtasks(task);
+		if (!task.isSubtask()) {
+			Hibernate.initialize(task.getSprints());
+			List<Task> subtasks = taskSrv.findSubtasks(task);
+			model.addAttribute("subtasks", subtasks);
+		}
 		model.addAttribute("task", task);
 		model.addAttribute("links", links);
-		model.addAttribute("subtasks", subtasks);
 		return "task/details";
 	}
 
@@ -460,21 +448,23 @@ public class TaskController {
 							Utils.getCurrentLocale()));
 			return "redirect:" + request.getHeader("Referer");
 		}
-		SubTask subTask = taskForm.createSubTask();
+		Task subTask = taskForm.createSubTask();
 		// build ID
-		int taskCount = task.getSubtasks().size();
+		int taskCount = task.getSubtasks();
 		taskCount++;
 		String taskID = task.getId() + "/" + taskCount;
 		subTask.setId(taskID);
-		subTask.setTask(task);
+		subTask.setParentID(task.getId());
 		subTask.setProject(project);
+		task.addSubTask();
+
 		// assigne
 		if (taskForm.getAssignee() != null) {
 			Account assignee = accSrv.findById(taskForm.getAssignee());
 			subTask.setAssignee(assignee);
 		}
 		Hibernate.initialize(task.getSubtasks());
-		task.addSubTask(taskSrv.save(subTask));
+		taskSrv.save(subTask);
 		taskSrv.save(task);
 		// TODO save log
 		// wlSrv.addActivityLog(subTask, "", LogType.CREATE);

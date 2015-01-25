@@ -1,5 +1,5 @@
 <%@page import="com.qprogramming.tasq.task.TaskPriority"%>
-<%@page import="com.qprogramming.tasq.task.SubTaskType"%>
+<%@page import="com.qprogramming.tasq.task.TaskType"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
 <%@ taglib prefix="security"
@@ -82,11 +82,14 @@
 				<ul class="dropdown-menu" role="menu"
 					aria-labelledby="dropdownMenu1">
 					<%
-						pageContext.setAttribute("types", SubTaskType.values());
+						pageContext.setAttribute("types", TaskType.values());
 					%>
 					<c:forEach items="${types}" var="enum_type">
-						<li><a class="taskType" tabindex="-1" href="#" id="${enum_type}" data-type="${enum_type}"><t:type type="${enum_type}" show_text="true"/></a></li>
+						<c:if test="${enum_type.subtask}">
+							<li><a class="taskType" tabindex="-1" href="#" id="${enum_type}" data-type="${enum_type}"><t:type type="${enum_type}" show_text="true" list="true"/></a></li>
+						</c:if>
 					</c:forEach>
+					<li><a class="taskType" tabindex="-1" href="#" id="IDLE" data-type="IDLE"><t:type type="IDLE" show_text="true" list="true"/></a></li>
 				</ul>
 			</div>
 			<span class="help-block"><s:message code="task.type.help" /> <a href="#" style="color:black"><span class="glyphicon glyphicon-question-sign"></span></a></span>

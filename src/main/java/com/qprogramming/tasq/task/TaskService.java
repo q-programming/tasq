@@ -15,14 +15,8 @@ public class TaskService {
 	@Autowired
 	private TaskRepository taskRepo;
 	
-	@Autowired
-	private SubTaskRepository subtaskRepo;
-
 	public Task save(Task task) {
 		return taskRepo.save(task);
-	}
-	public SubTask save(SubTask task) {
-		return subtaskRepo.save(task);
 	}
 
 	public List<Task> findAllByProject(Project project) {
@@ -66,11 +60,7 @@ public class TaskService {
 		return taskRepo.findByProjectAndSprintsId(sprint.getProject(), sprint.getId());
 	}
 	
-	public List<SubTask> findSubtasks(Task task){
-		return subtaskRepo.findByTaskId(task.getId());
+	public List<Task> findSubtasks(Task task){
+		return taskRepo.findByParentID(task.getId());
 	}
-	public SubTask findSubTaskById(String id) {
-		return subtaskRepo.findById(id);
-	}
-
 }

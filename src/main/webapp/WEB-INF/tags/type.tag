@@ -30,6 +30,12 @@
 		fa-border
 	</c:set>
 </c:if>
+<c:if test="${not empty list}">
+	<c:set var="list_view">
+		fa-fw
+	</c:set>
+</c:if>
+
 <c:if test="${not empty type}">
 	<c:choose>
 		<c:when test="${type eq 'TASK'}">

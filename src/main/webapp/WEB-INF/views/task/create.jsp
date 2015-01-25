@@ -114,8 +114,10 @@
 						pageContext.setAttribute("types", TaskType.values());
 					%>
 					<c:forEach items="${types}" var="enum_type">
-						<li><a class="taskType" tabindex="-1" href="#" id="${enum_type}" data-type="${enum_type}"><t:type
-									type="${enum_type}" show_text="true" list="true" /></a></li>
+						<c:if test="${not enum_type.subtask}">
+							<li><a class="taskType" tabindex="-1" href="#" id="${enum_type}" data-type="${enum_type}"><t:type
+										type="${enum_type}" show_text="true" list="true" /></a></li>
+						</c:if>
 					</c:forEach>
 				</ul>
 			</div>

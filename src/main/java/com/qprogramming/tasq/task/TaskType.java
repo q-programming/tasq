@@ -1,7 +1,14 @@
 package com.qprogramming.tasq.task;
 
 public enum TaskType {
-	TASK, USER_STORY, ISSUE, BUG, IDLE;
+	TASK(false), USER_STORY(false), ISSUE(false), BUG(false), IDLE(false), SUBTASK(
+			true), SUBBUG(true);
+	;
+	private boolean subtask;
+
+	private TaskType(boolean subtask) {
+		this.subtask = subtask;
+	}
 
 	@Override
 	public String toString() {
@@ -23,7 +30,15 @@ public enum TaskType {
 		return super.toString().toLowerCase();
 	}
 
-	public static TaskType toType(String string){
+	public boolean isSubtask() {
+		return subtask;
+	}
+
+	public void setSubtask(boolean subtask) {
+		this.subtask = subtask;
+	}
+
+	public static TaskType toType(String string) {
 		return valueOf(string.toUpperCase());
 	}
 

@@ -83,15 +83,15 @@ public class TaskForm {
 		return task;
 	}
 
-	public SubTask createSubTask() {
-		SubTask subTask = new SubTask();
+	public Task createSubTask() {
+		Task subTask = new Task();
 		subTask = createBaseTask(subTask);
-		subTask.setType(SubTaskType.toType(getType()));
+		subTask.setType(TaskType.toType(getType()));
 		return subTask;
 	}
 	
 
-	private <T extends AbstractTask> T createBaseTask(T task) {
+	private Task createBaseTask(Task task) {
 		task.setName(getName());
 		task.setCreate_date(new Date());
 		if (getDue_date() != null && !"".equals(getDue_date())) {

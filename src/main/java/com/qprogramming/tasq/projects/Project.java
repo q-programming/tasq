@@ -24,7 +24,6 @@ import javax.persistence.SequenceGenerator;
 import org.hibernate.annotations.IndexColumn;
 
 import com.qprogramming.tasq.account.Account;
-import com.qprogramming.tasq.task.AbstractTask;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskPriority;
 import com.qprogramming.tasq.task.TaskType;
@@ -65,7 +64,7 @@ public class Project implements Serializable {
 	private Date startDate;
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "project")
-	private List<AbstractTask> tasks;
+	private List<Task> tasks;
 
 	@Column
 	private Enum<TaskType> default_type;
@@ -179,11 +178,11 @@ public class Project implements Serializable {
 		this.projectId = projectId;
 	}
 
-	public List<AbstractTask> getTasks() {
+	public List<Task> getTasks() {
 		return tasks;
 	}
 
-	public void setTasks(List<AbstractTask> tasks) {
+	public void setTasks(List<Task> tasks) {
 		this.tasks = tasks;
 	}
 
