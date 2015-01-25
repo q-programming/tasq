@@ -30,10 +30,6 @@ public class Task extends AbstractTask implements java.io.Serializable {
 	 */
 	private static final long serialVersionUID = -7551953383145553379L;
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "project_tasks")
-	private Project project;
-
 	@Column
 	private Integer story_points;
 
@@ -46,19 +42,11 @@ public class Task extends AbstractTask implements java.io.Serializable {
 	@Column
 	private boolean inSprint;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "task")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "task",fetch = FetchType.LAZY)
 	private Set<SubTask> subtasks;
-
-	public Project getProject() {
-		return project;
-	}
 
 	public Integer getStory_points() {
 		return story_points;
-	}
-
-	public void setProject(Project project) {
-		this.project = project;
 	}
 
 	public void setStory_points(Integer story_points) {

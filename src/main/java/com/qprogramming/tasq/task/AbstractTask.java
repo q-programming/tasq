@@ -11,6 +11,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
@@ -22,6 +23,7 @@ import javax.persistence.Transient;
 import org.joda.time.Period;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.support.sorters.CommentsSorter;
 import com.qprogramming.tasq.support.sorters.WorkLogSorter;
@@ -81,6 +83,11 @@ public abstract class AbstractTask {
 	@ManyToOne
 	@JoinColumn(name = "task_assignee")
 	private Account assignee;
+	
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "project_tasks")
+	private Project project;
+
 
 	public String getId() {
 		return id;
@@ -264,6 +271,14 @@ public abstract class AbstractTask {
 
 	public void setPriority(Enum<TaskPriority> priority) {
 		this.priority = priority;
+	}
+
+	public Project getProject() {
+		return project;
+	}
+
+	public void setProject(Project project) {
+		this.project = project;
 	}
 
 	/*

@@ -72,7 +72,7 @@
 <script>
 	$(".worklog").click(function() {
 		var taskID = $(this).data('taskid');
-		var title = "<s:message code="task.logWork" /> " + taskID;
+		var title = '<i class="fa fa-calendar"></i> <s:message code="task.logWork" /> ' + taskID;
 		$("#myModalLabel").html(title);
 		$("#modal_taskID").val(taskID);
 	});

@@ -38,8 +38,7 @@
 						style="padding: 6px 11px;" href='#'
 						title="<s:message
 									code="project.active" text="Set as avtive" />"
-						data-placement="bottom"> <img
-							src="<c:url value="/resources/img/active.gif"/>"></img></a></td>
+						data-placement="bottom"> <i class="fa fa-refresh fa-spin"></i></a></td>
 				</tr>
 			</c:if>
 			<c:if test="${project.id ne user.active_project}">
@@ -55,8 +54,7 @@
 						href='<s:url value="/project/activate?id=${project.id}"></s:url>'
 						title="<s:message
 									code="project.activate" text="Set as avtive" />"
-						data-placement="bottom"> <span
-							class="glyphicon glyphicon-refresh"></span>
+						data-placement="bottom"> <i class="fa fa-refresh"></i>
 					</a></td>
 				</tr>
 			</c:if>

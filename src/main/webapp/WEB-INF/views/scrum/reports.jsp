@@ -28,14 +28,11 @@
 	<div style="display: table-caption; margin-left: 10px;">
 		<ul class="nav nav-tabs" style="border-bottom: 0">
 			<li><a style="color: black"
-				href="<c:url value="/${project.projectId}/scrum/backlog"/>"><span
-					class="glyphicon glyphicon-book"></span> Backlog</a></li>
+				href="<c:url value="/${project.projectId}/scrum/backlog"/>"><i class="fa fa-book"></i> Backlog</a></li>
 			<li><a style="color: black"
-				href="<c:url value="/${project.projectId}/scrum/board"/>"><span
-					class="glyphicon glyphicon-list-alt"></span> <s:message
+				href="<c:url value="/${project.projectId}/scrum/board"/>"><i class="fa fa-list-alt"></i> <s:message
 						code="agile.board" /></a></li>
-			<li class="active"><a style="color: black" href="#"><span
-					class="glyphicon glyphicon-bullhorn"></span> <s:message
+			<li class="active"><a style="color: black" href="#"><i class="fa fa-line-chart"></i> <s:message
 						code="agile.reports" /></a></li>
 		</ul>
 	</div>
@@ -100,7 +97,7 @@ $(document).ready(function() {
 	var lastSprint = "${ActiveSprint}";
 	var avatarURL = '<c:url value="/userAvatar/"/>';
 	var taskURL = '<c:url value="/task?id="/>';
-	var loading_indicator = '<div id="loading" class="centerPadded"><s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td>';
+	var loading_indicator = '<div id="loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td>';
 	var timeTracked = ${project.timeTracked};
 	$(".sprintMenuNo").click(function(){
 		var number = $(this).data('number');

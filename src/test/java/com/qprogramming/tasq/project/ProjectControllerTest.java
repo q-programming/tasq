@@ -53,6 +53,7 @@ import com.qprogramming.tasq.projects.ProjectChart;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.projects.ProjetController;
 import com.qprogramming.tasq.support.web.Message;
+import com.qprogramming.tasq.task.AbstractTask;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskPriority;
 import com.qprogramming.tasq.task.TaskService;
@@ -123,7 +124,7 @@ public class ProjectControllerTest {
 	@Test
 	public void showDetailsTest() {
 		Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
-		List<Task> taskList = new LinkedList<Task>();
+		List<AbstractTask> taskList = new LinkedList<AbstractTask>();
 		List<Task> openTaskList = new LinkedList<Task>();
 		Task task = new Task();
 		task.setId("TEST-1");

@@ -25,15 +25,12 @@
 	<%--MENU --%>
 	<div style="display: table-caption; margin-left: 10px;">
 		<ul class="nav nav-tabs" style="border-bottom: 0">
-			<li class="active"><a style="color: black" href="#"><span
-					class="glyphicon glyphicon-book"></span> Backlog</a></li>
+			<li class="active"><a style="color: black" href="#"><i class="fa fa-book"></i> Backlog</a></li>
 			<li><a style="color: black"
-				href="<c:url value="/${project.projectId}/scrum/board"/>"><span
-					class="glyphicon glyphicon-list-alt"></span> <s:message
+				href="<c:url value="/${project.projectId}/scrum/board"/>"><i class="fa fa-list-alt"></i> <s:message
 						code="agile.board" /></a></li>
 			<li><a style="color: black"
-				href="<c:url value="/${project.projectId}/scrum/reports"/>"><span
-					class="glyphicon glyphicon-bullhorn"></span> <s:message
+				href="<c:url value="/${project.projectId}/scrum/reports"/>"><i class="fa fa-line-chart"></i> <s:message
 						code="agile.reports" /></a></li>
 		</ul>
 	</div>

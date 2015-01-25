@@ -45,6 +45,7 @@ import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.ProjectSorter;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
+import com.qprogramming.tasq.task.AbstractTask;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskPriority;
 import com.qprogramming.tasq.task.TaskService;
@@ -111,12 +112,12 @@ public class ProjetController {
 		current.setLast_visited_p(clean);
 		accSrv.update(current);
 		// Check status of all projects
-		List<Task> tasks = project.getTasks();
+		List<AbstractTask> tasks = project.getTasks();
 		Map<TaskState, Integer> stateCount = new HashMap<TaskState, Integer>();
 		for (TaskState state : TaskState.values()) {
 			stateCount.put(state, 0);
 		}
-		for (Task task : tasks) {
+		for (AbstractTask task : tasks) {
 			Integer value = stateCount.get(task.getState());
 			value++;
 			stateCount.put((TaskState) task.getState(), value);

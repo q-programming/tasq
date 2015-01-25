@@ -296,10 +296,31 @@ public class TaskController {
 		}
 		return "redirect:/task?id=" + taskID;
 	}
+	@Transactional
+	@RequestMapping(value = "subtask", method = RequestMethod.GET)
+	public String showSubTaskDetails(@RequestParam(value = "id") String id,
+			Model model, RedirectAttributes ra) {
+		SubTask subtask = taskSrv.findSubTaskById(id);
+		if (subtask == null) {
+			MessageHelper.addErrorAttribute(
+					ra,
+					msg.getMessage("task.notexists", null,
+							Utils.getCurrentLocale()));
+			return "redirect:/tasks";
+		}
+		Hibernate.initialize(subtask.getComments());
+		Hibernate.initialize(subtask.getWorklog());
+		subtask.setDescription(subtask.getDescription().replaceAll("\n", "<br>"));
+		model.addAttribute("task", subtask);
+		model.addAttribute("subtask", true);
+		return "task/details";
+	}
+
+	
 
 	@Transactional
 	@RequestMapping(value = "task", method = RequestMethod.GET)
-	public String showDetails(@RequestParam(value = "id") String id,
+	public String showTaskDetails(@RequestParam(value = "id") String id,
 			Model model, RedirectAttributes ra) {
 		Task task = taskSrv.findById(id);
 		if (task == null) {
@@ -446,6 +467,7 @@ public class TaskController {
 		String taskID = task.getId() + "/" + taskCount;
 		subTask.setId(taskID);
 		subTask.setTask(task);
+		subTask.setProject(project);
 		// assigne
 		if (taskForm.getAssignee() != null) {
 			Account assignee = accSrv.findById(taskForm.getAssignee());

@@ -49,8 +49,14 @@
 		</div>
 		<h3>
 			<t:type type="${task.type}" />
+			<c:if test="${subtask}">
+			<a href='<c:url value="/task?id=${task.task.id}"/>'>[${task.task.id}]</a>
+			\ [${task.id}] ${task.name}
+			</c:if>
+			<c:if test="${not subtask}">
 			<a href='<c:url value="/project?id=${task.project.id}"/>'>${task.project.projectId}</a>
 			\ [${task.id}] ${task.name}
+			</c:if>
 		</h3>
 	</div>
 	<div style="display: table">
@@ -139,12 +145,14 @@
 								code="task.description" /></td>
 						<td class="left-margin">${task.description}</td>
 					</tr>
-					<tr>
-						<td><s:message code="task.storyPoints" /></td>
-						<td class="left-margin">
-							<span class="badge theme left">${task.story_points}</span>
-						</td>
-					</tr>
+					<c:if test="${not subtask}">
+						<tr>
+							<td><s:message code="task.storyPoints" /></td>
+							<td class="left-margin">
+								<span class="badge theme left">${task.story_points}</span>
+							</td>
+						</tr>
+					</c:if>
 				</table>
 			</div>
 			<%----------------ESTIMATES DIV -------------------------%>
@@ -159,7 +167,7 @@
 				<c:if test="${can_edit && user.isUser || is_assignee}">
 					<button class="btn btn-default btn-sm worklog" data-toggle="modal"
 						data-target="#logWorkform" data-taskID="${task.id}">
-						<span class="glyphicon glyphicon-calendar"></span>
+						<i class="fa fa-calendar"></i>
 						<s:message code="task.logWork"></s:message>
 					</button>
 					<c:if
@@ -277,6 +285,7 @@
 				</table>
 			</div>
 			<%-------------- RELATED TASKS ------------------%>
+			<c:if test="${not subtask}">
 			<div>
 				<div class="mod-header">
 					<h5 class="mod-header-title">
@@ -355,7 +364,7 @@
 			<div>
 				<div class="mod-header">
 					<h5 class="mod-header-title">
-						<span class="glyphicon glyphicon-list"></span>
+						<i class="fa fa-sitemap"></i>
 						SubTasks
 					</h5>
 					<a class="btn btn-default btn-xxs a-tooltip pull-right" href="<c:url value="task/${task.id}/subtask"/>" data-placement="top" data-original-title="<s:message code="task.link"/>">
@@ -365,12 +374,17 @@
 				<div id="subTask" class="form-group">
 					<table class="table table-hover table-condensed button-table">
 						<c:forEach var="subTask" items="${subtasks}">
-							<tr><td>${subTask}</td></tr>
+							<tr>
+								<td style="width:30px"><t:type type="${subTask.type}" list="true" /></td>
+								<td style="width: 30px"><t:priority priority="${subTask.priority}" list="true" /></td>
+								<td><a href="<c:url value="subtask?id=${subTask.id}"/>">[${subTask.id}] ${subTask.name}</a></td>
+								<td style="width: 100px"><t:state state="${subTask.state}" /></td>
+							</tr>
 						</c:forEach>
 					</table>
 				</div>
 			</div>
-			
+			</c:if>
 		</div>
 		<%--------------------RIGHT SIDE DIV -------------------------------------%>
 		<div class="left-margin" style="display: table-cell; width: 400px">
@@ -472,6 +486,7 @@
 				</table>
 			</div>
 			<%----------------SPRITNS ----------------------%>
+			<c:if test="${not subtask}">
 			<div>
 				<div class="mod-header">
 					<h5 class="mod-header-title">
@@ -486,6 +501,7 @@
 					</div>
 				</c:forEach>
 			</div>
+			</c:if>
 		</div>
 	</div>
 	<%--------------------------- BOTTOM TABS------------------------------------%>

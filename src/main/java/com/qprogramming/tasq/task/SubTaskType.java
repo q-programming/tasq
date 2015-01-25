@@ -1,7 +1,7 @@
 package com.qprogramming.tasq.task;
 
 public enum SubTaskType {
-	SUBTASK, ISSUE, SUBBUG, IDLE;
+	SUBTASK, SUBBUG, IDLE;
 
 	@Override
 	public String toString() {

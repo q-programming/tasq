@@ -19,32 +19,39 @@
 <c:set var="idle_txt">
 	<s:message code="task.type.idle" />
 </c:set>
+<c:set var="subtask_txt">
+	<s:message code="task.type.subtask" />
+</c:set>
+<c:set var="subbug_txt">
+	<s:message code="task.type.subbug" />
+</c:set>
 <c:if test="${empty list}">
 	<c:set var="list_view">
-		task-type
+		fa-border
 	</c:set>
 </c:if>
 <c:if test="${not empty type}">
 	<c:choose>
 		<c:when test="${type eq 'TASK'}">
-			<img class="a-tooltip ${list_view}" title="${task_txt}"
-				src="<c:url value="/resources/img/task.png"/>">
+			<i class="fa fa-lg fa-check-square a-tooltip ${list_view}"  title="${task_txt}"></i>
 		</c:when>
 		<c:when test="${type eq 'USER_STORY'}">
-			<img class="a-tooltip ${list_view}" title="${user_story_txt}"
-				src="<c:url value="/resources/img/user_story.png"/>">
+			<i class="fa fa-lg fa-lightbulb-o a-tooltip ${list_view}"  title="${user_story_txt}"></i>
 		</c:when>
 		<c:when test="${type eq 'ISSUE'}">
-			<img class="a-tooltip ${list_view}" title="${issue_txt}"
-				src="<c:url value="/resources/img/issue.png"/>">
+			<i class="fa fa-lg fa-exclamation-triangle a-tooltip ${list_view}"  title="${issue_txt}"></i>
 		</c:when>
 		<c:when test="${type eq 'BUG'}">
-			<img class="a-tooltip ${list_view}" title="${bug_txt}"
-				src="<c:url value="/resources/img/bug.png"/>">
+			<i class="fa fa-lg fa-bug a-tooltip ${list_view}"  title="${bug_txt}"></i>
+		</c:when>
+		<c:when test="${type eq 'SUBBUG'}">
+			<i class="fa fa-lg fa-bug a-tooltip ${list_view}"  title="${subbug_txt}"></i>
 		</c:when>
 		<c:when test="${type eq 'IDLE'}">
-			<img class="a-tooltip ${list_view}" title="${idle_txt}"
-				src="<c:url value="/resources/img/idle.png"/>">
+			<i class="fa fa-lg fa-coffee a-tooltip ${list_view}"  title="${idle_txt}"></i>
+		</c:when>
+		<c:when test="${type eq 'SUBTASK'}">
+			<i class="fa fa-lg fa-sitemap a-tooltip ${list_view}"  title="${subtask_txt}"></i>
 		</c:when>
 	</c:choose>
 </c:if>
@@ -62,8 +69,14 @@
 		<c:when test="${type eq 'BUG'}">
 			${bug_txt}
 		</c:when>
+		<c:when test="${type eq 'SUBBUG'}">
+			${subbug_txt}
+		</c:when>
 		<c:when test="${type eq 'IDLE'}">
 			${idle_txt}
+		</c:when>
+		<c:when test="${type eq 'SUBTASK'}">
+			${subtask_txt}
 		</c:when>
 	</c:choose>
 </c:if>

@@ -69,5 +69,8 @@ public class TaskService {
 	public List<SubTask> findSubtasks(Task task){
 		return subtaskRepo.findByTaskId(task.getId());
 	}
+	public SubTask findSubTaskById(String id) {
+		return subtaskRepo.findById(id);
+	}
 
 }

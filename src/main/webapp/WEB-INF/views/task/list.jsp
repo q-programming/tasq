@@ -121,8 +121,8 @@
 				<th class="export_cell export-hidden" style="width: 30px"><input
 					id="select_all" type="checkbox" class="a-tooltip"
 					title="<s:message code="task.export.clickAll"/>"></th>
-				<th style="width: 30px"><s:message code="task.type" /></th>
-				<th style="width: 30px"><span class="dropdown a-tooltip"
+				<th style="width: 30px;text-align: center;"><s:message code="task.type" /></th>
+				<th style="width: 30px;"><span class="dropdown a-tooltip"
 					title="<s:message code="task.priority" />"
 					style="padding-top: 5px; cursor: pointer;"> <a
 						class="dropdown-toggle theme" type="button" id="dropdownMenu2"
@@ -192,7 +192,7 @@
 			</c:if>
 			<td class="export_cell export-hidden"><input class="export"
 				type="checkbox" name="tasks" value="${task.id}"></td>
-			<td><t:type type="${task.type}" list="true" /></td>
+			<td style="text-align: center;"><t:type type="${task.type}" list="true" /></td>
 			<td><t:priority priority="${task.priority}" list="true" /></td>
 			<td><a href="<c:url value="task?id=${task.id}"/>"
 				style="color: inherit;<c:if test="${task.state eq 'CLOSED' }">

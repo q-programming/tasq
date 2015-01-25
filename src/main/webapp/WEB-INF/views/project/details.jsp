@@ -40,7 +40,7 @@
 				style="padding: 6px 11px;"
 				href='<s:url value="/project/manage?id=${project.id}"></s:url>'
 				title="<s:message code="project.manage" text="Set as avtive" />"
-				data-placement="bottom"><span class="glyphicon glyphicon-wrench"></span></a>
+				data-placement="bottom"><i class="fa fa-wrench"></i></a>
 		</div>
 	</c:if>
 	<div class="pull-right">
@@ -49,16 +49,14 @@
 				style="padding: 6px 11px;" href='#'
 				title="<s:message
 									code="project.active" text="Set as avtive" />"
-				data-placement="bottom"> <img
-				src="<c:url value="/resources/img/active.gif"/>"></img></a>
+				data-placement="bottom"> <i class="fa fa-refresh fa-spin"></i></a>
 		</c:if>
 		<c:if test="${project.id ne user.active_project}">
 			<a class="btn btn-default a-tooltip pull-right"
 				href='<s:url value="/project/activate?id=${project.id}"></s:url>'
 				title="<s:message
 									code="project.activate" text="Set as avtive" />"
-				data-placement="bottom"> <span
-				class="glyphicon glyphicon-refresh"></span>
+				data-placement="bottom"> <i class="fa fa-refresh"></i>
 			</a>
 		</c:if>
 	</div>
@@ -123,7 +121,7 @@
 					<a
 						href="<s:url value="/project?${show_q}id=${project.id}&closed=yes"></s:url>"><span
 						style="display: inherit; font-size: small; font-weight: normal; color: black; float: right">
-							<span class="glyphicon glyphicon-check"></span> <s:message
+							<i class="fa fa-check-square-o"></i> <s:message
 								code="project.hideClosed"></s:message>
 					</span></a>
 				</c:if>
@@ -131,7 +129,7 @@
 					<a
 						href="<s:url value="/project?${show_q}id=${project.id}"></s:url>"><span
 						style="display: inherit; font-size: small; font-weight: normal; color: black; float: right">
-							<span class="glyphicon glyphicon-unchecked"></span> <s:message
+							<i class="fa fa-square-o"></i> <s:message
 								code="project.hideClosed"></s:message>
 					</span></a>
 				</c:if>
@@ -189,7 +187,7 @@ $(document).on("click",".navBtn",function(e) {
 });
 
 function printChart(){
-	var loading_indicator = '<div id="loading" class="centerPadded"><s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td>';
+	var loading_indicator = '<div id="loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td>';
 	$("#chartdiv").append(loading_indicator);
 	projectId = '${project.id}';
 	$.get('<c:url value="/project/getChart"/>',{id:projectId},function(result){
@@ -265,7 +263,7 @@ function fetchWorkLogData(page) {
 	var url = '<c:url value="/projectEvents"/>';
 	var avatarURL = '<c:url value="/userAvatar/"/>';
 	var taskURL = '<c:url value="/task?id="/>';
-	var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
+	var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
 	$("#eventsTable").append(loading_indicator);
 	$.get(url, {id : projectID,	page: page}, function(data) {
 		console.log(data)
@@ -300,7 +298,7 @@ function printWorkLogNavigation(page,data){
 	var bottomRow='<tr>';
 	var prev = '<td style="width:30px"></td>';
 	if(!data.firstPage){
-		prev = '<td style="width:30px"><a class="navBtn btn" data-page="'+ (page -1)+'"><span class="glyphicon glyphicon-chevron-left"></span></a></td>';
+		prev = '<td style="width:30px"><a class="navBtn btn" data-page="'+ (page -1)+'"><i class="fa fa-arrow-left"></i></a></td>';
 	}
 	topRow+=prev;
 	bottomRow+=prev;
@@ -321,7 +319,7 @@ function printWorkLogNavigation(page,data){
 	
 	var next = '<td style="width:30px"></td>';
 	if(!data.lastPage){
-		next = '<td style="width:30px"><a class="navBtn btn" data-page="'+ (page +1) +'"><span class="glyphicon glyphicon-chevron-right"></span></a></td>';
+		next = '<td style="width:30px"><a class="navBtn btn" data-page="'+ (page +1) +'"><i class="fa fa-arrow-right"></i></a></td>';
 	}
 	topRow+=next+'</tr>';
 	bottomRow+=next+'</tr>';

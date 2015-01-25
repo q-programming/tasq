@@ -32,6 +32,10 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 	rel="stylesheet" media="screen" />
 <link href="<c:url value="/resources/css/core.css" />" rel="stylesheet"
 	media="screen" />
+<%-- FONT AWSOME --%>
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<%-- <link href="<c:url value="/resources/css/font-awesome.min.css" />" rel="stylesheet" --%>
+<!-- 	media="screen" /> -->
 <%-------THEME ------%>
 <security:authorize access="!isAuthenticated()">
 	<link href="<c:url value="/resources/css/theme.css" />"
