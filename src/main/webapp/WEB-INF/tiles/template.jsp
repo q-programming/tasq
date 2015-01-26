@@ -1,3 +1,4 @@
+<%@ page trimDirectiveWhitespaces="true" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
@@ -8,7 +9,6 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
-
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
@@ -18,7 +18,6 @@
 <%-- jQuery UI --%>
 <script src="<c:url value="/resources/js/jquery-ui-1.10.4.custom.js" />"></script>
 <script src="<c:url value="/resources/js/jquery.ui.datepicker-pl.js" />"></script>
-
 <link
 	href="<c:url value="/resources/css/jquery-ui-1.10.4.custom.min.css" />"
 	rel="stylesheet" media="screen" />
@@ -32,6 +31,10 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 	rel="stylesheet" media="screen" />
 <link href="<c:url value="/resources/css/core.css" />" rel="stylesheet"
 	media="screen" />
+<%-- FONT AWSOME --%>
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<%-- <link href="<c:url value="/resources/css/font-awesome.min.css" />" rel="stylesheet" --%>
+<!-- 	media="screen" /> -->
 <%-------THEME ------%>
 <security:authorize access="!isAuthenticated()">
 	<link href="<c:url value="/resources/css/theme.css" />"
@@ -48,8 +51,6 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 			rel="stylesheet" media="screen" />
 	</c:if>
 </security:authorize>
-
-
 <%-- CUSTOMS --%>
 <link href="<c:url value="/resources/css/custom.css" />"
 	rel="stylesheet" media="screen" />
@@ -62,21 +63,16 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 <script src="<c:url value="/resources/js/jquery.mask.min.js" />"></script>
 <script src="<c:url value="/resources/js/bootbox.min.js" />"></script>
 <script src="<c:url value="/resources/js/jquery.contextmenu.js" />"></script>
-
-
-
 <%-- <tilesx:useAttribute id="styles" name="styles" --%>
 <%-- 	classname="java.util.List" ignore="true" /> --%>
 <%-- <c:forEach var="cssName" items="${styles}"> --%>
 <%-- 	<link type="text/css" href="<c:url value="/resources/css/${cssName}"/>" --%>
 <!-- 		rel="stylesheet" media="screen" /> -->
 <%-- </c:forEach> --%>
-
 <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
 <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-
 </head>
 <body>
 	<tiles:insertAttribute name="header" defaultValue="" />
@@ -85,7 +81,6 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 		<tiles:insertAttribute name="body" defaultValue="" />
 	</div>
 	<!-- End of page content -->
-
 	<tiles:insertAttribute name="footer" defaultValue="" />
 	<%
 		/* Show a message. See support.web package */

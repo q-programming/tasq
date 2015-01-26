@@ -57,7 +57,6 @@
 												code="project.create" text="Create project" /></a></li>
 								</c:if>
 							</ul></li>
-
 					<%-- TASKS --%>
 					<li><div class="dropdown" style="padding-top: 5px">
 							<a class="dropdown-toggle btn theme" type="button"
@@ -177,8 +176,7 @@
 								<a class="btn btn-default btn-xxs a-tooltip dropdown-toggle"
 									type="button" id="manageDropdown" data-toggle="dropdown"
 									title="<s:message
-										code="menu.manage" text="Settings" />" data-placement="bottom"><span
-									class="glyphicon glyphicon-wrench"></span></a>
+										code="menu.manage" text="Settings" />" data-placement="bottom"><i class="fa fa-wrench"></i></a>
 									<ul class="dropdown-menu">
 										<li><a href="<s:url value="/users/manage"></s:url>"><s:message code="menu.manage.users" /></a></li>
 										<li><a href="#">Other</a></li>
@@ -187,15 +185,13 @@
 							<a class="btn btn-default btn-xxs a-tooltip" data-toggle="modal"
 								data-target="#show_users"
 								title="<s:message
-									code="menu.users" text="Settings" />"
-								data-placement="bottom"><span
-								class="glyphicon glyphicon-user"></span></a> <a
+									code="menu.users" text="Users" />"
+								data-placement="bottom"><i class="fa fa-user"></i></a> <a
 								class="btn btn-default btn-xxs a-tooltip"
 								href='<s:url value="/settings"></s:url>'
 								title="<s:message
 									code="menu.settings" text="Settings" />"
-								data-placement="bottom"><span
-								class="glyphicon glyphicon-cog"></span></a> <a
+								data-placement="bottom"><i class="fa fa-cog"></i></a> <a
 								class="btn btn-default btn-xxs a-tooltip"
 								href='<s:url value="/settings"></s:url>'
 								title="<s:message
@@ -206,8 +202,7 @@
 								href='<s:url value="/logout"></s:url>'
 								title="<s:message
 									code="menu.logout" text="Log out" />"
-								data-placement="bottom"><span
-								class="glyphicon glyphicon-off"></span></a>
+								data-placement="bottom"><i class="fa fa-power-off"></i></a>
 						</div>
 						<div style="color: white">${user}</div>
 					</li>

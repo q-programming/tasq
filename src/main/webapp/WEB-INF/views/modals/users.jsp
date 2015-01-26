@@ -30,7 +30,7 @@
 					aria-hidden="true">&times;</button>
 				<span id="search_users" class="glyphicon glyphicon-search search-btn a-tooltip" data-html="true" data-placement="left" title="<s:message code="user.search"/>"></span>
 				<h4 class="modal-title" id="myModalLabel">
-					${userList_text}
+					<i class="fa fa-users"></i> ${userList_text}
 				</h4>
 			</div>
 			<table id="user_table" class="table table-hover table-condensed" style="width: 95%;margin: 15px;">

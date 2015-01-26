@@ -226,6 +226,7 @@ public class WorkLogService {
 		}
 	}
 
+	@Transactional
 	public List<WorkLog> getAllSprintEvents(Sprint sprint) {
 		LocalDate start = new LocalDate(sprint.getRawStart_date());
 		LocalDate end = new LocalDate(sprint.getRawEnd_date()).plusDays(1);
@@ -236,7 +237,7 @@ public class WorkLogService {
 		List<WorkLog> result = new LinkedList<WorkLog>();
 		// Filterout not important events
 		for (WorkLog workLog : list) {
-			if (isSprintRelevant(workLog)) {
+			if (isSprintRelevant(workLog, sprint)) {
 				result.add(workLog);
 			}
 		}
@@ -277,12 +278,13 @@ public class WorkLogService {
 		return result;
 	}
 
-	private boolean isSprintRelevant(WorkLog workLog) {
+	private boolean isSprintRelevant(WorkLog workLog, Sprint sprint) {
 		LogType type = (LogType) workLog.getType();
-		return type.equals(LogType.DELETED) || type.equals(LogType.LOG)
+		return workLog.getTask().inSprint(sprint)
+				&& (type.equals(LogType.DELETED) || type.equals(LogType.LOG)
 				|| type.equals(LogType.TASKSPRINTREMOVE)
 				|| type.equals(LogType.TASKSPRINTADD)
 				|| type.equals(LogType.ESTIMATE) || type.equals(LogType.CLOSED)
-				|| type.equals(LogType.REOPEN);
+				|| type.equals(LogType.REOPEN));
 	}
 }

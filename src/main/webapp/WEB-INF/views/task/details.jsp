@@ -49,8 +49,14 @@
 		</div>
 		<h3>
 			<t:type type="${task.type}" />
+			<c:if test="${task.subtask}">
+			<a href='<c:url value="/task?id=${task.parent}"/>'>[${task.parent}]</a>
+			\ [${task.id}] ${task.name}
+			</c:if>
+			<c:if test="${not task.subtask}">
 			<a href='<c:url value="/project?id=${task.project.id}"/>'>${task.project.projectId}</a>
 			\ [${task.id}] ${task.name}
+			</c:if>
 		</h3>
 	</div>
 	<div style="display: table">
@@ -75,7 +81,7 @@
 											pageContext.setAttribute("states",
 															TaskState.values());
 										%>
-										<div id="task_priority" class="image-combo a-tooltip"
+										<div id="task_state" class="image-combo a-tooltip"
 											data-toggle="dropdown" data-placement="top"
 											title="<s:message code="main.click"/>">
 											<div id="current_state" style = "float: left;padding-right: 5px;">
@@ -139,12 +145,14 @@
 								code="task.description" /></td>
 						<td class="left-margin">${task.description}</td>
 					</tr>
-					<tr>
-						<td><s:message code="task.storyPoints" /></td>
-						<td class="left-margin">
-							<span class="badge theme left">${task.story_points}</span>
-						</td>
-					</tr>
+					<c:if test="${not task.subtask}">
+						<tr>
+							<td><s:message code="task.storyPoints" /></td>
+							<td class="left-margin">
+								<span class="badge theme left">${task.story_points}</span>
+							</td>
+						</tr>
+					</c:if>
 				</table>
 			</div>
 			<%----------------ESTIMATES DIV -------------------------%>
@@ -159,7 +167,7 @@
 				<c:if test="${can_edit && user.isUser || is_assignee}">
 					<button class="btn btn-default btn-sm worklog" data-toggle="modal"
 						data-target="#logWorkform" data-taskID="${task.id}">
-						<span class="glyphicon glyphicon-calendar"></span>
+						<i class="fa fa-calendar"></i>
 						<s:message code="task.logWork"></s:message>
 					</button>
 					<c:if
@@ -277,14 +285,15 @@
 				</table>
 			</div>
 			<%-------------- RELATED TASKS ------------------%>
+			<c:if test="${not task.subtask}">
 			<div>
 				<div class="mod-header">
 					<h5 class="mod-header-title">
-						<span class="glyphicon glyphicon-link"></span>
+						<i class="fa fa-lg fa-link fa-flip-horizontal"></i>
 						<s:message code="task.related"/>
 					</h5>
 					<a class="btn btn-default btn-xxs a-tooltip pull-right linkButton" href="#" title="" data-placement="top" data-original-title="<s:message code="task.link"/>">
-						<span class="glyphicon glyphicon-plus"></span><span class="glyphicon glyphicon-link"></span>
+						<i class="fa fa-plus"></i><i class="fa fa-lg fa-link fa-flip-horizontal"></i>
 					</a>
 				</div>
 				<div id="linkDiv" style="display:none" class="form-group">
@@ -306,7 +315,7 @@
 						<input type="hidden" id="taskB" name="taskB">
 						<div class="form-group col-md-4"  style="padding-left:10px">
 							<button type="submit" class="btn btn-default a-tooltip btn-sm" title="" data-placement="top" data-original-title="<s:message code="task.link.help" arguments="${task.id}"/>">
-								<span class="glyphicon glyphicon-link"></span> <s:message code="task.link"/>
+								<i class="fa fa-link fa-flip-horizontal"></i> <s:message code="task.link"/>
 							</button>
 							<a id="linkCancel" class="btn btn-sm linkButton">
 								<s:message code="main.cancel"/>
@@ -351,6 +360,31 @@
 				</div>
 				</div>
 			</div>
+			<%---------------------SUBTASKS -------------%>
+			<div>
+				<div class="mod-header">
+					<h5 class="mod-header-title">
+						<i class="fa fa-lg fa-sitemap"></i>
+						<s:message code="tasks.subtasks" />
+					</h5>
+					<a class="btn btn-default btn-xxs a-tooltip pull-right" href="<c:url value="task/${task.id}/subtask"/>" data-placement="top" data-original-title="<s:message code="task.subtasks.add"/>">
+						<i class="fa fa-plus"></i> <i class="fa fa-lg fa-sitemap"></i>
+					</a>
+				</div>
+				<div id="subTask" class="form-group">
+					<table class="table table-hover table-condensed button-table">
+						<c:forEach var="subTask" items="${subtasks}">
+							<tr>
+								<td style="width:30px"><t:type type="${subTask.type}" list="true" /></td>
+								<td style="width: 30px"><t:priority priority="${subTask.priority}" list="true" /></td>
+								<td><a style="color: inherit;" href="<c:url value="subtask?id=${subTask.id}"/>">[${subTask.id}] ${subTask.name}</a></td>
+								<td style="width: 100px"><t:state state="${subTask.state}" /></td>
+							</tr>
+						</c:forEach>
+					</table>
+				</div>
+			</div>
+			</c:if>
 		</div>
 		<%--------------------RIGHT SIDE DIV -------------------------------------%>
 		<div class="left-margin" style="display: table-cell; width: 400px">
@@ -386,14 +420,14 @@
 											<button class="btn btn-default btn-sm a-tooltip"
 												type="button" id="assign_me"
 												title="<s:message code="task.assignme"/>">
-												<span class="glyphicon glyphicon-user"></span>
+												<i class="fa fa-lg fa-user"></i>
 											</button>
 										</td>
 										<td>
 											<button class="btn btn-default btn-sm a-tooltip"
 												type="button" id="unassign"
 												title="<s:message code="task.unassign"/>">
-												<span class="glyphicon glyphicon-remove"></span>
+												<i class="fa fa-lg fa-user-times"></i>
 											</button>
 										</td>
 										<td>
@@ -425,7 +459,7 @@
 							<div style="display: table-cell; padding-left: 5px">
 								<span class="btn btn-default btn-sm a-tooltip"
 									id="assign_button" title="<s:message code="task.assign"/>">
-									<span class="glyphicon glyphicon-hand-left"></span>
+									<i class="fa fa-lg fa-user-plus"></i>
 								</span>
 							</div>
 						</c:if>
@@ -452,6 +486,7 @@
 				</table>
 			</div>
 			<%----------------SPRITNS ----------------------%>
+			<c:if test="${not task.subtask}">
 			<div>
 				<div class="mod-header">
 					<h5 class="mod-header-title">
@@ -466,14 +501,14 @@
 					</div>
 				</c:forEach>
 			</div>
+			</c:if>
 		</div>
 	</div>
 	<%--------------------------- BOTTOM TABS------------------------------------%>
 	<div>
 		<hr>
 		<ul class="nav nav-tabs">
-			<li><a style="color: black" href="#logWork" data-toggle="tab"><span
-					class="glyphicon glyphicon-list-alt"></span> <s:message
+			<li><a style="color: black" href="#logWork" data-toggle="tab"><i class="fa fa-newspaper-o"></i> <s:message
 						code="task.activeLog" /></a></li>
 			<li class="active"><a style="color: black" href="#comments"
 				data-toggle="tab"><span class="glyphicon glyphicon-comment"></span>

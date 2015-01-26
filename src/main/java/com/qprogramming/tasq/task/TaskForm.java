@@ -73,6 +73,25 @@ public class TaskForm {
 
 	public Task createTask() {
 		Task task = new Task();
+		task = createBaseTask(task);
+		if (getStory_points() != null && !"".equals(getStory_points())) {
+			task.setStory_points(Integer.parseInt(getStory_points()));
+		} else {
+			task.setStory_points(0);
+		}
+		task.setType(TaskType.toType(getType()));
+		return task;
+	}
+
+	public Task createSubTask() {
+		Task subTask = new Task();
+		subTask = createBaseTask(subTask);
+		subTask.setType(TaskType.toType(getType()));
+		return subTask;
+	}
+	
+
+	private Task createBaseTask(Task task) {
 		task.setName(getName());
 		task.setCreate_date(new Date());
 		if (getDue_date() != null && !"".equals(getDue_date())) {
@@ -80,13 +99,7 @@ public class TaskForm {
 		}
 		task.setDescription(getDescription());
 		task.setState(TaskState.TO_DO);
-		task.setType(TaskType.toType(getType()));
 		boolean estimated = !Boolean.parseBoolean(getNo_estimation());
-		if (getStory_points() != null && !"".equals(getStory_points())) {
-			task.setStory_points(Integer.parseInt(getStory_points()));
-		} else {
-			task.setStory_points(0);
-		}
 		Period p = PeriodHelper.inFormat(getEstimate());
 		task.setEstimate(p);
 		task.setRemaining(p);

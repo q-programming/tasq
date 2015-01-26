@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -20,6 +19,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
+import org.hibernate.Hibernate;
 import org.joda.time.Period;
 
 import com.qprogramming.tasq.account.Account;
@@ -38,7 +38,7 @@ public class Task implements java.io.Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -7551953383145553379L;
+	private static final long serialVersionUID = 6612220415004910977L;
 
 	@Id
 	private String id;
@@ -49,10 +49,6 @@ public class Task implements java.io.Serializable {
 	@Column(length = 4000)
 	private String description;
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "project_tasks")
-	private Project project;
-
 	@Column
 	private Date create_date;
 
@@ -61,9 +57,6 @@ public class Task implements java.io.Serializable {
 
 	@Column
 	private Date due_date;
-
-	@Column
-	private Integer story_points;
 
 	@Column
 	private Period estimate;
@@ -76,9 +69,6 @@ public class Task implements java.io.Serializable {
 
 	@Column
 	private Enum<TaskState> state;
-
-	@Column
-	private Enum<TaskType> type;
 
 	@Column
 	private Enum<TaskPriority> priority;
@@ -100,11 +90,27 @@ public class Task implements java.io.Serializable {
 	@JoinColumn(name = "task_assignee")
 	private Account assignee;
 
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "project_tasks")
+	private Project project;
+
+	@Column
+	private Integer story_points;
+
+	@Column
+	private Enum<TaskType> type;
+
 	@ManyToMany(fetch = FetchType.LAZY)
 	private Set<Sprint> sprints = new HashSet<Sprint>();
 
 	@Column
 	private boolean inSprint;
+
+	@Column
+	private Integer subtasks;
+
+	@Column
+	private String parent;
 
 	public String getId() {
 		return id;
@@ -116,10 +122,6 @@ public class Task implements java.io.Serializable {
 
 	public String getDescription() {
 		return description;
-	}
-
-	public Project getProject() {
-		return project;
 	}
 
 	public String getCreate_date() {
@@ -143,10 +145,6 @@ public class Task implements java.io.Serializable {
 		return due_date;
 	}
 
-	public Integer getStory_points() {
-		return story_points;
-	}
-
 	public String getEstimate() {
 		return PeriodHelper.outFormat(estimate);
 	}
@@ -167,10 +165,6 @@ public class Task implements java.io.Serializable {
 		this.description = description;
 	}
 
-	public void setProject(Project project) {
-		this.project = project;
-	}
-
 	public void setCreate_date(Date create_date) {
 		this.create_date = create_date;
 	}
@@ -181,10 +175,6 @@ public class Task implements java.io.Serializable {
 
 	public void setDue_date(Date due_date) {
 		this.due_date = due_date;
-	}
-
-	public void setStory_points(Integer story_points) {
-		this.story_points = story_points;
 	}
 
 	public void setEstimate(Period estimate) {
@@ -257,14 +247,6 @@ public class Task implements java.io.Serializable {
 		this.state = state;
 	}
 
-	public Enum<TaskType> getType() {
-		return type;
-	}
-
-	public void setType(Enum<TaskType> type) {
-		this.type = type;
-	}
-
 	public Boolean getEstimated() {
 		return estimated;
 	}
@@ -314,7 +296,26 @@ public class Task implements java.io.Serializable {
 		this.priority = priority;
 	}
 
+	public Project getProject() {
+		return project;
+	}
+
+	public void setProject(Project project) {
+		this.project = project;
+	}
+
+	public Integer getStory_points() {
+		return story_points;
+	}
+
+	public void setStory_points(Integer story_points) {
+		this.story_points = story_points;
+	}
+
 	public Set<Sprint> getSprints() {
+		if (sprints == null) {
+			sprints = new HashSet<Sprint>();
+		}
 		return sprints;
 	}
 
@@ -328,6 +329,30 @@ public class Task implements java.io.Serializable {
 
 	public void setInSprint(boolean inSprint) {
 		this.inSprint = inSprint;
+	}
+
+	public Integer getSubtasks() {
+		return subtasks == null ? 0 : subtasks;
+	}
+
+	public void setSubtasks(Integer subtasks) {
+		this.subtasks = subtasks;
+	}
+
+	public String getParent() {
+		return parent;
+	}
+
+	public void setParent(String parent) {
+		this.parent = parent;
+	}
+
+	public Enum<TaskType> getType() {
+		return type;
+	}
+
+	public void setType(Enum<TaskType> type) {
+		this.type = type;
 	}
 
 	/*
@@ -345,9 +370,12 @@ public class Task implements java.io.Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result
+				+ ((description == null) ? 0 : description.hashCode());
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((project == null) ? 0 : project.hashCode());
+		result = prime * result + ((owner == null) ? 0 : owner.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		return result;
 	}
 
@@ -363,6 +391,13 @@ public class Task implements java.io.Serializable {
 			return false;
 		}
 		Task other = (Task) obj;
+		if (description == null) {
+			if (other.description != null) {
+				return false;
+			}
+		} else if (!description.equals(other.description)) {
+			return false;
+		}
 		if (id == null) {
 			if (other.id != null) {
 				return false;
@@ -377,11 +412,18 @@ public class Task implements java.io.Serializable {
 		} else if (!name.equals(other.name)) {
 			return false;
 		}
-		if (project == null) {
-			if (other.project != null) {
+		if (owner == null) {
+			if (other.owner != null) {
 				return false;
 			}
-		} else if (!project.equals(other.project)) {
+		} else if (!owner.equals(other.owner)) {
+			return false;
+		}
+		if (type == null) {
+			if (other.type != null) {
+				return false;
+			}
+		} else if (!type.equals(other.type)) {
 			return false;
 		}
 		return true;
@@ -456,10 +498,7 @@ public class Task implements java.io.Serializable {
 	}
 
 	public void addSprint(Sprint sprint) {
-		if (this.sprints == null) {
-			this.sprints = new LinkedHashSet<Sprint>();
-		}
-		this.sprints.add(sprint);
+		getSprints().add(sprint);
 		setInSprint(true);
 	}
 
@@ -468,5 +507,24 @@ public class Task implements java.io.Serializable {
 			this.sprints.remove(sprint);
 			setInSprint(false);
 		}
+	}
+
+	/**
+	 * Reqieres session and initialize
+	 * 
+	 * @param sprint
+	 * @return
+	 */
+	public boolean inSprint(Sprint sprint) {
+		Hibernate.initialize(getSprints());
+		return getSprints().contains(sprint);
+	}
+
+	public void addSubTask() {
+		this.subtasks = getSubtasks() + 1;
+	}
+
+	public boolean isSubtask() {
+		return parent != null;
 	}
 }

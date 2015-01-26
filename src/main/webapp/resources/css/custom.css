@@ -32,7 +32,7 @@
 
 .task-type {
 	border: 1px solid;
-	padding: 2px;
+	padding: 8px 10px 5px 10px;
 	border-radius: 5px;
 	border-color: darkgray;
 }
@@ -180,7 +180,12 @@ form.form-search:before {
 a.closed {
 	text-decoration: line-through;
 }
-
+.clickable{
+	cursor: pointer;
+}
+.subtasks{
+	cursor: pointer;
+}
 .dropdown.pointer {
 	cursor: pointer;
 }

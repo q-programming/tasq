@@ -16,15 +16,21 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
 	Task findById(String id);
 
 	List<Task> findAllByProject(Project project);
+	
+	List<Task> findAllByProjectAndParentIsNull(Project project);
 
 	List<Task> findAllByProjectParticipants_Id(Long id);
 
-	List<Task> findByProjectAndState(Project project, TaskState state);
+	List<Task> findByProjectAndStateAndParentIsNull(Project project, TaskState state);
 
 	List<Task> findByAssignee(Account account);
 
 	List<Task> findByProjectAndSprintsId(Project project, Long id);
 
 	List<Task> findByProjectAndStateNot(Project project, TaskState closed);
+	
+	List<Task> findByProjectAndStateNotAndParentIsNull(Project project, TaskState closed);
+	
+	List<Task> findByParent(String id);
 
 }
