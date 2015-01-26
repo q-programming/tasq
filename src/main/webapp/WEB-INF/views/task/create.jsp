@@ -19,7 +19,7 @@
 <div style="display:table-caption;margin-left: 10px;">
 	<ul class="nav nav-tabs" style="border-bottom:0">
 			<li class="active"><a style="color: black" href="#"><span class="glyphicon glyphicon-plus"></span> <s:message code="task.create" text="Create task"/></a></li>
-			<li><a style="color: black" href="<c:url value="/task/import"/>"><span class="glyphicon glyphicon-import"></span> <s:message code="task.import"/></a></li>
+			<li><a style="color: black" href="<c:url value="/task/import"/>"><i class="fa fa-download"></i> <s:message code="task.import"/></a></li>
 	</ul>
 </div>
 <!-- 	<div class="mod-header"> -->

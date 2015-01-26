@@ -13,7 +13,8 @@ public enum LogType {
 			"log.type.sprintstop"), TASK_LINK("log.type.taskLink"), TASK_LINK_DEL(
 			"log.type.taskLink.delete"), TASKSPRINTADD(
 			"log.type.taskSprintAdd"), TASKSPRINTREMOVE(
-			"log.type.taskSprintRemove");
+			"log.type.taskSprintRemove"),SUBTASK(
+					"log.type.subtask");
 
 	private String code;
 

@@ -297,10 +297,11 @@ public class TaskController {
 		}
 		return "redirect:/task?id=" + taskID;
 	}
-	
+
 	@Transactional
 	@RequestMapping(value = "subtask", method = RequestMethod.GET)
-	public String showSubTaskDetails(@RequestParam(value = "id") String id, Model model, RedirectAttributes ra) {
+	public String showSubTaskDetails(@RequestParam(value = "id") String id,
+			Model model, RedirectAttributes ra) {
 		return showTaskDetails(id, model, ra);
 	}
 
@@ -454,7 +455,7 @@ public class TaskController {
 		taskCount++;
 		String taskID = task.getId() + "/" + taskCount;
 		subTask.setId(taskID);
-		subTask.setParentID(task.getId());
+		subTask.setParent(task.getId());
 		subTask.setProject(project);
 		task.addSubTask();
 
@@ -467,7 +468,7 @@ public class TaskController {
 		taskSrv.save(subTask);
 		taskSrv.save(task);
 		// TODO save log
-		// wlSrv.addActivityLog(subTask, "", LogType.CREATE);
+		wlSrv.addActivityLog(subTask, "", LogType.SUBTASK);
 		return "redirect:/task?id=" + id;
 	}
 
@@ -870,6 +871,19 @@ public class TaskController {
 					result.add(new DisplayTask(task));
 				}
 			}
+		}
+		return result;
+	}
+
+	@RequestMapping(value = "/task/getSubTasks", method = RequestMethod.GET)
+	public @ResponseBody
+	List<DisplayTask> showSubTasks(@RequestParam String taskID,
+			HttpServletResponse response) {
+		response.setContentType("application/json");
+		List<Task> allSubTasks = taskSrv.findSubtasks(taskID);
+		List<DisplayTask> result = new ArrayList<DisplayTask>();
+		for (Task task : allSubTasks) {
+			result.add(new DisplayTask(task));
 		}
 		return result;
 	}

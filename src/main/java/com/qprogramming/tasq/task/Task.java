@@ -11,12 +11,8 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -42,7 +38,7 @@ public class Task implements java.io.Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -7551953383145553379L;
+	private static final long serialVersionUID = 6612220415004910977L;
 
 	@Id
 	private String id;
@@ -114,7 +110,7 @@ public class Task implements java.io.Serializable {
 	private Integer subtasks;
 
 	@Column
-	private String parentID;
+	private String parent;
 
 	public String getId() {
 		return id;
@@ -339,16 +335,16 @@ public class Task implements java.io.Serializable {
 		return subtasks == null ? 0 : subtasks;
 	}
 
-	public String getParentID() {
-		return parentID;
-	}
-
 	public void setSubtasks(Integer subtasks) {
 		this.subtasks = subtasks;
 	}
 
-	public void setParentID(String parentID) {
-		this.parentID = parentID;
+	public String getParent() {
+		return parent;
+	}
+
+	public void setParent(String parent) {
+		this.parent = parent;
 	}
 
 	public Enum<TaskType> getType() {
@@ -529,6 +525,6 @@ public class Task implements java.io.Serializable {
 	}
 
 	public boolean isSubtask() {
-		return parentID != null;
+		return parent != null;
 	}
 }

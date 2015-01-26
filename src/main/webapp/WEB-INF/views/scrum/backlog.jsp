@@ -94,7 +94,7 @@
 				</div>
 				<c:if test="${sprint.active}">
 					<p>
-						<span class="glyphicon glyphicon-repeat"></span>
+						<i class="fa fa-lg fa-flip-horizontal fa-history"></i>
 						${sprint.start_date} - ${sprint.end_date}
 					</p>
 				</c:if>

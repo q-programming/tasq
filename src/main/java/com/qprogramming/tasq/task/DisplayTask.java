@@ -25,6 +25,8 @@ public class DisplayTask implements Comparable<DisplayTask> {
 	private DisplayAccount assignee;
 	private Boolean estimated = false;
 	private boolean inSprint;
+	private Integer subtasks;
+	private String parent;
 
 	public DisplayTask(Task task) {
 		BeanUtils.copyProperties(task, this);
@@ -136,6 +138,22 @@ public class DisplayTask implements Comparable<DisplayTask> {
 
 	public void setAssignee(DisplayAccount assignee) {
 		this.assignee = assignee;
+	}
+
+	public Integer getSubtasks() {
+		return subtasks;
+	}
+
+	public String getParent() {
+		return parent;
+	}
+
+	public void setSubtasks(Integer subtasks) {
+		this.subtasks = subtasks;
+	}
+
+	public void setParent(String parent) {
+		this.parent = parent;
 	}
 
 	public boolean isInSprint() {

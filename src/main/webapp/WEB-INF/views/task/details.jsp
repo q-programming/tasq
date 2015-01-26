@@ -50,7 +50,7 @@
 		<h3>
 			<t:type type="${task.type}" />
 			<c:if test="${task.subtask}">
-			<a href='<c:url value="/task?id=${task.parentID}"/>'>[${task.parentID}]</a>
+			<a href='<c:url value="/task?id=${task.parent}"/>'>[${task.parent}]</a>
 			\ [${task.id}] ${task.name}
 			</c:if>
 			<c:if test="${not task.subtask}">
@@ -365,9 +365,9 @@
 				<div class="mod-header">
 					<h5 class="mod-header-title">
 						<i class="fa fa-lg fa-sitemap"></i>
-						SubTasks
+						<s:message code="tasks.subtasks" />
 					</h5>
-					<a class="btn btn-default btn-xxs a-tooltip pull-right" href="<c:url value="task/${task.id}/subtask"/>" data-placement="top" data-original-title="<s:message code="task.link"/>">
+					<a class="btn btn-default btn-xxs a-tooltip pull-right" href="<c:url value="task/${task.id}/subtask"/>" data-placement="top" data-original-title="<s:message code="task.subtasks.add"/>">
 						<i class="fa fa-plus"></i> <i class="fa fa-lg fa-sitemap"></i>
 					</a>
 				</div>
@@ -377,7 +377,7 @@
 							<tr>
 								<td style="width:30px"><t:type type="${subTask.type}" list="true" /></td>
 								<td style="width: 30px"><t:priority priority="${subTask.priority}" list="true" /></td>
-								<td><a href="<c:url value="subtask?id=${subTask.id}"/>">[${subTask.id}] ${subTask.name}</a></td>
+								<td><a style="color: inherit;" href="<c:url value="subtask?id=${subTask.id}"/>">[${subTask.id}] ${subTask.name}</a></td>
 								<td style="width: 100px"><t:state state="${subTask.state}" /></td>
 							</tr>
 						</c:forEach>
@@ -420,14 +420,14 @@
 											<button class="btn btn-default btn-sm a-tooltip"
 												type="button" id="assign_me"
 												title="<s:message code="task.assignme"/>">
-												<span class="glyphicon glyphicon-user"></span>
+												<i class="fa fa-lg fa-user"></i>
 											</button>
 										</td>
 										<td>
 											<button class="btn btn-default btn-sm a-tooltip"
 												type="button" id="unassign"
 												title="<s:message code="task.unassign"/>">
-												<span class="glyphicon glyphicon-remove"></span>
+												<i class="fa fa-lg fa-user-times"></i>
 											</button>
 										</td>
 										<td>
@@ -459,7 +459,7 @@
 							<div style="display: table-cell; padding-left: 5px">
 								<span class="btn btn-default btn-sm a-tooltip"
 									id="assign_button" title="<s:message code="task.assign"/>">
-									<span class="glyphicon glyphicon-hand-left"></span>
+									<i class="fa fa-lg fa-user-plus"></i>
 								</span>
 							</div>
 						</c:if>
@@ -508,8 +508,7 @@
 	<div>
 		<hr>
 		<ul class="nav nav-tabs">
-			<li><a style="color: black" href="#logWork" data-toggle="tab"><span
-					class="glyphicon glyphicon-list-alt"></span> <s:message
+			<li><a style="color: black" href="#logWork" data-toggle="tab"><i class="fa fa-newspaper-o"></i> <s:message
 						code="task.activeLog" /></a></li>
 			<li class="active"><a style="color: black" href="#comments"
 				data-toggle="tab"><span class="glyphicon glyphicon-comment"></span>

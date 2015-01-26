@@ -1,3 +1,4 @@
+<%@page import="com.qprogramming.tasq.task.TaskType"%>
 <%@page import="com.qprogramming.tasq.task.worklog.LogType"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
@@ -117,34 +118,44 @@
 			<h3>
 				<a href="<c:url value="/tasks"/>" style="color: black"><s:message
 						code="task.tasks" /></a>
+				<div class="pull-right">
 				<c:if test="${empty param.closed}">
+					<div>
 					<a
 						href="<s:url value="/project?${show_q}id=${project.id}&closed=yes"></s:url>"><span
 						style="display: inherit; font-size: small; font-weight: normal; color: black; float: right">
 							<i class="fa fa-check-square-o"></i> <s:message
 								code="project.hideClosed"></s:message>
 					</span></a>
+					</div>
 				</c:if>
 				<c:if test="${not empty param.closed}">
+					<div>
 					<a
 						href="<s:url value="/project?${show_q}id=${project.id}"></s:url>"><span
 						style="display: inherit; font-size: small; font-weight: normal; color: black; float: right">
 							<i class="fa fa-square-o"></i> <s:message
 								code="project.hideClosed"></s:message>
 					</span></a>
+					</div>
 				</c:if>
-
+					<div style="display: inherit; font-size: small; font-weight: normal; color: black; float: right">
+						<s:message code="tasks.subtasks" />&nbsp;
+						<i id="opensubtask" class="fa fa-plus-square clickable a-tooltip" title="<s:message code="task.subtask.showall"/>"></i> 
+						<i id="hidesubtask" class="fa fa-minus-square clickable a-tooltip" title="<s:message code="task.subtask.hideall"/>"></i>
+					</div>
+				</div>
 			</h3>
 			<table class="table table-hover">
 				<c:forEach items="${tasks}" var="task">
 					<tr>
 						<td><t:type type="${task.type}" list="true" /></td>
 						<td><t:priority priority="${task.priority}" list="true" /></td>
-						<td><a href="<c:url value="task?id=${task.id}"/>"
+						<td><c:if test="${task.subtasks gt 0}"><i class="subtasks fa fa-plus-square" data-task="${task.id}" id="subtasks${task.id}"></i></c:if> <a href="<c:url value="task?id=${task.id}"/>"
 							style="<c:if test="${task.state eq 'CLOSED' }">
 							text-decoration: line-through;
-							</c:if>">[${task.id}]
-								${task.name}</a>
+							</c:if>">
+							[${task.id}] ${task.name}</a>
 						<td>
 						<td><c:set var="logged_class"></c:set> <c:if
 								test="${task.percentage_logged gt 100 or task.state eq 'BLOCKED'}">
@@ -169,12 +180,19 @@
 	<%
 	pageContext.setAttribute("types",
 					LogType.values());
+	pageContext.setAttribute("taskTypes",
+			TaskType.values());
 	%>
+<jsp:include page="../task/subtasks.jsp" />
 <script>
 $(document).ready(function($) {
-				var currentPage = 0
-				fetchWorkLogData(currentPage);
-				printChart();
+	var currentPage = 0
+	taskURL = '<c:url value="/task?id="/>';
+	apiurl = '<c:url value="/task/getSubTasks"/>';
+	small_loading_indicator = '<div id="small_loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br></div>';
+	loading_indicator = '<div id="loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></div>';
+	fetchWorkLogData(currentPage);
+	printChart();
 });
 
 $(document).on("click",".navBtn",function(e) {
@@ -187,7 +205,6 @@ $(document).on("click",".navBtn",function(e) {
 });
 
 function printChart(){
-	var loading_indicator = '<div id="loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td>';
 	$("#chartdiv").append(loading_indicator);
 	projectId = '${project.id}';
 	$.get('<c:url value="/project/getChart"/>',{id:projectId},function(result){
@@ -262,11 +279,10 @@ function fetchWorkLogData(page) {
 	var projectID = '${project.id}';
 	var url = '<c:url value="/projectEvents"/>';
 	var avatarURL = '<c:url value="/userAvatar/"/>';
-	var taskURL = '<c:url value="/task?id="/>';
 	var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
 	$("#eventsTable").append(loading_indicator);
 	$.get(url, {id : projectID,	page: page}, function(data) {
-		console.log(data)
+		//console.log(data)
 		$("#eventsTable tr").remove();
 		printWorkLogNavigation(page, data);
 		var rows = "";

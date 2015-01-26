@@ -180,7 +180,12 @@ form.form-search:before {
 a.closed {
 	text-decoration: line-through;
 }
-
+.clickable{
+	cursor: pointer;
+}
+.subtasks{
+	cursor: pointer;
+}
 .dropdown.pointer {
 	cursor: pointer;
 }

@@ -36,5 +36,3 @@ function showWait(show){
 		$("body").css("cursor", "auto");
 	}
 }
-
-

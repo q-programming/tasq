@@ -4,25 +4,23 @@
 <%@ attribute name="state" required="true"%>
 <c:choose>
 	<c:when test="${state eq 'TO_DO'}">
-		<span class="state_span"><span class="glyphicon glyphicon-list"></span>
+		<span class="state_span"><i class="fa fa-lg fa-pencil-square-o"></i> 
 			<s:message code="task.state.todo"></s:message></span>
 	</c:when>
 	<c:when test="${state eq 'ONGOING'}">
-		<span class="state_span"><span
-			class="glyphicon glyphicon-repeat"></span> <s:message
+		<span class="state_span"><i class="fa fa-lg fa-spin fa-repeat"></i> <s:message
 				code="task.state.ongoing"></s:message></span>
 	</c:when>
 	<c:when test="${state eq 'BLOCKED'}">
-		<span class="state_span"><span
-			class="glyphicon glyphicon-ban-circle"></span> <s:message
+		<span class="state_span"><i class="fa fa-lg fa-ban"></i> <s:message
 				code="task.state.blocked"></s:message></span>
 	</c:when>
 	<c:when test="${state eq 'CLOSED'}">
-		<span class="state_span"><span class="glyphicon glyphicon-ok"></span>
+		<span class="state_span"><i class="fa fa-lg fa-check"></i> 
 			<s:message code="task.state.closed"></s:message></span>
 	</c:when>
 	<c:otherwise>
-		<span class="state_span"><span class="glyphicon glyphicon-refresh"></span> 
+		<span class="state_span"><i class="fa fa-lg fa-refresh"></i> 
 			<s:message code="task.state.open"></s:message></span>
 	</c:otherwise>
 </c:choose>

@@ -416,28 +416,31 @@ public class ProjetController {
 		List<WorkLog> events = wrkLogSrv.findProjectCreateCloseEvents(project);
 		// Fill maps
 		for (WorkLog workLog : events) {
-			LocalDate date = new LocalDate(workLog.getRawTime());
-			if (LogType.CREATE.equals(workLog.getType())) {
-				Integer value = created.get(date.toString());
-				if (value == null) {
-					value = 0;
+			//Don't calculate for subtask ( not important )
+			if (!workLog.getTask().isSubtask()) {
+				LocalDate date = new LocalDate(workLog.getRawTime());
+				if (LogType.CREATE.equals(workLog.getType())) {
+					Integer value = created.get(date.toString());
+					if (value == null) {
+						value = 0;
+					}
+					value++;
+					created.put(date.toString(), value);
+				} else if (LogType.REOPEN.equals(workLog.getType())) {
+					Integer value = closed.get(date.toString());
+					if (value == null) {
+						value = 0;
+					}
+					value--;
+					closed.put(date.toString(), value);
+				} else {
+					Integer value = closed.get(date.toString());
+					if (value == null) {
+						value = 0;
+					}
+					value++;
+					closed.put(date.toString(), value);
 				}
-				value++;
-				created.put(date.toString(), value);
-			} else if (LogType.REOPEN.equals(workLog.getType())) {
-				Integer value = closed.get(date.toString());
-				if (value == null) {
-					value = 0;
-				}
-				value--;
-				closed.put(date.toString(), value);
-			} else {
-				Integer value = closed.get(date.toString());
-				if (value == null) {
-					value = 0;
-				}
-				value++;
-				closed.put(date.toString(), value);
 			}
 		}
 		// Look for the first event ever (they are sorted)

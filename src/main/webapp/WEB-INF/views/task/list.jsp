@@ -7,6 +7,12 @@
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
+<style>
+.subtaskLink{
+   color: inherit;
+}
+</style>
+
 <c:set var="tasks_text">
 	<s:message code="task.tasks" text="Tasks" />
 </c:set>
@@ -93,9 +99,9 @@
 	</div>
 	<div style="display: table-cell; padding-left: 20px;">
 		<div style="display:table-row">
-			<div id="buttDiv" style="display: table-cell">
-				<a class="btn btn-default export_startstop">
-					<span class="glyphicon glyphicon-export"></span>
+			<div id="buttDiv" style="display: table-cell;">
+				<a class="btn btn-default export_startstop" style="width: 120px;">
+					<i class="fa fa-upload"></i>
 					<s:message code="task.export" />
 				</a>
 			</div>
@@ -110,12 +116,17 @@
 				</div>
 			</div>
 		</div>
+		<div style="margin-top:10px">
+						<s:message code="tasks.subtasks" />&nbsp;
+						<i id="opensubtask" class="fa fa-plus-square clickable a-tooltip" title="<s:message code="task.subtask.showall"/>"></i> 
+						<i id="hidesubtask" class="fa fa-minus-square clickable a-tooltip" title="<s:message code="task.subtask.hideall"/>"></i>
+		</div>
 	</div>
 </div>
 <%--------TASK LIST ----------%>
 <div class="white-frame">
 	<security:authentication property="principal" var="user" />
-	<table class="table table-condensed">
+	<table class="table table-hover table-condensed">
 		<thead class="theme">
 			<tr>
 				<th class="export_cell export-hidden" style="width: 30px"><input
@@ -194,11 +205,16 @@
 				type="checkbox" name="tasks" value="${task.id}"></td>
 			<td style="text-align: center;"><t:type type="${task.type}" list="true" /></td>
 			<td><t:priority priority="${task.priority}" list="true" /></td>
-			<td><a href="<c:url value="task?id=${task.id}"/>"
+			<td>
+				<c:if test="${task.subtasks gt 0}">
+					<i class="subtasks fa fa-plus-square" data-task="${task.id}" id="subtasks${task.id}"></i>
+				</c:if>
+				<a href="<c:url value="task?id=${task.id}"/>"
 				style="color: inherit;<c:if test="${task.state eq 'CLOSED' }">
 							text-decoration: line-through;
 							</c:if>">[${task.id}]
-					${task.name}</a></td>
+					${task.name}</a>
+			</td>
 			<c:if test="${not task.estimated}">
 				<td>${task.logged_work}</td>
 			</c:if>
@@ -249,8 +265,13 @@
     </div>
   </div>
 </div>
+<jsp:include page="subtasks.jsp" />
 <script>
 	$(document).ready(function($) {
+		taskURL = '<c:url value="/task?id="/>';
+		apiurl = '<c:url value="/task/getSubTasks"/>';
+		small_loading_indicator = '<div id="small_loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br></div>';
+
 		$("#project").change(function(){
 			var query = "${query_url}";
 			var state = "${state_url}";

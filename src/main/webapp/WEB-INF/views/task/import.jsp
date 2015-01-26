@@ -14,8 +14,7 @@
 			<li><a style="color: black" href="<c:url value="/task/create"/>"><span
 					class="glyphicon glyphicon-plus"></span> <s:message
 						code="task.create" text="Create task" /></a></li>
-			<li class="active"><a style="color: black" href="#"><span
-					class="glyphicon glyphicon-import"></span> <s:message code="task.import"/></a></li>
+			<li class="active"><a style="color: black" href="#"><i class="fa fa-download"></i> <s:message code="task.import"/></a></li>
 		</ul>
 	</div>
 	<div class="help-block">
@@ -54,7 +53,7 @@
 				</select>
 			</div>
 			<hr>
-			<button class="btn btn-success pull-right" type="submit"><span class="glyphicon glyphicon-import"></span> <s:message code="task.import"/></button>
+			<button class="btn btn-success pull-right" type="submit"><i class="fa fa-download"></i> <s:message code="task.import"/></button>
 			<span class="btn pull-right" onclick="location.href='<c:url value="/"/>';"><s:message
 					code="main.cancel" text="Cancel" /></span>
 		</form>
