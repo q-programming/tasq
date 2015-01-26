@@ -417,7 +417,7 @@ public class ProjetController {
 		// Fill maps
 		for (WorkLog workLog : events) {
 			//Don't calculate for subtask ( not important )
-			if (!workLog.getTask().isSubtask()) {
+			if (workLog.getTask()!=null && !workLog.getTask().isSubtask()) {
 				LocalDate date = new LocalDate(workLog.getRawTime());
 				if (LogType.CREATE.equals(workLog.getType())) {
 					Integer value = created.get(date.toString());
