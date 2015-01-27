@@ -1,6 +1,7 @@
 package com.qprogramming.tasq.mail;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Locale;
 import java.util.Properties;
 
 import javax.mail.MessagingException;
@@ -40,6 +41,9 @@ public class MailMail {
 
 	@Value("${email.encoding}")
 	private String encoding;
+
+	@Value("${default.locale}")
+	private String defaultLang;
 
 	private static final Logger LOG = LoggerFactory.getLogger(MailMail.class);
 
@@ -140,5 +144,13 @@ public class MailMail {
 			return false;
 		}
 		return true;
+	}
+
+	public Locale getDefaultLang() {
+		return new Locale(defaultLang);
+	}
+
+	public void setDefaultLang(String defaultLang) {
+		this.defaultLang = defaultLang;
 	}
 }

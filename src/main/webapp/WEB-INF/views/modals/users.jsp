@@ -112,21 +112,6 @@ $.expr[":"].contains = $.expr.createPseudo(function(arg) {
     };
 });
 var previous;
-$(".change_role")
-	.on('focus', function () {
-    	previous = this.value;
-	})
-	.change(function(){
-	var selectBox = $(this);
-	$.post('<c:url value="/role"/>',{id:selectBox.data('user'),role:selectBox.val()},function(message){
-		if(message!='OK'){
-			showError(message);
-			selectBox.val(previous);
-		}
-	});
-	
-});
-
 $('#search_users').click(function() {
 	if($(this).attr("shown") && $('#search_field').val()!=''){
 		fetchUsers(0);
