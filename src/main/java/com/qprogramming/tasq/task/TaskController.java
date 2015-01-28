@@ -103,6 +103,18 @@ public class TaskController {
 		return new TaskForm();
 	}
 
+	@Transactional
+	@RequestMapping(value = "task/updatelogs", method = RequestMethod.GET)
+	public String update(RedirectAttributes ra, HttpServletRequest request) {
+		List<Task> list = taskSrv.findAll();
+		for (Task task : list) {
+			task.updateLoggedWork();
+			System.out.println(task + ": updated with " + task.getLoggedWork());
+		}
+		MessageHelper.addSuccessAttribute(ra, "Updated logged work");
+		return "redirect:" + request.getHeader("Referer");
+	}
+
 	@RequestMapping(value = "task/create", method = RequestMethod.POST)
 	public String createTask(
 			@Valid @ModelAttribute("taskForm") TaskForm taskForm,
@@ -488,7 +500,7 @@ public class TaskController {
 	@RequestMapping(value = "logwork", method = RequestMethod.POST)
 	public String logWork(
 			@RequestParam(value = "taskID") String taskID,
-			@RequestParam(value = "logged_work") String loggedWork,
+			@RequestParam(value = "loggedWork") String loggedWork,
 			@RequestParam(value = "remaining", required = false) String remainingTxt,
 			@RequestParam("date_logged") String dateLogged,
 			@RequestParam("time_logged") String timeLogged,
@@ -567,7 +579,7 @@ public class TaskController {
 			}
 			// TODO eliminate this?
 			if (state.equals(TaskState.TO_DO)
-					&& !("0m").equals(task.getLogged_work())) {
+					&& !("0m").equals(task.getLoggedWork())) {
 				MessageHelper.addWarningAttribute(ra, msg.getMessage(
 						"task.alreadyStarted", new Object[] { task.getId() },
 						Utils.getCurrentLocale()));
@@ -624,8 +636,8 @@ public class TaskController {
 				throw new TasqAuthException(msg, "role.error.task.permission");
 			}
 			if (state.equals(TaskState.TO_DO)) {
-				Hibernate.initialize(task.getLogged_work());
-				if (!("0m").equals(task.getLogged_work())) {
+				Hibernate.initialize(task.getLoggedWork());
+				if (!("0m").equals(task.getLoggedWork())) {
 					return new ResultData(ResultData.ERROR, msg.getMessage(
 							"task.alreadyStarted", null,
 							Utils.getCurrentLocale()));

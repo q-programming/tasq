@@ -17,7 +17,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.Transient;
 
 import org.hibernate.Hibernate;
 import org.joda.time.Period;
@@ -64,8 +63,8 @@ public class Task implements java.io.Serializable {
 	@Column
 	private Period remaining;
 
-	@Transient
-	private Period logged_work;
+	@Column
+	private Period loggedWork;
 
 	@Column
 	private Enum<TaskState> state;
@@ -206,9 +205,8 @@ public class Task implements java.io.Serializable {
 		worklog.add(wl);
 	}
 
-	public String getLogged_work() {
-		getRawLogged_work();
-		return PeriodHelper.outFormat(logged_work);
+	public String getLoggedWork() {
+		return PeriodHelper.outFormat(getRawLoggedWork());
 	}
 
 	public String getRemaining() {
@@ -223,20 +221,27 @@ public class Task implements java.io.Serializable {
 		this.remaining = remaining;
 	}
 
-	public Period getRawLogged_work() {
-		logged_work = new Period();
+	public void updateLoggedWork() {
+		this.loggedWork = new Period();
 		Set<WorkLog> worklg = getRawWorkLog();
 		for (WorkLog activity : worklg) {
 			if (!LogType.ESTIMATE.equals(activity.getType())) {
-				logged_work = PeriodHelper.plusPeriods(logged_work,
+				this.loggedWork = PeriodHelper.plusPeriods(this.loggedWork,
 						activity.getActivity());
 			}
 		}
-		return logged_work;
 	}
 
-	public void setLogged_work(Period logged_work) {
-		this.logged_work = logged_work;
+	public Period getRawLoggedWork() {
+		return loggedWork == null ? new Period() : loggedWork;
+	}
+
+	public void setLoggedWork(Period loggedWork) {
+		this.loggedWork = loggedWork;
+	}
+
+	public void addLoggedWork(Period loggedWork) {
+		this.loggedWork = PeriodHelper.plusPeriods(this.loggedWork, loggedWork);
 	}
 
 	public Enum<TaskState> getState() {
@@ -436,14 +441,14 @@ public class Task implements java.io.Serializable {
 	public float getPercentage_logged() {
 		long estimate_milis = estimate.toStandardDuration().getMillis();
 		if (estimate_milis > 0) {
-			return getRawLogged_work().toStandardDuration().getMillis() * 100
+			return getRawLoggedWork().toStandardDuration().getMillis() * 100
 					/ estimate_milis;
 			// task was without estimation time but is estimated type
 		} else if (estimate_milis <= 0 & estimated) {
 			if (getRawRemaining().toStandardDuration().getMillis() == 0) {
 				return 100;
 			} else {
-				return getRawLogged_work().toStandardDuration().getMillis()
+				return getRawLoggedWork().toStandardDuration().getMillis()
 						* 100
 						/ getRawRemaining().toStandardDuration().getMillis();
 			}
@@ -454,14 +459,14 @@ public class Task implements java.io.Serializable {
 	};
 
 	public boolean getLowerThanEstimate() {
-		Period loggedAndLeft = PeriodHelper.plusPeriods(getRawLogged_work(),
+		Period loggedAndLeft = PeriodHelper.plusPeriods(getRawLoggedWork(),
 				remaining);
 		Period result = PeriodHelper.minusPeriods(estimate, loggedAndLeft);
 		return result.toStandardDuration().getMillis() > 0;
 	}
 
 	public float getMoreThanEstimate() {
-		Period loggedAndLeft = getRawLogged_work();
+		Period loggedAndLeft = getRawLoggedWork();
 		if (remaining.toStandardDuration().getMillis() > 0) {
 			loggedAndLeft = PeriodHelper.plusPeriods(loggedAndLeft, remaining);
 		}
@@ -473,7 +478,7 @@ public class Task implements java.io.Serializable {
 		long remaining_milis = remaining.toStandardDuration().getMillis();
 		if (remaining_milis > 0) {
 			return (remaining_milis * 100)
-					/ PeriodHelper.plusPeriods(getRawLogged_work(), remaining)
+					/ PeriodHelper.plusPeriods(getRawLoggedWork(), remaining)
 							.toStandardDuration().getMillis();
 		}
 		return 0;

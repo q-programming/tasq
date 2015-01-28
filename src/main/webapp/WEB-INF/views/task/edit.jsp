@@ -88,7 +88,7 @@
 		<%-- Estimate --%>
 		<div id="estimate_div">
 			<div class="form-group">
-				<c:if test="${task.logged_work ne '0m' }">
+				<c:if test="${task.loggedWork ne '0m' }">
 					<div>
 						<div class="mod-header">
 							<h5 class="mod-header-title">
@@ -103,7 +103,7 @@
 								code="task.estimate.help.pattern" /> </span>
 					</div>
 				</c:if>
-				<c:if test="${task.logged_work eq '0m' }">
+				<c:if test="${task.loggedWork eq '0m' }">
 					<div class="mod-header">
 						<h5 class="mod-header-title">
 							<s:message code="task.estimate" />

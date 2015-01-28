@@ -5,18 +5,20 @@
 <security:authentication property="principal" var="user" />
 <security:authorize access="isAuthenticated()">
 	<c:set var="active_task_seconds">${user.active_task_seconds}</c:set>
-<c:if test="${not empty user.active_task }">
-	<div class="footer-time">
-		<div>
-			<s:message code ="task.active"/> <a
-				href="<c:url value="/task?id=${user.active_task[0]}"/>">${user.active_task[0]}</a>
-			<a class="btn btn-default btn-xxs a-tooltip" title="<s:message code="task.stopTime.description"></s:message>"
-				href='<c:url value="/task/time?id=${user.active_task[0]}&action=stop"/>'> <span
-				class="glyphicon glyphicon-time"></span></a> <span class="timer"></span>
+	<c:if test="${not empty user.active_task }">
+		<div class="footer-time">
+			<div>
+				<s:message code="task.active" />
+				<a href="<c:url value="/task?id=${user.active_task[0]}"/>">${user.active_task[0]}</a>
+				<a class="btn btn-default btn-xxs a-tooltip"
+					title="<s:message code="task.stopTime.description"></s:message>"
+					href='<c:url value="/task/time?id=${user.active_task[0]}&action=stop"/>'>
+					<i class="fa fa-lg fa-clock-o"></i>
+				</a> <span class="timer"></span>
+			</div>
 		</div>
-	</div>
-</c:if>
-<jsp:include page="../views/modals/users.jsp" />
+	</c:if>
+	<jsp:include page="../views/modals/users.jsp" />
 </security:authorize>
 <script>
 	$(function() {
@@ -31,16 +33,16 @@
 	$('.dropdown').on('hide.bs.dropdown', function(e) {
 		$(this).find('.dropdown-menu').first().stop(true, true).slideUp();
 	});
-	
-	$(document).ready(function($) {
+
+	$(document).ready(
+			function($) {
 				var task_start_time = "${active_task_seconds}";
 				var startTime = new Date(0);
 				startTime.setUTCSeconds(task_start_time);
-				<%-- only start timer if there is active task--%>
-				<c:if test="${active_task_seconds gt 0}">
-					setTimeout(display, 1000);
+<%-- only start timer if there is active task--%>
+	<c:if test="${active_task_seconds gt 0}">
+				setTimeout(display, 1000);
 				</c:if>
-				
 
 				function display() {
 					var endTime = new Date();
@@ -59,4 +61,6 @@
 					setTimeout(display, 1000);
 				}
 			});
+
+	
 </script>
