@@ -103,16 +103,34 @@ public class TaskController {
 		return new TaskForm();
 	}
 
+	/**
+	 * Admin call to update all tasks logged work based on their worklog events
+	 * 
+	 * @param ra
+	 * @param model
+	 * @return
+	 */
 	@Transactional
 	@RequestMapping(value = "task/updatelogs", method = RequestMethod.GET)
-	public String update(RedirectAttributes ra, HttpServletRequest request) {
-		List<Task> list = taskSrv.findAll();
-		for (Task task : list) {
-			task.updateLoggedWork();
-			System.out.println(task + ": updated with " + task.getLoggedWork());
+	public String update(RedirectAttributes ra, HttpServletRequest request,
+			Model model) {
+		if (Roles.isAdmin()) {
+			List<Task> list = taskSrv.findAll();
+			StringBuilder console = new StringBuilder(
+					"Updating logged work on all tasks within application");
+			console.append(BR);
+			for (Task task : list) {
+				task.updateLoggedWork();
+				console.append(task.toString());
+				console.append(": updated with ");
+				console.append(task.getLoggedWork());
+				console.append(BR);
+			}
+			model.addAttribute("console", console.toString());
+			return "other/console";
+		} else {
+			throw new TasqAuthException();
 		}
-		MessageHelper.addSuccessAttribute(ra, "Updated logged work");
-		return "redirect:" + request.getHeader("Referer");
 	}
 
 	@RequestMapping(value = "task/create", method = RequestMethod.POST)
@@ -420,7 +438,7 @@ public class TaskController {
 			}
 			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID,
 					false));
-			Utils.initializeWorkLogs(taskList);
+			//Utils.initializeWorkLogs(taskList);
 			model.addAttribute("tasks", taskList);
 			model.addAttribute("active_project", active);
 		}

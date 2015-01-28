@@ -64,6 +64,7 @@ public class WorkLogService {
 			} else {
 				loggedTask.setRemaining(remaining);
 			}
+			loggedTask.addLoggedWork(activity);
 			taskSrv.save(checkState(loggedTask));
 		}
 	}
@@ -83,7 +84,7 @@ public class WorkLogService {
 			wl = wlRepo.save(wl);
 			Hibernate.initialize(loggedTask.getWorklog());
 			loggedTask.addWorkLog(wl);
-			taskSrv.save(task);
+			taskSrv.save(loggedTask);
 		}
 	}
 
@@ -128,7 +129,7 @@ public class WorkLogService {
 			wl = wlRepo.save(wl);
 			Hibernate.initialize(loggedTask.getWorklog());
 			loggedTask.addWorkLog(wl);
-			taskSrv.save(task);
+			taskSrv.save(loggedTask);
 		}
 	}
 
@@ -156,6 +157,7 @@ public class WorkLogService {
 			Hibernate.initialize(loggedTask.getWorklog());
 			loggedTask.addWorkLog(wl);
 			loggedTask.reduceRemaining(activity);
+			loggedTask.addLoggedWork(activity);
 			if (!type.equals(LogType.ESTIMATE)) {
 				taskSrv.save(checkState(loggedTask));
 			} else {

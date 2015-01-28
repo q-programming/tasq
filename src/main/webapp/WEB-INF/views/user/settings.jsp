@@ -94,7 +94,7 @@
 			</button>
 		</div>
 	</form>
-	<jsp:include page="../modals/invite.jsp" />
+	<jsp:include page="../other/invite.jsp" />
 </div>
 <script>
 	$(document).ready(function($) {
