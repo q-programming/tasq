@@ -18,8 +18,15 @@
 	<s:message code="main.action" text="Action" />
 </c:set>
 <!-- <div id="messages_div"></div> -->
-<h3>${userList_text}</h3>
 <div class="white-frame" style="display: table; width: 100%;height:85vh">
+<div style="display: table-caption; margin-left: 10px;">
+		<ul class="nav nav-tabs" style="border-bottom: 0">
+			<li class="active"><a style="color: black" href="#"> <i class="fa fa-users"></i>	
+					<s:message code="menu.manage.users " text="Manage users" /></a></li>
+			<li><a style="color: black" href="<c:url value="/manage/tasks"/>"> <i
+					class="fa fa-lg fa-check-square"></i> <s:message code="menu.manage.tasks" /></a></li>
+		</ul>
+	</div>
 	<table id="manage_user_table" class="table table-hover table-condensed">
 		<thead>
 			<tr style="color: #428bca">
@@ -36,8 +43,7 @@
 				<td><security:authentication property="principal"
 						var="AuthUser" /> <a
 					href="<c:url value="/user?id=${p.id}"/>" class="btn"
-					rel="popover" data-img="<c:url value="/userAvatar/${p.id}"/>">${p.name}
-						${p.surname}</a></td>
+					rel="popover" data-img="<c:url value="/userAvatar/${p.id}"/>">${p}</a></td>
 				<security:authorize access="hasRole('ROLE_ADMIN')">
 					<td>
 						<select class="change_role a-tooltip" title="<s:message code="user.role.change"/>" data-user="${p.id}" style="border: 0px;">

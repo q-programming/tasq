@@ -103,6 +103,36 @@ public class TaskController {
 		return new TaskForm();
 	}
 
+	/**
+	 * Admin call to update all tasks logged work based on their worklog events
+	 * 
+	 * @param ra
+	 * @param model
+	 * @return
+	 */
+	@Transactional
+	@RequestMapping(value = "task/updatelogs", method = RequestMethod.GET)
+	public String update(RedirectAttributes ra, HttpServletRequest request,
+			Model model) {
+		if (Roles.isAdmin()) {
+			List<Task> list = taskSrv.findAll();
+			StringBuilder console = new StringBuilder(
+					"Updating logged work on all tasks within application");
+			console.append(BR);
+			for (Task task : list) {
+				task.updateLoggedWork();
+				console.append(task.toString());
+				console.append(": updated with ");
+				console.append(task.getLoggedWork());
+				console.append(BR);
+			}
+			model.addAttribute("console", console.toString());
+			return "other/console";
+		} else {
+			throw new TasqAuthException();
+		}
+	}
+
 	@RequestMapping(value = "task/create", method = RequestMethod.POST)
 	public String createTask(
 			@Valid @ModelAttribute("taskForm") TaskForm taskForm,
@@ -408,7 +438,7 @@ public class TaskController {
 			}
 			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID,
 					false));
-			Utils.initializeWorkLogs(taskList);
+			//Utils.initializeWorkLogs(taskList);
 			model.addAttribute("tasks", taskList);
 			model.addAttribute("active_project", active);
 		}
@@ -488,7 +518,7 @@ public class TaskController {
 	@RequestMapping(value = "logwork", method = RequestMethod.POST)
 	public String logWork(
 			@RequestParam(value = "taskID") String taskID,
-			@RequestParam(value = "logged_work") String loggedWork,
+			@RequestParam(value = "loggedWork") String loggedWork,
 			@RequestParam(value = "remaining", required = false) String remainingTxt,
 			@RequestParam("date_logged") String dateLogged,
 			@RequestParam("time_logged") String timeLogged,
@@ -567,7 +597,7 @@ public class TaskController {
 			}
 			// TODO eliminate this?
 			if (state.equals(TaskState.TO_DO)
-					&& !("0m").equals(task.getLogged_work())) {
+					&& !("0m").equals(task.getLoggedWork())) {
 				MessageHelper.addWarningAttribute(ra, msg.getMessage(
 						"task.alreadyStarted", new Object[] { task.getId() },
 						Utils.getCurrentLocale()));
@@ -624,8 +654,8 @@ public class TaskController {
 				throw new TasqAuthException(msg, "role.error.task.permission");
 			}
 			if (state.equals(TaskState.TO_DO)) {
-				Hibernate.initialize(task.getLogged_work());
-				if (!("0m").equals(task.getLogged_work())) {
+				Hibernate.initialize(task.getLoggedWork());
+				if (!("0m").equals(task.getLoggedWork())) {
 					return new ResultData(ResultData.ERROR, msg.getMessage(
 							"task.alreadyStarted", null,
 							Utils.getCurrentLocale()));

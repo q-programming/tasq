@@ -181,16 +181,6 @@ public class AccountController {
 		return result;
 	}
 
-	@RequestMapping(value = "/users/manage", method = RequestMethod.GET)
-	public String manageUsers(
-
-	Model model) {
-		List<Account> accountsList;
-		accountsList = accountSrv.findAll();
-		model.addAttribute("accountsList", accountsList);
-		return "user/manage";
-	}
-
 	@RequestMapping(value = "role", method = RequestMethod.POST, produces = "text/plain;charset=UTF-8")
 	@ResponseBody
 	public String setRole(@RequestParam(value = "id") Long id,

@@ -178,7 +178,8 @@
 									title="<s:message
 										code="menu.manage" text="Settings" />" data-placement="bottom"><i class="fa fa-wrench"></i></a>
 									<ul class="dropdown-menu">
-										<li><a href="<s:url value="/users/manage"></s:url>"><s:message code="menu.manage.users" /></a></li>
+										<li><a href="<s:url value="/manage/users"></s:url>"><i class="fa fa-users"></i> <s:message code="menu.manage.users" /></a></li>
+										<li><a href="<s:url value="/manage/tasks"></s:url>"><i class="fa fa-lg fa-check-square"></i> <s:message code="menu.manage.tasks" /></a></li>
 										<li><a href="#">Other</a></li>
 									</ul>
 							</c:if>

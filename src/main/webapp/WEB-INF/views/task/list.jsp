@@ -216,7 +216,7 @@
 					${task.name}</a>
 			</td>
 			<c:if test="${not task.estimated}">
-				<td>${task.logged_work}</td>
+				<td>${task.loggedWork}</td>
 			</c:if>
 			<c:if test="${task.estimated}">
 				<td><div class="progress" style="width: 50px">

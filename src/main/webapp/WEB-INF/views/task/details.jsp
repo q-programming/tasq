@@ -197,22 +197,22 @@
 				<%--ESTIMATES TAB	--%>
 				<%-- Default values --%>
 				<c:set var="estimate_value">100</c:set>
-				<c:set var="logged_work">${task.percentage_logged}</c:set>
+				<c:set var="loggedWork">${task.percentage_logged}</c:set>
 				<c:set var="remaining_width">100</c:set>
 				<c:set var="remaining_bar">${task.percentage_left}</c:set>
-				<%-- 	<br>${logged_work} <br>${task.percentage_left} <br>${task.lowerThanEstimate eq 'true'} --%>
+				<%-- 	<br>${loggedWork} <br>${task.percentage_left} <br>${task.lowerThanEstimate eq 'true'} --%>
 
 				<%-- Check if it's not lower than estimate --%>
 				<c:if test="${task.lowerThanEstimate eq 'true'}">
 					<c:set var="remaining_width">${task.percentage_logged + task.percentage_left}</c:set>
-					<c:set var="logged_work">${100- task.percentage_left}</c:set>
+					<c:set var="loggedWork">${100- task.percentage_left}</c:set>
 				</c:if>
 				<%-- logged work is greater than 100% and remaning time is greater than 0 --%>
 				<c:if
 					test="${task.percentage_logged gt 100 && task.remaining ne '0m' }">
 					<c:set var="estimate_width">${task.moreThanEstimate}</c:set>
 					<c:set var="remaining_bar">${task.overCommited}</c:set>
-					<c:set var="logged_work">${100-task.overCommited}</c:set>
+					<c:set var="loggedWork">${100-task.overCommited}</c:set>
 				</c:if>
 				<%-- There was more logged but remaining is 0 --%>
 				<c:if
@@ -234,7 +234,7 @@
 					<c:if test="${not task.estimated}">
 						<tr>
 							<td class="bar_td"><s:message code="task.logged" /></td>
-							<td class="bar_td">${task.logged_work}</td>
+							<td class="bar_td">${task.loggedWork}</td>
 							<td class="bar_td"></td>
 						</tr>
 					</c:if>
@@ -264,10 +264,10 @@
 										<c:set var="logged_class">progress-bar-danger</c:set>
 									</c:if>
 									<div class="progress-bar ${logged_class}" role="progressbar"
-										aria-valuenow="${logged_work}" aria-valuemin="0"
-										aria-valuemax="100" style="width:${logged_work}%"></div>
+										aria-valuenow="${loggedWork}" aria-valuemin="0"
+										aria-valuemax="100" style="width:${loggedWork}%"></div>
 								</div></td>
-							<td class="bar_td">${task.logged_work}</td>
+							<td class="bar_td">${task.loggedWork}</td>
 						</tr>
 						<%-- Remaining work bar --%>
 						<tr>
