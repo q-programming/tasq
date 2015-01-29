@@ -98,8 +98,8 @@ form.form-search:before {
 	display: block;
 	width: 14px;
 	height: 14px;
-	content: "\e003";
-	font-family: 'Glyphicons Halflings';
+	content: "\f002";
+	font-family: 'FontAwesome';
 	background-position: -48px 0;
 	position: absolute;
 	top: 5px;

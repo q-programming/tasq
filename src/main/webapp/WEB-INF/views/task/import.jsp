@@ -11,8 +11,7 @@
 	style="width: 700px; overflow: auto; display: table">
 	<div style="display: table-caption; margin-left: 10px;">
 		<ul class="nav nav-tabs" style="border-bottom: 0">
-			<li><a style="color: black" href="<c:url value="/task/create"/>"><span
-					class="glyphicon glyphicon-plus"></span> <s:message
+			<li><a style="color: black" href="<c:url value="/task/create"/>"><i class="fa fa-plus"></i> <s:message
 						code="task.create" text="Create task" /></a></li>
 			<li class="active"><a style="color: black" href="#"><i class="fa fa-download"></i> <s:message code="task.import"/></a></li>
 		</ul>

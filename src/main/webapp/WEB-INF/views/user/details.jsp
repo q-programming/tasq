@@ -13,16 +13,16 @@
 		<div
 			style="display: table-cell; margin-left: 10px; padding-left: 20px">
 			<h3>${account}</h3>
-			<span class="glyphicon glyphicon-envelope" style="color: black;"></span>
+			<i class="fa fa-envelope" style="color:black"></i>
 			<i><a href="mailto:${account.email}">${account.email}</a></i>
 			<div>
-				<span class="glyphicon glyphicon-cog"></span> 
+				<i class="fa fa-cog"></i>
 				<s:message code="role.role"></s:message>
 				:
 				<s:message code="${account.role.code}" />
 			</div>
 			<div>
-				<span class="glyphicon glyphicon-flag"></span> <s:message code="panel.language"></s:message>
+				<i class="fa fa-globe"></i> <s:message code="panel.language"></s:message>
 				:
 				<s:message code="lang.${account.language}" text="${account.language}"/>
 			</div>

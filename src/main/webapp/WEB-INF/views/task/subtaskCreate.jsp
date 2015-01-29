@@ -92,7 +92,7 @@
 					<li><a class="taskType" tabindex="-1" href="#" id="IDLE" data-type="IDLE"><t:type type="IDLE" show_text="true" list="true"/></a></li>
 				</ul>
 			</div>
-			<span class="help-block"><s:message code="task.type.help" /> <a href="#" style="color:black"><span class="glyphicon glyphicon-question-sign"></span></a></span>
+			<span class="help-block"><s:message code="task.type.help" /> <a href="#" style="color:black">&nbsp;<i class="fa fa-question-circle"></i></a></span>
 			<form:hidden path="type" id="type"/>
 			<form:errors path="type" element="p" class="text-danger" />
 		</div>
@@ -142,10 +142,9 @@
 		</div>
 		<label class="checkbox" style="display: inherit; font-weight: normal">
 			<input type="checkbox" name="no_estimation" id="no_estimation"
-			value="true"> <s:message code="task.withoutEstimation" /> <span
-			class="glyphicon glyphicon-question-sign a-tooltip"
+			value="true"> <s:message code="task.withoutEstimation" />&nbsp;<i class="fa fa-question-circle a-tooltip"
 			title="<s:message code ="task.withoutEstimation.help"/>"
-			data-placement="right"></span>
+			data-placement="right"></i>
 		</label>
 		<%----------DUE DATE --------------------------%>
 		<div>

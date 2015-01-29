@@ -12,7 +12,7 @@
 	</div>
 	<div class="pull-right">
 		<i class="fa fa-calendar"></i> <span
-			id="date_span"></span> <span class="glyphicon glyphicon-time"></span>
+			id="date_span"></span> <i class="fa fa-clock-o"></i>
 
 		<span id="time_span"></span>
 	</div>

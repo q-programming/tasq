@@ -74,13 +74,25 @@
 					<%
 						pageContext.setAttribute("types", TaskType.values());
 					%>
-					<c:forEach items="${types}" var="enum_type">
-						<li><a class="taskType" tabindex="-1" href="#" id="${enum_type}" data-type="${enum_type}"><t:type
-									type="${enum_type}" show_text="true" list="true" /></a></li>
-					</c:forEach>
+					<c:if test="${task.subtask}">
+						<c:forEach items="${types}" var="enum_type">
+							<c:if test="${enum_type.subtask}">
+								<li><a class="taskType" tabindex="-1" href="#" id="${enum_type}" data-type="${enum_type}"><t:type
+											type="${enum_type}" show_text="true" list="true" /></a></li>
+							</c:if>
+						</c:forEach>
+					</c:if>
+					<c:if test="${not task.subtask}">
+						<c:forEach items="${types}" var="enum_type">
+							<c:if test="${not enum_type.subtask}">
+								<li><a class="taskType" tabindex="-1" href="#" id="${enum_type}" data-type="${enum_type}"><t:type
+											type="${enum_type}" show_text="true" list="true" /></a></li>
+							</c:if>
+						</c:forEach>
+					</c:if>
 				</ul>
 			</div>
-			<span class="help-block"><s:message code="task.type.help" /> <a href="#" style="color:black"><span class="glyphicon glyphicon-question-sign"></span></a></span>
+			<span class="help-block"><s:message code="task.type.help" /> <a href="#" style="color:black"><i class="fa fa-question-circle"></i></a></span>
 			<input type="hidden" id="changed_taskType" name="type">
 <%-- 			<form:hidden path="type" id="changed_taskType"/> --%>
 			<form:errors path="type" element="p" class="text-danger" />

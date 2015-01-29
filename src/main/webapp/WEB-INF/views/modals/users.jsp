@@ -28,7 +28,7 @@
 			<div class="modal-header theme">
 				<button type="button" class="close" data-dismiss="modal"
 					aria-hidden="true">&times;</button>
-				<span id="search_users" class="glyphicon glyphicon-search search-btn a-tooltip" data-html="true" data-placement="left" title="<s:message code="user.search"/>"></span>
+				<i id="search_users" class="fa fa-search search-btn a-tooltip" data-html="true" data-placement="left" title="<s:message code="user.search"/>"></i>
 				<h4 class="modal-title" id="myModalLabel">
 					<i class="fa fa-users"></i> ${userList_text}
 				</h4>
@@ -94,7 +94,7 @@ function fetchUsers(page,term){
 						+ avatar
 						+ content.name + " " + content.surname +'</a></td>'
 						+ '<td>'+getRoleTypeMsg(content.role)+'</td>'
-						+ '<td><a href="mailto:'+content.email+'" title="'+email_txt+' ('+content.email+')"><span	class="glyphicon glyphicon-envelope" style="color: black;"></span></a></td></tr>';
+						+ '<td><a href="mailto:'+content.email+'" title="'+email_txt+' ('+content.email+')"><i class="fa fa-envelope" style="color: black;"></span></a></td></tr>';
 			$("#user_table").append(row);
 		}
 		//print Nav
@@ -166,7 +166,7 @@ function printNavigation(page,data){
 	var topRow='<tr id="topNavigation">';
 	var prev = '<td style="width:30px"></td>';
 	if(!data.firstPage){
-		prev = '<td style="width:30px"><a class="navBtn btn" data-page="'+ (page -1)+'"><span class="glyphicon glyphicon-chevron-left"></span></a></td>';
+		prev = '<td style="width:30px"><a class="navBtn btn" data-page="'+ (page -1)+'"><i class="fa fa-arrow-left"></i></a></td>';
 	}
 	topRow+=prev;
 	var numbers = '<td style="text-align:center">';
@@ -184,7 +184,7 @@ function printNavigation(page,data){
 	topRow+=numbers;
 	var next = '<td style="width:30px"></td>';
 	if(!data.lastPage){
-		next = '<td style="width:30px"><a class="navBtn btn" data-page="'+ (page +1) +'"><span class="glyphicon glyphicon-chevron-right"></span></a></td>';
+		next = '<td style="width:30px"><a class="navBtn btn" data-page="'+ (page +1) +'"><i class="fa fa-arrow-right"></i></a></td>';
 	}
 	topRow+=next+'</tr>';
 	$("#user_nav").append(topRow);

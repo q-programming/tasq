@@ -42,7 +42,7 @@
 			<div style="margin: 5px 0px;">
 				<s:message code="agile.create.sprint" />
 				<button id="create_sprint" class="btn btn-default btn-sm">
-					<span class="glyphicon glyphicon-plus"></span>
+					<i class="fa fa-lg fa-plus"></i>
 				</button>
 			</div>
 		</c:if>
@@ -63,7 +63,7 @@
 								<button class="btn btn-default btn-sm" id="start-sprint"
 									data-sprint="${sprint.id}" data-toggle="modal"
 									data-target="#startSprint">
-									<span class="glyphicon glyphicon-play"></span>
+									<i class="fa fa-lg fa-play"></i>&nbsp;
 									<s:message code="agile.sprint.start" />
 								</button>
 							</c:if>
@@ -72,7 +72,7 @@
 								title="<s:message code="agile.sprint.delete" />"
 								data-lang="${pageContext.response.locale}"
 								data-msg='<s:message code="agile.sprint.delete.confirm"></s:message>'>
-								<span class="glyphicon glyphicon-trash"></span>
+								<i class="fa fa-lg fa-trash-o"></i>
 							</a>
 						</c:if>
 						<c:if test="${sprint.active}">
@@ -81,7 +81,7 @@
 								href="<c:url value="/scrum/stop?id=${sprint.id}"/>"
 								data-lang="${pageContext.response.locale}"
 								data-msg='<s:message code="agile.sprint.finish.confirm"></s:message>'>
-								<span class="glyphicon glyphicon-ok"></span> <s:message
+								<i class="fa fa-lg fa-check"></i>&nbsp;<s:message
 									code="agile.sprint.finish" />
 							</a>
 						</c:if>

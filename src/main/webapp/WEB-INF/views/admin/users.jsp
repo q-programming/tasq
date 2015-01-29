@@ -35,7 +35,7 @@
 					title="<s:message
 							code="user.sort.surname" text="Sort by name" />">${name_text}</th>
 				<th>${role_text}</th>
-				<th>${action_text}<button id="manage_search" class="btn btn-default btn-xs pull-right"><span class="glyphicon glyphicon-search"></span></button></th>
+				<th>${action_text}<button id="manage_search" class="btn btn-default btn-xs pull-right"><i class="fa fa-search"></i></button></th>
 			</tr>
 		</thead>
 		<c:forEach items="${accountsList}" var="p">
@@ -57,20 +57,15 @@
 					<td><s:message code="${p.role.code}"/></td>
 				</security:authorize>
 				<td><security:authorize access="hasRole('ROLE_ADMIN')">
-						<a href="<c:url value="user/details?id=${p.id}"/>" title="Modify"><span
-							class="glyphicon glyphicon-pencil" style="color: black;">
-						</span></a>
 						<c:if test="${AuthUser != p}">
 							<a href="<c:url value="admin/user/${p.id}/delete"/>"
 								title="Delete"
 								data-msg="Are you Sure want to permamently remove this user?<br>This operation cannot be undone!"
-								class="confirmDialog"><span
-								class="glyphicon glyphicon-trash" style="color: black;">
+								class="confirmDialog"><i class="fa fa-trash-o" style="color:black"></i>
 							</span></a>
 						</c:if>
 					</security:authorize> <c:if test="${AuthUser != p}">
-						<a href="mailto:${p.email}" title="Send Message"><span
-							class="glyphicon glyphicon-envelope" style="color: black;">
+						<a href="mailto:${p.email}" title="Send Message"><i class="fa fa-envelope" style="color:black"></i>
 						</span></a>
 					</c:if></td>
 			</tr>

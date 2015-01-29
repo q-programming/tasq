@@ -220,8 +220,7 @@
 											<button type="submit"
 												class="btn btn-default btn-sm a-tooltip "
 												title="<s:message code="project.participant.admin.remove"/>">
-												<span class="glyphicon glyphicon-minus"></span><span
-													class="glyphicon glyphicon-wrench"></span>
+												<i class="fa fa-minus"></i><i class="fa fa-wrench"></i>
 											</button>
 										</form>
 									</div>
@@ -237,8 +236,7 @@
 											<button type="submit"
 												class="btn btn-default btn-sm a-tooltip "
 												title="<s:message code="project.participant.admin.add"/>">
-												<span class="glyphicon glyphicon-plus"></span><span
-													class="glyphicon glyphicon-wrench"></span>
+												<i class="fa fa-plus"></i><i class="fa fa-wrench"></i>
 											</button>
 										</form>
 									</div>

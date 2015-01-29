@@ -39,7 +39,7 @@
 						<label class="checkbox" style="display: inherit;"> <input
 							type="checkbox" name="emails" id="emails" value="true"
 							<c:if test="${user.email_notifications}">checked</c:if>>
-							<span class="glyphicon glyphicon-envelope"></span> <s:message
+							<i class="fa fa-envelope"></i> <s:message
 								code="panel.recieveEmails"></s:message>
 						</label> <span class="help-block"><s:message code="panel.emails.help"/></span>
 					</div>

@@ -71,7 +71,7 @@
 	<div class="row">
 		<a class="anchor" id="events"></a>
 		<div class="col-lg-10 col-md-9 col-sm-8 col-lg-offset-2 col-md-offset-3 col-sm-offset-4">
-			<h4 style="text-align: center;"><s:message code="agile.events.sprint"/></h4>
+			<h4 style="text-align: center;"><i class="fa fa-calendar"></i> <s:message code="agile.events.sprint"/></h4>
 			<table id="eventsTable" class="table table-bordered"
 				style="width: 100%">
 				<thead class="theme">
@@ -219,7 +219,7 @@ $(document).ready(function() {
 			$("#loading").remove();
 	    	//render chart
 			plot = $.jqplot('chartdiv', [ left,burned,ideal ], {
-				title : '<s:message code="agile.burndown.chart"/><p style="font-size: x-small;">'+startStop+'</p>',
+				title : '<i class="fa fa-line-chart"></i> <s:message code="agile.burndown.chart"/><p style="font-size: x-small;">'+startStop+'</p>',
 				animate: true,
 				grid: {
 	                background: '#ffffff',
@@ -272,7 +272,7 @@ $(document).ready(function() {
 			});
 			//	render time chart
 			plot2 = $.jqplot('chartdiv2', [ time ], {
-				title : '<s:message code="agile.timelogged.day"/><p style="font-size: x-small;">'+startStop+'</p>',
+				title : '<i class="fa fa-bar-chart"></i> <s:message code="agile.timelogged.day"/><p style="font-size: x-small;">'+startStop+'</p>',
 				animate: true,
 				grid: {
 	                background: '#ffffff',

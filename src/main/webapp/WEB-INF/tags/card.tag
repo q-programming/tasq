@@ -7,7 +7,7 @@
 <%@ attribute name="can_edit" required="true"%>
 <div class="agile-card theme" data-id="${task.id}" state="${task.state}" id="${task.id}">
 	<div class="side-bar theme"></div>
-	<div style="padding-left: 5px;">
+	<div style="padding-left: 5px;min-height: 50px;">
 		<t:type type="${task.type}" list="true" />
 		<a href="<c:url value="/task?id=${task.id}"/>"
 			style="color: inherit;" class="<c:if test="${task.state eq 'CLOSED' }">
@@ -20,10 +20,10 @@
 	<div style="display: table; width: 100%; margin-top: 5px;">
 		<div style="display: table-cell; vertical-align: bottom;">
 			<c:if test="${can_edit}">
-				<button class="btn btn-default btn-xxs a-tooltip worklog" type="button"
+				<button class="btn btn-default btn-xxs a-tooltip worklog" style="margin-left:5px" type="button"
 					data-toggle="modal" data-target="#logWorkform" data-taskID="${task.id}" id="log_time"
 					title="<s:message code="task.logWork"/>">
-					<span class="glyphicon glyphicon-time"></span>
+					<i class="fa fa-lg fa-clock-o"></i>
 				</button>
 			</c:if>
 			<span class="a-tooltip" title="<s:message code="task.remaining"/>">${task.remaining}</span>
@@ -35,7 +35,7 @@
 					<c:if test="${can_edit}">
 						<button class="btn btn-default btn-xxs a-tooltip assign_me" type="button"
 							data-taskID="${task.id}" title="<s:message code="task.assignme"/>">
-							<span class="glyphicon glyphicon-user"></span>
+							<i class="fa fa-lg fa-user"></i>
 						</button>
 					</c:if>
 				</i>

@@ -33,7 +33,7 @@
 			<c:if test="${can_edit}">
 				<a href="<c:url value="task/edit?id=${task.id}"/>"><button
 						class="btn btn-default btn-sm">
-						<span class="glyphicon glyphicon-pencil"></span>
+						<i class="fa fa-pencil"></i>
 						<s:message code="task.edit" />
 					</button></a>
 			</c:if>
@@ -43,7 +43,7 @@
 					title="<s:message code="task.delete" text="Delete task" />"
 					data-lang="${pageContext.response.locale}"
 					data-msg='<s:message code="task.delete.confirm"></s:message>'>
-					<span class="glyphicon glyphicon-trash"></span>
+					<i class="fa fa-trash-o"></i>
 				</a>
 			</c:if>
 		</div>
@@ -66,7 +66,7 @@
 			<div>
 				<div class="mod-header">
 					<h5 class="mod-header-title">
-						<span class="glyphicon glyphicon-align-left"></span>
+						<i class="fa fa-align-left"></i>
 						<s:message code="task.details" />
 					</h5>
 				</div>
@@ -159,7 +159,7 @@
 			<div>
 				<div class="mod-header">
 					<h5 class="mod-header-title">
-						<span class="glyphicon glyphicon-time"></span>
+						<i class="fa fa-lg fa-clock-o"></i>
 						<s:message code="task.timetrack" />
 					</h5>
 				</div>
@@ -167,7 +167,7 @@
 				<c:if test="${can_edit && user.isUser || is_assignee}">
 					<button class="btn btn-default btn-sm worklog" data-toggle="modal"
 						data-target="#logWorkform" data-taskID="${task.id}">
-						<i class="fa fa-calendar"></i>
+						<i class="fa fa-lg fa-calendar"></i>
 						<s:message code="task.logWork"></s:message>
 					</button>
 					<c:if
@@ -175,7 +175,7 @@
 						<a href="<c:url value="/task/time?id=${task.id}&action=stop"/>">
 							<button class="btn btn-default btn-sm a-tooltip"
 								title="<s:message code="task.stopTime.description" />">
-								<span class="glyphicon glyphicon-time"></span>
+								<i class="fa fa-lg fa-clock-o"></i>
 								<s:message code="task.stopTime"></s:message>
 							</button>
 						</a>
@@ -188,7 +188,7 @@
 						test="${empty user.active_task || user.active_task[0] ne task.id}">
 						<a href="<c:url value="/task/time?id=${task.id}&action=start"/>">
 							<button class="btn btn-default btn-sm">
-								<span class="glyphicon glyphicon-time"></span>
+								<i class="fa fa-lg fa-clock-o"></i>
 								<s:message code="task.startTime"></s:message>
 							</button>
 						</a>
@@ -345,7 +345,7 @@
 										<td style="width: 30px">
 											<div class="buttons_panel pull-right">
 												<a href='<c:url value="/task/deletelink?taskA=${task.id}&taskB=${linkTask.id}&link=${linkType.key}"/>'>
-													<span class="glyphicon glyphicon-trash" style="color: gray"></span>
+													<i class="fa fa-trash-o" style="color:gray"></i>
 												</a>
 											</div>
 										</td>
@@ -392,7 +392,7 @@
 			<div>
 				<div class="mod-header">
 					<h5 class="mod-header-title">
-						<span class="glyphicon glyphicon-user"></span>
+						<i class="fa fa-user"></i>
 						<s:message code="task.people" />
 					</h5>
 				</div>
@@ -470,7 +470,7 @@
 			<div>
 				<div class="mod-header">
 					<h5 class="mod-header-title">
-						<span class="glyphicon glyphicon-calendar"></span>
+						<i class="fa fa-calendar"></i>
 						<s:message code="task.dates" />
 					</h5>
 				</div>
@@ -511,7 +511,7 @@
 			<li><a style="color: black" href="#logWork" data-toggle="tab"><i class="fa fa-newspaper-o"></i> <s:message
 						code="task.activeLog" /></a></li>
 			<li class="active"><a style="color: black" href="#comments"
-				data-toggle="tab"><span class="glyphicon glyphicon-comment"></span>
+				data-toggle="tab"><i class="fa fa-comments"></i>
 					<s:message code="comment.comments" /></a></li>
 		</ul>
 		<div id="myTabContent" class="tab-content">
@@ -531,17 +531,15 @@
 								<div class="buttons_panel" style="float: right">
 									<a href="<c:url value="/task?id=${task.id}#c${comment.id}"/>"
 										title="<s:message code="comment.link" text="Link to this comment" />"
-										style="color: gray"><span class="glyphicon glyphicon-link"></span></a>
+										style="color: gray"><i class="fa fa-link"></i></a>
 									<c:if test="${user == comment.author }">
 										<c:if test="${not empty comment.message}">
 											<a href="#" class="comments_edit" data-toggle="modal"
 												data-target="#commentModal"
 												data-message="${comment.message}"
-												data-comment_id="${comment.id}"><span
-												class="glyphicon glyphicon-pencil" style="color: gray"></span></a>
+												data-comment_id="${comment.id}"><i class="fa fa-pencil" style="color:gray"></i></a>
 											<a
-												href='<c:url value="/task/${task.id}/comment/delete?id=${comment.id}"/>'><span
-												class="glyphicon glyphicon-trash" style="color: gray"></span></a>
+												href='<c:url value="/task/${task.id}/comment/delete?id=${comment.id}"/>'><i class="fa fa-trash-o" style="color:gray"></i></a>
 										</c:if>
 									</c:if>
 								</div>
@@ -583,7 +581,7 @@
 				</div>
 				<c:if test="${user.isReporter}">
 					<button id="comments_add" class="btn btn-default btn-sm">
-						<span class="glyphicon glyphicon-comment"></span>
+						<i class="fa fa-comment"></i>&nbsp;
 						<s:message code="comment.add" text="Add Comment" />
 					</button>
 				</c:if>
@@ -636,7 +634,7 @@
 					</div>
 					<div class="form-group">
 						<button class="btn btn-default pull-right" type="submit">
-							<span class="glyphicon glyphicon-pencil"></span>
+							<i class="fa fa-pencil"></i>
 							<s:message code="main.edit" text="Edit"></s:message>
 						</button>
 					</div>
@@ -813,7 +811,7 @@ $(document).ready(function($) {
 			});
 			
 $(document).on("click",".delete_task",function(e) {
-					var msg = '<p style="text-align:center"><span class="glyphicon glyphicon-warning-sign" style="display: initial;"></span> '
+					var msg = '<p style="text-align:center"><i class="fa fa-lg fa-exclamation-triangle" style="display: initial;"></i>&nbsp'
 							+ $(this).data('msg') + '</p>';
 					var lang = $(this).data('lang');
 					bootbox.setDefaults({

@@ -8,7 +8,7 @@
 	<a href="<c:url value="/"/>">
 		<button class="btn btn-default" style="margin: 20px;"
 			type="button">
-			<span class="glyphicon glyphicon-chevron-left"></span>
+			<i class="fa fa-chevron-left"></i>&nbsp;
 			<s:message code="main.return" />
 		</button></a>
 </p>

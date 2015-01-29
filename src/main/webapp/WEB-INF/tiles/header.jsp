@@ -47,13 +47,11 @@
 								</c:forEach>
 								<li role="presentation" class="divider"></li>
 								<li style="margin: 10px;"><a
-									href="<c:url value="/projects"/>"><span
-										class="glyphicon glyphicon-list"></span> <s:message
+									href="<c:url value="/projects"/>"><i class="fa fa-list"></i> <s:message
 											code="project.showAll" text="Projects" /></a></li>
 								<c:if test="${user.isUser == true}">
 									<li style="margin: 10px;"><a
-										href="<c:url value="/project/create"/>"><span
-											class="glyphicon glyphicon-plus"></span> <s:message
+										href="<c:url value="/project/create"/>"><i class="fa fa-plus"></i> <s:message
 												code="project.create" text="Create project" /></a></li>
 								</c:if>
 							</ul></li>
@@ -68,14 +66,12 @@
 											${l_task.name}</a></li>
 								</c:forEach>
 								<li role="presentation" class="divider"></li>
-								<li style="margin: 10px;"><a href="<c:url value="/tasks"/>"><span
-										class="glyphicon glyphicon-list"></span> <s:message
+								<li style="margin: 10px;"><a href="<c:url value="/tasks"/>"><i class="fa fa-list"></i> <s:message
 											code="task.showAll" text="Show all" /></a></li>
 
 								<c:if test="${user.isReporter == true}">
 									<li style="margin: 10px;"><a
-										href="<c:url value="/task/create"/>"><span
-											class="glyphicon glyphicon-plus"></span> <s:message
+										href="<c:url value="/task/create"/>"><i class="fa fa-plus"></i> <s:message
 												code="task.create" text="Create task" /></a></li>
 								</c:if>
 							</ul></li>
@@ -98,8 +94,7 @@
 									</c:if>
 								</c:forEach>
 								<li role="presentation" class="divider"></li>
-								<li style="margin: 10px;"><a href="<c:url value="/tasks"/>"><span
-										class="glyphicon glyphicon-list"></span> <s:message
+								<li style="margin: 10px;"><a href="<c:url value="/tasks"/>"><i class="fa fa-list"></i> <s:message
 											code="agile.showAll" text="Show all" /></a></li>
 							</ul></li>
 					<%--Create task button --%>
@@ -110,9 +105,7 @@
 									title="<s:message
 								code="task.create" text="Create task" />"
 									data-placement="bottom" href="<c:url value="/task/create"/>"
-									style="padding: 5px 15px; border: 1px solid"> <span
-									class="glyphicon glyphicon-plus"></span> <span
-									class="glyphicon glyphicon-th-list"></span></a>
+									style="padding: 5px 15px; border: 1px solid"> <i class="fa fa-plus"></i>&nbsp;<i class="fa fa-lg fa-check-square"></i></a>
 							</div>
 						</li>
 					</c:if>
@@ -197,8 +190,7 @@
 								href='<s:url value="/settings"></s:url>'
 								title="<s:message
 									code="menu.help" text="Help" />"
-								data-placement="bottom"><span
-								class="glyphicon glyphicon-question-sign"></span></a> <a
+								data-placement="bottom"><i class="fa fa-question-circle"></i></a> <a
 								class="btn btn-default btn-xxs a-tooltip"
 								href='<s:url value="/logout"></s:url>'
 								title="<s:message

@@ -34,7 +34,7 @@
 	</ul>
 </div>
 <div style="display:table-header-group;">
-	<h4>Sprint ${sprint.sprintNo} <span style="font-size: small;">(${sprint.start_date} - ${sprint.end_date})</span></h4>
+	<h4>Sprint ${sprint.sprintNo} <span style="font-size: small;margin-left:5px">(${sprint.start_date} - ${sprint.end_date})</span></h4>
 </div >
 	
 	<div class="table_state" data-state="TO_DO" >

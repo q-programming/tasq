@@ -66,24 +66,24 @@
 			<c:if test="${not empty param.projectID}">
 				<span><s:message code="project.project" />: <span
 					class="filter_span"> ${param.projectID}<a
-						href="<c:url value="tasks?${state_url}${query_url}${priority_url}"/>"><span
-							class="glyphicon glyphicon-remove"
-							style="font-size: smaller; margin-left: 3px; color: lightgray"></span></a></span></span>
+						href="<c:url value="tasks?${state_url}${query_url}${priority_url}"/>">
+						<i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
+						</a></span></span>
 			</c:if>
 			<c:if test="${not empty param.state}">
 				<span><s:message code="task.state" />: <span
 					class="filter_span"><t:state state="${param.state}" /> <a
-						href="<c:url value="tasks?${projID_url}${query_url}${priority_url}"/>"><span
-							class="glyphicon glyphicon-remove"
-							style="font-size: smaller; margin-left: 3px; color: lightgray"></span></a></span></span>
+						href="<c:url value="tasks?${projID_url}${query_url}${priority_url}"/>">
+						<i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i></a>
+						</span></span>
 			</c:if>
 			<c:if test="${not empty param.priority}">
 				<span><s:message code="task.priority" />: <span
 					class="filter_span"><t:priority priority="${param.priority}" />
 						<a
-						href="<c:url value="tasks?${projID_url}${query_url}${state_url}"/>"><span
-							class="glyphicon glyphicon-remove"
-							style="font-size: smaller; margin-left: 3px; color: lightgray"></span></a></span></span>
+						href="<c:url value="tasks?${projID_url}${query_url}${state_url}"/>">
+						<i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
+						</a></span></span>
 			</c:if>
 			<c:if test="${not empty param.query}">
 				<c:set var="query_url">
@@ -91,9 +91,9 @@
 			</c:set>
 				<span style="white-space:nowrap;"><s:message code="main.search" />: <span
 					class="filter_span"> ${fn:substring(param.query, 0, 40)}...<a
-						href="<c:url value="tasks?${projID_url}${state_url}${priority_url}"/>"><span
-							class="glyphicon glyphicon-remove"
-							style="font-size: smaller; margin-left: 3px; color: lightgray"></span></a></span></span>
+						href="<c:url value="tasks?${projID_url}${state_url}${priority_url}"/>">
+						<i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
+						</a></span></span>
 			</c:if>
 		</c:if>
 	</div>
@@ -111,7 +111,7 @@
 				</div>
 				<div style="display: table-cell">
 					<a id="fileExport" class="btn btn-default">
-						<span class='glyphicon glyphicon-download'></span> <s:message code="task.export.selected"/>
+						<i class="fa fa-long-arrow-down"></i><i class="fa fa-file"></i>  <s:message code="task.export.selected"/>
 					</a>
 				</div>
 			</div>
@@ -260,7 +260,7 @@
       		<br><s:message code="task.export.prepareFile"/>
   	  	</div>
   	  	<div class="centerPadded">
-  	  		<a href="<c:url value="/tasks"/>"><span class="glyphicon glyphicon-ok-circle"></span> <s:message code="task.export.goBack"/></a>
+  	  		<a href="<c:url value="/tasks"/>"><i class="fa fa-lg fa-check-circle-o"></i></span> <s:message code="task.export.goBack"/></a>
   	  	</div>
     </div>
   </div>
