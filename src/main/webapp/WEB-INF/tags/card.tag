@@ -2,9 +2,12 @@
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
+<%@ taglib prefix="security"
+	uri="http://www.springframework.org/security/tags"%>
 <%@ attribute name="task" required="true"
 	type="com.qprogramming.tasq.task.DisplayTask"%>
 <%@ attribute name="can_edit" required="true"%>
+<security:authentication property="principal" var="user" />
 <div class="agile-card theme" data-id="${task.id}" state="${task.state}" id="${task.id}">
 	<div class="side-bar theme"></div>
 	<div style="padding-left: 5px;min-height: 50px;">
@@ -17,23 +20,25 @@
 			class="badge theme <c:if test="${task.story_points == 0}">zero</c:if>">${task.story_points}
 		</span>
 	</div>
-	<div style="display: table; width: 100%; margin-top: 5px;">
+	<div style="display: table; width: 100%; margin-top: 5px;min-height: 30px;">
 		<div style="display: table-cell; vertical-align: bottom;">
 			<c:if test="${can_edit}">
+				<c:if test="${task.assignee.id eq user.id}">
 				<button class="btn btn-default btn-xxs a-tooltip worklog" style="margin-left:5px" type="button"
 					data-toggle="modal" data-target="#logWorkform" data-taskID="${task.id}" id="log_time"
 					title="<s:message code="task.logWork"/>">
 					<i class="fa fa-lg fa-clock-o"></i>
 				</button>
+				</c:if>
 			</c:if>
 			<span class="a-tooltip" title="<s:message code="task.remaining"/>">${task.remaining}</span>
 		</div>
 		<%---Assignee--%>
-		<div id="assignee_${task.id}" style="margin-top: 10px; text-align: right; display: table-cell;">
+		<div id="assignee_${task.id}" style="margin-top: 10px; text-align: right; display: table-cell;vertical-align: bottom;">
 			<c:if test="${empty task.assignee}">
 				<i><s:message code="task.unassigned" />
 					<c:if test="${can_edit}">
-						<button class="btn btn-default btn-xxs a-tooltip assign_me" type="button"
+						&nbsp;<button class="btn btn-default btn-xxs a-tooltip assign_me" type="button"
 							data-taskID="${task.id}" title="<s:message code="task.assignme"/>">
 							<i class="fa fa-lg fa-user"></i>
 						</button>
@@ -41,10 +46,11 @@
 				</i>
 			</c:if>
 			<c:if test="${not empty task.assignee}">
-				<img data-src="holder.js/20x20"
-					style="height: 20px; padding-right: 5px;"
-					src="<c:url value="/userAvatar/${task.assignee.id}"/>" />
-				<a ${link} href="<c:url value="/user?id=${task.assignee.id}"/>">${task.assignee}</a>
+				<a ${link} class="a-tooltip" href="<c:url value="/user?id=${task.assignee.id}"/>" title="${task.assignee}">
+					<img data-src="holder.js/30x30"
+						style="height: 30px; padding-right: 5px;"
+						src="<c:url value="/userAvatar/${task.assignee.id}"/>" />
+				</a>
 			</c:if>
 		</div>
 	</div>

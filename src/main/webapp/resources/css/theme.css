@@ -28,7 +28,8 @@ thead.theme {
 	padding: 5px;
 	margin-bottom: 5px;
 	border-color: lightgray;
-	background-color: rgba(249, 253, 255, 1)
+	background-color: rgba(249, 253, 255, 1);
+	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
 }
 .agile-list{
 	color: inherit;
