@@ -17,7 +17,7 @@ public class DisplayTask implements Comparable<DisplayTask> {
 	private String projectID;
 	private Integer story_points;
 	private Period estimate;
-	private Period remaining;
+	private String remaining;
 	private Period loggedWork;
 	private Enum<TaskState> state;
 	private Enum<TaskType> type;
@@ -27,6 +27,7 @@ public class DisplayTask implements Comparable<DisplayTask> {
 	private boolean inSprint;
 	private Integer subtasks;
 	private String parent;
+	private Float percentage;
 
 	public DisplayTask(Task task) {
 		BeanUtils.copyProperties(task, this);
@@ -34,6 +35,8 @@ public class DisplayTask implements Comparable<DisplayTask> {
 		if (task.getAssignee() != null) {
 			assignee = new DisplayAccount(task.getAssignee());
 		}
+		this.remaining = task.getRemaining();
+		this.percentage = task.getPercentage_logged();
 	}
 
 	public String getId() {
@@ -56,7 +59,7 @@ public class DisplayTask implements Comparable<DisplayTask> {
 		return estimate;
 	}
 
-	public Period getRemaining() {
+	public String getRemaining() {
 		return remaining;
 	}
 
@@ -96,7 +99,7 @@ public class DisplayTask implements Comparable<DisplayTask> {
 		this.estimate = estimate;
 	}
 
-	public void setRemaining(Period remaining) {
+	public void setRemaining(String remaining) {
 		this.remaining = remaining;
 	}
 
@@ -162,6 +165,14 @@ public class DisplayTask implements Comparable<DisplayTask> {
 
 	public void setInSprint(boolean inSprint) {
 		this.inSprint = inSprint;
+	}
+
+	public Float getPercentage() {
+		return percentage;
+	}
+
+	public void setPercentage(Float percentage) {
+		this.percentage = percentage;
 	}
 
 	@Override

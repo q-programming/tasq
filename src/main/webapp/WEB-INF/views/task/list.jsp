@@ -228,10 +228,14 @@
 							<c:set var="percentage">${100-task.overCommited}</c:set>
 						</c:if>
 						<c:if test="${task.estimate eq '0m' && task.remaining ne '0m'}">
-							<c:set var="percentage">${100- task.percentage_logged}</c:set>
+							<c:set var="percentage">${task.percentage_logged}</c:set>
 						</c:if>
 						<c:if test="${task.state eq 'CLOSED'}">
 							<c:set var="logged_class">progress-bar-success</c:set>
+							<c:set var="percentage">100</c:set>
+						</c:if>
+						<c:if test="${task.state eq 'TO_DO'}">
+							<c:set var="percentage">0</c:set>
 						</c:if>
 						<div class="progress-bar ${logged_class}" role="progressbar"
 							aria-valuenow="${percentage}" aria-valuemin="0"

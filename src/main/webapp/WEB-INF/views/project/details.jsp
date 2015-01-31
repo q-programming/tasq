@@ -157,18 +157,29 @@
 							</c:if>">
 							[${task.id}] ${task.name}</a>
 						<td>
-						<td><c:set var="logged_class"></c:set> <c:if
+						<td>
+							<c:set var="logged_class"></c:set>
+							<c:set var="percentage">${task.percentage_logged}</c:set>
+							<c:if
 								test="${task.percentage_logged gt 100 or task.state eq 'BLOCKED'}">
 								<c:set var="logged_class">progress-bar-danger</c:set>
-							</c:if> <c:if test="${task.state eq 'CLOSED'}">
+							</c:if>
+							<c:if test="${task.state eq 'CLOSED'}">
 								<c:set var="logged_class">progress-bar-success</c:set>
-							</c:if> <c:if test="${not task.estimated}">
+								<c:set var="percentage">100</c:set>
+							</c:if>
+							<c:if test="${task.state eq 'TO_DO'}">
+								<c:set var="logged_class">progress-bar-success</c:set>
+								<c:set var="percentage">0</c:set>
+							</c:if>
+							<c:if test="${not task.estimated}">
 								<div>${task.loggedWork}</div>
-							</c:if> <c:if test="${task.estimated}">
+							</c:if>
+							<c:if test="${task.estimated}">
 								<div class="progress" style="width: 50px">
 									<div class="progress-bar ${logged_class}" role="progressbar"
-										aria-valuenow="${task.percentage_logged}" aria-valuemin="0"
-										aria-valuemax="100" style="width:${task.percentage_logged}%"></div>
+										aria-valuenow="${percentage}" aria-valuemin="0"
+										aria-valuemax="100" style="width:${percentage}%"></div>
 								</div>
 							</c:if></td>
 					</tr>

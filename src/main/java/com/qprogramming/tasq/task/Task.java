@@ -440,17 +440,19 @@ public class Task implements java.io.Serializable {
 
 	public float getPercentage_logged() {
 		long estimate_milis = estimate.toStandardDuration().getMillis();
+		long remaining_milis = getRawRemaining().toStandardDuration()
+				.getMillis();
+		long logged_milis = getRawLoggedWork().toStandardDuration().getMillis();
 		if (estimate_milis > 0) {
-			return getRawLoggedWork().toStandardDuration().getMillis() * 100
-					/ estimate_milis;
+			return logged_milis * 100 / estimate_milis;
 			// task was without estimation time but is estimated type
 		} else if (estimate_milis <= 0 & estimated) {
-			if (getRawRemaining().toStandardDuration().getMillis() == 0) {
+			if (remaining_milis == 0 && logged_milis != 0) {
 				return 100;
+			} else if (remaining_milis == 0 && logged_milis == 0) {
+				return 0;
 			} else {
-				return getRawLoggedWork().toStandardDuration().getMillis()
-						* 100
-						/ getRawRemaining().toStandardDuration().getMillis();
+				return logged_milis * 100 / (remaining_milis + logged_milis);
 			}
 		} else {
 			return 0;
