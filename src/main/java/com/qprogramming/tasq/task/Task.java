@@ -149,7 +149,7 @@ public class Task implements java.io.Serializable {
 	}
 
 	public Period getRawEstimate() {
-		return estimate;
+		return estimate != null ? estimate : new Period();
 	}
 
 	public void setId(String id) {
@@ -214,7 +214,7 @@ public class Task implements java.io.Serializable {
 	}
 
 	public Period getRawRemaining() {
-		return remaining;
+		return remaining != null ? remaining : new Period();
 	}
 
 	public void setRemaining(Period remaining) {
@@ -439,7 +439,7 @@ public class Task implements java.io.Serializable {
 	 */
 
 	public float getPercentage_logged() {
-		long estimate_milis = estimate.toStandardDuration().getMillis();
+		long estimate_milis = getRawEstimate().toStandardDuration().getMillis();
 		long remaining_milis = getRawRemaining().toStandardDuration()
 				.getMillis();
 		long logged_milis = getRawLoggedWork().toStandardDuration().getMillis();
