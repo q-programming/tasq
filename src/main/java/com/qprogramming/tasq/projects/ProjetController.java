@@ -141,7 +141,8 @@ public class ProjetController {
 	}
 
 	@RequestMapping(value = "projectEvents", method = RequestMethod.GET)
-	public @ResponseBody Page<DisplayWorkLog> getProjectEvents(
+	public @ResponseBody
+	Page<DisplayWorkLog> getProjectEvents(
 			@RequestParam(value = "id") Long id,
 			@PageableDefault(size = 25, page = 0, sort = "time", direction = Direction.DESC) Pageable p) {
 		Project project = projSrv.findById(id);
@@ -149,7 +150,8 @@ public class ProjetController {
 			// NULL
 			return null;
 		}
-		if (!project.getParticipants().contains(Utils.getCurrentAccount())&& !Roles.isAdmin()) {
+		if (!project.getParticipants().contains(Utils.getCurrentAccount())
+				&& !Roles.isAdmin()) {
 			throw new TasqAuthException(msg, "role.error.project.permission");
 		}
 		// Fetch events
@@ -381,9 +383,9 @@ public class ProjetController {
 	}
 
 	@RequestMapping(value = "/project/getParticipants", method = RequestMethod.GET)
-	public @ResponseBody List<DisplayAccount> listParticipants(
-			@RequestParam Long id, @RequestParam String term,
-			HttpServletResponse response) {
+	public @ResponseBody
+	List<DisplayAccount> listParticipants(@RequestParam Long id,
+			@RequestParam String term, HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(id);
 		Set<Account> allParticipants = project.getParticipants();
@@ -403,7 +405,8 @@ public class ProjetController {
 	}
 
 	@RequestMapping(value = "/project/getChart", method = RequestMethod.GET)
-	public @ResponseBody ProjectChart getProjectChart(@RequestParam Long id,
+	public @ResponseBody
+	ProjectChart getProjectChart(@RequestParam Long id,
 			HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(id);
@@ -413,28 +416,31 @@ public class ProjetController {
 		List<WorkLog> events = wrkLogSrv.findProjectCreateCloseEvents(project);
 		// Fill maps
 		for (WorkLog workLog : events) {
-			LocalDate date = new LocalDate(workLog.getRawTime());
-			if (LogType.CREATE.equals(workLog.getType())) {
-				Integer value = created.get(date.toString());
-				if (value == null) {
-					value = 0;
+			//Don't calculate for subtask ( not important )
+			if (workLog.getTask()!=null && !workLog.getTask().isSubtask()) {
+				LocalDate date = new LocalDate(workLog.getRawTime());
+				if (LogType.CREATE.equals(workLog.getType())) {
+					Integer value = created.get(date.toString());
+					if (value == null) {
+						value = 0;
+					}
+					value++;
+					created.put(date.toString(), value);
+				} else if (LogType.REOPEN.equals(workLog.getType())) {
+					Integer value = closed.get(date.toString());
+					if (value == null) {
+						value = 0;
+					}
+					value--;
+					closed.put(date.toString(), value);
+				} else {
+					Integer value = closed.get(date.toString());
+					if (value == null) {
+						value = 0;
+					}
+					value++;
+					closed.put(date.toString(), value);
 				}
-				value++;
-				created.put(date.toString(), value);
-			} else if (LogType.REOPEN.equals(workLog.getType())) {
-				Integer value = closed.get(date.toString());
-				if (value == null) {
-					value = 0;
-				}
-				value--;
-				closed.put(date.toString(), value);
-			} else {
-				Integer value = closed.get(date.toString());
-				if (value == null) {
-					value = 0;
-				}
-				value++;
-				closed.put(date.toString(), value);
 			}
 		}
 		// Look for the first event ever (they are sorted)
@@ -463,8 +469,9 @@ public class ProjetController {
 	}
 
 	@RequestMapping(value = "/project/getDefaultAssignee", method = RequestMethod.GET)
-	public @ResponseBody DisplayAccount getDefaultAssignee(
-			@RequestParam Long id, HttpServletResponse response) {
+	public @ResponseBody
+	DisplayAccount getDefaultAssignee(@RequestParam Long id,
+			HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(id);
 		Account assignee = accSrv.findById(project.getDefaultAssigneeID());
@@ -476,7 +483,8 @@ public class ProjetController {
 	}
 
 	@RequestMapping(value = "/project/getDefaultTaskType", method = RequestMethod.GET)
-	public @ResponseBody TaskType getDefaultTaskType(@RequestParam Long id,
+	public @ResponseBody
+	TaskType getDefaultTaskType(@RequestParam Long id,
 			HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(id);
@@ -484,8 +492,9 @@ public class ProjetController {
 	}
 
 	@RequestMapping(value = "/project/getDefaultTaskPriority", method = RequestMethod.GET)
-	public @ResponseBody TaskPriority getDefaultTaskPriority(
-			@RequestParam Long id, HttpServletResponse response) {
+	public @ResponseBody
+	TaskPriority getDefaultTaskPriority(@RequestParam Long id,
+			HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(id);
 		return (TaskPriority) project.getDefault_priority();

@@ -1,10 +1,10 @@
 package com.qprogramming.tasq.project;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.times;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -183,6 +183,7 @@ public class ProjectControllerTest {
 	@Test
 	public void getProjectEventsAndChartTest() {
 		Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
+		Task task = createTask(PROJ_NAME, 1, project);
 		project.addParticipant(testAccount);
 		when(projSrv.findById(1L)).thenReturn(project);
 		List<WorkLog> list = new LinkedList<WorkLog>();
@@ -192,24 +193,28 @@ public class ProjectControllerTest {
 		wl.setMessage("msg");
 		wl.setTime(new Date());
 		wl.setTimeLogged(new Date());
+		wl.setTask(task);
 		WorkLog w2 = new WorkLog();
 		w2.setAccount(testAccount);
 		w2.setType(LogType.CLOSED);
 		w2.setMessage("msg");
 		w2.setTime(new Date());
 		w2.setTimeLogged(new Date());
+		w2.setTask(task);
 		WorkLog w3 = new WorkLog();
 		w3.setAccount(testAccount);
 		w3.setType(LogType.REOPEN);
 		w3.setMessage("msg");
 		w3.setTime(new Date());
 		w3.setTimeLogged(new Date());
+		w3.setTask(task);
 		WorkLog w4 = new WorkLog();
 		w4.setAccount(testAccount);
 		w4.setType(LogType.CLOSED);
 		w4.setMessage("msg");
 		w4.setTime(new Date());
 		w4.setTimeLogged(new Date());
+		w4.setTask(task);
 		list.add(wl);
 		list.add(wl);
 		list.add(wl);
@@ -619,6 +624,18 @@ public class ProjectControllerTest {
 		form.setAgile_type("SCRUM");
 		form.setId(1L);
 		return form;
+	}
+	
+	private Task createTask(String name, int no, Project project) {
+		Task task = new Task();
+		task.setName(name);
+		task.setProject(project);
+		task.setId(project.getProjectId() + "-" + no);
+		task.setPriority(TaskPriority.MAJOR);
+		task.setType(TaskType.USER_STORY);
+		task.setStory_points(2);
+		task.setState(TaskState.TO_DO);
+		return task;
 	}
 
 }

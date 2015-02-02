@@ -25,51 +25,52 @@
 <div class="white-frame" style="display: table; width: 100%;height:85vh">
 <div style="display:table-caption;margin-left: 10px;">
 	<ul class="nav nav-tabs" style="border-bottom:0">
-			<li><a style="color: black" href="<c:url value="/${project.projectId}/scrum/backlog"/>"><span class="glyphicon glyphicon-book"></span>
+			<li><a style="color: black" href="<c:url value="/${project.projectId}/scrum/backlog"/>"><i class="fa fa-book"></i>
 					Backlog</a></li>
-			<li class="active"><a style="color: black" href="#"><span class="glyphicon glyphicon-list-alt"></span> <s:message
+			<li class="active"><a style="color: black" href="#"><i class="fa fa-list-alt"></i> <s:message
 						code="agile.board" /></a></li>
-			<li><a style="color: black" href="<c:url value="/${project.projectId}/scrum/reports"/>"><span class="glyphicon glyphicon-bullhorn"></span>
+			<li><a style="color: black" href="<c:url value="/${project.projectId}/scrum/reports"/>"><i class="fa fa-line-chart"></i>
 			 <s:message code="agile.reports" /></a></li>
 	</ul>
 </div>
 <div style="display:table-header-group;">
-	<h4>Sprint ${sprint.sprintNo} <span style="font-size: small;">(${sprint.start_date} - ${sprint.end_date})</span></h4>
+	<h4 style="padding-bottom:20px">Sprint ${sprint.sprintNo} <span style="font-size: small;margin-left:5px">(${sprint.start_date} - ${sprint.end_date})</span></h4>
 </div >
-	
-	<div class="table_state" data-state="TO_DO" >
-		<div><h4><s:message code="task.state.todo"/></h4></div>
+	<div class="well table_state" data-state="TO_DO" >
+		<div class="table_header"><i class="fa fa-pencil-square-o"></i> <s:message code="task.state.todo"/></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'TO_DO'}">
 				<t:card task="${task}" can_edit="${can_edit}"/>
 			</c:if>
 		</c:forEach>
 	</div>
-	<div class="table_state" data-state="ONGOING">
-		<div><h4><s:message code="task.state.ongoing"/></h4></div>
+	<div style="display: table-cell;width:1px"></div>
+	<div class="well table_state" data-state="ONGOING">
+		<div class="table_header"><i class="fa fa-spin fa-repeat"></i> <s:message code="task.state.ongoing"/></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'ONGOING'}">
 				<t:card task="${task}" can_edit="${can_edit}"/>
 			</c:if>
 		</c:forEach>
 	</div>
-	<div class="table_state" data-state="CLOSED">
-		<div><h4><s:message code="task.state.closed"/></h4></div>
+	<div style="display: table-cell;width:1px"></div>
+	<div class="well table_state" data-state="CLOSED">
+		<div class="table_header"><i class="fa fa-check"></i> <s:message code="task.state.closed"/></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'CLOSED'}">
 				<t:card task="${task}" can_edit="${can_edit}" />
 			</c:if>
 		</c:forEach>
 	</div>
-	<div class="table_state" data-state="BLOCKED">
-		<div><h4><s:message code="task.state.blocked"/></h4></div>
+	<div style="display: table-cell;width:1px"></div>
+	<div class="well table_state" data-state="BLOCKED">
+		<div class="table_header"><i class="fa fa-ban"></i> <s:message code="task.state.blocked"/></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'BLOCKED'}">
 				<t:card task="${task}" can_edit="${can_edit}"/>
 			</c:if>
 		</c:forEach>
 	</div>
-	
 </div>
 <jsp:include page="../modals/logWork.jsp" />
 <jsp:include page="../modals/close.jsp" />
@@ -87,8 +88,8 @@
 					showError(result.message);
 				}
 				else{
-					var assignee = '<img data-src="holder.js/20x20"	style="height: 20px; padding-right: 5px;" src="<c:url value="/userAvatar/${user.id}"/>" />'
-									+'<a href="<c:url value="/user?id=${user.id}"/>">${user}</a>';
+					var assignee = '<a class="a-tooltip" href="<c:url value="/user?id=${user.id}"/>" title="${user}"><img data-src="holder.js/30x30"	style="height: 30px; padding-right: 5px;" src="<c:url value="/userAvatar/${user.id}"/>" />'
+									+'</a>';
 					$("#assignee_"+taskID).html(assignee);
 					showSuccess(result.message);
 					showWait(false);
@@ -123,9 +124,9 @@
 			    		showWait(true);
 						$.post('<c:url value="/task/changeState"/>',{id:taskID,state:state},function(result){
 							if(result.code == 'Error'){
-								reloadmsg = ' <s:message code="main.pageReload" arguments="10"/>';
+								reloadmsg = ' <s:message code="main.pageReload" arguments="5"/>';
 								showError(result.message + reloadmsg);
-								window.setTimeout('location.reload()', 10000);
+								window.setTimeout('location.reload()', 5000);
 							}
 							else{
 								showSuccess(result.message);

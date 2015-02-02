@@ -11,8 +11,8 @@
 		<security:authentication property="principal" />
 	</div>
 	<div class="pull-right">
-		<span class="glyphicon glyphicon-calendar"></span> <span
-			id="date_span"></span> <span class="glyphicon glyphicon-time"></span>
+		<i class="fa fa-calendar"></i> <span
+			id="date_span"></span> <i class="fa fa-clock-o"></i>
 
 		<span id="time_span"></span>
 	</div>
@@ -22,7 +22,7 @@
 				<table class="table table-hover table-condensed">
 					<thead class="theme">
 						<tr>
-							<th colspan="3"><span class="glyphicon glyphicon-user"></span>
+							<th colspan="3"><i class="fa fa-user"></i> 
 								<s:message code="home.mineAssigned"/></th>
 						</tr>
 					</thead>
@@ -42,7 +42,7 @@
 				<table class="table table-hover table-condensed">
 					<thead class="theme">
 						<tr>
-							<th colspan="3"><span class="glyphicon glyphicon-list-alt"></span>
+							<th colspan="3"><i class="fa fa-list-alt"></i> 
 								<s:message code="home.open"/></th>
 						</tr>
 					</thead>
@@ -65,7 +65,7 @@
 			<table class="table table-condensed table table-hover">
 				<thead class="theme">
 					<tr>
-						<th colspan="3"><span class="glyphicon glyphicon-calendar"></span>
+						<th colspan="3"><i class="fa fa-calendar"></i> 
 							<s:message code="home.due"/></th>
 					</tr>
 				</thead>

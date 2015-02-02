@@ -4,7 +4,7 @@
 	<groupId>com.qprogramming</groupId>
 	<artifactId>tasq</artifactId>
 	<packaging>war</packaging>
-	<version>0.8.1</version>
+	<version>0.8.2</version>
 	<name>Task tracking app</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

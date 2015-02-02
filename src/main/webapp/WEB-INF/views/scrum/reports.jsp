@@ -28,14 +28,11 @@
 	<div style="display: table-caption; margin-left: 10px;">
 		<ul class="nav nav-tabs" style="border-bottom: 0">
 			<li><a style="color: black"
-				href="<c:url value="/${project.projectId}/scrum/backlog"/>"><span
-					class="glyphicon glyphicon-book"></span> Backlog</a></li>
+				href="<c:url value="/${project.projectId}/scrum/backlog"/>"><i class="fa fa-book"></i> Backlog</a></li>
 			<li><a style="color: black"
-				href="<c:url value="/${project.projectId}/scrum/board"/>"><span
-					class="glyphicon glyphicon-list-alt"></span> <s:message
+				href="<c:url value="/${project.projectId}/scrum/board"/>"><i class="fa fa-list-alt"></i> <s:message
 						code="agile.board" /></a></li>
-			<li class="active"><a style="color: black" href="#"><span
-					class="glyphicon glyphicon-bullhorn"></span> <s:message
+			<li class="active"><a style="color: black" href="#"><i class="fa fa-line-chart"></i> <s:message
 						code="agile.reports" /></a></li>
 		</ul>
 	</div>
@@ -74,7 +71,7 @@
 	<div class="row">
 		<a class="anchor" id="events"></a>
 		<div class="col-lg-10 col-md-9 col-sm-8 col-lg-offset-2 col-md-offset-3 col-sm-offset-4">
-			<h4 style="text-align: center;"><s:message code="agile.events.sprint"/></h4>
+			<h4 style="text-align: center;"><i class="fa fa-calendar"></i> <s:message code="agile.events.sprint"/></h4>
 			<table id="eventsTable" class="table table-bordered"
 				style="width: 100%">
 				<thead class="theme">
@@ -100,7 +97,7 @@ $(document).ready(function() {
 	var lastSprint = "${ActiveSprint}";
 	var avatarURL = '<c:url value="/userAvatar/"/>';
 	var taskURL = '<c:url value="/task?id="/>';
-	var loading_indicator = '<div id="loading" class="centerPadded"><s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td>';
+	var loading_indicator = '<div id="loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td>';
 	var timeTracked = ${project.timeTracked};
 	$(".sprintMenuNo").click(function(){
 		var number = $(this).data('number');
@@ -222,7 +219,7 @@ $(document).ready(function() {
 			$("#loading").remove();
 	    	//render chart
 			plot = $.jqplot('chartdiv', [ left,burned,ideal ], {
-				title : '<s:message code="agile.burndown.chart"/><p style="font-size: x-small;">'+startStop+'</p>',
+				title : '<i class="fa fa-line-chart"></i> <s:message code="agile.burndown.chart"/><p style="font-size: x-small;">'+startStop+'</p>',
 				animate: true,
 				grid: {
 	                background: '#ffffff',
@@ -275,7 +272,7 @@ $(document).ready(function() {
 			});
 			//	render time chart
 			plot2 = $.jqplot('chartdiv2', [ time ], {
-				title : '<s:message code="agile.timelogged.day"/><p style="font-size: x-small;">'+startStop+'</p>',
+				title : '<i class="fa fa-bar-chart"></i> <s:message code="agile.timelogged.day"/><p style="font-size: x-small;">'+startStop+'</p>',
 				animate: true,
 				grid: {
 	                background: '#ffffff',

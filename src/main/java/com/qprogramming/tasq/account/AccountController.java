@@ -41,6 +41,7 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.projects.ProjectService;
+import com.qprogramming.tasq.support.ResultData;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.web.MessageHelper;
 
@@ -143,8 +144,9 @@ public class AccountController {
 	}
 
 	@RequestMapping(value = "/getAccounts", method = RequestMethod.GET)
-	public @ResponseBody List<DisplayAccount> listAccounts(
-			@RequestParam String term, HttpServletResponse response) {
+	public @ResponseBody
+	List<DisplayAccount> listAccounts(@RequestParam String term,
+			HttpServletResponse response) {
 		response.setContentType("application/json");
 		List<Account> all_accountr = accountSrv.findAll();
 		List<DisplayAccount> result = new ArrayList<DisplayAccount>();
@@ -163,7 +165,8 @@ public class AccountController {
 	}
 
 	@RequestMapping(value = "/users", method = RequestMethod.GET)
-	public @ResponseBody Page<DisplayAccount> listUsers(
+	public @ResponseBody
+	Page<DisplayAccount> listUsers(
 			@RequestParam(required = false) String term,
 			@PageableDefault(size = 25, page = 0, sort = "surname", direction = Direction.ASC) Pageable p) {
 		Page<Account> page;
@@ -181,19 +184,9 @@ public class AccountController {
 		return result;
 	}
 
-	@RequestMapping(value = "/users/manage", method = RequestMethod.GET)
-	public String manageUsers(
-
-	Model model) {
-		List<Account> accountsList;
-		accountsList = accountSrv.findAll();
-		model.addAttribute("accountsList", accountsList);
-		return "user/manage";
-	}
-
-	@RequestMapping(value = "role", method = RequestMethod.POST, produces = "text/plain;charset=UTF-8")
+	@RequestMapping(value = "role", method = RequestMethod.POST)
 	@ResponseBody
-	public String setRole(@RequestParam(value = "id") Long id,
+	public ResultData setRole(@RequestParam(value = "id") Long id,
 			@RequestParam(value = "role") Roles role) {
 		Account account = accountSrv.findById(id);
 		if (account != null) {
@@ -201,12 +194,17 @@ public class AccountController {
 			List<Account> admins = accountSrv.findAdmins();
 			if (account.getRole().equals(Roles.ROLE_ADMIN)
 					&& admins.size() == 1) {
-				return msg.getMessage("role.last.admin", null,
-						Utils.getCurrentLocale());
+				return new ResultData(ResultData.ERROR, msg.getMessage(
+						"role.last.admin", null, Utils.getCurrentLocale()));
 			} else {
+				String rolemsg = msg.getMessage(role.getCode(), null,
+						Utils.getCurrentLocale());
 				account.setRole(role);
 				accountSrv.update(account);
-				return "OK";
+				String resultMsg = msg.getMessage("role.change.succes",
+						new Object[] { account.toString(), rolemsg },
+						Utils.getCurrentLocale());
+				return new ResultData(ResultData.OK, resultMsg);
 			}
 		}
 		return null;

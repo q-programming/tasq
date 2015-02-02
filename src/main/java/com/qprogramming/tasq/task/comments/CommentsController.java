@@ -79,7 +79,7 @@ public class CommentsController {
 		return "redirect:" + request.getHeader("Referer");
 	}
 
-	@RequestMapping(value = "/task/{task_id}/comment/delete", method = RequestMethod.GET)
+	@RequestMapping(value = "/task/{taskId}/comment/delete", method = RequestMethod.GET)
 	public String deleteComment(@PathVariable String taskId,
 			@RequestParam(value = "id") Long id, HttpServletRequest request,
 			RedirectAttributes ra) {

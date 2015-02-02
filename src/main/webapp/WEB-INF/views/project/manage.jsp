@@ -87,10 +87,11 @@
 						<%
 							pageContext.setAttribute("types", TaskType.values());
 						%>
-						<li>------</li>
 						<c:forEach items="${types}" var="enum_type">
-							<li><a tabindex="-1" href="#" id="${enum_type.code}"><t:type
-										type="${enum_type}" show_text="true" list="true" /></a></li>
+							<c:if test="${not enum_type.subtask}">
+								<li><a tabindex="-1" href="#" id="${enum_type.code}"><t:type
+											type="${enum_type}" show_text="true" list="true" /></a></li>
+							</c:if>
 						</c:forEach>
 					</ul>
 					<span class="help-block"><s:message
@@ -154,8 +155,7 @@
 				<span class="btn btn-default btn-sm a-tooltip"
 					title="<s:message
 					code="project.participant.new" />"
-					id="add_button"><span class="glyphicon glyphicon-plus"></span><span
-					class="glyphicon glyphicon-user"></span></span>
+					id="add_button"><i class="fa fa-lg fa-user-plus"></i></span>
 			</div>
 			<div style="display: table-cell; padding-left: 20px; display: none"
 				id="add_div">
@@ -179,8 +179,7 @@
 				<a data-toggle="modal" data-target="#show_users"><span
 					class="btn btn-default btn-sm a-tooltip"
 					title="<s:message
-					code="menu.users" />"><b>?</b> <span
-						class="glyphicon glyphicon-user"></span></span></a>
+					code="menu.users" />"><i class="fa fa-lg fa-users"></i></span></a>
 			</div>
 		</div>
 	</div>
@@ -206,7 +205,7 @@
 										<button type="submit"
 											class="btn btn-default btn-sm a-tooltip "
 											title="<s:message code="project.participant.remove"/>">
-											<span class="glyphicon glyphicon-remove"></span>
+											<i class="fa fa-user-times"></i>
 										</button>
 									</form>
 								</div>
@@ -221,8 +220,7 @@
 											<button type="submit"
 												class="btn btn-default btn-sm a-tooltip "
 												title="<s:message code="project.participant.admin.remove"/>">
-												<span class="glyphicon glyphicon-minus"></span><span
-													class="glyphicon glyphicon-wrench"></span>
+												<i class="fa fa-minus"></i><i class="fa fa-wrench"></i>
 											</button>
 										</form>
 									</div>
@@ -238,8 +236,7 @@
 											<button type="submit"
 												class="btn btn-default btn-sm a-tooltip "
 												title="<s:message code="project.participant.admin.add"/>">
-												<span class="glyphicon glyphicon-plus"></span><span
-													class="glyphicon glyphicon-wrench"></span>
+												<i class="fa fa-plus"></i><i class="fa fa-wrench"></i>
 											</button>
 										</form>
 									</div>

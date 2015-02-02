@@ -25,15 +25,12 @@
 	<%--MENU --%>
 	<div style="display: table-caption; margin-left: 10px;">
 		<ul class="nav nav-tabs" style="border-bottom: 0">
-			<li class="active"><a style="color: black" href="#"><span
-					class="glyphicon glyphicon-book"></span> Backlog</a></li>
+			<li class="active"><a style="color: black" href="#"><i class="fa fa-book"></i> Backlog</a></li>
 			<li><a style="color: black"
-				href="<c:url value="/${project.projectId}/scrum/board"/>"><span
-					class="glyphicon glyphicon-list-alt"></span> <s:message
+				href="<c:url value="/${project.projectId}/scrum/board"/>"><i class="fa fa-list-alt"></i> <s:message
 						code="agile.board" /></a></li>
 			<li><a style="color: black"
-				href="<c:url value="/${project.projectId}/scrum/reports"/>"><span
-					class="glyphicon glyphicon-bullhorn"></span> <s:message
+				href="<c:url value="/${project.projectId}/scrum/reports"/>"><i class="fa fa-line-chart"></i> <s:message
 						code="agile.reports" /></a></li>
 		</ul>
 	</div>
@@ -45,7 +42,7 @@
 			<div style="margin: 5px 0px;">
 				<s:message code="agile.create.sprint" />
 				<button id="create_sprint" class="btn btn-default btn-sm">
-					<span class="glyphicon glyphicon-plus"></span>
+					<i class="fa fa-lg fa-plus"></i>
 				</button>
 			</div>
 		</c:if>
@@ -66,7 +63,7 @@
 								<button class="btn btn-default btn-sm" id="start-sprint"
 									data-sprint="${sprint.id}" data-toggle="modal"
 									data-target="#startSprint">
-									<span class="glyphicon glyphicon-play"></span>
+									<i class="fa fa-lg fa-play"></i>&nbsp;
 									<s:message code="agile.sprint.start" />
 								</button>
 							</c:if>
@@ -75,7 +72,7 @@
 								title="<s:message code="agile.sprint.delete" />"
 								data-lang="${pageContext.response.locale}"
 								data-msg='<s:message code="agile.sprint.delete.confirm"></s:message>'>
-								<span class="glyphicon glyphicon-trash"></span>
+								<i class="fa fa-lg fa-trash-o"></i>
 							</a>
 						</c:if>
 						<c:if test="${sprint.active}">
@@ -84,7 +81,7 @@
 								href="<c:url value="/scrum/stop?id=${sprint.id}"/>"
 								data-lang="${pageContext.response.locale}"
 								data-msg='<s:message code="agile.sprint.finish.confirm"></s:message>'>
-								<span class="glyphicon glyphicon-ok"></span> <s:message
+								<i class="fa fa-lg fa-check"></i>&nbsp;<s:message
 									code="agile.sprint.finish" />
 							</a>
 						</c:if>
@@ -97,7 +94,7 @@
 				</div>
 				<c:if test="${sprint.active}">
 					<p>
-						<span class="glyphicon glyphicon-repeat"></span>
+						<i class="fa fa-lg fa-flip-horizontal fa-history"></i>
 						${sprint.start_date} - ${sprint.end_date}
 					</p>
 				</c:if>

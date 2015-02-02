@@ -18,7 +18,7 @@
 					<input id="modal_taskID" type="hidden" name="taskID">
 					<div class="form-group">
 						<label><s:message code="task.logWork.spent" /></label> <input
-							id="logged_work" name="logged_work"
+							id="loggedWork" name="loggedWork"
 							style="width: 150px; height: 25px" class="form-control"
 							type="text" value=""> <span class="help-block"><s:message
 								code="task.logWork.help"></s:message> </span>
@@ -72,7 +72,7 @@
 <script>
 	$(".worklog").click(function() {
 		var taskID = $(this).data('taskid');
-		var title = "<s:message code="task.logWork" /> " + taskID;
+		var title = '<i class="fa fa-calendar"></i> <s:message code="task.logWork" /> ' + taskID;
 		$("#myModalLabel").html(title);
 		$("#modal_taskID").val(taskID);
 	});

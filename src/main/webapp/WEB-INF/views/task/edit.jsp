@@ -21,8 +21,6 @@
 			<h3>
 				<t:type type="${taskForm.type}" />
 				[${taskForm.id}] - ${taskForm.name}
-				<%-- 			<form:hidden path="id"/> --%>
-				<form:hidden path="type" />
 			</h3>
 		</div>
 		<div>
@@ -57,10 +55,52 @@
 				placeholder="${taskDesc_text}" />
 			<form:errors path="description" element="p" class="text-danger" />
 		</div>
+		<%-----------------TASK TYPE ---------------%>
+		<div class="form-group">
+			<div class="mod-header">
+				<h5 class="mod-header-title">
+					<s:message code="task.type" />
+				</h5>
+			</div>
+			<div class="dropdown">
+				<button id="type_button" class="btn btn-default "
+					style="${type_error}" type="button" id="dropdownMenu1"
+					data-toggle="dropdown">
+					<div id="task_type" class="image-combo"></div>
+					<span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu" role="menu"
+					aria-labelledby="dropdownMenu1">
+					<%
+						pageContext.setAttribute("types", TaskType.values());
+					%>
+					<c:if test="${task.subtask}">
+						<c:forEach items="${types}" var="enum_type">
+							<c:if test="${enum_type.subtask}">
+								<li><a class="taskType" tabindex="-1" href="#" id="${enum_type}" data-type="${enum_type}"><t:type
+											type="${enum_type}" show_text="true" list="true" /></a></li>
+							</c:if>
+						</c:forEach>
+					</c:if>
+					<c:if test="${not task.subtask}">
+						<c:forEach items="${types}" var="enum_type">
+							<c:if test="${not enum_type.subtask}">
+								<li><a class="taskType" tabindex="-1" href="#" id="${enum_type}" data-type="${enum_type}"><t:type
+											type="${enum_type}" show_text="true" list="true" /></a></li>
+							</c:if>
+						</c:forEach>
+					</c:if>
+				</ul>
+			</div>
+			<span class="help-block"><s:message code="task.type.help" /> <a href="#" style="color:black"><i class="fa fa-question-circle"></i></a></span>
+			<input type="hidden" id="changed_taskType" name="type">
+<%-- 			<form:hidden path="type" id="changed_taskType"/> --%>
+			<form:errors path="type" element="p" class="text-danger" />
+		</div>
 		<%-- Estimate --%>
 		<div id="estimate_div">
 			<div class="form-group">
-				<c:if test="${task.logged_work ne '0m' }">
+				<c:if test="${task.loggedWork ne '0m' }">
 					<div>
 						<div class="mod-header">
 							<h5 class="mod-header-title">
@@ -75,7 +115,7 @@
 								code="task.estimate.help.pattern" /> </span>
 					</div>
 				</c:if>
-				<c:if test="${task.logged_work eq '0m' }">
+				<c:if test="${task.loggedWork eq '0m' }">
 					<div class="mod-header">
 						<h5 class="mod-header-title">
 							<s:message code="task.estimate" />
@@ -129,7 +169,23 @@
 		$('.datepicker').datepicker("option", "firstDay", 1);
 		var currentDue = "${taskForm.due_date}";
 		$("#due_date").val(currentDue);
-	});
+		getDefaultTaskType();
+		
+		$(".taskType").click(function(){
+			$('#changed_taskType').val('');
+			var type = $(this).data('type');
+	   	 	$("#task_type").html($(this).html());
+	   		$("#changed_taskType").val(type);
+		});
 
+		function getDefaultTaskType(){
+			var taskType = '${task.type}';
+			var thisType = $("#"+taskType);
+	   	 	$("#task_type").html(thisType.html());
+	   		$("#changed_taskType").val(taskType);
+		}
+	});
+	
+	
 	
 </script>

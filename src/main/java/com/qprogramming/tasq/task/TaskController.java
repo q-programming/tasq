@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -102,6 +103,36 @@ public class TaskController {
 		return new TaskForm();
 	}
 
+	/**
+	 * Admin call to update all tasks logged work based on their worklog events
+	 * 
+	 * @param ra
+	 * @param model
+	 * @return
+	 */
+	@Transactional
+	@RequestMapping(value = "task/updatelogs", method = RequestMethod.GET)
+	public String update(RedirectAttributes ra, HttpServletRequest request,
+			Model model) {
+		if (Roles.isAdmin()) {
+			List<Task> list = taskSrv.findAll();
+			StringBuilder console = new StringBuilder(
+					"Updating logged work on all tasks within application");
+			console.append(BR);
+			for (Task task : list) {
+				task.updateLoggedWork();
+				console.append(task.toString());
+				console.append(": updated with ");
+				console.append(task.getLoggedWork());
+				console.append(BR);
+			}
+			model.addAttribute("console", console.toString());
+			return "other/console";
+		} else {
+			throw new TasqAuthException();
+		}
+	}
+
 	@RequestMapping(value = "task/create", method = RequestMethod.POST)
 	public String createTask(
 			@Valid @ModelAttribute("taskForm") TaskForm taskForm,
@@ -157,7 +188,7 @@ public class TaskController {
 					if (checkIfNotEstimated(task, project)) {
 						errors.rejectValue("addToSprint",
 								"agile.task2Sprint.Notestimated", new Object[] {
-								"", sprint.getSprintNo() },
+										"", sprint.getSprintNo() },
 								"Unable to add not estimated task to active sprint");
 						fillCreateTaskModel(model);
 						return null;
@@ -250,9 +281,9 @@ public class TaskController {
 			task.setEstimate(estimate);
 			task.setRemaining(estimate);
 			// TODO Refactor charst first
-			wlSrv.addActivityPeriodLog(task, PeriodHelper.outFormat(difference),
-					difference, LogType.ESTIMATE);
-			
+			wlSrv.addActivityPeriodLog(task,
+					PeriodHelper.outFormat(difference), difference,
+					LogType.ESTIMATE);
 		}
 		if (!task.getEstimated().equals(
 				!Boolean.parseBoolean(taskForm.getNo_estimation()))) {
@@ -263,16 +294,13 @@ public class TaskController {
 		}
 		int storyPoints = ("").equals(taskForm.getStory_points()) ? 0 : Integer
 				.parseInt(taskForm.getStory_points());
-		if (task.getStory_points() != storyPoints) {
+		if (task.getStory_points() != null
+				&& task.getStory_points() != storyPoints) {
 			wlSrv.addActivityLog(
 					task,
 					Integer.toString(-1
 							* (task.getStory_points() - storyPoints)),
 					LogType.ESTIMATE);
-			message.append("Story points: ");
-			message.append(task.getStory_points());
-			message.append(CHANGE_TO);
-			message.append(storyPoints);
 			task.setStory_points(storyPoints);
 		}
 		if (!task.getDue_date().equalsIgnoreCase(taskForm.getDue_date())) {
@@ -283,6 +311,15 @@ public class TaskController {
 			message.append(BR);
 			task.setDue_date(Utils.convertStringToDate(taskForm.getDue_date()));
 		}
+		TaskType type = TaskType.toType(taskForm.getType());
+		if (!task.getType().equals(type)) {
+			message.append("Type: ");
+			message.append(task.getType().toString());
+			message.append(CHANGE_TO);
+			message.append(type.toString());
+			message.append(BR);
+			task.setType(type);
+		}
 		LOG.debug(message.toString());
 		taskSrv.save(task);
 		if (message.length() > 0) {
@@ -292,8 +329,15 @@ public class TaskController {
 	}
 
 	@Transactional
+	@RequestMapping(value = "subtask", method = RequestMethod.GET)
+	public String showSubTaskDetails(@RequestParam(value = "id") String id,
+			Model model, RedirectAttributes ra) {
+		return showTaskDetails(id, model, ra);
+	}
+
+	@Transactional
 	@RequestMapping(value = "task", method = RequestMethod.GET)
-	public String showDetails(@RequestParam(value = "id") String id,
+	public String showTaskDetails(@RequestParam(value = "id") String id,
 			Model model, RedirectAttributes ra) {
 		Task task = taskSrv.findById(id);
 		if (task == null) {
@@ -321,10 +365,14 @@ public class TaskController {
 		// TASK
 		Hibernate.initialize(task.getComments());
 		Hibernate.initialize(task.getWorklog());
-		Hibernate.initialize(task.getSprints());
 		task.setDescription(task.getDescription().replaceAll("\n", "<br>"));
 		Map<TaskLinkType, List<DisplayTask>> links = linkService
 				.findTaskLinks(id);
+		if (!task.isSubtask()) {
+			Hibernate.initialize(task.getSprints());
+			List<Task> subtasks = taskSrv.findSubtasks(task);
+			model.addAttribute("subtasks", subtasks);
+		}
 		model.addAttribute("task", task);
 		model.addAttribute("links", links);
 		return "task/details";
@@ -390,11 +438,68 @@ public class TaskController {
 			}
 			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID,
 					false));
-			Utils.initializeWorkLogs(taskList);
+			//Utils.initializeWorkLogs(taskList);
 			model.addAttribute("tasks", taskList);
 			model.addAttribute("active_project", active);
 		}
 		return "task/list";
+	}
+
+	@RequestMapping(value = "task/{id}/subtask", method = RequestMethod.GET)
+	public TaskForm startSubTaskCreate(@PathVariable String id, Model model) {
+		Task task = taskSrv.findById(id);
+		if (task != null) {
+			model.addAttribute("project", task.getProject());
+			model.addAttribute("task", task);
+			return new TaskForm();
+		}
+		return null;
+	}
+
+	@Transactional
+	@RequestMapping(value = "task/{id}/subtask", method = RequestMethod.POST)
+	public String createSubTask(@PathVariable String id,
+			@Valid @ModelAttribute("taskForm") TaskForm taskForm,
+			Errors errors, RedirectAttributes ra, HttpServletRequest request,
+			Model model) {
+		if (!Roles.isReporter()) {
+			throw new TasqAuthException(msg);
+		}
+		Task task = taskSrv.findById(id);
+		Project project = projectSrv.findById(taskForm.getProject());
+		if (errors.hasErrors()) {
+			model.addAttribute("project", project);
+			model.addAttribute("task", task);
+			return null;
+		}
+		if (!projectSrv.canEdit(project)) {
+			MessageHelper.addErrorAttribute(
+					ra,
+					msg.getMessage("error.accesRights", null,
+							Utils.getCurrentLocale()));
+			return "redirect:" + request.getHeader("Referer");
+		}
+		Task subTask = taskForm.createSubTask();
+		// build ID
+		int taskCount = task.getSubtasks();
+		taskCount++;
+		String taskID = task.getId() + "/" + taskCount;
+		subTask.setId(taskID);
+		subTask.setParent(task.getId());
+		subTask.setProject(project);
+		task.addSubTask();
+
+		// assigne
+		if (taskForm.getAssignee() != null) {
+			Account assignee = accSrv.findById(taskForm.getAssignee());
+			subTask.setAssignee(assignee);
+		}
+		Hibernate.initialize(task.getSubtasks());
+		taskSrv.save(subTask);
+		taskSrv.save(task);
+		// TODO save log
+		wlSrv.addActivityLog(subTask, "", LogType.SUBTASK);
+		return "redirect:/task?id=" + id;
 	}
 
 	/**
@@ -413,7 +518,7 @@ public class TaskController {
 	@RequestMapping(value = "logwork", method = RequestMethod.POST)
 	public String logWork(
 			@RequestParam(value = "taskID") String taskID,
-			@RequestParam(value = "logged_work") String loggedWork,
+			@RequestParam(value = "loggedWork") String loggedWork,
 			@RequestParam(value = "remaining", required = false) String remainingTxt,
 			@RequestParam("date_logged") String dateLogged,
 			@RequestParam("time_logged") String timeLogged,
@@ -492,7 +597,7 @@ public class TaskController {
 			}
 			// TODO eliminate this?
 			if (state.equals(TaskState.TO_DO)
-					&& !("0m").equals(task.getLogged_work())) {
+					&& !("0m").equals(task.getLoggedWork())) {
 				MessageHelper.addWarningAttribute(ra, msg.getMessage(
 						"task.alreadyStarted", new Object[] { task.getId() },
 						Utils.getCurrentLocale()));
@@ -549,8 +654,8 @@ public class TaskController {
 				throw new TasqAuthException(msg, "role.error.task.permission");
 			}
 			if (state.equals(TaskState.TO_DO)) {
-				Hibernate.initialize(task.getLogged_work());
-				if (!("0m").equals(task.getLogged_work())) {
+				Hibernate.initialize(task.getLoggedWork());
+				if (!("0m").equals(task.getLoggedWork())) {
 					return new ResultData(ResultData.ERROR, msg.getMessage(
 							"task.alreadyStarted", null,
 							Utils.getCurrentLocale()));
@@ -796,6 +901,19 @@ public class TaskController {
 					result.add(new DisplayTask(task));
 				}
 			}
+		}
+		return result;
+	}
+
+	@RequestMapping(value = "/task/getSubTasks", method = RequestMethod.GET)
+	public @ResponseBody
+	List<DisplayTask> showSubTasks(@RequestParam String taskID,
+			HttpServletResponse response) {
+		response.setContentType("application/json");
+		List<Task> allSubTasks = taskSrv.findSubtasks(taskID);
+		List<DisplayTask> result = new ArrayList<DisplayTask>();
+		for (Task task : allSubTasks) {
+			result.add(new DisplayTask(task));
 		}
 		return result;
 	}

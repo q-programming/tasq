@@ -28,7 +28,8 @@ thead.theme {
 	padding: 5px;
 	margin-bottom: 5px;
 	border-color: lightgray;
-	background-color: rgba(249, 253, 255, 1)
+	background-color: rgba(249, 253, 255, 1);
+	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
 }
 .agile-list{
 	color: inherit;
@@ -59,4 +60,7 @@ span.badge.theme.zero{
 	{
 	color: #fff;
 	background-color: #2c5aa0;
+}
+.table-hover>tbody>tr:hover>td,.table-hover>tbody>tr:hover>th {
+	background-color: #E6F1F5
 }

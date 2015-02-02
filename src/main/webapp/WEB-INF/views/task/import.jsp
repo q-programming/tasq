@@ -11,17 +11,14 @@
 	style="width: 700px; overflow: auto; display: table">
 	<div style="display: table-caption; margin-left: 10px;">
 		<ul class="nav nav-tabs" style="border-bottom: 0">
-			<li><a style="color: black" href="<c:url value="/task/create"/>"><span
-					class="glyphicon glyphicon-plus"></span> <s:message
+			<li><a style="color: black" href="<c:url value="/task/create"/>"><i class="fa fa-plus"></i> <s:message
 						code="task.create" text="Create task" /></a></li>
-			<li class="active"><a style="color: black" href="#"><span
-					class="glyphicon glyphicon-import"></span> <s:message code="task.import"/></a></li>
+			<li class="active"><a style="color: black" href="#"><i class="fa fa-download"></i> <s:message code="task.import"/></a></li>
 		</ul>
 	</div>
 	<div class="help-block">
 		<s:message code="task.import.hint" />
-		<a href="<c:url value="/task/getTemplateFile"/>"><span
-			class="glyphicon glyphicon-file"></span> <s:message
+		<a href="<c:url value="/task/getTemplateFile"/>"><i class="fa fa-file-excel-o"></i> <s:message
 				code="task.import.template" /></a>
 	</div>
 	<div class="form-group ">
@@ -35,7 +32,7 @@
 				</div>
 			
 				<input id="file_upload" name="file" type="file" accept=".xls,.xml"
-					title='<s:message code="task.import.selectFile" />'
+					title='<i class="fa fa-file-excel-o"></i> <s:message code="task.import.selectFile" />'
 					class="inputfiles" data-filename-placement="inside">
 			</div>
 			<div class="form-group">
@@ -55,7 +52,7 @@
 				</select>
 			</div>
 			<hr>
-			<button class="btn btn-success pull-right" type="submit"><span class="glyphicon glyphicon-import"></span> <s:message code="task.import"/></button>
+			<button class="btn btn-success pull-right" type="submit"><i class="fa fa-download"></i> <s:message code="task.import"/></button>
 			<span class="btn pull-right" onclick="location.href='<c:url value="/"/>';"><s:message
 					code="main.cancel" text="Cancel" /></span>
 		</form>

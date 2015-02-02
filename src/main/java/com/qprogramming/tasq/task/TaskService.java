@@ -20,7 +20,7 @@ public class TaskService {
 	}
 
 	public List<Task> findAllByProject(Project project) {
-		return taskRepo.findAllByProject(project);
+		return taskRepo.findAllByProjectAndParentIsNull(project);
 
 	}
 
@@ -29,11 +29,12 @@ public class TaskService {
 	}
 
 	public List<Task> findByProjectAndState(Project project, TaskState state) {
-		return taskRepo.findByProjectAndState(project, state);
+		return taskRepo.findByProjectAndStateAndParentIsNull(project, state);
 	}
-	
+
 	public List<Task> findByProjectAndOpen(Project project) {
-		return taskRepo.findByProjectAndStateNot(project, TaskState.CLOSED);
+		return taskRepo.findByProjectAndStateNotAndParentIsNull(project,
+				TaskState.CLOSED);
 	}
 
 	/**
@@ -57,7 +58,14 @@ public class TaskService {
 	}
 
 	public List<Task> findAllBySprint(Sprint sprint) {
-		return taskRepo.findByProjectAndSprintsId(sprint.getProject(), sprint.getId());
+		return taskRepo.findByProjectAndSprintsId(sprint.getProject(),
+				sprint.getId());
 	}
-
+	public List<Task> findSubtasks(String taskID) {
+		return taskRepo.findByParent(taskID);
+	}
+	
+	public List<Task> findSubtasks(Task task) {
+		return findSubtasks(task.getId());
+	}
 }

@@ -60,3 +60,6 @@ span.badge.theme.zero{
 	color: #fff;
 	background-color: #DD6264;
 }
+.table-hover>tbody>tr:hover>td,.table-hover>tbody>tr:hover>th {
+	background-color: #ECDDDD;
+}

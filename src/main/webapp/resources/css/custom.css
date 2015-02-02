@@ -32,7 +32,7 @@
 
 .task-type {
 	border: 1px solid;
-	padding: 2px;
+	padding: 8px 10px 5px 10px;
 	border-radius: 5px;
 	border-color: darkgray;
 }
@@ -98,8 +98,8 @@ form.form-search:before {
 	display: block;
 	width: 14px;
 	height: 14px;
-	content: "\e003";
-	font-family: 'Glyphicons Halflings';
+	content: "\f002";
+	font-family: 'FontAwesome';
 	background-position: -48px 0;
 	position: absolute;
 	top: 5px;
@@ -135,10 +135,16 @@ form.form-search:before {
 .table_state {
 	margin: 10px;
 	padding: 0 10px;
-	width: 25%;
+	width: 24%;
 	display: table-cell;
-	border: 1px solid;
-	border-color: lightgray;
+/* 	border: 1px solid; */
+/* 	border-color: lightgray; */
+}
+.table_header{
+	margin-top: -25px;
+	margin-bottom: 20px;
+	font-size: large;
+	text-align: center;
 }
 
 .state_default {
@@ -180,7 +186,12 @@ form.form-search:before {
 a.closed {
 	text-decoration: line-through;
 }
-
+.clickable{
+	cursor: pointer;
+}
+.subtasks{
+	cursor: pointer;
+}
 .dropdown.pointer {
 	cursor: pointer;
 }

@@ -18,7 +18,7 @@
 				href='<s:url value="/users"></s:url>'
 				title="<s:message
 									code="menu.users" text="Settings" />"
-				data-placement="bottom"><span class="glyphicon glyphicon-user"></span></a>
+				data-placement="bottom"><i class="fa fa-user"></i></a>
 		</p>
 	</div>
 </div>

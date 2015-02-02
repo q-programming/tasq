@@ -18,13 +18,16 @@ public class DisplayTask implements Comparable<DisplayTask> {
 	private Integer story_points;
 	private Period estimate;
 	private Period remaining;
-	private Period logged_work;
+	private Period loggedWork;
 	private Enum<TaskState> state;
 	private Enum<TaskType> type;
 	private Enum<TaskPriority> priority;
 	private DisplayAccount assignee;
 	private Boolean estimated = false;
 	private boolean inSprint;
+	private Integer subtasks;
+	private String parent;
+	private Float percentage;
 
 	public DisplayTask(Task task) {
 		BeanUtils.copyProperties(task, this);
@@ -32,6 +35,7 @@ public class DisplayTask implements Comparable<DisplayTask> {
 		if (task.getAssignee() != null) {
 			assignee = new DisplayAccount(task.getAssignee());
 		}
+		this.percentage = task.getPercentage_logged();
 	}
 
 	public String getId() {
@@ -58,8 +62,8 @@ public class DisplayTask implements Comparable<DisplayTask> {
 		return remaining;
 	}
 
-	public Period getLogged_work() {
-		return logged_work;
+	public Period getLoggedWork() {
+		return loggedWork;
 	}
 
 	public Enum<TaskState> getState() {
@@ -98,8 +102,8 @@ public class DisplayTask implements Comparable<DisplayTask> {
 		this.remaining = remaining;
 	}
 
-	public void setLogged_work(Period logged_work) {
-		this.logged_work = logged_work;
+	public void setLoggedWork(Period loggedWork) {
+		this.loggedWork = loggedWork;
 	}
 
 	public void setState(Enum<TaskState> state) {
@@ -138,12 +142,36 @@ public class DisplayTask implements Comparable<DisplayTask> {
 		this.assignee = assignee;
 	}
 
+	public Integer getSubtasks() {
+		return subtasks;
+	}
+
+	public String getParent() {
+		return parent;
+	}
+
+	public void setSubtasks(Integer subtasks) {
+		this.subtasks = subtasks;
+	}
+
+	public void setParent(String parent) {
+		this.parent = parent;
+	}
+
 	public boolean isInSprint() {
 		return inSprint;
 	}
 
 	public void setInSprint(boolean inSprint) {
 		this.inSprint = inSprint;
+	}
+
+	public Float getPercentage() {
+		return percentage;
+	}
+
+	public void setPercentage(Float percentage) {
+		this.percentage = percentage;
 	}
 
 	@Override
