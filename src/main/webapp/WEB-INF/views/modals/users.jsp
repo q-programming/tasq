@@ -58,7 +58,7 @@
 	</div>
 </div>
 <script>
-var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
+var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><i class="fa fa-cog fa-spin"></i><s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
 
 $('#show_users').on('shown.bs.modal', function (e) {
 	if($("#user_table tr").length<3){

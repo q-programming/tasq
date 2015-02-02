@@ -57,7 +57,7 @@ userID = '${user.id}';
 <c:forEach items="${roles}" var="enum_role">
 	roles.push('${enum_role}');
 </c:forEach>
-var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
+var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
 role_change_txt = '<s:message code="user.role.change"/>';
 fetchManagedUsers(0);
 $.expr[":"].contains = $.expr.createPseudo(function(arg) {
