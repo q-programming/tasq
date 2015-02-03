@@ -165,7 +165,13 @@ public class TaskController {
 				return null;
 			}
 			// build ID
-			int taskCount = project.getTasks().size();
+			List<Task> list = new LinkedList<Task>(); 
+			for (Task task2 : project.getTasks()) {
+				if(!task2.isSubtask()){
+					list.add(task2);
+				}
+			}
+			int taskCount = list.size();
 			taskCount++;
 			String taskID = project.getProjectId() + "-" + taskCount;
 			task.setId(taskID);
