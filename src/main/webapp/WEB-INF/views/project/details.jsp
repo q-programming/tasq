@@ -233,7 +233,7 @@ function printChart(){
 	    		closedData.push([key, val]);
 	    	});
 	    	plot = $.jqplot('chartdiv', [ createdData , closedData ], {
-	    		title : '<s:message code="task.state.todo"/>/<s:message code="task.state.closed"/>',
+	    		title : '<s:message code="task.created"/>/<s:message code="task.state.closed"/>',
 	            seriesDefaults: {
 	                rendererOptions: {
 	                    smooth: true
@@ -273,7 +273,7 @@ function printChart(){
 	    		series:[
 	    		    {
 	    			    color: '#f0ad4e',
-	    			    highlighter: { formatString: '[%s] %s <s:message code="task.state.todo"/>'}
+	    			    highlighter: { formatString: '[%s] %s <s:message code="task.created"/>'}
 	    		    },
 	    		    {
 	    			    color:'#5cb85c',

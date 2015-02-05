@@ -119,7 +119,7 @@ public class SprintController {
 			}
 			model.addAttribute("project", project);
 			// Don't show closed tasks in backlog view
-			List<Task> taskList = taskSrv.findByProjectAndOpen(project);
+			List<Task> taskList = taskSrv.findAllByProject(project);
 			Collections.sort(taskList, new TaskSorter(
 					TaskSorter.SORTBY.PRIORITY, true));
 			List<DisplayTask> resultList = DisplayTask

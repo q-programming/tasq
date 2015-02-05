@@ -165,7 +165,13 @@ public class TaskController {
 				return null;
 			}
 			// build ID
-			int taskCount = project.getTasks().size();
+			List<Task> list = new LinkedList<Task>();
+			for (Task task2 : project.getTasks()) {
+				if (!task2.isSubtask()) {
+					list.add(task2);
+				}
+			}
+			int taskCount = list.size();
 			taskCount++;
 			String taskID = project.getProjectId() + "-" + taskCount;
 			task.setId(taskID);
@@ -438,7 +444,7 @@ public class TaskController {
 			}
 			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID,
 					false));
-			//Utils.initializeWorkLogs(taskList);
+			// Utils.initializeWorkLogs(taskList);
 			model.addAttribute("tasks", taskList);
 			model.addAttribute("active_project", active);
 		}
@@ -661,7 +667,7 @@ public class TaskController {
 							Utils.getCurrentLocale()));
 				}
 			} else if (state.equals(TaskState.CLOSED)) {
-				ResultData result = checkForTimers(taskID, task, false);
+				ResultData result = checkTaskCanOperated(task, false);
 				if (result.code.equals(ResultData.ERROR)) {
 					return result;
 				}
@@ -853,11 +859,19 @@ public class TaskController {
 			Project project = projectSrv.findById(task.getProject().getId());
 			// Only allow delete for administrators, owner or app admin
 			if (isAdmin(task, project)) {
-				task.setOwner(null);
-				task.setAssignee(null);
-				task.setProject(null);
-				// clear last and potential actives
-				ResultData result = checkForTimers(taskID, task, true);
+				ResultData result = new ResultData();
+				// check for links and subtasks
+				List<Task> subtasks = taskSrv.findSubtasks(taskID);
+				for (Task subtask : subtasks) {
+					result = removeTaskRelations(subtask);
+					if (ResultData.ERROR.equals(result.code)) {
+						MessageHelper.addWarningAttribute(ra, result.message,
+								Utils.getCurrentLocale());
+						return "redirect:" + request.getHeader("Referer");
+					}
+				}
+				taskSrv.deleteAll(subtasks);
+				result = removeTaskRelations(task);
 				if (result.code.equals(ResultData.ERROR)) {
 					MessageHelper.addWarningAttribute(ra, result.message,
 							Utils.getCurrentLocale());
@@ -928,6 +942,23 @@ public class TaskController {
 	}
 
 	/**
+	 * private method to remove task and all potential links
+	 * 
+	 * @param task
+	 * @return
+	 */
+	private ResultData removeTaskRelations(Task task) {
+		ResultData result = checkTaskCanOperated(task, true);
+		if (ResultData.OK.equals(result)) {
+			linkService.deleteTaskLinks(task);
+			task.setOwner(null);
+			task.setAssignee(null);
+			task.setProject(null);
+		}
+		return result;
+	}
+
+	/**
 	 * Fills model with project list and user's active project
 	 * 
 	 * @param model
@@ -944,7 +975,7 @@ public class TaskController {
 		model.addAttribute("projects_list", projectSrv.findAllByUser());
 	}
 
-	private ResultData checkForTimers(String taskID, Task task, boolean remove) {
+	private ResultData checkTaskCanOperated(Task task, boolean remove) {
 		List<Account> accounts = accSrv.findAll();
 		StringBuilder accountsWorking = new StringBuilder();
 		String separator = "";
@@ -953,7 +984,7 @@ public class TaskController {
 			boolean update = false;
 			if (account.getActive_task() != null
 					&& account.getActive_task().length > 0
-					&& account.getActive_task()[0].equals(taskID)) {
+					&& account.getActive_task()[0].equals(task.getId())) {
 				if (account.equals(Utils.getCurrentAccount())) {
 					if (remove) {
 						account.clearActive_task();

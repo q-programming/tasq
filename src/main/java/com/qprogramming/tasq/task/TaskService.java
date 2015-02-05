@@ -68,4 +68,9 @@ public class TaskService {
 	public List<Task> findSubtasks(Task task) {
 		return findSubtasks(task.getId());
 	}
+
+	public void deleteAll(List<Task> tasks) {
+		taskRepo.delete(tasks);
+		
+	}
 }
