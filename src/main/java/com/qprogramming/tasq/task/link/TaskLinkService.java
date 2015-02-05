@@ -1,6 +1,5 @@
 package com.qprogramming.tasq.task.link;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.qprogramming.tasq.task.DisplayTask;
+import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
 
 @Service
@@ -83,6 +83,12 @@ public class TaskLinkService {
 			}
 		}
 		return finalResult;
+	}
+	
+	public void deleteTaskLinks(Task task ){
+		List<TaskLink> listA = linkRepo.findByTaskA(task.getId());
+		listA.addAll(linkRepo.findByTaskB(task.getId()));
+		linkRepo.delete(listA);
 	}
 
 	/**
