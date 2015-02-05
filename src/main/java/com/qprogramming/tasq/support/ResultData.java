@@ -11,6 +11,10 @@ public class ResultData {
 	public String code;
 	public String message;
 
+	public ResultData() {
+		 
+	}
+	
 	public ResultData(String code, String message) {
 		this.code = code;
 		this.message = message;
