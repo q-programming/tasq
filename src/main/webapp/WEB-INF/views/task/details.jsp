@@ -214,6 +214,13 @@
 					<c:set var="remaining_bar">${task.overCommited}</c:set>
 					<c:set var="loggedWork">${100-task.overCommited}</c:set>
 				</c:if>
+				<c:if
+					test="${task.percentage_left gt 100}">
+					<c:set var="estimate_width">${task.moreThanEstimate}</c:set>
+					<c:set var="remaining_bar">${task.overCommited}</c:set>
+					<c:set var="loggedWork">${100-task.overCommited}</c:set>
+				</c:if>
+				
 				<%-- There was more logged but remaining is 0 --%>
 				<c:if
 					test="${task.percentage_logged gt 100 && task.remaining eq '0m' }">

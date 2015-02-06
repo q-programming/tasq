@@ -272,7 +272,7 @@ public class SprintControllerTest {
 		// Add to active sprint
 		sprint.setActive(true);
 		sprintCtrl.assignSprint(TEST, TEST, 1L, requestMock, raMock);
-		verify(wrkLogSrvMock, times(1)).addActivityLog(task, null,
+		verify(wrkLogSrvMock, times(1)).addActivityLog(task, "",
 				LogType.TASKSPRINTADD);
 		// Task not esstimated when adding to active
 		task.setStory_points(0);

@@ -145,7 +145,7 @@ $(document).ready(function() {
 	    $("#sprintNoMenu").html('<h4><b>Sprint '+ sprintNo + '</b> <span class="caret"></span></h4>')
 	    $.get('<c:url value="/${project.projectId}/sprint-data"/>',{sprint:sprintNo},function(result){
  	    	//Fill arrays of data
-	    	console.log(result);
+	    	//console.log(result);
 	    	$.each(result.timeBurned, function(key,val){
 	    		time.push([key, val]);
 	    	});

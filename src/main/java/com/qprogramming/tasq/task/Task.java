@@ -252,7 +252,7 @@ public class Task implements java.io.Serializable {
 		this.state = state;
 	}
 
-	public Boolean getEstimated() {
+	public Boolean isEstimated() {
 		return estimated;
 	}
 

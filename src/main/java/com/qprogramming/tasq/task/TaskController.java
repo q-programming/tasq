@@ -199,7 +199,11 @@ public class TaskController {
 						fillCreateTaskModel(model);
 						return null;
 					}
-					wlSrv.addActivityLog(task, null, LogType.TASKSPRINTADD);
+					String message = "";
+					if (task.isEstimated() && project.getTimeTracked()) {
+						message = task.getEstimate();
+					}
+					wlSrv.addActivityLog(task, message, LogType.TASKSPRINTADD);
 				}
 				// TODO
 			}
@@ -291,7 +295,7 @@ public class TaskController {
 					PeriodHelper.outFormat(difference), difference,
 					LogType.ESTIMATE);
 		}
-		if (!task.getEstimated().equals(
+		if (!task.isEstimated().equals(
 				!Boolean.parseBoolean(taskForm.getNo_estimation()))) {
 			message.append("Estimated changed to ");
 			message.append(!Boolean.parseBoolean(taskForm.getNo_estimation()));
@@ -1021,11 +1025,11 @@ public class TaskController {
 
 	private boolean checkIfNotEstimated(Task task, Project project) {
 		if (!project.getTimeTracked()) {
-			if (task.getStory_points() == 0) {
+			if (task.getStory_points() == 0 && task.isEstimated()) {
 				return true;
 			}
 		} else {
-			if (task.getEstimate().equals("0m")) {
+			if (task.getEstimate().equals("0m") && task.isEstimated()) {
 				return true;
 			}
 
