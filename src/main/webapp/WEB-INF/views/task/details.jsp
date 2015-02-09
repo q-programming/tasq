@@ -781,6 +781,7 @@ $(document).ready(function($) {
 // 			change state
 			$(".change_state").click(function() {
 	    	 var state = $(this).data('state');
+	    	 var newState = $(this).html();
 	    	 if(state == 'CLOSED'){
 		    		 $('#close_task').modal({
 		    	            show: true,
@@ -794,7 +795,7 @@ $(document).ready(function($) {
 							showError(result.message);
 						}
 						else{
-							$("#current_state").html($(this).html());
+							$("#current_state").html(newState);
 							showSuccess(result.message);
 						}
 					});

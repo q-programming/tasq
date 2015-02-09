@@ -41,7 +41,8 @@
 							<c:if test="${user.email_notifications}">checked</c:if>>
 							<i class="fa fa-envelope"></i> <s:message
 								code="panel.recieveEmails"></s:message>
-						</label> <span class="help-block"><s:message code="panel.emails.help"/></span>
+						</label> <span class="help-block"><s:message
+								code="panel.emails.help" /></span>
 					</div>
 				</div>
 				<div>
@@ -61,7 +62,8 @@
 									code="lang.pl" text="Polish" /></option>
 						</select>
 					</div>
-					<span style="padding-left: 20px" class="help-block"><s:message code="panel.language.help"/></span>
+					<span style="padding-left: 20px" class="help-block"><s:message
+							code="panel.language.help" /></span>
 				</div>
 				<div>
 					<div class="mod-header">
@@ -83,7 +85,8 @@
 							<option value="red"
 								<c:if test="${user.theme eq 'red'}">selected</c:if>><s:message
 									code="panel.theme.red" /></option>
-						</select> <span class="help-block"><s:message code="panel.theme.help"/></span>
+						</select> <span class="help-block"><s:message
+								code="panel.theme.help" /></span>
 					</div>
 				</div>
 			</div>
@@ -98,6 +101,7 @@
 </div>
 <script>
 	$(document).ready(function($) {
+		var imageWRN = '<s:message code="error.file100kb"/>';
 		$("#file_upload").bootstrapFileInput();
 
 		$("#avatar").hover(function() {
@@ -112,14 +116,32 @@
 
 		function readURL(input) {
 			if (input.files && input.files[0]) {
-				var reader = new FileReader();
-				reader.onload = function(e) {
-					$('#avatar_src').attr('src', e.target.result);
+				if(input.files[0].size > 100000){
+					showError(imageWRN);
+					return false;
 				}
-				reader.readAsDataURL(input.files[0]);
+				//check before uploading
+				var _URL = window.URL || window.webkitURL;
+				file = input.files[0];
+				img = new Image();
+				img.onload = function() {
+					if (this.width > 150 || this.height > 150) {
+						showError(imageWRN);
+					} else {
+						var reader = new FileReader();
+						reader.onload = function(e) {
+							$('#avatar_src').attr('src', e.target.result);
+						}
+						reader.readAsDataURL(file);
+					}
+				};
+				img.onerror = function() {
+					alert("not a valid file: " + file.type);
+				};
+				img.src = _URL.createObjectURL(file);
+
 			}
 		}
-
 	});
 
 	
