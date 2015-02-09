@@ -1,5 +1,8 @@
 package com.qprogramming.tasq.agile;
 
+import java.util.Collections;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,8 +12,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
+import com.qprogramming.tasq.support.Utils;
+import com.qprogramming.tasq.support.sorters.ProjectSorter;
 import com.qprogramming.tasq.task.TaskService;
 
 @Controller
@@ -37,5 +43,20 @@ public class AgileController {
 			}
 		}
 		return "";
+	}
+	
+	@RequestMapping(value = "boards", method = RequestMethod.GET)
+	public String listBoards(Model model) {
+		List<Project> projects;
+		if (Roles.isAdmin()) {
+			projects = projSrv.findAll();
+		} else {
+			projects = projSrv.findAllByUser();
+		}
+		Collections.sort(projects, new ProjectSorter(
+				ProjectSorter.SORTBY.LAST_VISIT, Utils.getCurrentAccount()
+						.getActive_project(), true));
+		model.addAttribute("projects", projects);
+		return "agile/list";
 	}
 }

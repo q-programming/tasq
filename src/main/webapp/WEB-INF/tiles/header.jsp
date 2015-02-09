@@ -94,7 +94,7 @@
 									</c:if>
 								</c:forEach>
 								<li role="presentation" class="divider"></li>
-								<li style="margin: 10px;"><a href="<c:url value="/tasks"/>"><i class="fa fa-list"></i> <s:message
+								<li style="margin: 10px;"><a href="<c:url value="/boards"/>"><i class="fa fa-list"></i> <s:message
 											code="agile.showAll" text="Show all" /></a></li>
 							</ul></li>
 					<%--Create task button --%>

@@ -256,6 +256,10 @@ public class Task implements java.io.Serializable {
 		return estimated;
 	}
 
+	public Boolean getEstimated() {
+		return estimated;
+	}
+
 	public void setEstimated(Boolean estimated) {
 		this.estimated = estimated;
 	}
