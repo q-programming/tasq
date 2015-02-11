@@ -118,9 +118,11 @@
 								</form>
 							</div>
 							<div style="display: table-cell">
+								<c:if test="${task.story_points ne 0 && task.estimated}">
 								<span
-									class="badge theme <c:if test="${task.story_points == 0}">zero</c:if>">
+									class="badge theme">
 									${task.story_points} </span>
+								</c:if>
 							</div>
 						</div>
 					</c:forEach>
@@ -154,9 +156,14 @@
 						</form>
 					</div>
 					<div style="display: table-cell">
-						<span
-							class="badge theme <c:if test="${task.story_points == 0}">zero</c:if>">
+						<c:if test="${task.story_points == 0 && task.estimated}">
+							<span class="badge theme">
+							? </span>
+						</c:if>
+						<c:if test="${task.story_points ne 0 && task.estimated}">
+							<span class="badge theme">
 							${task.story_points} </span>
+						</c:if>
 					</div>
 				</div>
 			</c:if>

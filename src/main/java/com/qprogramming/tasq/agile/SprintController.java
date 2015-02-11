@@ -516,11 +516,11 @@ public class SprintController {
 	 */
 	private boolean checkIfNotEstimated(Task task, Project project) {
 		if (!project.getTimeTracked()) {
-			if (task.getStory_points() == 0) {
+			if (task.getStory_points() == 0 && task.isEstimated()) {
 				return true;
 			}
 		} else {
-			if (task.getEstimate().equals("0m")) {
+			if (task.getEstimate().equals("0m") && task.isEstimated()) {
 				return true;
 			}
 

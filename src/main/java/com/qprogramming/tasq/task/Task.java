@@ -450,7 +450,7 @@ public class Task implements java.io.Serializable {
 		if (estimate_milis > 0) {
 			return logged_milis * 100 / estimate_milis;
 			// task was without estimation time but is estimated type
-		} else if (estimate_milis <= 0 & estimated) {
+		} else {
 			if (remaining_milis == 0 && logged_milis != 0) {
 				return 100;
 			} else if (remaining_milis == 0 && logged_milis == 0) {
@@ -458,11 +458,8 @@ public class Task implements java.io.Serializable {
 			} else {
 				return logged_milis * 100 / (remaining_milis + logged_milis);
 			}
-		} else {
-			return 0;
 		}
-
-	};
+	}
 
 	public boolean getLowerThanEstimate() {
 		Period loggedAndLeft = PeriodHelper.plusPeriods(getRawLoggedWork(),

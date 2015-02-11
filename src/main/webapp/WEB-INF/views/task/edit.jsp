@@ -129,6 +129,7 @@
 							code="task.estimate.help.pattern" /> </span>
 				</c:if>
 			</div>
+			<c:if test="${task.estimated}">
 			<div>
 				<label><s:message code="task.storyPoints" /></label>
 				<form:input path="story_points" class="form-control"
@@ -136,6 +137,7 @@
 				<span class="help-block"><s:message
 						code="task.storyPoints.help" /></span>
 			</div>
+			</c:if>
 		</div>
 		<div>
 			<div class="mod-header">

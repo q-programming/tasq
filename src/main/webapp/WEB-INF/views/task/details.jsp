@@ -14,7 +14,7 @@
 </security:authorize>
 <security:authentication property="principal" var="user" />
 <c:if
-	test="${(myfn:contains(task.project.administrators,user) || is_admin || task.owner.id == user.id) && task.state ne'CLOSED'}">
+	test="${(myfn:contains(task.project.administrators,user) || is_admin || task.owner.id == user.id)}">
 	<c:set var="can_edit" value="true" />
 </c:if>
 <c:if test="${task.assignee.id == user.id}">
@@ -30,7 +30,7 @@
 	<%----------------------TASK NAME-----------------------------%>
 	<div>
 		<div class="pull-right">
-			<c:if test="${can_edit}">
+			<c:if test="${can_edit  && task.state ne'CLOSED'}">
 				<a href="<c:url value="task/edit?id=${task.id}"/>"><button
 						class="btn btn-default btn-sm">
 						<i class="fa fa-pencil"></i>
@@ -145,11 +145,17 @@
 								code="task.description" /></td>
 						<td class="left-margin">${task.description}</td>
 					</tr>
-					<c:if test="${not task.subtask}">
+					<c:if test="${task.story_points eq 0}">
+						<c:set var="points">?</c:set>
+					</c:if>
+					<c:if test="${task.story_points ne 0}">
+						<c:set var="points">${task.story_points}</c:set>
+					</c:if>
+					<c:if test="${(not task.subtask) && (task.estimated) && not task.project.timeTracked}">
 						<tr>
 							<td><s:message code="task.storyPoints" /></td>
 							<td class="left-margin">
-								<span class="badge theme left">${task.story_points}</span>
+								<span class="badge theme left">${points}</span>
 							</td>
 						</tr>
 					</c:if>
@@ -201,7 +207,6 @@
 				<c:set var="remaining_width">100</c:set>
 				<c:set var="remaining_bar">${task.percentage_left}</c:set>
 				<%-- 	<br>${loggedWork} <br>${task.percentage_left} <br>${task.lowerThanEstimate eq 'true'} --%>
-
 				<%-- Check if it's not lower than estimate --%>
 				<c:if test="${task.lowerThanEstimate eq 'true'}">
 					<c:set var="remaining_width">${task.percentage_logged + task.percentage_left}</c:set>
@@ -238,15 +243,15 @@
 					</tr>
 					<%-- TODO add display based on type! --%>
 					<%-- if there weas no ESTIMATE at all --%>
-					<c:if test="${not task.estimated}">
-						<tr>
-							<td class="bar_td"><s:message code="task.logged" /></td>
-							<td class="bar_td">${task.loggedWork}</td>
-							<td class="bar_td"></td>
-						</tr>
-					</c:if>
+<%-- 					<c:if test="${not task.estimated}"> --%>
+<%-- 						<tr> --%>
+<%-- 							<td class="bar_td"><s:message code="task.logged" /></td> --%>
+<%-- 							<td class="bar_td">${task.loggedWork}</td> --%>
+<%-- 							<td class="bar_td"></td> --%>
+<%-- 						</tr> --%>
+<%-- 					</c:if> --%>
 					<%-- IF ESTIMATE IS NOT 0 --%>
-					<c:if test="${task.estimated}">
+<%-- 					<c:if test="${task.estimated}"> --%>
 						<%-- Estimate bar --%>
 						<c:if test="${task.estimate ne '0m'}">
 							<tr>
@@ -288,7 +293,7 @@
 								</div></td>
 							<td class="bar_td">${task.remaining }</td>
 						</tr>
-					</c:if>
+<%-- 					</c:if> --%>
 				</table>
 			</div>
 			<%-------------- RELATED TASKS ------------------%>

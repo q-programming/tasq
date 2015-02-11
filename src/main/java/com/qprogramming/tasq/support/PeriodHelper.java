@@ -30,7 +30,7 @@ public class PeriodHelper {
 	 * @return
 	 */
 	public static Period inFormat(String time) {
-		if (time == null) {
+		if (time == null || "".equals(time)) {
 			return new Period();
 		}
 		return IN_FORMATER.parsePeriod(time.replaceAll("\\s+", ""))

@@ -175,25 +175,27 @@
 					<s:message code="task.estimate" />
 				</h5>
 		</div>
-		<div id="estimate_div">
+		<div>
 			<div class="form-group ${sprint_class}">
-				<form:input path="estimate" class="form-control" style="width:150px" />
+				<div class="input-group"><form:input path="estimate" class="form-control" style="width:150px" />&nbsp;<span id="estimate_optional"><s:message code="main.optional"/></span></div>
 				<form:errors path="estimate" element="p" class="text-danger" />
 				<span class="help-block"><s:message code="task.estimate.help" /><br>
 					<s:message code="task.estimate.help.pattern" /> </span>
 			</div>
-			<div class="form-group ${sprint_class}">
-				<label><s:message code="task.storyPoints" /></label>
-				<form:input path="story_points" class="form-control "
-					style="width:150px" />
-				<span class="help-block"><s:message
-						code="task.storyPoints.help" /></span>
+			<div  id="estimate_div">
+				<div class="form-group ${sprint_class}">
+					<label><s:message code="task.storyPoints" /></label>
+					<form:input path="story_points" class="form-control "
+						style="width:150px" />
+					<span class="help-block"><s:message
+							code="task.storyPoints.help" /></span>
+				</div>
 			</div>
 		</div>
 		<label class="checkbox" style="display: inherit; font-weight: normal">
 			<input type="checkbox" name="no_estimation" id="no_estimation"
-			value="true"> <s:message code="task.withoutEstimation" />&nbsp;<i class="fa fa-question-circle a-tooltip"
-			title="<s:message code ="task.withoutEstimation.help"/>"
+			value="true"> <s:message code="task.withoutEstimation"  />&nbsp;<i class="fa fa-question-circle a-tooltip"
+			data-html="true" title="<s:message  code ="task.withoutEstimation.help" />"
 			data-placement="right"></i>
 		</label>
 		<%----------DUE DATE --------------------------%>
@@ -222,22 +224,46 @@
 $(document).ready(function($) {
 	$(".taskType").click(function(){
 		var type = $(this).data('type');
+		checkTaskTypeEstimate(type);
    	 	$("#task_type").html($(this).html());
    		$("#type").val(type);
 	});
 	
 	$(".taskPriority").click(function(){
 		var priority = $(this).data('priority');
-   	 	$("#task_priority").html($(this).html());
+  	 	$("#task_priority").html($(this).html());
    		$("#priority").val(priority);
 	});
 	
+	
 	//Projects
 	
-	$("#no_estimation").change(function() {
-			$("#estimate").val("");
-			$('#estimate_div').slideToggle("slow");
+	$("#no_estimation").click(function() {
+		toggleEstimation();
 	});
+	
+	function toggleEstimation(){
+		if($("#no_estimation").prop("checked") == true){
+			$('#estimate_div').slideUp("slow");
+			$("#story_points").val("");
+			$("#estimate_optional").show();
+		}else{
+			$("#estimate_optional").hide();
+			$('#estimate_div').slideDown("slow");
+		}
+	}
+	
+	function checkTaskTypeEstimate(type){
+		if (type == 'TASK' || type == 'BUG'){
+			$("#no_estimation").prop("checked", true);
+			toggleEstimation();
+		}else{
+			$("#no_estimation").prop("checked", false);
+			toggleEstimation();
+		}
+	}
+
+	
 	//------------------------------------Datepickers
 	$(".datepicker").datepicker({
 		minDate : '0'
@@ -321,6 +347,7 @@ $(document).ready(function($) {
 		$.get(url,{id:$("#projects_list").val()},function(result,status){
 				var thisType = $("#"+result);
 				var type = thisType.data('type');
+				checkTaskTypeEstimate(type)
 		   	 	$("#task_type").html(thisType.html());
 		   		$("#type").val(type);
 		});

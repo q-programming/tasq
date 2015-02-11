@@ -172,16 +172,17 @@
 								<c:set var="logged_class">progress-bar-success</c:set>
 								<c:set var="percentage">0</c:set>
 							</c:if>
-							<c:if test="${not task.estimated}">
-								<div>${task.loggedWork}</div>
-							</c:if>
-							<c:if test="${task.estimated}">
+<%-- 							<c:if test="${not task.estimated}"> --%>
+<%-- 								<div>${task.loggedWork}</div> --%>
+<%-- 							</c:if> --%>
+<%-- 							<c:if test="${task.estimated}"> --%>
 								<div class="progress" style="width: 50px">
-									<div class="progress-bar ${logged_class}" role="progressbar"
+									<div class="progress-bar ${logged_class} a-tooltip" role="progressbar"
 										aria-valuenow="${percentage}" aria-valuemin="0"
-										aria-valuemax="100" style="width:${percentage}%"></div>
+										aria-valuemax="100" style="width:${percentage}%" title="${percentage}%"></div>
 								</div>
-							</c:if></td>
+<%-- 							</c:if> --%>
+							</td>
 					</tr>
 				</c:forEach>
 			</table>

@@ -144,7 +144,7 @@
 			<input type="checkbox" name="no_estimation" id="no_estimation"
 			value="true"> <s:message code="task.withoutEstimation" />&nbsp;<i class="fa fa-question-circle a-tooltip"
 			title="<s:message code ="task.withoutEstimation.help"/>"
-			data-placement="right"></i>
+			data-placement="right" data-html="true"></i>
 		</label>
 		<%----------DUE DATE --------------------------%>
 		<div>
