@@ -163,10 +163,14 @@
 					<div class="input-group" style="width: 250px;">
 						<input type="text" class="form-control input-sm"
 							placeholder="<s:message code="project.participant.hint"/>"
-							id="participant"> <span class="input-group-btn">
-							<button type="button" id="dismiss_add" class="close"
-								style="padding-left: 5px">×</button>
-						</span>
+							id="participant">
+							<span class="input-group-btn">
+							<i id="participantsLoader" class="fa fa-lg fa-cog fa-spin" style="display:none"></i>
+							</span>
+							 <span class="input-group-btn">
+								<button type="button" id="dismiss_add" class="close"
+									style="padding-left: 5px">×</button>
+							</span>
 					</div>
 					<form id="added" action="<c:url value="/project/useradd"/>"
 						method="post">
@@ -272,8 +276,9 @@ $(document).ready(function($) {
         delay: 500,
         //define callback to format results
         source: function (request, response) {
-        	
+        	$("#participantsLoader").show();
             $.getJSON("<c:url value="/getAccounts"/>", request, function(result) {
+            	$("#participantsLoader").hide();
                 response($.map(result, function(item) {
                     return {
                         // following property gets displayed in drop down

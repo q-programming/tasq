@@ -310,6 +310,7 @@
 						</div>
 						<div class="form-group col-md-6">
 							<input class="form-control input-sm" id="task_link" placeholder="<s:message code="task.link.task.help"/>">
+							<div id="linkLoader" style="display:none"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br></div>
 						</div>
 						<input type="hidden" name="taskA" value="${task.id}">
 						<input type="hidden" id="taskB" name="taskB">
@@ -411,11 +412,14 @@
 								method="post">
 								<input type="hidden" name="taskID" value="${task.id}">
 								<table>
-									<tr>
-										<td style="width: 250px;"><input type="text"
-											class="form-control input-sm" name="account"
-											placeholder="<s:message code="project.participant.hint"/>"
-											id="assignee"></td>
+									<tr style="vertical-align: top;">
+										<td style="width: 250px;">
+											<input type="text"
+												class="form-control input-sm" name="account"
+												placeholder="<s:message code="project.participant.hint"/>"
+												id="assignee">
+											<div id="usersLoader" style="display:none"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br></div>
+										</td>
 										<td>
 											<button class="btn btn-default btn-sm a-tooltip"
 												type="button" id="assign_me"
@@ -685,6 +689,7 @@ $(document).ready(function($) {
 						delay : 500,
 						//define callback to format results
 						source : function(request, response) {
+							$("#usersLoader").show();
 							var term = request.term;
 							if ( term in cache ) {
 						          response( cache[ term ] );
@@ -692,6 +697,7 @@ $(document).ready(function($) {
 						    }
 							var url='<c:url value="/project/getParticipants"/>';
 							$.get(url,{id:'${task.project.id}',term:term},function(result) {
+									$("#usersLoader").hide();
 									cache[ term ] = result;
 									response($.map(result,function(item) {
 										return {
@@ -718,8 +724,10 @@ $(document).ready(function($) {
 				delay : 500,
 				//define callback to format results
 				source : function(request, response) {
+					$("#linkLoader").show();
 					var url = '<c:url value="/getTasks?taskID=${task.id}&projectID=${task.project.id}"/>';
 					$.getJSON(url,request,function(result) {
+							$("#linkLoader").hide();
 							response($.map(result,function(item) {
 								return {
 									// following property gets displayed in drop down
