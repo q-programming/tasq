@@ -66,11 +66,14 @@
 			<div>
 				<div class="mod-header">
 					<h5 class="mod-header-title">
-						<i class="fa fa-align-left"></i>
-						<s:message code="task.details" />
+						<a class="toggler" href="#"><i class="fa fa-caret-down"></i></a>
+						<span class="mod-header-title-txt">
+							<i class="fa fa-align-left"></i>
+							<s:message code="task.details" />
+						</span>
 					</h5>
 				</div>
-				<table>
+				<table class="togglerContent">
 					<tr>
 						<td style="width: 80px;"><s:message code="task.state" /></td>
 						<td class="left-margin">
@@ -159,8 +162,11 @@
 			<div>
 				<div class="mod-header">
 					<h5 class="mod-header-title">
-						<i class="fa fa-lg fa-clock-o"></i>
-						<s:message code="task.timetrack" />
+						<a class="toggler" href="#"><i class="fa fa-caret-down"></i></a>
+						<span class="mod-header-title-txt">
+							<i class="fa fa-lg fa-clock-o"></i>
+							<s:message code="task.timetrack" />
+						</span>
 					</h5>
 				</div>
 				<!-- logwork trigger modal -->
@@ -223,7 +229,7 @@
 				<c:if test="${task.estimate eq '0m' && task.remaining ne '0m'}">
 					<c:set var="remaining_bar">	${100-task.percentage_logged}</c:set>
 				</c:if>
-				<table style="width: 400px">
+				<table class="togglerContent" style="width: 400px">
 					<tr>
 						<td></td>
 						<td style="width: 150px"></td>
@@ -289,8 +295,11 @@
 			<div>
 				<div class="mod-header">
 					<h5 class="mod-header-title">
+						<a class="toggler" href="#"><i class="fa fa-caret-down"></i></a>
+						<span class="mod-header-title-txt">
 						<i class="fa fa-lg fa-link fa-flip-horizontal"></i>
-						<s:message code="task.related"/>
+							<s:message code="task.related"/>
+						</span>
 					</h5>
 					<a class="btn btn-default btn-xxs a-tooltip pull-right linkButton" href="#" title="" data-placement="top" data-original-title="<s:message code="task.link"/>">
 						<i class="fa fa-plus"></i><i class="fa fa-lg fa-link fa-flip-horizontal"></i>
@@ -324,7 +333,7 @@
 						</div>
 					</form>
 				</div>
-				<div style="max-height: 300px; overflow-y:auto;">
+				<div class="togglerContent" style="max-height: 300px; overflow-y:auto;padding-left:15px">
 				<div style="display:table;width:100%">
 				<c:forEach var="linkType" items="${links}">
 					<div style="display:table-row">
@@ -365,14 +374,17 @@
 			<div>
 				<div class="mod-header">
 					<h5 class="mod-header-title">
-						<i class="fa fa-lg fa-sitemap"></i>
-						<s:message code="tasks.subtasks" />
+						<a class="toggler" href="#"><i class="fa fa-caret-down"></i></a>
+						<span class="mod-header-title-txt">
+							<i class="fa fa-lg fa-sitemap"></i>
+							<s:message code="tasks.subtasks" />
+						</span>
 					</h5>
 					<a class="btn btn-default btn-xxs a-tooltip pull-right" href="<c:url value="task/${task.id}/subtask"/>" data-placement="top" data-original-title="<s:message code="task.subtasks.add"/>">
 						<i class="fa fa-plus"></i> <i class="fa fa-lg fa-sitemap"></i>
 					</a>
 				</div>
-				<div id="subTask" class="form-group">
+				<div id="subTask" class="form-group togglerContent" style="padding-left: 15px;">
 					<table class="table table-hover table-condensed button-table">
 						<c:forEach var="subTask" items="${subtasks}">
 							<tr>
