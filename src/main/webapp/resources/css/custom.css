@@ -120,12 +120,27 @@ form.form-search:before {
 	margin-top: 15px;
 	padding-bottom: 5px;
 }
-
+.mod-header:hover .mod-header-title-txt{
+	padding-left:0px
+}
+.mod-header-title-txt{
+	padding-left:12px
+}
 .mod-header-title {
 	background: white;
 	display: inline;
 	padding: 5px;
 	font-weight: bold;
+}
+
+a.toggler {
+	display: none;
+	color: gray;
+	background: white;
+}
+
+.mod-header:hover a.toggler {
+	display: inline;
 }
 
 .left-margin {

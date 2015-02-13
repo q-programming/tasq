@@ -396,6 +396,9 @@ public class TaskController {
 			@RequestParam(value = "query", required = false) String query,
 			@RequestParam(value = "priority", required = false) String priority,
 			Model model) {
+		if (state == null || state == "") {
+			return "redirect:tasks?state=OPEN";
+		}
 		List<Project> projects = projectSrv.findAllByUser();
 		Collections.sort(projects, new ProjectSorter(
 				ProjectSorter.SORTBY.LAST_VISIT, Utils.getCurrentAccount()
@@ -411,15 +414,13 @@ public class TaskController {
 		}
 		if (active != null) {
 			List<Task> taskList = new LinkedList<Task>();
-			if (state == null || state == "") {
+			if (("OPEN").equals(state)) {
+				taskList = taskSrv.findByProjectAndOpen(active);
+			} else if (("ALL").equals(state)) {
 				taskList = taskSrv.findAllByProject(active);
 			} else {
-				if (("OPEN").equals(state)) {
-					taskList = taskSrv.findByProjectAndOpen(active);
-				} else {
-					taskList = taskSrv.findByProjectAndState(active,
-							TaskState.valueOf(state));
-				}
+				taskList = taskSrv.findByProjectAndState(active,
+						TaskState.valueOf(state));
 			}
 			if (query != null && query != "") {
 				List<Task> searchResult = new LinkedList<Task>();
@@ -898,8 +899,8 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/getTasks", method = RequestMethod.GET)
-	public @ResponseBody
-	List<DisplayTask> showTasks(@RequestParam Long projectID,
+	public @ResponseBody List<DisplayTask> showTasks(
+			@RequestParam Long projectID,
 			@RequestParam(required = false) String taskID,
 			@RequestParam String term, HttpServletResponse response) {
 		response.setContentType("application/json");
@@ -924,9 +925,8 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/getSubTasks", method = RequestMethod.GET)
-	public @ResponseBody
-	List<DisplayTask> showSubTasks(@RequestParam String taskID,
-			HttpServletResponse response) {
+	public @ResponseBody List<DisplayTask> showSubTasks(
+			@RequestParam String taskID, HttpServletResponse response) {
 		response.setContentType("application/json");
 		List<Task> allSubTasks = taskSrv.findSubtasks(taskID);
 		List<DisplayTask> result = new ArrayList<DisplayTask>();

@@ -19,8 +19,13 @@
 		<span class="state_span"><i class="fa fa-lg fa-check"></i> 
 			<s:message code="task.state.closed"></s:message></span>
 	</c:when>
-	<c:otherwise>
+	<c:when test="${state eq 'OPEN'}">
 		<span class="state_span"><i class="fa fa-lg fa-refresh"></i> 
 			<s:message code="task.state.open"></s:message></span>
+	</c:when>
+	
+	<c:otherwise>
+		<span class="state_span"><i class="fa fa-lg fa-list"></i> 
+			<s:message code="task.showAll"></s:message></span>
 	</c:otherwise>
 </c:choose>

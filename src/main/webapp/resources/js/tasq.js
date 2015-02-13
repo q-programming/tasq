@@ -40,3 +40,9 @@ function IsEmail(email) {
 	  var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
 	  return regex.test(email);
 }
+
+$(document).on("click",".toggler",function(e) {
+	console.log("toggler");
+	console.log($(this).nextAll('.togglerContent').first());
+	$(this).nextAll('.togglerContent').first().toggle();
+});
