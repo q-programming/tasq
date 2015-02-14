@@ -17,6 +17,8 @@ import org.joda.time.DateTimeConstants;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
@@ -37,7 +39,6 @@ import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.support.ResultData;
 import com.qprogramming.tasq.support.Utils;
-import com.qprogramming.tasq.support.sorters.ProjectSorter;
 import com.qprogramming.tasq.support.sorters.SprintSorter;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
@@ -53,7 +54,10 @@ import com.qprogramming.tasq.task.worklog.WorkLogService;
 @Controller
 public class SprintController {
 
+	private static final Logger LOG = LoggerFactory
+			.getLogger(SprintController.class);
 	private static final String SPACE = " ";
+	private static final int MILLIS_PER_SECOND = DateTimeConstants.MILLIS_PER_SECOND;
 	private static final int SECONDS_PER_HOUR = DateTimeConstants.SECONDS_PER_HOUR;
 	private static final String NEW_LINE = "\n";
 
@@ -466,9 +470,8 @@ public class SprintController {
 				totalTime = PeriodHelper.plusPeriods(totalTime,
 						getPeriodValue(entry.getValue()));
 			}
-			result.setTotalTime(PeriodHelper.outFormat(totalTime
-					.toStandardHours().toPeriod()));
 
+			result.setTotalTime(getFloatValue(totalTime).toString());
 			return fillLeftAndBurned(result, sprint, wrkList, timeTracked);
 		} else {
 			return result;
@@ -725,7 +728,13 @@ public class SprintController {
 			taskStoryPoints *= -1;
 		}
 		if (LogType.ESTIMATE.equals(workLog.getType())) {
-			taskStoryPoints = -1 * Integer.valueOf(workLog.getMessage());
+			try {
+				taskStoryPoints = -1 * Integer.valueOf(workLog.getMessage());
+			} catch (NumberFormatException e) {
+				LOG.debug(workLog.toString()
+						+ ": No story points in estimate change "
+						+ workLog.getTask());
+			}
 		}
 		if (value == null) {
 			result = new Float(taskStoryPoints);
@@ -747,9 +756,9 @@ public class SprintController {
 		if (repo_project == null) {
 			return false;
 		}
-		Account current_account = Utils.getCurrentAccount();
-		return (repo_project.getAdministrators().contains(current_account)
-				|| repo_project.getParticipants().contains(current_account) || Roles
+		Account currentAccount = Utils.getCurrentAccount();
+		return (repo_project.getAdministrators().contains(currentAccount)
+				|| repo_project.getParticipants().contains(currentAccount) || Roles
 					.isAdmin());
 	}
 
@@ -763,8 +772,9 @@ public class SprintController {
 		if (value == null) {
 			value = new Period();
 		}
-		Float result = Float.valueOf((float) value.toStandardSeconds()
-				.getSeconds() / SECONDS_PER_HOUR);
+		Float result = Float.valueOf((float) (PeriodHelper.toStandardDuration(
+				value).getMillis() / MILLIS_PER_SECOND)
+				/ SECONDS_PER_HOUR);
 		return result;
 	}
 

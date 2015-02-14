@@ -21,17 +21,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class PeriodHelper {
 
-	@Value("${default.hoursPerDay}")
+	@Value("${default.hoursPerDay:8}")
 	private int hours;
-
-	@PostConstruct
-	public void init() {
-		DEFAULT_HOURS = hours;
-		MILLIS_PER_DAY = DateTimeConstants.MILLIS_PER_HOUR * hours;
-	}
-
-	private static int DEFAULT_HOURS;
 	private static long MILLIS_PER_DAY;
+	private static int DEFAULT_HOURS_PER_DAY = 8;
 
 	private static final PeriodFormatter IN_FORMATER = new PeriodFormatterBuilder()
 			.appendWeeks().appendSuffix("w").appendDays().appendSuffix("d")
@@ -41,6 +34,19 @@ public class PeriodHelper {
 			.appendWeeks().appendSuffix("w ").appendDays().appendSuffix("d ")
 			.appendHours().appendSuffix("h ").appendMinutes().appendSuffix("m")
 			.toFormatter();
+
+	/**
+	 * Set default hours and millis per day , if hours were somehow not present
+	 * in properties , use 8h as default
+	 */
+	@PostConstruct
+	public void init() {
+		if (hours == 0) {
+			hours = 8;
+		}
+		DEFAULT_HOURS_PER_DAY = hours;
+		MILLIS_PER_DAY = DateTimeConstants.MILLIS_PER_HOUR * hours;
+	}
 
 	/**
 	 * Returns new Period object fortmated from input ( for example 1w 2d 3h 30m
@@ -114,6 +120,10 @@ public class PeriodHelper {
 	}
 
 	public static Period normalizedStandard(Period period) {
+		if (MILLIS_PER_DAY == 0) {
+			MILLIS_PER_DAY = DateTimeConstants.MILLIS_PER_HOUR
+					* DEFAULT_HOURS_PER_DAY;
+		}
 		long millis = getPeriodMillis(period);
 		Period result = new Period();
 		int weeks = (int) (millis / DateTimeConstants.MILLIS_PER_WEEK);
