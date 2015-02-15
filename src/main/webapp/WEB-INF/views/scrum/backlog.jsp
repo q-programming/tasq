@@ -61,7 +61,7 @@
 							<c:if test="${not b_rendered}">
 								<c:set var="b_rendered" value="true" />
 								<button class="btn btn-default btn-sm" id="start-sprint"
-									data-sprint="${sprint.id}" data-toggle="modal"
+									data-sprint="${sprint.id}"  data-sprintNo="${sprint.sprintNo}" data-toggle="modal"
 									data-target="#startSprint">
 									<i class="fa fa-lg fa-play"></i>&nbsp;
 									<s:message code="agile.sprint.start" />
@@ -170,51 +170,7 @@
 		</c:forEach>
 	</div>
 </div>
-<%---------------------START SPRINT MODAL --%>
-<div class="modal fade" id="startSprint" tabindex="-1" role="dialog"
-	aria-labelledby="myModalLabel" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header theme">
-				<button type="button" class="close" data-dismiss="modal"
-					aria-hidden="true">&times;</button>
-				<h4 class="modal-title" id="myModalLabel">
-					<s:message code="agile.sprint.start.title" />
-				</h4>
-			</div>
-			<div class="modal-body">
-				<input id="project_id" type="hidden" name="project_id"
-					value="${project.id}"> <input id="sprintID" type="hidden"
-					name="sprintID">
-				<div>
-					<div style="margin-right: 50px; display: table-cell">
-						<label><s:message code="agile.sprint.from" /></label> <input
-							id="sprint_start" name="sprint_start"
-							style="width: 150px; height: 25px"
-							class="form-control datepicker" type="text" value="">
-					</div>
-					<div style="padding-left: 50px; display: table-cell">
-						<label><s:message code="agile.sprint.to" /></label> <input
-							id="sprint_end" name="sprint_end"
-							style="width: 150px; height: 25px"
-							class="form-control datepicker" type="text" value="">
-					</div>
-					<p id="errors" class="text-danger"></p>
-					<span class="help-block"><s:message
-							code="agile.sprint.startstop"></s:message></span>
-
-				</div>
-			</div>
-			<div class="modal-footer">
-				<button class="btn btn-default" id="sprint_start_btn">
-					<s:message code="agile.sprint.start" />
-				</button>
-				<a class="btn" data-dismiss="modal"><s:message
-						code="main.cancel" /></a>
-			</div>
-		</div>
-	</div>
-</div>
+<jsp:include page="../modals/sprint.jsp" />
 <script>
 $(document).ready(function($) {
 	var assign_txt = '<s:message code="agile.assing"/>';
@@ -229,11 +185,17 @@ $(document).ready(function($) {
 		$("#create_form").submit();
 	});
 	$("#start-sprint").click(function(e) {
+		var title = '<i class="fa fa-play"></i>&nbsp;<s:message code="agile.sprint.start.title" />';
 		var id = $(this).data('sprint');
+		var no = $(this).data('sprintno');
+		var title = '<i class="fa fa-play"></i>&nbsp;<s:message code="agile.sprint.start.title" /> ' + no ;
 		$("#sprintID").val(id);
+		$("#sprintStartModal").html(title);
 		$("#errors").html("");
-		$("#sprint_start").val("");
-		$("#sprint_end").val("");
+		$("#sprintStart").val("");
+		$("#sprintStartTime").val("");
+		$("#sprintEnd").val("");
+		$("#sprintEndTime").val("");
 	});
 	
 	$(".datepicker").datepicker({
@@ -241,39 +203,6 @@ $(document).ready(function($) {
 		dateFormat : "dd-mm-yy",
 		firstDay: 1
 	});
-	$( "#sprint_start_btn" ).click(function( event ) {
-		var start = $("#sprint_start").val();
-		var end = $("#sprint_end").val();
-		var projectID = $("#project_id").val();
-		var sprintID = $("#sprintID").val();
-		
-		var start_date = $.datepicker.parseDate("dd-mm-yy",start);
-		var end_date = $.datepicker.parseDate("dd-mm-yy",end);
-		if(start_date==null || end_date==null|| start_date > end_date){
-			var error_msg = "<s:message code="agile.sprint.startstop.error"/>";
-			$("#errors").html(error_msg)
-			event.preventDefault();
-		}
-		else{
-			$.post('<c:url value="/scrum/start"/>',{
-					sprintID:sprintID,
-					projectID:projectID,
-					sprintStart:start,
-					sprintEnd:end},function(result){
-				if(result.code == 'ERROR'){
-					showError(result.message);
-				}else if(result.code == 'WARNING'){
-					showWarning(result.message)
-				}
-				else{
-					showSuccess(result.message);
-					$("#start-sprint").remove();
-				}
-			$("#startSprint").modal('toggle');
-			});
-			}
-		});
-	
 	$(".agile-card").draggable({
  		revert : 'invalid',
 		cursor : 'move',

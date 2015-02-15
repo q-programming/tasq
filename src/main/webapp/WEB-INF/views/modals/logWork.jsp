@@ -84,7 +84,7 @@
 	});
 	$(".datepicker").change(function() {
 		var date = new Date;
-		var minutes = date.getMinutes();
+		var minutes = (date.getMinutes()<10?'0':'') + date.getMinutes();
 		var hour = date.getHours();
 		$("#time_logged").val(hour + ":" + minutes);
 	});
@@ -99,6 +99,13 @@
 		},
 		placeholder : "__:__"
 	});
+	$("#time_logged").change(function (){
+		var regex = /([01]\d|2[0-3]):([0-5]\d)/;
+		if(!regex.test($(this).val())){
+			$(this).val('');
+		}
+	});
+	
 	$("#estimate_manual").change(function() {
 		$('#remaining').attr("disabled", !this.checked);
 	});

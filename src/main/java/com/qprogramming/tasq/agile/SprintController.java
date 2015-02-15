@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hibernate.Hibernate;
+import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
@@ -271,16 +272,20 @@ public class SprintController {
 	public ResultData startSprint(@RequestParam(value = "sprintID") Long id,
 			@RequestParam(value = "projectID") Long projectId,
 			@RequestParam(value = "sprintStart") String sprintStart,
-			@RequestParam(value = "sprintEnd") String sprintEnd, Model model,
-			HttpServletRequest request, RedirectAttributes ra) {
+			@RequestParam(value = "sprintEnd") String sprintEnd, 
+			@RequestParam(value = "sprintStartTime") String sprintStartTime,
+			@RequestParam(value = "sprintEndTime") String sprintEndTime) {
 		// check if other sprints are not ending when this new is starting
 		List<Sprint> allSprints = sprintRepo.findByProjectId(projectId);
+		sprintStart+= " " +  sprintStartTime;
+		sprintEnd+= " " +  sprintEndTime;
+		Date startDate = Utils.convertStringToDateAndTime(sprintStart);
+		Date endDate = Utils.convertStringToDateAndTime(sprintEnd);
 		for (Sprint sprint : allSprints) {
 			if (sprint.getRawEnd_date() != null) {
-				LocalDate enddate = new LocalDate(sprint.getRawEnd_date());
-				LocalDate startDate = new LocalDate(
-						Utils.convertStringToDate(sprintStart));
-				if (enddate.equals(startDate) || startDate.isBefore(enddate)) {
+				DateTime sprintEndDate = new DateTime(sprint.getRawEnd_date());
+				DateTime sprintStartDate = new DateTime(startDate);
+				if (sprintEndDate.equals(sprintStartDate) || sprintStartDate.isBefore(sprintEndDate)) {
 					return new ResultData(ResultData.WARNING, msg.getMessage(
 							"agile.sprint.startOnEnd",
 							new Object[] { sprint.getSprintNo(), sprintStart },
@@ -322,8 +327,8 @@ public class SprintController {
 				}
 				sprint.setTotalEstimate(total_estimate);
 				sprint.setTotalStoryPoints(totalStoryPoints);
-				sprint.setStart_date(Utils.convertStringToDate(sprintStart));
-				sprint.setEnd_date(Utils.convertStringToDate(sprintEnd));
+				sprint.setStart_date(startDate);
+				sprint.setEnd_date(endDate);
 				sprint.setActive(true);
 				sprintRepo.save(sprint);
 				wrkLogSrv.addWorkLogNoTask(null, project, LogType.SPRINT_START);

@@ -368,7 +368,7 @@ public class SprintControllerTest {
 		list.add(sprint);
 		when(sprintRepoMock.findByProjectId(1L)).thenReturn(list);
 		ResultData result = sprintCtrl.startSprint(2L, 1L, "06-01-2015",
-				"12-01-2015", modelMock, requestMock, raMock);
+				"12-01-2015", "12:25","23:15");
 		Assert.assertEquals(ResultData.WARNING, result.code);
 
 	}
@@ -400,18 +400,18 @@ public class SprintControllerTest {
 		when(taskSrvMock.findAllBySprint(sprint2)).thenReturn(taskList);
 		testAccount.setRole(Roles.ROLE_USER);
 		ResultData result = sprintCtrl.startSprint(2L, 1L, "06-02-2015",
-				"12-02-2015", modelMock, requestMock, raMock);
+				"12-02-2015", "12:25","23:15");
 		Assert.assertEquals(ResultData.ERROR, result.code);
 		testAccount.setRole(Roles.ROLE_ADMIN);
 		result = sprintCtrl.startSprint(2L, 1L, "06-02-2015", "12-02-2015",
-				modelMock, requestMock, raMock);
+				"12:25","23:15");
 		Assert.assertEquals(ResultData.OK, result.code);
 		verify(sprintRepoMock, times(1)).save(any(Sprint.class));
 		verify(wrkLogSrvMock, times(1)).addWorkLogNoTask(null, project,
 				LogType.SPRINT_START);
 		taskList.get(1).setStory_points(0);
 		result = sprintCtrl.startSprint(2L, 1L, "06-02-2015", "12-02-2015",
-				modelMock, requestMock, raMock);
+				"12:25","23:15");
 		Assert.assertEquals(ResultData.WARNING, result.code);
 	}
 

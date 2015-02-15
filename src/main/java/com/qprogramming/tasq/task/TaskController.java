@@ -734,7 +734,7 @@ public class TaskController {
 							Utils.getCurrentLocale()));
 					return "redirect:" + request.getHeader("Referer");
 				}
-				account.startTimerOnTask(taskID);
+				account.startTimerOnTask(task);
 				accSrv.update(account);
 				if (task.getState().equals(TaskState.TO_DO)) {
 					task.setState(TaskState.ONGOING);
