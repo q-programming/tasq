@@ -62,7 +62,7 @@ public class WatchedTaskService {
 	 * @param task
 	 */
 	@Transactional
-	public void startWatching(Task task) {
+	public WatchedTask startWatching(Task task) {
 		WatchedTask watchedTask = getByTask(task);
 		if (watchedTask == null) {
 			watchedTask = new WatchedTask();
@@ -75,7 +75,7 @@ public class WatchedTaskService {
 		watchers.add(Utils.getCurrentAccount());
 		watchedTask.setWatchers(watchers);
 		watchedTask.setName(task.getName());
-		watchRepo.save(watchedTask);
+		return watchRepo.save(watchedTask);
 	}
 
 	/**
@@ -84,7 +84,7 @@ public class WatchedTaskService {
 	 * @param project_id
 	 */
 	@Transactional
-	public void stopWatching(Task task) {
+	public WatchedTask stopWatching(Task task) {
 		WatchedTask watchedTask = getByTask(task);
 		if (watchedTask != null) {
 			Account current_user = Utils.getCurrentAccount();
@@ -93,12 +93,25 @@ public class WatchedTaskService {
 				watchers.remove(current_user);
 				watchedTask.setWatchers(watchers);
 			}
-			watchRepo.save(watchedTask);
+			return watchRepo.save(watchedTask);
 		}
+		return null;
 	}
 
 	/**
-	 * Removes whole watcher. Overwrites WatchedTask with new instance and then deletes it
+	 * Checks if currently logged account is watching task
+	 * @param taskID
+	 * @return true if account is watching this task
+	 */
+	public boolean isWatching(String taskID) {
+		return getByTask(taskID).getWatchers().contains(
+				Utils.getCurrentAccount());
+	}
+
+	/**
+	 * Removes whole watcher. Overwrites WatchedTask with new instance and then
+	 * deletes it
+	 * 
 	 * @param wpDelete
 	 */
 	@Transactional

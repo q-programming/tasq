@@ -56,6 +56,8 @@ import com.qprogramming.tasq.task.comments.Comment;
 import com.qprogramming.tasq.task.comments.CommentsRepository;
 import com.qprogramming.tasq.task.link.TaskLinkService;
 import com.qprogramming.tasq.task.link.TaskLinkType;
+import com.qprogramming.tasq.task.watched.WatchedTask;
+import com.qprogramming.tasq.task.watched.WatchedTaskService;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
@@ -93,6 +95,9 @@ public class TaskController {
 
 	@Autowired
 	private TaskLinkService linkService;
+
+	@Autowired
+	private WatchedTaskService watchSrv;
 
 	@Autowired
 	private CommentsRepository commRepo;
@@ -383,6 +388,7 @@ public class TaskController {
 			List<Task> subtasks = taskSrv.findSubtasks(task);
 			model.addAttribute("subtasks", subtasks);
 		}
+		model.addAttribute("watching", watchSrv.isWatching(task.getId()));
 		model.addAttribute("task", task);
 		model.addAttribute("links", links);
 		return "task/details";
@@ -899,8 +905,8 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/getTasks", method = RequestMethod.GET)
-	public @ResponseBody List<DisplayTask> showTasks(
-			@RequestParam Long projectID,
+	public @ResponseBody
+	List<DisplayTask> showTasks(@RequestParam Long projectID,
 			@RequestParam(required = false) String taskID,
 			@RequestParam String term, HttpServletResponse response) {
 		response.setContentType("application/json");
@@ -925,8 +931,9 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/getSubTasks", method = RequestMethod.GET)
-	public @ResponseBody List<DisplayTask> showSubTasks(
-			@RequestParam String taskID, HttpServletResponse response) {
+	public @ResponseBody
+	List<DisplayTask> showSubTasks(@RequestParam String taskID,
+			HttpServletResponse response) {
 		response.setContentType("application/json");
 		List<Task> allSubTasks = taskSrv.findSubtasks(taskID);
 		List<DisplayTask> result = new ArrayList<DisplayTask>();
