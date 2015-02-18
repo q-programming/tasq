@@ -37,7 +37,7 @@
 						<i class="fa fa-lg fa-pencil"></i>
 					</button></a>
 			</c:if>
-			<button	id="watch" class="btn btn-default btn-sm a-tooltip" title="">
+			<button	id="watch" class="btn btn-default btn-sm a-tooltip" title="" data-html="true">
 				<c:if test="${watching}">
 					<i id="watch_icon" class="fa fa-lg fa-eye-slash"></i>
 				</c:if>
@@ -408,10 +408,10 @@
 				<div id="subTask" class="form-group togglerContent" style="padding-left: 15px;">
 					<table class="table table-hover table-condensed button-table">
 						<c:forEach var="subTask" items="${subtasks}">
-							<tr>
+							<tr class="<c:if test="${subTask.state eq 'CLOSED' }">closed</c:if>"> 
 								<td style="width:30px"><t:type type="${subTask.type}" list="true" /></td>
 								<td style="width: 30px"><t:priority priority="${subTask.priority}" list="true" /></td>
-								<td><a style="color: inherit;" href="<c:url value="subtask?id=${subTask.id}"/>">[${subTask.id}] ${subTask.name}</a></td>
+								<td><a style="color: inherit;<c:if test="${subTask.state eq 'CLOSED' }">text-decoration: line-through;</c:if>" href="<c:url value="subtask?id=${subTask.id}"/>">[${subTask.id}] ${subTask.name}</a></td>
 								<td style="width: 100px"><t:state state="${subTask.state}" /></td>
 							</tr>
 						</c:forEach>
@@ -864,7 +864,7 @@ $(document).ready(function($) {
 						showError(result.message);
 					}
 					else{
-						$("#watch").data('watchers',result.message);
+						showSuccess(result.message);
 						$("#watch_icon").toggleClass("fa-eye");
 						$("#watch_icon").toggleClass("fa-eye-slash");
 						updateWatchers();
@@ -873,10 +873,20 @@ $(document).ready(function($) {
 			});
 			
 			function updateWatchers(){
+				var startwatch = "<s:message code="task.watch.start" htmlEscape="false"/>";
+				var stopwatch = "<s:message code="task.watch.stop" htmlEscape="false"/>";
+				var current = '<s:message code="task.watching"/>';
 				var url = '<c:url value="/task/watchersCount"/>';
+				var msg;
+				if($("#watch_icon").hasClass("fa-eye")){
+					msg = startwatch + '<br>';
+				}else{
+					msg = stopwatch + '<br>'; 
+				}
+				
 				$.get(url,{id:taskID},function(result){
 					var watchers = result;
-					$("#watch").attr('data-original-title',"Currently " + watchers + " watching");
+					$("#watch").attr('data-original-title',msg + current + watchers);
 				});
 			}
 			

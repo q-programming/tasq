@@ -194,12 +194,12 @@
 				<c:set var="tr_bg" value="" />
 				<c:set var="link" value="" />
 				<c:if test="${task.state eq 'CLOSED'}">
-					<c:set var="tr_bg" value="background: rgba(50, 205, 81, 0.12);" />
+					<c:set var="tr_bg" value="closed" />
 				</c:if>
 				<c:if test="${task.state eq 'BLOCKED'}">
-					<c:set var="tr_bg" value="background: rgba(205, 50, 50, 0.12);" />
+					<c:set var="tr_bg" value="blocked" />
 				</c:if>
-				<tr style="${tr_bg}">
+				<tr class="${tr_bg}">
 			</c:if>
 			<td class="export_cell export-hidden"><input class="export"
 				type="checkbox" name="tasks" value="${task.id}"></td>

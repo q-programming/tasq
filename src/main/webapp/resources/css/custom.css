@@ -267,3 +267,9 @@ a.anchor {
 	top: -60px;
 	visibility: hidden;
 }
+tr.closed{
+	background: rgba(50, 205, 81, 0.12);
+}
+tr.blocked{
+	background: rgba(205, 50, 50, 0.12);
+}

@@ -100,12 +100,14 @@ public class WatchedTaskService {
 
 	/**
 	 * Checks if currently logged account is watching task
+	 * 
 	 * @param taskID
 	 * @return true if account is watching this task
 	 */
 	public boolean isWatching(String taskID) {
-		return getByTask(taskID).getWatchers().contains(
-				Utils.getCurrentAccount());
+		WatchedTask watched = getByTask(taskID);
+		return watched != null ? watched.getWatchers().contains(
+				Utils.getCurrentAccount()) : false;
 	}
 
 	/**

@@ -12,6 +12,11 @@ function showSuccess(message){
 		+ message
 		+'</div>';
 		$('#messages_div').append(successMsg);
+		$(".alert").alert();
+		window.setTimeout(function() { 
+			$(".alert-success").alert('close');
+			$(".alert-info").alert('close'); }
+		,10000);
 };
 
 function showWarning(message){
@@ -20,14 +25,16 @@ function showWarning(message){
 		+ message
 		+'</div>';
 		$('#messages_div').append(warningMsg);
+		$(".alert").alert();
+		window.setTimeout(function() { $(".alert-warning").alert('close'); }, 15000);
 };
 
 $(".alert").alert();
 window.setTimeout(function() { 
 	$(".alert-success").alert('close');
 	$(".alert-info").alert('close'); }
-,15000);
-window.setTimeout(function() { $(".alert-warning").alert('close'); }, 20000);
+,10000);
+window.setTimeout(function() { $(".alert-warning").alert('close'); }, 15000);
 
 function showWait(show){
 	if(show){
