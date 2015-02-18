@@ -47,12 +47,13 @@
 								</c:forEach>
 								<li role="presentation" class="divider"></li>
 								<li style="margin: 10px;"><a
-									href="<c:url value="/projects"/>"><i class="fa fa-list"></i> <s:message
-											code="project.showAll" text="Projects" /></a></li>
+									href="<c:url value="/projects"/>"><i class="fa fa-list"></i>
+										<s:message code="project.showAll" text="Projects" /></a></li>
 								<c:if test="${user.isUser == true}">
 									<li style="margin: 10px;"><a
-										href="<c:url value="/project/create"/>"><i class="fa fa-plus"></i> <s:message
-												code="project.create" text="Create project" /></a></li>
+										href="<c:url value="/project/create"/>"><i
+											class="fa fa-plus"></i> <s:message code="project.create"
+												text="Create project" /></a></li>
 								</c:if>
 							</ul></li>
 					<%-- TASKS --%>
@@ -66,13 +67,14 @@
 											${l_task.name}</a></li>
 								</c:forEach>
 								<li role="presentation" class="divider"></li>
-								<li style="margin: 10px;"><a href="<c:url value="/tasks"/>"><i class="fa fa-list"></i> <s:message
-											code="task.showAll" text="Show all" /></a></li>
+								<li style="margin: 10px;"><a href="<c:url value="/tasks"/>"><i
+										class="fa fa-list"></i> <s:message code="task.showAll"
+											text="Show all" /></a></li>
 
 								<c:if test="${user.isReporter == true}">
 									<li style="margin: 10px;"><a
-										href="<c:url value="/task/create"/>"><i class="fa fa-plus"></i> <s:message
-												code="task.create" text="Create task" /></a></li>
+										href="<c:url value="/task/create"/>"><i class="fa fa-plus"></i>
+											<s:message code="task.create" text="Create task" /></a></li>
 								</c:if>
 							</ul></li>
 					<%--AGILE --%>
@@ -94,8 +96,9 @@
 									</c:if>
 								</c:forEach>
 								<li role="presentation" class="divider"></li>
-								<li style="margin: 10px;"><a href="<c:url value="/boards"/>"><i class="fa fa-list"></i> <s:message
-											code="agile.showAll" text="Show all" /></a></li>
+								<li style="margin: 10px;"><a
+									href="<c:url value="/boards"/>"><i class="fa fa-list"></i>
+										<s:message code="agile.showAll" text="Show all" /></a></li>
 							</ul></li>
 					<%--Create task button --%>
 					<c:if test="${user.isReporter == true}">
@@ -105,7 +108,9 @@
 									title="<s:message
 								code="task.create" text="Create task" />"
 									data-placement="bottom" href="<c:url value="/task/create"/>"
-									style="padding: 5px 15px; border: 1px solid"> <i class="fa fa-plus"></i>&nbsp;<i class="fa fa-lg fa-check-square"></i></a>
+									style="padding: 5px 15px; border: 1px solid"> <i
+									class="fa fa-plus"></i>&nbsp;<i
+									class="fa fa-lg fa-check-square"></i></a>
 							</div>
 						</li>
 					</c:if>
@@ -164,45 +169,55 @@
 								style="border-radius: 10px" />
 						</form></li>
 					<li>
-						<div>
+						<div style="text-align: right;">
 							<c:if test="${user.isAdmin == true}">
-								<a class="btn btn-default btn-xxs a-tooltip dropdown-toggle"
+								<a class="btn btn-default btn-xs a-tooltip dropdown-toggle"
 									type="button" id="manageDropdown" data-toggle="dropdown"
 									title="<s:message
-										code="menu.manage" text="Settings" />" data-placement="bottom"><i class="fa fa-wrench"></i></a>
-									<ul class="dropdown-menu">
-										<li><a href="<s:url value="/manage/users"></s:url>"><i class="fa fa-users"></i> <s:message code="menu.manage.users" /></a></li>
-										<li><a href="<s:url value="/manage/tasks"></s:url>"><i class="fa fa-lg fa-check-square"></i> <s:message code="menu.manage.tasks" /></a></li>
-										<li><a href="#">Other</a></li>
-									</ul>
+										code="menu.manage" text="Settings" />"
+									data-placement="bottom"><i class="fa fa-wrench"></i></a>
+								<ul class="dropdown-menu" style="text-align: left;margin-top: 7px;">
+									<li><a href="<s:url value="/manage/users"></s:url>"><i
+											class="fa fa-users"></i> <s:message code="menu.manage.users" /></a></li>
+									<li><a href="<s:url value="/manage/tasks"></s:url>"><i
+											class="fa fa-lg fa-check-square"></i> <s:message
+												code="menu.manage.tasks" /></a></li>
+									<li><a href="#">Other</a></li>
+								</ul>
 							</c:if>
-							<a class="btn btn-default btn-xxs a-tooltip" data-toggle="modal"
+							<a class="btn btn-default btn-xs a-tooltip" data-toggle="modal"
 								data-target="#show_users"
 								title="<s:message
 									code="menu.users" text="Users" />"
 								data-placement="bottom"><i class="fa fa-user"></i></a> <a
-								class="btn btn-default btn-xxs a-tooltip"
-								href='<s:url value="/settings"></s:url>'
-								title="<s:message
-									code="menu.settings" text="Settings" />"
-								data-placement="bottom"><i class="fa fa-cog"></i></a> <a
-								class="btn btn-default btn-xxs a-tooltip"
+								class="btn btn-default btn-xs a-tooltip"
 								href='<s:url value="/settings"></s:url>'
 								title="<s:message
 									code="menu.help" text="Help" />"
-								data-placement="bottom"><i class="fa fa-question-circle"></i></a> <a
-								class="btn btn-default btn-xxs a-tooltip"
-								href='<s:url value="/logout"></s:url>'
-								title="<s:message
-									code="menu.logout" text="Log out" />"
-								data-placement="bottom"><i class="fa fa-power-off"></i></a>
+								data-placement="bottom"><i class="fa fa-question-circle"></i></a>
 						</div>
 						<div style="color: white">${user}</div>
 					</li>
 					<li>
 						<div class="pull-right">
-							<img src="<c:url value="/userAvatar"/>"
-								style="height: 50px; padding-left: 5px;"></img>
+							<a href="#" data-toggle="dropdown"><img src="<c:url value="/userAvatar"/>"
+								style="height: 50px; padding-left: 5px;" ></a>
+							<span class="caret theme"></span>
+							<div class="message_div">
+								<span class="badge theme">1</span>
+							</div>
+							<ul class="dropdown-menu" style="margin-top: 3px;">
+								<li><a href='<c:url value="/settings"/>'><i
+										class="fa fa-cog"></i> <s:message code="menu.settings"
+											text="Settings" /></a></li>
+								<li><a href='<c:url value="/events"/>'>
+								<i class="fa fa-bell"></i>
+								 Watches and Notifications</a></li>
+								<li class="divider"></li>
+								<li><a href='<s:url value="/logout"></s:url>'><i
+										class="fa fa-power-off"></i> <s:message code="menu.logout"
+											text="Log out" /></a></li>
+							</ul>
 						</div>
 					</li>
 				</security:authorize>

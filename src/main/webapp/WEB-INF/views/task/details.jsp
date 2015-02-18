@@ -860,7 +860,7 @@ $(document).ready(function($) {
 			$("#watch").click(function(){
 				var url = '<c:url value="/task/watch"/>';
 				$.post(url,{id:taskID},function(result){
-					if(result.code == 'Error'){
+					if(result.code == 'ERROR'){
 						showError(result.message);
 					}
 					else{

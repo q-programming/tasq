@@ -4,11 +4,15 @@ import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.task.TaskState;
+import com.qprogramming.tasq.task.TaskType;
 
 @Entity
 public class WatchedTask {
@@ -18,6 +22,9 @@ public class WatchedTask {
 
 	@Column
 	private String name;
+	
+	@Enumerated(EnumType.STRING)
+	private TaskType type;
 
 	@Column
 	@ManyToMany(fetch = FetchType.EAGER)
@@ -45,6 +52,14 @@ public class WatchedTask {
 
 	public void setWatchers(Set<Account> watchers) {
 		this.watchers = watchers;
+	}
+
+	public TaskType getType() {
+		return type;
+	}
+
+	public void setType(TaskType type) {
+		this.type = type;
 	}
 
 	@Override
@@ -101,6 +116,15 @@ public class WatchedTask {
 			return false;
 		}
 		return true;
+	}
+
+	public int getCount() {
+		Set<Account> watchers = getWatchers();
+		if (watchers == null) {
+			return 0;
+		} else {
+			return watchers.size();
+		}
 	}
 
 }

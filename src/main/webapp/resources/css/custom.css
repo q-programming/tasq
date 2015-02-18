@@ -273,3 +273,8 @@ tr.closed{
 tr.blocked{
 	background: rgba(205, 50, 50, 0.12);
 }
+.message_div {
+	position: absolute;
+	top: 40px;
+	left: 45px;
+}

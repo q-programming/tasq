@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.task.Task;
+import com.qprogramming.tasq.task.TaskState;
+import com.qprogramming.tasq.task.TaskType;
 
 @Service
 public class WatchedTaskService {
@@ -72,6 +74,7 @@ public class WatchedTaskService {
 			watchers = new HashSet<Account>();
 		}
 		watchedTask.setId(task.getId());
+		watchedTask.setType((TaskType) task.getType());
 		watchers.add(Utils.getCurrentAccount());
 		watchedTask.setWatchers(watchers);
 		watchedTask.setName(task.getName());
