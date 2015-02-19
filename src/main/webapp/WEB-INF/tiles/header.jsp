@@ -203,9 +203,11 @@
 							<a href="#" data-toggle="dropdown"><img src="<c:url value="/userAvatar"/>"
 								style="height: 50px; padding-left: 5px;" ></a>
 							<span class="caret theme"></span>
-							<div class="message_div">
-								<span class="badge theme">1</span>
-							</div>
+							<c:if test="${eventCount gt 0}">
+								<div class="message_div">
+									<span class="badge theme">1</span>
+								</div>
+							</c:if>
 							<ul class="dropdown-menu" style="margin-top: 3px;">
 								<li><a href='<c:url value="/settings"/>'><i
 										class="fa fa-cog"></i> <s:message code="menu.settings"

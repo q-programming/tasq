@@ -20,11 +20,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
+import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.WorkLogSorter;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
+import com.qprogramming.tasq.task.events.EventsService;
 
 /**
  * @author romanjak
@@ -34,13 +36,16 @@ import com.qprogramming.tasq.task.TaskState;
 public class WorkLogService {
 
 	@Autowired
-	WorkLogRepository wlRepo;
+	private WorkLogRepository wlRepo;
 
 	@Autowired
-	TaskService taskSrv;
+	private TaskService taskSrv;
 
 	@Autowired
-	ProjectService projSrv;
+	private ProjectService projSrv;
+
+	@Autowired
+	private EventsService eventSrv;
 
 	@Transactional
 	public void addTimedWorkLog(Task task, String msg, Date when,
@@ -66,6 +71,7 @@ public class WorkLogService {
 			}
 			loggedTask.addLoggedWork(activity);
 			taskSrv.save(checkState(loggedTask));
+			eventSrv.addWatchEvent(task.getId(),type, PeriodHelper.outFormat(activity), when);
 		}
 	}
 
@@ -85,6 +91,7 @@ public class WorkLogService {
 			Hibernate.initialize(loggedTask.getWorklog());
 			loggedTask.addWorkLog(wl);
 			taskSrv.save(loggedTask);
+			eventSrv.addWatchEvent(task.getId(),type, msg, when);
 		}
 	}
 
@@ -109,6 +116,7 @@ public class WorkLogService {
 			Hibernate.initialize(loggedTask.getWorklog());
 			loggedTask.addWorkLog(wl);
 			taskSrv.save(task);
+			eventSrv.addWatchEvent(task.getId(),type, msg, new Date());
 		}
 	}
 
@@ -130,6 +138,7 @@ public class WorkLogService {
 			Hibernate.initialize(loggedTask.getWorklog());
 			loggedTask.addWorkLog(wl);
 			taskSrv.save(loggedTask);
+			eventSrv.addWatchEvent(task.getId(),type, PeriodHelper.outFormat(activity), new Date());
 		}
 	}
 
@@ -163,6 +172,7 @@ public class WorkLogService {
 			} else {
 				taskSrv.save(loggedTask);
 			}
+			eventSrv.addWatchEvent(task.getId(),type, PeriodHelper.outFormat(activity), new Date());
 		}
 	}
 
@@ -284,9 +294,10 @@ public class WorkLogService {
 		LogType type = (LogType) workLog.getType();
 		return workLog.getTask().inSprint(sprint)
 				&& (type.equals(LogType.DELETED) || type.equals(LogType.LOG)
-				|| type.equals(LogType.TASKSPRINTREMOVE)
-				|| type.equals(LogType.TASKSPRINTADD)
-				|| type.equals(LogType.ESTIMATE) || type.equals(LogType.CLOSED)
-				|| type.equals(LogType.REOPEN));
+						|| type.equals(LogType.TASKSPRINTREMOVE)
+						|| type.equals(LogType.TASKSPRINTADD)
+						|| type.equals(LogType.ESTIMATE)
+						|| type.equals(LogType.CLOSED) || type
+							.equals(LogType.REOPEN));
 	}
 }
