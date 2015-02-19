@@ -22,8 +22,8 @@
 							code="notice.deleteAll" text="Delete All" />">
 				<i class="fa fa-trash"></i>
 			</button>
-		</a> <a href="<c:url value="notification/markall${sort_link}"/>"
-			title="Mark all as read" class="deleteDialog"
+		</a> <a href="#"
+			id="readAll" title="Mark all as read" class="deleteDialog"
 			data-msg="<s:message
 							code="notice.markAll.confirm" text="Mark All read?" />""><button
 				type="button" class="btn btn-default pull-right a-tooltip"
@@ -35,24 +35,24 @@
 		<table class="table table-hover table-condensed">
 			<thead class="theme">
 				<tr>
-					<th style="width: 55px;"></th>
+					<th style="width: 20px;"></th>
 					<th></th>
-					<th style="width: 100px;">Date</th>
+					<th style="width: 200px;">Date</th>
 				</tr>
 			</thead>
 
 			<c:forEach items="${events}" var="event">
-				<tr>
 					<!-- 			read/unread -->
 					<c:choose>
 						<c:when test="${event.unread}">
-							<td style="color: black;">
+							<tr class="eventRow unread">
 						</c:when>
 						<c:otherwise>
-							<td style="color: lightgray;">
+						<tr class="eventRow read">
 						</c:otherwise>
 					</c:choose>
 					<!-- 				choose correct glyph for notification -->
+					<td>
 					<c:choose>
 						<c:when test="${event.type eq 'COMMENT'}">
 							<i class="fa fa-comment"></i>
@@ -67,12 +67,20 @@
 					</td>
 					<td><c:choose>
 							<c:when test="${event.unread}">
-								<div style="font-weight: bold;">
+								<div  class="eventSummary">
 							</c:when>
 							<c:otherwise>
-								<div>
+								<div  class="eventSummary">
 							</c:otherwise>
-						</c:choose> [${event.task}] ${event.logtype} ${event.message}
+						</c:choose>
+						<a href="#" class="showMore" data-event="${event.id}">[${event.task}] - ${event.who}&nbsp; <s:message
+							code="${event.logtype.code}" /></a>
+						<blockquote class="eventMore quote">${event.message}<div
+								class="pull-right buttons_panel">
+								<a style="color:gray" href="<c:url value="/task?id=${event.task}"/>"><i class="fa fa-lg fa-link fa-flip-horizontal"></i></a>
+								<a style="color:gray" href="#"><i class="fa fa-lg fa-trash"></i></a>
+							</div>
+						</blockquote>
 						</div></td>
 					<td style="color: darkgrey;">${event.date}</td>
 				</tr>
@@ -80,3 +88,39 @@
 		</table>
 	</div>
 </div>
+<script>
+	$(".showMore").click(function(){
+		var eventID = $(this).data('event');
+		var event = $(this);
+		if(event.closest("tr").hasClass("unread")){
+			var url = '<c:url value="/events/read"/>';
+			$.post(url, {
+				id : eventID
+			}, function(result) {
+				if (result.code == 'ERROR') {
+					showError(result.message);
+				} else {
+					event.closest("tr").addClass("read");
+					event.closest("tr").removeClass("unread");
+				}
+			});
+
+		}
+		$(this).nextAll(".eventMore").toggle();
+	});
+	
+	$("#readAll").click(function(){
+		var url = '<c:url value="/events/readAll"/>';
+		$.post(url, {}, function(result) {
+			if (result.code == 'ERROR') {
+				showError(result.message);
+			} else {
+				$('tr.eventRow.unread').each(function(i, obj) {
+					obj.classList.add("read");
+					obj.classList.remove("unread");
+
+				});
+			}
+		});
+	});
+</script>

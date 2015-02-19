@@ -71,7 +71,7 @@ public class WorkLogService {
 			}
 			loggedTask.addLoggedWork(activity);
 			taskSrv.save(checkState(loggedTask));
-			eventSrv.addWatchEvent(task.getId(),type, PeriodHelper.outFormat(activity), when);
+			eventSrv.addWatchEvent(wl, PeriodHelper.outFormat(activity), when);
 		}
 	}
 
@@ -91,7 +91,7 @@ public class WorkLogService {
 			Hibernate.initialize(loggedTask.getWorklog());
 			loggedTask.addWorkLog(wl);
 			taskSrv.save(loggedTask);
-			eventSrv.addWatchEvent(task.getId(),type, msg, when);
+			eventSrv.addWatchEvent(wl, msg, when);
 		}
 	}
 
@@ -116,7 +116,7 @@ public class WorkLogService {
 			Hibernate.initialize(loggedTask.getWorklog());
 			loggedTask.addWorkLog(wl);
 			taskSrv.save(task);
-			eventSrv.addWatchEvent(task.getId(),type, msg, new Date());
+			eventSrv.addWatchEvent(wl, msg, new Date());
 		}
 	}
 
@@ -138,7 +138,7 @@ public class WorkLogService {
 			Hibernate.initialize(loggedTask.getWorklog());
 			loggedTask.addWorkLog(wl);
 			taskSrv.save(loggedTask);
-			eventSrv.addWatchEvent(task.getId(),type, PeriodHelper.outFormat(activity), new Date());
+			eventSrv.addWatchEvent(wl, PeriodHelper.outFormat(activity), new Date());
 		}
 	}
 
@@ -172,7 +172,7 @@ public class WorkLogService {
 			} else {
 				taskSrv.save(loggedTask);
 			}
-			eventSrv.addWatchEvent(task.getId(),type, PeriodHelper.outFormat(activity), new Date());
+			eventSrv.addWatchEvent(wl, PeriodHelper.outFormat(activity), new Date());
 		}
 	}
 

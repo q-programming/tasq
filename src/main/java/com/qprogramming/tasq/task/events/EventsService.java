@@ -9,9 +9,11 @@ import org.springframework.stereotype.Service;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.support.Utils;
+import com.qprogramming.tasq.task.events.Event.Type;
 import com.qprogramming.tasq.task.watched.WatchedTask;
 import com.qprogramming.tasq.task.watched.WatchedTaskService;
 import com.qprogramming.tasq.task.worklog.LogType;
+import com.qprogramming.tasq.task.worklog.WorkLog;
 
 @Service
 public class EventsService {
@@ -26,13 +28,17 @@ public class EventsService {
 		this.eventsRepo = eventsRepo;
 	}
 
+	public Event getById(Long id) {
+		return eventsRepo.findById(id);
+	}
+
 	/**
 	 * Returns list of all events for currently logged account
 	 * 
 	 * @return
 	 */
 	public List<Event> getEvents() {
-		List<Event> events = eventsRepo.findByAccountId(Utils
+		List<Event> events = eventsRepo.findByAccountIdOrderByDateDesc(Utils
 				.getCurrentAccount().getId());
 		return events != null ? events : new LinkedList<Event>();
 	}
@@ -56,22 +62,44 @@ public class EventsService {
 	 * @param string
 	 * @param when
 	 */
-	public void addWatchEvent(String taskID, LogType type, String string,
-			Date when) {
+	public void addWatchEvent(WorkLog log, String string, Date when) {
+		String taskID = log.getTask().getId();
 		WatchedTask task = watchSrv.getByTask(taskID);
 		for (Account account : task.getWatchers()) {
 			if (account != Utils.getCurrentAccount()) {
 				Event event = new Event();
 				event.setTask(taskID);
 				event.setAccount(account);
+				event.setWho(log.getAccount().toString());
 				event.setUnread(true);
-				event.setLogtype(type);
+				event.setLogtype((LogType) log.getType());
 				event.setDate(when);
-				event.setType(Event.Type.WATCH);
+				event.setType(getEventType((LogType) log.getType()));
 				event.setMessage(string);
 				eventsRepo.save(event);
 			}
 		}
 	}
+	public void save(Event event){
+		eventsRepo.save(event);
+	}
+	
+	public void save(List<Event> events) {
+		eventsRepo.save(events);
+		
+	}
+	
+
+	private Type getEventType(LogType type) {
+		switch (type) {
+		case COMMENT:
+			return Type.COMMENT;
+		default:
+			return Type.WATCH;
+		}
+
+	}
+
+
 
 }

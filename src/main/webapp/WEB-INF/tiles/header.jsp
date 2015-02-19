@@ -205,7 +205,7 @@
 							<span class="caret theme"></span>
 							<c:if test="${eventCount gt 0}">
 								<div class="message_div">
-									<span class="badge theme">1</span>
+									<span class="badge theme">${eventCount}</span>
 								</div>
 							</c:if>
 							<ul class="dropdown-menu" style="margin-top: 3px;">

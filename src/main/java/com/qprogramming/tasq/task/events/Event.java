@@ -31,6 +31,9 @@ public class Event {
 
 	@Enumerated(EnumType.STRING)
 	private LogType logtype;
+	
+	@Column
+	private String who;
 
 	@Column(length = 4000)
 	private String message;
@@ -70,6 +73,14 @@ public class Event {
 
 	public void setAccount(Account account) {
 		this.account = account;
+	}
+
+	public String getWho() {
+		return who;
+	}
+
+	public void setWho(String who) {
+		this.who = who;
 	}
 
 	public LogType getLogtype() {

@@ -278,3 +278,29 @@ tr.blocked{
 	top: 40px;
 	left: 45px;
 }
+.eventSummary.unread{
+	font-weight: bold;
+}
+
+tr.read i{
+	color: lightgray !important;
+}
+tr.unread i{
+	color: black !important;
+}
+tr.unread .eventSummary{
+	font-weight: bold;
+}
+
+
+a.showMore{
+	color:black;
+}
+blockquote.eventMore{
+	display:none;
+}
+
+blockquote.eventMore:hover .buttons_panel{
+	display: inline;
+}
+
