@@ -92,7 +92,7 @@ public class Account implements java.io.Serializable, UserDetails {
 	private Collection<GrantedAuthority> authorities;
 
 	/**
-	 * [0] Task ID [1] active task start time
+	 * [0] Task ID [1] active task start time [2] task description
 	 */
 	@Column
 	private Object[] active_task;
@@ -269,8 +269,9 @@ public class Account implements java.io.Serializable, UserDetails {
 		return active_task[1];
 	}
 
-	public void startTimerOnTask(String taskID) {
-		active_task = new Object[] { taskID, new DateTime() };
+	public void startTimerOnTask(Task task) {
+		active_task = new Object[] { task.getId(), new DateTime(),
+				task.getDescription() };
 	}
 
 	public void setActive_task(Object[] task) {

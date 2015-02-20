@@ -167,7 +167,12 @@ public class ProjetController {
 
 	@RequestMapping(value = "projects", method = RequestMethod.GET)
 	public String listProjects(Model model) {
-		List<Project> projects = projSrv.findAllByUser();
+		List<Project> projects;
+		if (Roles.isAdmin()) {
+			projects = projSrv.findAll();
+		} else {
+			projects = projSrv.findAllByUser();
+		}
 		Collections.sort(projects, new ProjectSorter(
 				ProjectSorter.SORTBY.LAST_VISIT, Utils.getCurrentAccount()
 						.getActive_project(), true));
@@ -416,8 +421,8 @@ public class ProjetController {
 		List<WorkLog> events = wrkLogSrv.findProjectCreateCloseEvents(project);
 		// Fill maps
 		for (WorkLog workLog : events) {
-			//Don't calculate for subtask ( not important )
-			if (workLog.getTask()!=null && !workLog.getTask().isSubtask()) {
+			// Don't calculate for subtask ( not important )
+			if (workLog.getTask() != null && !workLog.getTask().isSubtask()) {
 				LocalDate date = new LocalDate(workLog.getRawTime());
 				if (LogType.CREATE.equals(workLog.getType())) {
 					Integer value = created.get(date.toString());

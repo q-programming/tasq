@@ -194,12 +194,12 @@
 				<c:set var="tr_bg" value="" />
 				<c:set var="link" value="" />
 				<c:if test="${task.state eq 'CLOSED'}">
-					<c:set var="tr_bg" value="background: rgba(50, 205, 81, 0.12);" />
+					<c:set var="tr_bg" value="closed" />
 				</c:if>
 				<c:if test="${task.state eq 'BLOCKED'}">
-					<c:set var="tr_bg" value="background: rgba(205, 50, 50, 0.12);" />
+					<c:set var="tr_bg" value="blocked" />
 				</c:if>
-				<tr style="${tr_bg}">
+				<tr class="${tr_bg}">
 			</c:if>
 			<td class="export_cell export-hidden"><input class="export"
 				type="checkbox" name="tasks" value="${task.id}"></td>
@@ -215,11 +215,11 @@
 							</c:if>">[${task.id}]
 					${task.name}</a>
 			</td>
-			<c:if test="${not task.estimated}">
-				<td>${task.loggedWork}</td>
-			</c:if>
-			<c:if test="${task.estimated}">
-				<td><div class="progress" style="width: 50px">
+<%-- 			<c:if test="${not task.estimated}"> --%>
+<%-- 				<td>${task.loggedWork}</td> --%>
+<%-- 			</c:if> --%>
+<%-- 			<c:if test="${task.estimated}"> --%>
+				<td><div class="progress" style="width: 50px;">
 						<c:set var="logged_class"></c:set>
 						<c:set var="percentage">${100-task.percentage_left}</c:set>
 						<c:if
@@ -237,11 +237,11 @@
 						<c:if test="${task.state eq 'TO_DO'}">
 							<c:set var="percentage">0</c:set>
 						</c:if>
-						<div class="progress-bar ${logged_class}" role="progressbar"
+						<div class="progress-bar ${logged_class} a-tooltip" role="progressbar"
 							aria-valuenow="${percentage}" aria-valuemin="0"
-							aria-valuemax="100" style="width:${percentage}%"></div>
+							aria-valuemax="100" style="width:${percentage}%;" title="${percentage}%"></div>
 					</div></td>
-			</c:if>
+<%-- 			</c:if> --%>
 			<td class="${blinker}"><t:state state="${task.state}"></t:state></td>
 			<td><c:if test="${empty task.assignee}">
 					<i><s:message code="task.unassigned" /></i>

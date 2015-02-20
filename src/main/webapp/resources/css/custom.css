@@ -267,3 +267,40 @@ a.anchor {
 	top: -60px;
 	visibility: hidden;
 }
+tr.closed{
+	background: rgba(50, 205, 81, 0.12);
+}
+tr.blocked{
+	background: rgba(205, 50, 50, 0.12);
+}
+.message_div {
+	position: absolute;
+	top: 40px;
+	left: 45px;
+}
+.eventSummary.unread{
+	font-weight: bold;
+}
+
+tr.read i{
+	color: lightgray !important;
+}
+tr.unread i{
+	color: black !important;
+}
+tr.unread .eventSummary{
+	font-weight: bold;
+}
+
+
+a.showMore{
+	color:black;
+}
+blockquote.eventMore{
+	display:none;
+}
+
+blockquote.eventMore:hover .buttons_panel{
+	display: inline;
+}
+

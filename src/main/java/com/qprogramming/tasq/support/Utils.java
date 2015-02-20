@@ -112,6 +112,32 @@ public class Utils {
 		return result;
 	}
 	
+	/**
+	 * Returns date in simple format
+	 * @param date
+	 * @return
+	 */
+	public static Date convertStringToDateAndTime(String date) {
+		Date result = null;
+		try {
+			result = new SimpleDateFormat("dd-M-yyyy HH:mm").parse(date);
+		} catch (ParseException e) {
+			LOG.error(e.getMessage());
+		}
+		return result;
+	}
+	/**
+	 * Returns strng with date and time 
+	 * @param date
+	 * @return
+	 */
+	public static String convertDateTimeToString(Date date) {
+		String result = null;
+		result = new SimpleDateFormat("dd-M-yyyy HH:mm").format(date);
+		return result;
+	}
+	
+	
 	public static String convertDateToString(Date date) {
 		String result = null;
 		result = new SimpleDateFormat("dd-M-yyyy").format(date);

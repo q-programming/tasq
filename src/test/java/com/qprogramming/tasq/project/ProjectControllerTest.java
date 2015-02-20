@@ -263,12 +263,16 @@ public class ProjectControllerTest {
 	public void listProjectsTest() {
 		List<Project> list = createList(5);
 		testAccount.setActive_project(3L);
+		testAccount.setRole(Roles.ROLE_USER);
 		when(projSrv.findAllByUser()).thenReturn(list);
+		when(projSrv.findAll()).thenReturn(list);
 		when(
 				msg.getMessage(anyString(), any(Object[].class), anyString(),
 						any(Locale.class))).thenReturn("MSG");
 		projectCtr.listProjects(modelMock);
-		verify(modelMock, times(1)).addAttribute("projects", list);
+		testAccount.setRole(Roles.ROLE_ADMIN);
+		projectCtr.listProjects(modelMock);
+		verify(modelMock, times(2)).addAttribute("projects", list);
 		Assert.assertEquals(new Long(3), list.get(0).getId());
 	}
 

@@ -60,7 +60,7 @@ public class TaskForm {
 		setName(task.getName());
 		setProject(task.getProject().getId());
 		setDescription(task.getDescription());
-		setNo_estimation(task.getEstimated().toString());
+		setNo_estimation(task.isEstimated().toString());
 		setEstimate(task.getEstimate());
 		setStory_points(task.getStory_points() != null ? task.getStory_points()
 				.toString() : "");

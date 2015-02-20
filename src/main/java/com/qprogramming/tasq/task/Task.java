@@ -252,6 +252,10 @@ public class Task implements java.io.Serializable {
 		this.state = state;
 	}
 
+	public Boolean isEstimated() {
+		return estimated;
+	}
+
 	public Boolean getEstimated() {
 		return estimated;
 	}
@@ -439,14 +443,16 @@ public class Task implements java.io.Serializable {
 	 */
 
 	public float getPercentage_logged() {
-		long estimate_milis = getRawEstimate().toStandardDuration().getMillis();
-		long remaining_milis = getRawRemaining().toStandardDuration()
+		long estimate_milis = PeriodHelper.toStandardDuration(getRawEstimate())
 				.getMillis();
-		long logged_milis = getRawLoggedWork().toStandardDuration().getMillis();
+		long remaining_milis = PeriodHelper.toStandardDuration(
+				getRawRemaining()).getMillis();
+		long logged_milis = PeriodHelper.toStandardDuration(getRawLoggedWork())
+				.getMillis();
 		if (estimate_milis > 0) {
 			return logged_milis * 100 / estimate_milis;
 			// task was without estimation time but is estimated type
-		} else if (estimate_milis <= 0 & estimated) {
+		} else {
 			if (remaining_milis == 0 && logged_milis != 0) {
 				return 100;
 			} else if (remaining_milis == 0 && logged_milis == 0) {
@@ -454,11 +460,8 @@ public class Task implements java.io.Serializable {
 			} else {
 				return logged_milis * 100 / (remaining_milis + logged_milis);
 			}
-		} else {
-			return 0;
 		}
-
-	};
+	}
 
 	public boolean getLowerThanEstimate() {
 		Period loggedAndLeft = PeriodHelper.plusPeriods(getRawLoggedWork(),
@@ -499,7 +502,7 @@ public class Task implements java.io.Serializable {
 
 	public void reduceRemaining(Period activity) {
 		remaining = PeriodHelper.minusPeriods(remaining, activity);
-		if (remaining.toStandardDuration().getMillis() < 0) {
+		if (PeriodHelper.toStandardDuration(remaining).getMillis() < 0) {
 			remaining = new Period();
 		}
 	}

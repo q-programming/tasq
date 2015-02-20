@@ -17,14 +17,18 @@ import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.ProjectSorter;
 import com.qprogramming.tasq.task.Task;
+import com.qprogramming.tasq.task.events.Event;
+import com.qprogramming.tasq.task.events.EventsService;
 
 @Secured("ROLE_USER")
 @ControllerAdvice
 public class HomeControllerAdvice {
 	private AccountService accSrv;
+	private EventsService eventSrv;
 
 	@Autowired
-	public HomeControllerAdvice(AccountService accSrv) {
+	public HomeControllerAdvice(AccountService accSrv, EventsService eventSrv) {
+		this.eventSrv = eventSrv;
 		this.accSrv = accSrv;
 
 	}
@@ -58,5 +62,16 @@ public class HomeControllerAdvice {
 			return tasks;
 		}
 		return null;
+	}
+	
+	@ModelAttribute("eventCount")
+	public int getEvents() {
+		Authentication authentication = SecurityContextHolder.getContext()
+				.getAuthentication();
+		if (!(authentication instanceof AnonymousAuthenticationToken)) {
+			List<Event> events = eventSrv.getUnread(); 
+			return events.size();
+		}
+		return 0;
 	}
 }

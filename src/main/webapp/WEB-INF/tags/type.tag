@@ -37,7 +37,7 @@
 				title="<s:message code="task.type.idle" />"></i>
 		</c:when>
 		<c:when test="${type eq 'SUBTASK'}">
-			<i class="fa fa-lg fa-sitemap a-tooltip ${list_view}"
+			<i class="fa fa-lg fa-check-circle-o a-tooltip ${list_view}"
 				title="<s:message code="task.type.subtask" />"></i>
 		</c:when>
 	</c:choose>

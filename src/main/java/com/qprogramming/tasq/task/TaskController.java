@@ -54,8 +54,11 @@ import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
 import com.qprogramming.tasq.task.comments.Comment;
 import com.qprogramming.tasq.task.comments.CommentsRepository;
+import com.qprogramming.tasq.task.events.EventsService;
 import com.qprogramming.tasq.task.link.TaskLinkService;
 import com.qprogramming.tasq.task.link.TaskLinkType;
+import com.qprogramming.tasq.task.watched.WatchedTask;
+import com.qprogramming.tasq.task.watched.WatchedTaskService;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
@@ -93,6 +96,9 @@ public class TaskController {
 
 	@Autowired
 	private TaskLinkService linkService;
+
+	@Autowired
+	private WatchedTaskService watchSrv;
 
 	@Autowired
 	private CommentsRepository commRepo;
@@ -199,7 +205,11 @@ public class TaskController {
 						fillCreateTaskModel(model);
 						return null;
 					}
-					wlSrv.addActivityLog(task, null, LogType.TASKSPRINTADD);
+					String message = "";
+					if (task.isEstimated() && project.getTimeTracked()) {
+						message = task.getEstimate();
+					}
+					wlSrv.addActivityLog(task, message, LogType.TASKSPRINTADD);
 				}
 				// TODO
 			}
@@ -291,7 +301,7 @@ public class TaskController {
 					PeriodHelper.outFormat(difference), difference,
 					LogType.ESTIMATE);
 		}
-		if (!task.getEstimated().equals(
+		if (!task.isEstimated().equals(
 				!Boolean.parseBoolean(taskForm.getNo_estimation()))) {
 			message.append("Estimated changed to ");
 			message.append(!Boolean.parseBoolean(taskForm.getNo_estimation()));
@@ -379,6 +389,7 @@ public class TaskController {
 			List<Task> subtasks = taskSrv.findSubtasks(task);
 			model.addAttribute("subtasks", subtasks);
 		}
+		model.addAttribute("watching", watchSrv.isWatching(task.getId()));
 		model.addAttribute("task", task);
 		model.addAttribute("links", links);
 		return "task/details";
@@ -730,7 +741,7 @@ public class TaskController {
 							Utils.getCurrentLocale()));
 					return "redirect:" + request.getHeader("Referer");
 				}
-				account.startTimerOnTask(taskID);
+				account.startTimerOnTask(task);
 				accSrv.update(account);
 				if (task.getState().equals(TaskState.TO_DO)) {
 					task.setState(TaskState.ONGOING);
@@ -783,6 +794,7 @@ public class TaskController {
 					}
 					task.setAssignee(assignee);
 					taskSrv.save(task);
+					watchSrv.addToWatchers(task, assignee);
 					wlSrv.addActivityLog(task, assignee.toString(),
 							LogType.ASSIGNED);
 					MessageHelper.addSuccessAttribute(
@@ -815,6 +827,7 @@ public class TaskController {
 		task.setAssignee(assignee);
 		taskSrv.save(task);
 		wlSrv.addActivityLog(task, assignee.toString(), LogType.ASSIGNED);
+		watchSrv.startWatching(task);
 		return new ResultData(ResultData.OK, msg.getMessage("task.assinged.me",
 				null, Utils.getCurrentLocale()) + " " + task.getId());
 	}
@@ -895,8 +908,8 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/getTasks", method = RequestMethod.GET)
-	public @ResponseBody List<DisplayTask> showTasks(
-			@RequestParam Long projectID,
+	public @ResponseBody
+	List<DisplayTask> showTasks(@RequestParam Long projectID,
 			@RequestParam(required = false) String taskID,
 			@RequestParam String term, HttpServletResponse response) {
 		response.setContentType("application/json");
@@ -921,8 +934,9 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/getSubTasks", method = RequestMethod.GET)
-	public @ResponseBody List<DisplayTask> showSubTasks(
-			@RequestParam String taskID, HttpServletResponse response) {
+	public @ResponseBody
+	List<DisplayTask> showSubTasks(@RequestParam String taskID,
+			HttpServletResponse response) {
 		response.setContentType("application/json");
 		List<Task> allSubTasks = taskSrv.findSubtasks(taskID);
 		List<DisplayTask> result = new ArrayList<DisplayTask>();
@@ -1021,11 +1035,11 @@ public class TaskController {
 
 	private boolean checkIfNotEstimated(Task task, Project project) {
 		if (!project.getTimeTracked()) {
-			if (task.getStory_points() == 0) {
+			if (task.getStory_points() == 0 && task.isEstimated()) {
 				return true;
 			}
 		} else {
-			if (task.getEstimate().equals("0m")) {
+			if (task.getEstimate().equals("0m") && task.isEstimated()) {
 				return true;
 			}
 

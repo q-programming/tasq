@@ -1,29 +1,21 @@
 package com.qprogramming.tasq.agile;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.junit.Assert;
@@ -34,17 +26,12 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
-import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.MockSecurityContext;
@@ -54,8 +41,8 @@ import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
+import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.support.ResultData;
-import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.web.Message;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskPriority;
@@ -67,6 +54,7 @@ import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
 @RunWith(MockitoJUnitRunner.class)
+@PropertySource("classpath:/project.properties")
 public class SprintControllerTest {
 
 	private static final String TEST = "TEST";
@@ -95,6 +83,9 @@ public class SprintControllerTest {
 	private SprintRepository sprintRepoMock;
 	@Mock
 	private WorkLogService wrkLogSrvMock;
+	
+	@Autowired
+	PeriodHelper periodHelper;
 
 	@Mock
 	private Authentication authMock;
@@ -116,6 +107,7 @@ public class SprintControllerTest {
 
 	@Before
 	public void setUp() {
+		//ReflectionTestUtils.setField(PeriodHelper.class, "hours", 8);
 		testAccount = new Account(EMAIL, "", Roles.ROLE_USER);
 		project = new Project();
 		project.setName(TEST_PROJ);
@@ -272,7 +264,7 @@ public class SprintControllerTest {
 		// Add to active sprint
 		sprint.setActive(true);
 		sprintCtrl.assignSprint(TEST, TEST, 1L, requestMock, raMock);
-		verify(wrkLogSrvMock, times(1)).addActivityLog(task, null,
+		verify(wrkLogSrvMock, times(1)).addActivityLog(task, "",
 				LogType.TASKSPRINTADD);
 		// Task not esstimated when adding to active
 		task.setStory_points(0);
@@ -376,7 +368,7 @@ public class SprintControllerTest {
 		list.add(sprint);
 		when(sprintRepoMock.findByProjectId(1L)).thenReturn(list);
 		ResultData result = sprintCtrl.startSprint(2L, 1L, "06-01-2015",
-				"12-01-2015", modelMock, requestMock, raMock);
+				"12-01-2015", "12:25","23:15");
 		Assert.assertEquals(ResultData.WARNING, result.code);
 
 	}
@@ -408,18 +400,18 @@ public class SprintControllerTest {
 		when(taskSrvMock.findAllBySprint(sprint2)).thenReturn(taskList);
 		testAccount.setRole(Roles.ROLE_USER);
 		ResultData result = sprintCtrl.startSprint(2L, 1L, "06-02-2015",
-				"12-02-2015", modelMock, requestMock, raMock);
+				"12-02-2015", "12:25","23:15");
 		Assert.assertEquals(ResultData.ERROR, result.code);
 		testAccount.setRole(Roles.ROLE_ADMIN);
 		result = sprintCtrl.startSprint(2L, 1L, "06-02-2015", "12-02-2015",
-				modelMock, requestMock, raMock);
+				"12:25","23:15");
 		Assert.assertEquals(ResultData.OK, result.code);
 		verify(sprintRepoMock, times(1)).save(any(Sprint.class));
 		verify(wrkLogSrvMock, times(1)).addWorkLogNoTask(null, project,
 				LogType.SPRINT_START);
 		taskList.get(1).setStory_points(0);
 		result = sprintCtrl.startSprint(2L, 1L, "06-02-2015", "12-02-2015",
-				modelMock, requestMock, raMock);
+				"12:25","23:15");
 		Assert.assertEquals(ResultData.WARNING, result.code);
 	}
 

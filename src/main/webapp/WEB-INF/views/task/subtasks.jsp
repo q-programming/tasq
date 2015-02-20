@@ -62,7 +62,7 @@ function showSubTasks(target,parentTask)
 function getTaskTypeMsg(type){
 	switch(type){
 		case "SUBTASK":
-			var type='<i class="fa fa-lg fa-fw fa-sitemap"></i> ';
+			var type='<i class="fa fa-lg fa-fw fa-check-circle-o"></i> ';
 			return type;
 		case "SUBBUG":
 			var type='<i class="fa fa-lg fa-fw fa-bug"></i> ';

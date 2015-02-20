@@ -17,9 +17,10 @@
 			class="<c:if test="${task.state eq 'CLOSED' }">
 							closed
 							</c:if>">[${task.id}]
-			${task.name}</a> <span
-			class="badge theme <c:if test="${task.story_points == 0}">zero</c:if>">${task.story_points}
-		</span>
+			${task.name}</a> 
+			<c:if test="${task.story_points ne 0}">
+				<span class="badge theme">${task.story_points}</span>
+			</c:if>
 	</div>
 	<div
 		style="display: table; width: 100%; margin-top: 5px; min-height: 30px;">
