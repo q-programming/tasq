@@ -76,37 +76,42 @@ public class EventsService {
 	public void addWatchEvent(WorkLog log, String string, Date when) {
 		String taskID = log.getTask().getId();
 		WatchedTask task = watchSrv.getByTask(taskID);
-		for (Account account : task.getWatchers()) {
-			if (!account.equals(Utils.getCurrentAccount())) {
-				Event event = new Event();
-				event.setTask(taskID);
-				event.setAccount(account);
-				event.setWho(log.getAccount().toString());
-				event.setUnread(true);
-				event.setLogtype((LogType) log.getType());
-				event.setDate(when);
-				event.setType(getEventType((LogType) log.getType()));
-				event.setMessage(string);
-				eventsRepo.save(event);
-				if (account.getEmail_notifications()) {
-					Locale locale = new Locale(account.getLanguage());
-					String eventStr = msg.getMessage(
-							((LogType) log.getType()).getCode(), null, locale);
-					String subject = msg.getMessage(
-							"event.newEvent",
-							new Object[] { log.getTask().getId(),
-									Utils.getCurrentAccount(), eventStr },
-							locale);
-					String message = msg.getMessage(
-							"event.newEvent.body",
-							new Object[] { account.toString(),
-									Utils.getCurrentAccount(), eventStr,
-									string, log.getTask().getId() }, locale);
-					LOG.info(account.getEmail());
-					LOG.info(subject);
-					LOG.info(message);
-					// if(mailer.sendMail(mailer.NOTIFICATION, email, subject,
-					// message)){
+		if (task != null) {
+			for (Account account : task.getWatchers()) {
+				if (!account.equals(Utils.getCurrentAccount())) {
+					Event event = new Event();
+					event.setTask(taskID);
+					event.setAccount(account);
+					event.setWho(log.getAccount().toString());
+					event.setUnread(true);
+					event.setLogtype((LogType) log.getType());
+					event.setDate(when);
+					event.setType(getEventType((LogType) log.getType()));
+					event.setMessage(string);
+					eventsRepo.save(event);
+					if (account.getEmail_notifications()) {
+						Locale locale = new Locale(account.getLanguage());
+						String eventStr = msg.getMessage(
+								((LogType) log.getType()).getCode(), null,
+								locale);
+						String subject = msg.getMessage(
+								"event.newEvent",
+								new Object[] { log.getTask().getId(),
+										Utils.getCurrentAccount(), eventStr },
+								locale);
+						String message = msg
+								.getMessage("event.newEvent.body",
+										new Object[] { account.toString(),
+												Utils.getCurrentAccount(),
+												eventStr, string,
+												log.getTask().getId() }, locale);
+						LOG.info(account.getEmail());
+						LOG.info(subject);
+						LOG.info(message);
+						// if(mailer.sendMail(mailer.NOTIFICATION, email,
+						// subject,
+						// message)){
+					}
 				}
 			}
 		}
