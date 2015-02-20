@@ -7,14 +7,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.account.Account;
-import com.qprogramming.tasq.config.LocaleConfig;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.web.MessageHelper;
 
@@ -43,8 +41,9 @@ public class MailerController {
 		String link = Utils.getBaseURL() + "/signup";
 		String message = msg.getMessage("panel.invite.body", new Object[] {
 				sender.toString(), link }, mailer.getDefaultLang());
-		LOG.debug(subject);
-		LOG.debug(message);
+		LOG.info(email);
+		LOG.info(subject);
+		LOG.info(message);
 		//if(mailer.sendMail(mailer.NOTIFICATION, email, subject, message)){
 		MessageHelper.addSuccessAttribute(
 				ra,

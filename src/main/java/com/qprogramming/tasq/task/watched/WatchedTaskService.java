@@ -64,20 +64,23 @@ public class WatchedTaskService {
 	 * @param task
 	 */
 	@Transactional
+	public WatchedTask addToWatchers(Task task,Account account) {
+		WatchedTask watchedTask = getWatchedTask(task);
+		watchedTask.getWatchers().add(account);
+		return watchRepo.save(watchedTask);
+	}
+	
+	
+	/**
+	 * Starts watching as currently logged-in user Current user will be added to
+	 * watchers list
+	 * 
+	 * @param task
+	 */
+	@Transactional
 	public WatchedTask startWatching(Task task) {
-		WatchedTask watchedTask = getByTask(task);
-		if (watchedTask == null) {
-			watchedTask = new WatchedTask();
-		}
-		Set<Account> watchers = watchedTask.getWatchers();
-		if (watchers == null) {
-			watchers = new HashSet<Account>();
-		}
-		watchedTask.setId(task.getId());
-		watchedTask.setType((TaskType) task.getType());
-		watchers.add(Utils.getCurrentAccount());
-		watchedTask.setWatchers(watchers);
-		watchedTask.setName(task.getName());
+		WatchedTask watchedTask = getWatchedTask(task);
+		watchedTask.getWatchers().add(Utils.getCurrentAccount());
 		return watchRepo.save(watchedTask);
 	}
 
@@ -126,4 +129,20 @@ public class WatchedTaskService {
 		watchRepo.delete(wpDelete);
 	}
 
+	private WatchedTask getWatchedTask(Task task){
+		WatchedTask watchedTask = getByTask(task);
+		if (watchedTask == null) {
+			watchedTask = new WatchedTask();
+		}
+		Set<Account> watchers = watchedTask.getWatchers();
+		if (watchers == null) {
+			watchers = new HashSet<Account>();
+		}
+		watchedTask.setId(task.getId());
+		watchedTask.setType((TaskType) task.getType());
+		watchedTask.setWatchers(watchers);
+		watchedTask.setName(task.getName());
+		watchedTask.setWatchers(watchers);
+		return watchedTask;
+	}
 }

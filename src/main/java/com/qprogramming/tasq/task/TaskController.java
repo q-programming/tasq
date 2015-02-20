@@ -794,6 +794,7 @@ public class TaskController {
 					}
 					task.setAssignee(assignee);
 					taskSrv.save(task);
+					watchSrv.addToWatchers(task, assignee);
 					wlSrv.addActivityLog(task, assignee.toString(),
 							LogType.ASSIGNED);
 					MessageHelper.addSuccessAttribute(
@@ -826,6 +827,7 @@ public class TaskController {
 		task.setAssignee(assignee);
 		taskSrv.save(task);
 		wlSrv.addActivityLog(task, assignee.toString(), LogType.ASSIGNED);
+		watchSrv.startWatching(task);
 		return new ResultData(ResultData.OK, msg.getMessage("task.assinged.me",
 				null, Utils.getCurrentLocale()) + " " + task.getId());
 	}

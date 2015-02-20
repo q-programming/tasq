@@ -212,9 +212,21 @@
 								<li><a href='<c:url value="/settings"/>'><i
 										class="fa fa-cog"></i> <s:message code="menu.settings"
 											text="Settings" /></a></li>
-								<li><a href='<c:url value="/events"/>'>
-								<i class="fa fa-bell"></i>
-								 Watches and Notifications</a></li>
+								<li>
+								<c:if test="${eventCount eq 0}">
+									<a href='<c:url value="/events"/>'>
+									<i class="fa fa-bell-o"></i>&nbsp;<s:message code="events.events"/>
+								 </a>
+								</c:if>
+								<c:if test="${eventCount gt 0}">
+									<a href='<c:url value="/events"/>'>
+									<i class="fa fa-bell"></i>&nbsp;<s:message code="events.events"/>&nbsp;(${eventCount})
+								 	</a>
+								</c:if>
+								 </li>
+								 <li><a href='<c:url value="/watching"/>'>
+								<i class="fa fa-eye"></i>&nbsp;<s:message code="events.watching"/>
+								 </a></li>
 								<li class="divider"></li>
 								<li><a href='<s:url value="/logout"></s:url>'><i
 										class="fa fa-power-off"></i> <s:message code="menu.logout"

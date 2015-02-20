@@ -13,6 +13,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.task.worklog.LogType;
 
 @Entity
@@ -99,7 +100,11 @@ public class Event {
 		this.message = message;
 	}
 
-	public Date getDate() {
+	public String getDate() {
+		return Utils.convertDateTimeToString(date);
+	}
+	
+	public Date getRawDate() {
 		return date;
 	}
 

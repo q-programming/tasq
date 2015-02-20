@@ -37,7 +37,7 @@ public class EventsController {
 	}
 
 	/**
-	 * Returns int how many accounts is currently watching task with id
+	 * Sets event with id as read
 	 * 
 	 * @param id
 	 * @return
@@ -59,11 +59,37 @@ public class EventsController {
 		ResultData result = new ResultData();
 		List<Event> events = eventSrv.getEvents();
 		for (Event event : events) {
-			if(event.isUnread()){
+			if (event.isUnread()) {
 				event.setUnread(false);
 				eventSrv.save(event);
 			}
 		}
+		result.code = ResultData.OK;
+		return result;
+	}
+
+	/**
+	 * Returns int how many accounts is currently watching task with id
+	 * 
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping(value = "/events/delete", method = RequestMethod.POST)
+	@ResponseBody
+	public ResultData deleteEvent(@RequestParam(value = "id") Long id) {
+		ResultData result = new ResultData();
+		Event event = eventSrv.getById(id);
+		eventSrv.delete(event);
+		result.code = ResultData.OK;
+		return result;
+	}
+
+	@RequestMapping(value = "/events/deleteAll", method = RequestMethod.POST)
+	@ResponseBody
+	public ResultData deleteAllEvents() {
+		ResultData result = new ResultData();
+		List<Event> events = eventSrv.getEvents();
+		eventSrv.delete(events);
 		result.code = ResultData.OK;
 		return result;
 	}
