@@ -33,6 +33,7 @@ import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskPriority;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskType;
+import com.qprogramming.tasq.task.events.EventsService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HomeControllersTest {
@@ -50,6 +51,9 @@ public class HomeControllersTest {
 
 	@Mock
 	private AccountService accSrvMock;
+	
+	@Mock
+	private EventsService eventSrvMock;
 
 	@Mock
 	private TaskService taskSrvMock;
@@ -79,7 +83,7 @@ public class HomeControllersTest {
 		SecurityContextHolder.setContext(securityMock);
 		projSrv = new ProjectService(projRepoMock, accSrvMock);
 		homeCtrl = new HomeController(taskSrvMock, projSrv);
-		homeAdvCtrl = new HomeControllerAdvice(accSrvMock);
+		homeAdvCtrl = new HomeControllerAdvice(accSrvMock,eventSrvMock);
 	}
 
 	@Test

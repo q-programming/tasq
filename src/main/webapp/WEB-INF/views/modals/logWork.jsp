@@ -25,7 +25,7 @@
 					</div>
 					<div>
 						<div style="float: left; margin-right: 50px;">
-							<label><s:message code="main.date" /></label> <input
+							<label><s:message code="main.date" htmlEscape="false"/></label> <input
 								id="datepicker" name="date_logged"
 								style="width: 150px; height: 25px"
 								class="form-control datepicker" type="text" value="">

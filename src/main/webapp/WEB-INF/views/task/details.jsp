@@ -31,19 +31,28 @@
 	<div>
 		<div class="pull-right">
 			<c:if test="${can_edit  && task.state ne'CLOSED'}">
-				<a href="<c:url value="task/edit?id=${task.id}"/>"><button
-						class="btn btn-default btn-sm">
-						<i class="fa fa-pencil"></i>
-						<s:message code="task.edit" />
+				<a href="<c:url value="task/edit?id=${task.id}"/>">
+					<button
+						class="btn btn-default btn-sm a-tooltip" title="<s:message code="task.edit" />">
+						<i class="fa fa-lg fa-pencil"></i>
 					</button></a>
 			</c:if>
+			<button	id="watch" class="btn btn-default btn-sm a-tooltip" title="" data-html="true">
+				<c:if test="${watching}">
+					<i id="watch_icon" class="fa fa-lg fa-eye-slash"></i>
+				</c:if>
+				<c:if test="${not watching}">
+					<i id="watch_icon" class="fa fa-lg fa-eye"></i>
+				</c:if>
+			</button>
+			
 			<c:if test="${can_edit && user.isUser}">
 				<a class="btn btn-default btn-sm a-tooltip delete_task"
 					href="<c:url value="task/delete?id=${task.id}"/>"
 					title="<s:message code="task.delete" text="Delete task" />"
 					data-lang="${pageContext.response.locale}"
 					data-msg='<s:message code="task.delete.confirm"></s:message>'>
-					<i class="fa fa-trash-o"></i>
+					<i class="fa fa-lg fa-trash-o"></i>
 				</a>
 			</c:if>
 		</div>
@@ -399,10 +408,10 @@
 				<div id="subTask" class="form-group togglerContent" style="padding-left: 15px;">
 					<table class="table table-hover table-condensed button-table">
 						<c:forEach var="subTask" items="${subtasks}">
-							<tr>
+							<tr class="<c:if test="${subTask.state eq 'CLOSED' }">closed</c:if>"> 
 								<td style="width:30px"><t:type type="${subTask.type}" list="true" /></td>
 								<td style="width: 30px"><t:priority priority="${subTask.priority}" list="true" /></td>
-								<td><a style="color: inherit;" href="<c:url value="subtask?id=${subTask.id}"/>">[${subTask.id}] ${subTask.name}</a></td>
+								<td><a style="color: inherit;<c:if test="${subTask.state eq 'CLOSED' }">text-decoration: line-through;</c:if>" href="<c:url value="subtask?id=${subTask.id}"/>">[${subTask.id}] ${subTask.name}</a></td>
 								<td style="width: 100px"><t:state state="${subTask.state}" /></td>
 							</tr>
 						</c:forEach>
@@ -422,16 +431,19 @@
 					</h5>
 				</div>
 				<div>
-					<div>
-						<s:message code="task.owner" />
-						: <img data-src="holder.js/20x20"
-							style="height: 20px; padding-right: 5px;"
-							src="<c:url value="/userAvatar/${task.owner.id}"/>" /><a
-							href="<c:url value="/user?id=${task.owner.id}"/>">${task.owner}</a>
+					<div style="display: table">
+						<div style="display: table-cell;min-width: 100px">
+							<s:message code="task.owner" />:
+						</div>
+						<div style="display: table-cell">
+							<img data-src="holder.js/20x20"
+								style="height: 20px; padding-right: 5px;"
+								src="<c:url value="/userAvatar/${task.owner.id}"/>" /><a
+								href="<c:url value="/user?id=${task.owner.id}"/>">${task.owner}</a>
+						</div>	
 					</div>
-					<div style="display: table-cell; padding-left: 20px; display: none"
+					<div style="display:none;"
 						id="assign_div">
-						<div>
 							<form id="assign" action="<c:url value="/task/assign"/>"
 								method="post">
 								<input type="hidden" name="taskID" value="${task.id}">
@@ -467,30 +479,31 @@
 									</tr>
 								</table>
 							</form>
-						</div>
 					</div>
-					<div id="assign_button_div">
+					<div id="assign_button_div" style="display: table">
+						<div style="display: table-cell;min-width: 100px">
+								<s:message code="task.assignee" />:
+						</div>
 						<div style="display: table-cell;">
 							<c:if test="${empty task.assignee}">
-								<s:message code="task.assignee" />: <i><s:message
-										code="task.unassigned" /></i>
+								<i><s:message code="task.unassigned" /></i>
 							</c:if>
 							<c:if test="${not empty task.assignee}">
-								<s:message code="task.assignee" /> : <img
+								<img
 									data-src="holder.js/20x20"
-									style="height: 20px; padding-right: 5px;"
+									style="height: 20px;"
 									src="<c:url value="/userAvatar/${task.assignee.id}"/>" />
 								<a href="<c:url value="/user?id=${task.assignee.id}"/>">${task.assignee}</a>
 							</c:if>
-						</div>
-						<c:if test="${user.isUser}">
-							<div style="display: table-cell; padding-left: 5px">
-								<span class="btn btn-default btn-sm a-tooltip"
-									id="assign_button" title="<s:message code="task.assign"/>">
+							<c:if test="${user.isUser}">
+<!-- 								<div style="display: table-cell; padding-left: 5px"> -->
+									<span class="btn btn-default btn-sm a-tooltip"
+										id="assign_button" title="<s:message code="task.assign"/>">
 									<i class="fa fa-lg fa-user-plus"></i>
-								</span>
-							</div>
-						</c:if>
+									</span>
+<!-- 								</div> -->
+							</c:if>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -677,6 +690,7 @@
 <script>
 $(document).ready(function($) {
 	taskID = "${task.id}";
+	updateWatchers();
 	//--------------------------------------Coments----------------------------
 			function toggle_comment() {
 						$('#comments_add').toggle();
@@ -842,6 +856,39 @@ $(document).ready(function($) {
 			    	e.preventDefault();
 			    }
 			});
+			
+			$("#watch").click(function(){
+				var url = '<c:url value="/task/watch"/>';
+				$.post(url,{id:taskID},function(result){
+					if(result.code == 'ERROR'){
+						showError(result.message);
+					}
+					else{
+						showSuccess(result.message);
+						$("#watch_icon").toggleClass("fa-eye");
+						$("#watch_icon").toggleClass("fa-eye-slash");
+						updateWatchers();
+					}
+				});
+			});
+			
+			function updateWatchers(){
+				var startwatch = "<s:message code="task.watch.start" htmlEscape="false"/>";
+				var stopwatch = "<s:message code="task.watch.stop" htmlEscape="false"/>";
+				var current = '<s:message code="task.watching"/>';
+				var url = '<c:url value="/task/watchersCount"/>';
+				var msg;
+				if($("#watch_icon").hasClass("fa-eye")){
+					msg = startwatch + '<br>';
+				}else{
+					msg = stopwatch + '<br>'; 
+				}
+				
+				$.get(url,{id:taskID},function(result){
+					var watchers = result;
+					$("#watch").attr('data-original-title',msg + current + watchers);
+				});
+			}
 			
 $(document).on("click",".delete_task",function(e) {
 					var msg = '<p style="text-align:center"><i class="fa fa-lg fa-exclamation-triangle" style="display: initial;"></i>&nbsp'

@@ -126,6 +126,17 @@ public class Utils {
 		}
 		return result;
 	}
+	/**
+	 * Returns strng with date and time 
+	 * @param date
+	 * @return
+	 */
+	public static String convertDateTimeToString(Date date) {
+		String result = null;
+		result = new SimpleDateFormat("dd-M-yyyy HH:mm").format(date);
+		return result;
+	}
+	
 	
 	public static String convertDateToString(Date date) {
 		String result = null;
