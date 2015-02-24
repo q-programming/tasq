@@ -119,6 +119,21 @@ public class ProjectServiceTest {
 		Assert.assertNotNull(projSrv.activate(1L));
 		verify(accSrvMock,times(1)).update(testAccount);
 	}
+	
+	@Test
+	public void canEditEmptyTest() {
+		when(projRepoMock.findById(1L)).thenReturn(null);
+		Assert.assertFalse(projSrv.canEdit(1L));
+	}
+	
+	@Test
+	public void canEditTest() {
+		when(projRepoMock.findById(1L)).thenReturn(testProject);
+		Assert.assertTrue(projSrv.canEdit(1L));
+		testAccount.setRole(Roles.ROLE_USER);
+		Assert.assertTrue(projSrv.canEdit(1L));
+		
+	}
 
 
 	

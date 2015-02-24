@@ -7,7 +7,13 @@
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<script src="<c:url value="/resources/js/trumbowyg.min.js" />"></script>
+<link href="<c:url value="/resources/css/trumbowyg.min.css" />" rel="stylesheet" media="screen" />
 <security:authentication property="principal" var="user" />
+<c:if test="${user.language ne 'en' }">
+	<script src="<c:url value="/resources/js/trumbowyg.${user.language}.min.js" />"></script>
+</c:if>
+
 <c:set var="taskName_text">
 	<s:message code="task.name" text="Summary" />
 </c:set>
@@ -222,6 +228,18 @@
 </div>
 <script>
 $(document).ready(function($) {
+	var btnsGrps = jQuery.trumbowyg.btnsGrps;
+	$('#description').trumbowyg({
+		lang: '${user.language}',
+		fullscreenable: false,
+		btns: ['formatting',
+	           '|', btnsGrps.design,
+	           '|', 'link',
+	           '|', 'insertImage',
+	           '|', btnsGrps.justify,
+	           '|', btnsGrps.lists]
+	});
+	
 	$(".taskType").click(function(){
 		var type = $(this).data('type');
 		checkTaskTypeEstimate(type);

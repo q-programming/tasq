@@ -543,4 +543,32 @@ public class ProjetController {
 		projSrv.save(project);
 		return "redirect:" + request.getHeader("Referer");
 	}
+
+	@RequestMapping(value = "project/{id}/description", method = RequestMethod.POST)
+	public String changeDescriptions(@PathVariable Long id,
+			@RequestParam(value = "description") String description,
+			RedirectAttributes ra, HttpServletRequest request) {
+		if (!Roles.isUser()) {
+			throw new TasqAuthException(msg);
+		}
+		Project project = projSrv.findById(id);
+		if (project == null) {
+			MessageHelper.addErrorAttribute(
+					ra,
+					msg.getMessage("project.notexists", null,
+							Utils.getCurrentLocale()));
+			return "redirect:/projects";
+		}
+		if (!projSrv.canEdit(id)) {
+			MessageHelper.addErrorAttribute(
+					ra,
+					msg.getMessage("error.accesRights", null,
+							Utils.getCurrentLocale()));
+			return "redirect:" + request.getHeader("Referer");
+		}
+		project.setDescription(description);
+		projSrv.save(project);
+		return "redirect:" + request.getHeader("Referer");
+	}
+
 }

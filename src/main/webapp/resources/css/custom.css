@@ -142,6 +142,9 @@ a.toggler {
 .mod-header:hover a.toggler {
 	display: inline;
 }
+table.togglerContent {
+	width: 100%;
+}
 
 .left-margin {
 	padding-left: 20px;
