@@ -33,6 +33,13 @@
 	$('.dropdown').on('hide.bs.dropdown', function(e) {
 		$(this).find('.dropdown-menu').first().stop(true, true).slideUp();
 	});
+	//In case of session timeout or general server error
+	$( document ).ajaxError(function( event, jqxhr, settings, thrownError ) {
+		var message = '<s:message code="error.session"/>';
+		var url = '<c:url value="/"/>';
+		alert(message);
+		window.location.href = url;
+	});
 
 	$(document).ready(
 			function($) {
@@ -40,8 +47,8 @@
 				var startTime = new Date(0);
 				startTime.setUTCSeconds(task_start_time);
 <%-- only start timer if there is active task--%>
-	<c:if test="${active_task_seconds gt 0}">
-				setTimeout(display, 1000);
+				<c:if test="${active_task_seconds gt 0}">
+					setTimeout(display, 1000);
 				</c:if>
 
 				function display() {
