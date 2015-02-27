@@ -381,7 +381,6 @@ public class TaskController {
 		// TASK
 		Hibernate.initialize(task.getComments());
 		Hibernate.initialize(task.getWorklog());
-		task.setDescription(task.getDescription().replaceAll("\n", "<br>"));
 		Map<TaskLinkType, List<DisplayTask>> links = linkService
 				.findTaskLinks(id);
 		if (!task.isSubtask()) {
