@@ -49,7 +49,10 @@ function IsEmail(email) {
 }
 
 $(document).on("click",".toggler",function(e) {
-	console.log("toggler");
-	console.log($(this).nextAll('.togglerContent').first());
-	$(this).nextAll('.togglerContent').first().toggle();
+	var target = $(this).data('tab');
+	$(this).nextAll(".mod-header-title-txt").toggleClass('closed');
+	$('#'+target).toggle("blind", 500);
+	$(this).toggleClass('closed');
+	$(this).toggleClass('fa-caret-down');
+	$(this).toggleClass('fa-caret-right');
 });

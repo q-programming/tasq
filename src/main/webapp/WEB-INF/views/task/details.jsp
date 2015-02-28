@@ -75,14 +75,14 @@
 			<div>
 				<div class="mod-header">
 					<h5 class="mod-header-title">
-						<a class="toggler" href="#"><i class="fa fa-caret-down"></i></a>
+						<i class="fa fa-caret-down toggler" data-tab="detailsToggle"></i>
 						<span class="mod-header-title-txt">
 							<i class="fa fa-align-left"></i>
 							<s:message code="task.details" />
 						</span>
 					</h5>
 				</div>
-				<table class="togglerContent">
+				<table id="detailsToggle">
 					<tr>
 						<td style="width: 80px;"><s:message code="task.state" /></td>
 						<td class="left-margin">
@@ -177,7 +177,7 @@
 			<div>
 				<div class="mod-header">
 					<h5 class="mod-header-title">
-						<a class="toggler" href="#"><i class="fa fa-caret-down"></i></a>
+						<i class="fa fa-caret-down toggler" data-tab="estimatesToggle"></i>
 						<span class="mod-header-title-txt">
 							<i class="fa fa-lg fa-clock-o"></i>
 							<s:message code="task.timetrack" />
@@ -250,7 +250,7 @@
 				<c:if test="${task.estimate eq '0m' && task.remaining ne '0m'}">
 					<c:set var="remaining_bar">	${100-task.percentage_logged}</c:set>
 				</c:if>
-				<table class="togglerContent" style="width: 400px">
+				<table id="estimatesToggle" style="width: 400px">
 					<tr>
 						<td></td>
 						<td style="width: 150px"></td>
@@ -316,7 +316,7 @@
 			<div>
 				<div class="mod-header">
 					<h5 class="mod-header-title">
-						<a class="toggler" href="#"><i class="fa fa-caret-down"></i></a>
+						<i class="fa fa-caret-down toggler" data-tab="linksToggle"></i>
 						<span class="mod-header-title-txt">
 						<i class="fa fa-lg fa-link fa-flip-horizontal"></i>
 							<s:message code="task.related"/>
@@ -354,7 +354,7 @@
 						</div>
 					</form>
 				</div>
-				<div class="togglerContent" style="max-height: 300px; overflow-y:auto;padding-left:15px">
+				<div id="linksToggle" style="max-height: 300px; overflow-y:auto;padding-left:15px">
 				<div style="display:table;width:100%">
 				<c:forEach var="linkType" items="${links}">
 					<div style="display:table-row">
@@ -395,7 +395,7 @@
 			<div>
 				<div class="mod-header">
 					<h5 class="mod-header-title">
-						<a class="toggler" href="#"><i class="fa fa-caret-down"></i></a>
+						<i class="fa fa-caret-down toggler" data-tab="subtasksToggle"></i>
 						<span class="mod-header-title-txt">
 							<i class="fa fa-lg fa-sitemap"></i>
 							<s:message code="tasks.subtasks" />
@@ -406,7 +406,7 @@
 					</a>
 				</div>
 				<div id="subTask" class="form-group togglerContent" style="padding-left: 15px;">
-					<table class="table table-hover table-condensed button-table">
+					<table id="subtasksToggle" class="table table-hover table-condensed button-table">
 						<c:forEach var="subTask" items="${subtasks}">
 							<tr class="<c:if test="${subTask.state eq 'CLOSED' }">closed</c:if>"> 
 								<td style="width:30px"><t:type type="${subTask.type}" list="true" /></td>

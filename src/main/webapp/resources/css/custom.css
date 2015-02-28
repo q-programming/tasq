@@ -126,6 +126,9 @@ form.form-search:before {
 .mod-header-title-txt{
 	padding-left:12px
 }
+.mod-header-title-txt.closed{
+	padding-left:0px
+}
 .mod-header-title {
 	background: white;
 	display: inline;
@@ -133,14 +136,20 @@ form.form-search:before {
 	font-weight: bold;
 }
 
-a.toggler {
+.toggler {
 	display: none;
 	color: gray;
 	background: white;
+	cursor: pointer;
+}
+.toggler.closed {
+	display: inline;
+	margin-right: 3px;
 }
 
-.mod-header:hover a.toggler {
+.mod-header:hover .toggler {
 	display: inline;
+	cursor: pointer;
 }
 table.togglerContent {
 	width: 100%;
