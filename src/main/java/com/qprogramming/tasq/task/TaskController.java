@@ -403,7 +403,7 @@ public class TaskController {
 			@RequestParam(value = "priority", required = false) String priority,
 			Model model) {
 		if (state == null || state == "") {
-			return "redirect:tasks?state=OPEN";
+			state = "OPEN";
 		}
 		List<Project> projects = projectSrv.findAllByUser();
 		Collections.sort(projects, new ProjectSorter(
