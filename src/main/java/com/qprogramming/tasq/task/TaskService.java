@@ -1,8 +1,10 @@
 package com.qprogramming.tasq.task;
 
+import java.io.File;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.qprogramming.tasq.account.Account;
@@ -11,6 +13,9 @@ import com.qprogramming.tasq.projects.Project;
 
 @Service
 public class TaskService {
+
+	@Value("${tasq.rootdir}")
+	private String tasqRootDir;
 
 	@Autowired
 	private TaskRepository taskRepo;
@@ -61,16 +66,30 @@ public class TaskService {
 		return taskRepo.findByProjectAndSprintsId(sprint.getProject(),
 				sprint.getId());
 	}
+
 	public List<Task> findSubtasks(String taskID) {
 		return taskRepo.findByParent(taskID);
 	}
-	
+
 	public List<Task> findSubtasks(Task task) {
 		return findSubtasks(task.getId());
 	}
 
 	public void deleteAll(List<Task> tasks) {
 		taskRepo.delete(tasks);
-		
+	}
+
+	public void getTaskDirectory(Task task) {
+		String dirPath = getTaskDir(task);
+		File dir = new File(dirPath);
+		if (!dir.exists()) {
+			dir.mkdirs();
+			dir.setWritable(true, false);
+			dir.setReadable(true, false);
+		}
+	}
+
+	public String getTaskDir(Task task) {
+		return tasqRootDir + File.separator + task.getProject().getId()+ File.separator + task.getId();
 	}
 }

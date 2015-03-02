@@ -33,12 +33,16 @@
 	$('.dropdown').on('hide.bs.dropdown', function(e) {
 		$(this).find('.dropdown-menu').first().stop(true, true).slideUp();
 	});
-	//In case of session timeout or general server error
+	
+	//In case of session timeout or general server error. 
+	//But don't catch SyntaxError as most of api replays are not json parsed
 	$( document ).ajaxError(function( event, jqxhr, settings, thrownError ) {
-		var message = '<s:message code="error.session"/>';
-		var url = '<c:url value="/"/>';
-		alert(message);
-		window.location.href = url;
+		if(thrownError.message != "Unexpected end of input"){
+			var message = '<s:message code="error.session"/>';
+			var url = '<c:url value="/"/>';
+			alert(message);
+			window.location.href = url;
+		}
 	});
 
 	$(document).ready(
