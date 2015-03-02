@@ -47,7 +47,7 @@
 <%-- 				<s:message code="task.create" text="Create task"/> --%>
 <!-- 		</h3> -->
 <!-- 	</div> -->
-	<form:form modelAttribute="taskForm" id="taskForm" method="post" style="margin-top: 5px;">
+	<form:form modelAttribute="taskForm" id="taskForm" method="post" style="margin-top: 5px;" enctype="multipart/form-data">
 		<%-- Check all potential errors --%>
 		<c:set var="name_error">
 			<form:errors path="name" />
@@ -253,8 +253,6 @@
 			</div>
 			<table id="fileTable" style="width: 300px;">
 			</table>
-			</div>
-			
 		</div>
 		
 		<%--------------Submit button -----------------%>
@@ -305,7 +303,7 @@ $(document).ready(function($) {
 	function addFileInput(){
 		var choose = ' <s:message code="task.chooseFile" />';
 		var title = "<i class='fa fa-file'></i>"+choose;
-		var inputField = '<input class="file_upload" name="file" type="file" accept=".xls,.xml,.jpg,.png,.gif" title="'+title+'" data-filename-placement="inside">';
+		var inputField = '<input class="file_upload" name="files" type="file" accept=".xls,.xml,.jpg,.png,.gif" title="'+title+'" data-filename-placement="inside">';
 		$("#fileTable").append('<tr><td style="width:300px">'+inputField+'</td></tr>');
 		$("#fileTable tr:last").find(".file_upload").bootstrapFileInput();;
 	}

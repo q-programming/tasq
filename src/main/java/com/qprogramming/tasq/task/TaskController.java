@@ -3,6 +3,8 @@
  */
 package com.qprogramming.tasq.task;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Hibernate;
 import org.joda.time.DateTime;
@@ -36,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.account.Account;
@@ -54,10 +58,8 @@ import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
 import com.qprogramming.tasq.task.comments.Comment;
 import com.qprogramming.tasq.task.comments.CommentsRepository;
-import com.qprogramming.tasq.task.events.EventsService;
 import com.qprogramming.tasq.task.link.TaskLinkService;
 import com.qprogramming.tasq.task.link.TaskLinkType;
-import com.qprogramming.tasq.task.watched.WatchedTask;
 import com.qprogramming.tasq.task.watched.WatchedTaskService;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
@@ -211,9 +213,10 @@ public class TaskController {
 					}
 					wlSrv.addActivityLog(task, message, LogType.TASKSPRINTADD);
 				}
-				// TODO
 			}
 			projectSrv.save(project);
+			// Save files
+			saveTaskFiles(taskForm, task);
 			wlSrv.addActivityLog(task, "", LogType.CREATE);
 			return "redirect:/task?id=" + taskID;
 		}
@@ -514,7 +517,8 @@ public class TaskController {
 		Hibernate.initialize(task.getSubtasks());
 		taskSrv.save(subTask);
 		taskSrv.save(task);
-		// TODO save log
+		// TODO save in subdir?
+		saveTaskFiles(taskForm, subTask);
 		wlSrv.addActivityLog(subTask, "", LogType.SUBTASK);
 		return "redirect:/task?id=" + id;
 	}
@@ -1100,6 +1104,22 @@ public class TaskController {
 		Account currentAccount = Utils.getCurrentAccount();
 		return project.getAdministrators().contains(currentAccount)
 				|| task.getOwner().equals(currentAccount) || Roles.isAdmin();
+	}
+
+	private boolean saveTaskFiles(TaskForm newTaskForm, Task task) {
+		// Save
+		List<MultipartFile> files_array = newTaskForm.getFiles();
+		for (MultipartFile multipartFile : files_array) {
+			File file = new File(taskSrv.getTaskDirectory(task)
+					+ File.separator + multipartFile.getOriginalFilename());
+			try {
+				FileUtils.writeByteArrayToFile(file, multipartFile.getBytes());
+			} catch (IOException e) {
+				LOG.error(e.getMessage());
+				return false;
+			}
+		}
+		return true;
 	}
 
 }

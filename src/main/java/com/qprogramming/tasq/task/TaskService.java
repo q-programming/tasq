@@ -14,7 +14,8 @@ import com.qprogramming.tasq.projects.Project;
 @Service
 public class TaskService {
 
-	@Value("${tasq.rootdir}")
+	
+	@Value("${home.directory}")
 	private String tasqRootDir;
 
 	@Autowired
@@ -79,7 +80,7 @@ public class TaskService {
 		taskRepo.delete(tasks);
 	}
 
-	public void getTaskDirectory(Task task) {
+	public String getTaskDirectory(Task task) {
 		String dirPath = getTaskDir(task);
 		File dir = new File(dirPath);
 		if (!dir.exists()) {
@@ -87,9 +88,10 @@ public class TaskService {
 			dir.setWritable(true, false);
 			dir.setReadable(true, false);
 		}
+		return dirPath;
 	}
 
-	public String getTaskDir(Task task) {
-		return tasqRootDir + File.separator + task.getProject().getId()+ File.separator + task.getId();
+	private String getTaskDir(Task task) {
+		return tasqRootDir + File.separator + task.getProject().getProjectId()+ File.separator + task.getId();
 	}
 }
