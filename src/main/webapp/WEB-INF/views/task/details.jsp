@@ -419,6 +419,65 @@
 				</div>
 			</div>
 			</c:if>
+			<%---------------------FILES -------------%>
+			<c:if test="${fn:length(files) gt 0}">
+			<div>
+				<div class="mod-header">
+					<h5 class="mod-header-title">
+						<i class="fa fa-caret-down toggler" data-tab="filesToggle"></i>
+						<span class="mod-header-title-txt">
+							<i class="fa fa-lg fa-files-o"></i>
+							<s:message code="task.files" />
+						</span>
+					</h5>
+					<a class="btn btn-default btn-xxs a-tooltip pull-right" href="<c:url value="task/${task.id}/fileadd"/>" data-placement="top" data-original-title="<s:message code="task.subtasks.add"/>">
+						<i class="fa fa-plus"></i> <i class="fa fa-lg fa-file"></i>
+					</a>
+				</div>
+				<div>
+					<table id="filesToggle" class="table table-hover table-condensed button-table">
+						<c:forEach items="${files}" var="file">
+							<c:choose>
+								<c:when
+									test="${fn:endsWith(file,'pptx') || fn:endsWith(file,'ppt') || fn:endsWith(file,'pps')}">
+									<c:set var="file_type">fa-file-powerpoint-o</c:set>
+								</c:when>
+								<c:when
+									test="${fn:endsWith(file,'doc') || fn:endsWith(file,'docx') || fn:endsWith(file,'rtf') || fn:endsWith(file,'txt') || fn:endsWith(file,'odt')}">
+									<c:set var="file_type">fa-file-word-o</c:set>
+								</c:when>
+								<c:when
+									test="${fn:endsWith(file,'xls') || fn:endsWith(file,'xlsx') || fn:endsWith(file,'ods') || fn:endsWith(file,'csv')}">
+									<c:set var="file_type">fa-file-excel-o</c:set>
+								</c:when>
+								<c:when
+									test="${fn:endsWith(file,'jpg') || fn:endsWith(file,'png') || fn:endsWith(file,'gif')}">
+									<c:set var="file_type">fa-file-image-o</c:set>
+								</c:when>
+								
+								<c:otherwise>
+									<c:set var="file_type">fa-file-o</c:set>
+								</c:otherwise>
+						</c:choose>
+							<tr>
+								<td>
+									<i class="fa ${file_type}"></i>&nbsp;<a href="<c:url value="task/${task.id}/file?get=${file}"></c:url>">${file}</a>
+								</td>
+								<c:if test="${can_edit && user.isUser || is_assignee}">
+									<td style="width: 30px">
+											<div class="buttons_panel pull-right">
+												<a href='<c:url value="task/${task.id}/remove?file=${file}"/>'>
+													<i class="fa fa-trash-o" style="color:gray"></i>
+												</a>
+											</div>
+									</td>
+								</c:if>
+								</tr>
+						</c:forEach>
+					</table>
+				</div>
+			</div>
+			</c:if>
 		</div>
 		<%--------------------RIGHT SIDE DIV -------------------------------------%>
 		<div class="left-margin" style="display: table-cell; width: 400px">

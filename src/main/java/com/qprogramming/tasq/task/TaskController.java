@@ -4,7 +4,9 @@
 package com.qprogramming.tasq.task;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -21,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Hibernate;
 import org.joda.time.DateTime;
@@ -394,6 +397,7 @@ public class TaskController {
 		model.addAttribute("watching", watchSrv.isWatching(task.getId()));
 		model.addAttribute("task", task);
 		model.addAttribute("links", links);
+		model.addAttribute("files", getTaskFiles(task));
 		return "task/details";
 	}
 
@@ -894,6 +898,8 @@ public class TaskController {
 							Utils.getCurrentLocale());
 					return "redirect:" + request.getHeader("Referer");
 				}
+				// delete files
+				deleteFiles(task);
 				// leave message and clear all
 				StringBuilder message = new StringBuilder();
 				message.append("[");
@@ -947,6 +953,57 @@ public class TaskController {
 			result.add(new DisplayTask(task));
 		}
 		return result;
+	}
+	
+	@RequestMapping(value = "/task/{id}/file", method = RequestMethod.GET)
+	public @ResponseBody
+	String downloadFile(@PathVariable String id,
+			@RequestParam("get") String filename, HttpServletRequest request,
+			HttpServletResponse response, RedirectAttributes ra)
+			throws IOException {
+		Task task = taskSrv.findById(id);
+		if (task.getProject().getParticipants()
+				.contains(Utils.getCurrentAccount())) {
+			File file = new File(taskSrv.getTaskDirectory(task)
+					+ File.separator + filename);
+			if (file != null) {
+				response.setHeader("content-Disposition",
+						"attachment; filename=" + filename);
+				InputStream is = new FileInputStream(file);
+				IOUtils.copyLarge(is, response.getOutputStream());
+			}
+		} else {
+			MessageHelper.addErrorAttribute(
+					ra,
+					msg.getMessage("error.accesRights", null,
+							Utils.getCurrentLocale()));
+		}
+		return "redirect:" + request.getHeader("Referer");
+	}
+
+	@RequestMapping(value = "/task/{id}/remove", method = RequestMethod.GET)
+	public String removeFile(@PathVariable String id,
+			@RequestParam("file") String filename, HttpServletRequest request,
+			RedirectAttributes ra) {
+		Task task = taskSrv.findById(id);
+		if (!projectSrv.canEdit(task.getProject())
+				&& (!Roles.isReporter() || !task.getOwner().equals(
+						Utils.getCurrentAccount()))) {
+			MessageHelper.addErrorAttribute(
+					ra,
+					msg.getMessage("error.accesRights", null,
+							Utils.getCurrentLocale()));
+		} else {
+			File file = new File(taskSrv.getTaskDirectory(task)
+					+ File.separator + filename);
+			if (file != null) {
+				file.delete();
+				MessageHelper.addSuccessAttribute(ra, msg.getMessage(
+						"task.file.deleted", new Object[] { filename },
+						Utils.getCurrentLocale()));
+			}
+		}
+		return "redirect:" + request.getHeader("Referer");
 	}
 
 	private ResultData taskIsClosed(RedirectAttributes ra,
@@ -1120,6 +1177,40 @@ public class TaskController {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Get's tasks all files
+	 * 
+	 * @param project
+	 * @return
+	 */
+	private List<String> getTaskFiles(Task task) {
+		File folder = new File(taskSrv.getTaskDirectory(task));
+		File[] listOfFiles = folder.listFiles();
+		List<String> fileNames = new ArrayList<String>();
+		if (listOfFiles != null) {
+			for (File file : listOfFiles) {
+				if (file.isFile()) {
+					String fileName = file.getName();
+					fileNames.add(fileName);
+				}
+			}
+		}
+		return fileNames;
+	}
+
+	private void deleteFiles(Task task) {
+		File folder = new File(taskSrv.getTaskDirectory(task));
+		File[] listOfFiles = folder.listFiles();
+		if (listOfFiles != null) {
+			for (File file : listOfFiles) {
+				if (file.isFile()) {
+					file.delete();
+				}
+			}
+		}
+		folder.delete();
 	}
 
 }

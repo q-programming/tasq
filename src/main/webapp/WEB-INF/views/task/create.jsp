@@ -268,6 +268,7 @@
 </div>
 <script>
 $(document).ready(function($) {
+	var fileTypes='.doc,.docx,.rtf,.txt,.odt,.xls,.xlsx,.ods,.csv,.pps,.ppt,.pptx,.jpg,.png,.gif';
 	var btnsGrps = jQuery.trumbowyg.btnsGrps;
 	$('#description').trumbowyg({
 		lang: '${user.language}',
@@ -303,7 +304,7 @@ $(document).ready(function($) {
 	function addFileInput(){
 		var choose = ' <s:message code="task.chooseFile" />';
 		var title = "<i class='fa fa-file'></i>"+choose;
-		var inputField = '<input class="file_upload" name="files" type="file" accept=".xls,.xml,.jpg,.png,.gif" title="'+title+'" data-filename-placement="inside">';
+		var inputField = '<input class="file_upload" name="files" type="file" accept="'+fileTypes+'" title="'+title+'" data-filename-placement="inside">';
 		$("#fileTable").append('<tr><td style="width:300px">'+inputField+'</td></tr>');
 		$("#fileTable tr:last").find(".file_upload").bootstrapFileInput();;
 	}
