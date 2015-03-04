@@ -48,6 +48,10 @@ function IsEmail(email) {
 	  return regex.test(email);
 }
 
+function isNumber(n) {
+	  return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
 $(document).on("click",".toggler",function(e) {
 	var target = $(this).data('tab');
 	$(this).nextAll(".mod-header-title-txt").toggleClass('closed');

@@ -167,7 +167,14 @@
 						<tr>
 							<td><s:message code="task.storyPoints" /></td>
 							<td class="left-margin">
-								<span class="badge theme left">${points}</span>
+								<span class="points badge theme left"><span id="point_value">${points}</span>
+									<c:if test="${can_edit  && task.state ne'CLOSED'}"> 
+										<input id="point-input" class="point-input">
+										<span id="point_approve" style="display:none;cursor: pointer;"><i class="fa fa-check" style="vertical-align:text-top"></i></span>
+										<span id="point_cancel" style="display:none;cursor: pointer;"><i class="fa fa-times" style="vertical-align:text-top"></i></span>
+										<span id="point_edit" class="point-edit"><i class="fa fa-pencil points" style="vertical-align:text-top"></i></span>
+									</c:if>
+								</span>
 							</td>
 						</tr>
 					</c:if>
@@ -930,6 +937,53 @@ $(document).ready(function($) {
 					}
 				});
 			});
+			
+			//points
+			$('.point-edit').click(function(){
+				togglePoints();
+				$('#point_value').focus();
+				
+			});
+			
+			$('#point_approve').click(function(){
+				changePoints();
+			});
+			
+			$('#point-input').keypress(function (e) {
+				 var key = e.which;
+				 if(key == 13)  // the enter key code
+				  {
+					changePoints();
+				  }
+			});
+			
+			$('#point_cancel').click(function(){
+				togglePoints();
+			});
+
+			function togglePoints(){
+				$('#point-input').val('');
+				$('#point-input').toggle();
+				$('#point_value').toggle();
+				$('#point_approve').toggle();
+				$('#point_cancel').toggle();
+				$('#point_edit').toggleClass('hidden');
+			}
+			function changePoints(){
+				var points = $('#point-input').val();
+				if(isNumber(points) && points < 40){
+					$.post('<c:url value="/task/changePoints"/>',{id:taskID,points:points},function(result){
+						if(result.code == 'Error'){
+							showError(result.message);
+						}
+						else{
+							$("#point_value").html(points);
+							showSuccess(result.message);
+						}
+					});
+				}
+				togglePoints();
+			}
 			
 			function updateWatchers(){
 				var startwatch = "<s:message code="task.watch.start" htmlEscape="false"/>";

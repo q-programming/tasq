@@ -318,11 +318,7 @@ public class TaskController {
 				.parseInt(taskForm.getStory_points());
 		if (task.getStory_points() != null
 				&& task.getStory_points() != storyPoints) {
-			wlSrv.addActivityLog(
-					task,
-					Integer.toString(-1
-							* (task.getStory_points() - storyPoints)),
-					LogType.ESTIMATE);
+			addWorklogPointsChanged(task, storyPoints);
 			task.setStory_points(storyPoints);
 		}
 		if (!task.getDue_date().equalsIgnoreCase(taskForm.getDue_date())) {
@@ -722,6 +718,30 @@ public class TaskController {
 				null, Utils.getCurrentLocale()));
 	}
 
+	@RequestMapping(value = "/task/changePoints", method = RequestMethod.POST)
+	@ResponseBody
+	public ResultData changeStoryPoints(
+			@RequestParam(value = "id") String taskID,
+			@RequestParam(value = "points") Integer points) {
+		// check if not admin or user
+		Task task = taskSrv.findById(taskID);
+		if (task != null) {
+			// check if can edit
+			if (!projectSrv.canEdit(task.getProject()) && !Roles.isUser()) {
+				throw new TasqAuthException(msg, "role.error.task.permission");
+			}
+			// updatepoints
+			addWorklogPointsChanged(task, points);
+			task.setStory_points(points);
+			taskSrv.save(task);
+			return new ResultData(ResultData.OK, msg.getMessage(
+					"task.storypoints.edited", new Object[] { points },
+					Utils.getCurrentLocale()));
+		}
+		return new ResultData(ResultData.ERROR, msg.getMessage("error.unknown",
+				null, Utils.getCurrentLocale()));
+	}
+
 	@RequestMapping(value = "/task/time", method = RequestMethod.GET)
 	public String handleTimer(@RequestParam(value = "id") String taskID,
 			@RequestParam(value = "action") String action,
@@ -954,7 +974,7 @@ public class TaskController {
 		}
 		return result;
 	}
-	
+
 	@RequestMapping(value = "/task/{id}/file", method = RequestMethod.GET)
 	public @ResponseBody
 	String downloadFile(@PathVariable String id,
@@ -1126,6 +1146,12 @@ public class TaskController {
 					new Object[] { task.getId(), localised },
 					Utils.getCurrentLocale());
 		}
+	}
+
+	private void addWorklogPointsChanged(Task task, int storyPoints) {
+		wlSrv.addActivityLog(task,
+				Integer.toString(-1 * (task.getStory_points() - storyPoints)),
+				LogType.ESTIMATE);
 	}
 
 	/**

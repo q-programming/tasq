@@ -315,4 +315,19 @@ blockquote.eventMore{
 blockquote.eventMore:hover .buttons_panel{
 	display: inline;
 }
+.point-edit{
+	display:none;
+}
+.point-edit.hidden{
+	display:none;
+}
+span.points:hover .point-edit{
+	margin-left:15px;
+	display: inline;
+	cursor: pointer;
+}
+.point-input{
+	width:20px;
+	display:none;
+}
 
