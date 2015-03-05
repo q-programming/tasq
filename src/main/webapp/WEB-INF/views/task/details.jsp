@@ -529,7 +529,7 @@
 						<div style="display: table-cell">
 							<img data-src="holder.js/20x20"
 								style="height: 20px; padding-right: 5px;"
-								src="<c:url value="/userAvatar/${task.owner.id}"/>" /><a
+								src="<c:url value="/../avatar/${task.owner.id}.png"/>" /><a
 								href="<c:url value="/user?id=${task.owner.id}"/>">${task.owner}</a>
 						</div>	
 					</div>
@@ -583,7 +583,7 @@
 								<img
 									data-src="holder.js/20x20"
 									style="height: 20px;"
-									src="<c:url value="/userAvatar/${task.assignee.id}"/>" />
+									src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />
 								<a href="<c:url value="/user?id=${task.assignee.id}"/>">${task.assignee}</a>
 							</c:if>
 							<c:if test="${user.isUser}">
@@ -656,7 +656,7 @@
 								<div>
 									<img data-src="holder.js/30x30"
 										style="height: 30px; float: left; padding-right: 10px;"
-										src="<c:url value="/userAvatar/${comment.author.id}"/>" /> <a
+										src="<c:url value="/../avatar/${comment.author.id}.png"/>" /> <a
 										href="<c:url value="/user?id=${comment.author.id}"/>">${comment.author}</a>
 									<div class="time-div">${comment.date}</div>
 								</div> <%-- Comment buttons --%>

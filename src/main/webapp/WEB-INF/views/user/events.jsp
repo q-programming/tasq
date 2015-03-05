@@ -29,7 +29,7 @@
 							code="notice.markAll" text="Mark All read" />">
 				<i class="fa fa-check"></i>
 			</button></a>
-		<table class="table table-hover table-condensed">
+		<table id="eventsTable" class="table table-hover table-condensed">
 			<thead class="theme">
 				<tr>
 					<th style="width: 20px;"></th>
@@ -89,6 +89,78 @@
 	</div>
 </div>
 <script>
+var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><i class="fa fa-cog fa-spin"></i><s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
+//fetchEvents(0);
+$(document).on("click",".eventNavBtn",function(e) {
+	var page =  $(this).data('page');
+	fetchEvents(page,'');
+});
+
+// $("#search_field").change(function() {
+// 	fetchUsers(0,$("#search_field").val());
+// 	});
+	
+function fetchEvents(page,term){
+	$("#eventsTable .listedEvent").remove();
+	$("#eventsTable").append(loading_indicator);
+	var url = '<c:url value="/listEvents"/>';
+	$.get(url, {page: page,term:term}, function(data) {
+		$("#loading").remove();
+ 		console.log(data);
+
+// 		var avatarURL = '<c:url value="/userAvatar/"/>';
+// 		var userURL = '<c:url value="/user?id="/>';
+// 		var email_txt = '<s:message code="user.send.mail"/>';
+// 		for ( var j = 0; j < data.content.length; j++) {
+// 			var content = data.content[j];
+// 			var user = userURL + content.id; 
+// 			var avatar = '<img data-src="holder.js/30x30" style="height: 30px; float: left; padding-right: 10px;" src="' + avatarURL + +data.content[j].id +'"/>';
+// 			var row = '<tr class="listeduser"><td>'
+// 						+ '<a href="' + user + '" class="btn">'
+// 						+ avatar
+// 						+ content.name + " " + content.surname +'</a></td>'
+// 						+ '<td>'+getRoleTypeMsg(content.role)+'</td>'
+// 						+ '<td><a href="mailto:'+content.email+'" title="'+email_txt+' ('+content.email+')"><i class="fa fa-envelope" style="color: black;"></span></a></td></tr>';
+// 			$("#user_table").append(row);
+// 		}
+		//print Nav
+		$("#events_nav tr").remove();
+		if(data.totalPages > 1){
+			printNavigation(page,data);
+		}
+	});
+}
+function printNavigation(page,data){
+	$("#events_nav tr").remove();
+	var topRow='<tr id="topNavigation">';
+	var prev = '<td style="width:30px"></td>';
+	if(!data.firstPage){
+		prev = '<td style="width:30px"><a class="eventNavBtn btn" data-page="'+ (page -1)+'"><i class="fa fa-arrow-left"></i></a></td>';
+	}
+	topRow+=prev;
+	var numbers = '<td style="text-align:center">';
+	//print numbers
+	for (var i = 0; i < data.totalPages; i++) {
+		var btnClass = "eventNavBtn btn";
+		//active btn
+		if (i == data.number) {
+			btnClass += " btn-default";
+		}
+		var button = '<a class="'+btnClass+'" data-page="'+ i +'">'
+				+ (i + 1) + '</a>';
+				numbers+=button;
+	}
+	topRow+=numbers;
+	var next = '<td style="width:30px"></td>';
+	if(!data.lastPage){
+		next = '<td style="width:30px"><a class="navBtn btn" data-page="'+ (page +1) +'"><i class="fa fa-arrow-right"></i></a></td>';
+	}
+	topRow+=next+'</tr>';
+	$("#events_nav").append(topRow);
+}
+
+
+
 	$(".showMore").click(function() {
 		var eventID = $(this).data('event');
 		var event = $(this);

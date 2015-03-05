@@ -1,11 +1,26 @@
 package com.qprogramming.tasq.signup;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.nio.file.Files;
+
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
@@ -26,6 +41,11 @@ import com.qprogramming.tasq.support.web.MessageHelper;
 public class SignupController {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SignupController.class);
+
+	@Value("${home.directory}")
+	private String tasqRootDir;
+	private static final String AVATAR_DIR = "avatar";
+	private static final String PNG = ".png";
 
 	private AccountService accountSrv;
 	private MailMail mailer;
@@ -65,9 +85,28 @@ public class SignupController {
 			account.setRole(Roles.ROLE_ADMIN);
 		}
 		account = accountSrv.save(account);
+		//copy default avatar
+		HttpSession session = request.getSession();
+		ServletContext sc = session.getServletContext();
+		File dest = new File(getAvatar(account.getId()));
+		try {
+			InputStream in = new FileInputStream(
+					sc.getRealPath("/resources/img/avatar.png"));
+			OutputStream out = new FileOutputStream(dest);
+	        byte[] buf = new byte[1024];
+	        int len;
+	        while((len=in.read(buf))>0){
+	            out.write(buf,0,len);
+	        }
+	        out.close();
+	        in.close();
+		} catch (FileNotFoundException e) {
+			LOG.error(e.getMessage());
+		} catch (IOException e) {
+			LOG.error(e.getMessage());		
+		}
 		String confirmlink = Utils.getBaseURL() + "/confirm?id="
 				+ account.getUuid();
-
 		String subject = msg.getMessage("signup.register", null,
 				Utils.getDefaultLocale());
 		String message = msg.getMessage(
@@ -99,5 +138,13 @@ public class SignupController {
 			MessageHelper.addErrorAttribute(ra, "Verification error!");
 		}
 		return "redirect:/";
+	}
+	
+	private String getAvatarDir(){
+		return tasqRootDir + File.separator + AVATAR_DIR + File.separator;
+	}
+	
+	private String getAvatar(Long id){
+		return  getAvatarDir() + id + PNG;
 	}
 }

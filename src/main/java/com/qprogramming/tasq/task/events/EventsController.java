@@ -2,7 +2,12 @@ package com.qprogramming.tasq.task.events;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.support.ResultData;
 import com.qprogramming.tasq.task.watched.WatchedTask;
 
@@ -34,6 +40,21 @@ public class EventsController {
 		List<Event> events = eventSrv.getEvents();
 		model.addAttribute("events", events);
 		return "user/events";
+	}
+
+	/**
+	 * Get list of all tasks watched by currently logged user
+	 * 
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value = "/listEvents", method = RequestMethod.GET)
+	public @ResponseBody List<Event> eventsPaged(
+			@RequestParam(required = false) String term,
+			@PageableDefault(size = 25, page = 0, sort = "date", direction = Direction.DESC) Pageable p,HttpServletResponse response) {
+		response.setContentType("application/json");
+		List<Event> events = eventSrv.getEvents(p);
+		return events;
 	}
 
 	/**

@@ -1,6 +1,6 @@
 package com.qprogramming.tasq.account;
 
-import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -10,17 +10,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
-import javax.imageio.ImageIO;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -31,7 +32,6 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -48,6 +48,10 @@ import com.qprogramming.tasq.support.web.MessageHelper;
 @Controller
 @Secured("ROLE_USER")
 public class AccountController {
+	
+	@Value("${home.directory}")
+	private String tasqRootDir;
+
 	private static final int DEFAULT_WIDTH_HEIGHT = 150;
 	private AccountService accountSrv;
 	private ProjectService projSrv;
@@ -66,6 +70,9 @@ public class AccountController {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(AccountController.class);
 
+	private static final String AVATAR_DIR = "avatar";
+	private static final String PNG = ".png";
+
 	@RequestMapping(value = "settings", method = RequestMethod.GET)
 	public String settings() {
 		return "user/settings";
@@ -82,24 +89,30 @@ public class AccountController {
 			HttpServletResponse response) {
 		Account account = Utils.getCurrentAccount();
 		if (avatarFile.getSize() != 0) {
+			File file = new File(getAvatar(account.getId()));
 			try {
-				BufferedImage image = ImageIO.read(avatarFile.getInputStream());
-				Integer width = image.getWidth();
-				Integer height = image.getHeight();
-				if (width > DEFAULT_WIDTH_HEIGHT
-						|| height > DEFAULT_WIDTH_HEIGHT
-						|| avatarFile.getSize() > 100000) {
-					MessageHelper.addErrorAttribute(
-							ra,
-							msg.getMessage("error.file100kb", null,
-									Utils.getCurrentLocale()));
-					return "redirect:/settings";
-				}
-				byte[] bytes = avatarFile.getBytes();
-				account.setAvatar(bytes);
+				FileUtils.writeByteArrayToFile(file, avatarFile.getBytes());
 			} catch (IOException e) {
-				LOG.error(e.getLocalizedMessage());
+				LOG.error(e.getMessage());
 			}
+//			try {
+//				BufferedImage image = ImageIO.read(avatarFile.getInputStream());
+//				Integer width = image.getWidth();
+//				Integer height = image.getHeight();
+//				if (width > DEFAULT_WIDTH_HEIGHT
+//						|| height > DEFAULT_WIDTH_HEIGHT
+//						|| avatarFile.getSize() > 100000) {
+//					MessageHelper.addErrorAttribute(
+//							ra,
+//							msg.getMessage("error.file100kb", null,
+//									Utils.getCurrentLocale()));
+//					return "redirect:/settings";
+//				}
+//				byte[] bytes = avatarFile.getBytes();
+//				account.setAvatar(bytes);
+//			} catch (IOException e) {
+//				LOG.error(e.getLocalizedMessage());
+//			}
 		}
 		account.setLanguage(language);
 		localeResolver.setLocale(request, response, new Locale(language));
@@ -127,21 +140,26 @@ public class AccountController {
 		return "user/details";
 	}
 
-	@RequestMapping("/userAvatar")
-	public void getCurrentAvatar(HttpServletResponse response,
-			HttpServletRequest request) throws IOException {
-		byte[] imageBytes = Utils.getCurrentAccount().getAvatar();
-		loadImage(response, request, imageBytes);
-	}
-
-	@RequestMapping("/userAvatar/{id}")
-	public void getUserAvatar(HttpServletResponse response,
-			HttpServletRequest request, @PathVariable("id") final String id)
-			throws IOException {
-		Account acc = accountSrv.findById(Long.parseLong(id));
-		byte[] imageBytes = acc.getAvatar();
-		loadImage(response, request, imageBytes);
-	}
+//	@RequestMapping("/userAvatar")
+//	public void getCurrentAvatar(HttpServletResponse response,
+//			HttpServletRequest request) throws IOException {
+//		File file = new File(getAvatar(Utils.getCurrentAccount().getId()));
+//		response.setContentType("image/png");
+//        response.setHeader("Content-Length", String.valueOf(file.length()));
+//        response.setHeader("Content-Disposition", "inline; filename=\"" + file.getName() + "\"");
+//        Files.copy(file.toPath(), response.getOutputStream());
+//		byte[] imageBytes = Utils.getCurrentAccount().getAvatar();
+//		loadImage(response, request, imageBytes);
+//	}
+//
+//	@RequestMapping("/userAvatar/{id}")
+//	public void getUserAvatar(HttpServletResponse response,
+//			HttpServletRequest request, @PathVariable("id") final String id)
+//			throws IOException {
+//		Account acc = accountSrv.findById(Long.parseLong(id));
+//		byte[] imageBytes = acc.getAvatar();
+//		loadImage(response, request, imageBytes);
+//	}
 
 	@RequestMapping(value = "/getAccounts", method = RequestMethod.GET)
 	public @ResponseBody
@@ -208,6 +226,14 @@ public class AccountController {
 			}
 		}
 		return null;
+	}
+
+	private String getAvatarDir(){
+		return tasqRootDir + File.separator + AVATAR_DIR + File.separator;
+	}
+	
+	private String getAvatar(Long id){
+		return  getAvatarDir() + id + PNG;
 	}
 
 	/**

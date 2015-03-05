@@ -248,7 +248,7 @@
 				</c:if> <c:if test="${not empty task.assignee}">
 					<img data-src="holder.js/20x20"
 						style="height: 20px; padding-right: 5px;"
-						src="<c:url value="/userAvatar/${task.assignee.id}"/>" />
+						src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />
 					<a ${link} href="<c:url value="/user?id=${task.assignee.id}"/>">${task.assignee}</a>
 				</c:if></td>
 			</tr>

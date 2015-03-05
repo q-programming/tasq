@@ -148,7 +148,7 @@
 				<tr>
 					<td><img data-src="holder.js/30x30"
 						style="height: 30px; float: left; padding-right: 10px;"
-						src="<c:url value="/userAvatar/${admin.id}"/>" />${admin}</td>
+						src="<c:url value="/../avatar/${admin.id}.png"/>" />${admin}</td>
 				</tr>
 			</c:forEach>
 		</table>
@@ -204,7 +204,7 @@
 				<tr>
 					<td><img data-src="holder.js/30x30"
 						style="height: 30px; float: left; padding-right: 10px;"
-						src="<c:url value="/userAvatar/${participant.id}"/>" />${participant}
+						src="<c:url value="/../avatar/${participant.id}"/>" />${participant}
 						<span style="color: #737373">(<s:message
 								code="${participant.role.code}" />)
 					</span></td>

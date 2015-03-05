@@ -56,7 +56,7 @@
 						href="<c:url value="/user?id=${task.assignee.id}"/>"
 						title="${task.assignee}"> <img data-src="holder.js/30x30"
 						style="height: 30px; padding-right: 5px;"
-						src="<c:url value="/userAvatar/${task.assignee.id}"/>" />
+						src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />
 					</a>
 				</c:if>
 			</div>

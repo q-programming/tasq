@@ -171,14 +171,14 @@ function fetchManagedUsers(page,term){
 	$.get(url, {page: page,term:term,size:20}, function(data) {
 		$("#loading").remove();
 // 		console.log(data);
-		var avatarURL = '<c:url value="/userAvatar/"/>';
+		var avatarURL = '<c:url value="/../avatar/"/>';
 		var userURL = '<c:url value="/user?id="/>';
 		var email_txt = '<s:message code="user.send.mail"/>';
 		for ( var j = 0; j < data.content.length; j++) {
 			var content = data.content[j];
 			var username = content.name + " " + content.surname;
 			var user = userURL + content.id; 
-			var avatar = '<img data-src="holder.js/30x30" style="height: 30px; float: left; padding-right: 10px;" src="' + avatarURL + +data.content[j].id +'"/>';
+			var avatar = '<img data-src="holder.js/30x30" style="height: 30px; float: left; padding-right: 10px;" src="' + avatarURL + +data.content[j].id +'.png"/>';
 			var action;
 			if(content.id == userID){
 				action='';

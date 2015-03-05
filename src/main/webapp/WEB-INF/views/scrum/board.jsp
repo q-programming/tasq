@@ -88,7 +88,7 @@
 					showError(result.message);
 				}
 				else{
-					var assignee = '<a class="a-tooltip" href="<c:url value="/user?id=${user.id}"/>" title="${user}"><img data-src="holder.js/30x30"	style="height: 30px; padding-right: 5px;" src="<c:url value="/userAvatar/${user.id}"/>" />'
+					var assignee = '<a class="a-tooltip" href="<c:url value="/user?id=${user.id}"/>" title="${user}"><img data-src="holder.js/30x30"	style="height: 30px; padding-right: 5px;" src="<c:url value="/../avatar/${user.id}.png"/>" />'
 									+'</a>';
 					$("#assignee_"+taskID).html(assignee);
 					showSuccess(result.message);

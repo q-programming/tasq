@@ -86,6 +86,13 @@ public class SignupControllerTest {
 	private HttpServletRequest requestMock;
 	@Mock
 	private SessionLocaleResolver localeResolver;
+	@Mock
+	private HttpSession httpSesssionMock;
+	@Mock
+	private ServletContext scMock;
+	@Mock
+	private ServletOutputStream outStreamMock;
+
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -121,6 +128,12 @@ public class SignupControllerTest {
 
 	@Test
 	public void signUpAndConfirmTest() {
+		try {
+		when(requestMock.getSession()).thenReturn(httpSesssionMock);
+		URL fileURL = getClass().getResource("/avatar.png");
+		when(httpSesssionMock.getServletContext()).thenReturn(scMock);
+		when(scMock.getRealPath(anyString())).thenReturn(fileURL.getFile());
+			when(responseMock.getOutputStream()).thenReturn(outStreamMock);
 		when(accRepoMock.findAll()).thenReturn(accountsList);
 		when(accRepoMock.findByEmail(NEW_EMAIL)).thenReturn(null);
 		when(passwordEncoder.encode(any(CharSequence.class))).thenReturn(
@@ -132,6 +145,10 @@ public class SignupControllerTest {
 		when(accRepoMock.findByUuid("confirmMe")).thenReturn(testAccount);
 		signupCtr.confirm("confirmMe", raMock);
 		verify(accRepoMock,times(1)).save(testAccount);
+		} catch (IOException e) {
+			Assert.fail(e.getMessage());
+		}
+
 	}
 
 	@Test

@@ -290,7 +290,7 @@ function printChart(){
 function fetchWorkLogData(page) {
 	var projectID = '${project.id}';
 	var url = '<c:url value="/projectEvents"/>';
-	var avatarURL = '<c:url value="/userAvatar/"/>';
+	var avatarURL = '<c:url value="/../avatar/"/>';
 	var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
 	$("#eventsTable").append(loading_indicator);
 	$.get(url, {id : projectID,	page: page}, function(data) {
@@ -302,7 +302,7 @@ function fetchWorkLogData(page) {
 			var row = '<tr class="projEvent"><td colspan="3">';
 			var content = data.content[j];
 			var timeLogged = '<div class="time-div">'+ content.time +'</div>';
-			var avatar = '<img data-src="holder.js/30x30" style="height: 30px; float: left; padding-right: 10px;" src="' + avatarURL + content.account.id +'"/>';
+			var avatar = '<img data-src="holder.js/30x30" style="height: 30px; float: left; padding-right: 10px;" src="' + avatarURL + content.account.id +'.png"/>';
 			var account = content.account.name + " " + content.account.surname + " ";
 			var event = getEventTypeMsg(content.type);
 			var task = '';

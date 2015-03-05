@@ -200,7 +200,7 @@
 					</li>
 					<li>
 						<div class="pull-right">
-							<a href="#" data-toggle="dropdown"><img src="<c:url value="/userAvatar"/>"
+							<a href="#" data-toggle="dropdown"><img src="<c:url value="/../avatar/${user.id}.png"/>"
 								style="height: 50px; padding-left: 5px;" ></a>
 							<span class="caret theme"></span>
 							<c:if test="${eventCount gt 0}">
