@@ -219,7 +219,7 @@ public class TaskController {
 			}
 			projectSrv.save(project);
 			// Save files
-			saveTaskFiles(taskForm, task);
+			saveTaskFiles(taskForm.getFiles(), task);
 			wlSrv.addActivityLog(task, "", LogType.CREATE);
 			return "redirect:/task?id=" + taskID;
 		}
@@ -518,7 +518,7 @@ public class TaskController {
 		taskSrv.save(subTask);
 		taskSrv.save(task);
 		// TODO save in subdir?
-		saveTaskFiles(taskForm, subTask);
+		saveTaskFiles(taskForm.getFiles(), subTask);
 		wlSrv.addActivityLog(subTask, "", LogType.SUBTASK);
 		return "redirect:/task?id=" + id;
 	}
@@ -937,8 +937,8 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/getTasks", method = RequestMethod.GET)
-	public @ResponseBody
-	List<DisplayTask> showTasks(@RequestParam Long projectID,
+	public @ResponseBody List<DisplayTask> showTasks(
+			@RequestParam Long projectID,
 			@RequestParam(required = false) String taskID,
 			@RequestParam String term, HttpServletResponse response) {
 		response.setContentType("application/json");
@@ -963,9 +963,8 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/getSubTasks", method = RequestMethod.GET)
-	public @ResponseBody
-	List<DisplayTask> showSubTasks(@RequestParam String taskID,
-			HttpServletResponse response) {
+	public @ResponseBody List<DisplayTask> showSubTasks(
+			@RequestParam String taskID, HttpServletResponse response) {
 		response.setContentType("application/json");
 		List<Task> allSubTasks = taskSrv.findSubtasks(taskID);
 		List<DisplayTask> result = new ArrayList<DisplayTask>();
@@ -975,9 +974,23 @@ public class TaskController {
 		return result;
 	}
 
+	@RequestMapping(value = "/task/attachFiles", method = RequestMethod.POST)
+	public String attacheFiles(@RequestParam String taskID,
+			@RequestParam List<MultipartFile> files,
+			RedirectAttributes ra, HttpServletRequest request, Model model) {
+		Task task = taskSrv.findById(taskID);
+		if (task != null) {
+			// check if can edit
+			if (!projectSrv.canEdit(task.getProject()) && !Roles.isUser()) {
+				throw new TasqAuthException(msg, "role.error.task.permission");
+			}
+			saveTaskFiles(files, task);
+		}
+		return "redirect:" + request.getHeader("Referer");
+	}
+
 	@RequestMapping(value = "/task/{id}/file", method = RequestMethod.GET)
-	public @ResponseBody
-	String downloadFile(@PathVariable String id,
+	public @ResponseBody String downloadFile(@PathVariable String id,
 			@RequestParam("get") String filename, HttpServletRequest request,
 			HttpServletResponse response, RedirectAttributes ra)
 			throws IOException {
@@ -1189,9 +1202,8 @@ public class TaskController {
 				|| task.getOwner().equals(currentAccount) || Roles.isAdmin();
 	}
 
-	private boolean saveTaskFiles(TaskForm newTaskForm, Task task) {
+	private boolean saveTaskFiles(List<MultipartFile> files_array, Task task) {
 		// Save
-		List<MultipartFile> files_array = newTaskForm.getFiles();
 		for (MultipartFile multipartFile : files_array) {
 			File file = new File(taskSrv.getTaskDirectory(task)
 					+ File.separator + multipartFile.getOriginalFilename());

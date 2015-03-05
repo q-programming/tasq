@@ -1,3 +1,4 @@
+<%@page import="com.qprogramming.tasq.account.Roles"%>
 <%@page import="com.qprogramming.tasq.task.link.TaskLinkType"%>
 <%@page import="com.qprogramming.tasq.task.TaskPriority"%>
 <%@page import="com.qprogramming.tasq.task.TaskState"%>
@@ -13,6 +14,7 @@
 	<c:set var="is_admin" value="true" />
 </security:authorize>
 <security:authentication property="principal" var="user" />
+<c:set var="is_user" value="<%=Roles.isUser()%>" />
 <c:if
 	test="${(myfn:contains(task.project.administrators,user) || is_admin || task.owner.id == user.id)}">
 	<c:set var="can_edit" value="true" />
@@ -30,12 +32,35 @@
 	<%----------------------TASK NAME-----------------------------%>
 	<div>
 		<div class="pull-right">
-			<c:if test="${can_edit  && task.state ne'CLOSED'}">
-				<a href="<c:url value="task/edit?id=${task.id}"/>">
-					<button
-						class="btn btn-default btn-sm a-tooltip" title="<s:message code="task.edit" />">
-						<i class="fa fa-lg fa-pencil"></i>
-					</button></a>
+			<c:if test="${is_user  && task.state ne'CLOSED'}">
+				<a	class="btn btn-default btn-sm a-tooltip" href="#" data-toggle="dropdown">
+					<i class="fa fa-lg fa-pencil"></i>
+				</a>
+					<ul class="dropdown-menu" style="top: inherit;right: inherit;">
+						<c:if test="${can_edit}">
+							<li>
+								<a href="<c:url value="task/edit?id=${task.id}"/>">
+									<i class="fa fw fa-pencil"></i> <s:message code="task.edit" />
+								</a>
+							</li>	
+						</c:if>
+						<li>
+							<a class="linkButton" href="#">
+								<i class="fa fw fa-link fa-flip-horizontal"></i>&nbsp;<s:message code="task.link"/>
+							</a>
+						</li>
+						<li>
+							<a href="<c:url value="task/${task.id}/subtask"/>">
+								</i><i class="fa fw fa-sitemap"></i>&nbsp;<s:message code="task.subtasks.add"/>
+							</a>
+						</li>
+						<li>
+							<a class="addFileButton" href="#" data-toggle="modal" data-target="#files_task" data-taskID="${task.id}">
+								<i class="fa fw fa-file"></i>&nbsp;<s:message code="task.addFile"/>
+							</a>
+						</li>
+						
+					</ul>
 			</c:if>
 			<button	id="watch" class="btn btn-default btn-sm a-tooltip" title="" data-html="true">
 				<c:if test="${watching}">
@@ -715,6 +740,7 @@
 </div>
 <jsp:include page="../modals/logWork.jsp" />
 <jsp:include page="../modals/close.jsp" />
+<jsp:include page="../modals/file.jsp" />
 <!-- Edit Comment Modal -->
 <div class="modal fade" id="commentModal" tabindex="-1" role="dialog"
 	aria-labelledby="role" aria-hidden="true">
@@ -1004,18 +1030,18 @@ $(document).ready(function($) {
 			}
 			
 $(document).on("click",".delete_task",function(e) {
-					var msg = '<p style="text-align:center"><i class="fa fa-lg fa-exclamation-triangle" style="display: initial;"></i>&nbsp'
-							+ $(this).data('msg') + '</p>';
-					var lang = $(this).data('lang');
-					bootbox.setDefaults({
-						locale : lang
-					});
-					e.preventDefault();
-					var $link = $(this);
-					bootbox.confirm(msg, function(result) {
-						if (result == true) {
-							document.location.assign($link.attr('href'));
-						}
-					});
-});	
+		var msg = '<p style="text-align:center"><i class="fa fa-lg fa-exclamation-triangle" style="display: initial;"></i>&nbsp'
+					+ $(this).data('msg') + '</p>';
+		var lang = $(this).data('lang');
+		bootbox.setDefaults({
+				locale : lang
+		});
+		e.preventDefault();
+		var $link = $(this);
+		bootbox.confirm(msg, function(result) {
+		if (result == true) {
+			document.location.assign($link.attr('href'));
+		}
+	});
+});
 </script>
