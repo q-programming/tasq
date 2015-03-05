@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -61,10 +62,9 @@ public class EventsService {
 	 * @param page
 	 * @return
 	 */
-	public List<Event> getEvents(Pageable page) {
-		List<Event> events = eventsRepo.findByAccountId(Utils
+	public Page<Event> getEvents(Pageable page) {
+		return eventsRepo.findByAccountId(Utils
 				.getCurrentAccount().getId(), page);
-		return events != null ? events : new LinkedList<Event>();
 	}
 
 	/**

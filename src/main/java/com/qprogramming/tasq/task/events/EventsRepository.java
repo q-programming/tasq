@@ -2,6 +2,7 @@ package com.qprogramming.tasq.task.events;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -16,5 +17,5 @@ public interface EventsRepository extends
 
 	List<Event> findByAccountIdAndUnreadTrue(Long userId);
 
-	List<Event> findByAccountId(Long id, Pageable p);
+	Page<Event> findByAccountId(Long id, Pageable p);
 }
