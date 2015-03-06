@@ -533,44 +533,6 @@
 								href="<c:url value="/user?id=${task.owner.id}"/>">${task.owner}</a>
 						</div>	
 					</div>
-					<div style="display:none;"
-						id="assign_div">
-							<form id="assign" action="<c:url value="/task/assign"/>"
-								method="post">
-								<input type="hidden" name="taskID" value="${task.id}">
-								<table>
-									<tr style="vertical-align: top;">
-										<td style="width: 250px;">
-											<input type="text"
-												class="form-control input-sm" name="account"
-												placeholder="<s:message code="project.participant.hint"/>"
-												id="assignee">
-											<div id="usersLoader" style="display:none"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br></div>
-										</td>
-										<td>
-											<button class="btn btn-default btn-sm a-tooltip"
-												type="button" id="assign_me"
-												title="<s:message code="task.assignme"/>">
-												<i class="fa fa-lg fa-user"></i>
-											</button>
-										</td>
-										<td>
-											<button class="btn btn-default btn-sm a-tooltip"
-												type="button" id="unassign"
-												title="<s:message code="task.unassign"/>">
-												<i class="fa fa-lg fa-user-times"></i>
-											</button>
-										</td>
-										<td>
-											<button type="button" id="dismiss_assign"
-												class="close a-tooltip"
-												title="<s:message code="main.cancel"/>"
-												style="padding-left: 5px">×</button>
-										</td>
-									</tr>
-								</table>
-							</form>
-					</div>
 					<div id="assign_button_div" style="display: table">
 						<div style="display: table-cell;min-width: 100px">
 								<s:message code="task.assignee" />:
@@ -587,12 +549,13 @@
 								<a href="<c:url value="/user?id=${task.assignee.id}"/>">${task.assignee}</a>
 							</c:if>
 							<c:if test="${user.isUser}">
-<!-- 								<div style="display: table-cell; padding-left: 5px"> -->
-									<span class="btn btn-default btn-sm a-tooltip"
-										id="assign_button" title="<s:message code="task.assign"/>">
+									<span class="btn btn-default btn-sm a-tooltip assignToTask"
+										title="<s:message code="task.assign"/>" data-toggle="modal" data-target="#assign_modal" 
+										data-taskID="${task.id}" data-assignee="${task.assignee}" 
+										data-assigneeID="${task.assignee.id}"
+										data-projectID="${task.project.projectId}" >
 									<i class="fa fa-lg fa-user-plus"></i>
 									</span>
-<!-- 								</div> -->
 							</c:if>
 						</div>
 					</div>
@@ -723,7 +686,7 @@
 				<table class="table table-condensed table-hover">
 					<c:forEach items="${task.worklog}" var="worklog">
 						<tr>
-							<td><div style="font-size: smaller; color: dimgray;">${worklog.account}
+							<td><div style="font-size: smaller; color: dimgray;">${worklog.account}&nbsp;
 									<t:logType logType="${worklog.type}" />
 									<div class="time-div">${worklog.timeLogged}</div>
 								</div> <c:if test="${not empty worklog.message}">
@@ -741,6 +704,7 @@
 <jsp:include page="../modals/logWork.jsp" />
 <jsp:include page="../modals/close.jsp" />
 <jsp:include page="../modals/file.jsp" />
+<jsp:include page="../modals/assign.jsp" />
 <!-- Edit Comment Modal -->
 <div class="modal fade" id="commentModal" tabindex="-1" role="dialog"
 	aria-labelledby="role" aria-hidden="true">
@@ -813,42 +777,42 @@ $(document).ready(function($) {
 			$('#comments_cancel').click(function() {
 						toggle_comment();
 			});
-			var cache = {};
-			$("#assignee").autocomplete({
-						minLength : 1,
-						delay : 500,
-						//define callback to format results
-						source : function(request, response) {
-							$("#usersLoader").show();
-							var term = request.term;
-							if ( term in cache ) {
-						          response( cache[ term ] );
-						          return;
-						    }
-							var url='<c:url value="/project/getParticipants"/>';
-							$.get(url,{id:'${task.project.id}',term:term},function(result) {
-									$("#usersLoader").hide();
-									cache[ term ] = result;
-									response($.map(result,function(item) {
-										return {
-											// following property gets displayed in drop down
-											label : item.name+ " "+ item.surname,
-											value : item.email,
-											}
-										}));
-									});
-							},
-							//define select handler
-						select : function(event, ui) {
-							if (ui.item) {
-								event.preventDefault();
-								$("#assignee").val(ui.item.label);
-								$("#assign").append('<input type="hidden" name="email" value=' + ui.item.value + '>');
-								$("#assign").submit();
-								return false;
-							}
-						}
-					});
+// 			var cache = {};
+// 			$("#assignee").autocomplete({
+// 						minLength : 1,
+// 						delay : 500,
+// 						//define callback to format results
+// 						source : function(request, response) {
+// 							$("#usersLoader").show();
+// 							var term = request.term;
+// 							if ( term in cache ) {
+// 						          response( cache[ term ] );
+// 						          return;
+// 						    }
+// 							var url='<c:url value="/project/getParticipants"/>';
+// 							$.get(url,{id:'${task.project.id}',term:term},function(result) {
+// 									$("#usersLoader").hide();
+// 									cache[ term ] = result;
+// 									response($.map(result,function(item) {
+// 										return {
+// 											// following property gets displayed in drop down
+// 											label : item.name+ " "+ item.surname,
+// 											value : item.email,
+// 											}
+// 										}));
+// 									});
+// 							},
+// 							//define select handler
+// 						select : function(event, ui) {
+// 							if (ui.item) {
+// 								event.preventDefault();
+// 								$("#assignee").val(ui.item.label);
+// 								$("#assign").append('<input type="hidden" name="email" value=' + ui.item.value + '>');
+// 								$("#assign").submit();
+// 								return false;
+// 							}
+// 						}
+// 					});
 			$("#task_link").autocomplete({
 				minLength : 1,
 				delay : 500,
@@ -879,27 +843,6 @@ $(document).ready(function($) {
 				}
 			});
 
-			$("#assign_me").click(function() {
-						var current_email = "${user.email}";
-						$("#assign").append('<input type="hidden" name="email" value=' + current_email + '>');
-						$("#assign").submit();
-					});
-			
-			$("#unassign").click(function() {
-						var current_email = "";
-						$("#assign").append('<input type="hidden" name="email" value=' + current_email + '>');
-						$("#assign").submit();
-					});
-
-			$("#assign_button").click(function() {
-						$('#assign_div').toggle("blind");
-						$('#assign_button_div').toggle("blind");
-						$('#assignee').focus();
-					});
-			$("#dismiss_assign").click(function() {
-						$('#assign_div').toggle("blind");
-						$('#assign_button_div').toggle("blind");
-					});
 			$("#change_state").change(function() {
 						if ($(this).val() == 'CLOSED') {
 							$("#zero_remaining").toggle("blind");

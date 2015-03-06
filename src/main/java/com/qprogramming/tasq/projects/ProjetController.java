@@ -15,6 +15,8 @@ import javax.validation.Valid;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
@@ -46,6 +48,7 @@ import com.qprogramming.tasq.support.sorters.ProjectSorter;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
 import com.qprogramming.tasq.task.Task;
+import com.qprogramming.tasq.task.TaskController;
 import com.qprogramming.tasq.task.TaskPriority;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
@@ -58,6 +61,8 @@ import com.qprogramming.tasq.task.worklog.WorkLogService;
 @Controller
 public class ProjetController {
 
+	private static final Logger LOG = LoggerFactory
+			.getLogger(ProjetController.class);
 	private ProjectService projSrv;
 	private AccountService accSrv;
 	private TaskService taskSrv;
@@ -389,10 +394,18 @@ public class ProjetController {
 
 	@RequestMapping(value = "/project/getParticipants", method = RequestMethod.GET)
 	public @ResponseBody
-	List<DisplayAccount> listParticipants(@RequestParam Long id,
+	List<DisplayAccount> listParticipants(@RequestParam String id,
 			@RequestParam String term, HttpServletResponse response) {
 		response.setContentType("application/json");
-		Project project = projSrv.findById(id);
+		Project project = projSrv.findByProjectId(id);
+		if(project==null){
+			try{
+			Long projectID = Long.valueOf(id);
+			project = projSrv.findById(projectID);
+			}catch(NumberFormatException e){
+				LOG.error(e.getMessage());
+			}
+		}
 		Set<Account> allParticipants = project.getParticipants();
 		List<DisplayAccount> result = new ArrayList<DisplayAccount>();
 		for (Account account : allParticipants) {

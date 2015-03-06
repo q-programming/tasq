@@ -9,7 +9,7 @@
 		<div class="footer-time">
 			<div>
 				<s:message code="task.active" />
-				<a class="a-tooltip" href="<c:url value="/task?id=${user.active_task[0]}"/>" title="${user.active_task[2]}" data-html="true">${user.active_task[0]}</a>
+				<a class="a-tooltip" href="<c:url value="/task?id=${user.active_task[0]}"/>" title='${user.active_task[2]}' data-html="true">${user.active_task[0]}</a>
 				<a class="btn btn-default btn-xxs a-tooltip"
 					title="<s:message code="task.stopTime.description"></s:message>"
 					href='<c:url value="/task/time?id=${user.active_task[0]}&action=stop"/>'>

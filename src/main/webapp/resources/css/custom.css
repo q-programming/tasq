@@ -330,4 +330,13 @@ span.points:hover .point-edit{
 	width:20px;
 	display:none;
 }
+ul.auto-complete-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    z-index: 1500;
+    max-height: 250px;
+    overflow: auto;
+}
 

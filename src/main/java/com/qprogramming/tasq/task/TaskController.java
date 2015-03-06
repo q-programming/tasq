@@ -837,26 +837,30 @@ public class TaskController {
 		return "redirect:" + request.getHeader("Referer");
 	}
 
+	@RequestMapping(value = "/task/assignMe", method = RequestMethod.GET)
+	public String assignMe(@RequestParam(value = "id") String taskID,
+			RedirectAttributes ra, HttpServletRequest request) {
+		assignMeToTask(taskID);
+		return "redirect:" + request.getHeader("Referer");
+	}
+
 	@RequestMapping(value = "/task/assignMe", method = RequestMethod.POST)
 	@ResponseBody
-	public ResultData assignMe(@RequestParam(value = "id") String id) {
+	public ResultData assignMePOST(@RequestParam(value = "id") String id) {
 		// check if not admin or user
 		if (!Roles.isUser()) {
 			throw new TasqAuthException(msg);
 		}
-		Task task = taskSrv.findById(id);
-		if (!projectSrv.canEdit(task.getProject())) {
+		if (assignMeToTask(id)) {
+			return new ResultData(ResultData.OK, msg.getMessage(
+					"task.assinged.me", null, Utils.getCurrentLocale())
+					+ " "
+					+ id);
+		} else {
 			return new ResultData(ResultData.ERROR, msg.getMessage(
 					"role.error.task.permission", null,
 					Utils.getCurrentLocale()));
 		}
-		Account assignee = Utils.getCurrentAccount();
-		task.setAssignee(assignee);
-		taskSrv.save(task);
-		wlSrv.addActivityLog(task, assignee.toString(), LogType.ASSIGNED);
-		watchSrv.startWatching(task);
-		return new ResultData(ResultData.OK, msg.getMessage("task.assinged.me",
-				null, Utils.getCurrentLocale()) + " " + task.getId());
 	}
 
 	@RequestMapping(value = "/task/priority", method = RequestMethod.GET)
@@ -937,8 +941,8 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/getTasks", method = RequestMethod.GET)
-	public @ResponseBody List<DisplayTask> showTasks(
-			@RequestParam Long projectID,
+	public @ResponseBody
+	List<DisplayTask> showTasks(@RequestParam Long projectID,
 			@RequestParam(required = false) String taskID,
 			@RequestParam String term, HttpServletResponse response) {
 		response.setContentType("application/json");
@@ -963,8 +967,9 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/getSubTasks", method = RequestMethod.GET)
-	public @ResponseBody List<DisplayTask> showSubTasks(
-			@RequestParam String taskID, HttpServletResponse response) {
+	public @ResponseBody
+	List<DisplayTask> showSubTasks(@RequestParam String taskID,
+			HttpServletResponse response) {
 		response.setContentType("application/json");
 		List<Task> allSubTasks = taskSrv.findSubtasks(taskID);
 		List<DisplayTask> result = new ArrayList<DisplayTask>();
@@ -976,8 +981,8 @@ public class TaskController {
 
 	@RequestMapping(value = "/task/attachFiles", method = RequestMethod.POST)
 	public String attacheFiles(@RequestParam String taskID,
-			@RequestParam List<MultipartFile> files,
-			RedirectAttributes ra, HttpServletRequest request, Model model) {
+			@RequestParam List<MultipartFile> files, RedirectAttributes ra,
+			HttpServletRequest request, Model model) {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
@@ -990,7 +995,8 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/{id}/file", method = RequestMethod.GET)
-	public @ResponseBody String downloadFile(@PathVariable String id,
+	public @ResponseBody
+	String downloadFile(@PathVariable String id,
 			@RequestParam("get") String filename, HttpServletRequest request,
 			HttpServletResponse response, RedirectAttributes ra)
 			throws IOException {
@@ -1249,6 +1255,25 @@ public class TaskController {
 			}
 		}
 		folder.delete();
+	}
+
+	/**
+	 * Assigns currently logged user into task with given ID
+	 * 
+	 * @param id
+	 * @return
+	 */
+	private boolean assignMeToTask(String id) {
+		Task task = taskSrv.findById(id);
+		if (!projectSrv.canEdit(task.getProject())) {
+			return false;
+		}
+		Account assignee = Utils.getCurrentAccount();
+		task.setAssignee(assignee);
+		taskSrv.save(task);
+		wlSrv.addActivityLog(task, assignee.toString(), LogType.ASSIGNED);
+		watchSrv.startWatching(task);
+		return true;
 	}
 
 }

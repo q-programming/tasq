@@ -44,7 +44,11 @@
 				<c:if test="${empty task.assignee}">
 					<i><s:message code="task.unassigned" /> <c:if
 							test="${can_edit}">
-						&nbsp;<button class="btn btn-default btn-xxs a-tooltip assign_me"
+						&nbsp;<button class="btn btn-default assignToTask btn-xxs a-tooltip assign_me"
+										title="<s:message code="task.assign"/>" data-toggle="modal" data-target="#assign_modal" 
+										data-taskID="${task.id}" data-assignee="${task.assignee}" 
+										data-assigneeID="${task.assignee.id}"
+										data-projectID="${task.projectID}"
 								type="button" data-taskID="${task.id}"
 								title="<s:message code="task.assignme"/>">
 								<i class="fa fa-lg fa-user"></i>
@@ -58,6 +62,15 @@
 						style="height: 30px; padding-right: 5px;"
 						src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />
 					</a>
+					<button class="btn btn-default assignToTask btn-xxs a-tooltip assign_me"
+										title="<s:message code="task.assign"/>" data-toggle="modal" data-target="#assign_modal" 
+										data-taskID="${task.id}" data-assignee="${task.assignee}" 
+										data-assigneeID="${task.assignee.id}"
+										data-projectID="${task.projectID}"
+								type="button" data-taskID="${task.id}"
+								title="<s:message code="task.assignme"/>">
+								<i class="fa fa-lg fa-user"></i>
+							</button>
 				</c:if>
 			</div>
 		</div>

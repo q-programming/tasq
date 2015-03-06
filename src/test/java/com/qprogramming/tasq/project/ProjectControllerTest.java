@@ -474,13 +474,16 @@ public class ProjectControllerTest {
 		when(accountServiceMock.findByEmail(NEW_EMAIL)).thenReturn(
 				new Account(NEW_EMAIL, PASSWORD, Roles.ROLE_USER));
 		when(projSrv.findById(1L)).thenReturn(project);
+		when(projSrv.findByProjectId(PROJ_ID)).thenReturn(project);
 		projectCtr.addParticipant(1L, NEW_EMAIL, raMock, requestMock);
 		verify(accountServiceMock, times(1)).update(any(Account.class));
 		verify(projSrv, times(1)).save(project);
-		List<DisplayAccount> result = projectCtr.listParticipants(1L, null,
+		List<DisplayAccount> result = projectCtr.listParticipants(PROJ_ID, null,
 				responseMock);
 		Assert.assertEquals(2, result.size());
-		result = projectCtr.listParticipants(1L, "Jo", responseMock);
+		result = projectCtr.listParticipants(PROJ_ID, "Jo", responseMock);
+		Assert.assertEquals(1, result.size());
+		result = projectCtr.listParticipants("1", "Jo", responseMock);
 		Assert.assertEquals(1, result.size());
 	}
 

@@ -74,28 +74,11 @@
 </div>
 <jsp:include page="../modals/logWork.jsp" />
 <jsp:include page="../modals/close.jsp" />
+<jsp:include page="../modals/assign.jsp" />
 <%-- <tiles:insertTemplate template="modal/close"/> --%>
 <script>
 	$(document).ready(function($) {
 		<c:if test="${can_edit}">
-		$(".assign_me").click(function(){
-			var taskID = $(this).data('taskid');
-			showWait(true);
-			//assignMe
-			$.post('<c:url value="/task/assignMe"/>',{id:taskID},function(result){
-				console.log(result);
-				if(result.code!='OK'){
-					showError(result.message);
-				}
-				else{
-					var assignee = '<a class="a-tooltip" href="<c:url value="/user?id=${user.id}"/>" title="${user}"><img data-src="holder.js/30x30"	style="height: 30px; padding-right: 5px;" src="<c:url value="/../avatar/${user.id}.png"/>" />'
-									+'</a>';
-					$("#assignee_"+taskID).html(assignee);
-					showSuccess(result.message);
-					showWait(false);
-				}
-			});
-		});
 
 		$(".agile-card").draggable ({
 		    	revert: 'invalid',
