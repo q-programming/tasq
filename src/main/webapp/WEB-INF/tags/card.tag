@@ -58,19 +58,19 @@
 				<c:if test="${not empty task.assignee}">
 					<a ${link} class="a-tooltip"
 						href="<c:url value="/user?id=${task.assignee.id}"/>"
-						title="${task.assignee}"> <img data-src="holder.js/30x30"
+						title="${task.assignee}"><img data-src="holder.js/30x30"
 						style="height: 30px; padding-right: 5px;"
 						src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />
-					</a>
-					<button class="btn btn-default assignToTask btn-xxs a-tooltip assign_me"
+					</a><c:if test="${task.state ne 'CLOSED'}}"><button class="btn btn-default assignToTask btn-xxs a-tooltip assign_me"
 										title="<s:message code="task.assign"/>" data-toggle="modal" data-target="#assign_modal" 
 										data-taskID="${task.id}" data-assignee="${task.assignee}" 
 										data-assigneeID="${task.assignee.id}"
 										data-projectID="${task.projectID}"
-								type="button" data-taskID="${task.id}"
-								title="<s:message code="task.assignme"/>">
+										type="button" data-taskID="${task.id}"
+										title="<s:message code="task.assignme"/>">
 								<i class="fa fa-lg fa-user"></i>
-							</button>
+						</button>
+					</c:if>
 				</c:if>
 			</div>
 		</div>

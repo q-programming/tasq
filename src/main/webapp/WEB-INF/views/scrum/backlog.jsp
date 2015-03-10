@@ -123,6 +123,11 @@
 									class="badge theme">
 									${task.story_points} </span>
 								</c:if>
+								<c:if test="${task.story_points eq 0 && task.estimated}">
+								<span
+									class="badge theme">
+									? </span>
+								</c:if>
 							</div>
 						</div>
 					</c:forEach>

@@ -312,7 +312,7 @@ public class SprintController {
 								total_estimate, task.getRawEstimate());
 					}
 					if (!project.getTimeTracked()) {
-						if (task.getStory_points() == 0) {
+						if (task.getStory_points() == 0 && task.isEstimated()) {
 							warnings.append(task.getId());
 							warnings.append(" ");
 						}
