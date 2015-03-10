@@ -462,8 +462,9 @@ public class SprintController {
 				return result;
 			}
 			// Fill maps based on time or story point driven board
-			LocalDate startTime = new LocalDate(sprint.getRawStart_date());
-			LocalDate endTime = new LocalDate(sprint.getRawEnd_date());
+			
+			DateTime startTime = new DateTime(sprint.getRawStart_date());
+			DateTime endTime = new DateTime(sprint.getRawEnd_date());
 			boolean timeTracked = project.getTimeTracked();
 			List<WorkLog> wrkList = wrkLogSrv.getAllSprintEvents(sprint);
 			result.setWorklogs(DisplayWorkLog.convertToDisplayWorkLogs(wrkList));
@@ -537,14 +538,14 @@ public class SprintController {
 	}
 
 	private Map<String, Float> fillTimeBurndownMap(List<WorkLog> wrkList,
-			LocalDate startTime, LocalDate endTime) {
+			DateTime startTime, DateTime endTime) {
 		int sprintDays = Days.daysBetween(startTime, endTime).getDays() + 1;
 		Map<LocalDate, Period> timeBurndownMap = fillTimeMap(wrkList);
 		Map<String, Float> resultsBurned = new LinkedHashMap<String, Float>();
 		for (int i = 0; i < sprintDays; i++) {
-			LocalDate date = startTime.plusDays(i);
+			DateTime date = startTime.plusDays(i);
 			Period value = timeBurndownMap.get(date);
-			if (date.isAfter(LocalDate.now())) {
+			if (date.isAfter(DateTime.now())) {
 				resultsBurned.put(date.toString(), new Float(0));
 			} else {
 				if (value != null) {

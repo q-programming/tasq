@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.hibernate.Hibernate;
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -240,8 +241,8 @@ public class WorkLogService {
 
 	@Transactional
 	public List<WorkLog> getAllSprintEvents(Sprint sprint) {
-		LocalDate start = new LocalDate(sprint.getRawStart_date());
-		LocalDate end = new LocalDate(sprint.getRawEnd_date()).plusDays(1);
+		DateTime start = new DateTime(sprint.getRawStart_date());
+		DateTime end = new DateTime(sprint.getRawEnd_date()).plusDays(1);
 		List<WorkLog> list = wlRepo
 				.findByProjectIdAndTimeBetweenAndWorklogtaskNotNullOrderByTimeAsc(
 						sprint.getProject().getId(), start.toDate(),
