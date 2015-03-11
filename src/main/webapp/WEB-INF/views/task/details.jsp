@@ -253,15 +253,21 @@
 				<c:set var="loggedWork">${task.percentage_logged}</c:set>
 				<c:set var="remaining_width">100</c:set>
 				<c:set var="remaining_bar">${task.percentage_left}</c:set>
-				<%-- 	<br>${loggedWork} <br>${task.percentage_left} <br>${task.lowerThanEstimate eq 'true'} --%>
 				<%-- Check if it's not lower than estimate --%>
 				<c:if test="${task.lowerThanEstimate eq 'true'}">
 					<c:set var="remaining_width">${task.percentage_logged + task.percentage_left}</c:set>
-					<c:set var="loggedWork">${100- task.percentage_left}</c:set>
+					<c:set var="loggedWork">${(task.percentage_logged / (task.percentage_logged + task.percentage_left))*100}</c:set>
+					<c:set var="remaining_bar">${(task.percentage_left / (task.percentage_logged + task.percentage_left))*100}</c:set>
 				</c:if>
 				<%-- logged work is greater than 100% and remaning time is greater than 0 --%>
 				<c:if
 					test="${task.percentage_logged gt 100 && task.remaining ne '0m' }">
+					<c:set var="estimate_width">${task.moreThanEstimate}</c:set>
+					<c:set var="remaining_bar">${task.overCommited}</c:set>
+					<c:set var="loggedWork">${100-task.overCommited}</c:set>
+				</c:if>
+				<c:if
+					test="${task.percentage_logged + task.percentage_left gt 100 && task.remaining ne '0m' }">
 					<c:set var="estimate_width">${task.moreThanEstimate}</c:set>
 					<c:set var="remaining_bar">${task.overCommited}</c:set>
 					<c:set var="loggedWork">${100-task.overCommited}</c:set>
@@ -272,7 +278,6 @@
 					<c:set var="remaining_bar">${task.overCommited}</c:set>
 					<c:set var="loggedWork">${100-task.overCommited}</c:set>
 				</c:if>
-				
 				<%-- There was more logged but remaining is 0 --%>
 				<c:if
 					test="${task.percentage_logged gt 100 && task.remaining eq '0m' }">
@@ -445,6 +450,25 @@
 								<td style="width: 30px"><t:priority priority="${subTask.priority}" list="true" /></td>
 								<td><a style="color: inherit;<c:if test="${subTask.state eq 'CLOSED' }">text-decoration: line-through;</c:if>" href="<c:url value="subtask?id=${subTask.id}"/>">[${subTask.id}] ${subTask.name}</a></td>
 								<td style="width: 100px"><t:state state="${subTask.state}" /></td>
+								<td style="width:50px;padding-top: 14px;">
+								<div class="progress" style="height: 5px;">
+									<c:set var="logged_class"></c:set>
+									<c:set var="percentage">${subTask.percentage_logged}</c:set>
+									<c:if test="${subTask.state eq 'TO_DO'}">
+										<c:set var="percentage">0</c:set>
+									</c:if>
+									<c:if test="${subTask.state eq 'CLOSED'}">
+										<c:set var="logged_class">progress-bar-success</c:set>
+										<c:set var="percentage">100</c:set>
+									</c:if>
+									<c:if test="${subTask.state eq 'BLOCKED' || subTask.percentage_logged gt 100}">
+										<c:set var="logged_class">progress-bar-danger</c:set>
+									</c:if>
+									<div class="progress-bar ${logged_class} a-tooltip" title="${percentage}%" role="progressbar"
+										aria-valuenow="${percentage}" aria-valuemin="0"
+										aria-valuemax="100" style="width:${percentage}%"></div>
+								</div>
+								</td>
 							</tr>
 						</c:forEach>
 					</table>

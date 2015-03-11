@@ -388,7 +388,17 @@ public class TaskController {
 		if (!task.isSubtask()) {
 			Hibernate.initialize(task.getSprints());
 			List<Task> subtasks = taskSrv.findSubtasks(task);
+			//Add all subtasks into remaining work
+			for (Task subtask : subtasks) {
+				task.setEstimate(PeriodHelper.plusPeriods(
+						task.getRawEstimate(), subtask.getRawEstimate()));
+				task.setLoggedWork(PeriodHelper.plusPeriods(
+						task.getRawLoggedWork(), subtask.getRawLoggedWork()));
+				task.setRemaining(PeriodHelper.plusPeriods(
+						task.getRawRemaining(), subtask.getRawRemaining()));
+			}
 			model.addAttribute("subtasks", subtasks);
+
 		}
 		model.addAttribute("watching", watchSrv.isWatching(task.getId()));
 		model.addAttribute("task", task);
@@ -518,7 +528,7 @@ public class TaskController {
 		taskSrv.save(subTask);
 		taskSrv.save(task);
 		// TODO save in subdir?
-		saveTaskFiles(taskForm.getFiles(), subTask);
+		//saveTaskFiles(taskForm.getFiles(), subTask);
 		wlSrv.addActivityLog(subTask, "", LogType.SUBTASK);
 		return "redirect:/task?id=" + id;
 	}

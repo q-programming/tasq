@@ -472,7 +472,7 @@ public class Task implements java.io.Serializable {
 
 	public float getMoreThanEstimate() {
 		Period loggedAndLeft = getRawLoggedWork();
-		if (remaining.toStandardDuration().getMillis() > 0) {
+		if (PeriodHelper.toStandardDuration(remaining).getMillis() > 0) {
 			loggedAndLeft = PeriodHelper.plusPeriods(loggedAndLeft, remaining);
 		}
 		return estimate.toStandardDuration().getMillis() * 100
@@ -480,21 +480,24 @@ public class Task implements java.io.Serializable {
 	}
 
 	public float getOverCommited() {
-		long remaining_milis = remaining.toStandardDuration().getMillis();
+		long remaining_milis = PeriodHelper.toStandardDuration(remaining)
+				.getMillis();
 		if (remaining_milis > 0) {
+			Period plus = PeriodHelper.plusPeriods(getRawLoggedWork(),
+					remaining);
 			return (remaining_milis * 100)
-					/ PeriodHelper.plusPeriods(getRawLoggedWork(), remaining)
-							.toStandardDuration().getMillis();
+					/ PeriodHelper.toStandardDuration(plus).getMillis();
 		}
 		return 0;
 
 	}
 
 	public float getPercentage_left() {
-		long estimate_milis = estimate.toStandardDuration().getMillis();
+		long estimate_milis = PeriodHelper.toStandardDuration(getRawEstimate())
+				.getMillis();
 		if (estimate_milis > 0) {
-			return getRawRemaining().toStandardDuration().getMillis() * 100
-					/ estimate_milis;
+			return PeriodHelper.toStandardDuration(getRawRemaining())
+					.getMillis() * 100 / estimate_milis;
 		} else {
 			return 0;
 		}
