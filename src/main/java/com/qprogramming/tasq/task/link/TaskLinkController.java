@@ -21,17 +21,19 @@ import com.qprogramming.tasq.task.worklog.WorkLogService;
 
 @Controller
 public class TaskLinkController {
-	@Autowired
+
 	private TaskService taskSrv;
-
-	@Autowired
 	private WorkLogService wlSrv;
-
-	@Autowired
 	private MessageSource msg;
-
-	@Autowired
 	private TaskLinkService linkService;
+	
+	@Autowired
+	public TaskLinkController(TaskService taskSrv,WorkLogService wlSrv,MessageSource msg,TaskLinkService linkService) {
+		this.taskSrv = taskSrv;
+		this.wlSrv = wlSrv;
+		this.msg = msg;
+		this.linkService = linkService;
+	}
 
 	@Transactional
 	@RequestMapping(value = "/task/link", method = RequestMethod.POST)
