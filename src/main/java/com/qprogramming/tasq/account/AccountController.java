@@ -95,24 +95,6 @@ public class AccountController {
 			} catch (IOException e) {
 				LOG.error(e.getMessage());
 			}
-//			try {
-//				BufferedImage image = ImageIO.read(avatarFile.getInputStream());
-//				Integer width = image.getWidth();
-//				Integer height = image.getHeight();
-//				if (width > DEFAULT_WIDTH_HEIGHT
-//						|| height > DEFAULT_WIDTH_HEIGHT
-//						|| avatarFile.getSize() > 100000) {
-//					MessageHelper.addErrorAttribute(
-//							ra,
-//							msg.getMessage("error.file100kb", null,
-//									Utils.getCurrentLocale()));
-//					return "redirect:/settings";
-//				}
-//				byte[] bytes = avatarFile.getBytes();
-//				account.setAvatar(bytes);
-//			} catch (IOException e) {
-//				LOG.error(e.getLocalizedMessage());
-//			}
 		}
 		account.setLanguage(language);
 		localeResolver.setLocale(request, response, new Locale(language));
@@ -139,27 +121,6 @@ public class AccountController {
 		model.addAttribute("account", account);
 		return "user/details";
 	}
-
-//	@RequestMapping("/userAvatar")
-//	public void getCurrentAvatar(HttpServletResponse response,
-//			HttpServletRequest request) throws IOException {
-//		File file = new File(getAvatar(Utils.getCurrentAccount().getId()));
-//		response.setContentType("image/png");
-//        response.setHeader("Content-Length", String.valueOf(file.length()));
-//        response.setHeader("Content-Disposition", "inline; filename=\"" + file.getName() + "\"");
-//        Files.copy(file.toPath(), response.getOutputStream());
-//		byte[] imageBytes = Utils.getCurrentAccount().getAvatar();
-//		loadImage(response, request, imageBytes);
-//	}
-//
-//	@RequestMapping("/userAvatar/{id}")
-//	public void getUserAvatar(HttpServletResponse response,
-//			HttpServletRequest request, @PathVariable("id") final String id)
-//			throws IOException {
-//		Account acc = accountSrv.findById(Long.parseLong(id));
-//		byte[] imageBytes = acc.getAvatar();
-//		loadImage(response, request, imageBytes);
-//	}
 
 	@RequestMapping(value = "/getAccounts", method = RequestMethod.GET)
 	public @ResponseBody
@@ -235,29 +196,4 @@ public class AccountController {
 	private String getAvatar(Long id){
 		return  getAvatarDir() + id + PNG;
 	}
-
-	/**
-	 * Loads user image , if none is set, then returns default one
-	 * 
-	 * @param response
-	 * @param request
-	 * @param imageBytes
-	 * @throws FileNotFoundException
-	 * @throws IOException
-	 */
-	private void loadImage(HttpServletResponse response,
-			HttpServletRequest request, byte[] imageBytes)
-			throws FileNotFoundException, IOException {
-		if (imageBytes == null || imageBytes.length == 0) {
-			HttpSession session = request.getSession();
-			ServletContext sc = session.getServletContext();
-			InputStream is = new FileInputStream(
-					sc.getRealPath("/resources/img/avatar.png"));
-			imageBytes = IOUtils.toByteArray(is);
-			response.setContentType("image/png");
-		}
-		response.getOutputStream().write(imageBytes);
-		response.getOutputStream().flush();
-	}
-
 }

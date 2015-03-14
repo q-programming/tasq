@@ -241,7 +241,7 @@ public class Task implements java.io.Serializable {
 	}
 
 	public void addLoggedWork(Period loggedWork) {
-		this.loggedWork = PeriodHelper.plusPeriods(this.loggedWork, loggedWork);
+		this.loggedWork = PeriodHelper.plusPeriods(getRawLoggedWork(), loggedWork);
 	}
 
 	public Enum<TaskState> getState() {
