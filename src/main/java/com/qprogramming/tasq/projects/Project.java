@@ -2,6 +2,7 @@ package com.qprogramming.tasq.projects;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -179,7 +180,7 @@ public class Project implements Serializable {
 	}
 
 	public List<Task> getTasks() {
-		return tasks;
+		return tasks == null ? new ArrayList<Task>() : tasks;
 	}
 
 	public void setTasks(List<Task> tasks) {

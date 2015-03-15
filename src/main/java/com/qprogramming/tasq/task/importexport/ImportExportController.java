@@ -54,16 +54,9 @@ public class ImportExportController {
 
 	private static final String TEMPLATE_XLS = "template.xls";
 
-	@Autowired
 	private ProjectService projectSrv;
-
-	@Autowired
 	private TaskService taskSrv;
-
-	@Autowired
 	private WorkLogService wlSrv;
-
-	@Autowired
 	private MessageSource msg;
 
 	private static final Logger LOG = LoggerFactory
@@ -82,6 +75,14 @@ public class ImportExportController {
 	private static final Object ROW_SKIPPED = "Row was skipped</br>";
 	private static final String UNDERSCORE = "_";
 
+	@Autowired
+	public ImportExportController(ProjectService projectSrv,TaskService taskSrv,WorkLogService wlSrv,MessageSource msg) {
+		this.projectSrv = projectSrv;
+		this.taskSrv = taskSrv;
+		this.wlSrv = wlSrv;
+		this.msg = msg;
+	}
+	
 	@RequestMapping(value = "/task/getTemplateFile", method = RequestMethod.GET)
 	public @ResponseBody
 	String downloadTemplate(HttpServletRequest request,
