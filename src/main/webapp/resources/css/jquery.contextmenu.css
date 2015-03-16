@@ -86,6 +86,7 @@
   position: relative;
   cursor: default;
   padding: 3px 3px 3px 3px;
+  font-weight: bold;
 /*   color: #ffffff; */
 }
 

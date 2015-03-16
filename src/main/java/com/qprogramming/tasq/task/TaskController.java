@@ -187,6 +187,7 @@ public class TaskController {
 			String taskID = project.getProjectId() + "-" + taskCount;
 			task.setId(taskID);
 			task.setProject(project);
+			task.setTaskOrder((long) taskCount);
 			project.getTasks().add(task);
 			// assigne
 			if (taskForm.getAssignee() != null) {

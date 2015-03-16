@@ -7,6 +7,9 @@
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
 <%@ taglib prefix="myfn" uri="/WEB-INF/tags/custom.tld"%>
+<link href="<c:url value="/resources/css/jquery.contextmenu.css" />"
+	rel="stylesheet" media="screen" />
+<script src="<c:url value="/resources/js/jquery.contextmenu.js" />"></script>
 <c:set var="tasks_text">
 	<s:message code="task.tasks" text="Tasks" />
 </c:set>
@@ -40,7 +43,7 @@
 		</h4>
 		<c:if test="${can_edit}">
 			<div style="margin: 5px 0px;">
-				<s:message code="agile.create.sprint" />
+				<s:message code="agile.create.sprint" />&nbsp;
 				<button id="create_sprint" class="btn btn-default btn-sm">
 					<i class="fa fa-lg fa-plus"></i>
 				</button>
@@ -144,35 +147,44 @@
 	<div style="display: table-cell; padding-left: 20px; width: 45%">
 		<h4>
 			<s:message code="task.tasks" />
+			<span class="btn btn-default pull-right" id="save_order" style="display:none"><i class="fa fa-floppy-o"></i>&nbsp;Save order</span>
 		</h4>
+		<ul id="sortable" style="margin-top: 20px;">
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${not task.inSprint && task.state ne 'CLOSED'}">
 				<div class="agile-card" data-id="${task.id}" id="${task.id}">
+					<div class="side-bar theme"></div>
 					<div style="display: table-cell; width: 100%;">
 						<t:type type="${task.type}" list="true" />
 						<t:priority priority="${task.priority}" list="true" />
 						<a href="<c:url value="/task?id=${task.id}"/>"
 							style="color: inherit;">[${task.id}] ${task.name}</a>
 						<form id="sprint_assign_${task.id}"
-							action="<c:url value="/${project.projectId}/scrum/sprintAssign"/>"
-							method="post">
-							<input type="hidden" name="taskID" value="${task.id}"> <input
-								type="hidden" id="sprintID_${task.id}" name="sprintID">
-						</form>
+ 							action="<c:url value="/${project.projectId}/scrum/sprintAssign"/>"
+ 							method="post">
+ 							<input type="hidden" name="taskID" value="${task.id}"> <input
+ 								type="hidden" id="sprintID_${task.id}" name="sprintID">
+ 						</form>
 					</div>
 					<div style="display: table-cell">
 						<c:if test="${task.story_points == 0 && task.estimated}">
-							<span class="badge theme">
-							? </span>
+							<c:set var="points">?</c:set>
 						</c:if>
 						<c:if test="${task.story_points ne 0 && task.estimated}">
-							<span class="badge theme">
-							${task.story_points} </span>
+							<c:set var="points">${task.story_points}</c:set>
 						</c:if>
+						<span class="points badge theme">
+							${points}
+							<input class="point-input">
+							<span style="display:none;cursor: pointer;"><i class="fa fa-check" style="vertical-align:text-top"></i></span>
+							<span style="display:none;cursor: pointer;"><i class="fa fa-times" style="vertical-align:text-top"></i></span>
+							<span class="point-edit"><i class="fa fa-pencil points" style="vertical-align:text-top"></i></span>
+						</span>
 					</div>
 				</div>
 			</c:if>
 		</c:forEach>
+		</ul>
 	</div>
 </div>
 <jsp:include page="../modals/sprint.jsp" />
@@ -208,10 +220,23 @@ $(document).ready(function($) {
 		dateFormat : "dd-mm-yy",
 		firstDay: 1
 	});
-	$(".agile-card").draggable({
- 		revert : 'invalid',
+	$("#sortable").sortable({
 		cursor : 'move',
+		update: function(event,ui){
+			$("#save_order").show("highlight",{color: '#5cb85c'}, 1000);
+		}
 	});
+	$("#save_order").click(function(){
+		var order = $("ul#sortable").sortable("toArray");
+		var url = '<c:url value="/agile/order"/>';
+		var project = '${project.id}';
+		showWait(true);
+		$.post(url ,{ids:order,project:project},function(result){
+			showWait(false);
+			$("#save_order").hide("highlight",{color: '#5cb85c'}, 1000);
+		});
+	});
+
 	$(".table_sprint").droppable({
 		activeClass : "state_default",
 		hoverClass : "state_hover",
@@ -237,6 +262,30 @@ $(document).ready(function($) {
 					}
 		},
 		 </c:forEach>
+		,
+		null,
+		{
+			label: 'Move to top of backlog',
+			icon: '',
+			action : function(event) {
+				console.log("Top");
+				var task = event.currentTarget;
+				$("#sortable").prepend(task);
+				$("#save_order").show("highlight",{color: '#5cb85c'}, 1000);
+			}
+		}
+
+		,
+		{
+			label: 'Move to bottom of backlog',
+			icon: '',
+			action : function(event) {
+				console.log("Bottom");
+				var task = event.currentTarget;
+				$("#sortable").append(task);
+				$("#save_order").show("highlight",{color: '#5cb85c'}, 1000);
+			}
+		}
 		]});
 	
 	$('.agile-list').contextPopup({
@@ -289,6 +338,56 @@ $(document).ready(function($) {
 			location.reload();
 		});
 	}
+	//points
+	$('.point-edit').click(function(){
+		togglePoints();
+		$('#point_value').focus();
+		
+	});
+
+	//TODO
+	$('#point_approve').click(function(){
+		changePoints();
+	});
+	
+	$('#point-input').keypress(function (e) {
+		 var key = e.which;
+		 if(key == 13)  // the enter key code
+		  {
+			changePoints();
+		  }
+	});
+	
+	$('#point_cancel').click(function(){
+		togglePoints();
+	});
+
+	function togglePoints(){
+		$('#point-input').val('');
+		$('#point-input').toggle();
+		$('#point_value').toggle();
+		$('#point_approve').toggle();
+		$('#point_cancel').toggle();
+		$('#point_edit').toggleClass('hidden');
+	}
+	function changePoints(){
+		var points = $('#point-input').val();
+		if(isNumber(points) && points < 40){
+			showWait(true);
+			$.post('<c:url value="/task/changePoints"/>',{id:taskID,points:points},function(result){
+				if(result.code == 'Error'){
+					showError(result.message);
+				}
+				else{
+					$("#point_value").html(points);
+					showSuccess(result.message);
+				}
+			});
+		}
+		togglePoints();
+	}
+
+	
 	</c:if>
 });	
 </script>

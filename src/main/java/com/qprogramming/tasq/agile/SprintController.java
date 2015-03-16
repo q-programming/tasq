@@ -104,7 +104,7 @@ public class SprintController {
 			for (Task task : taskList) {
 				resultList.add(new DisplayTask(task));
 			}
-			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID,
+			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ORDER,
 					false));
 			model.addAttribute("sprint", sprint);
 			model.addAttribute("tasks", resultList);
@@ -127,7 +127,7 @@ public class SprintController {
 			// Don't show closed tasks in backlog view
 			List<Task> taskList = taskSrv.findAllByProject(project);
 			Collections.sort(taskList, new TaskSorter(
-					TaskSorter.SORTBY.PRIORITY, true));
+					TaskSorter.SORTBY.ORDER, true));
 			List<DisplayTask> resultList = DisplayTask
 					.convertToDisplayTasks(taskList);
 			Map<Sprint, List<DisplayTask>> sprint_result = new LinkedHashMap<Sprint, List<DisplayTask>>();
@@ -513,7 +513,7 @@ public class SprintController {
 		Sprint sprint = sprintRepo.findById(sprintID);
 		return sprint.isActive();
 	}
-
+	
 	/**
 	 * Checks if task is properly estimated based on project settings (
 	 * Estimated time not 0m for time based or story points not 0 for story

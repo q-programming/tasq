@@ -94,4 +94,16 @@ public class TaskService {
 	private String getTaskDir(Task task) {
 		return tasqRootDir + File.separator + task.getProject().getProjectId()+ File.separator + task.getId();
 	}
+
+	public List<Task> finAllById(List<String> taskIDs) {
+		return taskRepo.findById(taskIDs);
+	}
+
+	public List<Task> save(List<Task> taskList) {
+		 return taskRepo.save(taskList);
+	}
+
+	public List<Task> findAllByProjectId(Long project) {
+		return taskRepo.findByProjectId(project);
+	}
 }

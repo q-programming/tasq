@@ -110,6 +110,9 @@ public class Task implements java.io.Serializable {
 
 	@Column
 	private String parent;
+	
+	@Column(name="task_order")
+	private Long taskOrder;
 
 	public String getId() {
 		return id;
@@ -362,6 +365,14 @@ public class Task implements java.io.Serializable {
 
 	public void setType(Enum<TaskType> type) {
 		this.type = type;
+	}
+
+	public Long getTaskOrder() {
+		return taskOrder;
+	}
+
+	public void setTaskOrder(Long taskOrder) {
+		this.taskOrder = taskOrder;
 	}
 
 	/*

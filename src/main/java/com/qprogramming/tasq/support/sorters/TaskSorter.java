@@ -8,7 +8,7 @@ import com.qprogramming.tasq.task.TaskPriority;
 public class TaskSorter implements Comparator<Task> {
 
 	public static enum SORTBY {
-		NAME, START_DATE, ID, DUE_DATE, PRIORITY;
+		NAME, START_DATE, ID, DUE_DATE, PRIORITY, ORDER;
 	}
 
 	private SORTBY sortBy;
@@ -21,19 +21,29 @@ public class TaskSorter implements Comparator<Task> {
 
 	public int compare(Task a, Task b) {
 		int result = 0;
-
 		switch (sortBy) {
 		case NAME:
 			result = a.getName().compareTo(b.getName());
 			break;
-		case ID:
-			String aId = a.getId().split("-")[1].split("/")[0];
-			String bId = b.getId().split("-")[1].split("/")[0];
-			if (Integer.parseInt(aId) > Integer.parseInt(bId)) {
+		case ORDER:
+			if (a.getTaskOrder() != null && b.getTaskOrder() == null) {
 				result = 1;
+			} else if (a.getTaskOrder() == null && b.getTaskOrder() != null) {
+				result = -11;
+			} else if (a.getTaskOrder() == null && b.getTaskOrder() == null) {
+				result = compareByID(a, b);
 			} else {
-				result = -1;
+				if (a.getTaskOrder() > b.getTaskOrder()) {
+					result = -1;
+				} else if (a.getTaskOrder() < b.getTaskOrder()) {
+					result = 1;
+				} else {
+					result = 0;
+				}
 			}
+			break;
+		case ID:
+			result = compareByID(a, b);
 			break;
 		case DUE_DATE:
 			if (a.getRawDue_date().before(b.getRawDue_date())) {
@@ -58,5 +68,17 @@ public class TaskSorter implements Comparator<Task> {
 			break;
 		}
 		return isDescending ? -result : result;
+	}
+
+	private int compareByID(Task a, Task b) {
+		int result;
+		String aId = a.getId().split("-")[1].split("/")[0];
+		String bId = b.getId().split("-")[1].split("/")[0];
+		if (Integer.parseInt(aId) > Integer.parseInt(bId)) {
+			result = -1;
+		} else {
+			result = 1;
+		}
+		return result;
 	}
 }

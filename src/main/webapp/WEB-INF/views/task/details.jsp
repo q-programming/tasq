@@ -801,42 +801,6 @@ $(document).ready(function($) {
 			$('#comments_cancel').click(function() {
 						toggle_comment();
 			});
-// 			var cache = {};
-// 			$("#assignee").autocomplete({
-// 						minLength : 1,
-// 						delay : 500,
-// 						//define callback to format results
-// 						source : function(request, response) {
-// 							$("#usersLoader").show();
-// 							var term = request.term;
-// 							if ( term in cache ) {
-// 						          response( cache[ term ] );
-// 						          return;
-// 						    }
-// 							var url='<c:url value="/project/getParticipants"/>';
-// 							$.get(url,{id:'${task.project.id}',term:term},function(result) {
-// 									$("#usersLoader").hide();
-// 									cache[ term ] = result;
-// 									response($.map(result,function(item) {
-// 										return {
-// 											// following property gets displayed in drop down
-// 											label : item.name+ " "+ item.surname,
-// 											value : item.email,
-// 											}
-// 										}));
-// 									});
-// 							},
-// 							//define select handler
-// 						select : function(event, ui) {
-// 							if (ui.item) {
-// 								event.preventDefault();
-// 								$("#assignee").val(ui.item.label);
-// 								$("#assign").append('<input type="hidden" name="email" value=' + ui.item.value + '>');
-// 								$("#assign").submit();
-// 								return false;
-// 							}
-// 						}
-// 					});
 			$("#task_link").autocomplete({
 				minLength : 1,
 				delay : 500,
@@ -965,6 +929,7 @@ $(document).ready(function($) {
 			function changePoints(){
 				var points = $('#point-input').val();
 				if(isNumber(points) && points < 40){
+					showWait(true);
 					$.post('<c:url value="/task/changePoints"/>',{id:taskID,points:points},function(result){
 						if(result.code == 'Error'){
 							showError(result.message);
