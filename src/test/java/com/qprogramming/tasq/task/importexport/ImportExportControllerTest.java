@@ -19,6 +19,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.joda.time.Period;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -68,7 +69,7 @@ public class ImportExportControllerTest {
 	private Task task2;
 
 	private ImportExportController importExportCtrl;
-	
+
 	@Mock
 	private ProjectService projSrvMock;
 	@Mock
@@ -117,40 +118,45 @@ public class ImportExportControllerTest {
 		when(taskSrvMock.findById(TEST_1)).thenReturn(task1);
 		when(taskSrvMock.findById(TEST_2)).thenReturn(task2);
 		SecurityContextHolder.setContext(securityMock);
-		importExportCtrl = new ImportExportController(projSrvMock, taskSrvMock, wlSrvMock, msgMock);
+		importExportCtrl = new ImportExportController(projSrvMock, taskSrvMock,
+				wlSrvMock, msgMock);
 	}
-	
+
 	@Test
-	public void downloadTemplateTest(){
+	public void downloadTemplateTest() {
 		try {
 			when(responseMock.getOutputStream()).thenReturn(outputStreamMock);
 			importExportCtrl.downloadTemplate(requestMock, responseMock);
-			verify(responseMock,times(1)).setHeader("content-Disposition", "attachment; filename="+TEMPLATE_XLS);
-			verify(outputStreamMock,times(7)).write(any(byte[].class),anyInt(),anyInt());
+			verify(responseMock, times(1)).setHeader("content-Disposition",
+					"attachment; filename=" + TEMPLATE_XLS);
+			verify(outputStreamMock, times(7)).write(any(byte[].class),
+					anyInt(), anyInt());
 		} catch (IOException e) {
 			Assert.fail(e.getMessage());
 		}
 	}
-	
+
 	@Test
-	public void startImportFailedTaskTest(){
+	public void startImportFailedTaskTest() {
 		boolean catched = false;
 		testAccount.setRole(Roles.ROLE_VIEWER);
-		try{
-		importExportCtrl.startImportTasks(modelMock);
-		}catch(TasqAuthException e){
+		try {
+			importExportCtrl.startImportTasks(modelMock);
+		} catch (TasqAuthException e) {
 			catched = true;
 		}
 		Assert.assertTrue("Exception not catched", catched);
 	}
+
 	@Test
-	public void startImportTaskTest(){
+	public void startImportTaskTest() {
 		importExportCtrl.startImportTasks(modelMock);
-		verify(modelMock,times(1)).addAttribute(anyString(),Matchers.anyListOf(Project.class));
+		verify(modelMock, times(1)).addAttribute(anyString(),
+				Matchers.anyListOf(Project.class));
 	}
-	
+
 	@Test
-	public void importTasksTest(){
+	public void importTasksTest() {
 		URL fileURL = getClass().getResource("/sampleImport.xls");
 		Project project = createProject();
 		when(projSrvMock.findByProjectId(PROJECT_ID)).thenReturn(project);
@@ -158,122 +164,136 @@ public class ImportExportControllerTest {
 			mockMultipartFile = new MockMultipartFile("content",
 					fileURL.getFile(), "text/plain", getClass()
 							.getResourceAsStream("/sampleImport.xls"));
-			importExportCtrl.importTasks(mockMultipartFile, PROJECT_ID, modelMock);
+			importExportCtrl.importTasks(mockMultipartFile, PROJECT_ID,
+					modelMock);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
 
-//	@Test
-//	public void linkTasksLinkExistsTest() {
-//		TaskLink link = new TaskLink();
-//		link.setTaskA(TEST_1);
-//		link.setTaskA(TEST_2);
-//		link.setLinkType(TaskLinkType.RELATES_TO);
-//		when(
-//				taskLinkRepoMock.findByTaskAAndTaskBAndLinkType(TEST_1, TEST_2,
-//						TaskLinkType.RELATES_TO)).thenReturn(link);
-//		when(taskSrvMock.findById(TEST_1)).thenReturn(task1);
-//		when(taskSrvMock.findById(TEST_2)).thenReturn(task2);
-//		taskLinkController.linkTasks(TEST_1, TEST_2, TaskLinkType.RELATES_TO,
-//				raMock, requestMock);
-//		verify(raMock, times(1)).addFlashAttribute(anyString(),
-//				new Message(anyString(), Message.Type.DANGER, new Object[] {}));
-//	}
-//
-//	@Test
-//	public void linkTasksLinkABlocksBTest() {
-//		taskLinkController.linkTasks(TEST_1, TEST_2, TaskLinkType.BLOCKS,
-//				raMock, requestMock);
-//		Assert.assertTrue(task2.getState().equals(TaskState.BLOCKED));
-//		verify(taskSrvMock, times(1)).save(any(Task.class));
-//		verify(taskLinkRepoMock, times(1)).save(any(TaskLink.class));
-//		verify(raMock, times(1))
-//				.addFlashAttribute(
-//						anyString(),
-//						new Message(anyString(), Message.Type.SUCCESS,
-//								new Object[] {}));
-//	}
-//
-//	@Test
-//	public void linkTasksLinkAIsBlockedBTest() {
-//		taskLinkController.linkTasks(TEST_2, TEST_1,
-//				TaskLinkType.IS_BLOCKED_BY, raMock, requestMock);
-//		Assert.assertTrue(task2.getState().equals(TaskState.BLOCKED));
-//	}
-//
-//	@Test
-//	public void deleteLinkEmptyTest() {
-//		taskLinkController.deleteLinks(TEST_1, TEST_2, TaskLinkType.BLOCKS,
-//				raMock, requestMock);
-//		verify(raMock, times(1)).addFlashAttribute(anyString(),
-//				new Message(anyString(), Message.Type.DANGER, new Object[] {}));
-//	}
-//
-//	@Test
-//	public void deleteLinkTest() {
-//		TaskLink link = new TaskLink();
-//		link.setTaskA(TEST_1);
-//		link.setTaskB(TEST_2);
-//		link.setLinkType(TaskLinkType.DUPLICATES);
-//		when(
-//				taskLinkRepoMock.findByTaskBAndTaskAAndLinkType(TEST_1, TEST_2,
-//						TaskLinkType.DUPLICATES)).thenReturn(link);
-//		taskLinkController.deleteLinks(TEST_1, TEST_2, TaskLinkType.DUPLICATES,
-//				raMock, requestMock);
-//		verify(raMock, times(1))
-//				.addFlashAttribute(
-//						anyString(),
-//						new Message(anyString(), Message.Type.SUCCESS,
-//								new Object[] {}));
-//		verify(taskLinkRepoMock, times(1)).delete(any(TaskLink.class));
-//	}
-//
-//	@Test
-//	public void deleteLinksTest() {
-//		TaskLink link = new TaskLink();
-//		link.setTaskA(TEST_1);
-//		link.setTaskB(TEST_2);
-//		link.setLinkType(TaskLinkType.DUPLICATES);
-//		List<TaskLink> list = new ArrayList<TaskLink>();
-//		list.add(link);
-//		when(taskLinkRepoMock.findByTaskA(TEST_1)).thenReturn(list);
-//		taskLinkSrv.deleteTaskLinks(task1);
-//		verify(taskLinkRepoMock, times(1)).delete(list);
-//	}
-//
-//	@Test
-//	public void findTaskLinksTest() {
-//		TaskLink link = new TaskLink();
-//		link.setTaskA(TEST_1);
-//		link.setTaskB(TEST_2);
-//		link.setLinkType(TaskLinkType.DUPLICATES);
-//		TaskLink link2 = new TaskLink();
-//		link2.setTaskA(TEST_1);
-//		link2.setTaskB(TEST_2);
-//		link2.setLinkType(TaskLinkType.BLOCKS);
-//		TaskLink link3 = new TaskLink();
-//		link3.setTaskA(TEST_1);
-//		link3.setTaskB(TEST_2);
-//		link3.setLinkType(TaskLinkType.RELATES_TO);
-//		TaskLink link4 = new TaskLink();
-//		link4.setTaskA(TEST_1);
-//		link4.setTaskB(TEST_2);
-//		link4.setLinkType(TaskLinkType.DUPLICATES);
-//		List<TaskLink> list = new ArrayList<TaskLink>();
-//		List<TaskLink> list2 = new ArrayList<TaskLink>();
-//		list.add(link);
-//		list.add(link2);
-//		list.add(link3);
-//		list2.add(link4);
-//		when(taskLinkRepoMock.findByTaskA(TEST_1)).thenReturn(list);
-//		when(taskLinkRepoMock.findByTaskB(TEST_1)).thenReturn(list2);
-//		Map<TaskLinkType, List<DisplayTask>> map = taskLinkSrv
-//				.findTaskLinks(TEST_1);
-//		Assert.assertTrue(map.size() == 4);
-//	}
+	@Test
+	public void exportTasksTest() {
+		try {
+			task1.setEstimate(new Period());
+			when(responseMock.getOutputStream()).thenReturn(outputStreamMock);
+			when(taskSrvMock.findById(TEST_1)).thenReturn(task1);
+			when(taskSrvMock.findById(TEST_2)).thenReturn(task2);
+			String[] idList = {TEST_1,TEST_2};
+			importExportCtrl.exportTasks(idList, responseMock);
+		} catch (IOException e) {
+			Assert.fail(e.getMessage());
+		}
+	}
+
+	// @Test
+	// public void linkTasksLinkExistsTest() {
+	// TaskLink link = new TaskLink();
+	// link.setTaskA(TEST_1);
+	// link.setTaskA(TEST_2);
+	// link.setLinkType(TaskLinkType.RELATES_TO);
+	// when(
+	// taskLinkRepoMock.findByTaskAAndTaskBAndLinkType(TEST_1, TEST_2,
+	// TaskLinkType.RELATES_TO)).thenReturn(link);
+	// when(taskSrvMock.findById(TEST_1)).thenReturn(task1);
+	// when(taskSrvMock.findById(TEST_2)).thenReturn(task2);
+	// taskLinkController.linkTasks(TEST_1, TEST_2, TaskLinkType.RELATES_TO,
+	// raMock, requestMock);
+	// verify(raMock, times(1)).addFlashAttribute(anyString(),
+	// new Message(anyString(), Message.Type.DANGER, new Object[] {}));
+	// }
+	//
+	// @Test
+	// public void linkTasksLinkABlocksBTest() {
+	// taskLinkController.linkTasks(TEST_1, TEST_2, TaskLinkType.BLOCKS,
+	// raMock, requestMock);
+	// Assert.assertTrue(task2.getState().equals(TaskState.BLOCKED));
+	// verify(taskSrvMock, times(1)).save(any(Task.class));
+	// verify(taskLinkRepoMock, times(1)).save(any(TaskLink.class));
+	// verify(raMock, times(1))
+	// .addFlashAttribute(
+	// anyString(),
+	// new Message(anyString(), Message.Type.SUCCESS,
+	// new Object[] {}));
+	// }
+	//
+	// @Test
+	// public void linkTasksLinkAIsBlockedBTest() {
+	// taskLinkController.linkTasks(TEST_2, TEST_1,
+	// TaskLinkType.IS_BLOCKED_BY, raMock, requestMock);
+	// Assert.assertTrue(task2.getState().equals(TaskState.BLOCKED));
+	// }
+	//
+	// @Test
+	// public void deleteLinkEmptyTest() {
+	// taskLinkController.deleteLinks(TEST_1, TEST_2, TaskLinkType.BLOCKS,
+	// raMock, requestMock);
+	// verify(raMock, times(1)).addFlashAttribute(anyString(),
+	// new Message(anyString(), Message.Type.DANGER, new Object[] {}));
+	// }
+	//
+	// @Test
+	// public void deleteLinkTest() {
+	// TaskLink link = new TaskLink();
+	// link.setTaskA(TEST_1);
+	// link.setTaskB(TEST_2);
+	// link.setLinkType(TaskLinkType.DUPLICATES);
+	// when(
+	// taskLinkRepoMock.findByTaskBAndTaskAAndLinkType(TEST_1, TEST_2,
+	// TaskLinkType.DUPLICATES)).thenReturn(link);
+	// taskLinkController.deleteLinks(TEST_1, TEST_2, TaskLinkType.DUPLICATES,
+	// raMock, requestMock);
+	// verify(raMock, times(1))
+	// .addFlashAttribute(
+	// anyString(),
+	// new Message(anyString(), Message.Type.SUCCESS,
+	// new Object[] {}));
+	// verify(taskLinkRepoMock, times(1)).delete(any(TaskLink.class));
+	// }
+	//
+	// @Test
+	// public void deleteLinksTest() {
+	// TaskLink link = new TaskLink();
+	// link.setTaskA(TEST_1);
+	// link.setTaskB(TEST_2);
+	// link.setLinkType(TaskLinkType.DUPLICATES);
+	// List<TaskLink> list = new ArrayList<TaskLink>();
+	// list.add(link);
+	// when(taskLinkRepoMock.findByTaskA(TEST_1)).thenReturn(list);
+	// taskLinkSrv.deleteTaskLinks(task1);
+	// verify(taskLinkRepoMock, times(1)).delete(list);
+	// }
+	//
+	// @Test
+	// public void findTaskLinksTest() {
+	// TaskLink link = new TaskLink();
+	// link.setTaskA(TEST_1);
+	// link.setTaskB(TEST_2);
+	// link.setLinkType(TaskLinkType.DUPLICATES);
+	// TaskLink link2 = new TaskLink();
+	// link2.setTaskA(TEST_1);
+	// link2.setTaskB(TEST_2);
+	// link2.setLinkType(TaskLinkType.BLOCKS);
+	// TaskLink link3 = new TaskLink();
+	// link3.setTaskA(TEST_1);
+	// link3.setTaskB(TEST_2);
+	// link3.setLinkType(TaskLinkType.RELATES_TO);
+	// TaskLink link4 = new TaskLink();
+	// link4.setTaskA(TEST_1);
+	// link4.setTaskB(TEST_2);
+	// link4.setLinkType(TaskLinkType.DUPLICATES);
+	// List<TaskLink> list = new ArrayList<TaskLink>();
+	// List<TaskLink> list2 = new ArrayList<TaskLink>();
+	// list.add(link);
+	// list.add(link2);
+	// list.add(link3);
+	// list2.add(link4);
+	// when(taskLinkRepoMock.findByTaskA(TEST_1)).thenReturn(list);
+	// when(taskLinkRepoMock.findByTaskB(TEST_1)).thenReturn(list2);
+	// Map<TaskLinkType, List<DisplayTask>> map = taskLinkSrv
+	// .findTaskLinks(TEST_1);
+	// Assert.assertTrue(map.size() == 4);
+	// }
 
 	private Task createTask(String name, int no, Project project) {
 		Task task = new Task();
