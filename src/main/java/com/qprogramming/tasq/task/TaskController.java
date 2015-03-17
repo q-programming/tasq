@@ -746,7 +746,7 @@ public class TaskController {
 			task.setStory_points(points);
 			taskSrv.save(task);
 			return new ResultData(ResultData.OK, msg.getMessage(
-					"task.storypoints.edited", new Object[] { points },
+					"task.storypoints.edited", new Object[] { task.getId(), points },
 					Utils.getCurrentLocale()));
 		}
 		return new ResultData(ResultData.ERROR, msg.getMessage("error.unknown",

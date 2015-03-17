@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.Roles;
@@ -19,12 +20,15 @@ import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
+import com.qprogramming.tasq.task.events.Event;
+import com.qprogramming.tasq.task.events.EventsService;
 
 @Controller
 public class HomeController {
 
 	private TaskService taskSrv;
 	private ProjectService projSrv;
+	private EventsService eventSrv;
 
 	@Autowired
 	public HomeController(TaskService taskSrv, ProjectService projSrv) {
@@ -82,4 +86,10 @@ public class HomeController {
 			return "homeSignedIn";
 		}
 	}
+	@RequestMapping(value = "/eventCount", method = RequestMethod.GET)
+	@ResponseBody int getEventCount(){
+		List<Event> events = eventSrv.getUnread(); 
+		return events.size();
+	}
+	
 }

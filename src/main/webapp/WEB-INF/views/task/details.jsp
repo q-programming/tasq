@@ -937,6 +937,7 @@ $(document).ready(function($) {
 						else{
 							$("#point_value").html(points);
 							showSuccess(result.message);
+							showWait(false);
 						}
 					});
 				}

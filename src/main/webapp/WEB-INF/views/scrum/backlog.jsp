@@ -166,7 +166,7 @@
  								type="hidden" id="sprintID_${task.id}" name="sprintID">
  						</form>
 					</div>
-					<div style="display: table-cell">
+					<div class="pointsdiv" style="display: table-cell">
 						<c:if test="${task.story_points == 0 && task.estimated}">
 							<c:set var="points">?</c:set>
 						</c:if>
@@ -174,10 +174,10 @@
 							<c:set var="points">${task.story_points}</c:set>
 						</c:if>
 						<span class="points badge theme">
-							${points}
-							<input class="point-input">
-							<span style="display:none;cursor: pointer;"><i class="fa fa-check" style="vertical-align:text-top"></i></span>
-							<span style="display:none;cursor: pointer;"><i class="fa fa-times" style="vertical-align:text-top"></i></span>
+							<span class="point-value">${points}</span>
+							<input class="point-input" data-id="${task.id}">
+							<span class="point-approve" style="display:none;cursor: pointer;"><i class="fa fa-check" style="vertical-align:text-top"></i></span>
+							<span class="point-cancel" style="display:none;cursor: pointer;"><i class="fa fa-times" style="vertical-align:text-top"></i></span>
 							<span class="point-edit"><i class="fa fa-pencil points" style="vertical-align:text-top"></i></span>
 						</span>
 					</div>
@@ -340,38 +340,40 @@ $(document).ready(function($) {
 	}
 	//points
 	$('.point-edit').click(function(){
-		togglePoints();
+		togglePoints($(this));
 		$('#point_value').focus();
 		
 	});
-
-	//TODO
-	$('#point_approve').click(function(){
-		changePoints();
+	$('.point-approve').click(function(){
+		changePoints($(this));
 	});
 	
-	$('#point-input').keypress(function (e) {
+	$('.point-input').keypress(function (e) {
 		 var key = e.which;
 		 if(key == 13)  // the enter key code
 		  {
-			changePoints();
+			changePoints($(this));
 		  }
 	});
 	
-	$('#point_cancel').click(function(){
-		togglePoints();
+	$('.point-cancel').click(function(){
+		togglePoints($(this));
 	});
 
-	function togglePoints(){
-		$('#point-input').val('');
-		$('#point-input').toggle();
-		$('#point_value').toggle();
-		$('#point_approve').toggle();
-		$('#point_cancel').toggle();
-		$('#point_edit').toggleClass('hidden');
+	function togglePoints(clicked){
+		var parent = clicked.closest('.points');
+		parent.find('.point-input').toggle();
+		parent.find('.point-input').val('');
+		parent.find('.point-value').toggle();
+		parent.find('.point-approve').toggle();
+		parent.find('.point-cancel').toggle();
+		parent.find('.point-edit').toggleClass('hidden');
 	}
-	function changePoints(){
-		var points = $('#point-input').val();
+	function changePoints(edited){
+		var parent = edited.closest('.points');
+		var input = parent.find('.point-input');
+		var taskID = input.data('id');
+		var points = input.val();
 		if(isNumber(points) && points < 40){
 			showWait(true);
 			$.post('<c:url value="/task/changePoints"/>',{id:taskID,points:points},function(result){
@@ -379,12 +381,13 @@ $(document).ready(function($) {
 					showError(result.message);
 				}
 				else{
-					$("#point_value").html(points);
+					parent.find('.point-value').html(points);
 					showSuccess(result.message);
+					showWait(false);
 				}
 			});
 		}
-		togglePoints();
+		togglePoints(edited);
 	}
 
 	
