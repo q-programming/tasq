@@ -81,6 +81,9 @@ public class Project implements Serializable {
 
 	@Column
 	private Long defaultAssigneeID;
+	
+	@Column
+	private Long lastTaskNo;
 
 	public enum AgileType {
 		KANBAN, SCRUM
@@ -225,6 +228,14 @@ public class Project implements Serializable {
 
 	public void setDefaultAssigneeID(Long defaultAssigneeID) {
 		this.defaultAssigneeID = defaultAssigneeID;
+	}
+
+	public Long getLastTaskNo() {
+		return lastTaskNo==null?0:lastTaskNo;
+	}
+
+	public void setLastTaskNo(Long lastTaskNo) {
+		this.lastTaskNo = lastTaskNo;
 	}
 
 	/*

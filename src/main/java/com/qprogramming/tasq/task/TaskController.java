@@ -176,23 +176,19 @@ public class TaskController {
 				return null;
 			}
 			// build ID
-			List<Task> list = new LinkedList<Task>();
-			for (Task task2 : project.getTasks()) {
-				if (!task2.isSubtask()) {
-					list.add(task2);
-				}
-			}
-			int taskCount = list.size();
+			long taskCount = project.getLastTaskNo();
 			taskCount++;
 			String taskID = project.getProjectId() + "-" + taskCount;
 			task.setId(taskID);
 			task.setProject(project);
 			task.setTaskOrder((long) taskCount);
 			project.getTasks().add(task);
+			project.setLastTaskNo(taskCount);
 			// assigne
 			if (taskForm.getAssignee() != null) {
 				Account assignee = accSrv.findById(taskForm.getAssignee());
 				task.setAssignee(assignee);
+				watchSrv.addToWatchers(task, assignee);
 			}
 			// lookup for sprint
 			// Create log work
@@ -222,6 +218,8 @@ public class TaskController {
 			// Save files
 			saveTaskFiles(taskForm.getFiles(), task);
 			wlSrv.addActivityLog(task, "", LogType.CREATE);
+			watchSrv.startWatching(task);
+
 			return "redirect:/task?id=" + taskID;
 		}
 		return null;
@@ -282,9 +280,11 @@ public class TaskController {
 		}
 		if (!task.getDescription().equalsIgnoreCase(taskForm.getDescription())) {
 			message.append("Description: ");
+			message.append("<table><tr><td>");
 			message.append(task.getDescription());
-			message.append(CHANGE_TO);
+			message.append("</td><td>");
 			message.append(taskForm.getDescription());
+			message.append("</td></tr></table>");
 			message.append(BR);
 			task.setDescription(taskForm.getDescription());
 		}
@@ -308,19 +308,25 @@ public class TaskController {
 					PeriodHelper.outFormat(difference), difference,
 					LogType.ESTIMATE);
 		}
-		if (!task.isEstimated().equals(
-				!Boolean.parseBoolean(taskForm.getNo_estimation()))) {
-			message.append("Estimated changed to ");
-			message.append(!Boolean.parseBoolean(taskForm.getNo_estimation()));
-			message.append(BR);
-			task.setEstimated(!Boolean.parseBoolean(taskForm.getNo_estimation()));
-		}
-		int storyPoints = ("").equals(taskForm.getStory_points()) ? 0 : Integer
-				.parseInt(taskForm.getStory_points());
-		if (task.getStory_points() != null
-				&& task.getStory_points() != storyPoints) {
-			addWorklogPointsChanged(task, storyPoints);
-			task.setStory_points(storyPoints);
+		//TODO allow to change to estimate/not estimated
+//		if (!task.isEstimated().equals(
+//				!Boolean.parseBoolean(taskForm.getNo_estimation()))) {
+//			message.append("Estimated changed to ");
+//			message.append(!Boolean.parseBoolean(taskForm.getNo_estimation()));
+//			message.append(BR);
+//			task.setEstimated(!Boolean.parseBoolean(taskForm.getNo_estimation()));
+//		}
+		// Don't check for SP if task is not estimated TODO allow estimated/not
+		// estimated change
+		if (task.isEstimated()) {
+			int storyPoints = taskForm.getStory_points() == null
+					|| ("").equals(taskForm.getStory_points()) ? 0 : Integer
+					.parseInt(taskForm.getStory_points());
+			if (task.getStory_points() != null
+					&& task.getStory_points() != storyPoints) {
+				addWorklogPointsChanged(task, storyPoints);
+				task.setStory_points(storyPoints);
+			}
 		}
 		if (!task.getDue_date().equalsIgnoreCase(taskForm.getDue_date())) {
 			message.append("Due date: ");
@@ -389,7 +395,7 @@ public class TaskController {
 		if (!task.isSubtask()) {
 			Hibernate.initialize(task.getSprints());
 			List<Task> subtasks = taskSrv.findSubtasks(task);
-			//Add all subtasks into remaining work
+			// Add all subtasks into remaining work
 			for (Task subtask : subtasks) {
 				task.setEstimate(PeriodHelper.plusPeriods(
 						task.getRawEstimate(), subtask.getRawEstimate()));
@@ -529,7 +535,7 @@ public class TaskController {
 		taskSrv.save(subTask);
 		taskSrv.save(task);
 		// TODO save in subdir?
-		//saveTaskFiles(taskForm.getFiles(), subTask);
+		// saveTaskFiles(taskForm.getFiles(), subTask);
 		wlSrv.addActivityLog(subTask, "", LogType.SUBTASK);
 		return "redirect:/task?id=" + id;
 	}
@@ -746,8 +752,8 @@ public class TaskController {
 			task.setStory_points(points);
 			taskSrv.save(task);
 			return new ResultData(ResultData.OK, msg.getMessage(
-					"task.storypoints.edited", new Object[] { task.getId(), points },
-					Utils.getCurrentLocale()));
+					"task.storypoints.edited", new Object[] { task.getId(),
+							points }, Utils.getCurrentLocale()));
 		}
 		return new ResultData(ResultData.ERROR, msg.getMessage("error.unknown",
 				null, Utils.getCurrentLocale()));

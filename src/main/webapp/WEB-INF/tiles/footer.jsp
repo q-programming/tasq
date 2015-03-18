@@ -37,7 +37,8 @@
 	//In case of session timeout or general server error. 
 	//But don't catch SyntaxError as most of api replays are not json parsed
 	$( document ).ajaxError(function( event, jqxhr, settings, thrownError ) {
-		if(thrownError.message != "Unexpected end of input"){
+		if(thrownError.message != "Unexpected end of input" || thrownError.__proto__.name!= 'SyntaxError'){
+			console.log(thrownError);
 			var message = '<s:message code="error.session"/>';
 			var url = '<c:url value="/"/>';
 			alert(message);

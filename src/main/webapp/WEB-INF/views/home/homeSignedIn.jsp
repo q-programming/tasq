@@ -5,7 +5,7 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 
-<div class="white-frame" style="height: 85vh; overflow: auto">
+<div class="white-frame" style="overflow: auto">
 	<div class="pull-left">
 		<s:message code="home.hello"/>&nbsp;
 		<security:authentication property="principal" />
