@@ -844,7 +844,9 @@ $(document).ready(function($) {
 			$(".change_state").click(function() {
 	    	 var state = $(this).data('state');
 	    	 var newState = $(this).html();
+			 var subTasks = "${task.subtasks}";
 	    	 if(state == 'CLOSED'){
+	    		 	 $('#modal_subtaskCount').html(subTasks);
 		    		 $('#close_task').modal({
 		    	            show: true,
 		    	            keyboard: false,

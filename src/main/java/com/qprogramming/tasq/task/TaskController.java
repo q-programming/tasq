@@ -308,14 +308,14 @@ public class TaskController {
 					PeriodHelper.outFormat(difference), difference,
 					LogType.ESTIMATE);
 		}
-		//TODO allow to change to estimate/not estimated
-//		if (!task.isEstimated().equals(
-//				!Boolean.parseBoolean(taskForm.getNo_estimation()))) {
-//			message.append("Estimated changed to ");
-//			message.append(!Boolean.parseBoolean(taskForm.getNo_estimation()));
-//			message.append(BR);
-//			task.setEstimated(!Boolean.parseBoolean(taskForm.getNo_estimation()));
-//		}
+		// TODO allow to change to estimate/not estimated
+		// if (!task.isEstimated().equals(
+		// !Boolean.parseBoolean(taskForm.getNo_estimation()))) {
+		// message.append("Estimated changed to ");
+		// message.append(!Boolean.parseBoolean(taskForm.getNo_estimation()));
+		// message.append(BR);
+		// task.setEstimated(!Boolean.parseBoolean(taskForm.getNo_estimation()));
+		// }
 		// Don't check for SP if task is not estimated TODO allow estimated/not
 		// estimated change
 		if (task.isEstimated()) {
@@ -623,6 +623,7 @@ public class TaskController {
 			@RequestParam(value = "state") TaskState state,
 			@RequestParam(value = "zero_checkbox", required = false) Boolean remainingZero,
 			@RequestParam(value = "message", required = false) String message,
+			@RequestParam(value = "closesubtasks", required = false) Boolean closeSubtasks,
 			RedirectAttributes ra, HttpServletRequest request) {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
@@ -641,7 +642,17 @@ public class TaskController {
 						Utils.getCurrentLocale()));
 				return "redirect:" + request.getHeader("Referer");
 			}
-
+			// Close all subtasks
+			if (closeSubtasks != null && closeSubtasks) {
+				if (task.getSubtasks() > 0) {
+					List<Task> subtasks = taskSrv.findSubtasks(task);
+					for (Task subtask : subtasks) {
+						wlSrv.addActivityLog(subtask, "", LogType.CLOSED);
+						subtask.setState(TaskState.CLOSED);
+					}
+					taskSrv.save(subtasks);
+				}
+			}
 			TaskState oldState = (TaskState) task.getState();
 			task.setState(state);
 			// Zero remaining time
@@ -683,6 +694,7 @@ public class TaskController {
 			@RequestParam(value = "id") String taskID,
 			@RequestParam(value = "state") TaskState state,
 			@RequestParam(value = "zero_checkbox", required = false) Boolean remainingZero,
+			@RequestParam(value = "closesubtasks", required = false) Boolean closeSubtasks,
 			@RequestParam(value = "message", required = false) String message) {
 		// check if not admin or user
 		Task task = taskSrv.findById(taskID);
@@ -704,7 +716,19 @@ public class TaskController {
 					return result;
 				}
 			}
+			if (closeSubtasks != null && closeSubtasks) {
+				if (task.getSubtasks() > 0) {
+					List<Task> subtasks = taskSrv.findSubtasks(task);
+					for (Task subtask : subtasks) {
+						wlSrv.addActivityLog(subtask, "", LogType.CLOSED);
+						subtask.setState(TaskState.CLOSED);
+					}
+					taskSrv.save(subtasks);
+				}
+			}
+
 			TaskState oldState = (TaskState) task.getState();
+			
 			task.setState(state);
 			if (message != null && message != "") {
 				if (Utils.containsHTMLTags(message)) {
@@ -722,7 +746,6 @@ public class TaskController {
 					wlSrv.addActivityLog(task, message, LogType.COMMENT);
 				}
 			}
-
 			// Zero remaining time
 			if (remainingZero != null && remainingZero) {
 				task.setRemaining(PeriodHelper.inFormat("0m"));

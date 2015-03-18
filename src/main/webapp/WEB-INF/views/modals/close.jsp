@@ -6,19 +6,27 @@
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header theme">
-				<h4 class="modal-title" id="myModalLabel">
-					<s:message code="task.changeState" />
+				<h4 class="modal-title" id="closeDialogTitle">
+					<s:message code="task.closeTask" />
 				</h4>
 			</div>
 			<div class="modal-body">
 				<div class="form-group">
 					<span class="help-block"><s:message
-							code="task.changeState.help" /></span>
+							code="task.closeTask.help" /></span>
 				</div>
+				
 				<div class="checkbox">
+					<div style="font-weight: bold; margin-left: -22px;"><s:message code="task.estimate"/></div>
 					<label class="checkbox"> <input type="checkbox"
 						name="zero_checkbox" id="modal_zero_checkbox"> <s:message
 							code="task.setToZero" />
+					</label>
+				</div>
+				<div id="closeSubtask" class="checkbox" style="display:none">
+				<div style="font-weight: bold; margin-left: -22px;"><s:message code="tasks.subtasks"/></div>
+					<label class="checkbox"> <input type="checkbox"
+						name="closesubtasks" id="modal_subtasks" checked><s:message code="task.subtask.closeall"/> (<span id="modal_subtaskCount"></span>)
 					</label>
 				</div>
 				<div>
@@ -35,14 +43,23 @@
 	</div>
 </div>
 <script>
+	$('#close_task').on('shown.bs.modal', function (e) {
+		var subTasks = $("#modal_subtaskCount").html();
+		console.log(subTasks);
+		if(subTasks > 0 ){
+			$("#closeSubtask").show();
+		}
+	});
 	$("#close_task_btn").click(function() {
 		var comment = $("#modal_comment").val();
-		var zero = $("#modal_zero_checkbox").prop('checked') 
+		var zero = $("#modal_zero_checkbox").prop('checked');
+		var closeSubtasks = $("#modal_subtasks").prop('checked');
 		$.post('<c:url value="/task/changeState"/>', {
 			id : taskID,
 			state : 'CLOSED',
 			message: comment,
-			zero_checkbox: zero
+			zero_checkbox: zero,
+			closesubtasks: closeSubtasks
 		}, function(result) {
 			$('#close_task').modal('toggle');
 			if (result.code != 'OK') {

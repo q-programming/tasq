@@ -165,7 +165,7 @@ $(document).ready(function() {
 			  	    	
 			//Render worklog events
 			$.each(result.worklogs, function(key,val){
-	    		var task = '<td><a class="a-tooltip" href="'+ taskURL + val.task.id + '"data-html="true" title=\''+ val.task.description+'\'>[' + val.task.id + '] ' + val.task.name + '</a></td>'; 
+	    		var task = '<td><a class="a-tooltip" href="'+ taskURL + val.task.id + '" \'>[' + val.task.id + '] ' + val.task.name + '</a></td>'; 
 	    		var date = "<td>" +val.time + "</td>";
 	    		var event = "<td>" +getEventTypeMsg(val.type) + "</td>";
 	    		var change;

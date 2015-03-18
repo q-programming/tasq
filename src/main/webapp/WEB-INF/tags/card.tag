@@ -8,7 +8,7 @@
 	type="com.qprogramming.tasq.task.DisplayTask"%>
 <%@ attribute name="can_edit" required="true"%>
 <security:authentication property="principal" var="user" />
-<div class="agile-card theme" data-id="${task.id}" state="${task.state}"
+<div class="agile-card theme" data-id="${task.id}" state="${task.state}" data-subtasks="${task.subtasks}"
 	id="${task.id}">
 	<div class="side-bar theme"></div>
 	<div style="padding-left: 5px; min-height: 50px;">

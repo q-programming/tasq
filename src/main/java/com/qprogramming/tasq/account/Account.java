@@ -271,7 +271,7 @@ public class Account implements java.io.Serializable, UserDetails {
 
 	public void startTimerOnTask(Task task) {
 		active_task = new Object[] { task.getId(), new DateTime(),
-				task.getDescription() };
+				task.getId() + " - " + task.getName() };
 	}
 
 	public void setActive_task(Object[] task) {
