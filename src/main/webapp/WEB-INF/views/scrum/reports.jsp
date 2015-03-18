@@ -95,7 +95,7 @@ $(document).ready(function() {
 	var plot;
 	var plot2;
 	var lastSprint = "${ActiveSprint}";
-	var avatarURL = '<c:url value="/userAvatar/"/>';
+	var avatarURL = '<c:url value="/../avatar/"/>';
 	var taskURL = '<c:url value="/task?id="/>';
 	var loading_indicator = '<div id="loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td>';
 	var timeTracked = ${project.timeTracked};
@@ -165,7 +165,7 @@ $(document).ready(function() {
 			  	    	
 			//Render worklog events
 			$.each(result.worklogs, function(key,val){
-	    		var task = '<td><a class="a-tooltip" href="'+ taskURL + val.task.id + '"data-html="true" title=\''+ val.task.description+'\'>[' + val.task.id + '] ' + val.task.name + '</a></td>'; 
+	    		var task = '<td><a class="a-tooltip" href="'+ taskURL + val.task.id + '" \'>[' + val.task.id + '] ' + val.task.name + '</a></td>'; 
 	    		var date = "<td>" +val.time + "</td>";
 	    		var event = "<td>" +getEventTypeMsg(val.type) + "</td>";
 	    		var change;
@@ -201,7 +201,7 @@ $(document).ready(function() {
 	    		}
 	    		var account = val.account.name +" " + val.account.surname; 
 				var accountTd = '<td rel="popover" data-container="body" data-placement="top" data-account="'
-									+ account + '" data-account_email="' + val.account.email + '" data-account_img="' + avatarURL + val.account.id + '">'
+									+ account + '" data-account_email="' + val.account.email + '" data-account_img="' + avatarURL + val.account.id + '.png">'
 									+account
 								+'</td>';
 				var row = task + date + change + timeLogged + event + accountTd;

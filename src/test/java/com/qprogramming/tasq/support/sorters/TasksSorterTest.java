@@ -42,7 +42,7 @@ public class TasksSorterTest {
 
 	@Test
 	public void sortTasksByIdTest() {
-		Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID, false));
+		Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID, true));
 		Assert.assertEquals(FIRST, taskList.get(0).getName());
 	}
 
@@ -59,6 +59,27 @@ public class TasksSorterTest {
 				true));
 		Assert.assertEquals(SECOND, taskList.get(0).getName());
 	}
+	@Test
+	public void sortTasksByOrderTest() {
+		List<Task> taskList = new LinkedList<Task>();
+		Task task1 = createTask(5, FOURTH, "06-12-2014", TaskPriority.BLOCKER);
+		task1.setTaskOrder(4L);
+		Task task2 = createTask(1, FIRST, "06-12-2014", TaskPriority.BLOCKER);
+		task2.setTaskOrder(0L);
+		Task task3 = createTask(4, THIRD, "06-12-2014", TaskPriority.BLOCKER);
+		task3.setTaskOrder(3L);
+		Task task4 = createTask(2, SECOND, "06-12-2014", TaskPriority.BLOCKER);
+		task4.setTaskOrder(1L);
+		taskList.add(task1);
+		taskList.add(task2);
+		taskList.add(task3);
+		taskList.add(task4);
+		Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ORDER,
+				true));
+		Assert.assertEquals(FIRST, taskList.get(0).getName());
+	}
+
+	
 
 	private List<Task> createList() {
 		List<Task> taskList = new LinkedList<Task>();

@@ -130,26 +130,6 @@ public class AccountControllerTest {
 	}
 
 	@Test
-	public void getAvatarTest() {
-		try {
-			when(requestMock.getSession()).thenReturn(httpSesssionMock);
-			URL fileURL = getClass().getResource("/avatar.png");
-			when(httpSesssionMock.getServletContext()).thenReturn(scMock);
-			when(scMock.getRealPath(anyString())).thenReturn(fileURL.getFile());
-			when(responseMock.getOutputStream()).thenReturn(outStreamMock);
-			when(accSrvMock.findById(1L)).thenReturn(testAccount);
-
-			accountCtr.getCurrentAvatar(responseMock, requestMock);
-			accountCtr.getUserAvatar(responseMock, requestMock, "1");
-			verify(outStreamMock, times(2)).write(any(byte[].class));
-			verify(outStreamMock, times(2)).flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-			Assert.fail(e.getMessage());
-		}
-	}
-
-	@Test
 	public void listUsersTest() {
 		List<Account> single = new LinkedList<Account>();
 		single.add(testAccount);

@@ -74,41 +74,27 @@
 </div>
 <jsp:include page="../modals/logWork.jsp" />
 <jsp:include page="../modals/close.jsp" />
+<jsp:include page="../modals/assign.jsp" />
 <%-- <tiles:insertTemplate template="modal/close"/> --%>
 <script>
 	$(document).ready(function($) {
 		<c:if test="${can_edit}">
-		$(".assign_me").click(function(){
-			var taskID = $(this).data('taskid');
-			showWait(true);
-			//assignMe
-			$.post('<c:url value="/task/assignMe"/>',{id:taskID},function(result){
-				console.log(result);
-				if(result.code!='OK'){
-					showError(result.message);
-				}
-				else{
-					var assignee = '<a class="a-tooltip" href="<c:url value="/user?id=${user.id}"/>" title="${user}"><img data-src="holder.js/30x30"	style="height: 30px; padding-right: 5px;" src="<c:url value="/userAvatar/${user.id}"/>" />'
-									+'</a>';
-					$("#assignee_"+taskID).html(assignee);
-					showSuccess(result.message);
-					showWait(false);
-				}
-			});
-		});
 
 		$(".agile-card").draggable ({
 		    	revert: 'invalid',
 		    	cursor: 'move'
 		});
 		
-       
 		$( ".table_state" ).droppable({
 		      activeClass: "state_default",
 		      hoverClass: "state_hover",
 		      drop: function( event, ui ) {
 		    	  //event on drop
 		    	 taskID = ui.draggable.attr("id");
+		    	 subTasks = ui.draggable.attr('data-subtasks');
+		    	 var text = '<i class="fa fa-check"></i>&nbsp;<s:message code="task.closeTask"/>&nbsp;';
+		    	 $('#closeDialogTitle').html(text + taskID);
+		    	 $('#modal_subtaskCount').html(subTasks);
 		    	 var oldState =  ui.draggable.attr("state");
 		    	 var state = $(this).data('state');
 		    	 if( oldState != state){

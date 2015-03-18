@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.hibernate.Hibernate;
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,15 @@ public class WorkLogService {
 
 	@Autowired
 	private EventsService eventSrv;
+
+	@Autowired
+	public WorkLogService(WorkLogRepository wlRepo, TaskService taskSrv,
+			ProjectService projSrv, EventsService eventSrv) {
+		this.wlRepo = wlRepo;
+		this.taskSrv = taskSrv;
+		this.projSrv = projSrv;
+		this.eventSrv = eventSrv;
+	}
 
 	@Transactional
 	public void addTimedWorkLog(Task task, String msg, Date when,
@@ -138,7 +148,8 @@ public class WorkLogService {
 			Hibernate.initialize(loggedTask.getWorklog());
 			loggedTask.addWorkLog(wl);
 			taskSrv.save(loggedTask);
-			eventSrv.addWatchEvent(wl, PeriodHelper.outFormat(activity), new Date());
+			eventSrv.addWatchEvent(wl, PeriodHelper.outFormat(activity),
+					new Date());
 		}
 	}
 
@@ -172,7 +183,8 @@ public class WorkLogService {
 			} else {
 				taskSrv.save(loggedTask);
 			}
-			eventSrv.addWatchEvent(wl, PeriodHelper.outFormat(activity), new Date());
+			eventSrv.addWatchEvent(wl, PeriodHelper.outFormat(activity),
+					new Date());
 		}
 	}
 
@@ -212,36 +224,10 @@ public class WorkLogService {
 	 *            if true, only events with logged activity ( time )
 	 * @return
 	 */
-	public List<WorkLog> getSprintEvents(Sprint sprint, boolean timeTracked) {
-		LocalDate start = new LocalDate(sprint.getRawStart_date()).minusDays(1);
-		LocalDate end = new LocalDate(sprint.getRawEnd_date()).plusDays(1);
-
-		if (timeTracked) {
-			return wlRepo
-					.findByProjectIdAndTimeBetweenAndActivityNotNullOrderByTimeAsc(
-							sprint.getProject().getId(), start.toDate(),
-							end.toDate());
-		} else {
-			List<WorkLog> list = wlRepo
-					.findByProjectIdAndTimeBetweenOrderByTimeAsc(sprint
-							.getProject().getId(), start.toDate(), end.toDate());
-			List<WorkLog> result = new LinkedList<WorkLog>();
-			for (WorkLog workLog : list) {
-				if (LogType.CLOSED.equals(workLog.getType())
-						|| LogType.REOPEN.equals(workLog.getType())
-						|| LogType.TASKSPRINTADD.equals(workLog.getType())
-						|| LogType.TASKSPRINTREMOVE.equals(workLog.getType())) {
-					result.add(workLog);
-				}
-			}
-			return result;
-		}
-	}
-
 	@Transactional
 	public List<WorkLog> getAllSprintEvents(Sprint sprint) {
-		LocalDate start = new LocalDate(sprint.getRawStart_date());
-		LocalDate end = new LocalDate(sprint.getRawEnd_date()).plusDays(1);
+		DateTime start = new DateTime(sprint.getRawStart_date());
+		DateTime end = new DateTime(sprint.getRawEnd_date()).plusDays(1);
 		List<WorkLog> list = wlRepo
 				.findByProjectIdAndTimeBetweenAndWorklogtaskNotNullOrderByTimeAsc(
 						sprint.getProject().getId(), start.toDate(),

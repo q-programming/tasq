@@ -17,6 +17,7 @@ public class RootConfig {
 				new ClassPathResource("/persistence.properties"),
 				new ClassPathResource("/project.properties"),
 				new ClassPathResource("/email.properties"), });
+		ppc.setIgnoreUnresolvablePlaceholders(true);
 		return ppc;
 	}
 	

@@ -3,7 +3,13 @@
 <%@ taglib prefix="security"
 	uri="http://www.springframework.org/security/tags"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<script src="<c:url value="/resources/js/trumbowyg.min.js" />"></script>
+<link href="<c:url value="/resources/css/trumbowyg.min.css" />" rel="stylesheet" media="screen" />
 <security:authentication property="principal" var="user" />
+<c:if test="${user.language ne 'en' }">
+	<script src="<c:url value="/resources/js/trumbowyg.${user.language}.min.js" />"></script>
+</c:if>
+
 <c:set var="projectName_text">
 	<s:message code="project.name" />
 </c:set>
@@ -39,17 +45,23 @@
 		<c:if test="${not empty desc_error}">
 			<c:set var="desc_class" value="has-error" />
 		</c:if>
-
-		<div class="form-group pull-left ${id_class}" style="width: 100px">
-			<form:input path="project_id" class="form-control"
-				placeholder="${projectID_text}" />
-			<form:errors path="project_id" element="p" class="text-danger" />
+		<div style="display:table-row">
+			<div class="form-group pull-left ${id_class}" style="width: 100px">
+				<form:input path="project_id" class="form-control"
+					placeholder="${projectID_text}" />
+				<form:errors path="project_id" element="p" class="text-danger" />
+			</div>
+			<div class="form-group pull-left ${name_class }"
+				style="width: 500px; padding-left: 20px;">
+				<form:input path="name" class="form-control"
+					placeholder="${projectName_text}" />
+				<form:errors path="name" element="p" class="text-danger" />
+			</div>
 		</div>
-		<div class="form-group pull-left ${name_class }"
-			style="width: 500px; padding-left: 20px;">
-			<form:input path="name" class="form-control"
-				placeholder="${projectName_text}" />
-			<form:errors path="name" element="p" class="text-danger" />
+		<div style="display:table-row">
+			<div class="form-group">
+				<span class="help-block"><s:message code="project.create.name.hint" htmlEscape="false"/></span>
+			</div>
 		</div>
 		<div class="form-group"
 			style="width: 300px;">
@@ -60,6 +72,7 @@
 			</form:select>
 		</div>
 		<div class="form-group ${desc_class}">
+			<label>${projectDesc_text}</label>
 			<form:textarea path="description" class="form-control" rows="5"
 				placeholder="${projectDesc_text}" />
 			<form:errors path="description" element="p" class="text-danger" />
@@ -75,6 +88,17 @@
 </div>
 <script>
 	$(document).ready(function($) {
+		var btnsGrps = jQuery.trumbowyg.btnsGrps;
+		$('#description').trumbowyg({
+			lang: '${user.language}',
+			fullscreenable: false,
+			btns: ['formatting',
+		           '|', btnsGrps.design,
+		           '|', 'link',
+		           '|', 'insertImage',
+		           '|', btnsGrps.justify,
+		           '|', btnsGrps.lists]
+		});
 	});
 
 	

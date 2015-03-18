@@ -245,10 +245,17 @@
 			<td class="${blinker}"><t:state state="${task.state}"></t:state></td>
 			<td><c:if test="${empty task.assignee}">
 					<i><s:message code="task.unassigned" /></i>
+					<span class="btn btn-default btn-xxs a-tooltip assignToTask pull-right"
+										title="<s:message code="task.assign"/>" data-toggle="modal" data-target="#assign_modal" 
+										data-taskID="${task.id}" data-assignee="${task.assignee}" 
+										data-assigneeID="${task.assignee.id}"
+										data-projectID="${task.project.projectId}" >
+									<i class="fa fa-lg fa-user-plus"></i>
+					</span>
 				</c:if> <c:if test="${not empty task.assignee}">
 					<img data-src="holder.js/20x20"
 						style="height: 20px; padding-right: 5px;"
-						src="<c:url value="/userAvatar/${task.assignee.id}"/>" />
+						src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />
 					<a ${link} href="<c:url value="/user?id=${task.assignee.id}"/>">${task.assignee}</a>
 				</c:if></td>
 			</tr>
@@ -270,6 +277,7 @@
   </div>
 </div>
 <jsp:include page="subtasks.jsp" />
+<jsp:include page="../modals/assign.jsp" />
 <script>
 	$(document).ready(function($) {
 		taskURL = '<c:url value="/task?id="/>';

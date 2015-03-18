@@ -4,11 +4,13 @@
 package com.qprogramming.tasq.task;
 
 import java.util.Date;
+import java.util.List;
 
 import org.hibernate.validator.constraints.NotBlank;
 import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.support.Utils;
@@ -51,6 +53,8 @@ public class TaskForm {
 	private Long addToSprint;
 	
 	private Long assignee;
+	
+	private List<MultipartFile> files;
 
 	public TaskForm() {
 		// TODO Auto-generated constructor stub
@@ -216,5 +220,13 @@ public class TaskForm {
 
 	public void setAssignee(Long assignee) {
 		this.assignee = assignee;
+	}
+
+	public List<MultipartFile> getFiles() {
+		return files;
+	}
+
+	public void setFiles(List<MultipartFile> files) {
+		this.files = files;
 	}
 }

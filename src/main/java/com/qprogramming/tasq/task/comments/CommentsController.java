@@ -17,11 +17,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.account.Account;
-import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.web.MessageHelper;
 import com.qprogramming.tasq.task.Task;
@@ -33,17 +31,19 @@ import com.qprogramming.tasq.task.worklog.WorkLogService;
 @Controller
 public class CommentsController {
 
-	@Autowired
 	private CommentsRepository commRepo;
-
-	@Autowired
 	private TaskService taskSrv;
-
-	@Autowired
 	private WorkLogService wlSrv;
+	private MessageSource msg;
 
 	@Autowired
-	private MessageSource msg;
+	public CommentsController(CommentsRepository commRepo, TaskService taskSrv,
+			WorkLogService wlSrv, MessageSource msg) {
+		this.commRepo = commRepo;
+		this.taskSrv = taskSrv;
+		this.wlSrv = wlSrv;
+		this.msg = msg;
+	}
 
 	@Transactional
 	@RequestMapping(value = "/task/comment", method = RequestMethod.POST)
@@ -66,7 +66,7 @@ public class CommentsController {
 				comment.setAuthor(currAccount);
 				comment.setDate(new Date());
 				comment.setMessage(message);
-				commRepo.save(comment);
+				comment = commRepo.save(comment);
 				task.addComment(comment);
 				taskSrv.save(task);
 				wlSrv.addActivityLog(task, message, LogType.COMMENT);

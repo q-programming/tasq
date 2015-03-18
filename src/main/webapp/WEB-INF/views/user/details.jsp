@@ -7,7 +7,7 @@
 	style="height: 480px; overflow: auto; width: 600px">
 	<div style="display: table">
 		<div id="avatar" style="border: 1px dashed; min-width: 110px; text-align: center;">
-			<img src="<c:url value="/userAvatar/${account.id}"/>"
+			<img src="<c:url value="/../avatar/${account.id}.png"/>"
 				style="padding: 10px;"></img>
 		</div>
 		<div

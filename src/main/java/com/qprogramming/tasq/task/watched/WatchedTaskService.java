@@ -58,8 +58,7 @@ public class WatchedTaskService {
 	}
 
 	/**
-	 * Starts watching as currently logged-in user Current user will be added to
-	 * watchers list
+	 * Starts watching as given account 
 	 * 
 	 * @param task
 	 */

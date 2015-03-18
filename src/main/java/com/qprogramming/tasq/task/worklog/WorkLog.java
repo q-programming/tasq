@@ -78,6 +78,10 @@ public class WorkLog implements Serializable {
 		return sdf.format(time);
 	}
 
+	/**
+	 * When worklog occured
+	 * @param time
+	 */
 	public void setTime(Date time) {
 		this.time = time;
 	}

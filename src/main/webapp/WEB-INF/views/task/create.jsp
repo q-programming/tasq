@@ -7,7 +7,14 @@
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<script src="<c:url value="/resources/js/trumbowyg.min.js" />"></script>
+<script src="<c:url value="/resources/js/bootstrap.file-input.js"/>"></script>
+<link href="<c:url value="/resources/css/trumbowyg.min.css" />" rel="stylesheet" media="screen" />
 <security:authentication property="principal" var="user" />
+<c:if test="${user.language ne 'en' }">
+	<script src="<c:url value="/resources/js/trumbowyg.${user.language}.min.js" />"></script>
+</c:if>
+
 <c:set var="taskName_text">
 	<s:message code="task.name" text="Summary" />
 </c:set>
@@ -15,7 +22,20 @@
 	<s:message code="task.description" text="Description" />
 </c:set>
 
-<div class="white-frame" style="width: 700px; overflow: auto;display:table">
+<div class="col-lg-2 col-md-3 col-sm-4">
+	<div id="menu" style="position: fixed;">
+				<nav>
+					<ul class="nav nav-pills nav-stacked">
+						<li>&nbsp;</li>
+						<li class=""><a href="#nameA"><div class="side-bar theme"></div>${taskName_text}</a></li>
+						<li class=""><a href="#descA"><div class="side-bar theme"></div>${taskDesc_text}</a></li>
+						<li class=""><a href="#projectA"><div class="side-bar theme"></div>Other</a></li>
+						<li class=""><a href="#createA"><div class="side-bar theme"></div>Create</a></li>
+					</ul>
+				</nav>
+	</div>
+</div>
+<div class="white-frame" style="overflow: auto;display:table">
 <div style="display:table-caption;margin-left: 10px;">
 	<ul class="nav nav-tabs" style="border-bottom:0">
 			<li class="active"><a style="color: black" href="#"><i class="fa fa-plus"></i> <s:message code="task.create" text="Create task"/></a></li>
@@ -27,7 +47,7 @@
 <%-- 				<s:message code="task.create" text="Create task"/> --%>
 <!-- 		</h3> -->
 <!-- 	</div> -->
-	<form:form modelAttribute="taskForm" id="taskForm" method="post" style="margin-top: 5px;">
+	<form:form modelAttribute="taskForm" id="taskForm" method="post" style="margin-top: 5px;" enctype="multipart/form-data">
 		<%-- Check all potential errors --%>
 		<c:set var="name_error">
 			<form:errors path="name" />
@@ -49,18 +69,20 @@
 			<c:set var="sprint_class" value="has-error" />
 		</c:if>
 		
-		
+		<a class="anchor" id="nameA"></a>
 		<div class="form-group ${name_class }">
 			<form:input path="name" class="form-control"
 				placeholder="${taskName_text}" />
 			<form:errors path="name" element="p" class="text-danger" />
 		</div>
+		<a class="anchor" id="descA"></a>
 		<div class="form-group ${desc_class}">
 			<form:textarea path="description" class="form-control" rows="5"
 				placeholder="${taskDesc_text}" />
 			<form:errors path="description" element="p" class="text-danger" />
 		</div>
 		<%-------------------------Project ----------------------------------%>
+		<a class="anchor" id="projectA"></a>
 		<div class="form-group">
 			<div class="mod-header">
 				<h5 class="mod-header-title">
@@ -77,6 +99,7 @@
 			</form:select>
 			<span class="help-block"><s:message code="task.project.help" /></span>
 			<%--------------------	Assign to -------------------------------%>
+			<a class="anchor" id="assignToA"></a>
 			<div class="mod-header">
 				<h5 class="mod-header-title">
 					<s:message code="task.assign" />
@@ -95,6 +118,7 @@
 			<c:set var="type_error" value="border-color: #b94a48;" />
 		</c:if>
 		<%-----------------TASK TYPE ---------------%>
+		<a class="anchor" id="typeA"></a>
 		<div class="form-group">
 			<div class="mod-header">
 				<h5 class="mod-header-title">
@@ -126,6 +150,7 @@
 			<form:errors path="type" element="p" class="text-danger" />
 		</div>
 		<%------------PRIORITY --------------------%>
+		<a class="anchor" id="priorityA"></a>
 		<div class="form-group">
 			<div class="mod-header">
 				<h5 class="mod-header-title">
@@ -156,6 +181,7 @@
 			<form:errors path="priority" element="p"/>
 		</div>
 		<%-----------SPRINT---------------------------%>
+		<a class="anchor" id="sprintA"></a>
 		<div>
 			<div class="mod-header">
 				<h5 class="mod-header-title">
@@ -169,7 +195,8 @@
 				<div id="sprintWarning" style="color: darkorange;margin-top: 10px;"></div>
 			</div>
 		</div>
-		<%-- Estimate --%>
+		<%--------------- Estimate ---------------------%>
+		<a class="anchor" id="estimateA"></a>
 		<div class="mod-header">
 				<h5 class="mod-header-title">
 					<s:message code="task.estimate" />
@@ -199,6 +226,7 @@
 			data-placement="right"></i>
 		</label>
 		<%----------DUE DATE --------------------------%>
+		<a class="anchor" id="dueDateA"></a>
 		<div>
 			<div class="mod-header">
 				<h5 class="mod-header-title">
@@ -210,7 +238,25 @@
 				<span class="help-block"><s:message
 						code="task.dueDate.help" /></span>
 		</div>
+		<%----------FILE UPLOAD --------------------------%>
+		<a class="anchor" id="filesA"></a>
+		<div>
+			<div class="mod-header">
+				<h5 class="mod-header-title">
+					<s:message code="task.files" />
+				</h5>
+			</div>
+			<div class="pull-right">
+				<span id="addMoreFiles" class="btn btn-default btn-sm">
+					<i class="fa fa-plus"></i><i class="fa fa-file"></i>&nbsp;Add more files
+				</span>
+			</div>
+			<table id="fileTable" style="width: 300px;">
+			</table>
+		</div>
+		
 		<%--------------Submit button -----------------%>
+		<a class="anchor" id="createA"></a>
 		<div style="margin: 10px auto; text-align: right;">
 			<span class="btn" onclick="location.href='<c:url value="/"/>';"><s:message
 					code="main.cancel" text="Cancel" /></span>
@@ -222,6 +268,47 @@
 </div>
 <script>
 $(document).ready(function($) {
+	var fileTypes='.doc,.docx,.rtf,.txt,.odt,.xls,.xlsx,.ods,.csv,.pps,.ppt,.pptx,.jpg,.png,.gif';
+	var btnsGrps = jQuery.trumbowyg.btnsGrps;
+	$('#description').trumbowyg({
+		lang: '${user.language}',
+		fullscreenable: false,
+		btns: ['formatting',
+	           '|', btnsGrps.design,
+	           '|', 'link',
+	           '|', 'insertImage',
+	           '|', btnsGrps.justify,
+	           '|', btnsGrps.lists]
+	});
+	
+	$(".file_upload").bootstrapFileInput();
+	
+	$(document).on("change",".file_upload",function(e) {
+		var td = $(this).closest("td");
+		td.find(".removeFile").remove();
+		td.append('<span class="btn btn-default pull-right removeFile"><i class="fa fa-trash"></i><span>');
+    });
+	
+	$("#addMoreFiles").click(function(){
+		addFileInput();
+	});
+	
+	$(document).on("click",".removeFile",function(e) {
+		$(this).closest("tr").remove();
+		if($('#fileTable tr').length==0){
+			addFileInput();
+		}
+    });
+
+	
+	function addFileInput(){
+		var choose = ' <s:message code="task.chooseFile" />';
+		var title = "<i class='fa fa-file'></i>"+choose;
+		var inputField = '<input class="file_upload" name="files" type="file" accept="'+fileTypes+'" title="'+title+'" data-filename-placement="inside">';
+		$("#fileTable").append('<tr><td style="width:300px">'+inputField+'</td></tr>');
+		$("#fileTable tr:last").find(".file_upload").bootstrapFileInput();;
+	}
+	
 	$(".taskType").click(function(){
 		var type = $(this).data('type');
 		checkTaskTypeEstimate(type);
@@ -295,6 +382,10 @@ $(document).ready(function($) {
 	getDefaultAssignee();
 	getDefaultTaskType();
 	getDefaultTaskPriority();
+	addFileInput();
+	$('body').scrollspy({
+		target : '#menu'
+	});
 	
 	$("#assignee_auto").click(function(){
 		 $(this).select();

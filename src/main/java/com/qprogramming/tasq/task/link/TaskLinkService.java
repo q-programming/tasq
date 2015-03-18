@@ -16,11 +16,14 @@ import com.qprogramming.tasq.task.TaskService;
 @Service
 public class TaskLinkService {
 
-	@Autowired
 	private TaskLinkRepository linkRepo;
+	private TaskService taskSrv;
 
 	@Autowired
-	private TaskService taskSrv;
+	public TaskLinkService(TaskLinkRepository linkRepo, TaskService taskSrv) {
+		this.taskSrv = taskSrv;
+		this.linkRepo = linkRepo;
+	}
 
 	public void save(TaskLink link) {
 		linkRepo.save(link);
@@ -79,13 +82,13 @@ public class TaskLinkService {
 		// clean all potential empty results
 		for (Entry<TaskLinkType, List<DisplayTask>> entry : result.entrySet()) {
 			if (!entry.getValue().isEmpty()) {
-				finalResult.put(entry.getKey(),entry.getValue());
+				finalResult.put(entry.getKey(), entry.getValue());
 			}
 		}
 		return finalResult;
 	}
-	
-	public void deleteTaskLinks(Task task ){
+
+	public void deleteTaskLinks(Task task) {
 		List<TaskLink> listA = linkRepo.findByTaskA(task.getId());
 		listA.addAll(linkRepo.findByTaskB(task.getId()));
 		linkRepo.delete(listA);

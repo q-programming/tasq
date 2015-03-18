@@ -70,6 +70,9 @@ public class PeriodHelper {
 	 * @return
 	 */
 	public static String outFormat(Period period) {
+		if (period == null) {
+			period = new Period();
+		}
 		return period.toString(OUT_FORMATER);
 	}
 

@@ -8,7 +8,7 @@
 	type="com.qprogramming.tasq.task.DisplayTask"%>
 <%@ attribute name="can_edit" required="true"%>
 <security:authentication property="principal" var="user" />
-<div class="agile-card theme" data-id="${task.id}" state="${task.state}"
+<div class="agile-card theme" data-id="${task.id}" state="${task.state}" data-subtasks="${task.subtasks}"
 	id="${task.id}">
 	<div class="side-bar theme"></div>
 	<div style="padding-left: 5px; min-height: 50px;">
@@ -44,7 +44,11 @@
 				<c:if test="${empty task.assignee}">
 					<i><s:message code="task.unassigned" /> <c:if
 							test="${can_edit}">
-						&nbsp;<button class="btn btn-default btn-xxs a-tooltip assign_me"
+						&nbsp;<button class="btn btn-default assignToTask btn-xxs a-tooltip assign_me"
+										title="<s:message code="task.assign"/>" data-toggle="modal" data-target="#assign_modal" 
+										data-taskID="${task.id}" data-assignee="${task.assignee}" 
+										data-assigneeID="${task.assignee.id}"
+										data-projectID="${task.projectID}"
 								type="button" data-taskID="${task.id}"
 								title="<s:message code="task.assignme"/>">
 								<i class="fa fa-lg fa-user"></i>
@@ -54,10 +58,19 @@
 				<c:if test="${not empty task.assignee}">
 					<a ${link} class="a-tooltip"
 						href="<c:url value="/user?id=${task.assignee.id}"/>"
-						title="${task.assignee}"> <img data-src="holder.js/30x30"
+						title="${task.assignee}"><img data-src="holder.js/30x30"
 						style="height: 30px; padding-right: 5px;"
-						src="<c:url value="/userAvatar/${task.assignee.id}"/>" />
-					</a>
+						src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />
+					</a><c:if test="${task.state ne 'CLOSED'}}"><button class="btn btn-default assignToTask btn-xxs a-tooltip assign_me"
+										title="<s:message code="task.assign"/>" data-toggle="modal" data-target="#assign_modal" 
+										data-taskID="${task.id}" data-assignee="${task.assignee}" 
+										data-assigneeID="${task.assignee.id}"
+										data-projectID="${task.projectID}"
+										type="button" data-taskID="${task.id}"
+										title="<s:message code="task.assignme"/>">
+								<i class="fa fa-lg fa-user"></i>
+						</button>
+					</c:if>
 				</c:if>
 			</div>
 		</div>

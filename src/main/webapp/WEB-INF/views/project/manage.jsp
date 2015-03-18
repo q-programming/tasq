@@ -11,12 +11,22 @@
 <security:authorize access="hasRole('ROLE_ADMIN')">
 	<c:set var="is_admin" value="true" />
 </security:authorize>
+<script src="<c:url value="/resources/js/trumbowyg.min.js" />"></script>
+<link href="<c:url value="/resources/css/trumbowyg.min.css" />" rel="stylesheet" media="screen" />
 <security:authentication property="principal" var="user" />
+<c:if test="${user.language ne 'en' }">
+	<script src="<c:url value="/resources/js/trumbowyg.${user.language}.min.js" />"></script>
+</c:if>
 <div class="white-frame" style="overflow: auto;">
 	<h2>
 		<a href="<c:url value="/project?id=${project.id}"/>">[${project.projectId}]
 			${project.name}</a>
+			<a href="" class="showMore a-tooltip" title="<s:message code="project.manage.edit.description"/>" 
+			data-toggle="modal" data-target="#editDescription" data-backdrop="static" data-keyboard="false">
+				<i class="fa fa-pencil"></i>
+			</a>
 	</h2>
+	
 	<form id="priority_form"
 		action="<c:url value="/project/${project.id}/update"/>" method="post">
 		<div>
@@ -138,7 +148,7 @@
 				<tr>
 					<td><img data-src="holder.js/30x30"
 						style="height: 30px; float: left; padding-right: 10px;"
-						src="<c:url value="/userAvatar/${admin.id}"/>" />${admin}</td>
+						src="<c:url value="/../avatar/${admin.id}.png"/>" />${admin}</td>
 				</tr>
 			</c:forEach>
 		</table>
@@ -194,7 +204,7 @@
 				<tr>
 					<td><img data-src="holder.js/30x30"
 						style="height: 30px; float: left; padding-right: 10px;"
-						src="<c:url value="/userAvatar/${participant.id}"/>" />${participant}
+						src="<c:url value="/../avatar/${participant.id}.png"/>" />${participant}
 						<span style="color: #737373">(<s:message
 								code="${participant.role.code}" />)
 					</span></td>
@@ -252,6 +262,35 @@
 		</table>
 	</div>
 </div>
+<div class="modal fade" id="editDescription" role="dialog"
+	aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<form action="<c:url value="/project/${project.id}/description"/>" method="post">
+				<div class="modal-header theme">
+					<h4 class="modal-title" id="myModalLabel">
+						[${project.projectId}] project.name
+					</h4>
+				</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<textarea name="description" id="projectDescription">${project.description}</textarea>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<a class="btn" data-dismiss="modal"><s:message
+								code="main.cancel" /></a>
+					<button id="" class="btn btn-default" type="submit">
+						<s:message code="main.edit" />
+					</button>
+					</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+
+
 <script>
 $(document).ready(function($) {
 	<c:forEach items="${types}" var="enum_type">
@@ -269,7 +308,19 @@ $(document).ready(function($) {
 	</c:forEach>
 	$("#timeTracked, #defaultAssignes").change(function() {
 		$("#priority_form").submit();
-	});	
+	});
+	
+	var btnsGrps = jQuery.trumbowyg.btnsGrps;
+	$('#projectDescription').trumbowyg({
+		lang: '${user.language}',
+		fullscreenable: false,
+		btns: ['formatting',
+	           '|', btnsGrps.design,
+	           '|', 'link',
+	           '|', 'insertImage',
+	           '|', btnsGrps.justify,
+	           '|', btnsGrps.lists]
+	});
 	
 	$("#participant").autocomplete({
         minLength: 1,

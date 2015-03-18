@@ -2,6 +2,7 @@ package com.qprogramming.tasq.projects;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -80,6 +81,9 @@ public class Project implements Serializable {
 
 	@Column
 	private Long defaultAssigneeID;
+	
+	@Column
+	private Long lastTaskNo;
 
 	public enum AgileType {
 		KANBAN, SCRUM
@@ -179,7 +183,7 @@ public class Project implements Serializable {
 	}
 
 	public List<Task> getTasks() {
-		return tasks;
+		return tasks == null ? new ArrayList<Task>() : tasks;
 	}
 
 	public void setTasks(List<Task> tasks) {
@@ -224,6 +228,14 @@ public class Project implements Serializable {
 
 	public void setDefaultAssigneeID(Long defaultAssigneeID) {
 		this.defaultAssigneeID = defaultAssigneeID;
+	}
+
+	public Long getLastTaskNo() {
+		return lastTaskNo==null?0:lastTaskNo;
+	}
+
+	public void setLastTaskNo(Long lastTaskNo) {
+		this.lastTaskNo = lastTaskNo;
 	}
 
 	/*

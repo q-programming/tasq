@@ -200,9 +200,10 @@
 					</li>
 					<li>
 						<div class="pull-right">
-							<a href="#" data-toggle="dropdown"><img src="<c:url value="/userAvatar"/>"
-								style="height: 50px; padding-left: 5px;" ></a>
-							<span class="caret theme"></span>
+							<a href="#" data-toggle="dropdown"><img src="<c:url value="/../avatar/${user.id}.png"/>"
+								style="height: 50px; padding-left: 5px;" ><span class="caret theme"></span>
+							</a>
+							
 							<c:if test="${eventCount gt 0}">
 								<div class="message_div">
 									<span class="badge theme">${eventCount}</span>

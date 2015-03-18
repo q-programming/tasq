@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.qprogramming.tasq.account.Account;
@@ -52,6 +54,17 @@ public class EventsService {
 		List<Event> events = eventsRepo.findByAccountIdOrderByDateDesc(Utils
 				.getCurrentAccount().getId());
 		return events != null ? events : new LinkedList<Event>();
+	}
+
+	/**
+	 * Returns list of all events for currently logged account with Pageable
+	 * 
+	 * @param page
+	 * @return
+	 */
+	public Page<Event> getEvents(Pageable page) {
+		return eventsRepo.findByAccountId(Utils
+				.getCurrentAccount().getId(), page);
 	}
 
 	/**
@@ -143,5 +156,4 @@ public class EventsService {
 		}
 
 	}
-
 }

@@ -1,3 +1,4 @@
+<%@page import="com.qprogramming.tasq.task.worklog.LogType"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
 <div class="white-frame"
@@ -29,7 +30,7 @@
 							code="notice.markAll" text="Mark All read" />">
 				<i class="fa fa-check"></i>
 			</button></a>
-		<table class="table table-hover table-condensed">
+		<table id="eventsTable" class="table table-hover table-condensed">
 			<thead class="theme">
 				<tr>
 					<th style="width: 20px;"></th>
@@ -37,59 +38,104 @@
 					<th style="width: 200px;">Date</th>
 				</tr>
 			</thead>
-
-			<c:forEach items="${events}" var="event">
-				<!-- 			read/unread -->
-				<c:choose>
-					<c:when test="${event.unread}">
-						<tr class="eventRow unread">
-					</c:when>
-					<c:otherwise>
-						<tr class="eventRow read">
-					</c:otherwise>
-				</c:choose>
-				<!-- 				choose correct glyph for notification -->
-				<td><c:choose>
-						<c:when test="${event.type eq 'COMMENT'}">
-							<i class="fa fa-comment"></i>
-						</c:when>
-						<c:when test="${event.type eq 'WATCH'}">
-							<i class="fa fa-eye"></i>
-						</c:when>
-						<c:when test="${event.type eq 'SYSTEM'}">
-							<i class="fa fa-eye"></i>
-						</c:when>
-					</c:choose></td>
-				<td><c:choose>
-						<c:when test="${event.unread}">
-							<div class="eventSummary">
-						</c:when>
-						<c:otherwise>
-							<div class="eventSummary">
-						</c:otherwise>
-					</c:choose> <a href="#" class="showMore" data-event="${event.id}">[${event.task}]
-						- ${event.who}&nbsp; <s:message code="${event.logtype.code}" />
-				</a>
-					<blockquote class="eventMore quote">${event.message}<div
-							class="pull-right buttons_panel">
-							<a style="color: gray"
-								href="<c:url value="/task?id=${event.task}"/>"><i
-								class="fa fa-lg fa-link fa-flip-horizontal a-tooltip" title="<s:message code="event.task"/>"></i></a> <a
-								style="color: gray" href="#" data-event="${event.id}"
-								class="delete-event a-tooltip"
-								title="<s:message code="event.delete"/>"> <i
-								class="fa fa-lg fa-trash"></i></a>
-						</div>
-					</blockquote>
-					</div></td>
-				<td style="color: darkgrey;">${event.date}</td>
-				</tr>
-			</c:forEach>
 		</table>
+		<table id="eventsNavigation" style="width: 100%;"></table>
 	</div>
 </div>
 <script>
-	$(".showMore").click(function() {
+var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><i class="fa fa-cog fa-spin"></i><s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
+fetchEvents(0);
+$(document).on("click",".eventNavBtn",function(e) {
+	var page =  $(this).data('page');
+	fetchEvents(page,'');
+});
+
+// $("#search_field").change(function() {
+// 	fetchUsers(0,$("#search_field").val());
+// 	});
+	
+function fetchEvents(page,term){
+	$("#events_nav").remove();
+	$("#eventsTable .eventRow").remove();
+	$("#eventsTable").append(loading_indicator);
+	var url = '<c:url value="/listEvents"/>';
+	$.get(url, {page: page,term:term}, function(data) {
+		$("#loading").remove();
+		for ( var j = 0; j < data.content.length; j++) {
+			var event = data.content[j];
+			var row = '<tr class="eventRow ';
+			//read unread
+			if(event.unread){
+				row += 'unread">';
+			}else{
+				row += 'read">';
+			}
+			row+='<td>'
+			//Type
+			if(event.type == 'COMMENT'){
+				row+='<i class="fa fa-comment"></i>';
+			}else if(event.type == 'WATCH'){
+				row+='<i class="fa fa-eye"></i>';
+			}else if(event.type == 'SYSTEM'){
+				row+='<i class="fa fa-exclamation-triangle"></i>';
+			}
+			row+='</td><td><div class="eventSummary">';
+			//title
+			var link = '<a href="#" class="showMore" data-event="'+event.id+'">['+event.task+'] - '+event.who+'&nbsp; '+getEventTypeMsg(event.logtype)+'</a>';
+			row+=link;
+			//more
+			var taskurl = '<c:url value="/task?id="/>'+event.task;
+			var eventtask = '<s:message code="event.task"/>';
+			var deleteevent= '<s:message code="event.delete"/>';
+			var content = '<blockquote class="eventMore quote">'+event.message+'<div class="pull-right buttons_panel">'
+							+'<a style="color: gray" href="'+taskurl+'"><i class="fa fa-lg fa-link fa-flip-horizontal a-tooltip" title="'+eventtask+'"></i></a>'
+							+'<a style="color: gray" href="#" data-event="'+event.id+'" class="delete-event a-tooltip"	title="'+deleteevent+'"> <i class="fa fa-lg fa-trash"></i></a>'
+							+'</div></blockquote>';							
+			row+=content;			
+			//date
+			row+='</div></td><td style="color: darkgrey;">'+event.date+'</tr>';
+			$("#eventsTable").append(row);
+		}	
+		//print Nav
+		if(data.totalPages > 1){
+			printEventsNavigation(page,data);
+		}
+	});
+}
+<%
+pageContext.setAttribute("types",
+		LogType.values());
+%>
+function printEventsNavigation(page,data){
+	$("#events_nav").remove();
+	var topRow='<tr id="events_nav">';
+	var prev = '<td style="width:30px"></td>';
+	if(!data.firstPage){
+		prev = '<td style="width:30px"><a class="eventNavBtn btn" data-page="'+ (page -1)+'"><i class="fa fa-arrow-left"></i></a></td>';
+	}
+	topRow+=prev;
+	var numbers = '<td style="text-align:center">';
+	//print numbers
+	for (var i = 0; i < data.totalPages; i++) {
+		var btnClass = "eventNavBtn btn";
+		//active btn
+		if (i == data.number) {
+			btnClass += " btn-default";
+		}
+		var button = '<a class="'+btnClass+'" data-page="'+ i +'">'
+				+ (i + 1) + '</a>';
+				numbers+=button;
+	}
+	topRow+=numbers;
+	var next = '<td style="width:30px"></td>';
+	if(!data.lastPage){
+		next = '<td style="width:30px"><a class="navBtn btn" data-page="'+ (page +1) +'"><i class="fa fa-arrow-right"></i></a></td>';
+	}
+	topRow+=next+'</tr>';
+	$("#eventsNavigation").append(topRow);
+}
+
+	$(document).on("click",".showMore",function(e) {
 		var eventID = $(this).data('event');
 		var event = $(this);
 		if (event.closest("tr").hasClass("unread")) {
@@ -108,7 +154,7 @@
 		$(this).nextAll(".eventMore").toggle();
 	});
 
-	$(".delete-event").click(function() {
+	$(document).on("click",".delete-even",function(e) {
 		var eventID = $(this).data('event');
 		var event = $(this);
 		var url = '<c:url value="/events/delete"/>';
@@ -161,6 +207,17 @@
 							}
 						});
 			});
+	
+	function getEventTypeMsg(type){
+	switch(type){
+		<c:forEach items="${types}" var="enum_type">
+		case "${enum_type}":
+			return '<s:message code="${enum_type.code}"/> ';
+		</c:forEach>
+		default:
+			return 'not yet added ';
+	};
+};
 
 	
 </script>

@@ -66,6 +66,7 @@ import com.qprogramming.tasq.task.worklog.WorkLogService;
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectControllerTest {
 
+	private static final String NEW_DESCRIPTION = "newDescription";
 	private static final String TASQ_AUTH_MSG = "TasqAuthException was not thrown";
 	private static final String PROJ_ID = "TEST";
 	private static final String PROJ_NAME = "Test project";
@@ -473,13 +474,16 @@ public class ProjectControllerTest {
 		when(accountServiceMock.findByEmail(NEW_EMAIL)).thenReturn(
 				new Account(NEW_EMAIL, PASSWORD, Roles.ROLE_USER));
 		when(projSrv.findById(1L)).thenReturn(project);
+		when(projSrv.findByProjectId(PROJ_ID)).thenReturn(project);
 		projectCtr.addParticipant(1L, NEW_EMAIL, raMock, requestMock);
 		verify(accountServiceMock, times(1)).update(any(Account.class));
 		verify(projSrv, times(1)).save(project);
-		List<DisplayAccount> result = projectCtr.listParticipants(1L, null,
+		List<DisplayAccount> result = projectCtr.listParticipants(PROJ_ID, null,
 				responseMock);
 		Assert.assertEquals(2, result.size());
-		result = projectCtr.listParticipants(1L, "Jo", responseMock);
+		result = projectCtr.listParticipants(PROJ_ID, "Jo", responseMock);
+		Assert.assertEquals(1, result.size());
+		result = projectCtr.listParticipants("1", "Jo", responseMock);
 		Assert.assertEquals(1, result.size());
 	}
 
@@ -608,6 +612,53 @@ public class ProjectControllerTest {
 		project.setDefaultAssigneeID(null);
 		Assert.assertNull(projectCtr.getDefaultAssignee(1L, responseMock));
 	}
+	
+	@Test
+	public void changeDescriptionNoProjectsTest() {
+		when(projSrv.findById(1L)).thenReturn(null);
+		projectCtr.changeDescriptions(1L, NEW_DESCRIPTION, raMock, requestMock);
+		verify(raMock, times(1))
+				.addFlashAttribute(
+						anyString(),
+						new Message(anyString(), Message.Type.WARNING,
+								new Object[] {}));
+	}
+	
+	@Test
+	public void changeDescriptionBadAuthTest() {
+		Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
+		project.setId(1L);
+		project.addParticipant(testAccount);
+		testAccount.setRole(Roles.ROLE_VIEWER);
+		when(accountServiceMock.findById(1L)).thenReturn(testAccount);
+		when(projSrv.findById(1L)).thenReturn(project);
+		boolean catched=false;
+		try{
+		projectCtr.changeDescriptions(1L, NEW_DESCRIPTION, raMock, requestMock);
+		}catch (TasqAuthException e){
+			catched = true;
+		}
+		Assert.assertTrue(TASQ_AUTH_MSG, catched);
+		testAccount.setRole(Roles.ROLE_USER);
+		projectCtr.changeDescriptions(1L, NEW_DESCRIPTION, raMock, requestMock);
+		verify(raMock, times(1)).addFlashAttribute(anyString(),
+				new Message(anyString(), Message.Type.DANGER, new Object[] {}));
+	}
+	@Test
+	public void changeDescriptionTest() {
+		Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
+		project.setId(1L);
+		project.addParticipant(testAccount);
+		when(accountServiceMock.findById(1L)).thenReturn(testAccount);
+		when(projSrv.findById(1L)).thenReturn(project);
+		when(projSrv.canEdit(1L)).thenReturn(true);
+		projectCtr.changeDescriptions(1L, NEW_DESCRIPTION, raMock, requestMock);
+		Project newProject = project;
+		newProject.setDescription(NEW_DESCRIPTION);
+		verify(projSrv, times(1)).findById(1L);
+		verify(projSrv, times(1)).save(newProject);
+	}
+	
 
 	private List<Project> createList(int count) {
 		List<Project> list = new LinkedList<Project>();

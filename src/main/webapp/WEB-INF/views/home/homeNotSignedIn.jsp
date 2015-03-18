@@ -5,7 +5,7 @@
 	<h3>
 		<s:message code="view.index.title" />
 	</h3>
-	<img src="http://37.233.101.125/assets/images/projects/tasq.png">
+	<img src="<c:url value="/resources/img/tasq.png"/>">
 	<p>
 		<s:message code="view.index.desc" htmlEscape="false" />
 		<a
