@@ -59,7 +59,7 @@ public class KanbanController {
 			List<Task> taskList = new LinkedList<Task>();
 			taskList = taskSrv.findAllByProject(project);
 			Collections.sort(taskList, new TaskSorter(
-					TaskSorter.SORTBY.ORDER, false));
+					TaskSorter.SORTBY.ORDER, true));
 			List<DisplayTask> resultList = taskSrv.convertToDisplay(taskList);
 			model.addAttribute("tasks", resultList);
 			return "/kanban/board";

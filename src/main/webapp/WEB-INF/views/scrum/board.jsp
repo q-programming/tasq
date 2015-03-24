@@ -53,7 +53,7 @@
 		</c:forEach>
 	</div>
 	<div style="display: table-cell;width:1px"></div>
-	<div class="well table_state sortable_tasks" data-state="ONGOING">
+	<div class="well table_state notsortable_tasks" data-state="ONGOING">
 		<div class="table_header"><i class="fa fa-spin fa-repeat"></i> <s:message code="task.state.ongoing"/></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'ONGOING'}">
@@ -62,7 +62,7 @@
 		</c:forEach>
 	</div>
 	<div style="display: table-cell;width:1px"></div>
-	<div class="well table_state sortable_tasks" data-state="CLOSED">
+	<div class="well table_state notsortable_tasks" data-state="CLOSED">
 		<div class="table_header"><i class="fa fa-check"></i> <s:message code="task.state.closed"/></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'CLOSED'}">
@@ -71,7 +71,7 @@
 		</c:forEach>
 	</div>
 	<div style="display: table-cell;width:1px"></div>
-	<div class="well table_state sortable_tasks" data-state="BLOCKED">
+	<div class="well table_state notsortable_tasks" data-state="BLOCKED">
 		<div class="table_header"><i class="fa fa-ban"></i> <s:message code="task.state.blocked"/></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'BLOCKED'}">
@@ -89,14 +89,27 @@
 	$(document).ready(function($) {
 		<c:if test="${can_edit}">
 
+// 		$(".agile-card").draggable ({
+// 	    	revert: 'invalid',
+// 	    	cursor: 'move'
+// 		});
+		
 		$(".sortable_tasks").sortable({
 			cursor : 'move',
 			items: "div.agile-card",
+			helper: "clone",
 			update: function(event,ui){
 				$("#save_order").show("highlight",{color: '#5cb85c'}, 1000);
 				console.log("sort me!");
 			}
 		});
+		
+		$(".notsortable_tasks").sortable({
+			cursor : 'move',
+			helper: "clone",
+			items: "div.agile-card"
+		});
+		
 		$("#save_order").click(function(){
 			var order = $("div.sortable_tasks").sortable("toArray");
 			var url = '<c:url value="/agile/order"/>';
@@ -122,7 +135,10 @@
 		    	 var oldState =  ui.draggable.attr("state");
 		    	 var state = $(this).data('state');
 		    	 if( oldState != state){
-			    	 if(state == 'CLOSED'){
+			    	var target = $(this);
+			    	var dragged = ui.draggable;
+			    	dragged.css("opacity","0.3");
+			    	if(state == 'CLOSED'){
 			    		 $('#close_task').modal({
 			    	            show: true,
 			    	            keyboard: false,
@@ -134,11 +150,15 @@
 			    		showWait(true);
 						$.post('<c:url value="/task/changeState"/>',{id:taskID,state:state},function(result){
 							if(result.code == 'Error'){
+								dragged.css("opacity","1");
 								reloadmsg = ' <s:message code="main.pageReload" arguments="5"/>';
 								showError(result.message + reloadmsg);
 								window.setTimeout('location.reload()', 5000);
 							}
 							else{
+								dragged.css("opacity","1");
+					    		target.append(dragged.clone(true).show());
+					    		dragged.remove();
 								showSuccess(result.message);
 								if(oldState== 'CLOSED'){
 									$('#'+taskID + ' a[href]').toggleClass('closed');
