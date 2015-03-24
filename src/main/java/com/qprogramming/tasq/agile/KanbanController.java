@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
@@ -60,7 +59,7 @@ public class KanbanController {
 			List<Task> taskList = new LinkedList<Task>();
 			taskList = taskSrv.findAllByProject(project);
 			Collections.sort(taskList, new TaskSorter(
-					TaskSorter.SORTBY.PRIORITY, false));
+					TaskSorter.SORTBY.ORDER, false));
 			List<DisplayTask> resultList = taskSrv.convertToDisplay(taskList);
 			model.addAttribute("tasks", resultList);
 			return "/kanban/board";

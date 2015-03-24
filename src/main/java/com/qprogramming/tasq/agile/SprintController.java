@@ -99,10 +99,10 @@ public class SprintController {
 				return "redirect:/" + project.getProjectId() + "/scrum/backlog";
 			}
 			List<Task> taskList = new LinkedList<Task>();
-			List<DisplayTask> resultList = taskSrv.convertToDisplay(taskSrv
-					.findAllBySprint(sprint));
 			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ORDER,
 					false));
+			List<DisplayTask> resultList = taskSrv.convertToDisplay(taskSrv
+					.findAllBySprint(sprint));
 			model.addAttribute("sprint", sprint);
 			model.addAttribute("tasks", resultList);
 			return "/scrum/board";

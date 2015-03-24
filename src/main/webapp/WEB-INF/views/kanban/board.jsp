@@ -33,8 +33,14 @@
 </div>
 <div style="display:table-header-group;">
 	<h4 style="padding-bottom:20px">Release ${release.sprintNo} <span style="font-size: small;margin-left:5px">(${sprint.start_date} - ${sprint.end_date})</span></h4>
+			<div style="display:table-cell"></div>
+		<div style="display:table-cell"></div>
+		<div style="display:table-cell"></div>
+		<div style="display:table-cell"></div>
+		<div style="display:table-cell"></div>
+		<div style="display:table-cell"><span class="btn btn-default pull-right" id="save_order" style="display:none"><i class="fa fa-floppy-o"></i>&nbsp;Save order</span></div>
 </div >
-	<div class="well table_state" data-state="TO_DO" >
+	<div class="well table_state sortable_tasks" data-state="TO_DO" >
 		<div class="table_header"><i class="fa fa-pencil-square-o"></i> <s:message code="task.state.todo"/></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'TO_DO'}">
@@ -43,7 +49,7 @@
 		</c:forEach>
 	</div>
 	<div style="display: table-cell;width:1px"></div>
-	<div class="well table_state" data-state="ONGOING">
+	<div class="well table_state sortable_tasks" data-state="ONGOING">
 		<div class="table_header"><i class="fa fa-spin fa-repeat"></i> <s:message code="task.state.ongoing"/></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'ONGOING'}">
@@ -52,7 +58,7 @@
 		</c:forEach>
 	</div>
 	<div style="display: table-cell;width:1px"></div>
-	<div class="well table_state" data-state="CLOSED">
+	<div class="well table_state sortable_tasks" data-state="CLOSED">
 		<div class="table_header"><i class="fa fa-check"></i> <s:message code="task.state.closed"/></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'CLOSED'}">
@@ -61,7 +67,7 @@
 		</c:forEach>
 	</div>
 	<div style="display: table-cell;width:1px"></div>
-	<div class="well table_state" data-state="BLOCKED">
+	<div class="well table_state sortable_tasks" data-state="BLOCKED">
 		<div class="table_header"><i class="fa fa-ban"></i> <s:message code="task.state.blocked"/></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'BLOCKED'}">
@@ -78,10 +84,26 @@
 	$(document).ready(function($) {
 		<c:if test="${can_edit}">
 
-		$(".agile-card").draggable ({
-		    	revert: 'invalid',
-		    	cursor: 'move'
+		$(".sortable_tasks").sortable({
+			cursor : 'move',
+			items: "div.agile-card",
+			update: function(event,ui){
+				$("#save_order").show("highlight",{color: '#5cb85c'}, 1000);
+				console.log("sort me!");
+			}
 		});
+		$("#save_order").click(function(){
+			var order = $("div.sortable_tasks").sortable("toArray");
+			var url = '<c:url value="/agile/order"/>';
+			var project = '${project.id}';
+			console.log(order);
+			showWait(true);
+			$.post(url ,{ids:order,project:project},function(result){
+				showWait(false);
+				$("#save_order").hide("highlight",{color: '#5cb85c'}, 1000);
+			});
+		});
+
 		
 		$( ".table_state" ).droppable({
 		      activeClass: "state_default",

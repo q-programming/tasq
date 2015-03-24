@@ -166,6 +166,7 @@ public class ImportExportController {
 					String taskID = project.getProjectId() + "-" + taskCount;
 					task.setId(taskID);
 					task.setProject(project);
+					task.setTaskOrder((long)taskCount);
 					project.getTasks().add(task);
 					task = taskSrv.save(task);
 					projectSrv.save(project);
