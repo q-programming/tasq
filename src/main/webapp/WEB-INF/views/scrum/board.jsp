@@ -36,7 +36,7 @@
 <div style="display:table-header-group;">
 	<h4 style="padding-bottom:20px">Sprint ${sprint.sprintNo} <span style="font-size: small;margin-left:5px">(${sprint.start_date} - ${sprint.end_date})</span></h4>
 </div >
-	<div class="well table_state" data-state="TO_DO" >
+	<div class="well table_state sortable_tasks" data-state="TO_DO" >
 		<div class="table_header"><i class="fa fa-pencil-square-o"></i> <s:message code="task.state.todo"/></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'TO_DO'}">
@@ -45,7 +45,7 @@
 		</c:forEach>
 	</div>
 	<div style="display: table-cell;width:1px"></div>
-	<div class="well table_state" data-state="ONGOING">
+	<div class="well table_state sortable_tasks" data-state="ONGOING">
 		<div class="table_header"><i class="fa fa-spin fa-repeat"></i> <s:message code="task.state.ongoing"/></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'ONGOING'}">
@@ -54,7 +54,7 @@
 		</c:forEach>
 	</div>
 	<div style="display: table-cell;width:1px"></div>
-	<div class="well table_state" data-state="CLOSED">
+	<div class="well table_state sortable_tasks" data-state="CLOSED">
 		<div class="table_header"><i class="fa fa-check"></i> <s:message code="task.state.closed"/></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'CLOSED'}">
@@ -63,7 +63,7 @@
 		</c:forEach>
 	</div>
 	<div style="display: table-cell;width:1px"></div>
-	<div class="well table_state" data-state="BLOCKED">
+	<div class="well table_state sortable_tasks" data-state="BLOCKED">
 		<div class="table_header"><i class="fa fa-ban"></i> <s:message code="task.state.blocked"/></div>
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.state eq 'BLOCKED'}">
@@ -83,6 +83,13 @@
 		$(".agile-card").draggable ({
 		    	revert: 'invalid',
 		    	cursor: 'move'
+		});
+		$(".sortable_tasks").sortable({
+			cursor : 'move',
+			update: function(event,ui){
+// 				$("#save_order").show("highlight",{color: '#5cb85c'}, 1000);
+				console.log("sort me!");
+			}
 		});
 		
 		$( ".table_state" ).droppable({

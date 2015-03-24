@@ -1,6 +1,7 @@
 package com.qprogramming.tasq.task;
 
 import java.io.File;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,5 +106,12 @@ public class TaskService {
 
 	public List<Task> findAllByProjectId(Long project) {
 		return taskRepo.findByProjectId(project);
+	}
+	public List<DisplayTask> convertToDisplay(List<Task> list){
+		List<DisplayTask> resultList = new LinkedList<DisplayTask>();
+		for (Task task : list) {
+			resultList.add(new DisplayTask(task));
+		}
+		return resultList;
 	}
 }

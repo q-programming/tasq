@@ -99,11 +99,8 @@ public class SprintController {
 				return "redirect:/" + project.getProjectId() + "/scrum/backlog";
 			}
 			List<Task> taskList = new LinkedList<Task>();
-			List<DisplayTask> resultList = new LinkedList<DisplayTask>();
-			taskList = taskSrv.findAllBySprint(sprint);
-			for (Task task : taskList) {
-				resultList.add(new DisplayTask(task));
-			}
+			List<DisplayTask> resultList = taskSrv.convertToDisplay(taskSrv
+					.findAllBySprint(sprint));
 			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ORDER,
 					false));
 			model.addAttribute("sprint", sprint);
@@ -126,8 +123,8 @@ public class SprintController {
 			model.addAttribute("project", project);
 			// Don't show closed tasks in backlog view
 			List<Task> taskList = taskSrv.findAllByProject(project);
-			Collections.sort(taskList, new TaskSorter(
-					TaskSorter.SORTBY.ORDER, true));
+			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ORDER,
+					true));
 			List<DisplayTask> resultList = DisplayTask
 					.convertToDisplayTasks(taskList);
 			Map<Sprint, List<DisplayTask>> sprint_result = new LinkedHashMap<Sprint, List<DisplayTask>>();
@@ -272,20 +269,21 @@ public class SprintController {
 	public ResultData startSprint(@RequestParam(value = "sprintID") Long id,
 			@RequestParam(value = "projectID") Long projectId,
 			@RequestParam(value = "sprintStart") String sprintStart,
-			@RequestParam(value = "sprintEnd") String sprintEnd, 
+			@RequestParam(value = "sprintEnd") String sprintEnd,
 			@RequestParam(value = "sprintStartTime") String sprintStartTime,
 			@RequestParam(value = "sprintEndTime") String sprintEndTime) {
 		// check if other sprints are not ending when this new is starting
 		List<Sprint> allSprints = sprintRepo.findByProjectId(projectId);
-		sprintStart+= " " +  sprintStartTime;
-		sprintEnd+= " " +  sprintEndTime;
+		sprintStart += " " + sprintStartTime;
+		sprintEnd += " " + sprintEndTime;
 		Date startDate = Utils.convertStringToDateAndTime(sprintStart);
 		Date endDate = Utils.convertStringToDateAndTime(sprintEnd);
 		for (Sprint sprint : allSprints) {
 			if (sprint.getRawEnd_date() != null) {
 				DateTime sprintEndDate = new DateTime(sprint.getRawEnd_date());
 				DateTime sprintStartDate = new DateTime(startDate);
-				if (sprintEndDate.equals(sprintStartDate) || sprintStartDate.isBefore(sprintEndDate)) {
+				if (sprintEndDate.equals(sprintStartDate)
+						|| sprintStartDate.isBefore(sprintEndDate)) {
 					return new ResultData(ResultData.WARNING, msg.getMessage(
 							"agile.sprint.startOnEnd",
 							new Object[] { sprint.getSprintNo(), sprintStart },
@@ -446,8 +444,7 @@ public class SprintController {
 	 * @return
 	 */
 	@RequestMapping(value = "/{id}/sprint-data", method = RequestMethod.GET, produces = "application/json")
-	public @ResponseBody
-	SprintData showBurndownChart(@PathVariable String id,
+	public @ResponseBody SprintData showBurndownChart(@PathVariable String id,
 			@RequestParam(value = "sprint") Long sprintNo) {
 		SprintData result = new SprintData();
 		Project project = projSrv.findByProjectId(id);
@@ -462,7 +459,7 @@ public class SprintController {
 				return result;
 			}
 			// Fill maps based on time or story point driven board
-			
+
 			DateTime startTime = new DateTime(sprint.getRawStart_date());
 			DateTime endTime = new DateTime(sprint.getRawEnd_date());
 			boolean timeTracked = project.getTimeTracked();
@@ -485,9 +482,8 @@ public class SprintController {
 	}
 
 	@RequestMapping(value = "/getSprints", method = RequestMethod.GET)
-	public @ResponseBody
-	List<DisplaySprint> showProjectSprints(@RequestParam Long projectID,
-			HttpServletResponse response) {
+	public @ResponseBody List<DisplaySprint> showProjectSprints(
+			@RequestParam Long projectID, HttpServletResponse response) {
 		response.setContentType("application/json");
 		List<DisplaySprint> result = new LinkedList<DisplaySprint>();
 		List<Sprint> projectSprints = sprintRepo.findByProjectIdAndFinished(
@@ -507,13 +503,13 @@ public class SprintController {
 	 * @return
 	 */
 	@RequestMapping(value = "/scrum/isActive", method = RequestMethod.GET)
-	public @ResponseBody
-	boolean checkIfActive(@RequestParam(value = "id") Long sprintID,
+	public @ResponseBody boolean checkIfActive(
+			@RequestParam(value = "id") Long sprintID,
 			HttpServletResponse response) {
 		Sprint sprint = sprintRepo.findById(sprintID);
 		return sprint.isActive();
 	}
-	
+
 	/**
 	 * Checks if task is properly estimated based on project settings (
 	 * Estimated time not 0m for time based or story points not 0 for story
