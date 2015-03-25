@@ -29,7 +29,7 @@
 					<td><a style="color: white"
 						href="<c:url value="agile/${project.id}/"/>"><b>[${project.projectId}]
 								${project.name}</b></a></td>
-					<td><b>${project.agile_type}</b></td>
+					<td><b>${project.agile}</b></td>
 					<td><b>${project.description}</b></td>
 					<td><c:forEach var="admin" items="${project.administrators}"
 							end="0">
@@ -43,7 +43,7 @@
 					<td><a style="color: black"
 						href="<c:url value="agile/${project.id}/"/>"><b>[${project.projectId}]
 								${project.name}</b></a></td>
-					<td><b>${project.agile_type}</b></td>
+					<td><b>${project.agile}</b></td>
 					<td><b>${project.description}</b></td>
 					<td><c:forEach var="admin" items="${project.administrators}"
 							end="0">

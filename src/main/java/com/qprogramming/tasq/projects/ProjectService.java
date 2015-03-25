@@ -87,13 +87,21 @@ public class ProjectService {
 		if (repoProject == null) {
 			return false;
 		}
-		Account currentAccount = Utils.getCurrentAccount();
-		return repoProject.getAdministrators().contains(currentAccount)
-				|| repoProject.getParticipants().contains(currentAccount)
-				|| Roles.isAdmin();
+		return canEdit(repoProject);
 	}
 
 	public boolean canEdit(Project project) {
-		return canEdit(project.getId());
+		Account currentAccount = Utils.getCurrentAccount();
+		return project.getAdministrators().contains(currentAccount)
+				|| project.getParticipants().contains(currentAccount)
+				|| Roles.isAdmin();
+
+	}
+
+	public boolean canAdminister(Project project) {
+		Account currentAccount = Utils.getCurrentAccount();
+		return project.getAdministrators().contains(currentAccount)
+				|| Roles.isAdmin();
+
 	}
 }

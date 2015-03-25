@@ -19,11 +19,10 @@
 		</ul>
 	</div>
 	<div style="display: table-header-group;">
-		<h4 style="padding-bottom: 20px">
-			Release ${release.sprintNo} <span
-				style="font-size: small; margin-left: 5px">(${sprint.start_date}
-				- ${sprint.end_date})</span>
-		</h4>
+		<div style="display: table-cell; padding-bottom: 30px;">
+			<span class="btn btn-default pull-left" id="new release" data-toggle="modal" data-target="#releaseModal">
+				<i class="fa fa-clipboard"></i>&nbsp;New release</span>
+		</div>
 		<div style="display: table-cell"></div>
 		<div style="display: table-cell"></div>
 		<div style="display: table-cell"></div>
@@ -40,3 +39,5 @@
 <jsp:include page="../modals/logWork.jsp" />
 <jsp:include page="../modals/close.jsp" />
 <jsp:include page="../modals/assign.jsp" />
+<jsp:include page="../modals/release.jsp" />
+

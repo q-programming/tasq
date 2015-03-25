@@ -604,21 +604,35 @@
 					</tr>
 				</table>
 			</div>
-			<%----------------SPRITNS ----------------------%>
+			<%----------------SPRITNS/RELEASES ----------------------%>
 			<c:if test="${not task.subtask}">
 			<div>
+				<c:if test="${task.project.agile eq 'KANBAN'}">
 				<div class="mod-header">
 					<h5 class="mod-header-title">
-						<s:message code="task.sprints" />
+						<s:message code="agile.release" />
 					</h5>
 				</div>
+				<div>
+					<a
+						href="<c:url value="/${task.project.projectId}/${fn:toLowerCase(task.project.agile)}/reports?release=${task.release.release}"/>">
+						${task.release.release}</a>
+				</div>
+				</c:if>
+				<c:if test="${task.project.agile eq 'SCRUM'}">
 				<c:forEach items="${task.sprints}" var="sprint">
+					<div class="mod-header">
+						<h5 class="mod-header-title">
+							<s:message code="task.sprints" />
+						</h5>
+					</div>
 					<div>
 						<a
-							href="<c:url value="/${task.project.projectId}/${fn:toLowerCase(task.project.agile_type)}/reports?sprint=${sprint.sprintNo}"/>">Sprint
+							href="<c:url value="/${task.project.projectId}/${fn:toLowerCase(task.project.agile)}/reports?sprint=${sprint.sprintNo}"/>">Sprint
 							${sprint.sprintNo}</a>
 					</div>
 				</c:forEach>
+				</c:if> 
 			</div>
 			</c:if>
 		</div>

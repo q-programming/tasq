@@ -74,7 +74,7 @@ public class Project implements Serializable {
 	private Enum<TaskPriority> default_priority;
 
 	@Enumerated(EnumType.STRING)
-	private AgileType agile_type;
+	private AgileType agile;
 
 	@Column
 	private Boolean timeTracked = false;
@@ -206,12 +206,12 @@ public class Project implements Serializable {
 		this.default_priority = default_priority;
 	}
 
-	public AgileType getAgile_type() {
-		return agile_type;
+	public AgileType getAgile() {
+		return agile;
 	}
 
-	public void setAgile_type(String agile_type) {
-		this.agile_type = AgileType.valueOf(agile_type);
+	public void setAgile(String agile) {
+		this.agile = AgileType.valueOf(agile);
 	}
 
 	public Boolean getTimeTracked() {

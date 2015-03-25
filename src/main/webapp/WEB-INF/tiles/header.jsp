@@ -86,12 +86,12 @@
 								<c:forEach items="${last_projects}" var="l_project">
 									<c:if test="${l_project.id eq user.active_project}">
 										<li><a href="<c:url value="/agile/${l_project.id}/"/>"><b>${l_project.name}
-													(<s:message code="agile.board.${l_project.agile_type}" />)
+													(<s:message code="agile.board.${l_project.agile}" />)
 											</b></a></li>
 									</c:if>
 									<c:if test="${l_project.id ne user.active_project}">
 										<li><a href="<c:url value="/agile/${l_project.id}/"/>">${l_project.name}
-												(<s:message code="agile.board.${l_project.agile_type}" />)
+												(<s:message code="agile.board.${l_project.agile}" />)
 										</a></li>
 									</c:if>
 								</c:forEach>

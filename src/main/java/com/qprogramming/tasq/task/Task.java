@@ -22,6 +22,7 @@ import org.hibernate.Hibernate;
 import org.joda.time.Period;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.agile.Release;
 import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.support.PeriodHelper;
@@ -101,6 +102,9 @@ public class Task implements java.io.Serializable {
 
 	@ManyToMany(fetch = FetchType.LAZY)
 	private Set<Sprint> sprints = new HashSet<Sprint>();
+	
+	@ManyToOne(fetch = FetchType.EAGER)
+	private Release release;
 
 	@Column
 	private boolean inSprint;
@@ -333,6 +337,14 @@ public class Task implements java.io.Serializable {
 
 	public void setSprints(Set<Sprint> sprints) {
 		this.sprints = sprints;
+	}
+
+	public Release getRelease() {
+		return release;
+	}
+
+	public void setRelease(Release release) {
+		this.release = release;
 	}
 
 	public boolean isInSprint() {

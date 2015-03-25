@@ -28,7 +28,6 @@ public class TaskService {
 
 	public List<Task> findAllByProject(Project project) {
 		return taskRepo.findAllByProjectAndParentIsNull(project);
-
 	}
 
 	public List<Task> findAll() {
@@ -43,6 +42,15 @@ public class TaskService {
 		return taskRepo.findByProjectAndStateNotAndParentIsNull(project,
 				TaskState.CLOSED);
 	}
+	
+	public List<Task> findAllWithoutRelease(Project project) {
+		return taskRepo.findByProjectAndParentIsNullAndReleaseIsNull(project);
+	}
+	
+	public List<Task> findAllToRelease(Project project) {
+		return taskRepo.findByProjectAndStateAndParentIsNullAndReleaseIsNull(project, TaskState.CLOSED);
+	}
+
 
 	/**
 	 * @param id

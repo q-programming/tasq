@@ -142,7 +142,7 @@ public class ProjectServiceTest {
 		form.setProject_id(projid);
 		form.setName(name);
 		form.setDescription("Description");
-		form.setAgile_type("SCRUM");
+		form.setAgile("SCRUM");
 		form.setId(1L);
 		return form;
 	}

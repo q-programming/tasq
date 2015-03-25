@@ -84,8 +84,7 @@ public class SprintController {
 			HttpServletRequest request, RedirectAttributes ra) {
 		Project project = projSrv.findByProjectId(id);
 		if (project != null) {
-			if (!project.getParticipants().contains(Utils.getCurrentAccount())
-					&& !Roles.isAdmin()) {
+			if (!projSrv.canEdit(project)) {
 				throw new TasqAuthException(msg);
 			}
 			model.addAttribute("project", project);
@@ -115,8 +114,7 @@ public class SprintController {
 			HttpServletRequest request) {
 		Project project = projSrv.findByProjectId(id);
 		if (project != null) {
-			if (!project.getParticipants().contains(Utils.getCurrentAccount())
-					&& !Roles.isAdmin()) {
+			if (!projSrv.canEdit(project)) {
 				throw new TasqAuthException(msg);
 			}
 			model.addAttribute("project", project);
@@ -152,8 +150,7 @@ public class SprintController {
 	public String createSprint(@PathVariable String id, Model model,
 			HttpServletRequest request, RedirectAttributes ra) {
 		Project project = projSrv.findByProjectId(id);
-		if (!project.getAdministrators().contains(Utils.getCurrentAccount())
-				&& !Roles.isAdmin()) {
+		if (!projSrv.canAdminister(project)) {
 			throw new TasqAuthException(msg);
 		}
 		List<Sprint> sprints = sprintRepo.findByProjectId(project.getId());
@@ -177,8 +174,7 @@ public class SprintController {
 		Sprint sprint = sprintRepo.findById(sprintID);
 		Task task = taskSrv.findById(taskID);
 		Project project = task.getProject();
-		if (!project.getAdministrators().contains(Utils.getCurrentAccount())
-				&& !Roles.isAdmin()) {
+		if (!projSrv.canAdminister(project)) {
 			throw new TasqAuthException(msg);
 		}
 		Hibernate.initialize(task.getSprints());
@@ -214,8 +210,7 @@ public class SprintController {
 			HttpServletRequest request, RedirectAttributes ra) {
 		Task task = taskSrv.findById(taskID);
 		Project project = task.getProject();
-		if (!project.getAdministrators().contains(Utils.getCurrentAccount())
-				&& !Roles.isAdmin()) {
+		if (!projSrv.canAdminister(project)) {
 			throw new TasqAuthException(msg);
 		}
 		Sprint sprint = sprintRepo.findById(sprintID);
@@ -237,8 +232,7 @@ public class SprintController {
 			Model model, HttpServletRequest request, RedirectAttributes ra) {
 		Sprint sprint = sprintRepo.findById(id);
 		Project project = sprint.getProject();
-		if (!project.getAdministrators().contains(Utils.getCurrentAccount())
-				&& !Roles.isAdmin()) {
+		if (!projSrv.canAdminister(project)) {
 			throw new TasqAuthException(msg);
 		}
 		// consider checking if is active?
@@ -271,6 +265,10 @@ public class SprintController {
 			@RequestParam(value = "sprintEnd") String sprintEnd,
 			@RequestParam(value = "sprintStartTime") String sprintStartTime,
 			@RequestParam(value = "sprintEndTime") String sprintEndTime) {
+		Project project = projSrv.findById(projectId);
+		if (!projSrv.canAdminister(project)) {
+			throw new TasqAuthException(msg);
+		}
 		// check if other sprints are not ending when this new is starting
 		List<Sprint> allSprints = sprintRepo.findByProjectId(projectId);
 		sprintStart += " " + sprintStartTime;
@@ -291,7 +289,6 @@ public class SprintController {
 			}
 		}
 		Sprint sprint = sprintRepo.findById(id);
-		Project project = projSrv.findById(projectId);
 		Sprint active = sprintRepo.findByProjectIdAndActiveTrue(projectId);
 		if (sprint != null && !sprint.isActive() && active == null) {
 			if (canEdit(sprint.getProject()) || Roles.isAdmin()) {
@@ -346,6 +343,9 @@ public class SprintController {
 		Sprint sprint = sprintRepo.findById(id);
 		if (sprint != null) {
 			Project project = projSrv.findById(sprint.getProject().getId());
+			if (!projSrv.canAdminister(project)) {
+				throw new TasqAuthException(msg);
+			}
 			if (sprint.isActive()
 					&& (canEdit(sprint.getProject()) || Roles.isAdmin())) {
 				sprint.setActive(false);

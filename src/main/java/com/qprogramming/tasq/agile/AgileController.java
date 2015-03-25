@@ -45,9 +45,9 @@ public class AgileController {
 		if (project != null) {
 			// TODO check if any active sprints, if not redirect to backlog
 			// instead
-			if (project.getAgile_type().equals(Project.AgileType.KANBAN)) {
+			if (project.getAgile().equals(Project.AgileType.KANBAN)) {
 				return "redirect:/" + project.getProjectId() + "/kanban/board";
-			} else if (project.getAgile_type().equals(Project.AgileType.SCRUM)) {
+			} else if (project.getAgile().equals(Project.AgileType.SCRUM)) {
 				// /TODO check for active
 				return "redirect:/" + project.getProjectId() + "/scrum/board";
 			}
