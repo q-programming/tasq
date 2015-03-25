@@ -61,6 +61,11 @@ function fetchEvents(page,term){
 	var url = '<c:url value="/listEvents"/>';
 	$.get(url, {page: page,term:term}, function(data) {
 		$("#loading").remove();
+		console.log(data.content.length);
+		if(data.content.length == 0){
+			var row = '<tr class="eventRow centerPadded"><td colspan="3"><i><s:message code="event.noEvents"/></i></td></tr>';
+			$("#eventsTable").append(row);
+		}
 		for ( var j = 0; j < data.content.length; j++) {
 			var event = data.content[j];
 			var row = '<tr class="eventRow ';
@@ -202,6 +207,8 @@ function printEventsNavigation(page,data){
 										$('tr.eventRow').each(function(i, obj) {
 											obj.remove();
 										});
+										var row = '<tr class="eventRow centerPadded"><td colspan="3"><i><s:message code="event.noEvents"/></i></td></tr>';
+										$("#eventsTable").append(row);
 									}
 								});
 							}
