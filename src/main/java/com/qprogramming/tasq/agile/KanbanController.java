@@ -108,7 +108,7 @@ public class KanbanController {
 			Model model, HttpServletRequest request, RedirectAttributes ra) {
 		Project project = projSrv.findByProjectId(id);
 		if (project != null) {
-			List<Release> releases = releaseRepo.findAll();
+			List<Release> releases = releaseRepo.findByProjectId(project.getId());
 			model.addAttribute("project", project);
 			model.addAttribute("releases", releases);
 		}
