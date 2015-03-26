@@ -538,9 +538,9 @@ public class SprintController {
 		Map<LocalDate, Period> timeBurndownMap = fillTimeMap(wrkList);
 		Map<String, Float> resultsBurned = new LinkedHashMap<String, Float>();
 		for (int i = 0; i < sprintDays; i++) {
-			DateTime date = startTime.plusDays(i);
-			Period value = timeBurndownMap.get(date);
-			if (date.isAfter(DateTime.now())) {
+			LocalDate date = new LocalDate(startTime.plusDays(i));
+			Period value = timeBurndownMap.get(new LocalDate(date));
+			if (date.isAfter(LocalDate.now())) {
 				resultsBurned.put(date.toString(), new Float(0));
 			} else {
 				if (value != null) {
