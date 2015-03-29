@@ -605,7 +605,7 @@ public class SprintController {
 				totalPoints = burned.intValue();
 			}
 		}
-		if (timeTracked) {
+		if (!timeTracked) {
 			data.setTotalPoints(totalPoints);
 		}
 		return data;
