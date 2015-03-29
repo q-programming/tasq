@@ -220,7 +220,7 @@
 			</div>
 		</div>
 		<label class="checkbox" style="display: inherit; font-weight: normal">
-			<input type="checkbox" name="no_estimation" id="no_estimation"
+			<input type="checkbox" name="estimated" id="no_estimation"
 			value="true"> <s:message code="task.withoutEstimation"  />&nbsp;<i class="fa fa-question-circle a-tooltip"
 			data-html="true" title="<s:message  code ="task.withoutEstimation.help" />"
 			data-placement="right"></i>

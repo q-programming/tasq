@@ -307,13 +307,15 @@ public class TaskController {
 			task.setRemaining(estimate);
 		}
 		// TODO allow to change to estimate/not estimated
-		// if (!task.isEstimated().equals(
-		// !Boolean.parseBoolean(taskForm.getNo_estimation()))) {
-		// message.append("Estimated changed to ");
-		// message.append(!Boolean.parseBoolean(taskForm.getNo_estimation()));
-		// message.append(BR);
-		// task.setEstimated(!Boolean.parseBoolean(taskForm.getNo_estimation()));
-		// }
+		boolean notestimated = !taskForm.getEstimated();
+		if (!task.isEstimated().equals(notestimated)) {
+			message.append(changedFromTo("Estimated ", task.getEstimated()
+					.toString(), Boolean.toString(notestimated)));
+			task.setEstimated(notestimated);
+			if (!task.isEstimated()) {
+				task.setStory_points(0);
+			}
+		}
 		// Don't check for SP if task is not estimated TODO allow estimated/not
 		// estimated change
 		if (task.isEstimated()) {
@@ -340,7 +342,7 @@ public class TaskController {
 		LOG.debug(message.toString());
 		taskSrv.save(task);
 		message.append(TABLE_END);
-		if (message.length() > 0) {
+		if (message.length() > 37) {
 			wlSrv.addActivityLog(task, message.toString(), LogType.EDITED);
 		}
 		return "redirect:/task?id=" + taskID;
