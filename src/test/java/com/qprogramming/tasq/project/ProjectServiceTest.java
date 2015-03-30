@@ -26,6 +26,7 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountRepository;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.account.UserService;
 import com.qprogramming.tasq.projects.NewProjectForm;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectRepository;
@@ -40,16 +41,18 @@ public class ProjectServiceTest {
 	private static final String PROJ_ID = "TEST";
 
 	private ProjectService projSrv;
-	
+
 	@Mock
 	private AccountRepository accRepoMomck;
+	@Mock
+	private UserService usrSrvMock;
 
 	@Mock
 	private MockSecurityContext securityMock;
-	
+
 	@Mock
 	private ProjectRepository projRepoMock;
-	
+
 	@Mock
 	private AccountService accSrvMock;
 
@@ -68,7 +71,7 @@ public class ProjectServiceTest {
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
-		projSrv = new ProjectService(projRepoMock, accSrvMock);
+		projSrv = new ProjectService(projRepoMock, accSrvMock, usrSrvMock);
 		testProject = createForm(PROJ_NAME, PROJ_ID).createProject();
 	}
 
@@ -77,6 +80,7 @@ public class ProjectServiceTest {
 		when(projRepoMock.findByName(PROJ_NAME)).thenReturn(testProject);
 		Assert.assertNotNull(projSrv.findByName(PROJ_NAME));
 	}
+
 	@Test
 	public void findByIdTest() {
 		when(projRepoMock.findById(1L)).thenReturn(testProject);
@@ -84,11 +88,13 @@ public class ProjectServiceTest {
 		Assert.assertNotNull(projSrv.findById(1L));
 		Assert.assertNotNull(projSrv.findByProjectId(PROJ_ID));
 	}
+
 	@Test
 	public void saveTest() {
 		projSrv.save(testProject);
-		verify(projRepoMock,times(1)).save(testProject);
+		verify(projRepoMock, times(1)).save(testProject);
 	}
+
 	@Test
 	public void findAllTest() {
 		List<Project> list = new LinkedList<Project>();
@@ -96,6 +102,7 @@ public class ProjectServiceTest {
 		when(projRepoMock.findAll()).thenReturn(list);
 		Assert.assertNotNull(projSrv.findAll());
 	}
+
 	@Test
 	public void findAllByUserTest() {
 		List<Project> list = new LinkedList<Project>();
@@ -104,6 +111,7 @@ public class ProjectServiceTest {
 		Assert.assertNotNull(projSrv.findAllByUser());
 		Assert.assertNotNull(projSrv.findAllByUser(1L));
 	}
+
 	@Test
 	public void findUserActiveProjectTest() {
 		List<Project> list = new LinkedList<Project>();
@@ -112,31 +120,30 @@ public class ProjectServiceTest {
 		when(projRepoMock.findById(1L)).thenReturn(testProject);
 		Assert.assertNotNull(projSrv.findUserActiveProject());
 	}
+
 	@Test
 	public void activateTest() {
 		when(projRepoMock.findById(1L)).thenReturn(testProject);
 		when(projRepoMock.save(testProject)).thenReturn(testProject);
 		Assert.assertNotNull(projSrv.activate(1L));
-		verify(accSrvMock,times(1)).update(testAccount);
+		verify(accSrvMock, times(1)).update(testAccount);
 	}
-	
+
 	@Test
 	public void canEditEmptyTest() {
 		when(projRepoMock.findById(1L)).thenReturn(null);
 		Assert.assertFalse(projSrv.canEdit(1L));
 	}
-	
+
 	@Test
 	public void canEditTest() {
 		when(projRepoMock.findById(1L)).thenReturn(testProject);
 		Assert.assertTrue(projSrv.canEdit(1L));
 		testAccount.setRole(Roles.ROLE_USER);
 		Assert.assertTrue(projSrv.canEdit(1L));
-		
+
 	}
 
-
-	
 	private NewProjectForm createForm(String name, String projid) {
 		NewProjectForm form = new NewProjectForm();
 		form.setProject_id(projid);

@@ -26,6 +26,7 @@ import com.qprogramming.tasq.MockSecurityContext;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.account.UserService;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectRepository;
 import com.qprogramming.tasq.projects.ProjectService;
@@ -51,6 +52,9 @@ public class HomeControllersTest {
 
 	@Mock
 	private AccountService accSrvMock;
+	
+	@Mock
+	private UserService usrSrvMock;
 	
 	@Mock
 	private EventsService eventSrvMock;
@@ -81,7 +85,7 @@ public class HomeControllersTest {
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
-		projSrv = new ProjectService(projRepoMock, accSrvMock);
+		projSrv = new ProjectService(projRepoMock, accSrvMock,usrSrvMock);
 		homeCtrl = new HomeController(taskSrvMock, projSrv);
 		homeAdvCtrl = new HomeControllerAdvice(accSrvMock,eventSrvMock);
 	}
