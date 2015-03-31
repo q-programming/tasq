@@ -64,6 +64,7 @@ import com.qprogramming.tasq.task.comments.CommentsRepository;
 import com.qprogramming.tasq.task.link.TaskLinkService;
 import com.qprogramming.tasq.task.link.TaskLinkType;
 import com.qprogramming.tasq.task.watched.WatchedTaskService;
+import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
@@ -114,7 +115,7 @@ public class TaskController {
 
 	@Autowired
 	private CommentsRepository commRepo;
-
+	
 	@RequestMapping(value = "task/create", method = RequestMethod.GET)
 	public TaskForm startTaskCreate(Model model) {
 		fillCreateTaskModel(model);
@@ -355,7 +356,6 @@ public class TaskController {
 		return showTaskDetails(id, model, ra);
 	}
 
-	@Transactional
 	@RequestMapping(value = "task", method = RequestMethod.GET)
 	public String showTaskDetails(@RequestParam(value = "id") String id,
 			Model model, RedirectAttributes ra) {
@@ -381,14 +381,13 @@ public class TaskController {
 			}
 		}
 		account.setLast_visited_t(clean);
-		accSrv.update(account);
+		account = accSrv.update(account);
 		// TASK
-		Hibernate.initialize(task.getComments());
-		Hibernate.initialize(task.getWorklog());
+		Set<Comment> comments = commRepo.findByTaskIdOrderByDateDesc(id);
 		Map<TaskLinkType, List<DisplayTask>> links = linkService
 				.findTaskLinks(id);
 		if (!task.isSubtask()) {
-			Hibernate.initialize(task.getSprints());
+			
 			List<Task> subtasks = taskSrv.findSubtasks(task);
 			// Add all subtasks into remaining work
 			for (Task subtask : subtasks) {
@@ -400,9 +399,9 @@ public class TaskController {
 						task.getRawRemaining(), subtask.getRawRemaining()));
 			}
 			model.addAttribute("subtasks", subtasks);
-
 		}
 		model.addAttribute("watching", watchSrv.isWatching(task.getId()));
+		model.addAttribute("comments", comments);
 		model.addAttribute("task", task);
 		model.addAttribute("links", links);
 		model.addAttribute("files", getTaskFiles(task));
@@ -977,44 +976,6 @@ public class TaskController {
 			return "redirect:/project?id=" + project.getId();
 		}
 		return "redirect:" + request.getHeader("Referer");
-	}
-
-	@RequestMapping(value = "/getTasks", method = RequestMethod.GET)
-	public @ResponseBody List<DisplayTask> showTasks(
-			@RequestParam Long projectID,
-			@RequestParam(required = false) String taskID,
-			@RequestParam String term, HttpServletResponse response) {
-		response.setContentType("application/json");
-		Project project = projectSrv.findById(projectID);
-		List<Task> allTasks = taskSrv.findAllByProject(project);
-		if (taskID != null) {
-			Task task = taskSrv.findById(taskID);
-			allTasks.remove(task);
-		}
-		List<DisplayTask> result = new ArrayList<DisplayTask>();
-		for (Task task : allTasks) {
-			if (term == null) {
-				result.add(new DisplayTask(task));
-			} else {
-				if (StringUtils.containsIgnoreCase(task.getName(), term)
-						|| StringUtils.containsIgnoreCase(task.getId(), term)) {
-					result.add(new DisplayTask(task));
-				}
-			}
-		}
-		return result;
-	}
-
-	@RequestMapping(value = "/task/getSubTasks", method = RequestMethod.GET)
-	public @ResponseBody List<DisplayTask> showSubTasks(
-			@RequestParam String taskID, HttpServletResponse response) {
-		response.setContentType("application/json");
-		List<Task> allSubTasks = taskSrv.findSubtasks(taskID);
-		List<DisplayTask> result = new ArrayList<DisplayTask>();
-		for (Task task : allSubTasks) {
-			result.add(new DisplayTask(task));
-		}
-		return result;
 	}
 
 	@RequestMapping(value = "/task/attachFiles", method = RequestMethod.POST)

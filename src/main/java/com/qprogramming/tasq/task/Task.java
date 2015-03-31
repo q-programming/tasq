@@ -26,6 +26,7 @@ import com.qprogramming.tasq.agile.Release;
 import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.support.PeriodHelper;
+import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.CommentsSorter;
 import com.qprogramming.tasq.support.sorters.WorkLogSorter;
 import com.qprogramming.tasq.task.comments.Comment;
@@ -51,6 +52,9 @@ public class Task implements java.io.Serializable {
 
 	@Column
 	private Date create_date;
+	
+	@Column
+	private Date lastUpdate;
 
 	@Column
 	private boolean active = false;
@@ -131,8 +135,15 @@ public class Task implements java.io.Serializable {
 	}
 
 	public String getCreate_date() {
-		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
-		return sdf.format(create_date);
+		return Utils.convertDateTimeToString(create_date);
+	}
+
+	public Date getLastUpdate() {
+		return lastUpdate;
+	}
+
+	public void setLastUpdate(Date lastUpdate) {
+		this.lastUpdate = lastUpdate;
 	}
 
 	public boolean isActive() {
@@ -141,8 +152,7 @@ public class Task implements java.io.Serializable {
 
 	public String getDue_date() {
 		if (due_date != null) {
-			SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-			return sdf.format(due_date);
+			return Utils.convertDateToString(due_date);
 		}
 		return "";
 	}

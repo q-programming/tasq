@@ -3,10 +3,13 @@ package com.qprogramming.tasq.task;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.agile.Sprint;
@@ -121,5 +124,12 @@ public class TaskService {
 			resultList.add(new DisplayTask(task));
 		}
 		return resultList;
+	}
+	
+//	@Transactional
+	public Set<Sprint> getTaskSprints(String id){
+		Task task = taskRepo.findById(id);
+		Hibernate.initialize(task.getSprints());
+		return task.getSprints();
 	}
 }

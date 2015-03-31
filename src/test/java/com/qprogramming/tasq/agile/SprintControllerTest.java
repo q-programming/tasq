@@ -115,8 +115,9 @@ public class SprintControllerTest {
 		project.setProjectId(TEST);
 		Set<Account> participants = new HashSet<Account>(createList());
 		project.setParticipants(participants);
+		SprintService sprintSrv = new SprintService(sprintRepoMock);
 		sprintCtrl = new SprintController(projSrvMock, taskSrvMock,
-				sprintRepoMock, wrkLogSrvMock, msgMock);
+				sprintSrv, wrkLogSrvMock, msgMock);
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);

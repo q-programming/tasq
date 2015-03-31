@@ -6,14 +6,12 @@ import org.junit.Test;
 public class AccountClassTest {
 	private static final String LAMB = "Lamb";
 	private static final String ZOE = "Zoe";
-	private static final byte[] avatar = { 1, 2, 3 };
 
 	@Test
 	public void displayAccountTest() {
 		Account account = new Account(ZOE + "@test.com", "", Roles.ROLE_USER);
 		account.setName(ZOE);
 		account.setSurname(LAMB);
-		account.setAvatar(avatar);
 		account.setId(1L);
 		DisplayAccount disp = new DisplayAccount(account);
 		DisplayAccount disp2 = new DisplayAccount(account);
@@ -31,12 +29,10 @@ public class AccountClassTest {
 		Account account = new Account(ZOE + "@test.com", "", Roles.ROLE_USER);
 		account.setName(ZOE);
 		account.setSurname(LAMB);
-		account.setAvatar(avatar);
 		account.setId(1L);
 		Account account2 = new Account(ZOE + "@test.com", "", Roles.ROLE_USER);
 		account2.setName(ZOE);
 		account2.setSurname(LAMB);
-		account2.setAvatar(avatar);
 		account2.setId(1L);
 		Assert.assertEquals(account, account2);
 		Assert.assertEquals(account.hashCode(), account2.hashCode());

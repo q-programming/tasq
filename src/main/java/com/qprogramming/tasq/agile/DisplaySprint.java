@@ -184,4 +184,8 @@ public class DisplaySprint implements Comparable<DisplaySprint> {
 		}
 		return true;
 	}
+	@Override
+	public String toString() {
+		return "Sprint " + getSprintNo() ;
+	}
 }

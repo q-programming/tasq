@@ -18,6 +18,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.task.Task;
 
 @Entity
@@ -50,8 +51,6 @@ public class Comment implements Serializable {
 	@JoinColumn(name = "task_comments")
 	private Task task;
 
-	SimpleDateFormat sdf = new SimpleDateFormat("dd.M.yyyy HH:mm");
-
 	public Long getId() {
 		return id;
 	}
@@ -77,7 +76,7 @@ public class Comment implements Serializable {
 	}
 
 	public String getDate() {
-		return sdf.format(date);
+		return Utils.convertDateTimeToString(date);
 	}
 
 	public Date getRawDate() {
@@ -90,7 +89,7 @@ public class Comment implements Serializable {
 
 	public String getDate_edited() {
 		if (date_edited != null) {
-			return sdf.format(date_edited);
+			return Utils.convertDateTimeToString(date_edited);
 		} else {
 			return null;
 		}
