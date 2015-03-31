@@ -194,6 +194,11 @@ public class SprintController {
 		}
 		task.addSprint(sprint);
 		taskSrv.save(task);
+		List<Task> subtasks = taskSrv.findSubtasks(task);
+		for (Task subtask : subtasks) {
+			subtask.addSprint(sprint);
+			taskSrv.save(subtask);
+		}
 		MessageHelper.addSuccessAttribute(
 				ra,
 				msg.getMessage("agile.task2Sprint", new Object[] {
@@ -220,6 +225,11 @@ public class SprintController {
 		Hibernate.initialize(task.getSprints());
 		task.removeSprint(sprint);
 		taskSrv.save(task);
+		List<Task> subtasks = taskSrv.findSubtasks(task);
+		for (Task subtask : subtasks) {
+			subtask.removeSprint(sprint);
+			taskSrv.save(subtask);
+		}
 		MessageHelper.addSuccessAttribute(ra, msg.getMessage(
 				"agile.taskRemoved", new Object[] { task.getId() },
 				Utils.getCurrentLocale()));

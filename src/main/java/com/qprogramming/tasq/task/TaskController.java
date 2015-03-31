@@ -523,11 +523,14 @@ public class TaskController {
 		subTask.setParent(task.getId());
 		subTask.setProject(project);
 		task.addSubTask();
-
 		// assigne
 		if (taskForm.getAssignee() != null) {
 			Account assignee = accSrv.findById(taskForm.getAssignee());
 			subTask.setAssignee(assignee);
+		}
+		if(task.isInSprint()){
+			Hibernate.initialize(task.getSprints());
+			//TODO add to sprint
 		}
 		Hibernate.initialize(task.getSubtasks());
 		taskSrv.save(subTask);
