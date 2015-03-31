@@ -134,16 +134,31 @@
 							code="task.estimate.help.pattern" /> </span>
 				</c:if>
 			</div>
-			<c:if test="${task.estimated}">
-			<div>
+			
+			<div id="storyPoints" <c:if test="${not task.estimated}">style="display:none"</c:if>>
 				<label><s:message code="task.storyPoints" /></label>
 				<form:input path="story_points" class="form-control"
 					style="width:150px" />
 				<span class="help-block"><s:message
 						code="task.storyPoints.help" /></span>
 			</div>
-			</c:if>
+			
 		</div>
+			<c:if test="${not task.inSprint}">
+				<c:if test="${not task.estimated}">
+					<c:set var="checked">
+						checked="checked" 
+					</c:set>
+				</c:if>
+				<label class="checkbox" style="display: inherit; font-weight: normal">
+					<input type="checkbox" name="estimated" id="estimated" ${checked}/>
+					<s:message code="task.withoutEstimation"  />&nbsp;
+					<i class="fa fa-question-circle a-tooltip"
+						data-html="true" title="<s:message  code ="task.withoutEstimation.help" />"
+						data-placement="right">
+					</i>
+				</label>
+			</c:if>
 		<div>
 			<div class="mod-header">
 				<h5 class="mod-header-title">
@@ -168,6 +183,20 @@
 </div>
 <script>
 	$(document).ready(function($) {
+		
+		$("#estimated").click(function() {
+			toggleEstimation();
+		});
+		
+		function toggleEstimation(){
+			if($("#estimated").prop("checked") == true){
+				$('#storyPoints').slideUp("slow");
+				$("#story_points").val("");
+			}else{
+				$('#storyPoints').slideDown("slow");
+			}
+		}
+		
 		var btnsGrps = jQuery.trumbowyg.btnsGrps;
 		$('#description').trumbowyg({
 			lang: '${user.language}',

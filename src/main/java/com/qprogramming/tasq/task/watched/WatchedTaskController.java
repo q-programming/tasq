@@ -64,19 +64,6 @@ public class WatchedTaskController {
 	}
 
 	/**
-	 * Returns int how many accounts is currently watching task with id
-	 * 
-	 * @param id
-	 * @return
-	 */
-	@RequestMapping(value = "/task/watchersCount", method = RequestMethod.GET)
-	@ResponseBody
-	public int watchersCount(@RequestParam(value = "id") String id) {
-		WatchedTask watched = watchSrv.getByTask(id);
-		return watched != null ? watched.getWatchers().size() : 0;
-	}
-
-	/**
 	 * Get list of all tasks watched by currently logged user
 	 * 
 	 * @param model

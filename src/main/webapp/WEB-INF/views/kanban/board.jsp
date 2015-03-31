@@ -1,91 +1,43 @@
-<%@page import="com.qprogramming.tasq.task.TaskPriority"%>
-<%@page import="com.qprogramming.tasq.task.TaskState"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
-<%@ taglib prefix="security"
-	uri="http://www.springframework.org/security/tags"%>
-<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
-<%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
-<%@ taglib prefix="myfn" uri="/WEB-INF/tags/custom.tld"%>
 <c:set var="tasks_text">
 	<s:message code="task.tasks" text="Tasks" />
 </c:set>
 <c:set var="taskDesc_text">
-	<s:message code="task.description" text="Description" />
+	<s:message code="task.description" text="Description" arguments="" />
 </c:set>
-<security:authentication property="principal" var="user" />
-<c:if test="${myfn:contains(project.participants,user) && user.isUser || is_admin}">
-	<c:set var="can_edit" value="true" />
-</c:if>
-<h4>Kanban Board</h4>
-<div class="white-frame" style="display: table; width: 100%;height:85vh">
-	<div class="table_state" data-state="TO_DO">
-		<div><h4><s:message code="task.state.todo"/></h4></div>
-		<c:forEach items="${tasks}" var="task">
-			<c:if test="${task.state eq 'TO_DO'}">
-				<t:card task="${task}" can_edit="${can_edit}"/>
-			</c:if>
-		</c:forEach>
+<h3>[${project.projectId}] ${project}</h3>
+<div class="white-frame"
+	style="display: table; width: 100%; height: 85vh">
+	<div style="display: table-caption; margin-left: 10px;">
+		<ul class="nav nav-tabs" style="border-bottom: 0">
+			<li class="active"><a style="color: black" href="#"><i
+					class="fa fa-list-alt"></i> <s:message code="agile.board" /></a></li>
+			<li><a style="color: black"
+				href="<c:url value="/${project.projectId}/kanban/reports"/>"><i
+					class="fa fa-line-chart"></i> <s:message code="agile.reports" /></a></li>
+		</ul>
 	</div>
-	<div class="table_state" data-state="ONGOING">
-		<div><h4><s:message code="task.state.ongoing"/></h4></div>
-		<c:forEach items="${tasks}" var="task">
-			<c:if test="${task.state eq 'ONGOING'}">
-				<t:card task="${task}" can_edit="${can_edit}"/>
-			</c:if>
-		</c:forEach>
+	<div style="display: table-header-group;">
+		<div style="display: table-cell; padding-bottom: 30px;">
+			<span class="btn btn-default pull-left" id="new release" data-toggle="modal" data-target="#releaseModal">
+				<i class="fa fa-clipboard"></i>&nbsp;New release</span>
+		</div>
+		<div style="display: table-cell"></div>
+		<div style="display: table-cell"></div>
+		<div style="display: table-cell"></div>
+		<div style="display: table-cell"></div>
+		<div style="display: table-cell"></div>
+		<div style="display: table-cell">
+			<span class="btn btn-default pull-right" id="save_order"
+				style="display: none"><i class="fa fa-floppy-o"></i>&nbsp;Save
+				order</span>
+		</div>
 	</div>
-	<div class="table_state" data-state="CLOSED">
-		<div><h4><s:message code="task.state.closed"/></h4></div>
-		<c:forEach items="${tasks}" var="task">
-			<c:if test="${task.state eq 'CLOSED'}">
-				<t:card task="${task}" can_edit="${can_edit}"/>
-			</c:if>
-		</c:forEach>
-	</div>
-	<div class="table_state" data-state="BLOCKED">
-		<div><h4><s:message code="task.state.blocked"/></h4></div>
-		<c:forEach items="${tasks}" var="task">
-			<c:if test="${task.state eq 'BLOCKED'}">
-				<t:card task="${task}" can_edit="${can_edit}"/>
-			</c:if>
-		</c:forEach>
-	</div>
+	<jsp:include page="../agile/board.jsp" />
 </div>
-<script>
-	$(document).ready(function($) {
-		$("#assign_me").click(function(){
-			var current_email = "${user.email}";
-			$("#assign").append('<input type="hidden" name="email" value=' + current_email + '>');
-        	$("#assign").submit();
-		});
+<jsp:include page="../modals/logWork.jsp" />
+<jsp:include page="../modals/close.jsp" />
+<jsp:include page="../modals/assign.jsp" />
+<jsp:include page="../modals/release.jsp" />
 
-		$(".agile-card").draggable({
-		    	revert: 'invalid',
-		    	cursor: 'move'
-		});
-		$( ".table_state" ).droppable({
-		      activeClass: "state_default",
-		      hoverClass: "state_hover",
-		      drop: function( event, ui ) {
-		    	  //event on drop
-		    	 var taskID = ui.draggable.attr("id");
-		    	 var state = $(this).data('state');
-		    	 if($("#state_" + taskID).val() != state){
-			    	 if(state == 'CLOSED'){
-		    		 	alert("closing");
-		    	 	}
-		    	 	$("#state_" + taskID).val(state);
-		    	 	$("#state_form_"+taskID).submit();
-		    	 }
-		    	 
-		      },
-		      accept: function(dropElem) {
-		    	  	var taskID = dropElem.attr("id");
-		    	  	var state = $(this).data('state');
-		    	  	return $("#state_" + taskID).val() != state;
-		    	  	
-		    	  }
-		    });
-	});
-</script>

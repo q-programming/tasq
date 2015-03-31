@@ -21,6 +21,7 @@ import org.joda.time.Period;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.support.PeriodHelper;
+import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.task.Task;
 
 /**
@@ -74,8 +75,7 @@ public class WorkLog implements Serializable {
 	}
 
 	public String getTime() {
-		SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-		return sdf.format(time);
+		return Utils.convertDateTimeToString(time);
 	}
 
 	/**
@@ -115,8 +115,7 @@ public class WorkLog implements Serializable {
 	}
 
 	public String getTimeLogged() {
-		SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-		return sdf.format(timeLogged);
+		return Utils.convertDateTimeToString(timeLogged);
 	}
 
 	public Date getRawTimeLogged() {

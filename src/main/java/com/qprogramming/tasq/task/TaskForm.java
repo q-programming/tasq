@@ -44,16 +44,16 @@ public class TaskForm {
 
 	private String story_points;
 
-	private String no_estimation;
+	private Boolean estimated;
 
 	private String remaining;
 
 	private String due_date;
-	
+
 	private Long addToSprint;
-	
+
 	private Long assignee;
-	
+
 	private List<MultipartFile> files;
 
 	public TaskForm() {
@@ -64,7 +64,7 @@ public class TaskForm {
 		setName(task.getName());
 		setProject(task.getProject().getId());
 		setDescription(task.getDescription());
-		setNo_estimation(task.isEstimated().toString());
+		setEstimated(task.isEstimated());
 		setEstimate(task.getEstimate());
 		setStory_points(task.getStory_points() != null ? task.getStory_points()
 				.toString() : "");
@@ -93,7 +93,6 @@ public class TaskForm {
 		subTask.setType(TaskType.toType(getType()));
 		return subTask;
 	}
-	
 
 	private Task createBaseTask(Task task) {
 		task.setName(getName());
@@ -103,7 +102,7 @@ public class TaskForm {
 		}
 		task.setDescription(getDescription());
 		task.setState(TaskState.TO_DO);
-		boolean estimated = !Boolean.parseBoolean(getNo_estimation());
+		boolean estimated = getEstimated();
 		Period p = PeriodHelper.inFormat(getEstimate());
 		task.setEstimate(p);
 		task.setRemaining(p);
@@ -174,12 +173,12 @@ public class TaskForm {
 		this.story_points = String.valueOf(story_points.intValue());
 	}
 
-	public String getNo_estimation() {
-		return no_estimation;
+	public Boolean getEstimated() {
+		return estimated != null ? estimated : false;
 	}
 
-	public void setNo_estimation(String no_estimation) {
-		this.no_estimation = no_estimation;
+	public void setEstimated(Boolean no_estimation) {
+		this.estimated = no_estimation;
 	}
 
 	public String getRemaining() {

@@ -21,7 +21,7 @@ public class NewProjectForm {
 	@NotBlank(message = NOT_BLANK_MESSAGE)
 	private String description;
 	
-	private String agile_type;
+	private String agile;
 
 	public NewProjectForm() {
 		// TODO Auto-generated constructor stub
@@ -39,7 +39,7 @@ public class NewProjectForm {
 		project.setProjectId(getProject_id().toUpperCase());
 		project.setDefault_priority(TaskPriority.MAJOR);
 		project.setDefault_type(TaskType.TASK);
-		project.setAgile_type(agile_type);
+		project.setAgile(agile);
 		return project;
 	}
 
@@ -75,12 +75,12 @@ public class NewProjectForm {
 		this.project_id = project_id;
 	}
 
-	public String getAgile_type() {
-		return agile_type;
+	public String getAgile() {
+		return agile;
 	}
 
-	public void setAgile_type(String agile_type) {
-		this.agile_type = agile_type;
+	public void setAgile(String agile_type) {
+		this.agile = agile_type;
 	}
 
 }

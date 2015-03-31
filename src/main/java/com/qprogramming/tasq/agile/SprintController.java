@@ -64,17 +64,17 @@ public class SprintController {
 
 	private ProjectService projSrv;
 	private TaskService taskSrv;
-	private SprintRepository sprintRepo;
+	private SprintService sprintSrv;
 	private WorkLogService wrkLogSrv;
 	private MessageSource msg;
 
 	@Autowired
 	public SprintController(ProjectService prjSrv, TaskService taskSrv,
-			SprintRepository sprintRepo, WorkLogService wrkLogSrv,
+			SprintService sprintSrv, WorkLogService wrkLogSrv,
 			MessageSource msg) {
 		this.projSrv = prjSrv;
 		this.taskSrv = taskSrv;
-		this.sprintRepo = sprintRepo;
+		this.sprintSrv = sprintSrv;
 		this.wrkLogSrv = wrkLogSrv;
 		this.msg = msg;
 	}
@@ -84,12 +84,11 @@ public class SprintController {
 			HttpServletRequest request, RedirectAttributes ra) {
 		Project project = projSrv.findByProjectId(id);
 		if (project != null) {
-			if (!project.getParticipants().contains(Utils.getCurrentAccount())
-					&& !Roles.isAdmin()) {
+			if (!projSrv.canEdit(project)) {
 				throw new TasqAuthException(msg);
 			}
 			model.addAttribute("project", project);
-			Sprint sprint = sprintRepo.findByProjectIdAndActiveTrue(project
+			Sprint sprint = sprintSrv.findByProjectIdAndActiveTrue(project
 					.getId());
 			if (sprint == null) {
 				MessageHelper.addWarningAttribute(
@@ -98,14 +97,10 @@ public class SprintController {
 								Utils.getCurrentLocale()));
 				return "redirect:/" + project.getProjectId() + "/scrum/backlog";
 			}
-			List<Task> taskList = new LinkedList<Task>();
-			List<DisplayTask> resultList = new LinkedList<DisplayTask>();
-			taskList = taskSrv.findAllBySprint(sprint);
-			for (Task task : taskList) {
-				resultList.add(new DisplayTask(task));
-			}
+			List<Task> taskList = taskSrv.findAllBySprint(sprint);
 			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ORDER,
-					false));
+					true));
+			List<DisplayTask> resultList = taskSrv.convertToDisplay(taskList);
 			model.addAttribute("sprint", sprint);
 			model.addAttribute("tasks", resultList);
 			return "/scrum/board";
@@ -119,19 +114,18 @@ public class SprintController {
 			HttpServletRequest request) {
 		Project project = projSrv.findByProjectId(id);
 		if (project != null) {
-			if (!project.getParticipants().contains(Utils.getCurrentAccount())
-					&& !Roles.isAdmin()) {
+			if (!projSrv.canEdit(project)) {
 				throw new TasqAuthException(msg);
 			}
 			model.addAttribute("project", project);
 			// Don't show closed tasks in backlog view
 			List<Task> taskList = taskSrv.findAllByProject(project);
-			Collections.sort(taskList, new TaskSorter(
-					TaskSorter.SORTBY.ORDER, true));
+			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ORDER,
+					true));
 			List<DisplayTask> resultList = DisplayTask
 					.convertToDisplayTasks(taskList);
 			Map<Sprint, List<DisplayTask>> sprint_result = new LinkedHashMap<Sprint, List<DisplayTask>>();
-			List<Sprint> sprintList = sprintRepo.findByProjectIdAndFinished(
+			List<Sprint> sprintList = sprintSrv.findByProjectIdAndFinished(
 					project.getId(), false);
 			Collections.sort(sprintList, new SprintSorter());
 			// Assign tasks to sprints in order to display them
@@ -156,15 +150,14 @@ public class SprintController {
 	public String createSprint(@PathVariable String id, Model model,
 			HttpServletRequest request, RedirectAttributes ra) {
 		Project project = projSrv.findByProjectId(id);
-		if (!project.getAdministrators().contains(Utils.getCurrentAccount())
-				&& !Roles.isAdmin()) {
+		if (!projSrv.canAdminister(project)) {
 			throw new TasqAuthException(msg);
 		}
-		List<Sprint> sprints = sprintRepo.findByProjectId(project.getId());
+		List<Sprint> sprints = sprintSrv.findByProjectId(project.getId());
 		Sprint sprint = new Sprint();
 		sprint.setProject(project);
 		sprint.setSprint_no((long) sprints.size() + 1);
-		sprintRepo.save(sprint);
+		sprintSrv.save(sprint);
 		MessageHelper.addSuccessAttribute(
 				ra,
 				msg.getMessage("agile.createdSprint", null,
@@ -178,11 +171,10 @@ public class SprintController {
 			@RequestParam(value = "taskID") String taskID,
 			@RequestParam(value = "sprintID") Long sprintID,
 			HttpServletRequest request, RedirectAttributes ra) {
-		Sprint sprint = sprintRepo.findById(sprintID);
+		Sprint sprint = sprintSrv.findById(sprintID);
 		Task task = taskSrv.findById(taskID);
 		Project project = task.getProject();
-		if (!project.getAdministrators().contains(Utils.getCurrentAccount())
-				&& !Roles.isAdmin()) {
+		if (!projSrv.canAdminister(project)) {
 			throw new TasqAuthException(msg);
 		}
 		Hibernate.initialize(task.getSprints());
@@ -202,6 +194,11 @@ public class SprintController {
 		}
 		task.addSprint(sprint);
 		taskSrv.save(task);
+		List<Task> subtasks = taskSrv.findSubtasks(task);
+		for (Task subtask : subtasks) {
+			subtask.addSprint(sprint);
+			taskSrv.save(subtask);
+		}
 		MessageHelper.addSuccessAttribute(
 				ra,
 				msg.getMessage("agile.task2Sprint", new Object[] {
@@ -218,17 +215,21 @@ public class SprintController {
 			HttpServletRequest request, RedirectAttributes ra) {
 		Task task = taskSrv.findById(taskID);
 		Project project = task.getProject();
-		if (!project.getAdministrators().contains(Utils.getCurrentAccount())
-				&& !Roles.isAdmin()) {
+		if (!projSrv.canAdminister(project)) {
 			throw new TasqAuthException(msg);
 		}
-		Sprint sprint = sprintRepo.findById(sprintID);
+		Sprint sprint = sprintSrv.findById(sprintID);
 		if (sprint.isActive()) {
 			wrkLogSrv.addActivityLog(task, null, LogType.TASKSPRINTREMOVE);
 		}
 		Hibernate.initialize(task.getSprints());
 		task.removeSprint(sprint);
 		taskSrv.save(task);
+		List<Task> subtasks = taskSrv.findSubtasks(task);
+		for (Task subtask : subtasks) {
+			subtask.removeSprint(sprint);
+			taskSrv.save(subtask);
+		}
 		MessageHelper.addSuccessAttribute(ra, msg.getMessage(
 				"agile.taskRemoved", new Object[] { task.getId() },
 				Utils.getCurrentLocale()));
@@ -239,10 +240,9 @@ public class SprintController {
 	@RequestMapping(value = "/scrum/delete", method = RequestMethod.GET)
 	public String deleteSprint(@RequestParam(value = "id") Long id,
 			Model model, HttpServletRequest request, RedirectAttributes ra) {
-		Sprint sprint = sprintRepo.findById(id);
+		Sprint sprint = sprintSrv.findById(id);
 		Project project = sprint.getProject();
-		if (!project.getAdministrators().contains(Utils.getCurrentAccount())
-				&& !Roles.isAdmin()) {
+		if (!projSrv.canAdminister(project)) {
 			throw new TasqAuthException(msg);
 		}
 		// consider checking if is active?
@@ -258,7 +258,7 @@ public class SprintController {
 				}
 			}
 		}
-		sprintRepo.delete(sprint);
+		sprintSrv.delete(sprint);
 		MessageHelper.addSuccessAttribute(
 				ra,
 				msg.getMessage("agile.sprint.removed", null,
@@ -272,20 +272,25 @@ public class SprintController {
 	public ResultData startSprint(@RequestParam(value = "sprintID") Long id,
 			@RequestParam(value = "projectID") Long projectId,
 			@RequestParam(value = "sprintStart") String sprintStart,
-			@RequestParam(value = "sprintEnd") String sprintEnd, 
+			@RequestParam(value = "sprintEnd") String sprintEnd,
 			@RequestParam(value = "sprintStartTime") String sprintStartTime,
 			@RequestParam(value = "sprintEndTime") String sprintEndTime) {
+		Project project = projSrv.findById(projectId);
+		if (!projSrv.canAdminister(project)) {
+			throw new TasqAuthException(msg);
+		}
 		// check if other sprints are not ending when this new is starting
-		List<Sprint> allSprints = sprintRepo.findByProjectId(projectId);
-		sprintStart+= " " +  sprintStartTime;
-		sprintEnd+= " " +  sprintEndTime;
+		List<Sprint> allSprints = sprintSrv.findByProjectId(projectId);
+		sprintStart += " " + sprintStartTime;
+		sprintEnd += " " + sprintEndTime;
 		Date startDate = Utils.convertStringToDateAndTime(sprintStart);
 		Date endDate = Utils.convertStringToDateAndTime(sprintEnd);
 		for (Sprint sprint : allSprints) {
 			if (sprint.getRawEnd_date() != null) {
 				DateTime sprintEndDate = new DateTime(sprint.getRawEnd_date());
 				DateTime sprintStartDate = new DateTime(startDate);
-				if (sprintEndDate.equals(sprintStartDate) || sprintStartDate.isBefore(sprintEndDate)) {
+				if (sprintEndDate.equals(sprintStartDate)
+						|| sprintStartDate.isBefore(sprintEndDate)) {
 					return new ResultData(ResultData.WARNING, msg.getMessage(
 							"agile.sprint.startOnEnd",
 							new Object[] { sprint.getSprintNo(), sprintStart },
@@ -293,9 +298,8 @@ public class SprintController {
 				}
 			}
 		}
-		Sprint sprint = sprintRepo.findById(id);
-		Project project = projSrv.findById(projectId);
-		Sprint active = sprintRepo.findByProjectIdAndActiveTrue(projectId);
+		Sprint sprint = sprintSrv.findById(id);
+		Sprint active = sprintSrv.findByProjectIdAndActiveTrue(projectId);
 		if (sprint != null && !sprint.isActive() && active == null) {
 			if (canEdit(sprint.getProject()) || Roles.isAdmin()) {
 				Period total_estimate = new Period();
@@ -330,7 +334,7 @@ public class SprintController {
 				sprint.setStart_date(startDate);
 				sprint.setEnd_date(endDate);
 				sprint.setActive(true);
-				sprintRepo.save(sprint);
+				sprintSrv.save(sprint);
 				wrkLogSrv.addWorkLogNoTask(null, project, LogType.SPRINT_START);
 				return new ResultData(ResultData.OK, msg.getMessage(
 						"agile.sprint.started",
@@ -346,9 +350,12 @@ public class SprintController {
 	@RequestMapping(value = "/scrum/stop", method = RequestMethod.GET)
 	public String finishSprint(@RequestParam(value = "id") Long id,
 			HttpServletRequest request, RedirectAttributes ra) {
-		Sprint sprint = sprintRepo.findById(id);
+		Sprint sprint = sprintSrv.findById(id);
 		if (sprint != null) {
 			Project project = projSrv.findById(sprint.getProject().getId());
+			if (!projSrv.canAdminister(project)) {
+				throw new TasqAuthException(msg);
+			}
 			if (sprint.isActive()
 					&& (canEdit(sprint.getProject()) || Roles.isAdmin())) {
 				sprint.setActive(false);
@@ -377,7 +384,7 @@ public class SprintController {
 				}
 				MessageHelper.addSuccessAttribute(ra, message.toString());
 				wrkLogSrv.addWorkLogNoTask(null, project, LogType.SPRINT_STOP);
-				sprintRepo.save(sprint);
+				sprintSrv.save(sprint);
 			}
 		}
 		return "redirect:" + request.getHeader("Referer");
@@ -391,7 +398,7 @@ public class SprintController {
 		Project project = projSrv.findByProjectId(id);
 		if (project != null) {
 			if (sprintNo != null) {
-				Sprint sprint = sprintRepo.findByProjectIdAndSprintNo(
+				Sprint sprint = sprintSrv.findByProjectIdAndSprintNo(
 						project.getId(), sprintNo);
 				if (sprint.getRawEnd_date() == null & !sprint.isActive()) {
 					MessageHelper.addWarningAttribute(ra,
@@ -402,10 +409,10 @@ public class SprintController {
 							+ "/scrum/backlog";
 				}
 			}
-			Sprint lastSprint = sprintRepo.findByProjectIdAndActiveTrue(project
+			Sprint lastSprint = sprintSrv.findByProjectIdAndActiveTrue(project
 					.getId());
 			if (lastSprint == null) {
-				List<Sprint> sprints = sprintRepo.findByProjectId(project
+				List<Sprint> sprints = sprintSrv.findByProjectId(project
 						.getId());
 				if (sprints.isEmpty()) {
 					MessageHelper.addWarningAttribute(ra, msg.getMessage(
@@ -446,13 +453,12 @@ public class SprintController {
 	 * @return
 	 */
 	@RequestMapping(value = "/{id}/sprint-data", method = RequestMethod.GET, produces = "application/json")
-	public @ResponseBody
-	SprintData showBurndownChart(@PathVariable String id,
+	public @ResponseBody SprintData showBurndownChart(@PathVariable String id,
 			@RequestParam(value = "sprint") Long sprintNo) {
 		SprintData result = new SprintData();
 		Project project = projSrv.findByProjectId(id);
 		if (project != null) {
-			Sprint sprint = sprintRepo.findByProjectIdAndSprintNo(
+			Sprint sprint = sprintSrv.findByProjectIdAndSprintNo(
 					project.getId(), sprintNo);
 			if (sprint == null
 					|| (sprint.getRawEnd_date() == null & !sprint.isActive())) {
@@ -462,7 +468,7 @@ public class SprintController {
 				return result;
 			}
 			// Fill maps based on time or story point driven board
-			
+
 			DateTime startTime = new DateTime(sprint.getRawStart_date());
 			DateTime endTime = new DateTime(sprint.getRawEnd_date());
 			boolean timeTracked = project.getTimeTracked();
@@ -485,16 +491,12 @@ public class SprintController {
 	}
 
 	@RequestMapping(value = "/getSprints", method = RequestMethod.GET)
-	public @ResponseBody
-	List<DisplaySprint> showProjectSprints(@RequestParam Long projectID,
-			HttpServletResponse response) {
+	public @ResponseBody List<DisplaySprint> showProjectSprints(
+			@RequestParam Long projectID, HttpServletResponse response) {
 		response.setContentType("application/json");
-		List<DisplaySprint> result = new LinkedList<DisplaySprint>();
-		List<Sprint> projectSprints = sprintRepo.findByProjectIdAndFinished(
+		List<Sprint> projectSprints = sprintSrv.findByProjectIdAndFinished(
 				projectID, false);
-		for (Sprint sprint : projectSprints) {
-			result.add(new DisplaySprint(sprint));
-		}
+		List<DisplaySprint> result = sprintSrv.convertToDisplay(projectSprints);
 		Collections.sort(result);
 		return result;
 	}
@@ -507,13 +509,13 @@ public class SprintController {
 	 * @return
 	 */
 	@RequestMapping(value = "/scrum/isActive", method = RequestMethod.GET)
-	public @ResponseBody
-	boolean checkIfActive(@RequestParam(value = "id") Long sprintID,
+	public @ResponseBody boolean checkIfActive(
+			@RequestParam(value = "id") Long sprintID,
 			HttpServletResponse response) {
-		Sprint sprint = sprintRepo.findById(sprintID);
+		Sprint sprint = sprintSrv.findById(sprintID);
 		return sprint.isActive();
 	}
-	
+
 	/**
 	 * Checks if task is properly estimated based on project settings (
 	 * Estimated time not 0m for time based or story points not 0 for story
@@ -543,9 +545,9 @@ public class SprintController {
 		Map<LocalDate, Period> timeBurndownMap = fillTimeMap(wrkList);
 		Map<String, Float> resultsBurned = new LinkedHashMap<String, Float>();
 		for (int i = 0; i < sprintDays; i++) {
-			DateTime date = startTime.plusDays(i);
-			Period value = timeBurndownMap.get(date);
-			if (date.isAfter(DateTime.now())) {
+			LocalDate date = new LocalDate(startTime.plusDays(i));
+			Period value = timeBurndownMap.get(new LocalDate(date));
+			if (date.isAfter(LocalDate.now())) {
 				resultsBurned.put(date.toString(), new Float(0));
 			} else {
 				if (value != null) {
@@ -610,7 +612,7 @@ public class SprintController {
 				totalPoints = burned.intValue();
 			}
 		}
-		if (timeTracked) {
+		if (!timeTracked) {
 			data.setTotalPoints(totalPoints);
 		}
 		return data;

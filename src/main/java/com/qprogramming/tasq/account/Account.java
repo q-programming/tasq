@@ -67,9 +67,6 @@ public class Account implements java.io.Serializable, UserDetails {
 	private Roles role;
 
 	@Column
-	private byte[] avatar;
-
-	@Column
 	private String uuid;
 
 	@Column
@@ -206,10 +203,6 @@ public class Account implements java.io.Serializable, UserDetails {
 		return new SimpleGrantedAuthority(role.toString());
 	}
 
-	public byte[] getAvatar() {
-		return avatar;
-	}
-
 	public void setLast_visited_t(List<Task> last_visited) {
 		this.last_visited_t = last_visited;
 	}
@@ -225,11 +218,6 @@ public class Account implements java.io.Serializable, UserDetails {
 	public void setLast_visited_p(List<Project> last_visited_p) {
 		this.last_visited_p = last_visited_p;
 	}
-
-	public void setAvatar(byte[] avatar) {
-		this.avatar = avatar;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 

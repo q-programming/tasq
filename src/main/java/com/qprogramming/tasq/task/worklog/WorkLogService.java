@@ -80,6 +80,7 @@ public class WorkLogService {
 				loggedTask.setRemaining(remaining);
 			}
 			loggedTask.addLoggedWork(activity);
+			loggedTask.setLastUpdate(new Date());
 			taskSrv.save(checkState(loggedTask));
 			eventSrv.addWatchEvent(wl, PeriodHelper.outFormat(activity), when);
 		}
@@ -100,6 +101,7 @@ public class WorkLogService {
 			wl = wlRepo.save(wl);
 			Hibernate.initialize(loggedTask.getWorklog());
 			loggedTask.addWorkLog(wl);
+			loggedTask.setLastUpdate(new Date());
 			taskSrv.save(loggedTask);
 			eventSrv.addWatchEvent(wl, msg, when);
 		}
@@ -125,6 +127,7 @@ public class WorkLogService {
 			wl = wlRepo.save(wl);
 			Hibernate.initialize(loggedTask.getWorklog());
 			loggedTask.addWorkLog(wl);
+			loggedTask.setLastUpdate(new Date());
 			taskSrv.save(task);
 			eventSrv.addWatchEvent(wl, msg, new Date());
 		}
@@ -147,6 +150,7 @@ public class WorkLogService {
 			wl = wlRepo.save(wl);
 			Hibernate.initialize(loggedTask.getWorklog());
 			loggedTask.addWorkLog(wl);
+			loggedTask.setLastUpdate(new Date());
 			taskSrv.save(loggedTask);
 			eventSrv.addWatchEvent(wl, PeriodHelper.outFormat(activity),
 					new Date());
@@ -178,6 +182,7 @@ public class WorkLogService {
 			loggedTask.addWorkLog(wl);
 			loggedTask.reduceRemaining(activity);
 			loggedTask.addLoggedWork(activity);
+			loggedTask.setLastUpdate(new Date());
 			if (!type.equals(LogType.ESTIMATE)) {
 				taskSrv.save(checkState(loggedTask));
 			} else {
@@ -285,5 +290,11 @@ public class WorkLogService {
 						|| type.equals(LogType.ESTIMATE)
 						|| type.equals(LogType.CLOSED) || type
 							.equals(LogType.REOPEN));
+	}
+
+	public List<DisplayWorkLog> getTaskEvents(String id) {
+		return packIntoDisplay(wlRepo
+				.findByWorklogtaskIdOrderByTimeLoggedDesc(id));
+
 	}
 }

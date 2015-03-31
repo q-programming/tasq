@@ -61,8 +61,8 @@ public class AccountService {
 	 * @param account
 	 */
 	@Transactional
-	public void update(Account account) {
-		accRepo.save(account);
+	public Account update(Account account) {
+		return accRepo.save(account);
 	}
 
 	public Account findById(Long id) {

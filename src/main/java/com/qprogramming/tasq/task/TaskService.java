@@ -1,11 +1,15 @@
 package com.qprogramming.tasq.task;
 
 import java.io.File;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.agile.Sprint;
@@ -27,7 +31,6 @@ public class TaskService {
 
 	public List<Task> findAllByProject(Project project) {
 		return taskRepo.findAllByProjectAndParentIsNull(project);
-
 	}
 
 	public List<Task> findAll() {
@@ -42,6 +45,15 @@ public class TaskService {
 		return taskRepo.findByProjectAndStateNotAndParentIsNull(project,
 				TaskState.CLOSED);
 	}
+	
+	public List<Task> findAllWithoutRelease(Project project) {
+		return taskRepo.findByProjectAndParentIsNullAndReleaseIsNull(project);
+	}
+	
+	public List<Task> findAllToRelease(Project project) {
+		return taskRepo.findByProjectAndStateAndParentIsNullAndReleaseIsNull(project, TaskState.CLOSED);
+	}
+
 
 	/**
 	 * @param id
@@ -105,5 +117,19 @@ public class TaskService {
 
 	public List<Task> findAllByProjectId(Long project) {
 		return taskRepo.findByProjectId(project);
+	}
+	public List<DisplayTask> convertToDisplay(List<Task> list){
+		List<DisplayTask> resultList = new LinkedList<DisplayTask>();
+		for (Task task : list) {
+			resultList.add(new DisplayTask(task));
+		}
+		return resultList;
+	}
+	
+//	@Transactional
+	public Set<Sprint> getTaskSprints(String id){
+		Task task = taskRepo.findById(id);
+		Hibernate.initialize(task.getSprints());
+		return task.getSprints();
 	}
 }

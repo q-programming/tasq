@@ -15,4 +15,6 @@ public interface CommentsRepository extends JpaRepository<Comment, Integer> {
 
 	public Set<Comment> findByAuthor(Account author);
 
+	public Set<Comment> findByTaskIdOrderByDateDesc(String id);
+
 }

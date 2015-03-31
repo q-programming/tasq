@@ -339,4 +339,20 @@ ul.auto-complete-list {
     max-height: 250px;
     overflow: auto;
 }
+table.worklog_table {
+	width:100%;
+	border-width: 1px;
+/* 	border-style: hidden; */
+	border-collapse: collapse;
+	border-color: lightgray;
+	border-bottom-style: solid;
+}
+table.worklog_table td {
+	width: 50%;
+	border-width: 1px;
+	padding: 1px;
+	border-style: solid;
+	border-color: lightgray;
+	
+}
 

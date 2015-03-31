@@ -3,12 +3,15 @@ package com.qprogramming.tasq.projects;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.account.UserService;
 import com.qprogramming.tasq.support.Utils;
 
 @Service
@@ -16,11 +19,14 @@ public class ProjectService {
 
 	private ProjectRepository projRepo;
 	private AccountService accSrv;
+	private UserService userSrv;
 
 	@Autowired
-	public ProjectService(ProjectRepository projRepo, AccountService accSrv) {
+	public ProjectService(ProjectRepository projRepo, AccountService accSrv,
+			UserService userSrv) {
 		this.projRepo = projRepo;
 		this.accSrv = accSrv;
+		this.userSrv = userSrv;
 	}
 
 	public Project findByName(String name) {
@@ -69,10 +75,14 @@ public class ProjectService {
 	 */
 	public Project findUserActiveProject() {
 		Account account = Utils.getCurrentAccount();
-		if (account.getActive_project() != null) {
-			return projRepo.findById(account.getActive_project());
+		if (account.getActive_project() == null) {
+			// if there is not active project, force reload current logged user
+			account = accSrv.findById(Utils.getCurrentAccount().getId());
+			if (account.getActive_project() != null) {
+				userSrv.signin(account);
+			}
 		}
-		return null;
+		return projRepo.findById(account.getActive_project());
 	}
 
 	/**
@@ -87,13 +97,21 @@ public class ProjectService {
 		if (repoProject == null) {
 			return false;
 		}
-		Account currentAccount = Utils.getCurrentAccount();
-		return repoProject.getAdministrators().contains(currentAccount)
-				|| repoProject.getParticipants().contains(currentAccount)
-				|| Roles.isAdmin();
+		return canEdit(repoProject);
 	}
 
 	public boolean canEdit(Project project) {
-		return canEdit(project.getId());
+		Account currentAccount = Utils.getCurrentAccount();
+		return project.getAdministrators().contains(currentAccount)
+				|| project.getParticipants().contains(currentAccount)
+				|| Roles.isAdmin();
+
+	}
+
+	public boolean canAdminister(Project project) {
+		Account currentAccount = Utils.getCurrentAccount();
+		return project.getAdministrators().contains(currentAccount)
+				|| Roles.isAdmin();
+
 	}
 }

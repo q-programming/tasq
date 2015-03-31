@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -43,9 +45,9 @@ public class AgileController {
 		if (project != null) {
 			// TODO check if any active sprints, if not redirect to backlog
 			// instead
-			if (project.getAgile_type().equals(Project.AgileType.KANBAN)) {
-				return "/kanban/board";
-			} else if (project.getAgile_type().equals(Project.AgileType.SCRUM)) {
+			if (project.getAgile().equals(Project.AgileType.KANBAN)) {
+				return "redirect:/" + project.getProjectId() + "/kanban/board";
+			} else if (project.getAgile().equals(Project.AgileType.SCRUM)) {
 				// /TODO check for active
 				return "redirect:/" + project.getProjectId() + "/scrum/board";
 			}
@@ -73,17 +75,23 @@ public class AgileController {
 	boolean saveOrder(@RequestParam(value = "ids[]") String[] ids,
 			@RequestParam(value = "project") Long project,
 			HttpServletResponse response) {
-		long order = 0;
+		int order = 0;
 		List<Task> allTasks = taskSrv.findAllByProjectId(project);
+		//build map of all tasks
 		Map<String, Task> map = new HashMap<String, Task>();
 		for (Task i : allTasks) {
 			map.put(i.getId(), i);
 		}
-		List<Task> taskList = new ArrayList<Task>();
+		List<Task> taskList = new LinkedList<Task>();
+		List<Long> newTaskOrder = new LinkedList<Long>();
 		for (String taskID : Arrays.asList(ids)) {
 			Task task = map.get(taskID);
-			task.setTaskOrder(order);
+			newTaskOrder.add(task.getTaskOrder());
 			taskList.add(task);
+		}
+		Collections.sort(newTaskOrder);
+		for(Task task : taskList){
+			task.setTaskOrder(newTaskOrder.get(order));
 			order++;
 		}
 		taskSrv.save(taskList);

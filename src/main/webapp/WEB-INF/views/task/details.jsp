@@ -1,3 +1,5 @@
+<%@page import="com.qprogramming.tasq.task.worklog.LogType"%>
+<%@ page trimDirectiveWhitespaces="true" %>
 <%@page import="com.qprogramming.tasq.account.Roles"%>
 <%@page import="com.qprogramming.tasq.task.link.TaskLinkType"%>
 <%@page import="com.qprogramming.tasq.task.TaskPriority"%>
@@ -595,30 +597,52 @@
 				</div>
 				<table>
 					<tr>
-						<td><s:message code="task.created"></s:message></td>
+						<td><s:message code="task.created"/></td>
 						<td class="left-margin">: ${task.create_date}</td>
 					</tr>
 					<tr>
-						<td><s:message code="task.due"></s:message></td>
-						<td class="left-margin">: ${task.due_date}</td>
+						<td><s:message code="task.lastUpdate"/></td>
+						<td class="left-margin">: ${task.lastUpdate}</td>
 					</tr>
+					<c:if test="${not empty task.due_date}">
+						<tr>
+							<td><s:message code="task.due"/></td>
+							<td class="left-margin">: ${task.due_date}</td>
+						</tr>
+					</c:if>
 				</table>
 			</div>
-			<%----------------SPRITNS ----------------------%>
+			<%----------------SPRITNS/RELEASES ----------------------%>
 			<c:if test="${not task.subtask}">
 			<div>
+				<c:if test="${task.project.agile eq 'KANBAN'}">
+				<div class="mod-header">
+					<h5 class="mod-header-title">
+						<s:message code="agile.release" />
+					</h5>
+				</div>
+				<div>
+					<a
+						href="<c:url value="/${task.project.projectId}/${fn:toLowerCase(task.project.agile)}/reports?release=${task.release.release}"/>">
+						${task.release.release}</a>
+				</div>
+				</c:if>
+				<c:if test="${task.project.agile eq 'SCRUM'}">
 				<div class="mod-header">
 					<h5 class="mod-header-title">
 						<s:message code="task.sprints" />
 					</h5>
 				</div>
-				<c:forEach items="${task.sprints}" var="sprint">
-					<div>
-						<a
-							href="<c:url value="/${task.project.projectId}/${fn:toLowerCase(task.project.agile_type)}/reports?sprint=${sprint.sprintNo}"/>">Sprint
-							${sprint.sprintNo}</a>
-					</div>
-				</c:forEach>
+				<div id="sprints">
+				</div>
+<%-- 				<c:forEach items="${sprints}" var="sprint"> --%>
+<!-- 					<div> -->
+<!-- 						<a -->
+<%-- 							href="<c:url value="/${task.project.projectId}/${fn:toLowerCase(task.project.agile)}/reports?sprint=${sprint.sprintNo}"/>">Sprint --%>
+<%-- 							${sprint.sprintNo}</a> --%>
+<!-- 					</div> -->
+<%-- 				</c:forEach> --%>
+				</c:if> 
 			</div>
 			</c:if>
 		</div>
@@ -627,7 +651,7 @@
 	<div>
 		<hr>
 		<ul class="nav nav-tabs">
-			<li><a style="color: black" href="#logWork" data-toggle="tab"><i class="fa fa-newspaper-o"></i> <s:message
+			<li><a id="worklogs" style="color: black" href="#logWork" data-toggle="tab"><i class="fa fa-newspaper-o"></i> <s:message
 						code="task.activeLog" /></a></li>
 			<li class="active"><a style="color: black" href="#comments"
 				data-toggle="tab"><i class="fa fa-comments"></i>
@@ -637,7 +661,7 @@
 			<%--------------------------------- Comments -----------------------------%>
 			<div id="comments" class="tab-pane fade in active">
 				<table class="table table-hover button-table">
-					<c:forEach items="${task.comments}" var="comment">
+					<c:forEach items="${comments}" var="comment">
 						<tr id="c${comment.id}">
 							<td>
 								<div>
@@ -707,19 +731,19 @@
 			</div>
 			<%------------------ WORK LOG -------------------------%>
 			<div id="logWork" class="tab-pane fade">
-				<table class="table table-condensed table-hover">
-					<c:forEach items="${task.worklog}" var="worklog">
-						<tr>
-							<td><div style="font-size: smaller; color: dimgray;">${worklog.account}&nbsp;
-									<t:logType logType="${worklog.type}" />
-									<div class="time-div">${worklog.timeLogged}</div>
-								</div> <c:if test="${not empty worklog.message}">
-									<div>
-										<blockquote class="quote">${worklog.message}</blockquote>
-									</div>
-								</c:if></td>
-						</tr>
-					</c:forEach>
+				<table id="taskworklogs" class="table table-condensed table-hover">
+<%-- 					<c:forEach items="${worklogs}" var="worklog"> --%>
+<%-- 						<tr> --%>
+<%-- 							<td><div style="font-size: smaller; color: dimgray;">${worklog.account}&nbsp; --%>
+<%-- 									<t:logType logType="${worklog.type}" /> --%>
+<%-- 									<div class="time-div">${worklog.timeLogged}</div> --%>
+<%-- 								</div> <c:if test="${not empty worklog.message}"> --%>
+<!-- 									<div> -->
+<%-- 										<blockquote class="quote">${worklog.message}</blockquote> --%>
+<!-- 									</div> -->
+<%-- 								</c:if></td> --%>
+<%-- 						</tr> --%>
+<%-- 					</c:forEach> --%>
 				</table>
 			</div>
 		</div>
@@ -767,41 +791,50 @@
 	<!-- /.modal-dialog -->
 </div>
 <!-- /.modal -->
+	<%
+	pageContext.setAttribute("types",
+					LogType.values());
+	%>
 <script>
 $(document).ready(function($) {
 	taskID = "${task.id}";
 	updateWatchers();
+	getSprints();
 	//--------------------------------------Coments----------------------------
-			function toggle_comment() {
-						$('#comments_add').toggle();
-						$('#comments_div').slideToggle("slow");
-						$(document.body).animate({
-							'scrollTop' : $('#comments_div').offset().top
-						}, 2000);
-			}
+	function toggle_comment() {
+		$('#comments_add').toggle();
+		$('#comments_div').slideToggle("slow");
+		$(document.body).animate({
+			'scrollTop' : $('#comments_div').offset().top
+		}, 2000);
+	}
 			
-			$('#comments_scroll').click(function() {
-					$(document.body).animate({
-							'scrollTop' : $('#comments').offset().top
-						}, 2000);
-			});
+	$('#comments_scroll').click(function() {
+		$(document.body).animate({
+			'scrollTop' : $('#comments').offset().top
+		}, 2000);
+	});
 
-			$('#comments_add').click(function() {
-						toggle_comment();
+	$('#comments_add').click(function() {
+		toggle_comment();
+	});
+	
+	$('#worklogs').click(function() {
+		getWorklogs();
+	});
 
-			});
+	$('.comments_edit').click(function() {
+		var message = $(this).data('message');
+		var comment_id = $(this).data('comment_id');
+		$(".modal-body #message").val(message);
+		$(".modal-body #comment_id").val(comment_id);
+	});
 
-			$('.comments_edit').click(function() {
-						var message = $(this).data('message');
-						var comment_id = $(this).data('comment_id');
-						$(".modal-body #message").val(message);
-						$(".modal-body #comment_id").val(comment_id);
-			});
-
-			$('#comments_cancel').click(function() {
-						toggle_comment();
-			});
-			$("#task_link").autocomplete({
+	$('#comments_cancel').click(function() {
+		toggle_comment();
+	});
+	
+	$("#task_link").autocomplete({
 				minLength : 1,
 				delay : 500,
 				//define callback to format results
@@ -831,37 +864,37 @@ $(document).ready(function($) {
 				}
 			});
 
-			$("#change_state").change(function() {
-						if ($(this).val() == 'CLOSED') {
-							$("#zero_remaining").toggle("blind");
-						} else {
-							$("#zero_remaining").hide("blind");
-							$("#zero_checkbox").attr('checked', false);
-						}
-					});
-			});
+	$("#change_state").change(function() {
+		if ($(this).val() == 'CLOSED') {
+			$("#zero_remaining").toggle("blind");
+		} else {
+			$("#zero_remaining").hide("blind");
+			$("#zero_checkbox").attr('checked', false);
+		}
+	});
+	
 // 			change state
-			$(".change_state").click(function() {
-	    	 var state = $(this).data('state');
-	    	 var newState = $(this).html();
-			 var subTasks = "${task.subtasks}";
-	    	 if(state == 'CLOSED'){
-	    		 	 $('#modal_subtaskCount').html(subTasks);
-		    		 $('#close_task').modal({
-		    	            show: true,
-		    	            keyboard: false,
-		    	            backdrop: 'static'
-		    	     });
-	    	 	}
-		    	else{
-					$.post('<c:url value="/task/changeState"/>',{id:taskID,state:state},function(result){
-						if(result.code == 'Error'){
-							showError(result.message);
-						}
-						else{
-							$("#current_state").html(newState);
-							showSuccess(result.message);
-						}
+	$(".change_state").click(function() {
+	  	 var state = $(this).data('state');
+	  	 var newState = $(this).html();
+		 var subTasks = "${task.subtasks}";
+	   	 if(state == 'CLOSED'){
+	   		 	 $('#modal_subtaskCount').html(subTasks);
+	    		 $('#close_task').modal({
+	    	            show: true,
+	    	            keyboard: false,
+	    	            backdrop: 'static'
+	    	     });
+	   	 	}
+	    	else{
+				$.post('<c:url value="/task/changeState"/>',{id:taskID,state:state},function(result){
+					if(result.code == 'Error'){
+						showError(result.message);
+					}
+					else{
+						$("#current_state").html(newState);
+						showSuccess(result.message);
+					}
 					});
 		    	}
 			});
@@ -945,6 +978,38 @@ $(document).ready(function($) {
 				}
 				togglePoints();
 			}
+			function getSprints(){
+				projectId = '${project.id}';
+				var url ='<c:url value="/task/getSprints"/>' 
+				$.get(url ,{taskID:taskID},function(result){
+					$.each(result, function(key,sprint){
+						var url = '<c:url value="/${task.project.projectId}/${fn:toLowerCase(task.project.agile)}/reports?sprint="/>' + sprint.sprintNo;
+						var row = '<div><a href="'+url+'">Sprint ' + sprint.sprintNo+ '</a></div>';
+						$("#sprints").append(row);
+			    	});	
+				});
+			}
+			
+			function getWorklogs(){
+				var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
+				var url ='<c:url value="/task/getWorklogs"/>'
+				$("#taskworklogs").append(loading_indicator);
+				$.get(url ,{taskID:taskID},function(result){
+					$.each(result, function(key,worklog){
+						$("#loading").remove();
+						var account = worklog.account.name + ' ' +worklog.account.surname;
+						var type = getEventTypeMsg(worklog.type);
+						var message = "";
+						if (worklog.message != ""){
+							message = '<div><blockquote class="quote">' + worklog.message + '</blockquote></div>'
+						}
+						
+						var row = '<tr><td><div style="font-size: smaller; color: dimgray;">' + account + ' ' + type + '<div class="time-div">' + worklog.timeLogged + '</div> ' + message + '</td></tr>';
+						$("#taskworklogs").append(row);	  
+			    	});	
+				});
+			}
+			
 			
 			function updateWatchers(){
 				var startwatch = "<s:message code="task.watch.start" htmlEscape="false"/>";
@@ -976,7 +1041,18 @@ $(document).on("click",".delete_task",function(e) {
 		bootbox.confirm(msg, function(result) {
 		if (result == true) {
 			document.location.assign($link.attr('href'));
-		}
+			}
+		});
 	});
 });
+function getEventTypeMsg(type){
+	switch(type){
+		<c:forEach items="${types}" var="enum_type">
+		case "${enum_type}":
+			return '<s:message code="${enum_type.code}"/> ';
+		</c:forEach>
+		default:
+			return 'not yet added ';
+	};
+};
 </script>
