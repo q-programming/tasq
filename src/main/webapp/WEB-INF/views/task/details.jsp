@@ -820,7 +820,9 @@ $(document).ready(function($) {
 	});
 	
 	$('#worklogs').click(function() {
-		getWorklogs();
+		if($("#taskworklogs tr").length<1){
+			getWorklogs();
+		}
 	});
 
 	$('.comments_edit').click(function() {
