@@ -18,6 +18,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.uuid.Generators;
+
 /**
  * @author romanjak
  * @date 21 maj 2014
@@ -39,8 +41,11 @@ public class AccountService {
 	@Transactional
 	public Account save(Account account) {
 		account.setPassword(passwordEncoder.encode(account.getPassword()));
-		account.setLanguage(defaultLang);
-		account.setUuid(UUID.randomUUID().toString().replaceAll("-", ""));
+		if (account.getLanguage() == null) {
+			account.setLanguage(defaultLang);
+		}
+		UUID uuid = Generators.timeBasedGenerator().generate();
+		account.setUuid(uuid.toString());
 		entityManager.persist(account);
 		return account;
 	}
@@ -75,11 +80,15 @@ public class AccountService {
 	public List<Account> findAll() {
 		return accRepo.findAll();
 	}
+
 	public Page<Account> findAll(Pageable p) {
 		return accRepo.findAll(p);
 	}
-	public Page<Account> findByStartingWith(String term,Pageable p) {
-		return accRepo.findBySurnameStartingWithIgnoreCaseOrNameStartingWithIgnoreCase(term,term, p);
+
+	public Page<Account> findByStartingWith(String term, Pageable p) {
+		return accRepo
+				.findBySurnameStartingWithIgnoreCaseOrNameStartingWithIgnoreCase(
+						term, term, p);
 	}
 
 	public List<Account> findAdmins() {
