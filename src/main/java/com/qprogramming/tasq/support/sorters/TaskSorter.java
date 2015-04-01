@@ -72,8 +72,15 @@ public class TaskSorter implements Comparator<Task> {
 
 	private int compareByID(Task a, Task b) {
 		int result;
-		String aId = a.getId().split("-")[1].split("/")[0];
-		String bId = b.getId().split("-")[1].split("/")[0];
+		String aId="";
+		String bId="";
+		if(a.isSubtask()&& b.isSubtask()){
+			aId = a.getId().split("-")[1].split("/")[1];
+			bId = b.getId().split("-")[1].split("/")[1];
+		}else{
+			aId = a.getId().split("-")[1].split("/")[0];
+			bId = b.getId().split("-")[1].split("/")[0];
+		}
 		if (Integer.parseInt(aId) > Integer.parseInt(bId)) {
 			result = -1;
 		} else {
