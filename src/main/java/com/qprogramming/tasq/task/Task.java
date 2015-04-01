@@ -138,8 +138,14 @@ public class Task implements java.io.Serializable {
 		return Utils.convertDateTimeToString(create_date);
 	}
 
-	public Date getLastUpdate() {
+	public Date getRawLastUpdate() {
 		return lastUpdate;
+	}
+	public String getLastUpdate() {
+		if (lastUpdate!=null){
+		return Utils.convertDateTimeToString(lastUpdate);
+		}
+		return "";
 	}
 
 	public void setLastUpdate(Date lastUpdate) {
