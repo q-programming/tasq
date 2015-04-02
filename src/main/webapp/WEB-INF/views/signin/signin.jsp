@@ -43,7 +43,7 @@
         </div>
         <div class="form-group">
             <div class="col-lg-offset-2 col-lg-10">
-                <p><s:message code="signup.new" /> <a href='<s:url value="/signup"/>'><s:message code="signup.signup" /></a></p>
+                <p><s:message code="signup.new" />&nbsp;<a href='<s:url value="/signup"/>'><s:message code="signup.signup" /></a></p>
             </div>
         </div>
         <div class="form-group">
