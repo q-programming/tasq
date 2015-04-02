@@ -355,4 +355,6 @@ table.worklog_table td {
 	border-color: lightgray;
 	
 }
-
+td.centerd {
+  text-align: center;
+}

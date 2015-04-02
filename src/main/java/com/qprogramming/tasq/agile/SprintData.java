@@ -1,12 +1,17 @@
 package com.qprogramming.tasq.agile;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.qprogramming.tasq.task.DisplayTask;
 import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
 
 class SprintData {
+	public static final String ALL = "ALL";
+	public static final String CLOSED = "CLOSED";
 	private Map<String, Float> left;
 	private Map<String, Float> burned;
 	private Map<String, Float> ideal;
@@ -15,12 +20,16 @@ class SprintData {
 	private List<DisplayWorkLog> worklogs;
 	private Integer totalPoints = 0;
 	private String totalTime;
+	private Map<String, List<DisplayTask>> tasks;
 
 	public SprintData() {
 		left = new LinkedHashMap<String, Float>();
 		burned = new LinkedHashMap<String, Float>();
 		ideal = new LinkedHashMap<String, Float>();
 		timeBurned = new LinkedHashMap<String, Float>();
+		tasks = new HashMap<String, List<DisplayTask>>();
+		tasks.put(CLOSED, new LinkedList<DisplayTask>());
+		tasks.put(ALL, new LinkedList<DisplayTask>());
 	}
 
 	public String getMessage() {
@@ -87,6 +96,14 @@ class SprintData {
 		this.totalPoints = totalPoints;
 	}
 
+	public Map<String, List<DisplayTask>> getTasks() {
+		return tasks;
+	}
+
+	public void setTasks(Map<String, List<DisplayTask>> tasks) {
+		this.tasks = tasks;
+	}
+
 	public void createIdeal(String startTime, Float value, String endTime) {
 		ideal.put(startTime, value);
 		ideal.put(endTime, new Float(0));
@@ -99,5 +116,4 @@ class SprintData {
 	public void addTime(Integer time) {
 		totalTime += time;
 	}
-
 }

@@ -1,5 +1,6 @@
 package com.qprogramming.tasq.agile;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -70,8 +71,7 @@ public class SprintController {
 
 	@Autowired
 	public SprintController(ProjectService prjSrv, TaskService taskSrv,
-			SprintService sprintSrv, WorkLogService wrkLogSrv,
-			MessageSource msg) {
+			SprintService sprintSrv, WorkLogService wrkLogSrv, MessageSource msg) {
 		this.projSrv = prjSrv;
 		this.taskSrv = taskSrv;
 		this.sprintSrv = sprintSrv;
@@ -467,6 +467,16 @@ public class SprintController {
 				result.setMessage(message);
 				return result;
 			}
+			List<Task> sprintTasks = taskSrv.findAllBySprint(sprint);
+			for (Task task : sprintTasks) {
+				if (task.getState().equals(TaskState.CLOSED)) {
+					result.getTasks().get(SprintData.CLOSED)
+							.add(new DisplayTask(task));
+				} else {
+					result.getTasks().get(SprintData.ALL)
+							.add(new DisplayTask(task));
+				}
+			}
 			// Fill maps based on time or story point driven board
 
 			DateTime startTime = new DateTime(sprint.getRawStart_date());
@@ -483,7 +493,8 @@ public class SprintController {
 						getPeriodValue(entry.getValue()));
 			}
 
-			result.setTotalTime(getFloatValue(totalTime).toString());
+			result.setTotalTime(String.valueOf(round(getFloatValue(totalTime),
+					2)));
 			return fillLeftAndBurned(result, sprint, wrkList, timeTracked);
 		} else {
 			return result;
@@ -784,6 +795,19 @@ public class SprintController {
 				value).getMillis() / MILLIS_PER_SECOND)
 				/ SECONDS_PER_HOUR);
 		return result;
+	}
+
+	/**
+	 * Round to certain number of decimals
+	 * 
+	 * @param d
+	 * @param decimalPlace
+	 * @return
+	 */
+	public float round(float d, int decimalPlace) {
+		BigDecimal bd = new BigDecimal(Float.toString(d));
+		bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
+		return bd.floatValue();
 	}
 
 	/**

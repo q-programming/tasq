@@ -16,9 +16,9 @@ public class DisplayTask implements Comparable<DisplayTask> {
 	private String description;
 	private String projectID;
 	private Integer story_points;
-	private Period estimate;
-	private Period remaining;
-	private Period loggedWork;
+	private String estimate;
+	private String remaining;
+	private String loggedWork;
 	private Enum<TaskState> state;
 	private Enum<TaskType> type;
 	private Enum<TaskPriority> priority;
@@ -54,15 +54,15 @@ public class DisplayTask implements Comparable<DisplayTask> {
 		return story_points;
 	}
 
-	public Period getEstimate() {
+	public String getEstimate() {
 		return estimate;
 	}
 
-	public Period getRemaining() {
+	public String getRemaining() {
 		return remaining;
 	}
 
-	public Period getLoggedWork() {
+	public String getLoggedWork() {
 		return loggedWork;
 	}
 
@@ -94,15 +94,15 @@ public class DisplayTask implements Comparable<DisplayTask> {
 		this.story_points = story_points;
 	}
 
-	public void setEstimate(Period estimate) {
+	public void setEstimate(String estimate) {
 		this.estimate = estimate;
 	}
 
-	public void setRemaining(Period remaining) {
+	public void setRemaining(String remaining) {
 		this.remaining = remaining;
 	}
 
-	public void setLoggedWork(Period loggedWork) {
+	public void setLoggedWork(String loggedWork) {
 		this.loggedWork = loggedWork;
 	}
 
