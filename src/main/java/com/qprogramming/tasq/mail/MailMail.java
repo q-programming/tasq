@@ -53,6 +53,7 @@ public class MailMail {
 	public static final int MESSAGE = 1;
 	public static final int PROJECT = 2;
 	public static final int REGISTER = 3;
+	public static final int OTHER = -1;
 
 	private static final String TASQ = "tasq@tasq.com";
 	private static final String TASQ_PERSONAL = "TasQ";

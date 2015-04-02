@@ -7,7 +7,7 @@
 	<s:message code="signup.password" />
 </c:set>
 
-<form class="form-narrow form-horizontal" action='<s:url value="/j_spring_security_check"/>' method="post">
+<form class="form-narrow form-horizontal" action='<s:url value="/j_spring_security_check"/>' method="post" style="margin-top: 40px;">
     <c:if test="${not empty param['error']}">
         <div class="alert alert-error">
             <s:message code="error.signin" />
@@ -44,6 +44,11 @@
         <div class="form-group">
             <div class="col-lg-offset-2 col-lg-10">
                 <p><s:message code="signup.new" /> <a href='<s:url value="/signup"/>'><s:message code="signup.signup" /></a></p>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-lg-offset-2 col-lg-10">
+                <a href='<s:url value="/resetPassword"/>'><s:message code="signin.password.forgot" /></a>
             </div>
         </div>
     </fieldset>

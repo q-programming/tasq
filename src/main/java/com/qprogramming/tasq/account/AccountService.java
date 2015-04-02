@@ -39,8 +39,10 @@ public class AccountService {
 	private PasswordEncoder passwordEncoder;
 
 	@Transactional
-	public Account save(Account account) {
-		account.setPassword(passwordEncoder.encode(account.getPassword()));
+	public Account save(Account account, boolean passwordReset) {
+		if (passwordReset) {
+			account.setPassword(passwordEncoder.encode(account.getPassword()));
+		}
 		if (account.getLanguage() == null) {
 			account.setLanguage(defaultLang);
 		}

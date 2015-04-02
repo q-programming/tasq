@@ -16,14 +16,14 @@
 
 
 <form:form class="form-narrow form-horizontal" method="post"
-	modelAttribute="passwordResetForm">
+	modelAttribute="passwordResetForm" style="margin-top: 40px;">
 	<c:if test="${not empty param['error']}">
 		<div class="alert alert-error">
 			<s:message code="error.signin" />
 		</div>
 	</c:if>
 	<fieldset>
-		<legend>Please input new password</legend>
+		<legend><s:message code="signin.password.new"/></legend>
 		<div class="form-group">
 			<label for="password" class="col-lg-2 control-label">${password_txt}</label>
 			<div class="col-lg-10">
@@ -41,8 +41,9 @@
 			</div>
 		</div>
 		<div class="form-group">
+			<label for="id" class="col-lg-2 control-label"><s:message code="singin.password.token"/></label>
 			<div class="col-lg-10">
-				<form:input path="id" class="form-control" disabled="true" />
+				<form:input path="id" class="form-control " disabled="true" />
 			</div>
 		</div>
 		

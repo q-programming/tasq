@@ -57,7 +57,7 @@ public class SignupController {
 	private AccountService accountSrv;
 	private MailMail mailer;
 	private MessageSource msg;
-	
+
 	@Autowired
 	public SignupController(AccountService accountSrv, MessageSource msg,
 			MailMail mailer) {
@@ -91,7 +91,7 @@ public class SignupController {
 		if (accountSrv.findAll().isEmpty()) {
 			account.setRole(Roles.ROLE_ADMIN);
 		}
-		account = accountSrv.save(account);
+		account = accountSrv.save(account, true);
 		// copy default avatar
 		HttpSession session = request.getSession();
 		ServletContext sc = session.getServletContext();
@@ -120,7 +120,7 @@ public class SignupController {
 				"signup.register.message",
 				new Object[] { account.getName(), confirmlink,
 						Utils.getBaseURL() }, Utils.getDefaultLocale());
-		LOG.debug(confirmlink);
+		LOG.info(confirmlink);
 		// mailer.sendMail(MailMail.REGISTER, account.getEmail(), subject,
 		// message);
 		MessageHelper.addSuccessAttribute(ra, msg.getMessage("signup.success",
@@ -151,23 +151,9 @@ public class SignupController {
 	public PasswordResetForm reset(
 			@RequestParam(value = "id", required = true) String id,
 			RedirectAttributes ra) {
-		Account account = accountSrv.findByUuid(id);
-		if (account != null) {
-			UUID uuid = UUID.fromString(id);
-			DateTime date = new DateTime(Utils.getTimeFromUUID(uuid));
-			DateTime expireDate = date.plusHours(12);
-			if (date.isAfter(expireDate)) {
-				MessageHelper.addErrorAttribute(ra,
-						"Password reset token expired");
-			} else {
-				PasswordResetForm form = new PasswordResetForm();
-				form.setId(id);
-				return form;
-			}
-		} else {
-			MessageHelper.addErrorAttribute(ra, "Verification error!");
-		}
-		throw new TasqException("Error");
+		PasswordResetForm form = new PasswordResetForm();
+		form.setId(id);
+		return form;
 	}
 
 	@Transactional
@@ -184,16 +170,22 @@ public class SignupController {
 			DateTime date = new DateTime(Utils.getTimeFromUUID(uuid));
 			DateTime expireDate = date.plusHours(12);
 			if (date.isAfter(expireDate)) {
-				MessageHelper.addErrorAttribute(ra,
-						"Password reset token expired");
+				MessageHelper.addErrorAttribute(ra, msg.getMessage(
+						"signin.password.token.expired", null,
+						Utils.getDefaultLocale()));
 			} else {
 				account.setPassword(form.getPassword());
-				accountSrv.save(account);
-				MessageHelper.addSuccessAttribute(ra,
-						"Password succesfully reset");
+				accountSrv.save(account, true);
+				MessageHelper.addSuccessAttribute(
+						ra,
+						msg.getMessage("signin.password.success", null,
+								Utils.getDefaultLocale()));
 			}
 		} else {
-			MessageHelper.addErrorAttribute(ra, "Verification error!");
+			MessageHelper.addErrorAttribute(
+					ra,
+					msg.getMessage("signin.password.token.invalid", null,
+							Utils.getDefaultLocale()));
 		}
 		return "redirect:/";
 	}
@@ -207,16 +199,34 @@ public class SignupController {
 	@RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
 	public String resetPassword(
 			@RequestParam(value = "email", required = true) String email,
-			RedirectAttributes ra) {
+			RedirectAttributes ra, HttpServletRequest request) {
 		Account account = accountSrv.findByEmail(email);
 		if (account == null) {
-			MessageHelper.addErrorAttribute(ra, "Account not found");
+			MessageHelper.addWarningAttribute(ra, msg.getMessage(
+					"signin.password.notfound", new Object[] { email },
+					Utils.getDefaultLocale()));
+			return "redirect:" + request.getHeader("Referer");
 		} else {
-			UUID uuid = Generators.timeBasedGenerator().generate();
-			account.setUuid(uuid.toString());
-			accountSrv.save(account);
-			MessageHelper.addSuccessAttribute(ra,
-					"Password reset link sent to email");
+			accountSrv.save(account, false);
+			Utils.setHttpRequest(request);
+			StringBuilder url = new StringBuilder(Utils.getBaseURL());
+			url.append("/");
+			url.append("password?id=");
+			url.append(account.getUuid());
+			String subject = msg.getMessage("singin.password.reset", null,
+					Utils.getDefaultLocale());
+			String message = msg
+					.getMessage("singin.password.reset.message", new Object[] {
+							account.getName(), url, Utils.getBaseURL() },
+							Utils.getDefaultLocale());
+			LOG.info(url.toString());
+			// mailer.sendMail(MailMail.OTHER, account.getEmail(), subject,
+			// message);
+			MessageHelper.addSuccessAttribute(
+					ra,
+					msg.getMessage("singin.password.token.sent",
+							new Object[] { email }, Utils.getDefaultLocale())
+							+ " " + url);
 		}
 		return "redirect:/";
 	}

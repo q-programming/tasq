@@ -125,9 +125,9 @@ public class UtilsTest {
 	public void uuidTest(){
 		UUID uuid = Generators.timeBasedGenerator().generate();
 		uuid.timestamp();
-		
 		DateTime date = new  DateTime(Utils.getTimeFromUUID(uuid));
-		System.out.println(uuid);
+		DateTime beforedate = new DateTime().minusDays(1);
+		Assert.assertTrue(beforedate.isBefore(date));
 	}
 	
 
