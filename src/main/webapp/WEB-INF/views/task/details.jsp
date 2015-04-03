@@ -12,17 +12,14 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
 <%@ taglib prefix="myfn" uri="/WEB-INF/tags/custom.tld"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<script src="<c:url value="/resources/js/bootstrap-tagsinput.js" />"></script>
+<link href="<c:url value="/resources/css/bootstrap-tagsinput.css" />" rel="stylesheet" media="screen" />
 <security:authorize access="hasRole('ROLE_ADMIN')">
 	<c:set var="is_admin" value="true" />
 </security:authorize>
 <security:authentication property="principal" var="user" />
 <c:set var="is_user" value="<%=Roles.isUser()%>" />
-<c:if
-	test="${(myfn:contains(task.project.administrators,user) || is_admin || task.owner.id == user.id)}">
-	<script src="<c:url value="/resources/js/bootstrap-tagsinput.js" />"></script>
-	<link href="<c:url value="/resources/css/bootstrap-tagsinput.css" />"
-		rel="stylesheet" media="screen" />
-
+<c:if test="${(myfn:contains(task.project.administrators,user) || is_admin || task.owner.id == user.id)}">
 	<c:set var="can_edit" value="true" />
 </c:if>
 <c:if test="${task.assignee.id == user.id}">
@@ -179,13 +176,21 @@
 					<tr>
 						<td style="vertical-align: top;">Tags</td>
 						<td class="left-margin">
-
-						
-						<input id="taskTags" type="text"
-								value="<c:forEach var="tag" items="${task.tags}">${tag},</c:forEach>" data-role="tagsinput" />
-							<i id="editTags" class="fa fa-pencil" style="vertical-align: super; display: none"></i>
-							<i id="tagsLoading" class="fa fa-cog fa-spin" style="vertical-align: super; display: none"></i>
-							</td>
+							<c:if test="${can_edit}">
+								<input id="taskTags" type="text" title="<s:message code="task.tags.add"/>"
+										value="<c:forEach var="tag" items="${task.tags}">${tag},</c:forEach>"/>
+									<i id="editTags" class="fa fa-pencil" style="vertical-align: super; display: none"></i>
+									<i id="tagsLoading" class="fa fa-cog fa-spin" style="vertical-align: super; display: none"></i>
+							</c:if>
+							<c:if test="${not can_edit}">
+								<div style="color: rgb(187, 186, 186);padding: 6px 6px;">
+									<c:if test="${empty task.tags}">No tags</c:if>
+									<c:forEach var="tag" items="${task.tags}">
+										<span class="tag label label-info theme" data-name="${tag}">${tag}</span>
+									</c:forEach>
+								</div>
+							</c:if>
+						</td>
 					</tr>
 					<tr>
 						<td style="vertical-align: top;"><s:message
@@ -845,6 +850,7 @@ $(document).ready(function($) {
 	taskID = "${task.id}";
 	updateWatchers();
 	getSprints();
+	
 	//--------------------------------------Coments----------------------------
 	function toggle_comment() {
 		$('#comments_add').toggle();
@@ -1093,6 +1099,13 @@ $(document).on("click",".delete_task",function(e) {
 	});
 	
 	//TAGS
+	$('#taskTags').tagsinput({
+  		maxChars: 12,
+  		trimValue: true
+	});
+	
+	checkIfEmptyTags()
+	
 	$(".bootstrap-tagsinput").hover(
 		  function() {
 		    $( this ).addClass( "inputHover" );
@@ -1136,24 +1149,44 @@ $(document).on("click",".delete_task",function(e) {
 			$("#tagsinput").val(ui.item.value);
     	}
     });
-	$('input').on('itemAdded', function(event) {
+	
+	
+	$('#taskTags').on('itemAdded', function(event) {
 		showWait(true);
 		console.log("Sending to backedn "+event.item  );
 		var url='<c:url value="/addTaskTag"/>';
 		$.get(url,{name:event.item,taskID:taskID},function(data) {
 			showWait(false);
 			console.log(data);
+			checkIfEmptyTags();
 		});
 	});
-	$('input').on('itemRemoved', function(event) {
+	
+	$('#taskTags').on('itemRemoved', function(event) {
 		showWait(true);
 		console.log("Sending to backedn " +  event.item );
 		var url='<c:url value="/removeTaskTag"/>';
 		$.get(url,{name:event.item,taskID:taskID},function(data) {
 			showWait(false);
 			console.log(data);
+			checkIfEmptyTags();
 		});
 	});
+	
+	$(".tag").click(function(){
+		console.log("clicked")
+		console.log($(this).data("name"));
+		var url = '<c:url value="/tasks"/>?query=' + $(this).data("name");
+		window.location.href = url;
+	});
+	function checkIfEmptyTags(){
+		if($("#taskTags").val()==""){
+			var noTags = '<s:message code="task.tags.noTags"/>';
+			$("#tagsinput").attr("placeholder", noTags);
+		}else{
+			$("#tagsinput").attr("placeholder", "");
+		}
+	}
 });
 function getEventTypeMsg(type){
 	switch(type){

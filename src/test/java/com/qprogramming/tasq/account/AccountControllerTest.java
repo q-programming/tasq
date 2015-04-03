@@ -148,9 +148,6 @@ public class AccountControllerTest {
 		when(accSrvMock.findAll()).thenReturn(accountsList);
 		List<DisplayAccount> list = accountCtr.listAccounts(null, responseMock);
 		Assert.assertEquals(5, list.size());
-		list = accountCtr.listAccounts("do", responseMock);
-		Assert.assertEquals(2, list.size());
-
 	}
 
 	@Test

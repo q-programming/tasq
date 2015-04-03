@@ -31,19 +31,18 @@
 
     this.$element = $(element);
     this.$element.hide();
-
     this.isSelect = (element.tagName === 'SELECT');
     this.multiple = (this.isSelect && element.hasAttribute('multiple'));
     this.objectItems = options && options.itemValue;
     this.placeholderText = element.hasAttribute('placeholder') ? this.$element.attr('placeholder') : '';
+    this.title = element.hasAttribute('title') ? this.$element.attr('title') : '';
     this.inputSize = Math.max(1, this.placeholderText.length);
-
     this.$container = $('<div class="bootstrap-tagsinput"></div>');
-    this.$input = $('<input id="tagsinput" type="text" placeholder="' + this.placeholderText + '"/>').appendTo(this.$container);
+    this.$input = $('<input class="a-tooltip" id="tagsinput" type="text" placeholder="' + this.placeholderText + '" title="'+this.title+'"/>').appendTo(this.$container);
 
     this.$element.after(this.$container);
 
-    var inputWidth = (this.inputSize < 3 ? 3 : this.inputSize) + "em";
+    var inputWidth = (this.inputSize < 6 ? 6 : this.inputSize) + "em";
     this.$input.get(0).style.cssText = "width: " + inputWidth + " !important;";
     this.build(options);
   }
