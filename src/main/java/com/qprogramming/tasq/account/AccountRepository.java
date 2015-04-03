@@ -18,7 +18,11 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
 
 	Account findByUuid(String id);
 
-	Page<Account> findBySurnameStartingWithIgnoreCaseOrNameStartingWithIgnoreCase(String term,String term2, Pageable p);
+	Page<Account> findBySurnameContainingIgnoreCaseOrNameContainingIgnoreCase(
+			String term, String term2, Pageable p);
+
+	List<Account> findBySurnameContainingIgnoreCaseOrNameContainingIgnoreCase(
+			String term, String term2);
 
 	List<Account> findByRole(Roles role);
 

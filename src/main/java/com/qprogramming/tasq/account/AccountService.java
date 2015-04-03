@@ -87,10 +87,15 @@ public class AccountService {
 		return accRepo.findAll(p);
 	}
 
-	public Page<Account> findByStartingWith(String term, Pageable p) {
+	public Page<Account> findByNameSurnameContaining(String term, Pageable p) {
 		return accRepo
-				.findBySurnameStartingWithIgnoreCaseOrNameStartingWithIgnoreCase(
+				.findBySurnameContainingIgnoreCaseOrNameContainingIgnoreCase(
 						term, term, p);
+	}
+	public List<Account> findByNameSurnameContaining(String term) {
+		return accRepo
+				.findBySurnameContainingIgnoreCaseOrNameContainingIgnoreCase(
+						term, term);
 	}
 
 	public List<Account> findAdmins() {

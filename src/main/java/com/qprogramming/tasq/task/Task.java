@@ -1,10 +1,10 @@
 package com.qprogramming.tasq.task;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -30,6 +30,7 @@ import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.CommentsSorter;
 import com.qprogramming.tasq.support.sorters.WorkLogSorter;
 import com.qprogramming.tasq.task.comments.Comment;
+import com.qprogramming.tasq.task.tag.Tag;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 
@@ -107,6 +108,9 @@ public class Task implements java.io.Serializable {
 	@ManyToMany(fetch = FetchType.LAZY)
 	private Set<Sprint> sprints = new HashSet<Sprint>();
 	
+	@ManyToMany(fetch = FetchType.EAGER)
+	private Set<Tag> tags = new HashSet<Tag>();
+
 	@ManyToOne(fetch = FetchType.EAGER)
 	private Release release;
 
@@ -395,6 +399,14 @@ public class Task implements java.io.Serializable {
 
 	public void setTaskOrder(Long taskOrder) {
 		this.taskOrder = taskOrder;
+	}
+
+	public Set<Tag> getTags() {
+		return tags;
+	}
+
+	public void setTags(Set<Tag> tags) {
+		this.tags = tags;
 	}
 
 	/*

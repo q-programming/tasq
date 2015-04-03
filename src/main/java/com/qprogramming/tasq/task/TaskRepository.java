@@ -41,4 +41,6 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
 
 	List<Task> findByProjectAndParentIsNullAndReleaseIsNull(Project project);
 
+	List<Task> findByTagsName(String name);
+
 }

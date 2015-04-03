@@ -358,3 +358,6 @@ table.worklog_table td {
 td.centerd {
   text-align: center;
 }
+.tag{
+	cursor: pointer;
+}
