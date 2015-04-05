@@ -5,10 +5,18 @@
 <tiles-definitions>
 	<definition name="signin" extends="default">
 		<put-attribute name="body" value="/WEB-INF/views/signin/signin.jsp" />
+<!-- 		<put-attribute name="header" value="" type="string" /> -->
+<!-- 		<put-attribute name="footer" value="" type="string" /> -->
+		<put-list-attribute name="styles">
+			<add-attribute value="signin.css" />
+		</put-list-attribute>
+	</definition>
+	<definition name="password" extends="default">
+		<put-attribute name="body" value="/WEB-INF/views/signin/newPassword.jsp" />
 		<put-attribute name="header" value="" type="string" />
 		<put-attribute name="footer" value="" type="string" />
 		<put-list-attribute name="styles">
 			<add-attribute value="signin.css" />
 		</put-list-attribute>
-	</definition>	
+	</definition>
 </tiles-definitions>

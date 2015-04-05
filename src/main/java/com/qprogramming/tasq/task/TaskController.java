@@ -115,7 +115,7 @@ public class TaskController {
 
 	@Autowired
 	private CommentsRepository commRepo;
-	
+
 	@RequestMapping(value = "task/create", method = RequestMethod.GET)
 	public TaskForm startTaskCreate(Model model) {
 		fillCreateTaskModel(model);
@@ -387,7 +387,7 @@ public class TaskController {
 		Map<TaskLinkType, List<DisplayTask>> links = linkService
 				.findTaskLinks(id);
 		if (!task.isSubtask()) {
-			
+
 			List<Task> subtasks = taskSrv.findSubtasks(task);
 			// Add all subtasks into remaining work
 			for (Task subtask : subtasks) {
@@ -528,9 +528,9 @@ public class TaskController {
 			Account assignee = accSrv.findById(taskForm.getAssignee());
 			subTask.setAssignee(assignee);
 		}
-		if(task.isInSprint()){
+		if (task.isInSprint()) {
 			Hibernate.initialize(task.getSprints());
-			//TODO add to sprint
+			// TODO add to sprint
 		}
 		Hibernate.initialize(task.getSubtasks());
 		taskSrv.save(subTask);
@@ -1241,13 +1241,16 @@ public class TaskController {
 	private boolean saveTaskFiles(List<MultipartFile> files_array, Task task) {
 		// Save
 		for (MultipartFile multipartFile : files_array) {
-			File file = new File(taskSrv.getTaskDirectory(task)
-					+ File.separator + multipartFile.getOriginalFilename());
-			try {
-				FileUtils.writeByteArrayToFile(file, multipartFile.getBytes());
-			} catch (IOException e) {
-				LOG.error(e.getMessage());
-				return false;
+			if (!multipartFile.isEmpty()) {
+				File file = new File(taskSrv.getTaskDirectory(task)
+						+ File.separator + multipartFile.getOriginalFilename());
+				try {
+					FileUtils.writeByteArrayToFile(file,
+							multipartFile.getBytes());
+				} catch (IOException e) {
+					LOG.error(e.getMessage());
+					return false;
+				}
 			}
 		}
 		return true;

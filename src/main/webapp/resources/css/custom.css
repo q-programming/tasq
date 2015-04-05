@@ -342,7 +342,6 @@ ul.auto-complete-list {
 table.worklog_table {
 	width:100%;
 	border-width: 1px;
-/* 	border-style: hidden; */
 	border-collapse: collapse;
 	border-color: lightgray;
 	border-bottom-style: solid;
@@ -353,7 +352,6 @@ table.worklog_table td {
 	padding: 1px;
 	border-style: solid;
 	border-color: lightgray;
-	
 }
 .centered{
 	text-align: center;
@@ -389,4 +387,11 @@ table.worklog_table td {
   height: 12px;
   margin: 0;
   background-color: lightgray;
+td.centerd {
+  text-align: center;
+}
+.tag{
+	cursor: pointer;
+	padding: 5px;
+  	border-radius: 4px;
 }

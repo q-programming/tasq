@@ -220,7 +220,7 @@
 			</div>
 		</div>
 		<label class="checkbox" style="display: inherit; font-weight: normal">
-			<input type="checkbox" name="estimated" id="no_estimation"
+			<input type="checkbox" name="estimated" id="estimated"
 			value="true"> <s:message code="task.withoutEstimation"  />&nbsp;<i class="fa fa-question-circle a-tooltip"
 			data-html="true" title="<s:message  code ="task.withoutEstimation.help" />"
 			data-placement="right"></i>
@@ -325,12 +325,12 @@ $(document).ready(function($) {
 	
 	//Projects
 	
-	$("#no_estimation").click(function() {
+	$("#estimated").click(function() {
 		toggleEstimation();
 	});
 	
 	function toggleEstimation(){
-		if($("#no_estimation").prop("checked") == true){
+		if($("#estimated").prop("checked") == true){
 			$('#estimate_div').slideUp("slow");
 			$("#story_points").val("");
 			$("#estimate_optional").show();

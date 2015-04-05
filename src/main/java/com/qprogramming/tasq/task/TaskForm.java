@@ -106,7 +106,7 @@ public class TaskForm {
 		Period p = PeriodHelper.inFormat(getEstimate());
 		task.setEstimate(p);
 		task.setRemaining(p);
-		task.setEstimated(estimated);
+		task.setEstimated(!estimated);
 		task.setLoggedWork(PeriodHelper.inFormat(""));
 		task.setOwner(Utils.getCurrentAccount());
 		task.setPriority(TaskPriority.toPriority(getPriority()));

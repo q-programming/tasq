@@ -87,6 +87,12 @@
 				</thead>
 			</table>
 			<a class="anchor" id="sprintTotal"></a>
+			<h4 style="text-align: center;"><i class="fa fa-list-ul"></i> <s:message code="agile.sprint.total"/></h4>
+			<table id="summaryTable" class="table table-bordered"
+				style="width: 100%">
+				<thead id="totalSummary" class="theme">
+				</thead>
+			</table>
 		</div>
 	</div>
 </div>
@@ -136,7 +142,8 @@ $(document).ready(function() {
 	    }
 	    $("#chartdiv").append(loading_indicator);
 	    $('#eventsTable tbody').html('');
-	    $('#total').remove();
+	    $('#summaryTable tbody').html('');
+	    $('#totalSummary tr').remove()
 	    if(timeTracked){
 	    	$('th:nth-child(4)').hide();
 	    }else{
@@ -207,18 +214,57 @@ $(document).ready(function() {
 				var row = task + date + change + timeLogged + event + accountTd;
 				$("#eventsTable").append("<tr>"+row+"</tr>");
 	    	});
+			//Summary
+			//All tasks within sprint
+			var thead;
+			if(timeTracked){
+				thead = '<tr><th colspan=2><s:message code="task.task" /></th><th><s:message code="agile.time"/></th></tr>';
+			}else{
+				thead = '<tr><th colspan=1><s:message code="task.task" /></th><th><s:message code="task.storyPoints" /></th><th><s:message code="agile.time"/></th></tr>';
+			}
+			$("#totalSummary").append(thead);
 			//Total
-			var totalTxt = '<s:message code="agile.sprint.total"/>';
 			if(result.totalTime == '0m'){
 				result.totalTime = '0h';
 			}
 			if(timeTracked){
-				var totalRow = '<thead id="total" class="theme"><tr><th colspan="2">' + totalTxt + '</th><th colspan="2" style="text-align:center">~ ' + result.totalTime + '</th><th colspan="2"></th><thead>';
-				$("#eventsTable").append(totalRow);
+				var totalRow = '<tr class="theme"><th>Completed</th><th></th><th style="text-align:center">~ ' + result.totalTime + ' h</th>';
+				$("#summaryTable").append(totalRow);
 			}else{
-				var totalRow = '<thead id="total" class="theme"><tr><th colspan="2">' + totalTxt + '</th><th colspan="2" style="text-align:center">'+ result.totalPoints + ' SP</th><th colspan="2">~ ' + result.totalTime + '</th><th></th><thead>';
-				$("#eventsTable").append(totalRow);
+				var totalRow = '<tr class="theme"><th>Completed</th><th style="text-align:center">'+ result.totalPoints + ' SP</th><th style="text-align:center">~ ' + result.totalTime + ' h</th>';
+				$("#summaryTable").append(totalRow);
 			}
+			$.each(result.tasks.CLOSED, function(key,task){
+				var type = getTaskType(task.type);
+				var taskCell = '<td>'+type+'<a href="'+taskURL + task.id + '">['+task.id+'] ' + task.name + '</a></td>';
+				var metter;
+				if(timeTracked){
+					metter = '<td class="centerd">' + task.loggedWork + '</td>';
+				}else{
+					metter = '<td class="centerd">' + task.story_points + '</td><td class="centerd">' + task.loggedWork + '</td>';
+				}
+				row = '<tr>' + taskCell + metter + '</tr>';
+				$("#summaryTable").append(row);
+			})
+			row = '<tr><th colspan=3>Not Completed</th></tr>';
+			$("#summaryTable").append(row);
+			$.each(result.tasks.ALL, function(key,task){
+				var type = getTaskType(task.type);
+				var taskCell = '<td>'+type+'<a href="'+taskURL + task.id + '">['+task.id+'] ' + task.name + '</a></td>';
+				var metter;
+				if(timeTracked){
+					metter = '<td class="centerd">' + task.loggedWork + '</td>';
+				}else{
+					metter = '<td class="centerd">' + task.story_points + '</td><td class="centerd"></td>';
+				}
+				row = '<tr>' + taskCell + metter + '</tr>';
+				$("#summaryTable").append(row);
+			})
+
+
+// 			var totalTxt = '<s:message code="agile.sprint.total"/>';
+// 			$("#summaryTable").append('<tr class="theme"><th colspan="3" >' + totalTxt + '</th></tr>')
+
 			//remove loading
 			$("#loading").remove();
 	    	//render chart
@@ -349,6 +395,28 @@ $(document).ready(function() {
 				return '<s:message code="task.state.tasksprintremove"/>';
 			case "ESTIMATE":
 				return '<s:message code="task.state.estimatechange"/>';
+			default:
+				return 'not yet added ';
+		};
+	}
+	function getTaskType(type){
+		switch(type){
+			case "TASK":
+				var type='<i class="fa fa-lg fa-fw fa-check-square"></i> ';
+				return type;
+			case "USER_STORY":
+				var type='<i class="fa fa-lg fa-fw fa-lightbulb-o"></i> ';
+				return type;
+			case "ISSUE":
+				var type='<i class="fa fa-lg fa-fw fa-exclamation-triangle"></i> ';
+				return type;
+			case "BUG":
+				var type='<i class="fa fa-lg fa-fw fa-bug"></i> ';
+				return type;
+			case "IDLE":
+				var type='<i class="fa fa-lg fa-fw fa-coffee"></i> ';
+				return type;
+
 			default:
 				return 'not yet added ';
 		};

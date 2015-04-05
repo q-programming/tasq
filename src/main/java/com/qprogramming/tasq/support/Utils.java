@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,8 +25,11 @@ import com.qprogramming.tasq.task.Task;
 public class Utils {
 	private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
 	private static final String HTML_TAG_PATTERN = "<([A-Za-z][A-Za-z0-9]*)\\b[^>]*>(.*?)</\\1>";
+	private static final long NUM_100NS_INTERVALS_SINCE_UUID_EPOCH = 0x01b21dd213814000L;
 	private static String baseURL;
 	private static HttpServletRequest request;
+	
+	
 
 	@Value("${default.locale}")
 	private String defaultLang;
@@ -39,6 +43,14 @@ public class Utils {
 		request = httpServRequest;
 	}
 
+	/**
+	 * Returns milis for timestamp of given uuid
+	 * @param uuid
+	 * @return
+	 */
+	public static long getTimeFromUUID(UUID uuid) {
+		return (uuid.timestamp() - NUM_100NS_INTERVALS_SINCE_UUID_EPOCH) / 10000;
+	}
 	/**
 	 * Returns true if contents have at least one html tag
 	 * 

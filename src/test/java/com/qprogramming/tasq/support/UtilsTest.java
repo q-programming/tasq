@@ -7,9 +7,11 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -21,6 +23,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.fasterxml.uuid.Generators;
 import com.qprogramming.tasq.MockSecurityContext;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
@@ -116,6 +119,15 @@ public class UtilsTest {
 		Assert.assertTrue(Roles.isUser());
 		Assert.assertTrue(Roles.isAdmin());
 		Assert.assertEquals("role.admin",Roles.ROLE_ADMIN.getCode());
+	}
+	
+	@Test
+	public void uuidTest(){
+		UUID uuid = Generators.timeBasedGenerator().generate();
+		uuid.timestamp();
+		DateTime date = new  DateTime(Utils.getTimeFromUUID(uuid));
+		DateTime beforedate = new DateTime().minusDays(1);
+		Assert.assertTrue(beforedate.isBefore(date));
 	}
 	
 

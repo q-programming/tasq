@@ -12,6 +12,7 @@ import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.servlet.ServletContext;
@@ -40,6 +41,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.fasterxml.uuid.Generators;
 import com.qprogramming.tasq.MockSecurityContext;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountController;
@@ -93,7 +95,6 @@ public class SignupControllerTest {
 	@Mock
 	private ServletOutputStream outStreamMock;
 
-
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
@@ -129,26 +130,25 @@ public class SignupControllerTest {
 	@Test
 	public void signUpAndConfirmTest() {
 		try {
-		when(requestMock.getSession()).thenReturn(httpSesssionMock);
-		URL fileURL = getClass().getResource("/avatar.png");
-		when(httpSesssionMock.getServletContext()).thenReturn(scMock);
-		when(scMock.getRealPath(anyString())).thenReturn(fileURL.getFile());
+			when(requestMock.getSession()).thenReturn(httpSesssionMock);
+			URL fileURL = getClass().getResource("/avatar.png");
+			when(httpSesssionMock.getServletContext()).thenReturn(scMock);
+			when(scMock.getRealPath(anyString())).thenReturn(fileURL.getFile());
 			when(responseMock.getOutputStream()).thenReturn(outStreamMock);
-		when(accRepoMock.findAll()).thenReturn(accountsList);
-		when(accRepoMock.findByEmail(NEW_EMAIL)).thenReturn(null);
-		when(passwordEncoder.encode(any(CharSequence.class))).thenReturn(
-				"encodedPassword");
-		SignupForm form = fillForm();
-		Errors errors = new BeanPropertyBindingResult(form, "form");
-		signupCtr.signup(form, errors, raMock, requestMock);
-		verify(entityManagerMock, times(1)).persist(any(Account.class));
-		when(accRepoMock.findByUuid("confirmMe")).thenReturn(testAccount);
-		signupCtr.confirm("confirmMe", raMock);
-		verify(accRepoMock,times(1)).save(testAccount);
+			when(accRepoMock.findAll()).thenReturn(accountsList);
+			when(accRepoMock.findByEmail(NEW_EMAIL)).thenReturn(null);
+			when(passwordEncoder.encode(any(CharSequence.class))).thenReturn(
+					"encodedPassword");
+			SignupForm form = fillForm();
+			Errors errors = new BeanPropertyBindingResult(form, "form");
+			signupCtr.signup(form, errors, raMock, requestMock);
+			verify(entityManagerMock, times(1)).persist(any(Account.class));
+			when(accRepoMock.findByUuid("confirmMe")).thenReturn(testAccount);
+			signupCtr.confirm("confirmMe", raMock);
+			verify(accRepoMock, times(1)).save(testAccount);
 		} catch (IOException e) {
 			Assert.fail(e.getMessage());
 		}
-
 	}
 
 	@Test
@@ -159,6 +159,7 @@ public class SignupControllerTest {
 		signupCtr.signup(form, errors, raMock, requestMock);
 		Assert.assertTrue(errors.hasErrors());
 	}
+
 	@Test
 	public void signUpEmailFormErrorTest() {
 		when(accRepoMock.findByEmail(NEW_EMAIL)).thenReturn(testAccount);
@@ -169,22 +170,91 @@ public class SignupControllerTest {
 	}
 
 	@Test
-	public void signUpPasswordNotMatchTest() {
+	public void confirmErrorTest() {
+		when(accRepoMock.findByUuid("confirmMe")).thenReturn(null);
+		signupCtr.confirm("don't confirm me", raMock);
+		verify(raMock, times(1)).addFlashAttribute(anyString(),
+				new Message(anyString(), Message.Type.DANGER, new Object[] {}));
+
+	}
+
+	@Test
+	public void SignupPasswordNotMatchingTest() {
 		SignupForm form = fillForm();
 		Errors errors = new BeanPropertyBindingResult(form, "form");
 		form.setConfirmPassword("wrong");
 		signupCtr.signup(form, errors, raMock, requestMock);
 		Assert.assertTrue(errors.hasErrors());
 	}
+
 	@Test
-	public void confirmErrorTest() {
-		when(accRepoMock.findByUuid("confirmMe")).thenReturn(null);
-		signupCtr.confirm("don't confirm me", raMock);
+	public void resetSubmitNotMatchingTest() {
+		PasswordResetForm form = fillPasswordForm();
+		Errors errors = new BeanPropertyBindingResult(form, "form");
+		form.setConfirmPassword("wrong");
+		signupCtr.resetSubmit(form, errors, raMock);
+		Assert.assertTrue(errors.hasErrors());
+	}
+
+	@Test
+	public void resetSubmitNoAccountTest() {
+		when(
+				msgMock.getMessage(anyString(), any(Object[].class),
+						any(Locale.class))).thenReturn("MESSAGE");
+
+		PasswordResetForm form = fillPasswordForm();
+		Errors errors = new BeanPropertyBindingResult(form, "form");
+		signupCtr.resetSubmit(form, errors, raMock);
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.DANGER, new Object[] {}));
-		
+	}
+
+	@Test
+	public void resetSubmitTest() {
+		when(
+				msgMock.getMessage(anyString(), any(Object[].class),
+						any(Locale.class))).thenReturn("MESSAGE");
+		when(accountSrv.findByUuid(anyString())).thenReturn(testAccount);
+		when(passwordEncoder.encode(any(CharSequence.class))).thenReturn(
+				"encodedPassword");
+		PasswordResetForm form = fillPasswordForm();
+		Errors errors = new BeanPropertyBindingResult(form, "form");
+		signupCtr.resetSubmit(form, errors, raMock);
+		verify(raMock, times(1)).addFlashAttribute(anyString(),
+				new Message(anyString(), Message.Type.DANGER, new Object[] {}));
+	}
+
+	@Test
+	public void resetPasswordNoAccountTest() {
+		when(
+				msgMock.getMessage(anyString(), any(Object[].class),
+						any(Locale.class))).thenReturn("MESSAGE");
+		signupCtr.resetPassword(EMAIL, raMock, requestMock);
+		verify(raMock, times(1))
+				.addFlashAttribute(
+						anyString(),
+						new Message(anyString(), Message.Type.WARNING,
+								new Object[] {}));
 	}
 	
+	@Test
+	public void resetPasswordTest() {
+		when(
+				msgMock.getMessage(anyString(), any(Object[].class),
+						any(Locale.class))).thenReturn("MESSAGE");
+		when(accountSrv.findByEmail(EMAIL)).thenReturn(testAccount);
+		when(requestMock.getScheme()).thenReturn("http");
+		when(requestMock.getServerName()).thenReturn("testServer");
+		when(requestMock.getServerPort()).thenReturn(8080);
+		signupCtr.resetPassword(EMAIL, raMock, requestMock);
+		verify(raMock, times(1))
+				.addFlashAttribute(
+						anyString(),
+						new Message(anyString(), Message.Type.WARNING,
+								new Object[] {}));
+	}
+
+
 	private List<Account> createList() {
 		List<Account> accountsList = new LinkedList<Account>();
 		accountsList.add(createAccount(JOHN, DOE));
@@ -209,6 +279,15 @@ public class SignupControllerTest {
 		form.setEmail(NEW_EMAIL);
 		form.setPassword(PASSWORD);
 		form.setConfirmPassword(PASSWORD);
+		return form;
+	}
+
+	private PasswordResetForm fillPasswordForm() {
+		PasswordResetForm form = new PasswordResetForm();
+		form.setPassword(PASSWORD);
+		form.setConfirmPassword(PASSWORD);
+		UUID uuid = Generators.timeBasedGenerator().generate();
+		form.setId(uuid.toString());
 		return form;
 	}
 
