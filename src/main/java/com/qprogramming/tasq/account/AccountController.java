@@ -48,7 +48,7 @@ import com.qprogramming.tasq.support.web.MessageHelper;
 @Controller
 @Secured("ROLE_USER")
 public class AccountController {
-	
+
 	@Value("${home.directory}")
 	private String tasqRootDir;
 
@@ -127,18 +127,16 @@ public class AccountController {
 	List<DisplayAccount> listAccounts(@RequestParam String term,
 			HttpServletResponse response) {
 		response.setContentType("application/json");
-		List<Account> all_accountr = accountSrv.findAll();
+		List<Account> accounts = new LinkedList<Account>();
+		if (term == null) {
+			accounts = accountSrv.findAll();
+		} else {
+			accounts = accountSrv.findByNameSurnameContaining(term);
+		}
 		List<DisplayAccount> result = new ArrayList<DisplayAccount>();
-		for (Account account : all_accountr) {
-			if (term == null) {
-				DisplayAccount s_account = new DisplayAccount(account);
-				result.add(s_account);
-			} else {
-				if (StringUtils.containsIgnoreCase(account.toString(), term)) {
-					DisplayAccount s_account = new DisplayAccount(account);
-					result.add(s_account);
-				}
-			}
+		for (Account account : accounts) {
+			DisplayAccount d_account = new DisplayAccount(account);
+			result.add(d_account);
 		}
 		return result;
 	}
@@ -150,7 +148,7 @@ public class AccountController {
 			@PageableDefault(size = 25, page = 0, sort = "surname", direction = Direction.ASC) Pageable p) {
 		Page<Account> page;
 		if (term != null) {
-			page = accountSrv.findByStartingWith(term, p);
+			page = accountSrv.findByNameSurnameContaining(term, p);
 		} else {
 			page = accountSrv.findAll(p);
 		}
@@ -189,11 +187,11 @@ public class AccountController {
 		return null;
 	}
 
-	private String getAvatarDir(){
+	private String getAvatarDir() {
 		return tasqRootDir + File.separator + AVATAR_DIR + File.separator;
 	}
-	
-	private String getAvatar(Long id){
-		return  getAvatarDir() + id + PNG;
+
+	private String getAvatar(Long id) {
+		return getAvatarDir() + id + PNG;
 	}
 }

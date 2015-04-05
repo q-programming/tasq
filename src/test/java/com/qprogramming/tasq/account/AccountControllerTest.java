@@ -136,7 +136,7 @@ public class AccountControllerTest {
 		Page<Account> result = new PageImpl<Account>(accountsList);
 		Page<Account> singleResult = new PageImpl<Account>(single);
 		Pageable p = new PageRequest(0, 5, new Sort(Sort.Direction.ASC, "surname"));
-		when(accSrvMock.findByStartingWith("Do", p)).thenReturn(singleResult);
+		when(accSrvMock.findByNameSurnameContaining("Do", p)).thenReturn(singleResult);
 		when(accSrvMock.findAll(p)).thenReturn(result);
 		Assert.assertEquals(5, accountCtr.listUsers(null, p).getTotalElements());  accountCtr.listUsers(null, p);
 		Assert.assertEquals(1, accountCtr.listUsers("Do", p).getTotalElements());  accountCtr.listUsers(null, p);
@@ -148,9 +148,6 @@ public class AccountControllerTest {
 		when(accSrvMock.findAll()).thenReturn(accountsList);
 		List<DisplayAccount> list = accountCtr.listAccounts(null, responseMock);
 		Assert.assertEquals(5, list.size());
-		list = accountCtr.listAccounts("do", responseMock);
-		Assert.assertEquals(2, list.size());
-
 	}
 
 	@Test

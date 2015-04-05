@@ -126,6 +126,15 @@ public class TaskService {
 		return resultList;
 	}
 	
+	/**
+	 * Returns all tasks with given tag
+	 * @param name
+	 * @return
+	 */
+	public List<Task> findByTag(String name) {
+		return taskRepo.findByTagsName(name);
+	}
+	
 //	@Transactional
 	public Set<Sprint> getTaskSprints(String id){
 		Task task = taskRepo.findById(id);
