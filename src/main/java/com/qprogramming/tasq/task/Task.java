@@ -53,7 +53,7 @@ public class Task implements java.io.Serializable {
 
 	@Column
 	private Date create_date;
-	
+
 	@Column
 	private Date lastUpdate;
 
@@ -107,7 +107,7 @@ public class Task implements java.io.Serializable {
 
 	@ManyToMany(fetch = FetchType.LAZY)
 	private Set<Sprint> sprints = new HashSet<Sprint>();
-	
+
 	@ManyToMany(fetch = FetchType.EAGER)
 	private Set<Tag> tags = new HashSet<Tag>();
 
@@ -122,8 +122,8 @@ public class Task implements java.io.Serializable {
 
 	@Column
 	private String parent;
-	
-	@Column(name="task_order")
+
+	@Column(name = "task_order")
 	private Long taskOrder;
 
 	public String getId() {
@@ -145,9 +145,10 @@ public class Task implements java.io.Serializable {
 	public Date getRawLastUpdate() {
 		return lastUpdate;
 	}
+
 	public String getLastUpdate() {
-		if (lastUpdate!=null){
-		return Utils.convertDateTimeToString(lastUpdate);
+		if (lastUpdate != null) {
+			return Utils.convertDateTimeToString(lastUpdate);
 		}
 		return "";
 	}
@@ -268,7 +269,8 @@ public class Task implements java.io.Serializable {
 	}
 
 	public void addLoggedWork(Period loggedWork) {
-		this.loggedWork = PeriodHelper.plusPeriods(getRawLoggedWork(), loggedWork);
+		this.loggedWork = PeriodHelper.plusPeriods(getRawLoggedWork(),
+				loggedWork);
 	}
 
 	public Enum<TaskState> getState() {
@@ -341,7 +343,7 @@ public class Task implements java.io.Serializable {
 	}
 
 	public Integer getStory_points() {
-		return story_points;
+		return story_points != null ? story_points : 0;
 	}
 
 	public void setStory_points(Integer story_points) {

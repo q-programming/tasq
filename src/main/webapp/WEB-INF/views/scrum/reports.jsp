@@ -241,6 +241,9 @@ $(document).ready(function() {
 				if(timeTracked){
 					metter = '<td class="centerd">' + task.loggedWork + '</td>';
 				}else{
+					if(task.story_points == 0){
+						task.story_points = '-';
+					}
 					metter = '<td class="centerd">' + task.story_points + '</td><td class="centerd">' + task.loggedWork + '</td>';
 				}
 				row = '<tr>' + taskCell + metter + '</tr>';
@@ -416,7 +419,12 @@ $(document).ready(function() {
 			case "IDLE":
 				var type='<i class="fa fa-lg fa-fw fa-coffee"></i> ';
 				return type;
-
+			case "SUBTASK":
+				var type='<i class="fa fa-lg fa-fw fa-check-circle-o"></i> ';
+				return type;
+			case "SUBBUG":
+				var type='<i class="fa fa-lg fa-fw fa-bug"></i> ';
+				return type;
 			default:
 				return 'not yet added ';
 		};
