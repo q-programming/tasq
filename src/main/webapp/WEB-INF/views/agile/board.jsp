@@ -18,7 +18,7 @@
 		<s:message code="task.state.todo" />
 	</div>
 	<c:forEach items="${tasks}" var="task">
-		<c:if test="${task.state eq 'TO_DO'}">
+		<c:if test="${task.state eq 'TO_DO' && not task.subtask}">
 			<t:card task="${task}" can_edit="${can_edit}" />
 		</c:if>
 	</c:forEach>
@@ -30,7 +30,7 @@
 		<s:message code="task.state.ongoing" />
 	</div>
 	<c:forEach items="${tasks}" var="task">
-		<c:if test="${task.state eq 'ONGOING'}">
+		<c:if test="${task.state eq 'ONGOING' && not task.subtask}">
 			<t:card task="${task}" can_edit="${can_edit}" />
 		</c:if>
 	</c:forEach>
@@ -42,7 +42,7 @@
 		<s:message code="task.state.closed" />
 	</div>
 	<c:forEach items="${tasks}" var="task">
-		<c:if test="${task.state eq 'CLOSED'}">
+		<c:if test="${task.state eq 'CLOSED' && not task.subtask}">
 			<t:card task="${task}" can_edit="${can_edit}" />
 		</c:if>
 	</c:forEach>
@@ -54,7 +54,7 @@
 		<s:message code="task.state.blocked" />
 	</div>
 	<c:forEach items="${tasks}" var="task">
-		<c:if test="${task.state eq 'BLOCKED'}">
+		<c:if test="${task.state eq 'BLOCKED' && not task.subtask}">
 			<t:card task="${task}" can_edit="${can_edit}" />
 		</c:if>
 	</c:forEach>
