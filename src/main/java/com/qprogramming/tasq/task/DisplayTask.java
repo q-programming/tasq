@@ -26,6 +26,7 @@ public class DisplayTask implements Comparable<DisplayTask> {
 	private Boolean estimated = false;
 	private boolean inSprint;
 	private Integer subtasks;
+	private boolean subtask;
 	private String parent;
 	private Float percentage;
 
@@ -36,6 +37,7 @@ public class DisplayTask implements Comparable<DisplayTask> {
 			assignee = new DisplayAccount(task.getAssignee());
 		}
 		this.percentage = task.getPercentage_logged();
+		this.subtask = task.isSubtask();
 	}
 
 	public String getId() {
@@ -172,6 +174,14 @@ public class DisplayTask implements Comparable<DisplayTask> {
 
 	public void setPercentage(Float percentage) {
 		this.percentage = percentage;
+	}
+
+	public boolean isSubtask() {
+		return subtask;
+	}
+
+	public void setSubtask(boolean subtask) {
+		this.subtask = subtask;
 	}
 
 	@Override
