@@ -531,10 +531,8 @@
 								class="fa fa-lg fa-files-o"></i> <s:message code="task.files" />
 							</span>
 						</h5>
-						<a class="btn btn-default btn-xxs a-tooltip pull-right"
-							href="<c:url value="task/${task.id}/fileadd"/>"
-							data-placement="top"
-							data-original-title="<s:message code="task.subtasks.add"/>">
+						<a class="btn btn-default btn-xxs a-tooltip pull-right addFileButton" href="#" data-toggle="modal"
+						data-target="#files_task" data-taskID="${task.id}">
 							<i class="fa fa-plus"></i> <i class="fa fa-lg fa-file"></i>
 						</a>
 					</div>
@@ -565,8 +563,13 @@
 									</c:otherwise>
 								</c:choose>
 								<tr>
-									<td><i class="fa ${file_type}"></i>&nbsp;<a
-										href="<c:url value="task/${task.id}/file?get=${file}"></c:url>">${file}</a>
+									<td><i class="fa ${file_type}"></i>&nbsp;
+									<c:if test="${file_type eq 'fa-file-image-o'}">
+										<img data-src="holder.js/50x50"
+											style="height: 50px;" 
+											src="<c:url value="task/${task.id}/imgfile?get=${file}"/>" />
+									</c:if>
+									<a href="<c:url value="task/${task.id}/file?get=${file}"></c:url>">${file}</a>
 									</td>
 									<c:if test="${can_edit && user.isUser || is_assignee}">
 										<td style="width: 30px">

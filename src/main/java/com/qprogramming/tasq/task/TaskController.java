@@ -64,7 +64,6 @@ import com.qprogramming.tasq.task.comments.CommentsRepository;
 import com.qprogramming.tasq.task.link.TaskLinkService;
 import com.qprogramming.tasq.task.link.TaskLinkType;
 import com.qprogramming.tasq.task.watched.WatchedTaskService;
-import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
@@ -1021,6 +1020,32 @@ public class TaskController {
 		return "redirect:" + request.getHeader("Referer");
 	}
 
+	@RequestMapping(value = "/task/{id}/imgfile", method = RequestMethod.GET)
+	public @ResponseBody String showImageFile(@PathVariable String id,
+			@RequestParam("get") String filename, HttpServletRequest request,
+			HttpServletResponse response, RedirectAttributes ra)
+			throws IOException {
+		Task task = taskSrv.findById(id);
+		if (task.getProject().getParticipants()
+				.contains(Utils.getCurrentAccount())) {
+			File file = new File(taskSrv.getTaskDirectory(task)
+					+ File.separator + filename);
+			if (file != null) {
+				response.setHeader("content-Disposition",
+						"attachment; filename=" + filename);
+				InputStream is = new FileInputStream(file);
+				IOUtils.copyLarge(is, response.getOutputStream());
+				response.setContentType("image/png");
+			}
+		} else {
+			MessageHelper.addErrorAttribute(
+					ra,
+					msg.getMessage("error.accesRights", null,
+							Utils.getCurrentLocale()));
+		}
+		return "redirect:" + request.getHeader("Referer");
+	}
+
 	@RequestMapping(value = "/task/{id}/remove", method = RequestMethod.GET)
 	public String removeFile(@PathVariable String id,
 			@RequestParam("file") String filename, HttpServletRequest request,
@@ -1308,5 +1333,4 @@ public class TaskController {
 		watchSrv.startWatching(task);
 		return true;
 	}
-
 }
