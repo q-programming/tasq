@@ -41,14 +41,13 @@ import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.agile.Sprint;
-import com.qprogramming.tasq.agile.SprintRepository;
+import com.qprogramming.tasq.agile.SprintService;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.ProjectSorter;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
 import com.qprogramming.tasq.task.Task;
-import com.qprogramming.tasq.task.TaskController;
 import com.qprogramming.tasq.task.TaskPriority;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
@@ -66,18 +65,18 @@ public class ProjetController {
 	private ProjectService projSrv;
 	private AccountService accSrv;
 	private TaskService taskSrv;
-	private SprintRepository sprintRepo;
+	private SprintService sprintSrv;
 	private WorkLogService wrkLogSrv;
 	private MessageSource msg;
 
 	@Autowired
 	public ProjetController(ProjectService projSrv, AccountService accSrv,
-			TaskService taskSrv, SprintRepository sprintRepo,
+			TaskService taskSrv, SprintService sprintSrv,
 			WorkLogService wrklSrv, MessageSource msg) {
 		this.projSrv = projSrv;
 		this.accSrv = accSrv;
 		this.taskSrv = taskSrv;
-		this.sprintRepo = sprintRepo;
+		this.sprintSrv = sprintSrv;
 		this.wrkLogSrv = wrklSrv;
 		this.msg = msg;
 	}
@@ -540,7 +539,7 @@ public class ProjetController {
 			project.setDefault_priority(priority);
 		}
 		project.setDefault_type(type);
-		Sprint activeSprint = sprintRepo.findByProjectIdAndActiveTrue(id);
+		Sprint activeSprint = sprintSrv.findByProjectIdAndActiveTrue(id);
 		if (activeSprint != null) {
 			MessageHelper.addWarningAttribute(
 					ra,

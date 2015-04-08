@@ -235,39 +235,38 @@ $(document).ready(function() {
 				$("#summaryTable").append(totalRow);
 			}
 			$.each(result.tasks.CLOSED, function(key,task){
-				var type = getTaskType(task.type);
-				var taskCell = '<td>'+type+'<a href="'+taskURL + task.id + '">['+task.id+'] ' + task.name + '</a></td>';
-				var metter;
-				if(timeTracked){
-					metter = '<td class="centerd">' + task.loggedWork + '</td>';
-				}else{
-					if(task.story_points == 0){
-						task.story_points = '-';
+				if(!task.subtask){
+					var type = getTaskType(task.type);
+					var taskCell = '<td>'+type+'<a href="'+taskURL + task.id + '">['+task.id+'] ' + task.name + '</a></td>';
+					var metter;
+					if(timeTracked){
+						metter = '<td class="centerd">' + task.loggedWork + '</td>';
+					}else{	
+						if(task.story_points == 0){
+							task.story_points = '-';
+						}
+						metter = '<td class="centerd">' + task.story_points + '</td><td class="centerd">' + task.loggedWork + '</td>';
 					}
-					metter = '<td class="centerd">' + task.story_points + '</td><td class="centerd">' + task.loggedWork + '</td>';
+					row = '<tr>' + taskCell + metter + '</tr>';
+					$("#summaryTable").append(row);
 				}
-				row = '<tr>' + taskCell + metter + '</tr>';
-				$("#summaryTable").append(row);
 			})
 			row = '<tr><th colspan=3>Not Completed</th></tr>';
 			$("#summaryTable").append(row);
 			$.each(result.tasks.ALL, function(key,task){
-				var type = getTaskType(task.type);
-				var taskCell = '<td>'+type+'<a href="'+taskURL + task.id + '">['+task.id+'] ' + task.name + '</a></td>';
-				var metter;
-				if(timeTracked){
-					metter = '<td class="centerd">' + task.loggedWork + '</td>';
-				}else{
-					metter = '<td class="centerd">' + task.story_points + '</td><td class="centerd"></td>';
+				if(!task.subtask){
+					var type = getTaskType(task.type);
+					var taskCell = '<td>'+type+'<a href="'+taskURL + task.id + '">['+task.id+'] ' + task.name + '</a></td>';
+					var metter;
+					if(timeTracked){
+						metter = '<td class="centerd">' + task.loggedWork + '</td>';
+					}else{
+						metter = '<td class="centerd">' + task.story_points + '</td><td class="centerd"></td>';
+					}
+					row = '<tr>' + taskCell + metter + '</tr>';
+					$("#summaryTable").append(row);
 				}
-				row = '<tr>' + taskCell + metter + '</tr>';
-				$("#summaryTable").append(row);
 			})
-
-
-// 			var totalTxt = '<s:message code="agile.sprint.total"/>';
-// 			$("#summaryTable").append('<tr class="theme"><th colspan="3" >' + totalTxt + '</th></tr>')
-
 			//remove loading
 			$("#loading").remove();
 	    	//render chart

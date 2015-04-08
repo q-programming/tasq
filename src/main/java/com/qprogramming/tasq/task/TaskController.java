@@ -49,7 +49,7 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.agile.Sprint;
-import com.qprogramming.tasq.agile.SprintRepository;
+import com.qprogramming.tasq.agile.SprintService;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
@@ -104,7 +104,7 @@ public class TaskController {
 	private MessageSource msg;
 
 	@Autowired
-	private SprintRepository sprintRepository;
+	private SprintService sprintSrv;
 
 	@Autowired
 	private TaskLinkService linkService;
@@ -201,7 +201,7 @@ public class TaskController {
 			// Create log work
 			taskSrv.save(task);
 			if (taskForm.getAddToSprint() != null) {
-				Sprint sprint = sprintRepository.findByProjectIdAndSprintNo(
+				Sprint sprint = sprintSrv.findByProjectIdAndSprintNo(
 						project.getId(), taskForm.getAddToSprint());
 				task.addSprint(sprint);
 				// increase scope
@@ -528,8 +528,9 @@ public class TaskController {
 			subTask.setAssignee(assignee);
 		}
 		if (task.isInSprint()) {
-			Hibernate.initialize(task.getSprints());
-			// TODO add to sprint
+			Sprint active = sprintSrv.findByProjectIdAndActiveTrue(task
+					.getProject().getId());
+			subTask.addSprint(active);
 		}
 		Hibernate.initialize(task.getSubtasks());
 		taskSrv.save(subTask);
@@ -996,7 +997,8 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/{id}/file", method = RequestMethod.GET)
-	public @ResponseBody String downloadFile(@PathVariable String id,
+	public @ResponseBody
+	String downloadFile(@PathVariable String id,
 			@RequestParam("get") String filename, HttpServletRequest request,
 			HttpServletResponse response, RedirectAttributes ra)
 			throws IOException {
@@ -1021,7 +1023,8 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/{id}/imgfile", method = RequestMethod.GET)
-	public @ResponseBody String showImageFile(@PathVariable String id,
+	public @ResponseBody
+	String showImageFile(@PathVariable String id,
 			@RequestParam("get") String filename, HttpServletRequest request,
 			HttpServletResponse response, RedirectAttributes ra)
 			throws IOException {

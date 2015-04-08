@@ -45,7 +45,7 @@ import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.agile.Sprint;
-import com.qprogramming.tasq.agile.SprintRepository;
+import com.qprogramming.tasq.agile.SprintService;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.NewProjectForm;
 import com.qprogramming.tasq.projects.Project;
@@ -82,7 +82,7 @@ public class ProjectControllerTest {
 	@Mock
 	private TaskService taskSrv;
 	@Mock
-	private SprintRepository sprintRepo;
+	private SprintService sprintSrvMock;
 	@Mock
 	private WorkLogService wrkLogSrv;
 	@Mock
@@ -118,7 +118,7 @@ public class ProjectControllerTest {
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
 		projectCtr = new ProjetController(projSrv, accountServiceMock, taskSrv,
-				sprintRepo, wrkLogSrv, msg);
+				sprintSrvMock, wrkLogSrv, msg);
 	}
 
 	@Test
@@ -404,7 +404,7 @@ public class ProjectControllerTest {
 		Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
 		project.setId(1L);
 		when(projSrv.findById(1L)).thenReturn(project);
-		when(sprintRepo.findByProjectIdAndActiveTrue(1L)).thenReturn(
+		when(sprintSrvMock.findByProjectIdAndActiveTrue(1L)).thenReturn(
 				new Sprint());
 		when(accountServiceMock.findById(1L)).thenReturn(testAccount);
 		projectCtr.updateProperties(1L, true, TaskPriority.BLOCKER,
@@ -421,7 +421,7 @@ public class ProjectControllerTest {
 		Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
 		project.setId(1L);
 		when(projSrv.findById(1L)).thenReturn(project);
-		when(sprintRepo.findByProjectIdAndActiveTrue(1L)).thenReturn(null);
+		when(sprintSrvMock.findByProjectIdAndActiveTrue(1L)).thenReturn(null);
 		when(accountServiceMock.findById(1L)).thenReturn(testAccount);
 		projectCtr.updateProperties(1L, true, TaskPriority.BLOCKER,
 				TaskType.BUG, 1L, raMock, requestMock);
