@@ -63,6 +63,8 @@ import com.qprogramming.tasq.task.comments.Comment;
 import com.qprogramming.tasq.task.comments.CommentsRepository;
 import com.qprogramming.tasq.task.link.TaskLinkService;
 import com.qprogramming.tasq.task.link.TaskLinkType;
+import com.qprogramming.tasq.task.tag.Tag;
+import com.qprogramming.tasq.task.tag.TagsRepository;
 import com.qprogramming.tasq.task.watched.WatchedTaskService;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
@@ -114,6 +116,9 @@ public class TaskController {
 
 	@Autowired
 	private CommentsRepository commRepo;
+
+	@Autowired
+	private TagsRepository tagsRepo;
 
 	@RequestMapping(value = "task/create", method = RequestMethod.GET)
 	public TaskForm startTaskCreate(Model model) {
@@ -446,14 +451,15 @@ public class TaskController {
 						TaskState.valueOf(state));
 			}
 			if (query != null && query != "") {
+				Tag tag = tagsRepo.findByName(query);
 				List<Task> searchResult = new LinkedList<Task>();
 				for (Task task : taskList) {
-
 					if (StringUtils.containsIgnoreCase(task.getId(), query)
 							|| StringUtils.containsIgnoreCase(task.getName(),
 									query)
 							|| StringUtils.containsIgnoreCase(
-									task.getDescription(), query)) {
+									task.getDescription(), query)
+							|| task.getTags().contains(tag)) {
 						searchResult.add(task);
 					}
 				}
@@ -472,7 +478,6 @@ public class TaskController {
 			}
 			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID,
 					false));
-			// Utils.initializeWorkLogs(taskList);
 			model.addAttribute("tasks", taskList);
 			model.addAttribute("active_project", active);
 		}

@@ -161,12 +161,13 @@
 				<%-- Logged in user --%>
 				<security:authorize access="isAuthenticated()">
 					<security:authentication property="principal" var="user" />
-					<li><form class="form-search form-inline"
+					<li><form id="searchForm" class="form-search form-inline"
 							action="<s:url value="/tasks"></s:url>">
-							<input type="text" name="query"
+							<input id="searchField" type="text" name="query"
 								class="form-control search-query input-sm"
 								placeholder="<s:message code="task.search"/>"
 								style="border-radius: 10px" />
+							<div id="tagsLoading" class="ui-widget-content ui-corner-all" style="display:none"><i class="fa fa-cog fa-spin"></i>&nbsp;<s:message code="main.loading" /></div>
 						</form></li>
 					<li>
 						<div style="text-align: right;">

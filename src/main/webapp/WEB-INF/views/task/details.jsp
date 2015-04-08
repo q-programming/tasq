@@ -180,7 +180,7 @@
 								<input id="taskTags" type="text" title="<s:message code="task.tags.add"/>"
 										value="<c:forEach var="tag" items="${task.tags}">${tag},</c:forEach>"/>
 									<i id="editTags" class="fa fa-pencil" style="vertical-align: super; display: none"></i>
-									<i id="tagsLoading" class="fa fa-cog fa-spin" style="vertical-align: super; display: none"></i>
+									<i id="searchFieldHelp" class="fa fa-cog fa-spin" style="vertical-align: super;"></i>
 							</c:if>
 							<c:if test="${not can_edit}">
 								<div style="color: rgb(187, 186, 186);padding: 6px 6px;">
@@ -1127,7 +1127,7 @@ $(document).on("click",".delete_task",function(e) {
 
 	$( "#tagsinput" ).autocomplete({
     	source: function(request, response) {
-    		$("#tagsLoading").show();
+    		$("#searchFieldHelp").show();
     		var term = request.term;
     		if ( term in cache ) {
               response( cache[ term ] );
@@ -1135,7 +1135,7 @@ $(document).on("click",".delete_task",function(e) {
     	    }
     		var url='<c:url value="/getTags"/>';
     		$.get(url,{term:term},function(data) {
-    			$("#tagsLoading").hide();
+    			$("#searchFieldHelp").hide();
     			var results = [];
                 $.each(data, function(i, item) {
                     var itemToAdd = {
@@ -1175,9 +1175,8 @@ $(document).on("click",".delete_task",function(e) {
 			checkIfEmptyTags();
 		});
 	});
-	
-	$(".tag").click(function(){
-		console.log("clicked")
+	$(document).on("click",".tag",function(e) {
+		console.log("clicked");
 		console.log($(this).data("name"));
 		var url = '<c:url value="/tasks"/>?query=' + $(this).data("name");
 		window.location.href = url;

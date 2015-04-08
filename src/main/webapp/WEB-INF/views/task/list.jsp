@@ -89,8 +89,15 @@
 				<c:set var="query_url">
 							query=${param.query}&
 			</c:set>
+				<c:if test="${fn:length(param.query) > 40}">
+					<c:set var="searchQueryTag">${fn:substring(param.query, 0, 40)}...</c:set>
+				</c:if>
+				<c:if test="${fn:length(param.query) < 40}">
+					<c:set var="searchQueryTag">${param.query}</c:set>
+				</c:if>
+				
 				<span style="white-space:nowrap;"><s:message code="main.search" />: <span
-					class="filter_span"> ${fn:substring(param.query, 0, 40)}...<a
+					class="filter_span"> ${searchQueryTag}<a
 						href="<c:url value="tasks?${projID_url}${state_url}${priority_url}"/>">
 						<i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
 						</a></span></span>

@@ -21,6 +21,7 @@
 	<jsp:include page="../views/modals/users.jsp" />
 </security:authorize>
 <script>
+var cache = {};
 	$(function() {
 		$('.a-tooltip').tooltip();
 	});
@@ -45,6 +46,36 @@
 			window.location.href = url;
 		}
 	});
+	
+	$( "#searchField" ).autocomplete({
+		appendTo: ".container",
+		source: function(request, response) {
+    		$("#tagsLoading").show();
+    		var term = request.term;
+    		if ( term in cache ) {
+              response( cache[ term ] );
+              return;
+    	    }
+    		var url='<c:url value="/getTags"/>';
+    		$.get(url,{term:term},function(data) {
+    			$("#tagsLoading").hide();
+    			var results = [];
+                $.each(data, function(i, item) {
+                    var itemToAdd = {
+                        value : item.name,
+                        label : item.name
+                    };
+                    results.push(itemToAdd);
+                });
+                cache[ term ] = results;
+                return response(results);
+    		});
+    	},
+    	select : function(event, ui) {
+			$("#searchField").val(ui.item.value);
+			$("#searchForm").submit();
+    	}
+    });
 
 	$(document).ready(
 			function($) {
