@@ -432,11 +432,11 @@ public class Task implements java.io.Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((description == null) ? 0 : description.hashCode());
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((owner == null) ? 0 : owner.hashCode());
+		result = prime * result
+				+ ((priority == null) ? 0 : priority.hashCode());
+		result = prime * result + ((project == null) ? 0 : project.hashCode());
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		return result;
 	}
@@ -453,13 +453,6 @@ public class Task implements java.io.Serializable {
 			return false;
 		}
 		Task other = (Task) obj;
-		if (description == null) {
-			if (other.description != null) {
-				return false;
-			}
-		} else if (!description.equals(other.description)) {
-			return false;
-		}
 		if (id == null) {
 			if (other.id != null) {
 				return false;
@@ -467,18 +460,25 @@ public class Task implements java.io.Serializable {
 		} else if (!id.equals(other.id)) {
 			return false;
 		}
-		if (name == null) {
-			if (other.name != null) {
-				return false;
-			}
-		} else if (!name.equals(other.name)) {
-			return false;
-		}
 		if (owner == null) {
 			if (other.owner != null) {
 				return false;
 			}
 		} else if (!owner.equals(other.owner)) {
+			return false;
+		}
+		if (priority == null) {
+			if (other.priority != null) {
+				return false;
+			}
+		} else if (!priority.equals(other.priority)) {
+			return false;
+		}
+		if (project == null) {
+			if (other.project != null) {
+				return false;
+			}
+		} else if (!project.equals(other.project)) {
 			return false;
 		}
 		if (type == null) {

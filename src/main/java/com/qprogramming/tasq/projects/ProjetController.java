@@ -102,16 +102,15 @@ public class ProjetController {
 		// set last visited
 		Account current = Utils.getCurrentAccount();
 		List<Project> lastVisited = current.getLast_visited_p();
-		lastVisited.add(0, project);
-		if (lastVisited.size() > 4) {
-			lastVisited = lastVisited.subList(0, 4);
-		}
 		List<Project> clean = new ArrayList<Project>();
 		Set<Project> lookup = new HashSet<Project>();
 		for (Project item : lastVisited) {
 			if (lookup.add(item)) {
 				clean.add(item);
 			}
+		}
+		if (clean.size() > 4) {
+			clean = clean.subList(0, 4);
 		}
 		current.setLast_visited_p(clean);
 		accSrv.update(current);
@@ -398,11 +397,11 @@ public class ProjetController {
 			@RequestParam String term, HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findByProjectId(id);
-		if(project==null){
-			try{
-			Long projectID = Long.valueOf(id);
-			project = projSrv.findById(projectID);
-			}catch(NumberFormatException e){
+		if (project == null) {
+			try {
+				Long projectID = Long.valueOf(id);
+				project = projSrv.findById(projectID);
+			} catch (NumberFormatException e) {
 				LOG.error(e.getMessage());
 			}
 		}

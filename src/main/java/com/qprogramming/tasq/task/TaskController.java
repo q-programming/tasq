@@ -369,15 +369,15 @@ public class TaskController {
 		Account account = Utils.getCurrentAccount();
 		List<Task> lastVisited = account.getLast_visited_t();
 		lastVisited.add(0, task);
-		if (lastVisited.size() > 4) {
-			lastVisited = lastVisited.subList(0, 4);
-		}
 		List<Task> clean = new ArrayList<Task>();
 		Set<Task> lookup = new HashSet<Task>();
 		for (Task item : lastVisited) {
 			if (lookup.add(item)) {
 				clean.add(item);
 			}
+		}
+		if (clean.size() > 4) {
+			clean = clean.subList(0, 4);
 		}
 		account.setLast_visited_t(clean);
 		account = accSrv.update(account);
