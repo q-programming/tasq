@@ -123,7 +123,7 @@
       self.itemsArray.push(item);
 
       // add a tag element
-      var $tag = $('<span class="tag ' + htmlEncode(tagClass) + ' theme" data-name="'+htmlEncode(itemText)+'">' + htmlEncode(itemText) + '<span data-role="remove"></span></span>');
+      var $tag = $('<span class="tag ' + htmlEncode(tagClass) + ' theme"><span class="tagSearch" data-name="'+htmlEncode(itemText)+'">' + htmlEncode(itemText) + '</span><span data-role="remove"></span></span>');
       $tag.data('item', item);
       self.findInputWrapper().before($tag);
       $tag.after(' ');

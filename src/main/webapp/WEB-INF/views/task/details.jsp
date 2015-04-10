@@ -184,9 +184,9 @@
 							</c:if>
 							<c:if test="${not can_edit}">
 								<div style="color: rgb(187, 186, 186);padding: 6px 6px;">
-									<c:if test="${empty task.tags}">No tags</c:if>
+									<c:if test="${empty task.tags}"><s:message code="task.tags.noTags"/></c:if>
 									<c:forEach var="tag" items="${task.tags}">
-										<span class="tag label label-info theme" data-name="${tag}">${tag}</span>
+										<span class="tag label label-info theme"><span class="tagSearch" data-name="${tag}">${tag}</span></span>
 									</c:forEach>
 								</div>
 							</c:if>
@@ -1176,7 +1176,7 @@ $(document).on("click",".delete_task",function(e) {
 			checkIfEmptyTags();
 		});
 	});
-	$(document).on("click",".tag",function(e) {
+	$(document).on("click",".tagSearch",function(e) {
 		console.log("clicked");
 		console.log($(this).data("name"));
 		var url = '<c:url value="/tasks"/>?query=' + $(this).data("name");
@@ -1185,7 +1185,7 @@ $(document).on("click",".delete_task",function(e) {
 	
 	function checkIfEmptyTags(){
 		if($("#taskTags").val()==""){
-			var noTags = '<s:message code="task.tags.noTags"/>';
+			var noTags = '<s:message code="task.tags.noTags" htmlEscape="false"/>';
 			$("#tagsinput").attr("placeholder", noTags);
 		}else{
 			$("#tagsinput").attr("placeholder", "");
