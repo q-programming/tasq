@@ -89,6 +89,7 @@ public class TaskController {
 	private static final String BR = "<br>";
 	private static final String START = "start";
 	private static final String STOP = "stop";
+	private static final String CANCEL = "cancel";
 
 	@Autowired
 	private TaskService taskSrv;
@@ -826,6 +827,11 @@ public class TaskController {
 						"task.logWork.logged",
 						new Object[] { PeriodHelper.outFormat(logWork),
 								task.getId() }, Utils.getCurrentLocale()));
+			}else if(action.equals(CANCEL)){
+				Account account = Utils.getCurrentAccount();
+				account.clearActive_task();
+				accSrv.update(account);
+				return "redirect:/task?id=" + taskID;
 			}
 		} else {
 			return "redirect:" + request.getHeader("Referer");

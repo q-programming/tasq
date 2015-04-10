@@ -180,7 +180,7 @@
 								<input id="taskTags" type="text" title="<s:message code="task.tags.add"/>"
 										value="<c:forEach var="tag" items="${task.tags}">${tag},</c:forEach>"/>
 									<i id="editTags" class="fa fa-pencil" style="vertical-align: super; display: none"></i>
-									<i id="searchFieldHelp" class="fa fa-cog fa-spin" style="vertical-align: super;"></i>
+									<i id="searchFieldHelp" class="fa fa-cog fa-spin" style="vertical-align: super;display: none"></i>
 							</c:if>
 							<c:if test="${not can_edit}">
 								<div style="color: rgb(187, 186, 186);padding: 6px 6px;">
@@ -243,8 +243,8 @@
 					</button>
 					<c:if
 						test="${not empty user.active_task && user.active_task[0] eq task.id}">
-						<a href="<c:url value="/task/time?id=${task.id}&action=stop"/>">
-							<button class="btn btn-default btn-sm a-tooltip"
+						<a href="#">
+							<button class="btn btn-default btn-sm a-tooltip handleTimerBtn"
 								title="<s:message code="task.stopTime.description" />">
 								<i class="fa fa-lg fa-clock-o"></i>
 								<s:message code="task.stopTime"></s:message>
@@ -1104,6 +1104,7 @@ $(document).on("click",".delete_task",function(e) {
 	//TAGS
 	$('#taskTags').tagsinput({
   		maxChars: 12,
+  		maxTags: 6,
   		trimValue: true
 	});
 	
@@ -1181,6 +1182,7 @@ $(document).on("click",".delete_task",function(e) {
 		var url = '<c:url value="/tasks"/>?query=' + $(this).data("name");
 		window.location.href = url;
 	});
+	
 	function checkIfEmptyTags(){
 		if($("#taskTags").val()==""){
 			var noTags = '<s:message code="task.tags.noTags"/>';
