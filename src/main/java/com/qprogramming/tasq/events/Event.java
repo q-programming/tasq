@@ -1,4 +1,4 @@
-package com.qprogramming.tasq.task.events;
+package com.qprogramming.tasq.events;
 
 import java.util.Date;
 
@@ -51,7 +51,7 @@ public class Event {
 	public enum Type {
 		COMMENT, WATCH, SYSTEM
 	}
-
+	
 	public Long getId() {
 		return id;
 	}

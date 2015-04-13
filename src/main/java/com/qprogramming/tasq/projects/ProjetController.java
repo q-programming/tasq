@@ -43,6 +43,8 @@ import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.agile.SprintService;
 import com.qprogramming.tasq.error.TasqAuthException;
+import com.qprogramming.tasq.events.Event;
+import com.qprogramming.tasq.events.EventsService;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.ProjectSorter;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
@@ -68,17 +70,19 @@ public class ProjetController {
 	private SprintService sprintSrv;
 	private WorkLogService wrkLogSrv;
 	private MessageSource msg;
+	private EventsService eventsSrv;
 
 	@Autowired
 	public ProjetController(ProjectService projSrv, AccountService accSrv,
 			TaskService taskSrv, SprintService sprintSrv,
-			WorkLogService wrklSrv, MessageSource msg) {
+			WorkLogService wrklSrv, MessageSource msg,EventsService eventsSrv) {
 		this.projSrv = projSrv;
 		this.accSrv = accSrv;
 		this.taskSrv = taskSrv;
 		this.sprintSrv = sprintSrv;
 		this.wrkLogSrv = wrklSrv;
 		this.msg = msg;
+		this.eventsSrv = eventsSrv;
 	}
 
 	@Transactional
@@ -290,6 +294,7 @@ public class ProjetController {
 				account.setActive_project(id);
 				accSrv.update(account);
 			}
+			eventsSrv.addSystemEvent(account, LogType.ASSIGN_PROJ, project.toString());
 			projSrv.save(project);
 		}
 		return "redirect:" + request.getHeader("Referer");
@@ -328,6 +333,7 @@ public class ProjetController {
 
 			}
 			project.removeParticipant(account);
+			eventsSrv.addSystemEvent(account, LogType.REMOVE_PROJ, project.toString());
 			projSrv.save(project);
 		}
 		return "redirect:" + request.getHeader("Referer");

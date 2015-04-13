@@ -1,8 +1,8 @@
-package com.qprogramming.tasq.task.events;
+package com.qprogramming.tasq.events;
 
 import org.springframework.beans.BeanUtils;
 
-import com.qprogramming.tasq.task.events.Event.Type;
+import com.qprogramming.tasq.events.Event.Type;
 import com.qprogramming.tasq.task.worklog.LogType;
 
 public class DisplayEvent {

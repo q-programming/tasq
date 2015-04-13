@@ -47,6 +47,7 @@ import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.agile.SprintService;
 import com.qprogramming.tasq.error.TasqAuthException;
+import com.qprogramming.tasq.events.EventsService;
 import com.qprogramming.tasq.projects.NewProjectForm;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectChart;
@@ -86,6 +87,8 @@ public class ProjectControllerTest {
 	@Mock
 	private WorkLogService wrkLogSrv;
 	@Mock
+	private EventsService eventsSrvMock;
+	@Mock
 	private MessageSource msg;
 	@Mock
 	private AccountService accountServiceMock;
@@ -118,7 +121,7 @@ public class ProjectControllerTest {
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
 		projectCtr = new ProjetController(projSrv, accountServiceMock, taskSrv,
-				sprintSrvMock, wrkLogSrv, msg);
+				sprintSrvMock, wrkLogSrv, msg,eventsSrvMock);
 	}
 
 	@Test

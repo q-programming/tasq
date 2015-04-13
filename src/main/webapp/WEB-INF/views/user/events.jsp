@@ -86,7 +86,12 @@ function fetchEvents(page,term){
 			}
 			row+='</td><td><div class="eventSummary">';
 			//title
-			var link = '<a href="#" class="showMore" data-event="'+event.id+'">['+event.task+'] - '+event.who+'&nbsp; '+getEventTypeMsg(event.logtype)+'</a>';
+			if(event.task!=null){
+				var link = '<a href="#" class="showMore" data-event="'+event.id+'">['+event.task+'] - '+event.who+'&nbsp; '+getEventTypeMsg(event.logtype)+'</a>';
+			}
+			else{
+				var link = '<a href="#" class="showMore" data-event="'+event.id+'">'+event.who+'&nbsp; '+getEventTypeMsg(event.logtype)+'</a>';
+			}
 			row+=link;
 			//more
 			var taskurl = '<c:url value="/task?id="/>'+event.task;
