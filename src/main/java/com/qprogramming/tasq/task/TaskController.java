@@ -67,6 +67,7 @@ import com.qprogramming.tasq.task.tag.Tag;
 import com.qprogramming.tasq.task.tag.TagsRepository;
 import com.qprogramming.tasq.task.watched.WatchedTaskService;
 import com.qprogramming.tasq.task.worklog.LogType;
+import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
 /**
@@ -827,7 +828,7 @@ public class TaskController {
 						"task.logWork.logged",
 						new Object[] { PeriodHelper.outFormat(logWork),
 								task.getId() }, Utils.getCurrentLocale()));
-			}else if(action.equals(CANCEL)){
+			} else if (action.equals(CANCEL)) {
 				Account account = Utils.getCurrentAccount();
 				account.clearActive_task();
 				accSrv.update(account);
@@ -947,7 +948,7 @@ public class TaskController {
 		return "redirect:" + request.getHeader("Referer");
 	}
 
-	@Transactional
+//	@Transactional
 	@RequestMapping(value = "/task/delete", method = RequestMethod.GET)
 	public String deleteTask(@RequestParam(value = "id") String taskID,
 			RedirectAttributes ra, HttpServletRequest request) {
@@ -968,6 +969,7 @@ public class TaskController {
 					}
 				}
 				taskSrv.deleteAll(subtasks);
+				deleteFiles(task);
 				result = removeTaskRelations(task);
 				if (result.code.equals(ResultData.ERROR)) {
 					MessageHelper.addWarningAttribute(ra, result.message,
@@ -975,7 +977,6 @@ public class TaskController {
 					return "redirect:" + request.getHeader("Referer");
 				}
 				// delete files
-				deleteFiles(task);
 				// leave message and clear all
 				StringBuilder message = new StringBuilder();
 				message.append("[");
@@ -983,11 +984,19 @@ public class TaskController {
 				message.append("]");
 				message.append(" - ");
 				message.append(task.getName());
+				if (task.isSubtask()) {
+					Task parentTask = taskSrv.findById(task.getParent());
+					int count = parentTask.getSubtasks();
+					parentTask.setSubtasks(--count);
+					taskSrv.save(parentTask);
+					taskSrv.save(purgeTask(task));
+				}
 				taskSrv.delete(task);
 				wlSrv.addWorkLogNoTask(message.toString(), project,
 						LogType.DELETED);
 			}
-			return "redirect:/project?id=" + project.getId();
+			//TODO add message about removed task
+			return "redirect:/";
 		}
 		return "redirect:" + request.getHeader("Referer");
 	}
@@ -1008,8 +1017,7 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/{id}/file", method = RequestMethod.GET)
-	public @ResponseBody
-	String downloadFile(@PathVariable String id,
+	public @ResponseBody String downloadFile(@PathVariable String id,
 			@RequestParam("get") String filename, HttpServletRequest request,
 			HttpServletResponse response, RedirectAttributes ra)
 			throws IOException {
@@ -1034,8 +1042,7 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/{id}/imgfile", method = RequestMethod.GET)
-	public @ResponseBody
-	String showImageFile(@PathVariable String id,
+	public @ResponseBody String showImageFile(@PathVariable String id,
 			@RequestParam("get") String filename, HttpServletRequest request,
 			HttpServletResponse response, RedirectAttributes ra)
 			throws IOException {
@@ -1118,7 +1125,7 @@ public class TaskController {
 	 */
 	private ResultData removeTaskRelations(Task task) {
 		ResultData result = checkTaskCanOperated(task, true);
-		if (ResultData.OK.equals(result)) {
+		if (ResultData.OK.equals(result.code)) {
 			linkService.deleteTaskLinks(task);
 			task.setOwner(null);
 			task.setAssignee(null);
@@ -1179,6 +1186,9 @@ public class TaskController {
 					lastVisited.remove(task);
 					account.setLast_visited_t(lastVisited);
 					update = true;
+				}
+				if (Utils.getCurrentAccount().equals(account)) {
+					Utils.getCurrentAccount().setLast_visited_t(lastVisited);
 				}
 			}
 			if (update) {
@@ -1346,5 +1356,13 @@ public class TaskController {
 		wlSrv.addActivityLog(task, assignee.toString(), LogType.ASSIGNED);
 		watchSrv.startWatching(task);
 		return true;
+	}
+	/**
+	 * Nuke Task - set everything to null 
+	 */
+	private Task purgeTask(Task task){
+		Task zerotask = new Task();
+		zerotask.setId(task.getId());
+		return zerotask;
 	}
 }

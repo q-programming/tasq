@@ -52,7 +52,7 @@ import com.qprogramming.tasq.projects.NewProjectForm;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectChart;
 import com.qprogramming.tasq.projects.ProjectService;
-import com.qprogramming.tasq.projects.ProjetController;
+import com.qprogramming.tasq.projects.ProjectController;
 import com.qprogramming.tasq.support.web.Message;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskPriority;
@@ -76,7 +76,7 @@ public class ProjectControllerTest {
 	private static final String NEW_EMAIL = "newuser@test.com";
 	private Account testAccount;
 
-	private ProjetController projectCtr;
+	private ProjectController projectCtr;
 
 	@Mock
 	private ProjectService projSrv;
@@ -120,7 +120,7 @@ public class ProjectControllerTest {
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
-		projectCtr = new ProjetController(projSrv, accountServiceMock, taskSrv,
+		projectCtr = new ProjectController(projSrv, accountServiceMock, taskSrv,
 				sprintSrvMock, wrkLogSrv, msg,eventsSrvMock);
 	}
 

@@ -60,10 +60,10 @@ import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
 @Controller
-public class ProjetController {
+public class ProjectController {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(ProjetController.class);
+			.getLogger(ProjectController.class);
 	private ProjectService projSrv;
 	private AccountService accSrv;
 	private TaskService taskSrv;
@@ -73,7 +73,7 @@ public class ProjetController {
 	private EventsService eventsSrv;
 
 	@Autowired
-	public ProjetController(ProjectService projSrv, AccountService accSrv,
+	public ProjectController(ProjectService projSrv, AccountService accSrv,
 			TaskService taskSrv, SprintService sprintSrv,
 			WorkLogService wrklSrv, MessageSource msg,EventsService eventsSrv) {
 		this.projSrv = projSrv;

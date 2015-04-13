@@ -116,7 +116,7 @@ public class TaskRestController {
 	
 	@RequestMapping(value = "/task/getWorklogs", method = RequestMethod.GET)
 	public List<DisplayWorkLog> getWorklogs(@RequestParam String taskID) {
-		return wlSrv.getTaskEvents(taskID);
+		return wlSrv.getTaskDisplayEvents(taskID);
 	}
 	
 }

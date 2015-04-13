@@ -291,9 +291,14 @@ public class WorkLogService {
 							.equals(LogType.REOPEN));
 	}
 
-	public List<DisplayWorkLog> getTaskEvents(String id) {
+	public List<DisplayWorkLog> getTaskDisplayEvents(String id) {
 		return packIntoDisplay(wlRepo
 				.findByWorklogtaskIdOrderByTimeLoggedDesc(id));
 
+	}
+
+	public List<WorkLog> getTaskEvents(String taskID) {
+		return wlRepo
+				.findByWorklogtaskIdOrderByTimeLoggedDesc(taskID);
 	}
 }

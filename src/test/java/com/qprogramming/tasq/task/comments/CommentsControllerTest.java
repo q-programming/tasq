@@ -52,7 +52,7 @@ import com.qprogramming.tasq.projects.NewProjectForm;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectChart;
 import com.qprogramming.tasq.projects.ProjectService;
-import com.qprogramming.tasq.projects.ProjetController;
+import com.qprogramming.tasq.projects.ProjectController;
 import com.qprogramming.tasq.support.web.Message;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskPriority;

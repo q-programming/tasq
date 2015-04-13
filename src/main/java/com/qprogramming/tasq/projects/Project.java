@@ -64,7 +64,7 @@ public class Project implements Serializable {
 	@Column
 	private Date startDate;
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "project")
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "project", orphanRemoval=true)
 	private List<Task> tasks;
 
 	@Column
