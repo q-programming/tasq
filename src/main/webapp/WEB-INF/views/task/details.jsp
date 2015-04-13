@@ -178,16 +178,12 @@
 						<td class="left-margin">
 							<c:if test="${can_edit}">
 								<input id="taskTags" type="text" title="<s:message code="task.tags.add"/>"
-										value="<c:forEach var="tag" items="${task.tags}">${tag},</c:forEach>"/>
+										value=""/>
 									<i id="editTags" class="fa fa-pencil" style="vertical-align: super; display: none"></i>
 									<i id="searchFieldHelp" class="fa fa-cog fa-spin" style="vertical-align: super;display: none"></i>
 							</c:if>
 							<c:if test="${not can_edit}">
-								<div style="color: rgb(187, 186, 186);padding: 6px 6px;">
-									<c:if test="${empty task.tags}"><s:message code="task.tags.noTags"/></c:if>
-									<c:forEach var="tag" items="${task.tags}">
-										<span class="tag label label-info theme"><span class="tagSearch" data-name="${tag}">${tag}</span></span>
-									</c:forEach>
+								<div id="taskTagslist" style="color: rgb(187, 186, 186);padding: 6px 6px;">
 								</div>
 							</c:if>
 						</td>
@@ -1102,13 +1098,17 @@ $(document).on("click",".delete_task",function(e) {
 	});
 	
 	//TAGS
-	$('#taskTags').tagsinput({
-  		maxChars: 12,
-  		maxTags: 6,
-  		trimValue: true
-	});
-	
-	checkIfEmptyTags()
+	var init = true;
+	var noTags = '<s:message code="task.tags.noTags" htmlEscape="false"/>';
+	$('#taskTags').tagsinput(
+			{
+	  		maxChars: 12,
+	  		maxTags: 6,
+	  		trimValue: true
+			}
+	);
+	loadTags();
+// 	checkIfEmptyTags()
 	
 	$(".bootstrap-tagsinput").hover(
 		  function() {
@@ -1154,16 +1154,17 @@ $(document).on("click",".delete_task",function(e) {
     	}
     });
 	
-	
 	$('#taskTags').on('itemAdded', function(event) {
-		showWait(true);
-		console.log("Sending to backedn "+event.item  );
-		var url='<c:url value="/addTaskTag"/>';
-		$.get(url,{name:event.item,taskID:taskID},function(data) {
-			showWait(false);
-			console.log(data);
-			checkIfEmptyTags();
-		});
+		if(!init){
+			showWait(true);
+			console.log("Sending to backedn "+event.item  );
+			var url='<c:url value="/addTaskTag"/>';
+			$.get(url,{name:event.item,taskID:taskID},function(data) {
+				showWait(false);
+				console.log(data);
+				checkIfEmptyTags();
+			});
+		}
 	});
 	
 	$('#taskTags').on('itemRemoved', function(event) {
@@ -1177,18 +1178,40 @@ $(document).on("click",".delete_task",function(e) {
 		});
 	});
 	$(document).on("click",".tagSearch",function(e) {
-		console.log("clicked");
-		console.log($(this).data("name"));
 		var url = '<c:url value="/tasks"/>?query=' + $(this).data("name");
 		window.location.href = url;
 	});
 	
+	function loadTags(){
+		var url='<c:url value="/getTaskTags"/>';
+		$.get(url,{taskID:taskID},function(data) {
+			var delimiter = '';
+			$.each(data, function(i, item) {
+				if('${can_edit}'){
+					$('#taskTags').tagsinput('add', item.name);
+				}else{
+					var tag = '<span class="tag label label-info theme"><span class="tagSearch" data-name="'+item.name+'">'+item.name+'</span></span>'
+					$('#taskTagslist').append(tag);
+					$('#taskTagslist').attr('tags','true');
+				}
+			});
+			checkIfEmptyTags();
+			init = false;
+		});
+		
+	}
+	
 	function checkIfEmptyTags(){
-		if($("#taskTags").val()==""){
-			var noTags = '<s:message code="task.tags.noTags" htmlEscape="false"/>';
-			$("#tagsinput").attr("placeholder", noTags);
+		if('${can_edit}'){
+			if($("#taskTags").val()==""){
+				$("#tagsinput").attr("placeholder", noTags);
+			}else{
+				$("#tagsinput").attr("placeholder", "");
+			}
 		}else{
-			$("#tagsinput").attr("placeholder", "");
+			if(!$('#taskTagslist').attr('tags')){
+				$('#taskTagslist').append(noTags);
+			}			
 		}
 	}
 });

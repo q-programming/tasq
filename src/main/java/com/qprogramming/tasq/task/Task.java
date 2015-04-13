@@ -108,7 +108,7 @@ public class Task implements java.io.Serializable {
 	@ManyToMany(fetch = FetchType.LAZY)
 	private Set<Sprint> sprints = new HashSet<Sprint>();
 
-	@ManyToMany(fetch = FetchType.EAGER)
+	@ManyToMany(fetch = FetchType.LAZY)
 	private Set<Tag> tags = new HashSet<Tag>();
 
 	@ManyToOne(fetch = FetchType.EAGER)
