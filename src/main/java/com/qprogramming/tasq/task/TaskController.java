@@ -67,7 +67,6 @@ import com.qprogramming.tasq.task.tag.Tag;
 import com.qprogramming.tasq.task.tag.TagsRepository;
 import com.qprogramming.tasq.task.watched.WatchedTaskService;
 import com.qprogramming.tasq.task.worklog.LogType;
-import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
 /**
@@ -92,70 +91,38 @@ public class TaskController {
 	private static final String STOP = "stop";
 	private static final String CANCEL = "cancel";
 
-	@Autowired
 	private TaskService taskSrv;
-
-	@Autowired
 	private ProjectService projectSrv;
-
-	@Autowired
 	private AccountService accSrv;
-
-	@Autowired
 	private WorkLogService wlSrv;
-
-	@Autowired
 	private MessageSource msg;
-
-	@Autowired
 	private SprintService sprintSrv;
-
-	@Autowired
 	private TaskLinkService linkService;
-
-	@Autowired
 	private WatchedTaskService watchSrv;
-
-	@Autowired
 	private CommentsRepository commRepo;
+	private TagsRepository tagsRepo;
 
 	@Autowired
-	private TagsRepository tagsRepo;
+	public TaskController(TaskService taskSrv, ProjectService projectSrv,
+			AccountService accSrv, WorkLogService wlSrv, MessageSource msg,
+			SprintService sprintSrv, TaskLinkService linkService,
+			CommentsRepository commRepo, TagsRepository tagsRepo,WatchedTaskService watchSrv) {
+		this.taskSrv = taskSrv;
+		this.projectSrv = projectSrv;
+		this.accSrv = accSrv;
+		this.wlSrv = wlSrv;
+		this.msg = msg;
+		this.sprintSrv = sprintSrv;
+		this.linkService = linkService;
+		this.commRepo = commRepo;
+		this.tagsRepo = tagsRepo;
+		this.watchSrv = watchSrv;
+	}
 
 	@RequestMapping(value = "task/create", method = RequestMethod.GET)
 	public TaskForm startTaskCreate(Model model) {
 		fillCreateTaskModel(model);
 		return new TaskForm();
-	}
-
-	/**
-	 * Admin call to update all tasks logged work based on their worklog events
-	 * 
-	 * @param ra
-	 * @param model
-	 * @return
-	 */
-	@Transactional
-	@RequestMapping(value = "task/updatelogs", method = RequestMethod.GET)
-	public String update(RedirectAttributes ra, HttpServletRequest request,
-			Model model) {
-		if (Roles.isAdmin()) {
-			List<Task> list = taskSrv.findAll();
-			StringBuilder console = new StringBuilder(
-					"Updating logged work on all tasks within application");
-			console.append(BR);
-			for (Task task : list) {
-				task.updateLoggedWork();
-				console.append(task.toString());
-				console.append(": updated with ");
-				console.append(task.getLoggedWork());
-				console.append(BR);
-			}
-			model.addAttribute("console", console.toString());
-			return "other/console";
-		} else {
-			throw new TasqAuthException();
-		}
 	}
 
 	@RequestMapping(value = "task/create", method = RequestMethod.POST)
@@ -313,7 +280,6 @@ public class TaskController {
 			task.setEstimate(estimate);
 			task.setRemaining(estimate);
 		}
-		// TODO allow to change to estimate/not estimated
 		boolean notestimated = !taskForm.getEstimated();
 		if (!task.isEstimated().equals(notestimated)) {
 			message.append(changedFromTo("Estimated ", task.getEstimated()
@@ -323,8 +289,7 @@ public class TaskController {
 				task.setStory_points(0);
 			}
 		}
-		// Don't check for SP if task is not estimated TODO allow estimated/not
-		// estimated change
+		// Don't check for SP if task is not estimated 
 		if (task.isEstimated()) {
 			int storyPoints = taskForm.getStory_points() == null
 					|| ("").equals(taskForm.getStory_points()) ? 0 : Integer
@@ -948,7 +913,7 @@ public class TaskController {
 		return "redirect:" + request.getHeader("Referer");
 	}
 
-//	@Transactional
+	// @Transactional
 	@RequestMapping(value = "/task/delete", method = RequestMethod.GET)
 	public String deleteTask(@RequestParam(value = "id") String taskID,
 			RedirectAttributes ra, HttpServletRequest request) {
@@ -995,7 +960,7 @@ public class TaskController {
 				wlSrv.addWorkLogNoTask(message.toString(), project,
 						LogType.DELETED);
 			}
-			//TODO add message about removed task
+			// TODO add message about removed task
 			return "redirect:/";
 		}
 		return "redirect:" + request.getHeader("Referer");
@@ -1017,7 +982,8 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/{id}/file", method = RequestMethod.GET)
-	public @ResponseBody String downloadFile(@PathVariable String id,
+	public @ResponseBody
+	String downloadFile(@PathVariable String id,
 			@RequestParam("get") String filename, HttpServletRequest request,
 			HttpServletResponse response, RedirectAttributes ra)
 			throws IOException {
@@ -1042,7 +1008,8 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/{id}/imgfile", method = RequestMethod.GET)
-	public @ResponseBody String showImageFile(@PathVariable String id,
+	public @ResponseBody
+	String showImageFile(@PathVariable String id,
 			@RequestParam("get") String filename, HttpServletRequest request,
 			HttpServletResponse response, RedirectAttributes ra)
 			throws IOException {
@@ -1090,6 +1057,36 @@ public class TaskController {
 			}
 		}
 		return "redirect:" + request.getHeader("Referer");
+	}
+
+	/**
+	 * Admin call to update all tasks logged work based on their worklog events
+	 * 
+	 * @param ra
+	 * @param model
+	 * @return
+	 */
+	@Transactional
+	@RequestMapping(value = "task/updatelogs", method = RequestMethod.GET)
+	public String update(RedirectAttributes ra, HttpServletRequest request,
+			Model model) {
+		if (Roles.isAdmin()) {
+			List<Task> list = taskSrv.findAll();
+			StringBuilder console = new StringBuilder(
+					"Updating logged work on all tasks within application");
+			console.append(BR);
+			for (Task task : list) {
+				task.updateLoggedWork();
+				console.append(task.toString());
+				console.append(": updated with ");
+				console.append(task.getLoggedWork());
+				console.append(BR);
+			}
+			model.addAttribute("console", console.toString());
+			return "other/console";
+		} else {
+			throw new TasqAuthException();
+		}
 	}
 
 	private ResultData taskIsClosed(RedirectAttributes ra,
@@ -1147,7 +1144,7 @@ public class TaskController {
 		if (project == null) {
 			throw new TasqAuthException(msg, "error.noProjects");
 		}
-		model.addAttribute("project", projectSrv.findUserActiveProject());
+		model.addAttribute("project", project);
 		model.addAttribute("projects_list", projectSrv.findAllByUser());
 	}
 
@@ -1357,10 +1354,11 @@ public class TaskController {
 		watchSrv.startWatching(task);
 		return true;
 	}
+
 	/**
-	 * Nuke Task - set everything to null 
+	 * Nuke Task - set everything to null
 	 */
-	private Task purgeTask(Task task){
+	private Task purgeTask(Task task) {
 		Task zerotask = new Task();
 		zerotask.setId(task.getId());
 		return zerotask;

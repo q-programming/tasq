@@ -9,7 +9,6 @@ import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.agile.Sprint;
@@ -18,12 +17,15 @@ import com.qprogramming.tasq.projects.Project;
 @Service
 public class TaskService {
 
-	
 	@Value("${home.directory}")
 	private String tasqRootDir;
 
-	@Autowired
 	private TaskRepository taskRepo;
+
+	@Autowired
+	public TaskService(TaskRepository taskRepo) {
+		this.taskRepo = taskRepo;
+	}
 
 	public Task save(Task task) {
 		return taskRepo.save(task);
@@ -45,15 +47,15 @@ public class TaskService {
 		return taskRepo.findByProjectAndStateNotAndParentIsNull(project,
 				TaskState.CLOSED);
 	}
-	
+
 	public List<Task> findAllWithoutRelease(Project project) {
 		return taskRepo.findByProjectAndParentIsNullAndReleaseIsNull(project);
 	}
-	
-	public List<Task> findAllToRelease(Project project) {
-		return taskRepo.findByProjectAndStateAndParentIsNullAndReleaseIsNull(project, TaskState.CLOSED);
-	}
 
+	public List<Task> findAllToRelease(Project project) {
+		return taskRepo.findByProjectAndStateAndParentIsNullAndReleaseIsNull(
+				project, TaskState.CLOSED);
+	}
 
 	/**
 	 * @param id
@@ -104,7 +106,8 @@ public class TaskService {
 	}
 
 	private String getTaskDir(Task task) {
-		return tasqRootDir + File.separator + task.getProject().getProjectId()+ File.separator + task.getId();
+		return tasqRootDir + File.separator + task.getProject().getProjectId()
+				+ File.separator + task.getId();
 	}
 
 	public List<Task> finAllById(List<String> taskIDs) {
@@ -112,31 +115,33 @@ public class TaskService {
 	}
 
 	public List<Task> save(List<Task> taskList) {
-		 return taskRepo.save(taskList);
+		return taskRepo.save(taskList);
 	}
 
 	public List<Task> findAllByProjectId(Long project) {
 		return taskRepo.findByProjectId(project);
 	}
-	public List<DisplayTask> convertToDisplay(List<Task> list){
+
+	public List<DisplayTask> convertToDisplay(List<Task> list) {
 		List<DisplayTask> resultList = new LinkedList<DisplayTask>();
 		for (Task task : list) {
 			resultList.add(new DisplayTask(task));
 		}
 		return resultList;
 	}
-	
+
 	/**
 	 * Returns all tasks with given tag
+	 * 
 	 * @param name
 	 * @return
 	 */
 	public List<Task> findByTag(String name) {
 		return taskRepo.findByTagsName(name);
 	}
-	
-//	@Transactional
-	public Set<Sprint> getTaskSprints(String id){
+
+	// @Transactional
+	public Set<Sprint> getTaskSprints(String id) {
 		Task task = taskRepo.findById(id);
 		Hibernate.initialize(task.getSprints());
 		return task.getSprints();
