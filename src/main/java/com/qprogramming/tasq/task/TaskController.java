@@ -106,7 +106,8 @@ public class TaskController {
 	public TaskController(TaskService taskSrv, ProjectService projectSrv,
 			AccountService accSrv, WorkLogService wlSrv, MessageSource msg,
 			SprintService sprintSrv, TaskLinkService linkService,
-			CommentsRepository commRepo, TagsRepository tagsRepo,WatchedTaskService watchSrv) {
+			CommentsRepository commRepo, TagsRepository tagsRepo,
+			WatchedTaskService watchSrv) {
 		this.taskSrv = taskSrv;
 		this.projectSrv = projectSrv;
 		this.accSrv = accSrv;
@@ -289,7 +290,7 @@ public class TaskController {
 				task.setStory_points(0);
 			}
 		}
-		// Don't check for SP if task is not estimated 
+		// Don't check for SP if task is not estimated
 		if (task.isEstimated()) {
 			int storyPoints = taskForm.getStory_points() == null
 					|| ("").equals(taskForm.getStory_points()) ? 0 : Integer
@@ -537,7 +538,7 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
-			if (!projectSrv.canEdit(task.getProject()) && !Roles.isUser()) {
+			if (!projectSrv.canEdit(task.getProject()) || !Roles.isUser()) {
 				MessageHelper.addErrorAttribute(
 						ra,
 						msg.getMessage("error.accesRights", null,
@@ -552,12 +553,8 @@ public class TaskController {
 				StringBuilder message = new StringBuilder(loggedWork);
 				Date when = new Date();
 				if (dateLogged != "" && timeLogged != "") {
-					try {
-						when = new SimpleDateFormat("dd-M-yyyy HH:mm")
-								.parse(dateLogged + " " + timeLogged);
-					} catch (ParseException e) {
-						LOG.error(e.getLocalizedMessage());
-					}
+					when = Utils.convertStringToDateAndTime(dateLogged + " "
+							+ timeLogged);
 					message.append(BR);
 					message.append("Date: ");
 					message.append(dateLogged + " " + timeLogged);
@@ -590,80 +587,9 @@ public class TaskController {
 	}
 
 	@Transactional
-	@RequestMapping(value = "/task/state", method = RequestMethod.POST)
-	public String changeState(
-			@RequestParam(value = "taskID") String taskID,
-			@RequestParam(value = "state") TaskState state,
-			@RequestParam(value = "zero_checkbox", required = false) Boolean remainingZero,
-			@RequestParam(value = "message", required = false) String message,
-			@RequestParam(value = "closesubtasks", required = false) Boolean closeSubtasks,
-			RedirectAttributes ra, HttpServletRequest request) {
-		Task task = taskSrv.findById(taskID);
-		if (task != null) {
-			if (state.equals(task.getState())) {
-				return "redirect:" + request.getHeader("Referer");
-			}
-			// check if can edit
-			if (!projectSrv.canEdit(task.getProject()) && !Roles.isUser()) {
-				throw new TasqAuthException(msg);
-			}
-			// TODO eliminate this?
-			if (state.equals(TaskState.TO_DO)
-					&& !("0m").equals(task.getLoggedWork())) {
-				MessageHelper.addWarningAttribute(ra, msg.getMessage(
-						"task.alreadyStarted", new Object[] { task.getId() },
-						Utils.getCurrentLocale()));
-				return "redirect:" + request.getHeader("Referer");
-			}
-			// Close all subtasks
-			if (closeSubtasks != null && closeSubtasks) {
-				if (task.getSubtasks() > 0) {
-					List<Task> subtasks = taskSrv.findSubtasks(task);
-					for (Task subtask : subtasks) {
-						wlSrv.addActivityLog(subtask, "", LogType.CLOSED);
-						subtask.setState(TaskState.CLOSED);
-					}
-					taskSrv.save(subtasks);
-				}
-			}
-			TaskState oldState = (TaskState) task.getState();
-			task.setState(state);
-			// Zero remaining time
-			if (remainingZero != null && remainingZero) {
-				task.setRemaining(PeriodHelper.inFormat("0m"));
-			}
-			// add comment for task change state?
-			if (message != null && message != "") {
-				if (Utils.containsHTMLTags(message)) {
-					MessageHelper.addErrorAttribute(
-							ra,
-							msg.getMessage("comment.htmlTag", null,
-									Utils.getCurrentLocale()));
-					return "redirect:" + request.getHeader("Referer");
-				} else {
-					Comment comment = new Comment();
-					comment.setTask(task);
-					comment.setAuthor(Utils.getCurrentAccount());
-					comment.setDate(new Date());
-					comment.setMessage(message);
-					commRepo.save(comment);
-					Hibernate.initialize(task.getComments());
-					task.addComment(comment);
-					wlSrv.addActivityLog(task, message, LogType.COMMENT);
-				}
-			}
-			// Save all
-			taskSrv.save(task);
-			String resultMessage = worklogStateChange(state, oldState, task);
-			MessageHelper.addSuccessAttribute(ra, resultMessage);
-		}
-		return "redirect:" + request.getHeader("Referer");
-	}
-
-	@Transactional
 	@RequestMapping(value = "/task/changeState", method = RequestMethod.POST)
 	@ResponseBody
-	public ResultData changeStatePOST(
+	public ResultData changeState(
 			@RequestParam(value = "id") String taskID,
 			@RequestParam(value = "state") TaskState state,
 			@RequestParam(value = "zero_checkbox", required = false) Boolean remainingZero,
@@ -673,7 +599,7 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
-			if (!projectSrv.canEdit(task.getProject()) && !Roles.isUser()) {
+			if (!projectSrv.canEdit(task.getProject()) || !Roles.isUser()) {
 				throw new TasqAuthException(msg, "role.error.task.permission");
 			}
 			if (state.equals(TaskState.TO_DO)) {
@@ -740,7 +666,7 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
-			if (!projectSrv.canEdit(task.getProject()) && !Roles.isUser()) {
+			if (!projectSrv.canEdit(task.getProject()) || !Roles.isUser()) {
 				throw new TasqAuthException(msg, "role.error.task.permission");
 			}
 			// updatepoints
@@ -906,14 +832,11 @@ public class TaskController {
 				message.append(task.getPriority().toString());
 				taskSrv.save(task);
 				wlSrv.addActivityLog(task, message.toString(), LogType.PRIORITY);
-
 			}
-
 		}
 		return "redirect:" + request.getHeader("Referer");
 	}
 
-	// @Transactional
 	@RequestMapping(value = "/task/delete", method = RequestMethod.GET)
 	public String deleteTask(@RequestParam(value = "id") String taskID,
 			RedirectAttributes ra, HttpServletRequest request) {
@@ -982,8 +905,7 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/{id}/file", method = RequestMethod.GET)
-	public @ResponseBody
-	String downloadFile(@PathVariable String id,
+	public @ResponseBody String downloadFile(@PathVariable String id,
 			@RequestParam("get") String filename, HttpServletRequest request,
 			HttpServletResponse response, RedirectAttributes ra)
 			throws IOException {
@@ -1008,8 +930,7 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/{id}/imgfile", method = RequestMethod.GET)
-	public @ResponseBody
-	String showImageFile(@PathVariable String id,
+	public @ResponseBody String showImageFile(@PathVariable String id,
 			@RequestParam("get") String filename, HttpServletRequest request,
 			HttpServletResponse response, RedirectAttributes ra)
 			throws IOException {

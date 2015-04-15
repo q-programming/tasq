@@ -7,6 +7,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -23,6 +25,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.omg.CORBA.AnyHolder;
 import org.springframework.context.MessageSource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -41,7 +44,9 @@ import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.events.EventsService;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
+import com.qprogramming.tasq.support.ResultData;
 import com.qprogramming.tasq.support.web.Message;
+import com.qprogramming.tasq.task.comments.Comment;
 import com.qprogramming.tasq.task.comments.CommentsRepository;
 import com.qprogramming.tasq.task.link.TaskLinkService;
 import com.qprogramming.tasq.task.tag.TagsRepository;
@@ -443,6 +448,7 @@ public class TaskControllerTest {
 		Assert.assertEquals(44.0F, task1.getPercentage_left(), 0);
 		verify(modelMock, times(6)).addAttribute(anyString(), anyObject());
 	}
+
 	@Test
 	public void showTaskListTest() {
 		Project project = createProject(1L);
@@ -450,7 +456,7 @@ public class TaskControllerTest {
 		List<Project> projList = new LinkedList<Project>();
 		projList.add(project);
 		projList.add(project2);
-		
+
 		project.setLastTaskNo(0L);
 		Task task1 = createTask(TASK_NAME, 1, project);
 		task1.setEstimate(new Period(1, 0, 0, 0));
@@ -483,17 +489,207 @@ public class TaskControllerTest {
 		when(projSrvMock.findAllByUser()).thenReturn(projList);
 		when(projSrvMock.findUserActiveProject()).thenReturn(project);
 		when(taskRepoMock.findByParent(TASK_ID)).thenReturn(subtasks);
-		when(taskRepoMock.findAllByProjectAndParentIsNull(project)).thenReturn(allList);
+		when(taskRepoMock.findAllByProjectAndParentIsNull(project)).thenReturn(
+				allList);
 		taskCtr.listTasks(null, null, null, null, modelMock);
 		when(projSrvMock.findByProjectId(PROJ_ID)).thenReturn(project);
 		taskCtr.listTasks(PROJ_ID, "TO_DO", null, null, modelMock);
-		when(taskRepoMock.findByProjectAndStateAndParentIsNull(project, TaskState.TO_DO)).thenReturn(toDoList);
+		when(
+				taskRepoMock.findByProjectAndStateAndParentIsNull(project,
+						TaskState.TO_DO)).thenReturn(toDoList);
 		taskCtr.listTasks(PROJ_ID, null, "tas", "MAJOR", modelMock);
 		verify(modelMock, times(9)).addAttribute(anyString(), anyObject());
 	}
-	
-	
-	
+
+	@Test
+	public void startSubtaskcreateTest() {
+		Project project = createProject(1L);
+		Task task = createTask(TASK_NAME, 1, project);
+		when(taskRepoMock.findById(TASK_ID)).thenReturn(task);
+		taskCtr.startSubTaskCreate(TASK_ID, modelMock);
+		verify(modelMock, times(2)).addAttribute(anyString(), anyObject());
+	}
+
+	@Test
+	public void createSubTaskAuthErrorTest() {
+		testAccount.setRole(Roles.ROLE_VIEWER);
+		boolean catched = false;
+		try {
+			taskCtr.createSubTask(null, null, null, raMock, requestMock,
+					modelMock);
+		} catch (TasqAuthException e) {
+			catched = true;
+		}
+		Assert.assertTrue(TASQ_AUTH_MSG, catched);
+	}
+
+	@Test
+	public void createSubTaskErrorsTest() {
+		Project project = createProject(1L);
+		project.setLastTaskNo(1L);
+		Task task = createTask(TASK_NAME, 1, project);
+		task.setSubtasks(1);
+		task.setInSprint(true);
+		Task subtask = createTask(TASK_NAME, 2, project);
+		TaskForm form = new TaskForm(subtask);
+		Errors errors = new BeanPropertyBindingResult(form, "form");
+		errors.reject("name", "Error");
+		String result = taskCtr.createSubTask(TASK_ID, form, errors, raMock,
+				requestMock, modelMock);
+		Assert.assertNull(result);
+	}
+
+	@Test
+	public void createSubTaskCantEditTest() {
+		Project project = createProject(1L);
+		project.setLastTaskNo(1L);
+		Task task = createTask(TASK_NAME, 1, project);
+		task.setSubtasks(1);
+		task.setInSprint(true);
+		Task subtask = createTask(TASK_NAME, 2, project);
+		TaskForm form = new TaskForm(subtask);
+		Errors errors = new BeanPropertyBindingResult(form, "form");
+		when(projSrvMock.canEdit(project)).thenReturn(false);
+		taskCtr.createSubTask(TASK_ID, form, errors, raMock, requestMock,
+				modelMock);
+		verify(raMock, times(1)).addFlashAttribute(anyString(),
+				new Message(anyString(), Message.Type.DANGER, new Object[] {}));
+
+	}
+
+	@Test
+	public void createSubTaskTest() {
+		Sprint sprint = new Sprint();
+		sprint.setId(1L);
+		sprint.setActive(true);
+		Project project = createProject(1L);
+		project.setLastTaskNo(1L);
+		Task task = createTask(TASK_NAME, 1, project);
+		task.setSubtasks(1);
+		task.setInSprint(true);
+		Task subtask = createTask(TASK_NAME, 2, project);
+		TaskForm form = new TaskForm(subtask);
+		form.setAssignee(1L);
+		form.setAddToSprint(1L);
+		Errors errors = new BeanPropertyBindingResult(form, "form");
+		when(taskRepoMock.findById(TASK_ID)).thenReturn(task);
+		when(projSrvMock.findById(1L)).thenReturn(project);
+		when(projSrvMock.canEdit(project)).thenReturn(true);
+		when(accountServiceMock.findById(1L)).thenReturn(testAccount);
+		when(sprintSrvMock.findByProjectIdAndSprintNo(1L, 1L)).thenReturn(
+				sprint);
+		taskCtr.createSubTask(TASK_ID, form, errors, raMock, requestMock,
+				modelMock);
+		verify(taskRepoMock, times(2)).save(any(Task.class));
+	}
+
+	@Test
+	public void logWorkCantEditTest() {
+		Project project = createProject(1L);
+		Task task = createTask(TASK_NAME, 1, project);
+		testAccount.setRole(Roles.ROLE_USER);
+		when(taskRepoMock.findById(TASK_ID)).thenReturn(task);
+		when(projSrvMock.canEdit(project)).thenReturn(false);
+		taskCtr.logWork(TASK_ID, null, null, null, null, raMock, requestMock,
+				modelMock);
+		verify(raMock, times(1)).addFlashAttribute(anyString(),
+				new Message(anyString(), Message.Type.DANGER, new Object[] {}));
+	}
+
+	@Test
+	public void logWorkTest() {
+		Project project = createProject(1L);
+		Task task = createTask(TASK_NAME, 1, project);
+		task.setEstimate(new Period(1, 20, 0, 0));
+		testAccount.setRole(Roles.ROLE_USER);
+		when(taskRepoMock.findById(TASK_ID)).thenReturn(task);
+		when(projSrvMock.canEdit(project)).thenReturn(true);
+		taskCtr.logWork(TASK_ID, "1", "10m", "1-05-2015", "12:00", raMock,
+				requestMock, modelMock);
+		verify(wrkLogSrv, times(1)).addDatedWorkLog(any(Task.class),
+				anyString(), any(Date.class), any(LogType.class));
+		verify(wrkLogSrv, times(1)).addTimedWorkLog(any(Task.class),
+				anyString(), any(Date.class), any(Period.class),
+				any(Period.class), any(LogType.class));
+	}
+
+	@Test
+	public void changeStateAndSPNoAuthTest() {
+		Project project = createProject(1L);
+		Task task = createTask(TASK_NAME, 1, project);
+		when(taskRepoMock.findById(TASK_ID)).thenReturn(task);
+		when(projSrvMock.canEdit(project)).thenReturn(true);
+		testAccount.setRole(Roles.ROLE_VIEWER);
+		boolean catched = false;
+		try {
+			taskCtr.changeState(TASK_ID, null, null, null, null);
+		} catch (TasqAuthException e) {
+			catched = true;
+		}
+		Assert.assertTrue(TASQ_AUTH_MSG, catched);
+		catched = false;
+		try {
+			taskCtr.changeStoryPoints(TASK_ID, 2);
+		} catch (TasqAuthException e) {
+			catched = true;
+		}
+		Assert.assertTrue(TASQ_AUTH_MSG, catched);
+
+	}
+
+	@Test
+	public void changeStateTODOTest() {
+		Project project = createProject(1L);
+		Task task = createTask(TASK_NAME, 1, project);
+		task.setLoggedWork(new Period(0, 10, 0, 0));
+		task.setComments(new HashSet<Comment>());
+		when(taskRepoMock.findById(TASK_ID)).thenReturn(task);
+		when(projSrvMock.canEdit(project)).thenReturn(true);
+		ResultData data = taskCtr.changeState(TASK_ID, TaskState.TO_DO, true,
+				null, "Done");
+		Assert.assertEquals(ResultData.ERROR, data.code);
+	}
+
+	@Test
+	public void changeStateCLOSEDTest() {
+		Project project = createProject(1L);
+		Task task = createTask(TASK_NAME, 1, project);
+		task.setState(TaskState.CLOSED);
+		task.setComments(new HashSet<Comment>());
+		Account account = new Account(NEW_EMAIL,PASSWORD,Roles.ROLE_USER);
+		Object[] activeTask = {task.getId()};
+		account.setActive_task(activeTask);
+		List<Account> accounts = new LinkedList<Account>();
+		accounts.add(testAccount);
+		accounts.add(account);
+		when(accountServiceMock.findAll()).thenReturn(accounts);
+		when(taskRepoMock.findById(TASK_ID)).thenReturn(task);
+		when(projSrvMock.canEdit(project)).thenReturn(true);
+		ResultData data = taskCtr.changeState(TASK_ID, TaskState.CLOSED, true,
+				null, "Done");
+		Assert.assertEquals(ResultData.ERROR, data.code);
+	}
+
+	@Test
+	public void changeState() {
+		Project project = createProject(1L);
+		Task task = createTask(TASK_NAME, 1, project);
+		task.setComments(new HashSet<Comment>());
+		task.setSubtasks(1);
+		Task subtask = createTask(TASK_NAME, 2, project);
+		subtask.setParent(TASK_ID);
+		List<Task> subtasks = new LinkedList<Task>();
+		subtasks.add(subtask);
+		Object[] activeTask = {task.getId()};
+		testAccount.setActive_task(activeTask);
+		when(taskRepoMock.findByParent(TASK_ID)).thenReturn(subtasks);
+		when(taskRepoMock.findById(TASK_ID)).thenReturn(task);
+		when(projSrvMock.canEdit(project)).thenReturn(true);
+		ResultData result = taskCtr.changeState(TASK_ID, TaskState.CLOSED, true, true, "Done");
+		verify(wrkLogSrv, times(1)).addActivityLog(subtask, "", LogType.CLOSED);
+		verify(taskRepoMock, times(1)).save(any(Task.class));
+		Assert.assertEquals(ResultData.OK, result.code);
+	}
 
 	@Test
 	public void displayTaskTest() {
