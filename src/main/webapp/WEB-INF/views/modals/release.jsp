@@ -27,7 +27,7 @@
 								id="release" name="release"
 								style="width: 150px; height: 25px" class="form-control"
 								type="text" value=""> <span class="help-block"><s:message
-									code="agile.release.name.help" /><i
+									code="agile.release.name.help" />&nbsp;<i
 								class="fa fa-info-circle a-tooltip"
 								title="<s:message
 							code="agile.release.help" htmlEscape="false"/>"

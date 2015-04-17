@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.qprogramming.tasq.agile.Release;
 import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.events.EventsService;
 import com.qprogramming.tasq.projects.Project;
@@ -237,9 +238,28 @@ public class WorkLogService {
 						sprint.getProject().getId(), start.toDate(),
 						end.toDate());
 		List<WorkLog> result = new LinkedList<WorkLog>();
-		// Filterout not important events
+		// Filter out not important events
 		for (WorkLog workLog : list) {
 			if (isSprintRelevant(workLog, sprint)) {
+				result.add(workLog);
+			}
+		}
+
+		return result;
+	}
+
+	@Transactional
+	public List<WorkLog> getAllReleaseEvents(Release release) {
+		DateTime start = release.getStartDate();
+		DateTime end = release.getEndDate();
+		List<WorkLog> list = wlRepo
+				.findByProjectIdAndTimeBetweenAndWorklogtaskNotNullOrderByTimeAsc(
+						release.getProject().getId(), start.toDate(),
+						end.toDate());
+		List<WorkLog> result = new LinkedList<WorkLog>();
+		// Filter out events for task which are part of this release
+		for (WorkLog workLog : list) {
+			if (isReleaseRelevant(workLog, release)) {
 				result.add(workLog);
 			}
 		}
@@ -290,6 +310,13 @@ public class WorkLogService {
 						|| type.equals(LogType.CLOSED) || type
 							.equals(LogType.REOPEN));
 	}
+	private boolean isReleaseRelevant(WorkLog workLog, Release release) {
+		LogType type = (LogType) workLog.getType();
+		return release.equals(workLog.getTask().getRelease())
+				&& (type.equals(LogType.DELETED) || type.equals(LogType.LOG)
+						|| type.equals(LogType.CLOSED) || type
+							.equals(LogType.REOPEN));
+	}
 
 	public List<DisplayWorkLog> getTaskDisplayEvents(String id) {
 		return packIntoDisplay(wlRepo
@@ -298,7 +325,6 @@ public class WorkLogService {
 	}
 
 	public List<WorkLog> getTaskEvents(String taskID) {
-		return wlRepo
-				.findByWorklogtaskIdOrderByTimeLoggedDesc(taskID);
+		return wlRepo.findByWorklogtaskIdOrderByTimeLoggedDesc(taskID);
 	}
 }

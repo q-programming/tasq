@@ -49,7 +49,7 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.agile.Sprint;
-import com.qprogramming.tasq.agile.SprintService;
+import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
@@ -96,7 +96,7 @@ public class TaskController {
 	private AccountService accSrv;
 	private WorkLogService wlSrv;
 	private MessageSource msg;
-	private SprintService sprintSrv;
+	private AgileService sprintSrv;
 	private TaskLinkService linkService;
 	private WatchedTaskService watchSrv;
 	private CommentsRepository commRepo;
@@ -105,7 +105,7 @@ public class TaskController {
 	@Autowired
 	public TaskController(TaskService taskSrv, ProjectService projectSrv,
 			AccountService accSrv, WorkLogService wlSrv, MessageSource msg,
-			SprintService sprintSrv, TaskLinkService linkService,
+			AgileService sprintSrv, TaskLinkService linkService,
 			CommentsRepository commRepo, TagsRepository tagsRepo,
 			WatchedTaskService watchSrv) {
 		this.taskSrv = taskSrv;

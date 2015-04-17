@@ -1,5 +1,6 @@
 package com.qprogramming.tasq.support;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -13,6 +14,8 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 
 import org.hibernate.Hibernate;
+import org.joda.time.DateTimeConstants;
+import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +26,9 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.task.Task;
 
 public class Utils {
+	public static final int MILLIS_PER_SECOND = DateTimeConstants.MILLIS_PER_SECOND;
+	public static final int SECONDS_PER_HOUR = DateTimeConstants.SECONDS_PER_HOUR;
+	
 	private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
 	private static final String HTML_TAG_PATTERN = "<([A-Za-z][A-Za-z0-9]*)\\b[^>]*>(.*?)</\\1>";
 	private static final long NUM_100NS_INTERVALS_SINCE_UUID_EPOCH = 0x01b21dd213814000L;
@@ -154,6 +160,47 @@ public class Utils {
 		String result = null;
 		result = new SimpleDateFormat("dd-M-yyyy").format(date);
 		return result;
+	}
+	
+	/**
+	 * Helper method to get float value from Period ( hours )
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public static Float getFloatValue(Period value) {
+		if (value == null) {
+			value = new Period();
+		}
+		Float result = Float.valueOf((float) (PeriodHelper.toStandardDuration(
+				value).getMillis() / MILLIS_PER_SECOND)
+				/ SECONDS_PER_HOUR);
+		return result;
+	}
+
+	/**
+	 * Round to certain number of decimals
+	 * 
+	 * @param d
+	 * @param decimalPlace
+	 * @return
+	 */
+	public static float round(float d, int decimalPlace) {
+		BigDecimal bd = new BigDecimal(Float.toString(d));
+		bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
+		return bd.floatValue();
+	}
+
+	/**
+	 * Helper method to get Period value (hours ) from float value
+	 * 
+	 * @param timelogged
+	 * @return
+	 */
+	public static Period getPeriodValue(Float timelogged) {
+		Period value = new Period(0, 0, (int) (timelogged * Utils.SECONDS_PER_HOUR),
+				0);
+		return value;
 	}
 
 

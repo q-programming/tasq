@@ -40,11 +40,13 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.agile.Release;
 import com.qprogramming.tasq.agile.Sprint;
-import com.qprogramming.tasq.agile.SprintService;
+import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.events.Event;
 import com.qprogramming.tasq.events.EventsService;
+import com.qprogramming.tasq.projects.Project.AgileType;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.ProjectSorter;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
@@ -67,14 +69,14 @@ public class ProjectController {
 	private ProjectService projSrv;
 	private AccountService accSrv;
 	private TaskService taskSrv;
-	private SprintService sprintSrv;
+	private AgileService sprintSrv;
 	private WorkLogService wrkLogSrv;
 	private MessageSource msg;
 	private EventsService eventsSrv;
 
 	@Autowired
 	public ProjectController(ProjectService projSrv, AccountService accSrv,
-			TaskService taskSrv, SprintService sprintSrv,
+			TaskService taskSrv, AgileService sprintSrv,
 			WorkLogService wrklSrv, MessageSource msg,EventsService eventsSrv) {
 		this.projSrv = projSrv;
 		this.accSrv = accSrv;
@@ -246,6 +248,7 @@ public class ProjectController {
 			account.setActive_project(newProject.getId());
 			accSrv.update(account);
 		}
+		//TODO Create first release if Kanban ?
 		MessageHelper.addSuccessAttribute(
 				ra,
 				msg.getMessage("project.created", new Object[] { name },

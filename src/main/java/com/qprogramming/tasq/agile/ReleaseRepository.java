@@ -13,4 +13,8 @@ public interface ReleaseRepository extends JpaRepository<Release, Integer> {
 	Release findById(Long id);
 
 	List<Release> findByProjectId(Long projectId);
+	
+	List<Release> findByProjectIdOrderByEndDateDesc(Long id);
+
+	Release findByProjectIdAndRelease(Long id, String releaseNo);
 }

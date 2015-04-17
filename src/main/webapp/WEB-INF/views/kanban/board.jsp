@@ -21,7 +21,7 @@
 	<div style="display: table-header-group;">
 		<div style="display: table-cell; padding-bottom: 30px;">
 			<span class="btn btn-default pull-left" id="new release" data-toggle="modal" data-target="#releaseModal">
-				<i class="fa fa-clipboard"></i>&nbsp;New release</span>
+				<i class="fa fa-clipboard"></i>&nbsp;<s:message code="agile.newRelease"/></span>
 		</div>
 		<div style="display: table-cell"></div>
 		<div style="display: table-cell"></div>

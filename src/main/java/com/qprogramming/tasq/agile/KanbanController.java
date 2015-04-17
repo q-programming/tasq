@@ -3,9 +3,13 @@ package com.qprogramming.tasq.agile;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import org.joda.time.DateTime;
+import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +21,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
+import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
@@ -30,6 +35,8 @@ import com.qprogramming.tasq.task.DisplayTask;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
+import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
+import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
 @Controller
@@ -38,19 +45,20 @@ public class KanbanController {
 			.getLogger(KanbanController.class);
 	private TaskService taskSrv;
 	private ProjectService projSrv;
-	private WorkLogService wlSrv;
+	private WorkLogService wrkLogSrv;
 	private MessageSource msg;
-	private ReleaseRepository releaseRepo;
+	private AgileService agileSrv;
+
+	// private ReleaseRepository releaseRepo;
 
 	@Autowired
 	public KanbanController(TaskService taskSrv, ProjectService projSrv,
-			WorkLogService wlSrv, MessageSource msg,
-			ReleaseRepository releaseRepo) {
+			WorkLogService wlSrv, MessageSource msg, AgileService agileSrv) {
 		this.taskSrv = taskSrv;
 		this.projSrv = projSrv;
-		this.wlSrv = wlSrv;
+		this.wrkLogSrv = wlSrv;
 		this.msg = msg;
-		this.releaseRepo = releaseRepo;
+		this.agileSrv = agileSrv;
 	}
 
 	@RequestMapping(value = "{id}/kanban/board", method = RequestMethod.GET)
@@ -84,8 +92,24 @@ public class KanbanController {
 			if (!projSrv.canAdminister(project)) {
 				throw new TasqAuthException(msg);
 			}
+			// search if name unique for project
+			Release unique = agileSrv.findByProjectIdAndRelease(
+					project.getId(), releaseNo);
+			if (unique != null) {
+				StringBuilder projectName = new StringBuilder("[");
+				projectName.append(project.getProjectId());
+				projectName.append("] ");
+				projectName.append(project.getName());
+				MessageHelper.addWarningAttribute(
+						ra,
+						msg.getMessage("agile.release.exists", new Object[] {
+								releaseNo, projectName.toString() },
+								Utils.getCurrentLocale()));
+				return "redirect:" + request.getHeader("Referer");
+			}
+
 			List<Task> taskList = taskSrv.findAllToRelease(project);
-			if(taskList.isEmpty()){
+			if (taskList.isEmpty()) {
 				MessageHelper.addWarningAttribute(
 						ra,
 						msg.getMessage("agile.newRelease.noTasks", null,
@@ -93,10 +117,22 @@ public class KanbanController {
 				return "redirect:" + request.getHeader("Referer");
 			}
 			Release release = new Release(project, releaseNo, comment);
-			release = releaseRepo.save(release);
+			List<Release> releases = agileSrv
+					.findReleaseByProjectIdOrderByDateDesc(project.getId());
+			if (!releases.isEmpty()) {
+				release.setStartDate(releases.get(releases.size() - 1)
+						.getEndDate());
+			}
+			release = agileSrv.save(release);
+			int count = 0;
 			for (Task task : taskList) {
 				task.setRelease(release);
+				count++;
 			}
+			MessageHelper.addSuccessAttribute(
+					ra,
+					msg.getMessage("agile.newRelease.success", new Object[] {
+							releaseNo, count }, Utils.getCurrentLocale()));
 		}
 		return "redirect:" + request.getHeader("Referer");
 	}
@@ -108,11 +144,69 @@ public class KanbanController {
 			Model model, HttpServletRequest request, RedirectAttributes ra) {
 		Project project = projSrv.findByProjectId(id);
 		if (project != null) {
-			List<Release> releases = releaseRepo.findByProjectId(project.getId());
+			List<Release> releases = agileSrv
+					.findReleaseByProjectIdOrderByDateDesc(project.getId());
 			model.addAttribute("project", project);
 			model.addAttribute("releases", releases);
 		}
 		return "/kanban/reports";
+	}
+
+	@RequestMapping(value = "/getReleases", method = RequestMethod.GET)
+	public @ResponseBody List<Release> showProjectSprints(
+			@RequestParam Long projectID, HttpServletResponse response) {
+		response.setContentType("application/json");
+		Project project = projSrv.findById(projectID);
+		List<Release> releases = agileSrv
+				.findReleaseByProjectIdOrderByDateDesc(project.getId());
+		return releases;
+	}
+
+	@RequestMapping(value = "/{id}/release-data", method = RequestMethod.GET, produces = "application/json")
+	public @ResponseBody SprintData showBurndownChart(@PathVariable String id,
+			@RequestParam(value = "release", required = false) String releaseNo) {
+		SprintData result = new SprintData();
+		Project project = projSrv.findByProjectId(id);
+		if (project != null) {
+			Release release;
+			if (releaseNo == null || releaseNo == "") {
+				release = agileSrv.findActiveByProjectId(project.getId());
+			} else {
+				release = agileSrv.findByProjectIdAndRelease(project.getId(),
+						releaseNo);
+			}
+			List<Task> releaseTasks = taskSrv.findAllByRelease(release);
+			for (Task task : releaseTasks) {
+				if (task.getState().equals(TaskState.CLOSED)) {
+					result.getTasks().get(SprintData.CLOSED)
+							.add(new DisplayTask(task));
+				} else {
+					result.getTasks().get(SprintData.ALL)
+							.add(new DisplayTask(task));
+				}
+			}
+			// Fill maps based on time or story point driven board
+			DateTime startTime = release.getStartDate();
+			DateTime endTime = release.getEndDate();
+			//TODO Active release ( release is null )
+			List<WorkLog> wrkList = wrkLogSrv.getAllReleaseEvents(release);
+			result.setWorklogs(DisplayWorkLog.convertToDisplayWorkLogs(wrkList));
+			result.setTimeBurned(agileSrv.fillTimeBurndownMap(wrkList,
+					startTime, endTime));
+			Period totalTime = new Period();
+			for (Map.Entry<String, Float> entry : result.getTimeBurned()
+					.entrySet()) {
+				totalTime = PeriodHelper.plusPeriods(totalTime,
+						Utils.getPeriodValue(entry.getValue()));
+			}
+
+			result.setTotalTime(String.valueOf(Utils.round(
+					Utils.getFloatValue(totalTime), 2)));
+			// return fillLeftAndBurned(result, sprint, wrkList, timeTracked);
+			return result;
+		} else {
+			return result;
+		}
 	}
 
 }

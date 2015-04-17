@@ -83,7 +83,7 @@ public class KanbanControllerTest {
 	@Mock
 	private SprintRepository sprintRepoMock;
 	@Mock
-	private ReleaseRepository releaseRepoMock;
+	private AgileService agileSrvMock;
 	@Mock
 	private WorkLogService wrkLogSrvMock;
 
@@ -119,7 +119,7 @@ public class KanbanControllerTest {
 		Set<Account> participants = new HashSet<Account>(createList());
 		project.setParticipants(participants);
 		kanbanCtrl = new KanbanController(taskSrvMock, projSrvMock,
-				wrkLogSrvMock, msgMock, releaseRepoMock);
+				wrkLogSrvMock, msgMock, agileSrvMock);
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
@@ -180,7 +180,7 @@ public class KanbanControllerTest {
 		when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
 		when(projSrvMock.canAdminister(project)).thenReturn(true);
 		Release release = new Release(project, RELEASE, null);
-		when(releaseRepoMock.save(release)).thenReturn(release);
+		when(agileSrvMock.save(release)).thenReturn(release);
 		List<Task> taskList = createTaskList(project);
 		taskList.get(0).setState(TaskState.CLOSED);
 		taskList.get(1).setState(TaskState.CLOSED);
@@ -201,7 +201,7 @@ public class KanbanControllerTest {
 		Release release = new Release(project, RELEASE, null);
 		List<Release> releaseList = new LinkedList<Release>();
 		releaseList.add(release);
-		when(releaseRepoMock.findByProjectId(project.getId())).thenReturn(
+		when(agileSrvMock.findReleaseByProjectIdOrderByDateDesc(project.getId())).thenReturn(
 				releaseList);
 		kanbanCtrl.showReport(TEST, null, modelMock, requestMock, raMock);
 		verify(modelMock, times(2)).addAttribute(anyString(), anyObject());

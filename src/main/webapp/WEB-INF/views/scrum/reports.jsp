@@ -105,23 +105,19 @@ $(document).ready(function() {
 	var taskURL = '<c:url value="/task?id="/>';
 	var loading_indicator = '<div id="loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td>';
 	var timeTracked = ${project.timeTracked};
+
 	$(".sprintMenuNo").click(function(){
 		var number = $(this).data('number');
 		renderSprintData(number);
 	});
 	
-	$("#sprintNumber").val(lastSprint);
+	//Initial sprint render ( from param )
 	renderSprintData(lastSprint);
-		
-	$("#sprintNumber").change(function(){
-		renderSprintData(this.value);
-	});
-		
-		
-		var labelFormat = '%s SP';
-		if (timeTracked){
-			labelFormat = '%#.1f h';
-		}
+
+	var labelFormat = '%s SP';
+	if (timeTracked){
+		labelFormat = '%#.1f h';
+	}
 		
 
 	function renderSprintData(sprintNo){

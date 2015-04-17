@@ -1,6 +1,5 @@
 package com.qprogramming.tasq.agile;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,7 +14,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.hibernate.Hibernate;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeConstants;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
@@ -59,22 +57,20 @@ public class SprintController {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SprintController.class);
 	private static final String SPACE = " ";
-	private static final int MILLIS_PER_SECOND = DateTimeConstants.MILLIS_PER_SECOND;
-	private static final int SECONDS_PER_HOUR = DateTimeConstants.SECONDS_PER_HOUR;
 	private static final String NEW_LINE = "\n";
 
 	private ProjectService projSrv;
 	private TaskService taskSrv;
-	private SprintService sprintSrv;
+	private AgileService agileSrv;
 	private WorkLogService wrkLogSrv;
 	private MessageSource msg;
 
 	@Autowired
 	public SprintController(ProjectService prjSrv, TaskService taskSrv,
-			SprintService sprintSrv, WorkLogService wrkLogSrv, MessageSource msg) {
+			AgileService agileSrv, WorkLogService wrkLogSrv, MessageSource msg) {
 		this.projSrv = prjSrv;
 		this.taskSrv = taskSrv;
-		this.sprintSrv = sprintSrv;
+		this.agileSrv = agileSrv;
 		this.wrkLogSrv = wrkLogSrv;
 		this.msg = msg;
 	}
@@ -88,7 +84,7 @@ public class SprintController {
 				throw new TasqAuthException(msg);
 			}
 			model.addAttribute("project", project);
-			Sprint sprint = sprintSrv.findByProjectIdAndActiveTrue(project
+			Sprint sprint = agileSrv.findByProjectIdAndActiveTrue(project
 					.getId());
 			if (sprint == null) {
 				MessageHelper.addWarningAttribute(
@@ -125,7 +121,7 @@ public class SprintController {
 			List<DisplayTask> resultList = DisplayTask
 					.convertToDisplayTasks(taskList);
 			Map<Sprint, List<DisplayTask>> sprint_result = new LinkedHashMap<Sprint, List<DisplayTask>>();
-			List<Sprint> sprintList = sprintSrv.findByProjectIdAndFinished(
+			List<Sprint> sprintList = agileSrv.findByProjectIdAndFinished(
 					project.getId(), false);
 			Collections.sort(sprintList, new SprintSorter());
 			// Assign tasks to sprints in order to display them
@@ -153,11 +149,11 @@ public class SprintController {
 		if (!projSrv.canAdminister(project)) {
 			throw new TasqAuthException(msg);
 		}
-		List<Sprint> sprints = sprintSrv.findByProjectId(project.getId());
+		List<Sprint> sprints = agileSrv.findByProjectId(project.getId());
 		Sprint sprint = new Sprint();
 		sprint.setProject(project);
 		sprint.setSprint_no((long) sprints.size() + 1);
-		sprintSrv.save(sprint);
+		agileSrv.save(sprint);
 		MessageHelper.addSuccessAttribute(
 				ra,
 				msg.getMessage("agile.createdSprint", null,
@@ -171,7 +167,7 @@ public class SprintController {
 			@RequestParam(value = "taskID") String taskID,
 			@RequestParam(value = "sprintID") Long sprintID,
 			HttpServletRequest request, RedirectAttributes ra) {
-		Sprint sprint = sprintSrv.findById(sprintID);
+		Sprint sprint = agileSrv.findById(sprintID);
 		Task task = taskSrv.findById(taskID);
 		Project project = task.getProject();
 		if (!projSrv.canAdminister(project)) {
@@ -218,7 +214,7 @@ public class SprintController {
 		if (!projSrv.canAdminister(project)) {
 			throw new TasqAuthException(msg);
 		}
-		Sprint sprint = sprintSrv.findById(sprintID);
+		Sprint sprint = agileSrv.findById(sprintID);
 		if (sprint.isActive()) {
 			wrkLogSrv.addActivityLog(task, null, LogType.TASKSPRINTREMOVE);
 		}
@@ -240,7 +236,7 @@ public class SprintController {
 	@RequestMapping(value = "/scrum/delete", method = RequestMethod.GET)
 	public String deleteSprint(@RequestParam(value = "id") Long id,
 			Model model, HttpServletRequest request, RedirectAttributes ra) {
-		Sprint sprint = sprintSrv.findById(id);
+		Sprint sprint = agileSrv.findById(id);
 		Project project = sprint.getProject();
 		if (!projSrv.canAdminister(project)) {
 			throw new TasqAuthException(msg);
@@ -258,7 +254,7 @@ public class SprintController {
 				}
 			}
 		}
-		sprintSrv.delete(sprint);
+		agileSrv.delete(sprint);
 		MessageHelper.addSuccessAttribute(
 				ra,
 				msg.getMessage("agile.sprint.removed", null,
@@ -280,7 +276,7 @@ public class SprintController {
 			throw new TasqAuthException(msg);
 		}
 		// check if other sprints are not ending when this new is starting
-		List<Sprint> allSprints = sprintSrv.findByProjectId(projectId);
+		List<Sprint> allSprints = agileSrv.findByProjectId(projectId);
 		sprintStart += " " + sprintStartTime;
 		sprintEnd += " " + sprintEndTime;
 		Date startDate = Utils.convertStringToDateAndTime(sprintStart);
@@ -298,8 +294,8 @@ public class SprintController {
 				}
 			}
 		}
-		Sprint sprint = sprintSrv.findById(id);
-		Sprint active = sprintSrv.findByProjectIdAndActiveTrue(projectId);
+		Sprint sprint = agileSrv.findById(id);
+		Sprint active = agileSrv.findByProjectIdAndActiveTrue(projectId);
 		if (sprint != null && !sprint.isActive() && active == null) {
 			if (canEdit(sprint.getProject()) || Roles.isAdmin()) {
 				Period total_estimate = new Period();
@@ -316,7 +312,8 @@ public class SprintController {
 								total_estimate, task.getRawEstimate());
 					}
 					if (!project.getTimeTracked()) {
-						if (!task.isSubtask() && task.getStory_points() == 0 && task.isEstimated()) {
+						if (!task.isSubtask() && task.getStory_points() == 0
+								&& task.isEstimated()) {
 							warnings.append(task.getId());
 							warnings.append(" ");
 						}
@@ -334,7 +331,7 @@ public class SprintController {
 				sprint.setStart_date(startDate);
 				sprint.setEnd_date(endDate);
 				sprint.setActive(true);
-				sprintSrv.save(sprint);
+				agileSrv.save(sprint);
 				wrkLogSrv.addWorkLogNoTask(null, project, LogType.SPRINT_START);
 				return new ResultData(ResultData.OK, msg.getMessage(
 						"agile.sprint.started",
@@ -350,7 +347,7 @@ public class SprintController {
 	@RequestMapping(value = "/scrum/stop", method = RequestMethod.GET)
 	public String finishSprint(@RequestParam(value = "id") Long id,
 			HttpServletRequest request, RedirectAttributes ra) {
-		Sprint sprint = sprintSrv.findById(id);
+		Sprint sprint = agileSrv.findById(id);
 		if (sprint != null) {
 			Project project = projSrv.findById(sprint.getProject().getId());
 			if (!projSrv.canAdminister(project)) {
@@ -384,7 +381,7 @@ public class SprintController {
 				}
 				MessageHelper.addSuccessAttribute(ra, message.toString());
 				wrkLogSrv.addWorkLogNoTask(null, project, LogType.SPRINT_STOP);
-				sprintSrv.save(sprint);
+				agileSrv.save(sprint);
 			}
 		}
 		return "redirect:" + request.getHeader("Referer");
@@ -398,7 +395,7 @@ public class SprintController {
 		Project project = projSrv.findByProjectId(id);
 		if (project != null) {
 			if (sprintNo != null) {
-				Sprint sprint = sprintSrv.findByProjectIdAndSprintNo(
+				Sprint sprint = agileSrv.findByProjectIdAndSprintNo(
 						project.getId(), sprintNo);
 				if (sprint.getRawEnd_date() == null & !sprint.isActive()) {
 					MessageHelper.addWarningAttribute(ra,
@@ -409,11 +406,11 @@ public class SprintController {
 							+ "/scrum/backlog";
 				}
 			}
-			Sprint lastSprint = sprintSrv.findByProjectIdAndActiveTrue(project
+			Sprint lastSprint = agileSrv.findByProjectIdAndActiveTrue(project
 					.getId());
 			if (lastSprint == null) {
-				List<Sprint> sprints = sprintSrv.findByProjectId(project
-						.getId());
+				List<Sprint> sprints = agileSrv
+						.findByProjectId(project.getId());
 				if (sprints.isEmpty()) {
 					MessageHelper.addWarningAttribute(ra, msg.getMessage(
 							"agile.sprint.noSprints", null,
@@ -458,7 +455,7 @@ public class SprintController {
 		SprintData result = new SprintData();
 		Project project = projSrv.findByProjectId(id);
 		if (project != null) {
-			Sprint sprint = sprintSrv.findByProjectIdAndSprintNo(
+			Sprint sprint = agileSrv.findByProjectIdAndSprintNo(
 					project.getId(), sprintNo);
 			if (sprint == null
 					|| (sprint.getRawEnd_date() == null & !sprint.isActive())) {
@@ -484,17 +481,17 @@ public class SprintController {
 			boolean timeTracked = project.getTimeTracked();
 			List<WorkLog> wrkList = wrkLogSrv.getAllSprintEvents(sprint);
 			result.setWorklogs(DisplayWorkLog.convertToDisplayWorkLogs(wrkList));
-			result.setTimeBurned(fillTimeBurndownMap(wrkList, startTime,
-					endTime));
+			result.setTimeBurned(agileSrv.fillTimeBurndownMap(wrkList,
+					startTime, endTime));
 			Period totalTime = new Period();
 			for (Map.Entry<String, Float> entry : result.getTimeBurned()
 					.entrySet()) {
 				totalTime = PeriodHelper.plusPeriods(totalTime,
-						getPeriodValue(entry.getValue()));
+						Utils.getPeriodValue(entry.getValue()));
 			}
 
-			result.setTotalTime(String.valueOf(round(getFloatValue(totalTime),
-					2)));
+			result.setTotalTime(String.valueOf(Utils.round(
+					Utils.getFloatValue(totalTime), 2)));
 			return fillLeftAndBurned(result, sprint, wrkList, timeTracked);
 		} else {
 			return result;
@@ -505,9 +502,9 @@ public class SprintController {
 	public @ResponseBody List<DisplaySprint> showProjectSprints(
 			@RequestParam Long projectID, HttpServletResponse response) {
 		response.setContentType("application/json");
-		List<Sprint> projectSprints = sprintSrv.findByProjectIdAndFinished(
+		List<Sprint> projectSprints = agileSrv.findByProjectIdAndFinished(
 				projectID, false);
-		List<DisplaySprint> result = sprintSrv.convertToDisplay(projectSprints);
+		List<DisplaySprint> result = agileSrv.convertToDisplay(projectSprints);
 		Collections.sort(result);
 		return result;
 	}
@@ -523,7 +520,7 @@ public class SprintController {
 	public @ResponseBody boolean checkIfActive(
 			@RequestParam(value = "id") Long sprintID,
 			HttpServletResponse response) {
-		Sprint sprint = sprintSrv.findById(sprintID);
+		Sprint sprint = agileSrv.findById(sprintID);
 		return sprint.isActive();
 	}
 
@@ -548,28 +545,6 @@ public class SprintController {
 
 		}
 		return false;
-	}
-
-	private Map<String, Float> fillTimeBurndownMap(List<WorkLog> wrkList,
-			DateTime startTime, DateTime endTime) {
-		int sprintDays = Days.daysBetween(startTime, endTime).getDays() + 1;
-		Map<LocalDate, Period> timeBurndownMap = fillTimeMap(wrkList);
-		Map<String, Float> resultsBurned = new LinkedHashMap<String, Float>();
-		for (int i = 0; i < sprintDays; i++) {
-			LocalDate date = new LocalDate(startTime.plusDays(i));
-			Period value = timeBurndownMap.get(new LocalDate(date));
-			if (date.isAfter(LocalDate.now())) {
-				resultsBurned.put(date.toString(), new Float(0));
-			} else {
-				if (value != null) {
-					Float result = getFloatValue(value);
-					resultsBurned.put(date.toString(), result);
-				} else {
-					resultsBurned.put(date.toString(), new Float(0));
-				}
-			}
-		}
-		return resultsBurned;
 	}
 
 	/**
@@ -598,7 +573,7 @@ public class SprintController {
 		Float remaining_estimate = new Float(0);
 		Float burned = new Float(0);
 		if (timeTracked) {
-			remaining_estimate = getFloatValue(sprint.getTotalEstimate());
+			remaining_estimate = Utils.getFloatValue(sprint.getTotalEstimate());
 		} else {
 			remaining_estimate = new Float(sprint.getTotalStoryPoints());
 		}
@@ -627,32 +602,6 @@ public class SprintController {
 			data.setTotalPoints(totalPoints);
 		}
 		return data;
-	}
-
-	/**
-	 * Fills time map with worklogs in format <Date, Period Burned> Only events
-	 * with before present day are added
-	 * 
-	 * @param worklogList
-	 * 
-	 * @return
-	 **/
-	private Map<LocalDate, Period> fillTimeMap(List<WorkLog> worklogList) {
-		Map<LocalDate, Period> burndownMap = new LinkedHashMap<LocalDate, Period>();
-		for (WorkLog workLog : worklogList) {
-			if (workLog.getActivity() != null) {
-				LocalDate dateLogged = new LocalDate(workLog.getRawTime());
-				Period value = burndownMap.get(dateLogged);
-				if (value == null) {
-					value = workLog.getActivity();
-				} else {
-					value = PeriodHelper.plusPeriods(value,
-							workLog.getActivity());
-				}
-				burndownMap.put(dateLogged, value);
-			}
-		}
-		return burndownMap;
 	}
 
 	/**
@@ -725,9 +674,9 @@ public class SprintController {
 	 */
 	private Float addOrSubstractTime(WorkLog workLog, Float value) {
 		Float result = value;
-		Float taskLogged = getFloatValue(workLog.getActivity());
+		Float taskLogged = Utils.getFloatValue(workLog.getActivity());
 		if (LogType.ESTIMATE.equals(workLog.getType())) {
-			taskLogged = getFloatValue(PeriodHelper.inFormat(workLog
+			taskLogged = Utils.getFloatValue(PeriodHelper.inFormat(workLog
 					.getMessage()));
 			taskLogged *= -1;
 		}
@@ -780,46 +729,4 @@ public class SprintController {
 				|| repo_project.getParticipants().contains(currentAccount) || Roles
 					.isAdmin());
 	}
-
-	/**
-	 * Helper method to get float value from Period ( hours )
-	 * 
-	 * @param value
-	 * @return
-	 */
-	private Float getFloatValue(Period value) {
-		if (value == null) {
-			value = new Period();
-		}
-		Float result = Float.valueOf((float) (PeriodHelper.toStandardDuration(
-				value).getMillis() / MILLIS_PER_SECOND)
-				/ SECONDS_PER_HOUR);
-		return result;
-	}
-
-	/**
-	 * Round to certain number of decimals
-	 * 
-	 * @param d
-	 * @param decimalPlace
-	 * @return
-	 */
-	public float round(float d, int decimalPlace) {
-		BigDecimal bd = new BigDecimal(Float.toString(d));
-		bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
-		return bd.floatValue();
-	}
-
-	/**
-	 * Helper method to get Period value (hours ) from float value
-	 * 
-	 * @param timelogged
-	 * @return
-	 */
-	private Period getPeriodValue(Float timelogged) {
-		Period value = new Period(0, 0, (int) (timelogged * SECONDS_PER_HOUR),
-				0);
-		return value;
-	}
-
 }

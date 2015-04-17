@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.agile.Release;
 import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.projects.Project;
 
@@ -80,6 +81,10 @@ public class TaskService {
 	public List<Task> findAllBySprint(Sprint sprint) {
 		return taskRepo.findByProjectAndSprintsId(sprint.getProject(),
 				sprint.getId());
+	}
+	public List<Task> findAllByRelease(Release release) {
+		return taskRepo.findByProjectAndRelease(release.getProject(),
+				release);
 	}
 
 	public List<Task> findSubtasks(String taskID) {
