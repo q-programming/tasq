@@ -20,8 +20,8 @@ import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
-import com.qprogramming.tasq.task.events.Event;
-import com.qprogramming.tasq.task.events.EventsService;
+import com.qprogramming.tasq.events.Event;
+import com.qprogramming.tasq.events.EventsService;
 
 @Controller
 public class HomeController {

@@ -178,16 +178,12 @@
 						<td class="left-margin">
 							<c:if test="${can_edit}">
 								<input id="taskTags" type="text" title="<s:message code="task.tags.add"/>"
-										value="<c:forEach var="tag" items="${task.tags}">${tag},</c:forEach>"/>
+										value=""/>
 									<i id="editTags" class="fa fa-pencil" style="vertical-align: super; display: none"></i>
-									<i id="tagsLoading" class="fa fa-cog fa-spin" style="vertical-align: super; display: none"></i>
+									<i id="searchFieldHelp" class="fa fa-cog fa-spin" style="vertical-align: super;display: none"></i>
 							</c:if>
 							<c:if test="${not can_edit}">
-								<div style="color: rgb(187, 186, 186);padding: 6px 6px;">
-									<c:if test="${empty task.tags}">No tags</c:if>
-									<c:forEach var="tag" items="${task.tags}">
-										<span class="tag label label-info theme" data-name="${tag}">${tag}</span>
-									</c:forEach>
+								<div id="taskTagslist" style="color: rgb(187, 186, 186);padding: 6px 6px;">
 								</div>
 							</c:if>
 						</td>
@@ -243,8 +239,8 @@
 					</button>
 					<c:if
 						test="${not empty user.active_task && user.active_task[0] eq task.id}">
-						<a href="<c:url value="/task/time?id=${task.id}&action=stop"/>">
-							<button class="btn btn-default btn-sm a-tooltip"
+						<a href="#">
+							<button class="btn btn-default btn-sm a-tooltip handleTimerBtn"
 								title="<s:message code="task.stopTime.description" />">
 								<i class="fa fa-lg fa-clock-o"></i>
 								<s:message code="task.stopTime"></s:message>
@@ -531,10 +527,8 @@
 								class="fa fa-lg fa-files-o"></i> <s:message code="task.files" />
 							</span>
 						</h5>
-						<a class="btn btn-default btn-xxs a-tooltip pull-right"
-							href="<c:url value="task/${task.id}/fileadd"/>"
-							data-placement="top"
-							data-original-title="<s:message code="task.subtasks.add"/>">
+						<a class="btn btn-default btn-xxs a-tooltip pull-right addFileButton" href="#" data-toggle="modal"
+						data-target="#files_task" data-taskID="${task.id}">
 							<i class="fa fa-plus"></i> <i class="fa fa-lg fa-file"></i>
 						</a>
 					</div>
@@ -565,8 +559,13 @@
 									</c:otherwise>
 								</c:choose>
 								<tr>
-									<td><i class="fa ${file_type}"></i>&nbsp;<a
-										href="<c:url value="task/${task.id}/file?get=${file}"></c:url>">${file}</a>
+									<td><i class="fa ${file_type}"></i>&nbsp;
+									<c:if test="${file_type eq 'fa-file-image-o'}">
+										<img data-src="holder.js/50x50"
+											style="height: 50px;" 
+											src="<c:url value="task/${task.id}/imgfile?get=${file}"/>" />
+									</c:if>
+									<a href="<c:url value="task/${task.id}/file?get=${file}"></c:url>">${file}</a>
 									</td>
 									<c:if test="${can_edit && user.isUser || is_assignee}">
 										<td style="width: 30px">
@@ -1099,12 +1098,17 @@ $(document).on("click",".delete_task",function(e) {
 	});
 	
 	//TAGS
-	$('#taskTags').tagsinput({
-  		maxChars: 12,
-  		trimValue: true
-	});
-	
-	checkIfEmptyTags()
+	var init = true;
+	var noTags = '<s:message code="task.tags.noTags" htmlEscape="false"/>';
+	$('#taskTags').tagsinput(
+			{
+	  		maxChars: 12,
+	  		maxTags: 6,
+	  		trimValue: true
+			}
+	);
+	loadTags();
+// 	checkIfEmptyTags()
 	
 	$(".bootstrap-tagsinput").hover(
 		  function() {
@@ -1124,7 +1128,7 @@ $(document).on("click",".delete_task",function(e) {
 
 	$( "#tagsinput" ).autocomplete({
     	source: function(request, response) {
-    		$("#tagsLoading").show();
+    		$("#searchFieldHelp").show();
     		var term = request.term;
     		if ( term in cache ) {
               response( cache[ term ] );
@@ -1132,7 +1136,7 @@ $(document).on("click",".delete_task",function(e) {
     	    }
     		var url='<c:url value="/getTags"/>';
     		$.get(url,{term:term},function(data) {
-    			$("#tagsLoading").hide();
+    			$("#searchFieldHelp").hide();
     			var results = [];
                 $.each(data, function(i, item) {
                     var itemToAdd = {
@@ -1150,16 +1154,17 @@ $(document).on("click",".delete_task",function(e) {
     	}
     });
 	
-	
 	$('#taskTags').on('itemAdded', function(event) {
-		showWait(true);
-		console.log("Sending to backedn "+event.item  );
-		var url='<c:url value="/addTaskTag"/>';
-		$.get(url,{name:event.item,taskID:taskID},function(data) {
-			showWait(false);
-			console.log(data);
-			checkIfEmptyTags();
-		});
+		if(!init){
+			showWait(true);
+			console.log("Sending to backedn "+event.item  );
+			var url='<c:url value="/addTaskTag"/>';
+			$.get(url,{name:event.item,taskID:taskID},function(data) {
+				showWait(false);
+				console.log(data);
+				checkIfEmptyTags();
+			});
+		}
 	});
 	
 	$('#taskTags').on('itemRemoved', function(event) {
@@ -1172,19 +1177,41 @@ $(document).on("click",".delete_task",function(e) {
 			checkIfEmptyTags();
 		});
 	});
-	
-	$(".tag").click(function(){
-		console.log("clicked")
-		console.log($(this).data("name"));
+	$(document).on("click",".tagSearch",function(e) {
 		var url = '<c:url value="/tasks"/>?query=' + $(this).data("name");
 		window.location.href = url;
 	});
+	
+	function loadTags(){
+		var url='<c:url value="/getTaskTags"/>';
+		$.get(url,{taskID:taskID},function(data) {
+			var delimiter = '';
+			$.each(data, function(i, item) {
+				if('${can_edit}'){
+					$('#taskTags').tagsinput('add', item.name);
+				}else{
+					var tag = '<span class="tag label label-info theme"><span class="tagSearch" data-name="'+item.name+'">'+item.name+'</span></span>'
+					$('#taskTagslist').append(tag);
+					$('#taskTagslist').attr('tags','true');
+				}
+			});
+			checkIfEmptyTags();
+			init = false;
+		});
+		
+	}
+	
 	function checkIfEmptyTags(){
-		if($("#taskTags").val()==""){
-			var noTags = '<s:message code="task.tags.noTags"/>';
-			$("#tagsinput").attr("placeholder", noTags);
+		if('${can_edit}'){
+			if($("#taskTags").val()==""){
+				$("#tagsinput").attr("placeholder", noTags);
+			}else{
+				$("#tagsinput").attr("placeholder", "");
+			}
 		}else{
-			$("#tagsinput").attr("placeholder", "");
+			if(!$('#taskTagslist').attr('tags')){
+				$('#taskTagslist').append(noTags);
+			}			
 		}
 	}
 });

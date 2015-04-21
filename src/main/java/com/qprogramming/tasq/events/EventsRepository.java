@@ -1,4 +1,4 @@
-package com.qprogramming.tasq.task.events;
+package com.qprogramming.tasq.events;
 
 import java.util.List;
 

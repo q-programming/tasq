@@ -166,6 +166,7 @@
  								type="hidden" id="sprintID_${task.id}" name="sprintID">
  						</form>
 					</div>
+					<c:if test="${task.estimated}">
 					<div class="pointsdiv" style="display: table-cell">
 						<c:if test="${task.story_points == 0 && task.estimated}">
 							<c:set var="points">?</c:set>
@@ -181,6 +182,7 @@
 							<span class="point-edit"><i class="fa fa-pencil points" style="vertical-align:text-top"></i></span>
 						</span>
 					</div>
+					</c:if>
 				</div>
 			</c:if>
 		</c:forEach>
@@ -296,7 +298,7 @@ $(document).ready(function($) {
 					var taskID = event.currentTarget.id;
 					var sprintID = event.currentTarget.getAttribute('sprint-id');
 					var url = '<c:url value="/scrum/isActive"/>';
-					var message = '<s:message code="agile.sprint.add.confirm"/>';
+					var message = '<s:message code="agile.sprint.remove.confirm"/>';
 					$.get(url ,{id:sprintID},function(active){
 						if(active){
 							bootbox.confirm(message, function(result) {
@@ -315,7 +317,7 @@ $(document).ready(function($) {
 		var url = '<c:url value="/scrum/isActive"/>';
 		$.get(url ,{id:sprintID},function(active){
 			if(active){
-				var message = '<s:message code="agile.sprint.remove.confirm"/>';
+				var message = '<s:message code="agile.sprint.add.confirm"/>';
 				bootbox.confirm(message, function(result) {
 					if(result){
 						addToSprint(taskID,sprintID)

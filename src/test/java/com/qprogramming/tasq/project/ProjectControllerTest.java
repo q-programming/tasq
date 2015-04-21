@@ -45,13 +45,14 @@ import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.agile.Sprint;
-import com.qprogramming.tasq.agile.SprintRepository;
+import com.qprogramming.tasq.agile.SprintService;
 import com.qprogramming.tasq.error.TasqAuthException;
+import com.qprogramming.tasq.events.EventsService;
 import com.qprogramming.tasq.projects.NewProjectForm;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectChart;
 import com.qprogramming.tasq.projects.ProjectService;
-import com.qprogramming.tasq.projects.ProjetController;
+import com.qprogramming.tasq.projects.ProjectController;
 import com.qprogramming.tasq.support.web.Message;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskPriority;
@@ -75,16 +76,18 @@ public class ProjectControllerTest {
 	private static final String NEW_EMAIL = "newuser@test.com";
 	private Account testAccount;
 
-	private ProjetController projectCtr;
+	private ProjectController projectCtr;
 
 	@Mock
 	private ProjectService projSrv;
 	@Mock
 	private TaskService taskSrv;
 	@Mock
-	private SprintRepository sprintRepo;
+	private SprintService sprintSrvMock;
 	@Mock
 	private WorkLogService wrkLogSrv;
+	@Mock
+	private EventsService eventsSrvMock;
 	@Mock
 	private MessageSource msg;
 	@Mock
@@ -117,8 +120,8 @@ public class ProjectControllerTest {
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
-		projectCtr = new ProjetController(projSrv, accountServiceMock, taskSrv,
-				sprintRepo, wrkLogSrv, msg);
+		projectCtr = new ProjectController(projSrv, accountServiceMock, taskSrv,
+				sprintSrvMock, wrkLogSrv, msg,eventsSrvMock);
 	}
 
 	@Test
@@ -404,7 +407,7 @@ public class ProjectControllerTest {
 		Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
 		project.setId(1L);
 		when(projSrv.findById(1L)).thenReturn(project);
-		when(sprintRepo.findByProjectIdAndActiveTrue(1L)).thenReturn(
+		when(sprintSrvMock.findByProjectIdAndActiveTrue(1L)).thenReturn(
 				new Sprint());
 		when(accountServiceMock.findById(1L)).thenReturn(testAccount);
 		projectCtr.updateProperties(1L, true, TaskPriority.BLOCKER,
@@ -421,7 +424,7 @@ public class ProjectControllerTest {
 		Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
 		project.setId(1L);
 		when(projSrv.findById(1L)).thenReturn(project);
-		when(sprintRepo.findByProjectIdAndActiveTrue(1L)).thenReturn(null);
+		when(sprintSrvMock.findByProjectIdAndActiveTrue(1L)).thenReturn(null);
 		when(accountServiceMock.findById(1L)).thenReturn(testAccount);
 		projectCtr.updateProperties(1L, true, TaskPriority.BLOCKER,
 				TaskType.BUG, 1L, raMock, requestMock);

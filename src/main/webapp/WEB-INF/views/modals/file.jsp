@@ -66,7 +66,6 @@ function addFileInput() {
 	$("#fileTable").append(
 			'<tr><td style="width:300px">' + inputField + '</td></tr>');
 	$("#fileTable tr:last").find(".file_upload").bootstrapFileInput();
-	;
 }
 
 $("#upload_file_btn").click(function() {

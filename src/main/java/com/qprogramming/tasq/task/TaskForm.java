@@ -4,6 +4,7 @@
 package com.qprogramming.tasq.task;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.hibernate.validator.constraints.NotBlank;
@@ -222,7 +223,7 @@ public class TaskForm {
 	}
 
 	public List<MultipartFile> getFiles() {
-		return files;
+		return files == null ? new LinkedList<MultipartFile>() : files;
 	}
 
 	public void setFiles(List<MultipartFile> files) {

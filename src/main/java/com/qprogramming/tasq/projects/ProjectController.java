@@ -41,14 +41,15 @@ import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.agile.Sprint;
-import com.qprogramming.tasq.agile.SprintRepository;
+import com.qprogramming.tasq.agile.SprintService;
 import com.qprogramming.tasq.error.TasqAuthException;
+import com.qprogramming.tasq.events.Event;
+import com.qprogramming.tasq.events.EventsService;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.ProjectSorter;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
 import com.qprogramming.tasq.task.Task;
-import com.qprogramming.tasq.task.TaskController;
 import com.qprogramming.tasq.task.TaskPriority;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
@@ -59,27 +60,29 @@ import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
 @Controller
-public class ProjetController {
+public class ProjectController {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(ProjetController.class);
+			.getLogger(ProjectController.class);
 	private ProjectService projSrv;
 	private AccountService accSrv;
 	private TaskService taskSrv;
-	private SprintRepository sprintRepo;
+	private SprintService sprintSrv;
 	private WorkLogService wrkLogSrv;
 	private MessageSource msg;
+	private EventsService eventsSrv;
 
 	@Autowired
-	public ProjetController(ProjectService projSrv, AccountService accSrv,
-			TaskService taskSrv, SprintRepository sprintRepo,
-			WorkLogService wrklSrv, MessageSource msg) {
+	public ProjectController(ProjectService projSrv, AccountService accSrv,
+			TaskService taskSrv, SprintService sprintSrv,
+			WorkLogService wrklSrv, MessageSource msg,EventsService eventsSrv) {
 		this.projSrv = projSrv;
 		this.accSrv = accSrv;
 		this.taskSrv = taskSrv;
-		this.sprintRepo = sprintRepo;
+		this.sprintSrv = sprintSrv;
 		this.wrkLogSrv = wrklSrv;
 		this.msg = msg;
+		this.eventsSrv = eventsSrv;
 	}
 
 	@Transactional
@@ -102,16 +105,15 @@ public class ProjetController {
 		// set last visited
 		Account current = Utils.getCurrentAccount();
 		List<Project> lastVisited = current.getLast_visited_p();
-		lastVisited.add(0, project);
-		if (lastVisited.size() > 4) {
-			lastVisited = lastVisited.subList(0, 4);
-		}
 		List<Project> clean = new ArrayList<Project>();
 		Set<Project> lookup = new HashSet<Project>();
 		for (Project item : lastVisited) {
 			if (lookup.add(item)) {
 				clean.add(item);
 			}
+		}
+		if (clean.size() > 4) {
+			clean = clean.subList(0, 4);
 		}
 		current.setLast_visited_p(clean);
 		accSrv.update(current);
@@ -292,6 +294,7 @@ public class ProjetController {
 				account.setActive_project(id);
 				accSrv.update(account);
 			}
+			eventsSrv.addSystemEvent(account, LogType.ASSIGN_PROJ, project.toString());
 			projSrv.save(project);
 		}
 		return "redirect:" + request.getHeader("Referer");
@@ -330,6 +333,7 @@ public class ProjetController {
 
 			}
 			project.removeParticipant(account);
+			eventsSrv.addSystemEvent(account, LogType.REMOVE_PROJ, project.toString());
 			projSrv.save(project);
 		}
 		return "redirect:" + request.getHeader("Referer");
@@ -398,11 +402,11 @@ public class ProjetController {
 			@RequestParam String term, HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findByProjectId(id);
-		if(project==null){
-			try{
-			Long projectID = Long.valueOf(id);
-			project = projSrv.findById(projectID);
-			}catch(NumberFormatException e){
+		if (project == null) {
+			try {
+				Long projectID = Long.valueOf(id);
+				project = projSrv.findById(projectID);
+			} catch (NumberFormatException e) {
 				LOG.error(e.getMessage());
 			}
 		}
@@ -541,7 +545,7 @@ public class ProjetController {
 			project.setDefault_priority(priority);
 		}
 		project.setDefault_type(type);
-		Sprint activeSprint = sprintRepo.findByProjectIdAndActiveTrue(id);
+		Sprint activeSprint = sprintSrv.findByProjectIdAndActiveTrue(id);
 		if (activeSprint != null) {
 			MessageHelper.addWarningAttribute(
 					ra,

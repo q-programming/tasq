@@ -44,7 +44,7 @@ import com.qprogramming.tasq.task.TaskPriority;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
 import com.qprogramming.tasq.task.TaskType;
-import com.qprogramming.tasq.task.events.EventsService;
+import com.qprogramming.tasq.events.EventsService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WorkLogTest {

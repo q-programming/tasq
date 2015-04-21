@@ -64,7 +64,7 @@ public class Project implements Serializable {
 	@Column
 	private Date startDate;
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "project")
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "project", orphanRemoval=true)
 	private List<Task> tasks;
 
 	@Column
@@ -252,8 +252,12 @@ public class Project implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((agile == null) ? 0 : agile.hashCode());
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result
+				+ ((projectId == null) ? 0 : projectId.hashCode());
+		result = prime * result
+				+ ((startDate == null) ? 0 : startDate.hashCode());
 		return result;
 	}
 
@@ -269,6 +273,9 @@ public class Project implements Serializable {
 			return false;
 		}
 		Project other = (Project) obj;
+		if (agile != other.agile) {
+			return false;
+		}
 		if (id == null) {
 			if (other.id != null) {
 				return false;
@@ -276,13 +283,21 @@ public class Project implements Serializable {
 		} else if (!id.equals(other.id)) {
 			return false;
 		}
-		if (name == null) {
-			if (other.name != null) {
+		if (projectId == null) {
+			if (other.projectId != null) {
 				return false;
 			}
-		} else if (!name.equals(other.name)) {
+		} else if (!projectId.equals(other.projectId)) {
+			return false;
+		}
+		if (startDate == null) {
+			if (other.startDate != null) {
+				return false;
+			}
+		} else if (!startDate.equals(other.startDate)) {
 			return false;
 		}
 		return true;
 	}
+	
 }

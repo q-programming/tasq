@@ -11,10 +11,9 @@ public enum LogType {
 			"log.type.assign"), PRIORITY("log.type.priority"), DELETED(
 			"log.type.delete"), SPRINT_START("log.type.sprintstart"), SPRINT_STOP(
 			"log.type.sprintstop"), TASK_LINK("log.type.taskLink"), TASK_LINK_DEL(
-			"log.type.taskLink.delete"), TASKSPRINTADD(
-			"log.type.taskSprintAdd"), TASKSPRINTREMOVE(
-			"log.type.taskSprintRemove"),SUBTASK(
-					"log.type.subtask");
+			"log.type.taskLink.delete"), TASKSPRINTADD("log.type.taskSprintAdd"), TASKSPRINTREMOVE(
+			"log.type.taskSprintRemove"), SUBTASK("log.type.subtask"), ASSIGN_PROJ(
+			"log.type.assignProj"), REMOVE_PROJ("log.type.removeProj");
 
 	private String code;
 

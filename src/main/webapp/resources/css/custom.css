@@ -395,4 +395,8 @@ td.centerd {
 	cursor: pointer;
 	padding: 5px;
   	border-radius: 4px;
+  	margin-right: 4px;
+}
+.tagSearch{
+	cursor: pointer;
 }

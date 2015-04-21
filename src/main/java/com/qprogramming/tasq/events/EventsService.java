@@ -1,4 +1,4 @@
-package com.qprogramming.tasq.task.events;
+package com.qprogramming.tasq.events;
 
 import java.util.Date;
 import java.util.LinkedList;
@@ -14,9 +14,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.events.Event.Type;
 import com.qprogramming.tasq.mail.MailMail;
 import com.qprogramming.tasq.support.Utils;
-import com.qprogramming.tasq.task.events.Event.Type;
 import com.qprogramming.tasq.task.watched.WatchedTask;
 import com.qprogramming.tasq.task.watched.WatchedTaskService;
 import com.qprogramming.tasq.task.worklog.LogType;
@@ -63,8 +63,8 @@ public class EventsService {
 	 * @return
 	 */
 	public Page<Event> getEvents(Pageable page) {
-		return eventsRepo.findByAccountId(Utils
-				.getCurrentAccount().getId(), page);
+		return eventsRepo.findByAccountId(Utils.getCurrentAccount().getId(),
+				page);
 	}
 
 	/**
@@ -130,6 +130,37 @@ public class EventsService {
 		}
 	}
 
+	public void addSystemEvent(Account account, LogType type, String string) {
+		Event event = new Event();
+		event.setAccount(account);
+		event.setWho(Utils.getCurrentAccount().toString());
+		event.setUnread(true);
+		event.setLogtype(type);
+		event.setDate(new Date());
+		event.setType(getEventType(type));
+		event.setMessage(string);
+		eventsRepo.save(event);
+		if (account.getEmail_notifications()) {
+			Locale locale = new Locale(account.getLanguage());
+			String eventStr = msg.getMessage(type.getCode(), null, locale);
+			String subject = msg.getMessage("event.newSystemEvent",
+					new Object[] { Utils.getCurrentAccount(), eventStr },
+					locale);
+			String message = msg.getMessage(
+					"event.newSystemEvent.body",
+					new Object[] { account.toString(),
+							Utils.getCurrentAccount(), eventStr, string, },
+					locale);
+			LOG.info(account.getEmail());
+			LOG.info(subject);
+			LOG.info(message);
+			// if(mailer.sendMail(mailer.NOTIFICATION, email,
+			// subject,
+			// message)){
+		}
+
+	}
+
 	public void save(Event event) {
 		eventsRepo.save(event);
 	}
@@ -149,11 +180,15 @@ public class EventsService {
 
 	private Type getEventType(LogType type) {
 		switch (type) {
+		case ASSIGN_PROJ:
+			return Type.SYSTEM;
+		case REMOVE_PROJ:
+			return Type.SYSTEM;
 		case COMMENT:
 			return Type.COMMENT;
 		default:
 			return Type.WATCH;
 		}
-
 	}
+
 }

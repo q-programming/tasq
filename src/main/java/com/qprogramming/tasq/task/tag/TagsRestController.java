@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,6 +43,17 @@ public class TagsRestController {
 		} else {
 			result = tagsRepo.findByNameContainingIgnoreCase(term);
 		}
+		return result;
+	}
+	
+	@Transactional
+	@RequestMapping(value = "/getTaskTags", method = RequestMethod.GET)
+	public Set<Tag> getTaskTags(@RequestParam String taskID,
+			HttpServletResponse response) {
+		response.setContentType("application/json");
+		Task task = taskSrv.findById(taskID);
+		Hibernate.initialize(task.getTags());
+		Set<Tag> result = task.getTags();
 		return result;
 	}
 
