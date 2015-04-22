@@ -47,6 +47,7 @@ import com.qprogramming.tasq.task.worklog.WorkLogService;
 public class KanbanController {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(KanbanController.class);
+	private static final String TODO_ONGOING = "<td>To do</td><td>Ongoing</td>";
 	private TaskService taskSrv;
 	private ProjectService projSrv;
 	private WorkLogService wrkLogSrv;
@@ -217,10 +218,11 @@ public class KanbanController {
 		KanbanData data = result;
 		Map<LocalDate, Integer> openMap = new LinkedHashMap<LocalDate, Integer>();
 		Map<LocalDate, Integer> closedMap = new LinkedHashMap<LocalDate, Integer>();
+		Map<LocalDate, Integer> progressMap = new LinkedHashMap<LocalDate, Integer>();
 		for (WorkLog workLog : wrkList) {
 			LocalDate dateLogged = new LocalDate(workLog.getRawTime());
-			if (LogType.CREATE.equals(workLog.getType())
-					|| LogType.REOPEN.equals(workLog.getType())) {
+			//TODO refactor
+			if (LogType.CREATE.equals(workLog.getType())) {
 				Integer value = openMap.get(dateLogged);
 				value = value == null ? 0 : value;
 				value++;
@@ -230,6 +232,23 @@ public class KanbanController {
 				value = value == null ? 0 : value;
 				value++;
 				closedMap.put(dateLogged, value);
+			} else if (LogType.REOPEN.equals(workLog.getType())) {
+				Integer openValue = openMap.get(dateLogged);
+				openValue = openValue == null ? 0 : openValue;
+				openValue++;
+				openMap.put(dateLogged, openValue);
+				Integer closedValue = closedMap.get(dateLogged);
+				closedValue = closedValue == null ? 0 : closedValue;
+				closedValue--;
+				closedMap.put(dateLogged, closedValue);
+			} else if (LogType.STATUS.equals(workLog.getType())) {
+				Integer value = progressMap.get(dateLogged);
+				value = value == null ? 0 : value;
+				// TODO search for other way ?
+				if (workLog.getMessage().contains(TODO_ONGOING)) {
+					value++;
+					progressMap.put(dateLogged, value);
+				}
 			}
 		}
 		LocalDate startTime = new LocalDate(release.getStartDate());
@@ -242,12 +261,16 @@ public class KanbanController {
 			LocalDate date = startTime.plusDays(i);
 			Integer openValue = openMap.get(date);
 			Integer closedValue = closedMap.get(date);
+			Integer progressValue = progressMap.get(date);
 			openValue = openValue == null ? 0 : openValue;
 			closedValue = closedValue == null ? 0 : closedValue;
+			progressValue = progressValue == null ? 0 : progressValue;
 			open += openValue;
 			closed += closedValue;
+			progressValue += closed;
 			data.putToOpen(date.toString(), open);
 			data.putToClosed(date.toString(), closed);
+			data.putToInProgress(date.toString(), progressValue);
 		}
 
 		// Integer totalPoints = new Integer(0);

@@ -314,6 +314,7 @@ public class WorkLogService {
 		LogType type = (LogType) workLog.getType();
 		return release.equals(workLog.getTask().getRelease())
 				&& (type.equals(LogType.CREATE) || type.equals(LogType.DELETED) || type.equals(LogType.LOG)
+						|| type.equals(LogType.STATUS)
 						|| type.equals(LogType.CLOSED) || type
 							.equals(LogType.REOPEN));
 	}

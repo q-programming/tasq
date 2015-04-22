@@ -1,13 +1,9 @@
 package com.qprogramming.tasq.agile;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
-import com.qprogramming.tasq.task.DisplayTask;
-
-class SprintData extends AgileData{
+class SprintData extends AgileData {
 	private Map<String, Float> left;
 	private Map<String, Float> burned;
 	private Map<String, Float> ideal;
@@ -59,6 +55,5 @@ class SprintData extends AgileData{
 	public void putToLeft(String time, Float value) {
 		left.put(time, value);
 	}
-
 
 }

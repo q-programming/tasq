@@ -123,9 +123,11 @@ function renderSprintData(releaseNo){
     time = new Array([]);
     openData = new Array([]);
     closedData = new Array([]);
+    progressData = new Array([]);
     time.pop();
     openData.pop();
     closedData.pop();
+    progressData.pop();
     if(plot){
     	plot.destroy();
     }
@@ -148,6 +150,9 @@ function renderSprintData(releaseNo){
     	});
     	$.each(result.closed, function(key,val){
     		closedData.push([key, val]);
+    	});
+    	$.each(result.inProgress, function(key,val){
+    		progressData.push([key, val]);
     	});
     	var startStop ='';
 		//Render worklog events
@@ -204,7 +209,7 @@ function renderSprintData(releaseNo){
     	//render chart
     	var startStop = result.startStop;
     	var labelFormat = '%d';
-		plot = $.jqplot('chartdiv', [ openData,closedData], {
+		plot = $.jqplot('chartdiv', [ openData,progressData,closedData], {
 			title : '<i class="fa fa-line-chart"></i> <s:message code="agile.burndown.chart"/><p style="font-size: x-small;">'+startStop+'</p>',
 			animate: true,
 			grid: {
@@ -220,8 +225,8 @@ function renderSprintData(releaseNo){
                 }
             },
     		fillBetween: {
-                series1: 0,
-                series2: 1,
+                series1: 1,
+                series2: 2,
                 color: "rgba(66, 139, 202, 0.18)",
                 baseSeries: 0,
                 fill: true
@@ -248,6 +253,11 @@ function renderSprintData(releaseNo){
 			    	color: '#f0ad4e',
 				    label: '<s:message code="task.created"/>',
 				    highlighter: { formatString: '[%s] %s <s:message code="task.state.open"/>'}
+			    },
+			    {
+			    	color:'blue',
+				    label: '<s:message code="task.state.ongoing"/>',
+				    highlighter: { formatString: '[%s] %s <s:message code="task.state.ongoing"/>'}
 			    },
 			    {
 			    	color:'#5cb85c',
@@ -330,14 +340,16 @@ function renderSprintData(releaseNo){
 
 	function getEventTypeMsg(type){
 		switch(type){
+			case "CREATE":
+				return '<s:message code="task.created"/>';
 			case "CLOSED":
 				return '<s:message code="task.state.closed"/>';
 			case "REOPEN":
 				return '<s:message code="task.state.reopen"/>';
 			case "LOG":
 				return '<s:message code="task.state.logged"/>';
-			case "TASKSPRINTADD":
-				return '<s:message code="task.state.tasksprintadd"/>';
+			case "STATUS":
+				return 'changed status';
 			case "TASKSPRINTREMOVE":
 				return '<s:message code="task.state.tasksprintremove"/>';
 			case "ESTIMATE":
