@@ -2,7 +2,6 @@ package com.qprogramming.tasq.agile;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -18,10 +17,6 @@ class SprintData extends AgileData{
 		left = new LinkedHashMap<String, Float>();
 		burned = new LinkedHashMap<String, Float>();
 		ideal = new LinkedHashMap<String, Float>();
-		timeBurned = new LinkedHashMap<String, Float>();
-		tasks = new HashMap<String, List<DisplayTask>>();
-		tasks.put(CLOSED, new LinkedList<DisplayTask>());
-		tasks.put(ALL, new LinkedList<DisplayTask>());
 	}
 
 	public Map<String, Float> getLeft() {

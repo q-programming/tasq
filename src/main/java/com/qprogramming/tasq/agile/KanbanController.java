@@ -1,6 +1,7 @@
 package com.qprogramming.tasq.agile;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +39,7 @@ import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
 import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
+import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
@@ -163,9 +167,9 @@ public class KanbanController {
 	}
 
 	@RequestMapping(value = "/{id}/release-data", method = RequestMethod.GET, produces = "application/json")
-	public @ResponseBody SprintData showBurndownChart(@PathVariable String id,
+	public @ResponseBody KanbanData showBurndownChart(@PathVariable String id,
 			@RequestParam(value = "release", required = false) String releaseNo) {
-		SprintData result = new SprintData();
+		KanbanData result = new KanbanData();
 		Project project = projSrv.findByProjectId(id);
 		if (project != null) {
 			Release release;
@@ -188,7 +192,7 @@ public class KanbanController {
 			// Fill maps based on time or story point driven board
 			DateTime startTime = release.getStartDate();
 			DateTime endTime = release.getEndDate();
-			//TODO Active release ( release is null )
+			// TODO Active release ( release is null )
 			List<WorkLog> wrkList = wrkLogSrv.getAllReleaseEvents(release);
 			result.setWorklogs(DisplayWorkLog.convertToDisplayWorkLogs(wrkList));
 			result.setTimeBurned(agileSrv.fillTimeBurndownMap(wrkList,
@@ -202,11 +206,52 @@ public class KanbanController {
 
 			result.setTotalTime(String.valueOf(Utils.round(
 					Utils.getFloatValue(totalTime), 2)));
-			// return fillLeftAndBurned(result, sprint, wrkList, timeTracked);
-			return result;
+			return fillOpenAndClosed(result, release, wrkList);
 		} else {
 			return result;
 		}
 	}
 
+	private KanbanData fillOpenAndClosed(KanbanData result, Release release,
+			List<WorkLog> wrkList) {
+		KanbanData data = result;
+		Map<LocalDate, Integer> openMap = new LinkedHashMap<LocalDate, Integer>();
+		Map<LocalDate, Integer> closedMap = new LinkedHashMap<LocalDate, Integer>();
+		for (WorkLog workLog : wrkList) {
+			LocalDate dateLogged = new LocalDate(workLog.getRawTime());
+			if (LogType.CREATE.equals(workLog.getType())
+					|| LogType.REOPEN.equals(workLog.getType())) {
+				Integer value = openMap.get(dateLogged);
+				value = value == null ? 0 : value;
+				value++;
+				openMap.put(dateLogged, value);
+			} else if (LogType.CLOSED.equals(workLog.getType())) {
+				Integer value = closedMap.get(dateLogged);
+				value = value == null ? 0 : value;
+				value++;
+				closedMap.put(dateLogged, value);
+			}
+		}
+		LocalDate startTime = new LocalDate(release.getStartDate());
+		LocalDate endTime = new LocalDate(release.getEndDate());
+		data.setStartStop(startTime.toString() + " - " + endTime.toString());
+		int releaseDays = Days.daysBetween(startTime, endTime).getDays() + 1;
+		Integer open = new Integer(0);
+		Integer closed = new Integer(0);
+		for (int i = 0; i < releaseDays; i++) {
+			LocalDate date = startTime.plusDays(i);
+			Integer openValue = openMap.get(date);
+			Integer closedValue = closedMap.get(date);
+			openValue = openValue == null ? 0 : openValue;
+			closedValue = closedValue == null ? 0 : closedValue;
+			open += openValue;
+			closed += closedValue;
+			data.putToOpen(date.toString(), open);
+			data.putToClosed(date.toString(), closed);
+		}
+
+		// Integer totalPoints = new Integer(0);
+		//
+		return data;
+	}
 }

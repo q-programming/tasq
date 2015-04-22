@@ -110,7 +110,6 @@ $(document).ready(function() {
 	var avatarURL = '<c:url value="/../avatar/"/>';
 	var taskURL = '<c:url value="/task?id="/>';
 	var loading_indicator = '<div id="loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td>';
-	var labelFormat = '%#.1f h';
 	
 	$(".releaseMenuNo").click(function(){
 		var number = $(this).data('number');
@@ -122,13 +121,11 @@ $(document).ready(function() {
 function renderSprintData(releaseNo){
 	//init arrays and remove first element via pop()
     time = new Array([]);
-    left = new Array([]);
-    burned = new Array([]);
-    ideal = new Array([]);
+    openData = new Array([]);
+    closedData = new Array([]);
     time.pop();
-    left.pop();
-    burned.pop();
-    ideal.pop();
+    openData.pop();
+    closedData.pop();
     if(plot){
     	plot.destroy();
     }
@@ -146,20 +143,13 @@ function renderSprintData(releaseNo){
     	$.each(result.timeBurned, function(key,val){
     		time.push([key, val]);
     	});
-    	$.each(result.left, function(key,val){
-    		left.push([key, val]);
+    	$.each(result.open, function(key,val){
+    		openData.push([key, val]);
     	});
-    	$.each(result.burned, function(key,val){
-    		burned.push([key, val]);
+    	$.each(result.closed, function(key,val){
+    		closedData.push([key, val]);
     	});
     	var startStop ='';
-    	$.each(result.ideal, function(key,val){
-    		ideal.push([key, val]);
-    		startStop+=key;
-    		startStop+=" - ";
-    	});
-    	startStop = startStop.slice(0,-3);
-		  	    	
 		//Render worklog events
 		$.each(result.worklogs, function(key,val){
     		var task = '<td><a class="a-tooltip" href="'+ taskURL + val.task.id + '" \'>[' + val.task.id + '] ' + val.task.name + '</a></td>'; 
@@ -212,7 +202,9 @@ function renderSprintData(releaseNo){
 		//remove loading
 		$("#loading").remove();
     	//render chart
-		plot = $.jqplot('chartdiv', [ left,burned,ideal ], {
+    	var startStop = result.startStop;
+    	var labelFormat = '%d';
+		plot = $.jqplot('chartdiv', [ openData,closedData], {
 			title : '<i class="fa fa-line-chart"></i> <s:message code="agile.burndown.chart"/><p style="font-size: x-small;">'+startStop+'</p>',
 			animate: true,
 			grid: {
@@ -222,6 +214,18 @@ function renderSprintData(releaseNo){
 				show : true,
 				sizeAdjust : 7.5
 			},
+            seriesDefaults: {
+                rendererOptions: {
+                    smooth: true
+                }
+            },
+    		fillBetween: {
+                series1: 0,
+                series2: 1,
+                color: "rgba(66, 139, 202, 0.18)",
+                baseSeries: 0,
+                fill: true
+            },
 			axesDefaults : {
 				labelRenderer : $.jqplot.CanvasAxisLabelRenderer
 			},
@@ -241,18 +245,14 @@ function renderSprintData(releaseNo){
 			},
 			series:[
 			    {
-				    label: '<s:message code="agile.remaining"/>',
+			    	color: '#f0ad4e',
+				    label: '<s:message code="task.created"/>',
+				    highlighter: { formatString: '[%s] %s <s:message code="task.state.open"/>'}
 			    },
 			    {
-				    label: '<s:message code="agile.burned"/>',
-			    },
-			    {
-				    color: '#B34202',
-				    label: '<s:message code="agile.ideal"/>',
-				    lineWidth:1, 
-				    markerOptions: {
-			            show: false,  
-			        }
+			    	color:'#5cb85c',
+				    label: '<s:message code="task.state.closed"/>',
+				    highlighter: { formatString: '[%s] %s <s:message code="task.state.closed"/>'}
 			    }],
 			legend: {
 					renderer: jQuery.jqplot.EnhancedLegendRenderer,
@@ -265,6 +265,7 @@ function renderSprintData(releaseNo){
 			    }
 		});
 		//	render time chart
+		labelFormat = '%#.1f h';
 		plot2 = $.jqplot('chartdiv2', [ time ], {
 			title : '<i class="fa fa-bar-chart"></i> <s:message code="agile.timelogged.day"/><p style="font-size: x-small;">'+startStop+'</p>',
 			animate: true,
