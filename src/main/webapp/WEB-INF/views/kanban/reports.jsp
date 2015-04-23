@@ -65,7 +65,7 @@
 		</div>
 	</div>
 	<div class="row" style="height: 500px;">
-		<a class="anchor" id="burndown_chart"></a>
+		<a class="anchor" id="chart"></a>
 		<div class="col-lg-10 col-md-9 col-sm-8 col-lg-offset-2 col-md-offset-3 col-sm-offset-4" id="chartdiv"  style="height: 500px;"></div>
 	</div>
 	<div class="row" style="height: 300px;">
@@ -75,14 +75,13 @@
 	<div class="row">
 		<a class="anchor" id="events"></a>
 		<div class="col-lg-10 col-md-9 col-sm-8 col-lg-offset-2 col-md-offset-3 col-sm-offset-4">
-			<h4 style="text-align: center;"><i class="fa fa-calendar"></i> <s:message code="agile.events.sprint"/></h4>
+			<h4 style="text-align: center;"><i class="fa fa-calendar"></i> <s:message code="agile.events.release"/></h4>
 			<table id="eventsTable" class="table table-bordered"
 				style="width: 100%">
 				<thead class="theme">
 					<tr>
 						<th style="width: 300px"><s:message code="task.task" /></th>
 						<th style="width: 100px"><s:message code="main.date" /></th>
-						<th style="width: 60px; text-align: center" colspan="2"><s:message code="agile.change"/></th>
 						<th id="timeColumn" style="width: 60px; text-align: center"><s:message code="agile.time"/></th>
 						<th style="width: 90px"><s:message code="task.activeLog" /></th>
 						<th style="width: 100px"><s:message code="agile.user" /></th>
@@ -91,10 +90,10 @@
 				</thead>
 			</table>
 			<a class="anchor" id="sprintTotal"></a>
-			<h4 style="text-align: center;"><i class="fa fa-list-ul"></i> <s:message code="agile.sprint.total"/></h4>
+			<h4 style="text-align: center;"><i class="fa fa-list-ul"></i> <s:message code="agile.release.total"/></h4>
 			<table id="summaryTable" class="table table-bordered"
 				style="width: 100%">
-				<thead id="#releaseTotal" class="theme">
+				<thead id="releaseTotal" class="theme">
 				</thead>
 			</table>
 		</div>
@@ -161,27 +160,15 @@ function renderSprintData(releaseNo){
     		var date = "<td>" +val.time + "</td>";
     		var event = "<td>" +getEventTypeMsg(val.type) + "</td>";
     		var change;
-    		var timeLogged;
-	    	if  (val.type=='REOPEN'){
-	    			change = '<td style="width:30px"></td><td style="width:30px"></td>';
-	    	}else if(val.type=='LOG'){
-	    		change = '<td style="width:30px"></td><td style="width:30px">' + val.message + '</td>';
-    		}
-   			else{
-    			change = '<td style="width:30px"></td><td style="width:30px"></td>';
-   			}
     		var timeLogged = "<td>";
-    		if(val.activity){
-   				timeLogged = "<td>";
-   				timeLogged+=val.message;
-    		}
+			timeLogged+=val.message;
    			timeLogged+="</td>";
     		var account = val.account.name +" " + val.account.surname; 
 			var accountTd = '<td rel="popover" data-container="body" data-placement="top" data-account="'
 								+ account + '" data-account_email="' + val.account.email + '" data-account_img="' + avatarURL + val.account.id + '.png">'
 								+account
 							+'</td>';
-			var row = task + date + change + timeLogged + event + accountTd;
+			var row = task + date + timeLogged + event + accountTd;
 			$("#eventsTable").append("<tr>"+row+"</tr>");
     	});
 		//Summary
@@ -193,7 +180,7 @@ function renderSprintData(releaseNo){
 		if(result.totalTime == '0m'){
 			result.totalTime = '0h';
 		}
-		var totalRow = '<tr class="theme"><th>Completed</th><th></th><th style="text-align:center">~ ' + result.totalTime + ' h</th>';
+		var totalRow = '<tr class="theme"><th>Completed</th><th style="text-align:center">~ ' + result.totalTime + ' h</th>';
 		$("#summaryTable").append(totalRow);
 		$.each(result.tasks.CLOSED, function(key,task){
 			if(!task.subtask){
@@ -210,7 +197,7 @@ function renderSprintData(releaseNo){
     	var startStop = result.startStop;
     	var labelFormat = '%d';
 		plot = $.jqplot('chartdiv', [ openData,progressData,closedData], {
-			title : '<i class="fa fa-line-chart"></i> <s:message code="agile.burndown.chart"/><p style="font-size: x-small;">'+startStop+'</p>',
+			title : '<i class="fa fa-line-chart"></i> <s:message code="agile.release.chart"/><p style="font-size: x-small;">'+startStop+'</p>',
 			animate: true,
 			grid: {
                 background: '#ffffff',
@@ -228,7 +215,7 @@ function renderSprintData(releaseNo){
                 series1: 1,
                 series2: 2,
                 color: "rgba(66, 139, 202, 0.18)",
-                baseSeries: 0,
+                baseSeries: 2,
                 fill: true
             },
 			axesDefaults : {
@@ -252,10 +239,11 @@ function renderSprintData(releaseNo){
 			    {
 			    	color: '#f0ad4e',
 				    label: '<s:message code="task.created"/>',
-				    highlighter: { formatString: '[%s] %s <s:message code="task.state.open"/>'}
+				    highlighter: { formatString: '[%s] %s <s:message code="task.created"/>'}
+				    
 			    },
 			    {
-			    	color:'blue',
+			    	color:'#428bca',
 				    label: '<s:message code="task.state.ongoing"/>',
 				    highlighter: { formatString: '[%s] %s <s:message code="task.state.ongoing"/>'}
 			    },

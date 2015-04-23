@@ -128,7 +128,7 @@ public class AgileService {
 	public Release findActiveByProjectId(Long id) {
 		List<Release> list = findReleaseByProjectIdOrderByDateDesc(id);
 		if(list.isEmpty()){
-			return null;
+			return new Release();
 		}
 		return list.get(list.size() - 1);
 	}
