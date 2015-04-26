@@ -151,7 +151,7 @@ function renderSprintData(releaseNo){
     		closedData.push([key, val]);
     	});
     	$.each(result.inProgress, function(key,val){
-    		progressData.push([key, val]);
+    		progressData.push([key, val,result.progressLabels[key]]);
     	});
     	var startStop ='';
 		//Render worklog events
@@ -224,7 +224,7 @@ function renderSprintData(releaseNo){
 			axes : {
 				xaxis : {
 					renderer:$.jqplot.DateAxisRenderer, 
-			        tickOptions:{formatString:'%#d-%m'},
+			        tickOptions:{formatString:'%Y-%m-%#d'},
 					pad : 0
 				},
 				yaxis : {
@@ -242,14 +242,25 @@ function renderSprintData(releaseNo){
 				    highlighter: { formatString: '[%s] %s <s:message code="task.created"/>'}
 				    
 			    },
+			    
 			    {
 			    	color:'#428bca',
 				    label: '<s:message code="task.state.ongoing"/>',
-				    highlighter: { formatString: '[%s] %s <s:message code="task.state.ongoing"/>'}
+				    highlighter: {
+				    	tooltipContentEditor: function(str, seriesIndex, pointIndex, plot){
+				    			var highDate = str.split(',')[0];
+				    			var label = result.progressLabels[highDate];
+		                        return "[" + highDate +"] " + label + " " + plot.series[seriesIndex]["label"];
+		                        },
+				    	
+				    	}
 			    },
 			    {
 			    	color:'#5cb85c',
 				    label: '<s:message code="task.state.closed"/>',
+				    showMarker : true,
+				    fill: true,
+				    fillAlpha: 0.5,
 				    highlighter: { formatString: '[%s] %s <s:message code="task.state.closed"/>'}
 			    }],
 			legend: {

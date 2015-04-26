@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -261,32 +262,44 @@ public class KanbanController {
 			Integer progressValue = progressMap.get(date);
 			openValue = openValue == null ? 0 : openValue;
 			closedValue = closedValue == null ? 0 : closedValue;
-			progressValue = progressValue == null || progressValue < 0 ? 0
-					: progressValue;
-
+			progressValue = progressValue == null ? 0 : progressValue;
 			open += openValue;
 			closed += closedValue;
-			progress+= progressValue;
+			progress += progressValue;
+			if(progress<0){
+				progress = 0;
+			}
 			data.putToOpen(date.toString(), open);
 			data.putToClosed(date.toString(), closed);
-			data.putToInProgress(date.toString(), progress);
+			data.putToInProgress(date.toString(), closed+progress);
+			data.putToInProgressLabel(date.toString(), progress);
 		}
+		normalizeProgressLabels(data, progressMap);
 
 		// Integer totalPoints = new Integer(0);
 		//
 		return data;
 	}
 
-	private void increaseMap(Map<LocalDate, Integer> map,
-			LocalDate dateLogged) {
+	private void normalizeProgressLabels(KanbanData data,
+			Map<LocalDate, Integer> progressMap) {
+		for (Entry<LocalDate, Integer> entry : progressMap.entrySet()) {
+			Integer value = entry.getValue();
+			if (value < 0) {
+				value = 0;
+				data.putToInProgressLabel(entry.getKey().toString(), value);
+			}
+		}
+	}
+
+	private void increaseMap(Map<LocalDate, Integer> map, LocalDate dateLogged) {
 		Integer value = map.get(dateLogged);
 		value = value == null ? 0 : value;
 		value++;
 		map.put(dateLogged, value);
 	}
-	
-	private void decreaseMap(Map<LocalDate, Integer> map,
-			LocalDate dateLogged) {
+
+	private void decreaseMap(Map<LocalDate, Integer> map, LocalDate dateLogged) {
 		Integer value = map.get(dateLogged);
 		value = value == null ? 0 : value;
 		value--;

@@ -7,12 +7,14 @@ public class KanbanData extends AgileData {
 	private Map<String, Integer> open;
 	private Map<String, Integer> inProgress;
 	private Map<String, Integer> closed;
+	private Map<String, Integer> progressLabels;
 	private String startStop;
 
 	public KanbanData() {
 		open = new LinkedHashMap<String, Integer>();
 		closed = new LinkedHashMap<String, Integer>();
 		inProgress = new LinkedHashMap<String, Integer>();
+		progressLabels = new LinkedHashMap<String, Integer>();
 	}
 
 	public Map<String, Integer> getOpen() {
@@ -47,6 +49,14 @@ public class KanbanData extends AgileData {
 		this.startStop = startStop;
 	}
 
+	public Map<String, Integer> getProgressLabels() {
+		return progressLabels;
+	}
+
+	public void setProgressLabels(Map<String, Integer> progressLabels) {
+		this.progressLabels = progressLabels;
+	}
+
 	public void putToOpen(String date, Integer value) {
 		this.open.put(date, value);
 	}
@@ -57,6 +67,7 @@ public class KanbanData extends AgileData {
 	public void putToInProgress(String date, Integer value) {
 		this.inProgress.put(date, value);
 	}
-
-
+	public void putToInProgressLabel(String date, Integer value) {
+		this.progressLabels.put(date, value);
+	}
 }
