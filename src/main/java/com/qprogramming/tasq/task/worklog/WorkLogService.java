@@ -310,10 +310,13 @@ public class WorkLogService {
 						|| type.equals(LogType.CLOSED) || type
 							.equals(LogType.REOPEN));
 	}
+
 	private boolean isReleaseRelevant(WorkLog workLog, Release release) {
 		LogType type = (LogType) workLog.getType();
-		return release.equals(workLog.getTask().getRelease())
-				&& (type.equals(LogType.CREATE) || type.equals(LogType.DELETED) || type.equals(LogType.LOG)
+		return (release.equals(workLog.getTask().getRelease()) || release
+				.isActive())
+				&& (type.equals(LogType.CREATE) || type.equals(LogType.DELETED)
+						|| type.equals(LogType.LOG)
 						|| type.equals(LogType.STATUS)
 						|| type.equals(LogType.CLOSED) || type
 							.equals(LogType.REOPEN));

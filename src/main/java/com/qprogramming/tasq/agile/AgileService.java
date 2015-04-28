@@ -125,10 +125,16 @@ public class AgileService {
 		return releaseRepo.save(release);
 	}
 
-	public Release findActiveByProjectId(Long id) {
+	/**
+	 * Fetches last release from project
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public Release findLastReleaseByProjectId(Long id) {
 		List<Release> list = findReleaseByProjectIdOrderByDateDesc(id);
-		if(list.isEmpty()){
-			return new Release();
+		if (list.isEmpty()) {
+			return null;
 		}
 		return list.get(list.size() - 1);
 	}

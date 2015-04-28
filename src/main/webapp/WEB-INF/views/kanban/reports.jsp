@@ -20,12 +20,12 @@
 <c:set var="taskDesc_text">
 	<s:message code="task.description" text="Description" arguments="" />
 </c:set>
-<c:if test="${empty param.release}">
-	<c:set var="ActiveRelease"><s:message code="agile.release.current"/></c:set>
-</c:if>
-<c:if test="${not empty param.release}">
-	<c:set var="ActiveRelease"><s:message code="agile.release"/> ${param.release}</c:set>
-</c:if>
+<%-- <c:if test="${empty param.release}"> --%>
+<%-- 	<c:set var="ActiveRelease"><s:message code="agile.release.current"/></c:set> --%>
+<%-- </c:if> --%>
+<%-- <c:if test="${not empty param.release}"> --%>
+<%-- 	<c:set var="ActiveRelease"><s:message code="agile.release"/>${param.release}</c:set> --%>
+<%-- </c:if> --%>
 <h3>[${project.projectId}] ${project}</h3>
 <div class="white-frame"
 	style="display: table; width: 100%; height: 85vh">
@@ -52,10 +52,10 @@
 							<ul id="releases" class="dropdown-menu" role="menu">
 								<li><a href="#" class="releaseMenuNo" data-number=""> <s:message code="agile.release.current"/></a></li>
 								<c:forEach var="release" items="${releases}">
-									<li><a href="#" class="releaseMenuNo" data-number="${release.release}"> Release ${release.release}</a></li>
+									<li><a href="#" class="releaseMenuNo" data-number="${release.release}"><s:message code="agile.release"/> ${release.release}</a></li>
 								</c:forEach>
    							</ul>
-						<li><a href="#chart"><div class="side-bar theme"></div><s:message code="agile.burndown"/></a></li>
+						<li><a href="#chart"><div class="side-bar theme"></div><s:message code="agile.release.chart"/></a></li>
 						<li><a href="#time_chart"><div class="side-bar theme"></div><s:message code="agile.timelogged"/></a></li>
 						<li><a href="#events"><div class="side-bar theme"></div><s:message code="agile.events"/></a></li>
 						<li><a href="#releaseTotal"><div class="side-bar theme"></div><s:message code="agile.total"/></a></li>
@@ -108,16 +108,20 @@ $(document).ready(function() {
 	var lastSprint = "${ActiveRelease}";
 	var avatarURL = '<c:url value="/../avatar/"/>';
 	var taskURL = '<c:url value="/task?id="/>';
+	var relaseTxt = '<s:message code="agile.release"/>&nbsp;';
 	var loading_indicator = '<div id="loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td>';
+	var release = '${param.release}';
+	renderReleaseData(release);
+	
 	
 	$(".releaseMenuNo").click(function(){
 		var number = $(this).data('number');
-		renderSprintData(number);
+		renderReleaseData(number);
 	});
 
 	
 
-function renderSprintData(releaseNo){
+function renderReleaseData(releaseNo){
 	//init arrays and remove first element via pop()
     time = new Array([]);
     openData = new Array([]);
@@ -137,10 +141,15 @@ function renderSprintData(releaseNo){
     $('#eventsTable tbody').html('');
     $('#summaryTable tbody').html('');
     $('#totalSummary tr').remove()
-    $("#releaseNoMenu").html('<h4><b>Release '+ releaseNo + '</b> <span class="caret"></span></h4>')
-    $.get('<c:url value="/${project.projectId}/release-data"/>',{release:releaseNo},function(result){
-	    	//Fill arrays of data
-    	//console.log(result);
+    if(releaseNo){
+    	releaseName = releaseNo;
+    	$("#releaseNoMenu").html('<h4><b>'+ relaseTxt + releaseNo + '</b> <span class="caret"></span></h4>')
+    }else{
+    	$("#releaseNoMenu").html('<h4><b><s:message code="agile.release.current"/></b> <span class="caret"></span></h4>')
+    }
+
+	$.get('<c:url value="/${project.projectId}/release-data"/>',{release:releaseNo},function(result){
+		//console.log(result);
     	$.each(result.timeBurned, function(key,val){
     		time.push([key, val]);
     	});
@@ -259,8 +268,6 @@ function renderSprintData(releaseNo){
 			    	color:'#5cb85c',
 				    label: '<s:message code="task.state.closed"/>',
 				    showMarker : true,
-				    fill: true,
-				    fillAlpha: 0.5,
 				    highlighter: { formatString: '[%s] %s <s:message code="task.state.closed"/>'}
 			    }],
 			legend: {

@@ -82,9 +82,13 @@ public class TaskService {
 		return taskRepo.findByProjectAndSprintsId(sprint.getProject(),
 				sprint.getId());
 	}
+
 	public List<Task> findAllByRelease(Release release) {
-		return taskRepo.findByProjectAndRelease(release.getProject(),
-				release);
+		return taskRepo.findByProjectAndRelease(release.getProject(), release);
+	}
+
+	public List<Task> findAllByRelease(Project project, Release release) {
+		return taskRepo.findByProjectAndRelease(project, release);
 	}
 
 	public List<Task> findSubtasks(String taskID) {

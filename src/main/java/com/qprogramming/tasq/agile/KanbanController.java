@@ -179,19 +179,30 @@ public class KanbanController {
 			Release release;
 			DateTime startTime;
 			DateTime endTime;
+			List<Task> releaseTasks;
 			if (releaseNo == null || releaseNo == "") {
-				release = agileSrv.findActiveByProjectId(project.getId());
-				startTime = release.getEndDate();
+				release = agileSrv.findLastReleaseByProjectId(project.getId());
+				if (release == null) {
+					startTime = new DateTime(project.getRawStartDate());
+				} else {
+					startTime = release.getEndDate();
+					release = null;
+				}
+				releaseTasks = taskSrv.findAllByRelease(project,release);
 				endTime = new DateTime();
-				release = null;
-
+				release = new Release();
+				release.setProject(project);
+				release.setStartDate(startTime);
+				release.setActive(true);
 			} else {
 				release = agileSrv.findByProjectIdAndRelease(project.getId(),
 						releaseNo);
 				startTime = release.getStartDate();
 				endTime = release.getEndDate();
+				releaseTasks = taskSrv.findAllByRelease(release);
 			}
-			List<Task> releaseTasks = taskSrv.findAllByRelease(release);
+
+			List<WorkLog> wrkList = wrkLogSrv.getAllReleaseEvents(release);
 			for (Task task : releaseTasks) {
 				if (task.getState().equals(TaskState.CLOSED)) {
 					result.getTasks().get(SprintData.CLOSED)
@@ -201,8 +212,6 @@ public class KanbanController {
 							.add(new DisplayTask(task));
 				}
 			}
-			// TODO Active release ( release is null )
-			List<WorkLog> wrkList = wrkLogSrv.getAllReleaseEvents(release);
 			result.setWorklogs(DisplayWorkLog.convertToDisplayWorkLogs(wrkList));
 			result.setTimeBurned(agileSrv.fillTimeBurndownMap(wrkList,
 					startTime, endTime));
@@ -242,7 +251,7 @@ public class KanbanController {
 				value = value == null ? 0 : value;
 				// TODO search for other way + remove old ?
 				if (workLog.getMessage().contains(TODO_ONGOING)
-						|| workLog.getMessage().contains(TODO_ONGOING_DEPR)) {
+						|| workLog.getMessage().contains(getToDoOngoing())) {
 					value++;
 					progressMap.put(dateLogged, value);
 				}
@@ -251,10 +260,20 @@ public class KanbanController {
 		LocalDate startTime = new LocalDate(release.getStartDate());
 		LocalDate endTime = new LocalDate(release.getEndDate());
 		data.setStartStop(startTime.toString() + " - " + endTime.toString());
-		int releaseDays = Days.daysBetween(startTime, endTime).getDays() + 1;
+		fillChartData(data, openMap, closedMap, progressMap, startTime,
+				endTime);
+		normalizeProgressLabels(data, progressMap);
+		return data;
+	}
+
+	private void fillChartData(KanbanData data,
+			Map<LocalDate, Integer> openMap, Map<LocalDate, Integer> closedMap,
+			Map<LocalDate, Integer> progressMap, LocalDate startTime,
+			LocalDate endTime) {
 		Integer open = new Integer(0);
 		Integer closed = new Integer(0);
 		Integer progress = new Integer(0);
+		int releaseDays = Days.daysBetween(startTime, endTime).getDays() + 1;
 		for (int i = 0; i < releaseDays; i++) {
 			LocalDate date = startTime.plusDays(i);
 			Integer openValue = openMap.get(date);
@@ -266,19 +285,14 @@ public class KanbanController {
 			open += openValue;
 			closed += closedValue;
 			progress += progressValue;
-			if(progress<0){
+			if (progress < 0) {
 				progress = 0;
 			}
 			data.putToOpen(date.toString(), open);
 			data.putToClosed(date.toString(), closed);
-			data.putToInProgress(date.toString(), closed+progress);
+			data.putToInProgress(date.toString(), closed + progress);
 			data.putToInProgressLabel(date.toString(), progress);
 		}
-		normalizeProgressLabels(data, progressMap);
-
-		// Integer totalPoints = new Integer(0);
-		//
-		return data;
 	}
 
 	private void normalizeProgressLabels(KanbanData data,
@@ -304,6 +318,11 @@ public class KanbanController {
 		value = value == null ? 0 : value;
 		value--;
 		map.put(dateLogged, value);
+	}
+
+	@Deprecated
+	private String getToDoOngoing() {
+		return TODO_ONGOING_DEPR;
 	}
 
 }

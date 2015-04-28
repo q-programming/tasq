@@ -44,6 +44,9 @@ public class Release implements java.io.Serializable {
 	@ManyToOne
 	@JoinColumn(name = "project_release")
 	private Project project;
+	
+	@Column
+	private boolean active = false;
 
 	public Release() {
 		// TODO Auto-generated constructor stub
@@ -54,6 +57,7 @@ public class Release implements java.io.Serializable {
 		this.release = release;
 		this.endDate = new DateTime();
 		this.comment = comment;
+		this.active = false;
 	}
 
 	public Long getId() {
@@ -108,6 +112,14 @@ public class Release implements java.io.Serializable {
 
 	public void setEndDate(DateTime endDate) {
 		this.endDate = endDate;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 
 	@Override
