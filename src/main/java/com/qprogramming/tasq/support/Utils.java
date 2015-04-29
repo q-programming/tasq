@@ -32,6 +32,11 @@ public class Utils {
 	private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
 	private static final String HTML_TAG_PATTERN = "<([A-Za-z][A-Za-z0-9]*)\\b[^>]*>(.*?)</\\1>";
 	private static final long NUM_100NS_INTERVALS_SINCE_UUID_EPOCH = 0x01b21dd213814000L;
+	public static final String TABLE = "<table class=\"worklog_table\">";
+	public static final String TABLE_END = "</table>";
+	private static final String TD_TR = "</td></tr>";
+	private static final String TD_TD = "</td><td>";
+	private static final String TR_TD = "<tr><td>";
 	private static String baseURL;
 	private static HttpServletRequest request;
 	
@@ -202,6 +207,23 @@ public class Utils {
 				0);
 		return value;
 	}
+	
+	public static  StringBuilder changedFromTo(String what, String from, String to) {
+		StringBuilder message = new StringBuilder();
+		if (what != null) {
+			message.append("<tr><td colspan=2><b>");
+			message.append(what);
+			message.append(" :</b>");
+			message.append(TD_TR);
+		}
+		message.append(TR_TD);
+		message.append(from);
+		message.append(TD_TD);
+		message.append(to);
+		message.append(TD_TR);
+		return message;
+	}
+
 
 
 }

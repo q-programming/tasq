@@ -81,7 +81,7 @@ public class WorkLogService {
 			}
 			loggedTask.addLoggedWork(activity);
 			loggedTask.setLastUpdate(new Date());
-			taskSrv.save(checkState(loggedTask));
+			checkStateAndSave(loggedTask);
 			eventSrv.addWatchEvent(wl, PeriodHelper.outFormat(activity), when);
 		}
 	}
@@ -184,7 +184,7 @@ public class WorkLogService {
 			loggedTask.addLoggedWork(activity);
 			loggedTask.setLastUpdate(new Date());
 			if (!type.equals(LogType.ESTIMATE)) {
-				taskSrv.save(checkState(loggedTask));
+				checkStateAndSave(loggedTask);
 			} else {
 				taskSrv.save(loggedTask);
 			}
@@ -285,11 +285,18 @@ public class WorkLogService {
 		return result;
 	}
 
-	private Task checkState(Task task) {
+	/**
+	 * Checks if state should be changed to ongoing and saves task
+	 * 
+	 * @param task
+	 * @return
+	 */
+	public Task checkStateAndSave(Task task) {
 		if (task.getState().equals(TaskState.TO_DO)) {
 			task.setState(TaskState.ONGOING);
+			changeState(TaskState.TO_DO, TaskState.ONGOING, task);
 		}
-		return task;
+		return taskSrv.save(task);
 	}
 
 	private List<DisplayWorkLog> packIntoDisplay(List<WorkLog> list) {
@@ -330,5 +337,21 @@ public class WorkLogService {
 
 	public List<WorkLog> getTaskEvents(String taskID) {
 		return wlRepo.findByWorklogtaskIdOrderByTimeLoggedDesc(taskID);
+	}
+
+	/**
+	 * Adds event about state changed
+	 * 
+	 * @param newState
+	 * @param oldState
+	 * @param task
+	 */
+	public void changeState(TaskState oldState, TaskState newState, Task task) {
+		StringBuilder message = new StringBuilder(Utils.TABLE);
+		message.append(Utils.changedFromTo(null, oldState.getDescription(),
+				newState.getDescription()));
+		message.append(Utils.TABLE_END);
+		addActivityLog(task, message.toString(), LogType.STATUS);
+
 	}
 }

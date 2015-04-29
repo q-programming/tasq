@@ -76,11 +76,6 @@ import com.qprogramming.tasq.task.worklog.WorkLogService;
 @Controller
 public class TaskController {
 
-	private static final String TABLE = "<table class=\"worklog_table\">";
-	private static final String TABLE_END = "</table>";
-	private static final String TD_TR = "</td></tr>";
-	private static final String TD_TD = "</td><td>";
-	private static final String TR_TD = "<tr><td>";
 	private static final String OPEN = "OPEN";
 	private static final String ALL = "ALL";
 	private static final Logger LOG = LoggerFactory
@@ -251,15 +246,15 @@ public class TaskController {
 					Utils.getCurrentLocale());
 			return "redirect:" + request.getHeader("Referer");
 		}
-		StringBuilder message = new StringBuilder(TABLE);
+		StringBuilder message = new StringBuilder(Utils.TABLE);
 		if (!task.getName().equalsIgnoreCase(taskForm.getName())) {
-			message.append(changedFromTo("Name", task.getName(),
+			message.append(Utils.changedFromTo("Name", task.getName(),
 					taskForm.getName()));
 			task.setName(taskForm.getName());
 		}
 		if (!task.getDescription().equalsIgnoreCase(taskForm.getDescription())) {
-			message.append(changedFromTo("Description", task.getDescription(),
-					taskForm.getDescription()));
+			message.append(Utils.changedFromTo("Description",
+					task.getDescription(), taskForm.getDescription()));
 			task.setDescription(taskForm.getDescription());
 		}
 		if ((taskForm.getEstimate() != null)
@@ -275,16 +270,16 @@ public class TaskController {
 						PeriodHelper.outFormat(difference), difference,
 						LogType.ESTIMATE);
 			} else {
-				message.append(changedFromTo("Estimate", task.getEstimate(),
-						taskForm.getEstimate()));
+				message.append(Utils.changedFromTo("Estimate",
+						task.getEstimate(), taskForm.getEstimate()));
 			}
 			task.setEstimate(estimate);
 			task.setRemaining(estimate);
 		}
 		boolean notestimated = !taskForm.getEstimated();
 		if (!task.isEstimated().equals(notestimated)) {
-			message.append(changedFromTo("Estimated ", task.getEstimated()
-					.toString(), Boolean.toString(notestimated)));
+			message.append(Utils.changedFromTo("Estimated ", task
+					.getEstimated().toString(), Boolean.toString(notestimated)));
 			task.setEstimated(notestimated);
 			if (!task.isEstimated()) {
 				task.setStory_points(0);
@@ -302,19 +297,19 @@ public class TaskController {
 			}
 		}
 		if (!task.getDue_date().equalsIgnoreCase(taskForm.getDue_date())) {
-			message.append(changedFromTo("Due date", task.getDue_date(),
+			message.append(Utils.changedFromTo("Due date", task.getDue_date(),
 					taskForm.getDue_date()));
 			task.setDue_date(Utils.convertStringToDate(taskForm.getDue_date()));
 		}
 		TaskType type = TaskType.toType(taskForm.getType());
 		if (!task.getType().equals(type)) {
-			message.append(changedFromTo("Type", task.getType().toString(),
-					type.toString()));
+			message.append(Utils.changedFromTo("Type", task.getType()
+					.toString(), type.toString()));
 			task.setType(type);
 		}
 		LOG.debug(message.toString());
 		taskSrv.save(task);
-		message.append(TABLE_END);
+		message.append(Utils.TABLE_END);
 		if (message.length() > 37) {
 			wlSrv.addActivityLog(task, message.toString(), LogType.EDITED);
 		}
@@ -681,6 +676,7 @@ public class TaskController {
 				null, Utils.getCurrentLocale()));
 	}
 
+	@Transactional
 	@RequestMapping(value = "/task/time", method = RequestMethod.GET)
 	public String handleTimer(@RequestParam(value = "id") String taskID,
 			@RequestParam(value = "action") String action,
@@ -709,10 +705,7 @@ public class TaskController {
 				}
 				account.startTimerOnTask(task);
 				accSrv.update(account);
-				if (task.getState().equals(TaskState.TO_DO)) {
-					task.setState(TaskState.ONGOING);
-					taskSrv.save(task);
-				}
+				wlSrv.checkStateAndSave(task);
 			} else if (action.equals(STOP)) {
 				Period logWork = stopTimer(task);
 				MessageHelper.addSuccessAttribute(ra, msg.getMessage(
@@ -1019,22 +1012,6 @@ public class TaskController {
 				new Object[] { localized }, Utils.getCurrentLocale()));
 	}
 
-	private StringBuilder changedFromTo(String what, String from, String to) {
-		StringBuilder message = new StringBuilder();
-		if (what != null) {
-			message.append("<tr><td colspan=2><b>");
-			message.append(what);
-			message.append(" :</b>");
-			message.append(TD_TR);
-		}
-		message.append(TR_TD);
-		message.append(from);
-		message.append(TD_TD);
-		message.append(to);
-		message.append(TD_TR);
-		return message;
-	}
-
 	/**
 	 * private method to remove task and all potential links
 	 * 
@@ -1141,11 +1118,7 @@ public class TaskController {
 			return msg.getMessage("task.state.changed.reopened",
 					new Object[] { task.getId() }, Utils.getCurrentLocale());
 		} else {
-			StringBuilder message = new StringBuilder(TABLE);
-			message.append(changedFromTo(null, oldState.getDescription(),
-					state.getDescription()));
-			message.append(TABLE_END);
-			wlSrv.addActivityLog(task, message.toString(), LogType.STATUS);
+			wlSrv.changeState(oldState, state, task);
 			String localised = msg.getMessage(state.getCode(), null,
 					Utils.getCurrentLocale());
 			return msg.getMessage("task.state.changed",
@@ -1162,10 +1135,11 @@ public class TaskController {
 							* (task.getStory_points() - storyPoints)),
 					LogType.ESTIMATE);
 		} else {
-			StringBuilder message = new StringBuilder(TABLE);
-			message.append(changedFromTo("Story points", task.getStory_points()
-					.toString(), Integer.toString(storyPoints)));
-			message.append(TABLE_END);
+			StringBuilder message = new StringBuilder(Utils.TABLE);
+			message.append(Utils.changedFromTo("Story points", task
+					.getStory_points().toString(), Integer
+					.toString(storyPoints)));
+			message.append(Utils.TABLE_END);
 			wlSrv.addActivityLog(task, message.toString(), LogType.EDITED);
 		}
 	}
