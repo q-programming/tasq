@@ -12,7 +12,15 @@
 		</div>
 		<div
 			style="display: table-cell; margin-left: 10px; padding-left: 20px">
-			<h3>${account}</h3>
+			<h3>
+			${account}&nbsp;
+			<c:if test="${account.online}">
+				<i class="fa fa-user a-tooltip" style="color:mediumseagreen" title="<s:message code="main.online"/>"></i>
+			</c:if>
+			<c:if test="${not account.online}">
+				<i class="fa fa-user a-tooltip" style="color:lightgray" title="<s:message code="main.offline"/>"></i>
+			</c:if>
+			</h3>
 			<i class="fa fa-envelope" style="color:black"></i>
 			<i><a href="mailto:${account.email}">${account.email}</a></i>
 			<div>

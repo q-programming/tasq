@@ -1,26 +1,20 @@
 package com.qprogramming.tasq.account;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
@@ -29,6 +23,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.session.SessionInformation;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -52,11 +48,13 @@ public class AccountController {
 	@Value("${home.directory}")
 	private String tasqRootDir;
 
-	private static final int DEFAULT_WIDTH_HEIGHT = 150;
 	private AccountService accountSrv;
 	private ProjectService projSrv;
 	private SessionLocaleResolver localeResolver;
 	private MessageSource msg;
+	@Autowired
+	@Qualifier("sessionRegistry")
+	private SessionRegistry sessionRegistry;
 
 	@Autowired
 	public AccountController(AccountService accountSrv, ProjectService projSrv,
@@ -117,15 +115,21 @@ public class AccountController {
 							Utils.getCurrentLocale()));
 			return "redirect:/users";
 		}
+		List<Object> principals = sessionRegistry.getAllPrincipals();
+		DisplayAccount dispAccount = new DisplayAccount(account);
+		List<SessionInformation> sessions = sessionRegistry.getAllSessions(
+				account, false);
+		if (!sessions.isEmpty() && principals.contains(account)) {
+			dispAccount.setOnline(true);
+		}
 		model.addAttribute("projects", projSrv.findAllByUser(account.getId()));
-		model.addAttribute("account", account);
+		model.addAttribute("account", dispAccount);
 		return "user/details";
 	}
 
 	@RequestMapping(value = "/getAccounts", method = RequestMethod.GET)
-	public @ResponseBody
-	List<DisplayAccount> listAccounts(@RequestParam String term,
-			HttpServletResponse response) {
+	public @ResponseBody List<DisplayAccount> listAccounts(
+			@RequestParam String term, HttpServletResponse response) {
 		response.setContentType("application/json");
 		List<Account> accounts = new LinkedList<Account>();
 		if (term == null) {
@@ -142,8 +146,7 @@ public class AccountController {
 	}
 
 	@RequestMapping(value = "/users", method = RequestMethod.GET)
-	public @ResponseBody
-	Page<DisplayAccount> listUsers(
+	public @ResponseBody Page<DisplayAccount> listUsers(
 			@RequestParam(required = false) String term,
 			@PageableDefault(size = 25, page = 0, sort = "surname", direction = Direction.ASC) Pageable p) {
 		Page<Account> page;
@@ -153,8 +156,15 @@ public class AccountController {
 			page = accountSrv.findAll(p);
 		}
 		List<DisplayAccount> list = new LinkedList<DisplayAccount>();
+		List<Object> principals = sessionRegistry.getAllPrincipals();
 		for (Account account : page) {
-			list.add(new DisplayAccount(account));
+			DisplayAccount dispAccount = new DisplayAccount(account);
+			List<SessionInformation> sessions = sessionRegistry.getAllSessions(
+					account, false);
+			if (!sessions.isEmpty() && principals.contains(account)) {
+				dispAccount.setOnline(true);
+			}
+			list.add(dispAccount);
 		}
 		Page<DisplayAccount> result = new PageImpl<DisplayAccount>(list, p,
 				page.getTotalElements());
