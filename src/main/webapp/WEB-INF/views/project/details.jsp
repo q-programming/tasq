@@ -13,6 +13,9 @@
 	src="<c:url value="/resources/js/jqplot.highlighter.js"/>"></script>
 <script language="javascript" type="text/javascript"
 	src="<c:url value="/resources/js/jqplot.dateAxisRenderer.js"/>"></script>
+<script language="javascript" type="text/javascript"
+	src="<c:url value="/resources/js/jqplot.cursor.min.js"/>"></script>
+
 <security:authorize access="hasRole('ROLE_ADMIN')">
 	<c:set var="is_admin" value="true" />
 </security:authorize>
@@ -240,6 +243,11 @@ function printChart(){
 	                    smooth: true
 	                }
 	            },
+	            cursor:{ 
+	                show: true,
+	                zoom:true, 
+	                showTooltip:false
+	            }, 
 	    		fillBetween: {
 	                series1: 0,
 	                series2: 1,

@@ -82,6 +82,8 @@ public class SprintControllerTest {
 	@Mock
 	private SprintRepository sprintRepoMock;
 	@Mock
+	private ReleaseRepository releaseRepoMock;
+	@Mock
 	private WorkLogService wrkLogSrvMock;
 	
 	@Autowired
@@ -115,7 +117,7 @@ public class SprintControllerTest {
 		project.setProjectId(TEST);
 		Set<Account> participants = new HashSet<Account>(createList());
 		project.setParticipants(participants);
-		SprintService sprintSrv = new SprintService(sprintRepoMock);
+		AgileService sprintSrv = new AgileService(sprintRepoMock,releaseRepoMock);
 		sprintCtrl = new SprintController(projSrvMock, taskSrvMock,
 				sprintSrv, wrkLogSrvMock, msgMock);
 		when(securityMock.getAuthentication()).thenReturn(authMock);

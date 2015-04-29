@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.qprogramming.tasq.agile.DisplaySprint;
 import com.qprogramming.tasq.agile.Sprint;
-import com.qprogramming.tasq.agile.SprintService;
+import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.task.comments.Comment;
@@ -33,13 +33,13 @@ public class TaskRestController {
 
 	private TaskService taskSrv;
 	private WatchedTaskService watchSrv;
-	private SprintService sprintSrv;
+	private AgileService sprintSrv;
 	private ProjectService projSrv;
 	private WorkLogService wlSrv;
 
 	@Autowired
 	public TaskRestController(TaskService taskSrv, WatchedTaskService watchSrv,
-			SprintService sprintSrv, ProjectService projSrv,WorkLogService wlSrv) {
+			AgileService sprintSrv, ProjectService projSrv,WorkLogService wlSrv) {
 		this.taskSrv = taskSrv;
 		this.watchSrv = watchSrv;
 		this.sprintSrv = sprintSrv;

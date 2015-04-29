@@ -39,7 +39,7 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.agile.Sprint;
-import com.qprogramming.tasq.agile.SprintService;
+import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.events.EventsService;
 import com.qprogramming.tasq.projects.Project;
@@ -77,7 +77,7 @@ public class TaskControllerTest {
 	@Mock
 	private TaskRepository taskRepoMock;
 	@Mock
-	private SprintService sprintSrvMock;
+	private AgileService sprintSrvMock;
 	@Mock
 	private WorkLogService wrkLogSrv;
 	@Mock
