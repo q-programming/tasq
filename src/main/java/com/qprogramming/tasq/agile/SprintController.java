@@ -464,9 +464,15 @@ public class SprintController {
 				result.setMessage(message);
 				return result;
 			}
+			DateTime startTime = new DateTime(sprint.getRawStart_date());
+			DateTime endTime = new DateTime(sprint.getRawEnd_date());
 			List<Task> sprintTasks = taskSrv.findAllBySprint(sprint);
 			for (Task task : sprintTasks) {
-				if (task.getState().equals(TaskState.CLOSED)) {
+				DateTime finishDate = null;
+				if (task.getFinishDate() != null) {
+					finishDate = new DateTime(task.getFinishDate());
+				}
+				if (task.getState().equals(TaskState.CLOSED)&& (finishDate != null && endTime.isAfter(finishDate))) {
 					result.getTasks().get(SprintData.CLOSED)
 							.add(new DisplayTask(task));
 				} else {
@@ -476,8 +482,6 @@ public class SprintController {
 			}
 			// Fill maps based on time or story point driven board
 
-			DateTime startTime = new DateTime(sprint.getRawStart_date());
-			DateTime endTime = new DateTime(sprint.getRawEnd_date());
 			boolean timeTracked = project.getTimeTracked();
 			List<WorkLog> wrkList = wrkLogSrv.getAllSprintEvents(sprint);
 			result.setWorklogs(DisplayWorkLog.convertToDisplayWorkLogs(wrkList));

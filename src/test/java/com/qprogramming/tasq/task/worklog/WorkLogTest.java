@@ -122,8 +122,8 @@ public class WorkLogTest {
 		wlSrv.addTimedWorkLog(task1, "", new Date(), null, new Period(1, 0, 0,
 				0), LogType.LOG);
 		Assert.assertEquals(1, task1.getRawRemaining().getHours());
-		verify(taskSrvMock, times(1)).save(any(Task.class));
-		verify(eventSrvMock, times(1)).addWatchEvent(any(WorkLog.class),
+		verify(taskSrvMock, times(2)).save(any(Task.class));
+		verify(eventSrvMock, times(2)).addWatchEvent(any(WorkLog.class),
 				anyString(), any(Date.class));
 	}
 
@@ -136,8 +136,8 @@ public class WorkLogTest {
 		wlSrv.addTimedWorkLog(task1, "", new Date(), new Period(1, 0, 0, 0),
 				new Period(1, 0, 0, 0), LogType.LOG);
 		Assert.assertEquals(1, task1.getRawRemaining().getHours());
-		verify(taskSrvMock, times(1)).save(any(Task.class));
-		verify(eventSrvMock, times(1)).addWatchEvent(any(WorkLog.class),
+		verify(taskSrvMock, times(2)).save(any(Task.class));
+		verify(eventSrvMock, times(2)).addWatchEvent(any(WorkLog.class),
 				anyString(), any(Date.class));
 	}
 
@@ -191,8 +191,8 @@ public class WorkLogTest {
 		wlSrv.addNormalWorkLog(task1, "", new Period(1, 0, 0, 0),
 				LogType.ESTIMATE);
 		Assert.assertEquals(1, task1.getRawRemaining().getHours());
-		verify(taskSrvMock, times(2)).save(any(Task.class));
-		verify(eventSrvMock, times(2)).addWatchEvent(any(WorkLog.class),
+		verify(taskSrvMock, times(3)).save(any(Task.class));
+		verify(eventSrvMock, times(3)).addWatchEvent(any(WorkLog.class),
 				anyString(), any(Date.class));
 	}
 

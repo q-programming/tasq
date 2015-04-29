@@ -14,7 +14,6 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
@@ -52,17 +51,17 @@ public class AccountController {
 	private ProjectService projSrv;
 	private SessionLocaleResolver localeResolver;
 	private MessageSource msg;
-	@Autowired
-	@Qualifier("sessionRegistry")
 	private SessionRegistry sessionRegistry;
 
 	@Autowired
 	public AccountController(AccountService accountSrv, ProjectService projSrv,
-			MessageSource msg, SessionLocaleResolver localeResolver) {
+			MessageSource msg, SessionLocaleResolver localeResolver,
+			SessionRegistry sessionRegistry) {
 		this.accountSrv = accountSrv;
 		this.projSrv = projSrv;
 		this.msg = msg;
 		this.localeResolver = localeResolver;
+		this.sessionRegistry = sessionRegistry;
 	}
 
 	private static final Logger LOG = LoggerFactory
@@ -128,8 +127,9 @@ public class AccountController {
 	}
 
 	@RequestMapping(value = "/getAccounts", method = RequestMethod.GET)
-	public @ResponseBody List<DisplayAccount> listAccounts(
-			@RequestParam String term, HttpServletResponse response) {
+	public @ResponseBody
+	List<DisplayAccount> listAccounts(@RequestParam String term,
+			HttpServletResponse response) {
 		response.setContentType("application/json");
 		List<Account> accounts = new LinkedList<Account>();
 		if (term == null) {
@@ -146,7 +146,8 @@ public class AccountController {
 	}
 
 	@RequestMapping(value = "/users", method = RequestMethod.GET)
-	public @ResponseBody Page<DisplayAccount> listUsers(
+	public @ResponseBody
+	Page<DisplayAccount> listUsers(
 			@RequestParam(required = false) String term,
 			@PageableDefault(size = 25, page = 0, sort = "surname", direction = Direction.ASC) Pageable p) {
 		Page<Account> page;

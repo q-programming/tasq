@@ -56,6 +56,9 @@ public class Task implements java.io.Serializable {
 
 	@Column
 	private Date lastUpdate;
+	
+	@Column
+	private Date finishDate;
 
 	@Column
 	private boolean active = false;
@@ -170,6 +173,14 @@ public class Task implements java.io.Serializable {
 
 	public Date getRawDue_date() {
 		return due_date;
+	}
+
+	public Date getFinishDate() {
+		return finishDate;
+	}
+
+	public void setFinishDate(Date finishDate) {
+		this.finishDate = finishDate;
 	}
 
 	public String getEstimate() {

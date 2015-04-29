@@ -161,8 +161,9 @@ public class KanbanController {
 	}
 
 	@RequestMapping(value = "/getReleases", method = RequestMethod.GET)
-	public @ResponseBody List<Release> showProjectSprints(
-			@RequestParam Long projectID, HttpServletResponse response) {
+	public @ResponseBody
+	List<Release> showProjectSprints(@RequestParam Long projectID,
+			HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(projectID);
 		List<Release> releases = agileSrv
@@ -171,7 +172,8 @@ public class KanbanController {
 	}
 
 	@RequestMapping(value = "/{id}/release-data", method = RequestMethod.GET, produces = "application/json")
-	public @ResponseBody KanbanData showBurndownChart(@PathVariable String id,
+	public @ResponseBody
+	KanbanData showBurndownChart(@PathVariable String id,
 			@RequestParam(value = "release", required = false) String releaseNo) {
 		KanbanData result = new KanbanData();
 		Project project = projSrv.findByProjectId(id);
@@ -204,7 +206,12 @@ public class KanbanController {
 
 			List<WorkLog> wrkList = wrkLogSrv.getAllReleaseEvents(release);
 			for (Task task : releaseTasks) {
-				if (task.getState().equals(TaskState.CLOSED)) {
+				DateTime finishDate = null;
+				if (task.getFinishDate() != null) {
+					finishDate = new DateTime(task.getFinishDate());
+				}
+				if (task.getState().equals(TaskState.CLOSED)
+						&& (finishDate != null && endTime.isAfter(finishDate))) {
 					result.getTasks().get(SprintData.CLOSED)
 							.add(new DisplayTask(task));
 				} else {

@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -37,6 +38,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.session.SessionInformation;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -78,6 +81,8 @@ public class AccountControllerTest {
 	private ServletOutputStream outStreamMock;
 	@Mock
 	private SessionLocaleResolver localeResolverMock;
+	@Mock 
+	private SessionRegistry sessionRegistry;
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -100,7 +105,7 @@ public class AccountControllerTest {
 	@Before
 	public void setUp() {
 		accountCtr = new AccountController(accSrvMock, projSrvMock, msgMock,
-				localeResolverMock);
+				localeResolverMock,sessionRegistry);
 		testAccount = new Account(EMAIL, "", Roles.ROLE_ADMIN);
 		testAccount.setLanguage("en");
 		when(securityMock.getAuthentication()).thenReturn(authMock);
@@ -135,9 +140,16 @@ public class AccountControllerTest {
 		single.add(testAccount);
 		Page<Account> result = new PageImpl<Account>(accountsList);
 		Page<Account> singleResult = new PageImpl<Account>(single);
+		List<Object> principals = new LinkedList<Object>();
+		List<SessionInformation> sessions = new LinkedList<SessionInformation>();
+		principals.add(testAccount);
+		SessionInformation session = new SessionInformation(testAccount, "12345", new Date());
+		sessions.add(session);
 		Pageable p = new PageRequest(0, 5, new Sort(Sort.Direction.ASC, "surname"));
 		when(accSrvMock.findByNameSurnameContaining("Do", p)).thenReturn(singleResult);
 		when(accSrvMock.findAll(p)).thenReturn(result);
+		when(sessionRegistry.getAllPrincipals()).thenReturn(principals);
+		when(sessionRegistry.getAllSessions(testAccount, false)).thenReturn(sessions);
 		Assert.assertEquals(5, accountCtr.listUsers(null, p).getTotalElements());  accountCtr.listUsers(null, p);
 		Assert.assertEquals(1, accountCtr.listUsers("Do", p).getTotalElements());  accountCtr.listUsers(null, p);
 	}

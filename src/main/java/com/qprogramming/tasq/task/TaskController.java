@@ -67,6 +67,7 @@ import com.qprogramming.tasq.task.tag.Tag;
 import com.qprogramming.tasq.task.tag.TagsRepository;
 import com.qprogramming.tasq.task.watched.WatchedTaskService;
 import com.qprogramming.tasq.task.worklog.LogType;
+import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
 /**
@@ -589,7 +590,7 @@ public class TaskController {
 			@RequestParam(value = "state") TaskState state,
 			@RequestParam(value = "zero_checkbox", required = false) Boolean remainingZero,
 			@RequestParam(value = "closesubtasks", required = false) Boolean closeSubtasks,
-			@RequestParam(value = "message", required = false) String message) {
+			@RequestParam(value = "message", required = false) String commentMessage) {
 		// check if not admin or user
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
@@ -622,10 +623,9 @@ public class TaskController {
 			}
 
 			TaskState oldState = (TaskState) task.getState();
-
 			task.setState(state);
-			if (message != null && message != "") {
-				if (Utils.containsHTMLTags(message)) {
+			if (commentMessage != null && commentMessage != "") {
+				if (Utils.containsHTMLTags(commentMessage)) {
 					return new ResultData(ResultData.ERROR, msg.getMessage(
 							"comment.htmlTag", null, Utils.getCurrentLocale()));
 				} else {
@@ -633,20 +633,20 @@ public class TaskController {
 					comment.setTask(task);
 					comment.setAuthor(Utils.getCurrentAccount());
 					comment.setDate(new Date());
-					comment.setMessage(message);
+					comment.setMessage(commentMessage);
 					commRepo.save(comment);
 					Hibernate.initialize(task.getComments());
 					task.addComment(comment);
-					wlSrv.addActivityLog(task, message, LogType.COMMENT);
+					wlSrv.addActivityLog(task, commentMessage, LogType.COMMENT);
 				}
 			}
 			// Zero remaining time
 			if (remainingZero != null && remainingZero) {
 				task.setRemaining(PeriodHelper.inFormat("0m"));
 			}
+			String message = worklogStateChange(state, oldState, task);
 			taskSrv.save(task);
-			return new ResultData(ResultData.OK, worklogStateChange(state,
-					oldState, task));
+			return new ResultData(ResultData.OK, message);
 		}
 		return new ResultData(ResultData.ERROR, msg.getMessage("error.unknown",
 				null, Utils.getCurrentLocale()));
@@ -898,7 +898,8 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/{id}/file", method = RequestMethod.GET)
-	public @ResponseBody String downloadFile(@PathVariable String id,
+	public @ResponseBody
+	String downloadFile(@PathVariable String id,
 			@RequestParam("get") String filename, HttpServletRequest request,
 			HttpServletResponse response, RedirectAttributes ra)
 			throws IOException {
@@ -923,7 +924,8 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/{id}/imgfile", method = RequestMethod.GET)
-	public @ResponseBody String showImageFile(@PathVariable String id,
+	public @ResponseBody
+	String showImageFile(@PathVariable String id,
 			@RequestParam("get") String filename, HttpServletRequest request,
 			HttpServletResponse response, RedirectAttributes ra)
 			throws IOException {
@@ -994,6 +996,43 @@ public class TaskController {
 				console.append(task.toString());
 				console.append(": updated with ");
 				console.append(task.getLoggedWork());
+				console.append(BR);
+			}
+			model.addAttribute("console", console.toString());
+			return "other/console";
+		} else {
+			throw new TasqAuthException();
+		}
+	}
+	/**
+	 * Helper temp method to eliminate depreciated task without finishDate
+	 * @param ra
+	 * @param request
+	 * @param model
+	 * @return
+	 */
+	@Deprecated
+	@Transactional
+	@RequestMapping(value = "task/updateFinish", method = RequestMethod.GET)
+	public String updateFinishDate(RedirectAttributes ra, HttpServletRequest request,
+			Model model) {
+		if (Roles.isAdmin()) {
+			List<Task> list = taskSrv.findAll();
+			StringBuilder console = new StringBuilder(
+					"Updating logged work on all tasks within application");
+			console.append(BR);
+			for (Task task : list) {
+				List<WorkLog> worklogs = wlSrv.getTaskEvents(task.getId());
+				WorkLog closing = new WorkLog();
+				for (WorkLog workLog : worklogs) {
+					if(workLog.getType().equals(LogType.CLOSED)){
+						closing = workLog;
+					}
+				}
+				task.setFinishDate(closing.getRawTime());
+				console.append(task.toString());
+				console.append(": finish date set to :");
+				console.append(closing.getRawTime());
 				console.append(BR);
 			}
 			model.addAttribute("console", console.toString());
@@ -1110,11 +1149,13 @@ public class TaskController {
 	private String worklogStateChange(TaskState state, TaskState oldState,
 			Task task) {
 		if (state.equals(TaskState.CLOSED)) {
+			task.setFinishDate(new Date());
 			wlSrv.addActivityLog(task, "", LogType.CLOSED);
 			return msg.getMessage("task.state.changed.closed",
 					new Object[] { task.getId() }, Utils.getCurrentLocale());
 		} else if (oldState.equals(TaskState.CLOSED)) {
 			wlSrv.addActivityLog(task, "", LogType.REOPEN);
+			task.setFinishDate(null);
 			return msg.getMessage("task.state.changed.reopened",
 					new Object[] { task.getId() }, Utils.getCurrentLocale());
 		} else {
