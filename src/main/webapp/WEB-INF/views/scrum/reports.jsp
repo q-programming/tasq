@@ -15,6 +15,9 @@
 <!-- 	rel="stylesheet" media="screen" /> -->
 <link rel="stylesheet" type="text/css"
 	href="<c:url value="/resources/css/jquery.jqplot.css"/>" />
+<script language="javascript" type="text/javascript"
+	src="<c:url value="/resources/js/jqplot.cursor.min.js"/>"></script>
+	
 	
 <c:if test="${empty param.sprint}">
 	<c:set var="ActiveSprint">${lastSprint.sprintNo }</c:set>
@@ -293,6 +296,11 @@ $(document).ready(function() {
 						}
 					}
 				},
+	            cursor:{ 
+	                show: true,
+	                zoom:true, 
+	                showTooltip:false
+	            }, 
 				series:[
 				    {
 					    label: '<s:message code="agile.remaining"/>',
@@ -341,6 +349,11 @@ $(document).ready(function() {
 						}
 					}
 				},
+	            cursor:{ 
+	                show: true,
+	                zoom:true, 
+	                showTooltip:false
+	            }, 
 				highlighter: {
 				      show: true,
 				      sizeAdjust: 10

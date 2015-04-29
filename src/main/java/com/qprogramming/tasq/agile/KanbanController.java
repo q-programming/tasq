@@ -188,7 +188,7 @@ public class KanbanController {
 					startTime = release.getEndDate();
 					release = null;
 				}
-				releaseTasks = taskSrv.findAllByRelease(project,release);
+				releaseTasks = taskSrv.findAllByRelease(project, release);
 				endTime = new DateTime();
 				release = new Release();
 				release.setProject(project);
@@ -242,26 +242,23 @@ public class KanbanController {
 				increaseMap(openMap, dateLogged);
 			} else if (LogType.CLOSED.equals(workLog.getType())) {
 				increaseMap(closedMap, dateLogged);
+				decreaseMap(openMap, dateLogged);
 				decreaseMap(progressMap, dateLogged);
 			} else if (LogType.REOPEN.equals(workLog.getType())) {
 				decreaseMap(closedMap, dateLogged);
 				increaseMap(progressMap, dateLogged);
 			} else if (LogType.STATUS.equals(workLog.getType())) {
-				Integer value = progressMap.get(dateLogged);
-				value = value == null ? 0 : value;
-				// TODO search for other way + remove old ?
 				if (workLog.getMessage().contains(TODO_ONGOING)
 						|| workLog.getMessage().contains(getToDoOngoing())) {
-					value++;
-					progressMap.put(dateLogged, value);
+					increaseMap(progressMap, dateLogged);
+					decreaseMap(openMap, dateLogged);
 				}
 			}
 		}
 		LocalDate startTime = new LocalDate(release.getStartDate());
 		LocalDate endTime = new LocalDate(release.getEndDate());
 		data.setStartStop(startTime.toString() + " - " + endTime.toString());
-		fillChartData(data, openMap, closedMap, progressMap, startTime,
-				endTime);
+		fillChartData(data, openMap, closedMap, progressMap, startTime, endTime);
 		normalizeProgressLabels(data, progressMap);
 		return data;
 	}
@@ -283,15 +280,15 @@ public class KanbanController {
 			closedValue = closedValue == null ? 0 : closedValue;
 			progressValue = progressValue == null ? 0 : progressValue;
 			open += openValue;
+			open = open < 0 ? 0 : open;
 			closed += closedValue;
 			progress += progressValue;
-			if (progress < 0) {
-				progress = 0;
-			}
-			data.putToOpen(date.toString(), open);
+			progress = progress < 0 ? 0 : progress;
 			data.putToClosed(date.toString(), closed);
 			data.putToInProgress(date.toString(), closed + progress);
+			data.putToOpen(date.toString(), closed + progress + open);
 			data.putToInProgressLabel(date.toString(), progress);
+			data.putToOpenLabel(date.toString(), open);
 		}
 	}
 

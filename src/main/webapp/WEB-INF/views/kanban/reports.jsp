@@ -9,6 +9,8 @@
 	src="<c:url value="/resources/js/jqplot.enhancedLegendRenderer.min.js"/>"></script>
 <script language="javascript" type="text/javascript"
 	src="<c:url value="/resources/js/jqplot.dateAxisRenderer.js"/>"></script>
+<script language="javascript" type="text/javascript"
+	src="<c:url value="/resources/js/jqplot.cursor.min.js"/>"></script>
 <%-- <link href="<c:url value="/resources/css/docs.min.css" />" --%>
 <!-- 	rel="stylesheet" media="screen" /> -->
 <link rel="stylesheet" type="text/css"
@@ -20,12 +22,6 @@
 <c:set var="taskDesc_text">
 	<s:message code="task.description" text="Description" arguments="" />
 </c:set>
-<%-- <c:if test="${empty param.release}"> --%>
-<%-- 	<c:set var="ActiveRelease"><s:message code="agile.release.current"/></c:set> --%>
-<%-- </c:if> --%>
-<%-- <c:if test="${not empty param.release}"> --%>
-<%-- 	<c:set var="ActiveRelease"><s:message code="agile.release"/>${param.release}</c:set> --%>
-<%-- </c:if> --%>
 <h3>[${project.projectId}] ${project}</h3>
 <div class="white-frame"
 	style="display: table; width: 100%; height: 85vh">
@@ -89,7 +85,7 @@
 					</tr>
 				</thead>
 			</table>
-			<a class="anchor" id="sprintTotal"></a>
+			<a class="anchor" id="releaseTotal"></a>
 			<h4 style="text-align: center;"><i class="fa fa-list-ul"></i> <s:message code="agile.release.total"/></h4>
 			<table id="summaryTable" class="table table-bordered"
 				style="width: 100%">
@@ -99,8 +95,6 @@
 		</div>
 	</div>
 </div>
-
-
 <script>
 $(document).ready(function() {
 	var plot;
@@ -220,6 +214,11 @@ function renderReleaseData(releaseNo){
                     smooth: true
                 }
             },
+            cursor:{ 
+                show: true,
+                zoom:true, 
+                showTooltip:false
+            }, 
     		fillBetween: {
                 series1: 1,
                 series2: 2,
@@ -233,7 +232,7 @@ function renderReleaseData(releaseNo){
 			axes : {
 				xaxis : {
 					renderer:$.jqplot.DateAxisRenderer, 
-			        tickOptions:{formatString:'%Y-%m-%#d'},
+			        tickOptions:{formatString:'%Y-%m-%d'},
 					pad : 0
 				},
 				yaxis : {
@@ -247,8 +246,15 @@ function renderReleaseData(releaseNo){
 			series:[
 			    {
 			    	color: '#f0ad4e',
-				    label: '<s:message code="task.created"/>',
-				    highlighter: { formatString: '[%s] %s <s:message code="task.created"/>'}
+				    label: '<s:message code="agile.release.open"/>',
+				    highlighter: {
+				    	tooltipContentEditor: function(str, seriesIndex, pointIndex, plot){
+				    			var highDate = str.split(',')[0];
+				    			var label = result.openLabels[highDate];
+		                        return "[" + highDate +"] " + label + " " + plot.series[seriesIndex]["label"];
+		                        },
+				    	
+				    	}
 				    
 			    },
 			    
@@ -308,6 +314,11 @@ function renderReleaseData(releaseNo){
 			      show: true,
 			      sizeAdjust: 10
 			},
+            cursor:{ 
+                show: true,
+                zoom:true, 
+                showTooltip:false
+            }, 
 			series:[
 			    {
 				    label: '<s:message code="agile.timelogged"/>',
