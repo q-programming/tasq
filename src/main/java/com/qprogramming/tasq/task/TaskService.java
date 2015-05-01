@@ -114,7 +114,7 @@ public class TaskService {
 		return dirPath;
 	}
 
-	private String getTaskDir(Task task) {
+	public String getTaskDir(Task task) {
 		return tasqRootDir + File.separator + task.getProject().getProjectId()
 				+ File.separator + task.getId();
 	}

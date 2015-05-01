@@ -174,6 +174,10 @@ public class Task implements java.io.Serializable {
 	public Date getRawDue_date() {
 		return due_date;
 	}
+	public Date getRawCreate_date() {
+		return create_date;
+	}
+	
 
 	public Date getFinishDate() {
 		return finishDate;
@@ -599,6 +603,9 @@ public class Task implements java.io.Serializable {
 
 	public void addSubTask() {
 		this.subtasks = getSubtasks() + 1;
+	}
+	public void removeSubTask() {
+		this.subtasks = getSubtasks() - 1;
 	}
 
 	public boolean isSubtask() {

@@ -26,13 +26,14 @@
 	<c:set var="is_assignee" value="true" />
 </c:if>
 <div class="white-frame" style="overflow: auto;">
+	<%----------------------TASK NAME-----------------------------%>
 	<c:set var="taskName_text">
 		<s:message code="task.name" text="Name" />
 	</c:set>
 	<c:set var="taskDesc_text">
 		<s:message code="task.description" />
 	</c:set>
-	<%----------------------TASK NAME-----------------------------%>
+	<%----------------------EDIT MENU-----------------------------%>
 	<div>
 		<div class="pull-right">
 			<c:if test="${is_user  && task.state ne'CLOSED'}">
@@ -49,14 +50,27 @@
 							class="fa fw fa-link fa-flip-horizontal"></i>&nbsp;<s:message
 								code="task.link" />
 					</a></li>
-					<li><a href="<c:url value="task/${task.id}/subtask"/>"> </i><i
-							class="fa fw fa-sitemap"></i>&nbsp;<s:message
+					<c:if test="${not task.subtask}">
+						<li><a href="<c:url value="task/${task.id}/subtask"/>">
+								<i class="fa fw fa-sitemap"></i>&nbsp;<s:message
 								code="task.subtasks.add" />
-					</a></li>
+							</a>
+						</li>
+					</c:if>
 					<li><a class="addFileButton" href="#" data-toggle="modal"
 						data-target="#files_task" data-taskID="${task.id}"> <i
 							class="fa fw fa-file"></i>&nbsp;<s:message code="task.addFile" />
 					</a></li>
+					<c:if test="${task.subtask}">
+						<li><a href="#" class="convert2task" data-toggle="modal" data-target="#convert2task" 
+								data-taskid="${task.id}" data-type="${task.type}" data-project="${task.project.id}" 
+								>
+								<i class="fa fw fa-level-up"></i>&nbsp;<s:message
+								code="task.subtasks.2task" />
+							</a>
+						</li>
+					</c:if>
+					
 
 				</ul>
 			</c:if>
@@ -306,17 +320,6 @@
 						<td style="width: 150px"></td>
 						<td></td>
 					</tr>
-					<%-- TODO add display based on type! --%>
-					<%-- if there weas no ESTIMATE at all --%>
-					<%-- 					<c:if test="${not task.estimated}"> --%>
-					<%-- 						<tr> --%>
-					<%-- 							<td class="bar_td"><s:message code="task.logged" /></td> --%>
-					<%-- 							<td class="bar_td">${task.loggedWork}</td> --%>
-					<%-- 							<td class="bar_td"></td> --%>
-					<%-- 						</tr> --%>
-					<%-- 					</c:if> --%>
-					<%-- IF ESTIMATE IS NOT 0 --%>
-					<%-- 					<c:if test="${task.estimated}"> --%>
 					<%-- Estimate bar --%>
 					<c:if test="${task.estimate ne '0m'}">
 						<tr>
@@ -782,18 +785,6 @@
 			<%------------------ WORK LOG -------------------------%>
 			<div id="logWork" class="tab-pane fade">
 				<table id="taskworklogs" class="table table-condensed table-hover">
-					<%-- 					<c:forEach items="${worklogs}" var="worklog"> --%>
-					<%-- 						<tr> --%>
-					<%-- 							<td><div style="font-size: smaller; color: dimgray;">${worklog.account}&nbsp; --%>
-					<%-- 									<t:logType logType="${worklog.type}" /> --%>
-					<%-- 									<div class="time-div">${worklog.timeLogged}</div> --%>
-					<%-- 								</div> <c:if test="${not empty worklog.message}"> --%>
-					<!-- 									<div> -->
-					<%-- 										<blockquote class="quote">${worklog.message}</blockquote> --%>
-					<!-- 									</div> -->
-					<%-- 								</c:if></td> --%>
-					<%-- 						</tr> --%>
-					<%-- 					</c:forEach> --%>
 				</table>
 			</div>
 		</div>
@@ -803,6 +794,9 @@
 <jsp:include page="../modals/close.jsp" />
 <jsp:include page="../modals/file.jsp" />
 <jsp:include page="../modals/assign.jsp" />
+<c:if test="${task.subtask}">
+	<jsp:include page="../modals/convert2task.jsp" />
+</c:if>
 <!-- Edit Comment Modal -->
 <div class="modal fade" id="commentModal" tabindex="-1" role="dialog"
 	aria-labelledby="role" aria-hidden="true">

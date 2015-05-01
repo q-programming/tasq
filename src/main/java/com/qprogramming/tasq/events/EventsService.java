@@ -55,6 +55,16 @@ public class EventsService {
 				.getCurrentAccount().getId());
 		return events != null ? events : new LinkedList<Event>();
 	}
+	
+	/**
+	 * Returns list of all events for task
+	 * 
+	 * @return
+	 */
+	public List<Event> getTaskEvents(String task) {
+		List<Event> events = eventsRepo.findByTask(task);
+		return events != null ? events : new LinkedList<Event>();
+	}
 
 	/**
 	 * Returns list of all events for currently logged account with Pageable

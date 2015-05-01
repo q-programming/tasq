@@ -93,6 +93,8 @@ public class TaskControllerTest {
 	@Mock
 	private WatchedTaskService watchSrvMock;
 	@Mock
+	private EventsService eventSrvMock;
+	@Mock
 	private MockSecurityContext securityMock;
 	@Mock
 	private Authentication authMock;
@@ -123,7 +125,7 @@ public class TaskControllerTest {
 		taskSrv = new TaskService(taskRepoMock);
 		taskCtr = new TaskController(taskSrv, projSrvMock, accountServiceMock,
 				wrkLogSrv, msgMock, sprintSrvMock, taskLinkSrvMock,
-				commRepoMock, tagsRepoMock, watchSrvMock);
+				commRepoMock, tagsRepoMock, watchSrvMock,eventSrvMock);
 	}
 
 	@Test

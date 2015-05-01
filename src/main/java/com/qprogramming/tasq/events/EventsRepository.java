@@ -16,6 +16,9 @@ public interface EventsRepository extends
 	List<Event> findByAccountIdOrderByDateDesc(Long userId);
 
 	List<Event> findByAccountIdAndUnreadTrue(Long userId);
+	
+	List<Event> findByTask(String task);
 
 	Page<Event> findByAccountId(Long id, Pageable p);
+	
 }

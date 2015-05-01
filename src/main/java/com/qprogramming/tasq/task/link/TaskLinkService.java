@@ -93,6 +93,12 @@ public class TaskLinkService {
 		listA.addAll(linkRepo.findByTaskB(task.getId()));
 		linkRepo.delete(listA);
 	}
+	
+	public List<TaskLink> findAllTaskLinks(Task task) {
+		List<TaskLink> list = linkRepo.findByTaskA(task.getId());
+		list.addAll(linkRepo.findByTaskB(task.getId()));
+		return list;
+	}
 
 	/**
 	 * Searches if link exists, then checks if there is counter link ( block ->

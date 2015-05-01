@@ -154,7 +154,10 @@
 					<tr>
 						<td><t:type type="${task.type}" list="true" /></td>
 						<td><t:priority priority="${task.priority}" list="true" /></td>
-						<td><c:if test="${task.subtasks gt 0}"><i class="subtasks fa fa-plus-square" data-task="${task.id}" id="subtasks${task.id}"></i></c:if> <a href="<c:url value="task?id=${task.id}"/>"
+						<td>
+						<c:if test="${task.subtasks gt 0}">
+							<i class="subtasks fa fa-plus-square" data-task="${task.id}" id="subtasks${task.id}"></i>
+						</c:if> <a href="<c:url value="task?id=${task.id}"/>"
 							style="<c:if test="${task.state eq 'CLOSED' }">
 							text-decoration: line-through;
 							</c:if>">
@@ -175,17 +178,12 @@
 								<c:set var="logged_class">progress-bar-success</c:set>
 								<c:set var="percentage">0</c:set>
 							</c:if>
-<%-- 							<c:if test="${not task.estimated}"> --%>
-<%-- 								<div>${task.loggedWork}</div> --%>
-<%-- 							</c:if> --%>
-<%-- 							<c:if test="${task.estimated}"> --%>
-								<div class="progress" style="width: 50px">
-									<div class="progress-bar ${logged_class} a-tooltip" role="progressbar"
-										aria-valuenow="${percentage}" aria-valuemin="0"
-										aria-valuemax="100" style="width:${percentage}%" title="${percentage}%"></div>
-								</div>
-<%-- 							</c:if> --%>
-							</td>
+							<div class="progress" style="width: 50px">
+								<div class="progress-bar ${logged_class} a-tooltip" role="progressbar"
+									aria-valuenow="${percentage}" aria-valuemin="0"
+									aria-valuemax="100" style="width:${percentage}%" title="${percentage}%"></div>
+							</div>
+						</td>
 					</tr>
 				</c:forEach>
 			</table>
