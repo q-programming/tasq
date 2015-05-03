@@ -928,6 +928,14 @@ public class TaskController {
 		return "redirect:" + request.getHeader("Referer");
 	}
 
+	@RequestMapping(value = "/task/{id}/{subid}/file", method = RequestMethod.GET)
+	public @ResponseBody String downloadSubtaskFile(@PathVariable String id,
+			@PathVariable String subid, @RequestParam("get") String filename,
+			HttpServletRequest request, HttpServletResponse response,
+			RedirectAttributes ra) throws IOException {
+		return downloadFile(id + "/" + subid, filename, request, response, ra);
+	}
+
 	@RequestMapping(value = "/task/{id}/imgfile", method = RequestMethod.GET)
 	public @ResponseBody String showImageFile(@PathVariable String id,
 			@RequestParam("get") String filename, HttpServletRequest request,
@@ -954,8 +962,16 @@ public class TaskController {
 		return "redirect:" + request.getHeader("Referer");
 	}
 
-	@RequestMapping(value = "/task/{id}/remove", method = RequestMethod.GET)
-	public String removeFile(@PathVariable String id,
+	@RequestMapping(value = "/task/{id}/{subid}/imgfile", method = RequestMethod.GET)
+	public @ResponseBody String showSubTaskImageFile(@PathVariable String id,
+			@PathVariable String subid, @RequestParam("get") String filename,
+			HttpServletRequest request, HttpServletResponse response,
+			RedirectAttributes ra) throws IOException {
+		return showImageFile(id + "/" + subid, filename, request, response, ra);
+	}
+
+	@RequestMapping(value = "/task/removeFile", method = RequestMethod.GET)
+	public String removeFile(@RequestParam  String id,
 			@RequestParam("file") String filename, HttpServletRequest request,
 			RedirectAttributes ra) {
 		Task task = taskSrv.findById(id);
@@ -1054,10 +1070,11 @@ public class TaskController {
 			project.setLastTaskNo(taskCount);
 			project.getTasks().add(task);
 			projectSrv.save(project);
-			//Add log
+			// Add log
 			StringBuilder message = new StringBuilder(Utils.TABLE);
-			message.append(Utils.changedFromTo("ID", id,taskID));
-			message.append(Utils.changedFromTo("Type", subtask.getType().toString(),type.toString()));
+			message.append(Utils.changedFromTo("ID", id, taskID));
+			message.append(Utils.changedFromTo("Type", subtask.getType()
+					.toString(), type.toString()));
 			message.append(Utils.TABLE_END);
 			wlSrv.addActivityLog(task, message.toString(), LogType.SUBTASK2TASK);
 			// cleanup
@@ -1070,7 +1087,8 @@ public class TaskController {
 					ra,
 					msg.getMessage("task.subtasks.2task.success", new Object[] {
 							id, taskID }, Utils.getCurrentLocale()));
-			TaskLink link = new TaskLink(parent.getId(), taskID, TaskLinkType.RELATES_TO);
+			TaskLink link = new TaskLink(parent.getId(), taskID,
+					TaskLinkType.RELATES_TO);
 			linkService.save(link);
 			return "redirect:/task?id=" + taskID;
 		}

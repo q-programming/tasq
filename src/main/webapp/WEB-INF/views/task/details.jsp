@@ -98,11 +98,11 @@
 			<t:type type="${task.type}" />
 			<c:if test="${task.subtask}">
 				<a href='<c:url value="/task?id=${task.parent}"/>'>[${task.parent}]</a>
-			\ [${task.id}] ${task.name}
+			/ [${task.id}] ${task.name}
 			</c:if>
 			<c:if test="${not task.subtask}">
 				<a href='<c:url value="/project?id=${task.project.id}"/>'>${task.project.projectId}</a>
-			\ [${task.id}] ${task.name}
+			/ [${task.id}] ${task.name}
 			</c:if>
 		</h3>
 	</div>
@@ -574,7 +574,7 @@
 										<td style="width: 30px">
 											<div class="buttons_panel pull-right">
 												<a
-													href='<c:url value="task/${task.id}/remove?file=${file}"/>'>
+													href='<c:url value="task/removeFile?id=${task.id}&file=${file}"/>'>
 													<i class="fa fa-trash-o" style="color: gray"></i>
 												</a>
 											</div>
