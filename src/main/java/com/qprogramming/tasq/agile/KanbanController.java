@@ -162,7 +162,7 @@ public class KanbanController {
 
 	@RequestMapping(value = "/getReleases", method = RequestMethod.GET)
 	public @ResponseBody
-	List<Release> showProjectSprints(@RequestParam Long projectID,
+	List<Release> showProjectReleases(@RequestParam Long projectID,
 			HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(projectID);
