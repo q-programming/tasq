@@ -3,10 +3,12 @@ package com.qprogramming.tasq.agile;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
@@ -46,6 +48,7 @@ import com.qprogramming.tasq.task.DisplayTask;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
+import com.qprogramming.tasq.task.tag.Tag;
 import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLog;
@@ -75,6 +78,7 @@ public class SprintController {
 		this.msg = msg;
 	}
 
+	@Transactional(readOnly=true)
 	@RequestMapping(value = "{id}/scrum/board", method = RequestMethod.GET)
 	public String showBoard(@PathVariable String id, Model model,
 			HttpServletRequest request, RedirectAttributes ra) {
@@ -96,7 +100,13 @@ public class SprintController {
 			List<Task> taskList = taskSrv.findAllBySprint(sprint);
 			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ORDER,
 					true));
-			List<DisplayTask> resultList = taskSrv.convertToDisplay(taskList);
+			Set<Tag> tags = new HashSet<Tag>();
+			for (Task task : taskList) {
+				Hibernate.initialize(task.getTags());
+				tags.addAll(task.getTags());
+			}
+			List<DisplayTask> resultList = taskSrv.convertToDisplay(taskList,true);
+			model.addAttribute("tags", tags);
 			model.addAttribute("sprint", sprint);
 			model.addAttribute("tasks", resultList);
 			return "/scrum/board";

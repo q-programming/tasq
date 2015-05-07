@@ -1,14 +1,14 @@
 package com.qprogramming.tasq.task;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
-import org.joda.time.Period;
 import org.springframework.beans.BeanUtils;
 
 import com.qprogramming.tasq.account.DisplayAccount;
-import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
-import com.qprogramming.tasq.task.worklog.WorkLog;
+import com.qprogramming.tasq.task.tag.Tag;
 
 public class DisplayTask implements Comparable<DisplayTask> {
 	private String id;
@@ -29,6 +29,7 @@ public class DisplayTask implements Comparable<DisplayTask> {
 	private boolean subtask;
 	private String parent;
 	private Float percentage;
+	private Set<String> tags;
 
 	public DisplayTask(Task task) {
 		BeanUtils.copyProperties(task, this);
@@ -38,6 +39,7 @@ public class DisplayTask implements Comparable<DisplayTask> {
 		}
 		this.percentage = task.getPercentage_logged();
 		this.subtask = task.isSubtask();
+		tags = new HashSet<String>();
 	}
 
 	public String getId() {
@@ -182,6 +184,27 @@ public class DisplayTask implements Comparable<DisplayTask> {
 
 	public void setSubtask(boolean subtask) {
 		this.subtask = subtask;
+	}
+
+	public Set<String> getTags() {
+		if (tags == null) {
+			tags = new HashSet<String>();
+		}
+		return tags;
+	}
+
+	public void setTags(Set<String> tags) {
+		this.tags = tags;
+	}
+
+	public void setTagsFromTask(Set<Tag> tags) {
+		for (Tag tag : tags) {
+			this.tags.add(tag.getName());
+		}
+	}
+
+	public void addTag(String tag) {
+		getTags().add(tag);
 	}
 
 	@Override

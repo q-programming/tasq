@@ -131,10 +131,23 @@ public class TaskService {
 		return taskRepo.findByProjectId(project);
 	}
 
-	public List<DisplayTask> convertToDisplay(List<Task> list) {
+	/**
+	 * converts to DisplayTask
+	 * 
+	 * @param list
+	 * @param tags
+	 *            if tags should be included (!requires transaction )
+	 * @return
+	 */
+	public List<DisplayTask> convertToDisplay(List<Task> list, boolean tags) {
 		List<DisplayTask> resultList = new LinkedList<DisplayTask>();
 		for (Task task : list) {
-			resultList.add(new DisplayTask(task));
+			DisplayTask displayTask = new DisplayTask(task);
+			if (tags) {
+				Hibernate.initialize(task.getTags());
+				displayTask.setTagsFromTask(task.getTags());
+			}
+			resultList.add(displayTask);
 		}
 		return resultList;
 	}

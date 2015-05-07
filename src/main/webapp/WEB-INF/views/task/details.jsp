@@ -1148,14 +1148,17 @@ $(document).on("click",".delete_task",function(e) {
     	}
     });
 	
-	$('#taskTags').on('itemAdded', function(event) {
+	$('#taskTags').on('beforeItemAdd', function(event) {
 		if(!init){
 			showWait(true);
-			console.log("Sending to backedn "+event.item  );
 			var url='<c:url value="/addTaskTag"/>';
 			$.get(url,{name:event.item,taskID:taskID},function(data) {
+				if(data == 'ERROR'){
+					event.cancel = true;
+					var warning = '<s:message code="task.tags.notAdded"/>';
+					showWarning(warning);
+				}
 				showWait(false);
-				console.log(data);
 				checkIfEmptyTags();
 			});
 		}
@@ -1163,11 +1166,9 @@ $(document).on("click",".delete_task",function(e) {
 	
 	$('#taskTags').on('itemRemoved', function(event) {
 		showWait(true);
-		console.log("Sending to backedn " +  event.item );
 		var url='<c:url value="/removeTaskTag"/>';
 		$.get(url,{name:event.item,taskID:taskID},function(data) {
 			showWait(false);
-			console.log(data);
 			checkIfEmptyTags();
 		});
 	});

@@ -9,8 +9,7 @@ type="com.qprogramming.tasq.task.DisplayTask"%>
 <%@ attribute name="can_edit" required="true"%>
 <security:authentication property="principal" var="user" />
 <div class="agile-card theme" data-id="${task.id}" state="${task.state}" data-subtasks="${task.subtasks}"
-id="${task.id}">
-<div class="side-bar theme"></div>
+id="${task.id}" data-tags="<c:forEach items="${task.tags}" var="tag">${tag},</c:forEach>">
 <div style="padding-left: 5px; min-height: 50px;">
 <t:type type="${task.type}" list="true" />
 <a href="<c:url value="/task?id=${task.id}"/>" style="color: inherit;"

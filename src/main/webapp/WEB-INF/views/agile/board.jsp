@@ -12,55 +12,100 @@
 <c:if test="${myfn:contains(project.participants,user) && user.isUser || is_admin}">
 	<c:set var="can_edit" value="true" />
 </c:if>
-<div class="well table_state sortable_tasks" data-state="TO_DO">
-	<div class="table_header">
+<tr>
+	<td class="table_header">
 		<i class="fa fa-pencil-square-o"></i>
 		<s:message code="task.state.todo" />
-	</div>
-	<c:forEach items="${tasks}" var="task">
-		<c:if test="${task.state eq 'TO_DO' && not task.subtask}">
-			<t:card task="${task}" can_edit="${can_edit}" />
-		</c:if>
-	</c:forEach>
-</div>
-<div style="display: table-cell; width: 1px"></div>
-<div class="well table_state notsortable_tasks" data-state="ONGOING">
-	<div class="table_header">
+	</td>
+	<td class="table_header">
 		<i class="fa fa-spin fa-repeat"></i>
 		<s:message code="task.state.ongoing" />
-	</div>
-	<c:forEach items="${tasks}" var="task">
-		<c:if test="${task.state eq 'ONGOING' && not task.subtask}">
-			<t:card task="${task}" can_edit="${can_edit}" />
-		</c:if>
-	</c:forEach>
-</div>
-<div style="display: table-cell; width: 1px"></div>
-<div class="well table_state notsortable_tasks" data-state="CLOSED">
-	<div class="table_header">
+	</td>
+	<td class="table_header">
 		<i class="fa fa-check"></i>
 		<s:message code="task.state.closed" />
+	</td>
+	<td class="table_header">
+		<i class="fa fa-ban"></i>
+		<s:message code="task.state.blocked" />
+	</td>
+</tr>
+<tr>
+<td style="vertical-align: top;">
+	<div class="well table_state sortable_tasks" data-state="TO_DO">
+		<c:forEach items="${tasks}" var="task">
+			<c:if test="${task.state eq 'TO_DO' && not task.subtask}">
+				<t:card task="${task}" can_edit="${can_edit}" />
+			</c:if>
+		</c:forEach>
 	</div>
+</td>
+<td style="vertical-align: top;">
+	<div class="well table_state notsortable_tasks" data-state="ONGOING">
+		<c:forEach items="${tasks}" var="task">
+			<c:if test="${task.state eq 'ONGOING' && not task.subtask}">
+				<t:card task="${task}" can_edit="${can_edit}" />
+			</c:if>
+		</c:forEach>
+	</div>
+</td>
+<td style="vertical-align: top;">
+	<div class="well table_state notsortable_tasks" data-state="CLOSED">
 	<c:forEach items="${tasks}" var="task">
 		<c:if test="${task.state eq 'CLOSED' && not task.subtask}">
 			<t:card task="${task}" can_edit="${can_edit}" />
 		</c:if>
 	</c:forEach>
-</div>
-<div style="display: table-cell; width: 1px"></div>
-<div class="well table_state notsortable_tasks" data-state="BLOCKED">
-	<div class="table_header">
-		<i class="fa fa-ban"></i>
-		<s:message code="task.state.blocked" />
 	</div>
-	<c:forEach items="${tasks}" var="task">
-		<c:if test="${task.state eq 'BLOCKED' && not task.subtask}">
-			<t:card task="${task}" can_edit="${can_edit}" />
-		</c:if>
-	</c:forEach>
-</div>
+</td>
+<td style="vertical-align: top;">
+	<div class="well table_state notsortable_tasks" data-state="BLOCKED">
+		<c:forEach items="${tasks}" var="task">
+			<c:if test="${task.state eq 'BLOCKED' && not task.subtask}">
+				<t:card task="${task}" can_edit="${can_edit}" />
+			</c:if>
+		</c:forEach>
+	</div>
+</td>
+</tr>
+</table>
 <script>
+	var currentTag;
+	var maxHeight = 0;
+	$(window).resize(function() {
+		resizeDivs();
+	});
+	
 	$(document).ready(function($) {
+		resizeDivs();
+		$(".tag_filter").click(function(){
+			//first show all 
+			$(".agile-card").each(function() {
+				$(this).show();
+			});
+			$(".tag_filter").each(function() {
+				$(this).removeClass("not_selected");
+			});
+			var tag = $(this).data("name");
+			if(tag != currentTag){
+				$( ".agile-card" ).each(function() {
+						var ids =  $(this).data("id");
+				  		var tags = $(this).data("tags").split(",");
+				  		if (!($.inArray(tag.toLowerCase(),tags)>=0)){
+				  			$(this).hide();
+				  		}
+// 				  		if (!(tags.toLowerCase().indexOf(tag) >= 0)){
+// 					  		$(this).hide();
+// 				  		}
+				});
+				$('.tag_filter').not(this).each(function(){
+		         	$(this).addClass("not_selected");
+		     	});
+				currentTag = tag;				
+			}else{
+				currentTag = "";
+			}
+		});
 		<c:if test="${can_edit}">
 		
 		$(".notsortable_tasks").sortable({
@@ -159,4 +204,15 @@
 		    });
 		</c:if>
 	});
+	
+	function resizeDivs(){
+		var bodyheight = $(document).height();
+	    $(".table_state").css("min-height",bodyheight*0.65);
+	    $(".table_state").each(function() {
+			if(maxHeight < $(this).outerHeight()){
+				maxHeight = $(this).outerHeight();
+			}
+		});
+	    $(".table_state").css("min-height",maxHeight);
+	}
 </script>

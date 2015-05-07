@@ -1,15 +1,18 @@
 package com.qprogramming.tasq.agile;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.hibernate.Hibernate;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
@@ -39,6 +42,7 @@ import com.qprogramming.tasq.task.DisplayTask;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
+import com.qprogramming.tasq.task.tag.Tag;
 import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLog;
@@ -69,6 +73,7 @@ public class KanbanController {
 		this.agileSrv = agileSrv;
 	}
 
+	@Transactional(readOnly=true)
 	@RequestMapping(value = "{id}/kanban/board", method = RequestMethod.GET)
 	public String showBoard(@PathVariable String id, Model model,
 			HttpServletRequest request, RedirectAttributes ra) {
@@ -82,7 +87,13 @@ public class KanbanController {
 			taskList = taskSrv.findAllWithoutRelease(project);
 			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ORDER,
 					true));
-			List<DisplayTask> resultList = taskSrv.convertToDisplay(taskList);
+			Set<Tag> tags = new HashSet<Tag>();
+			for (Task task : taskList) {
+				Hibernate.initialize(task.getTags());
+				tags.addAll(task.getTags());
+			}
+			List<DisplayTask> resultList = taskSrv.convertToDisplay(taskList,true);
+			model.addAttribute("tags", tags);
 			model.addAttribute("tasks", resultList);
 			return "/kanban/board";
 		}
