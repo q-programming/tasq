@@ -83,6 +83,9 @@ table.button-table tr:hover td .buttons_panel {
 .table_sprint{
 	min-height: 50px;
 }
+.agile-card{
+	max-width: 500px
+}
 
 .sprint_div:hover .buttons_panel {
 	display: block;

@@ -78,7 +78,7 @@ public class SprintController {
 		this.msg = msg;
 	}
 
-	@Transactional(readOnly=true)
+	@Transactional(readOnly = true)
 	@RequestMapping(value = "{id}/scrum/board", method = RequestMethod.GET)
 	public String showBoard(@PathVariable String id, Model model,
 			HttpServletRequest request, RedirectAttributes ra) {
@@ -105,7 +105,8 @@ public class SprintController {
 				Hibernate.initialize(task.getTags());
 				tags.addAll(task.getTags());
 			}
-			List<DisplayTask> resultList = taskSrv.convertToDisplay(taskList,true);
+			List<DisplayTask> resultList = taskSrv.convertToDisplay(taskList,
+					true);
 			model.addAttribute("tags", tags);
 			model.addAttribute("sprint", sprint);
 			model.addAttribute("tasks", resultList);
@@ -172,11 +173,12 @@ public class SprintController {
 	}
 
 	@Transactional
-	@RequestMapping(value = "/{id}/scrum/sprintAssign", method = RequestMethod.POST)
-	public String assignSprint(@PathVariable String id,
+	@RequestMapping(value = "/task/sprintAssign", method = RequestMethod.POST)
+	public @ResponseBody ResultData assignSprint(
 			@RequestParam(value = "taskID") String taskID,
 			@RequestParam(value = "sprintID") Long sprintID,
 			HttpServletRequest request, RedirectAttributes ra) {
+		ResultData result = new ResultData();
 		Sprint sprint = agileSrv.findById(sprintID);
 		Task task = taskSrv.findById(taskID);
 		Project project = task.getProject();
@@ -186,11 +188,12 @@ public class SprintController {
 		Hibernate.initialize(task.getSprints());
 		if (sprint.isActive()) {
 			if (checkIfNotEstimated(task, project)) {
-				MessageHelper.addWarningAttribute(ra, msg.getMessage(
+				result.code = ResultData.WARNING;
+				result.message = msg.getMessage(
 						"agile.task2Sprint.Notestimated",
 						new Object[] { task.getId(), sprint.getSprintNo() },
-						Utils.getCurrentLocale()));
-				return "redirect:" + request.getHeader("Referer");
+						Utils.getCurrentLocale());
+				return result;
 			}
 			String message = "";
 			if (task.isEstimated() && project.getTimeTracked()) {
@@ -205,17 +208,15 @@ public class SprintController {
 			subtask.addSprint(sprint);
 			taskSrv.save(subtask);
 		}
-		MessageHelper.addSuccessAttribute(
-				ra,
-				msg.getMessage("agile.task2Sprint", new Object[] {
-						task.getId(), sprint.getSprintNo() },
-						Utils.getCurrentLocale()));
-		return "redirect:" + request.getHeader("Referer");
+		result.code = ResultData.OK;
+		result.message = msg.getMessage("agile.task2Sprint", new Object[] {
+				task.getId(), sprint.getSprintNo() }, Utils.getCurrentLocale());
+		return result;
 	}
 
 	@Transactional
 	@RequestMapping(value = "/task/sprintRemove", method = RequestMethod.POST)
-	public String removeFromSprint(
+	public @ResponseBody ResultData removeFromSprint(
 			@RequestParam(value = "taskID") String taskID,
 			@RequestParam(value = "sprintID") Long sprintID, Model model,
 			HttpServletRequest request, RedirectAttributes ra) {
@@ -224,6 +225,7 @@ public class SprintController {
 		if (!projSrv.canAdminister(project)) {
 			throw new TasqAuthException(msg);
 		}
+		ResultData result = new ResultData();
 		Sprint sprint = agileSrv.findById(sprintID);
 		if (sprint.isActive()) {
 			wrkLogSrv.addActivityLog(task, null, LogType.TASKSPRINTREMOVE);
@@ -236,10 +238,10 @@ public class SprintController {
 			subtask.removeSprint(sprint);
 			taskSrv.save(subtask);
 		}
-		MessageHelper.addSuccessAttribute(ra, msg.getMessage(
-				"agile.taskRemoved", new Object[] { task.getId() },
-				Utils.getCurrentLocale()));
-		return "redirect:" + request.getHeader("Referer");
+		result.code = ResultData.OK;
+		result.message = msg.getMessage("agile.taskRemoved",
+				new Object[] { task.getId() }, Utils.getCurrentLocale());
+		return result;
 	}
 
 	@Transactional
@@ -482,7 +484,8 @@ public class SprintController {
 				if (task.getFinishDate() != null) {
 					finishDate = new DateTime(task.getFinishDate());
 				}
-				if (task.getState().equals(TaskState.CLOSED)&& (finishDate != null && endTime.isAfter(finishDate))) {
+				if (task.getState().equals(TaskState.CLOSED)
+						&& (finishDate != null && endTime.isAfter(finishDate))) {
 					result.getTasks().get(SprintData.CLOSED)
 							.add(new DisplayTask(task));
 				} else {
