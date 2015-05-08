@@ -80,8 +80,11 @@ table.button-table tr:hover td .buttons_panel {
 .buttons_panel {
 	display: none;
 }
+.table_sprint{
+	min-height: 50px;
+}
 
-.table_sprint:hover .buttons_panel {
+.sprint_div:hover .buttons_panel {
 	display: block;
 }
 

@@ -55,7 +55,7 @@
 		<c:forEach var="entry" items="${sprint_result}">
 			<c:set var="sprint" value="${entry.key}" />
 			<c:set var="count" value="0" />
-			<div class="table_sprint" data-id="${sprint.id}">
+			<div class="sprint_div">
 				<%---Buttons --%>
 				<%-- Only print button for sprint at top (active or not_active) --%>
 				<c:if test="${can_edit}">
@@ -101,7 +101,8 @@
 						${sprint.start_date} - ${sprint.end_date}
 					</p>
 				</c:if>
-				<div id="sprint_${sprint.sprintNo}">
+				<div class="table_sprint" data-id="${sprint.id}">
+					<div id="sprint_${sprint.sprintNo}">
 					<%--Sprint task --%>
 					<c:forEach items="${entry.value}" var="task">
 						<c:set var="count" value="${count + task.story_points}" />
@@ -134,6 +135,7 @@
 							</div>
 						</div>
 					</c:forEach>
+					</div>
 				</div>
 				<div style="text-align: right;">
 					<s:message code="agile.storypoints.total" />
@@ -200,6 +202,7 @@ $(document).ready(function($) {
 		locale : lang
 	});
 	<c:if test="${can_edit}">
+	reloadEvents();
 	$("#create_sprint").click(function() {
 		$("#create_form").submit();
 	});
@@ -242,14 +245,83 @@ $(document).ready(function($) {
 	$(".table_sprint").droppable({
 		activeClass : "state_default",
 		hoverClass : "state_hover",
-		drop : function(event, ui) {
-			//event on drop
-			var taskID = ui.draggable.attr("id");
+// 		drop : function(event, ui) {
+// 			//event on drop
+// 			var target = $(this);
+// 			var dragged = ui.draggable;
+// 			var taskID = ui.draggable.attr("id");
+// 			var sprintID = $(this).data('id');
+// 			console.log("data");
+// 			dragged.draggable({
+//                 connectToSortable: '.table_sprint',
+//                 helper: 'clone'
+//             });
+// 			target.append(dragged.clone(true).show());
+// 	    	var droppedOn = $(this);
+	// 	        $(dragged).detach().css({top: 0,left: 0}).appendTo(droppedOn);
+			//checkIfActiveAndSend(taskID,sprintID);
+	// 		},
+	});
+// 	$(".table_sprint").sortable({
+// 		connectWith: '.table_sprint',
+// 		cursor : 'move',
+// 		items: "div.agile-card",
+// 		helper: 'clone',
+// 	    receive: function(ev, ui) {
+// 	        ui.item.remove();
+// 	    },
+// 		update: function(event,ui){
+// 			console.log("update");
+// 		}
+// 	});
+//     $('.agile-card').draggable({
+//     	snap: true
+//     });
+
+    $(".agile-card").draggable({
+    	connectToSortable: '.table_sprint',
+    	cursor: 'move',
+    	helper: 'clone',
+    	revert: 'invalid'
+//         start: function(){
+//             $(this).data("origPosition",$(this).position());
+//             }
+//         stop: function(event, ui){
+        	
+//             console.log(ui.item);
+//         }
+    });
+    
+    $(".table_sprint").sortable({
+    	connectWith: '.table_sprint',
+    	cursor: 'move', 
+    	cursorAt: { top: 0, left: 0 },
+    	hoverClass : "state_hover",
+    	placeholder: 'ui-sortable-placeholder',
+    	tolerance: 'pointer',
+    	beforeStop: function (event, ui) { 
+    		var draggedItem = ui.item;
+    		draggedItem.removeClass("agile-card");
+    		draggedItem.addClass("agile-list");
+    		draggedItem.attr("sprint-id",$(this).data('id'));
+    		console.log(draggedItem);
+    		},
+	    receive : function(event, ui) {
+    		var dragged = ui.item;
+    		console.log("------------");
+			console.log(dragged);
+			console.log(ui);
+			var taskID = dragged.attr("id");
 			var sprintID = $(this).data('id');
 			checkIfActiveAndSend(taskID,sprintID);
-		},
-	});
-	
+			reloadEvents();
+			dragged.remove();
+    	}
+    });
+    
+
+	function reloadEvents(){
+		
 	$('.agile-card').contextPopup({
 		title: assign_txt,
 		items : 
@@ -260,6 +332,7 @@ $(document).ready(function($) {
 				action : function(event) {
 					var taskID = event.currentTarget.id;
 					var sprintID = "${sprint.id}";
+					console.log(event.currentTarget);
 					checkIfActiveAndSend(taskID,sprintID);
 					}
 		},
@@ -299,19 +372,22 @@ $(document).ready(function($) {
 					var sprintID = event.currentTarget.getAttribute('sprint-id');
 					var url = '<c:url value="/scrum/isActive"/>';
 					var message = '<s:message code="agile.sprint.remove.confirm"/>';
+					var task = event.currentTarget
+					console.log(task)
 					$.get(url ,{id:sprintID},function(active){
 						if(active){
 							bootbox.confirm(message, function(result) {
 								if(result){
-									removeFromSprint(taskID,sprintID)
+									removeFromSprint(taskID,sprintID,task)
 								}
 							});	
 						}else{
-							removeFromSprint(taskID,sprintID)
+							removeFromSprint(taskID,sprintID,task)
 						}
 					});
 				}
 		}]});
+	}
 	
 	function checkIfActiveAndSend(taskID,sprintID){
 		var url = '<c:url value="/scrum/isActive"/>';
@@ -320,14 +396,16 @@ $(document).ready(function($) {
 				var message = '<s:message code="agile.sprint.add.confirm"/>';
 				bootbox.confirm(message, function(result) {
 					if(result){
-						addToSprint(taskID,sprintID)
+						//addToSprint(taskID,sprintID)
+						console.log("Added to sprint" + sprintID);
 					}
 					else{
 						location.reload();
 					}
 	 			}); 					
 			}else{
-				addToSprint(taskID,sprintID)
+				//addToSprint(taskID,sprintID)
+				console.log("Added to sprint" + sprintID);
 			}
 		});
 	}
@@ -335,10 +413,12 @@ $(document).ready(function($) {
 		$("#sprintID_" + taskID).val(sprintID);
 		$("#sprint_assign_" + taskID).submit();
 	}
-	function removeFromSprint(taskID,sprintID){
-		$.post('<c:url value="/task/sprintRemove"/>',{taskID:taskID,sprintID:sprintID},function(){
-			location.reload();
-		});
+	function removeFromSprint(taskID,sprintID,task){
+		$(task).detach().prependTo("#sortable");
+// 		$.post('<c:url value="/task/sprintRemove"/>',{taskID:taskID,sprintID:sprintID},function(){
+// 			location.reload();
+// 		});
+		console.log("remove");
 	}
 	//points
 	$('.point-edit').click(function(){

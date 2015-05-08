@@ -179,7 +179,7 @@ public class SprintControllerTest {
 						any(Locale.class))).thenReturn("TEST");
 		Assert.assertEquals("/scrum/board",
 				sprintCtrl.showBoard(TEST, modelMock, requestMock, raMock));
-		verify(modelMock, times(3)).addAttribute(anyString(), anyObject());
+		verify(modelMock, times(4)).addAttribute(anyString(), anyObject());
 	}
 
 	@Test

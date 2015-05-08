@@ -91,7 +91,7 @@
 				$( ".agile-card" ).each(function() {
 						var ids =  $(this).data("id");
 				  		var tags = $(this).data("tags").split(",");
-				  		if (!($.inArray(tag.toLowerCase(),tags)>=0)){
+				  		if (!($.inArray(tag,tags)>=0)){
 				  			$(this).hide();
 				  		}
 // 				  		if (!(tags.toLowerCase().indexOf(tag) >= 0)){

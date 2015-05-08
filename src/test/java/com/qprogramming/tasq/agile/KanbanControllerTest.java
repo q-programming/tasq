@@ -156,7 +156,7 @@ public class KanbanControllerTest {
 						any(Locale.class))).thenReturn("TEST");
 		Assert.assertEquals("/kanban/board",
 				kanbanCtrl.showBoard(TEST, modelMock, requestMock, raMock));
-		verify(modelMock, times(2)).addAttribute(anyString(), anyObject());
+		verify(modelMock, times(3)).addAttribute(anyString(), anyObject());
 	}
 
 	@Test
