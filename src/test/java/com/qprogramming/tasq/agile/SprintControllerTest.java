@@ -85,7 +85,7 @@ public class SprintControllerTest {
 	private ReleaseRepository releaseRepoMock;
 	@Mock
 	private WorkLogService wrkLogSrvMock;
-	
+
 	@Autowired
 	PeriodHelper periodHelper;
 
@@ -109,7 +109,7 @@ public class SprintControllerTest {
 
 	@Before
 	public void setUp() {
-		//ReflectionTestUtils.setField(PeriodHelper.class, "hours", 8);
+		// ReflectionTestUtils.setField(PeriodHelper.class, "hours", 8);
 		testAccount = new Account(EMAIL, "", Roles.ROLE_USER);
 		project = new Project();
 		project.setName(TEST_PROJ);
@@ -117,9 +117,10 @@ public class SprintControllerTest {
 		project.setProjectId(TEST);
 		Set<Account> participants = new HashSet<Account>(createList());
 		project.setParticipants(participants);
-		AgileService sprintSrv = new AgileService(sprintRepoMock,releaseRepoMock);
-		sprintCtrl = new SprintController(projSrvMock, taskSrvMock,
-				sprintSrv, wrkLogSrvMock, msgMock);
+		AgileService sprintSrv = new AgileService(sprintRepoMock,
+				releaseRepoMock);
+		sprintCtrl = new SprintController(projSrvMock, taskSrvMock, sprintSrv,
+				wrkLogSrvMock, msgMock);
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
@@ -237,7 +238,7 @@ public class SprintControllerTest {
 		Task task = createTask(TEST, 1, project);
 		when(taskSrvMock.findById(TEST)).thenReturn(task);
 		try {
-			sprintCtrl.assignSprint(TEST, TEST, 1L, requestMock, raMock);
+			sprintCtrl.assignSprint(TEST, 1L, requestMock, raMock);
 		} catch (TasqAuthException e) {
 			catched = true;
 		}
@@ -261,27 +262,20 @@ public class SprintControllerTest {
 
 		resultTask.addSprint(sprint);
 		when(taskSrvMock.findById(TEST)).thenReturn(task);
-		sprintCtrl.assignSprint(TEST, TEST, 1L, requestMock, raMock);
-
-		verify(raMock, times(1))
-				.addFlashAttribute(
-						anyString(),
-						new Message(anyString(), Message.Type.SUCCESS,
-								new Object[] {}));
+		ResultData result = sprintCtrl.assignSprint(TEST, 1L, requestMock,
+				raMock);
+		Assert.assertEquals(ResultData.OK, result.code);
 		verify(taskSrvMock, times(1)).save(resultTask);
 		// Add to active sprint
 		sprint.setActive(true);
-		sprintCtrl.assignSprint(TEST, TEST, 1L, requestMock, raMock);
+		sprintCtrl.assignSprint(TEST, 1L, requestMock, raMock);
 		verify(wrkLogSrvMock, times(1)).addActivityLog(task, "",
 				LogType.TASKSPRINTADD);
 		// Task not esstimated when adding to active
+		task.setEstimated(true);
 		task.setStory_points(0);
-		sprintCtrl.assignSprint(TEST, TEST, 1L, requestMock, raMock);
-		verify(raMock, times(3))
-				.addFlashAttribute(
-						anyString(),
-						new Message(anyString(), Message.Type.WARNING,
-								new Object[] {}));
+		result = sprintCtrl.assignSprint(TEST, 1L, requestMock, raMock);
+		Assert.assertEquals(ResultData.WARNING, result.code);
 	}
 
 	@Test
@@ -352,12 +346,9 @@ public class SprintControllerTest {
 		task.addSprint(sprint);
 		when(taskSrvMock.findById(TEST)).thenReturn(task);
 		when(projSrvMock.canAdminister(project)).thenReturn(true);
-		sprintCtrl.removeFromSprint(TEST, 1L, modelMock, requestMock, raMock);
-		verify(raMock, times(1))
-				.addFlashAttribute(
-						anyString(),
-						new Message(anyString(), Message.Type.SUCCESS,
-								new Object[] {}));
+		ResultData result = sprintCtrl.removeFromSprint(TEST, 1L, modelMock,
+				requestMock, raMock);
+		Assert.assertEquals(ResultData.OK, result.code);
 		verify(taskSrvMock, times(1)).save(resultTask);
 		// remove from active sprint
 		sprint.setActive(true);
@@ -379,7 +370,7 @@ public class SprintControllerTest {
 		when(sprintRepoMock.findByProjectId(1L)).thenReturn(list);
 		when(projSrvMock.canAdminister(any(Project.class))).thenReturn(true);
 		ResultData result = sprintCtrl.startSprint(2L, 1L, "06-01-2015",
-				"12-01-2015", "12:25","23:15");
+				"12-01-2015", "12:25", "23:15");
 		Assert.assertEquals(ResultData.WARNING, result.code);
 
 	}
@@ -412,18 +403,18 @@ public class SprintControllerTest {
 		when(taskSrvMock.findAllBySprint(sprint2)).thenReturn(taskList);
 		testAccount.setRole(Roles.ROLE_USER);
 		ResultData result = sprintCtrl.startSprint(2L, 1L, "06-02-2015",
-				"12-02-2015", "12:25","23:15");
+				"12-02-2015", "12:25", "23:15");
 		Assert.assertEquals(ResultData.ERROR, result.code);
 		testAccount.setRole(Roles.ROLE_ADMIN);
 		result = sprintCtrl.startSprint(2L, 1L, "06-02-2015", "12-02-2015",
-				"12:25","23:15");
+				"12:25", "23:15");
 		Assert.assertEquals(ResultData.OK, result.code);
 		verify(sprintRepoMock, times(1)).save(any(Sprint.class));
 		verify(wrkLogSrvMock, times(1)).addWorkLogNoTask(null, project,
 				LogType.SPRINT_START);
 		taskList.get(1).setStory_points(0);
 		result = sprintCtrl.startSprint(2L, 1L, "06-02-2015", "12-02-2015",
-				"12:25","23:15");
+				"12:25", "23:15");
 		Assert.assertEquals(ResultData.WARNING, result.code);
 	}
 
@@ -535,9 +526,9 @@ public class SprintControllerTest {
 		sprint.setEnd_date(new LocalDate().plusDays(5).toDate());
 		sprint.setTotalEstimate(new Period(10, 0, 0, 0));
 		Task task = createTask(TEST, 1, project);
-		task.setEstimate(new Period(10,0,0,0));
+		task.setEstimate(new Period(10, 0, 0, 0));
 		WorkLog wrk = new WorkLog();
-		wrk.setActivity(new Period(1,0,0,0));
+		wrk.setActivity(new Period(1, 0, 0, 0));
 		wrk.setTask(task);
 		wrk.setTime(new LocalDate().minusDays(2).toDate());
 		wrk.setTimeLogged(wrk.getRawTime());
@@ -554,7 +545,7 @@ public class SprintControllerTest {
 		SprintData result = sprintCtrl.showBurndownChart(TEST, 1L);
 		Assert.assertNull(result.getMessage());
 	}
-	
+
 	@Test
 	public void showBurdownChartTest() {
 		Sprint sprint = createSingleSprint();
@@ -562,10 +553,10 @@ public class SprintControllerTest {
 		sprint.setEnd_date(new LocalDate().plusDays(5).toDate());
 		sprint.setTotalStoryPoints(4);
 		Task task = createTask(TEST, 1, project);
-		task.setEstimate(new Period(10,0,0,0));
+		task.setEstimate(new Period(10, 0, 0, 0));
 		task.setState(TaskState.CLOSED);
 		WorkLog wrk = new WorkLog();
-		wrk.setActivity(new Period(1,0,0,0));
+		wrk.setActivity(new Period(1, 0, 0, 0));
 		wrk.setTask(task);
 		wrk.setTime(new LocalDate().minusDays(2).toDate());
 		wrk.setTimeLogged(wrk.getRawTime());
@@ -597,8 +588,9 @@ public class SprintControllerTest {
 		SprintData result = sprintCtrl.showBurndownChart(TEST, 1L);
 		Assert.assertNull(result.getMessage());
 	}
+
 	@Test
-	public void equalsSprintTest(){
+	public void equalsSprintTest() {
 		Sprint sprint = createSingleSprint();
 		Sprint sprint2 = createSingleSprint();
 		DisplaySprint ds = new DisplaySprint(sprint);
@@ -609,9 +601,8 @@ public class SprintControllerTest {
 		Assert.assertEquals(sprint, sprint2);
 		ds.setSprintNo(2L);
 		Assert.assertEquals(1, ds.compareTo(ds2));
-		
+
 	}
-	
 
 	private Sprint createSingleSprint() {
 		Sprint sprint = new Sprint();
