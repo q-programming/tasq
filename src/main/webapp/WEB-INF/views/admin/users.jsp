@@ -176,6 +176,11 @@ function fetchManagedUsers(page,term){
 		var email_txt = '<s:message code="user.send.mail"/>';
 		for ( var j = 0; j < data.content.length; j++) {
 			var content = data.content[j];
+			if(content.online){
+				online = '<i class="fa fa-user a-tooltip" style="color:mediumseagreen" title="<s:message code="main.online"/>"></i>';
+			}else{
+				online = '<i class="fa fa-user a-tooltip" style="color:lightgray" title="<s:message code="main.offline"/>"></i>';
+			}
 			var username = content.name + " " + content.surname;
 			var user = userURL + content.id; 
 			var avatar = '<img data-src="holder.js/30x30" style="height: 30px; float: left; padding-right: 10px;" src="' + avatarURL + +data.content[j].id +'.png"/>';
@@ -186,6 +191,7 @@ function fetchManagedUsers(page,term){
 				action='<a href="mailto:'+content.email+'" title="'+email_txt+' ('+content.email+')"><i class="fa fa-envelope" style="color: black;"></span></a>';
 			}
 			var row = '<tr class="listeduser"><td>'
+						+ online
 						+ '<a href="' + user + '" class="btn">'
 						+ avatar + username + '</a></td>'
 						+ '<td>'+printRoleSelect(content.id,content.role) + '</td>'
@@ -197,6 +203,7 @@ function fetchManagedUsers(page,term){
 		if(data.totalPages > 1){
 			printManageNavigation(page,data);
 		}
+		$('.a-tooltip').tooltip();
 	});
 }
 function printRoleSelect(id,role){

@@ -12,6 +12,8 @@ public class DisplayAccount {
 	private String username;
 	private Long id;
 	private Roles role;
+	private boolean online;
+	private String language;
 
 	public DisplayAccount(Account account) {
 		BeanUtils.copyProperties(account, this);
@@ -63,6 +65,22 @@ public class DisplayAccount {
 
 	public void setRole(Roles role) {
 		this.role = role;
+	}
+
+	public boolean isOnline() {
+		return online;
+	}
+
+	public void setOnline(boolean online) {
+		this.online = online;
+	}
+
+	public String getLanguage() {
+		return language;
+	}
+
+	public void setLanguage(String language) {
+		this.language = language;
 	}
 
 	@Override

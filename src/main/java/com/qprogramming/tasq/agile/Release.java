@@ -31,9 +31,12 @@ public class Release implements java.io.Serializable {
 
 	@Column
 	private String release;
-	
+
 	@Column
-	private DateTime date;
+	private DateTime startDate;
+
+	@Column
+	private DateTime endDate;
 	
 	@Column
 	private String comment;
@@ -42,17 +45,20 @@ public class Release implements java.io.Serializable {
 	@JoinColumn(name = "project_release")
 	private Project project;
 	
+	@Column
+	private boolean active = false;
+
 	public Release() {
 		// TODO Auto-generated constructor stub
 	}
+
 	public Release(Project project, String release, String comment) {
 		this.project = project;
 		this.release = release;
-		this.date = new DateTime();
+		this.endDate = new DateTime();
 		this.comment = comment;
+		this.active = false;
 	}
-
-	
 
 	public Long getId() {
 		return id;
@@ -86,12 +92,39 @@ public class Release implements java.io.Serializable {
 		this.comment = comment;
 	}
 
-	public DateTime getDate() {
-		return date;
+	public DateTime getStartDate() {
+		if(startDate == null){
+			startDate = new DateTime(project.getRawStartDate());
+		}
+		return startDate;
 	}
 
-	public void setDate(DateTime date) {
-		this.date = date;
+	public void setStartDate(DateTime startDate) {
+		this.startDate = startDate;
+	}
+
+	public DateTime getEndDate() {
+		if (endDate==null){
+			endDate = new DateTime();
+		}
+		return endDate;
+	}
+
+	public void setEndDate(DateTime endDate) {
+		this.endDate = endDate;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	@Override
+	public String toString() {
+		return project.getProjectId() + " " + release;
 	}
 
 	@Override

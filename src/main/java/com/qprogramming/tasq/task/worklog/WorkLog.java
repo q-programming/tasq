@@ -86,6 +86,9 @@ public class WorkLog implements Serializable {
 		this.time = time;
 	}
 
+	/**
+	 * When worklog occured
+	 */
 	public Date getRawTime() {
 		return time;
 	}

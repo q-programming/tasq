@@ -87,9 +87,16 @@ function fetchUsers(page,term){
 		var email_txt = '<s:message code="user.send.mail"/>';
 		for ( var j = 0; j < data.content.length; j++) {
 			var content = data.content[j];
+			var online;
+			if(content.online){
+				online = '<i class="fa fa-user a-tooltip" style="color:mediumseagreen" title="<s:message code="main.online"/>"></i>';
+			}else{
+				online = '<i class="fa fa-user a-tooltip" style="color:lightgray" title="<s:message code="main.offline"/>"></i>';
+			}
 			var user = userURL + content.id; 
 			var avatar = '<img data-src="holder.js/30x30" style="height: 30px; float: left; padding-right: 10px;" src="' + avatarURL + +data.content[j].id +'.png"/>';
 			var row = '<tr class="listeduser"><td>'
+						+ online
 						+ '<a href="' + user + '" class="btn">'
 						+ avatar
 						+ content.name + " " + content.surname +'</a></td>'
@@ -102,6 +109,7 @@ function fetchUsers(page,term){
 		if(data.totalPages > 1){
 			printNavigation(page,data);
 		}
+		$('.a-tooltip').tooltip();
 	});
 }
 

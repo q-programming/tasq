@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.agile.Release;
 import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.projects.Project;
 
@@ -82,6 +83,14 @@ public class TaskService {
 				sprint.getId());
 	}
 
+	public List<Task> findAllByRelease(Release release) {
+		return taskRepo.findByProjectAndRelease(release.getProject(), release);
+	}
+
+	public List<Task> findAllByRelease(Project project, Release release) {
+		return taskRepo.findByProjectAndRelease(project, release);
+	}
+
 	public List<Task> findSubtasks(String taskID) {
 		return taskRepo.findByParent(taskID);
 	}
@@ -105,7 +114,7 @@ public class TaskService {
 		return dirPath;
 	}
 
-	private String getTaskDir(Task task) {
+	public String getTaskDir(Task task) {
 		return tasqRootDir + File.separator + task.getProject().getProjectId()
 				+ File.separator + task.getId();
 	}
@@ -122,10 +131,23 @@ public class TaskService {
 		return taskRepo.findByProjectId(project);
 	}
 
-	public List<DisplayTask> convertToDisplay(List<Task> list) {
+	/**
+	 * converts to DisplayTask
+	 * 
+	 * @param list
+	 * @param tags
+	 *            if tags should be included (!requires transaction )
+	 * @return
+	 */
+	public List<DisplayTask> convertToDisplay(List<Task> list, boolean tags) {
 		List<DisplayTask> resultList = new LinkedList<DisplayTask>();
 		for (Task task : list) {
-			resultList.add(new DisplayTask(task));
+			DisplayTask displayTask = new DisplayTask(task);
+			if (tags) {
+				Hibernate.initialize(task.getTags());
+				displayTask.setTagsFromTask(task.getTags());
+			}
+			resultList.add(displayTask);
 		}
 		return resultList;
 	}

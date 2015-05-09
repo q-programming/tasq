@@ -39,7 +39,7 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.agile.Sprint;
-import com.qprogramming.tasq.agile.SprintService;
+import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.events.EventsService;
 import com.qprogramming.tasq.projects.Project;
@@ -77,7 +77,7 @@ public class TaskControllerTest {
 	@Mock
 	private TaskRepository taskRepoMock;
 	@Mock
-	private SprintService sprintSrvMock;
+	private AgileService sprintSrvMock;
 	@Mock
 	private WorkLogService wrkLogSrv;
 	@Mock
@@ -92,6 +92,8 @@ public class TaskControllerTest {
 	private TagsRepository tagsRepoMock;
 	@Mock
 	private WatchedTaskService watchSrvMock;
+	@Mock
+	private EventsService eventSrvMock;
 	@Mock
 	private MockSecurityContext securityMock;
 	@Mock
@@ -123,7 +125,7 @@ public class TaskControllerTest {
 		taskSrv = new TaskService(taskRepoMock);
 		taskCtr = new TaskController(taskSrv, projSrvMock, accountServiceMock,
 				wrkLogSrv, msgMock, sprintSrvMock, taskLinkSrvMock,
-				commRepoMock, tagsRepoMock, watchSrvMock);
+				commRepoMock, tagsRepoMock, watchSrvMock,eventSrvMock);
 	}
 
 	@Test

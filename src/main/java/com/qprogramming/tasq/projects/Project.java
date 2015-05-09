@@ -25,6 +25,7 @@ import javax.persistence.SequenceGenerator;
 import org.hibernate.annotations.IndexColumn;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskPriority;
 import com.qprogramming.tasq.task.TaskType;
@@ -112,8 +113,10 @@ public class Project implements Serializable {
 	}
 
 	public String getStartDate() {
-		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
-		return sdf.format(startDate);
+		return Utils.convertDateTimeToString(startDate);
+	}
+	public Date getRawStartDate(){
+		return startDate;
 	}
 
 	public void setId(Long id) {

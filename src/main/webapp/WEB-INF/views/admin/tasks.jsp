@@ -18,4 +18,12 @@
 				class="fa fa-gear fa-stack-1x"></i>
 		</span></a> Reload all logged work on all tasks within application
 	</div>
+	<hr>
+	<div>
+		<a class="btn btn-default"
+			href="<c:url value="task/updateFinish"></c:url>"> <span
+			class="fa-stack"> <i class="fa fa-repeat fa-stack-2x"></i> <i
+				class="fa fa-check fa-stack-1x"></i>
+		</span></a> Check all tasks and set correct finish date 
+	</div>
 </div>

@@ -55,7 +55,7 @@
 		<c:forEach var="entry" items="${sprint_result}">
 			<c:set var="sprint" value="${entry.key}" />
 			<c:set var="count" value="0" />
-			<div class="table_sprint" data-id="${sprint.id}">
+			<div class="sprint_div">
 				<%---Buttons --%>
 				<%-- Only print button for sprint at top (active or not_active) --%>
 				<c:if test="${can_edit}">
@@ -101,7 +101,7 @@
 						${sprint.start_date} - ${sprint.end_date}
 					</p>
 				</c:if>
-				<div id="sprint_${sprint.sprintNo}">
+				<div id="sprint_${sprint.id}" class="table_sprint" data-id="${sprint.id}">
 					<%--Sprint task --%>
 					<c:forEach items="${entry.value}" var="task">
 						<c:set var="count" value="${count + task.story_points}" />
@@ -123,12 +123,12 @@
 							<div style="display: table-cell">
 								<c:if test="${task.story_points ne 0 && task.estimated}">
 								<span
-									class="badge theme">
+									class="badge theme points-value" data-points="${task.story_points}">
 									${task.story_points} </span>
 								</c:if>
 								<c:if test="${task.story_points eq 0 && task.estimated}">
 								<span
-									class="badge theme">
+									class="badge theme points-value" data-points=0>
 									? </span>
 								</c:if>
 							</div>
@@ -137,7 +137,7 @@
 				</div>
 				<div style="text-align: right;">
 					<s:message code="agile.storypoints.total" />
-					<span class="badge theme" style="margin: 0px 5px;">${count}</span>
+					<span id="sprint_points_${sprint.id}" class="badge theme" style="margin: 0px 5px;">${count}</span>
 				</div>
 			</div>
 			<hr>
@@ -160,7 +160,7 @@
 						<a href="<c:url value="/task?id=${task.id}"/>"
 							style="color: inherit;">[${task.id}] ${task.name}</a>
 						<form id="sprint_assign_${task.id}"
- 							action="<c:url value="/${project.projectId}/scrum/sprintAssign"/>"
+ 							action=""
  							method="post">
  							<input type="hidden" name="taskID" value="${task.id}"> <input
  								type="hidden" id="sprintID_${task.id}" name="sprintID">
@@ -175,7 +175,7 @@
 							<c:set var="points">${task.story_points}</c:set>
 						</c:if>
 						<span class="points badge theme">
-							<span class="point-value">${points}</span>
+							<span class="point-value" data-points="${points}">${points}</span>
 							<input class="point-input" data-id="${task.id}">
 							<span class="point-approve" style="display:none;cursor: pointer;"><i class="fa fa-check" style="vertical-align:text-top"></i></span>
 							<span class="point-cancel" style="display:none;cursor: pointer;"><i class="fa fa-times" style="vertical-align:text-top"></i></span>
@@ -200,6 +200,7 @@ $(document).ready(function($) {
 		locale : lang
 	});
 	<c:if test="${can_edit}">
+	reloadEvents();
 	$("#create_sprint").click(function() {
 		$("#create_form").submit();
 	});
@@ -243,13 +244,17 @@ $(document).ready(function($) {
 		activeClass : "state_default",
 		hoverClass : "state_hover",
 		drop : function(event, ui) {
-			//event on drop
+			var target = $(this);
+			var dragged = ui.draggable;
 			var taskID = ui.draggable.attr("id");
 			var sprintID = $(this).data('id');
-			checkIfActiveAndSend(taskID,sprintID);
-		},
+			checkIfActiveAndSend(taskID,sprintID,dragged);
+		}
 	});
-	
+
+	function reloadEvents(){
+	$('.agile-card').unbind('contextmenu');	
+	$('.agile-list').unbind('contextmenu');
 	$('.agile-card').contextPopup({
 		title: assign_txt,
 		items : 
@@ -260,7 +265,8 @@ $(document).ready(function($) {
 				action : function(event) {
 					var taskID = event.currentTarget.id;
 					var sprintID = "${sprint.id}";
-					checkIfActiveAndSend(taskID,sprintID);
+					var task = event.currentTarget
+					checkIfActiveAndSend(taskID,sprintID,task);
 					}
 		},
 		 </c:forEach>
@@ -299,45 +305,78 @@ $(document).ready(function($) {
 					var sprintID = event.currentTarget.getAttribute('sprint-id');
 					var url = '<c:url value="/scrum/isActive"/>';
 					var message = '<s:message code="agile.sprint.remove.confirm"/>';
+					var task = event.currentTarget
+					console.log(task)
 					$.get(url ,{id:sprintID},function(active){
 						if(active){
 							bootbox.confirm(message, function(result) {
 								if(result){
-									removeFromSprint(taskID,sprintID)
+									removeFromSprint(taskID,sprintID,task)
 								}
 							});	
 						}else{
-							removeFromSprint(taskID,sprintID)
+							removeFromSprint(taskID,sprintID,task)
 						}
 					});
 				}
 		}]});
+	}
 	
-	function checkIfActiveAndSend(taskID,sprintID){
+	function checkIfActiveAndSend(taskID,sprintID,task){
+		showWait(true);
 		var url = '<c:url value="/scrum/isActive"/>';
 		$.get(url ,{id:sprintID},function(active){
 			if(active){
 				var message = '<s:message code="agile.sprint.add.confirm"/>';
 				bootbox.confirm(message, function(result) {
 					if(result){
-						addToSprint(taskID,sprintID)
+						addToSprint(taskID,sprintID,task)
+						console.log("Added to sprint" + sprintID);
 					}
 					else{
 						location.reload();
 					}
 	 			}); 					
 			}else{
-				addToSprint(taskID,sprintID)
+				addToSprint(taskID,sprintID,task);
 			}
 		});
 	}
-	function addToSprint(taskID,sprintID){
-		$("#sprintID_" + taskID).val(sprintID);
-		$("#sprint_assign_" + taskID).submit();
+	
+	//EVENTS
+	function addToSprint(taskID,sprintID,task){
+		var url = '<c:url value="/task/sprintAssign"/>';
+		$("#save_order").hide();
+		$.post(url,{taskID:taskID,sprintID:sprintID},function(result){
+			if(result.code == 'OK'){
+				$(task).removeClass("agile-card");
+				$(task).addClass("agile-list");
+				$(task).attr("sprint-id",sprintID);
+				$(task).detach().prependTo("#sprint_" + sprintID);
+				reloadEvents();
+				showSuccess(result.message);
+			}else{
+				showWarning(result.message);
+			}
+			showWait(false);
+		});
 	}
-	function removeFromSprint(taskID,sprintID){
-		$.post('<c:url value="/task/sprintRemove"/>',{taskID:taskID,sprintID:sprintID},function(){
-			location.reload();
+	function removeFromSprint(taskID,sprintID,task){
+		showWait(true);
+		var url = '<c:url value="/task/sprintRemove"/>';
+		$("#save_order").hide();
+		$.post(url,{taskID:taskID,sprintID:sprintID},function(result){
+			if(result.code == 'OK'){
+				$(task).addClass("agile-card");
+				$(task).removeClass("agile-list");
+				$(task).attr("sprint-id","");
+				$(task).detach().prependTo("#sortable");
+				reloadEvents();
+				showSuccess(result.message);
+			}else{
+				showWarning(result.message);
+			}
+			showWait(false);
 		});
 	}
 	//points

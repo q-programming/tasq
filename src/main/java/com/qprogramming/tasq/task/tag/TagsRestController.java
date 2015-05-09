@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.qprogramming.tasq.support.ResultData;
+import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
 
@@ -60,6 +61,9 @@ public class TagsRestController {
 	@Transactional
 	@RequestMapping(value = "/addTaskTag", method = RequestMethod.GET)
 	public String addTag(@RequestParam String name, @RequestParam String taskID) {
+		if(Utils.containsHTMLTags(name)){
+			return ResultData.ERROR;
+		}
 		Task task = taskSrv.findById(taskID);
 		if (task == null) {
 			return ResultData.ERROR;

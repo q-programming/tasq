@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.agile.Release;
 import com.qprogramming.tasq.projects.Project;
 
 @Repository
@@ -42,5 +43,7 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
 	List<Task> findByProjectAndParentIsNullAndReleaseIsNull(Project project);
 
 	List<Task> findByTagsName(String name);
+
+	List<Task> findByProjectAndRelease(Project project, Release release);
 
 }

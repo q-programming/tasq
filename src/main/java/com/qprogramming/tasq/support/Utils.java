@@ -1,5 +1,6 @@
 package com.qprogramming.tasq.support;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -13,6 +14,8 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 
 import org.hibernate.Hibernate;
+import org.joda.time.DateTimeConstants;
+import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,12 +26,21 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.task.Task;
 
 public class Utils {
+	private static final String DATE_FORMAT = "dd-MM-yyyy";
+	private static final String DATE_FORMAT_TIME = "dd-MM-yyyy HH:mm";
+	public static final int MILLIS_PER_SECOND = DateTimeConstants.MILLIS_PER_SECOND;
+	public static final int SECONDS_PER_HOUR = DateTimeConstants.SECONDS_PER_HOUR;
 	private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
 	private static final String HTML_TAG_PATTERN = "<([A-Za-z][A-Za-z0-9]*)\\b[^>]*>(.*?)</\\1>";
 	private static final long NUM_100NS_INTERVALS_SINCE_UUID_EPOCH = 0x01b21dd213814000L;
+	private static final String TD_TR = "</td></tr>";
+	private static final String TD_TD = "</td><td>";
+	private static final String TR_TD = "<tr><td>";
 	private static String baseURL;
 	private static HttpServletRequest request;
 	
+	public static final String TABLE = "<table class=\"worklog_table\">";
+	public static final String TABLE_END = "</table>";
 	
 
 	@Value("${default.locale}")
@@ -117,7 +129,7 @@ public class Utils {
 	public static Date convertStringToDate(String date) {
 		Date result = null;
 		try {
-			result = new SimpleDateFormat("dd-M-yyyy").parse(date);
+			result = new SimpleDateFormat(DATE_FORMAT).parse(date);
 		} catch (ParseException e) {
 			LOG.error(e.getMessage());
 		}
@@ -132,7 +144,7 @@ public class Utils {
 	public static Date convertStringToDateAndTime(String date) {
 		Date result = null;
 		try {
-			result = new SimpleDateFormat("dd-M-yyyy HH:mm").parse(date);
+			result = new SimpleDateFormat(DATE_FORMAT_TIME).parse(date);
 		} catch (ParseException e) {
 			LOG.error(e.getMessage());
 		}
@@ -145,16 +157,74 @@ public class Utils {
 	 */
 	public static String convertDateTimeToString(Date date) {
 		String result = null;
-		result = new SimpleDateFormat("dd-M-yyyy HH:mm").format(date);
+		result = new SimpleDateFormat(DATE_FORMAT_TIME).format(date);
 		return result;
 	}
 	
 	
 	public static String convertDateToString(Date date) {
 		String result = null;
-		result = new SimpleDateFormat("dd-M-yyyy").format(date);
+		result = new SimpleDateFormat(DATE_FORMAT).format(date);
 		return result;
 	}
+	
+	/**
+	 * Helper method to get float value from Period ( hours )
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public static Float getFloatValue(Period value) {
+		if (value == null) {
+			value = new Period();
+		}
+		Float result = Float.valueOf((float) (PeriodHelper.toStandardDuration(
+				value).getMillis() / MILLIS_PER_SECOND)
+				/ SECONDS_PER_HOUR);
+		return result;
+	}
+
+	/**
+	 * Round to certain number of decimals
+	 * 
+	 * @param d
+	 * @param decimalPlace
+	 * @return
+	 */
+	public static float round(float d, int decimalPlace) {
+		BigDecimal bd = new BigDecimal(Float.toString(d));
+		bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
+		return bd.floatValue();
+	}
+
+	/**
+	 * Helper method to get Period value (hours ) from float value
+	 * 
+	 * @param timelogged
+	 * @return
+	 */
+	public static Period getPeriodValue(Float timelogged) {
+		Period value = new Period(0, 0, (int) (timelogged * Utils.SECONDS_PER_HOUR),
+				0);
+		return value;
+	}
+	
+	public static  StringBuilder changedFromTo(String what, String from, String to) {
+		StringBuilder message = new StringBuilder();
+		if (what != null) {
+			message.append("<tr><td colspan=2><b>");
+			message.append(what);
+			message.append(" :</b>");
+			message.append(TD_TR);
+		}
+		message.append(TR_TD);
+		message.append(from);
+		message.append(TD_TD);
+		message.append(to);
+		message.append(TD_TR);
+		return message;
+	}
+
 
 
 }

@@ -83,7 +83,7 @@ public class KanbanControllerTest {
 	@Mock
 	private SprintRepository sprintRepoMock;
 	@Mock
-	private ReleaseRepository releaseRepoMock;
+	private AgileService agileSrvMock;
 	@Mock
 	private WorkLogService wrkLogSrvMock;
 
@@ -119,7 +119,7 @@ public class KanbanControllerTest {
 		Set<Account> participants = new HashSet<Account>(createList());
 		project.setParticipants(participants);
 		kanbanCtrl = new KanbanController(taskSrvMock, projSrvMock,
-				wrkLogSrvMock, msgMock, releaseRepoMock);
+				wrkLogSrvMock, msgMock, agileSrvMock);
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
@@ -156,7 +156,7 @@ public class KanbanControllerTest {
 						any(Locale.class))).thenReturn("TEST");
 		Assert.assertEquals("/kanban/board",
 				kanbanCtrl.showBoard(TEST, modelMock, requestMock, raMock));
-		verify(modelMock, times(2)).addAttribute(anyString(), anyObject());
+		verify(modelMock, times(3)).addAttribute(anyString(), anyObject());
 	}
 
 	@Test
@@ -175,12 +175,27 @@ public class KanbanControllerTest {
 	}
 
 	@Test
+	public void newReleaseNotUniqueTest() {
+		project.addParticipant(testAccount);
+		when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
+		when(projSrvMock.canAdminister(project)).thenReturn(true);
+		when(agileSrvMock.findByProjectIdAndRelease(1L, RELEASE)).thenReturn(
+				new Release(project, RELEASE, null));
+		kanbanCtrl.newRelease(TEST, RELEASE, null, requestMock, raMock);
+		verify(raMock, times(1))
+				.addFlashAttribute(
+						anyString(),
+						new Message(anyString(), Message.Type.WARNING,
+								new Object[] {}));
+	}
+
+	@Test
 	public void newReleaseTest() {
 		project.addParticipant(testAccount);
 		when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
 		when(projSrvMock.canAdminister(project)).thenReturn(true);
 		Release release = new Release(project, RELEASE, null);
-		when(releaseRepoMock.save(release)).thenReturn(release);
+		when(agileSrvMock.save(release)).thenReturn(release);
 		List<Task> taskList = createTaskList(project);
 		taskList.get(0).setState(TaskState.CLOSED);
 		taskList.get(1).setState(TaskState.CLOSED);
@@ -195,16 +210,100 @@ public class KanbanControllerTest {
 	}
 
 	@Test
+	public void showProjectReleasesTest() {
+		project.addParticipant(testAccount);
+		when(projSrvMock.findById(1L)).thenReturn(project);
+		Release release = new Release(project, RELEASE, null);
+		List<Release> list = new LinkedList<Release>();
+		list.add(release);
+		when(
+				agileSrvMock.findReleaseByProjectIdOrderByDateDesc(project
+						.getId())).thenReturn(list);
+		List<Release> result = kanbanCtrl.showProjectReleases(project.getId(),
+				responseMock);
+		Assert.assertFalse(result.isEmpty());
+	}
+
+	@Test
 	public void getReportTest() {
 		project.addParticipant(testAccount);
 		when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
 		Release release = new Release(project, RELEASE, null);
 		List<Release> releaseList = new LinkedList<Release>();
 		releaseList.add(release);
-		when(releaseRepoMock.findByProjectId(project.getId())).thenReturn(
-				releaseList);
+		when(
+				agileSrvMock.findReleaseByProjectIdOrderByDateDesc(project
+						.getId())).thenReturn(releaseList);
 		kanbanCtrl.showReport(TEST, null, modelMock, requestMock, raMock);
 		verify(modelMock, times(2)).addAttribute(anyString(), anyObject());
+	}
+
+	@Test
+	public void showChartTest() {
+		project.setStartDate(new LocalDate().minusDays(4).toDate());
+		Release release = new Release(project, RELEASE, null);
+		Task task = createTask(TEST, 1, project);
+		task.setRelease(release);
+		WorkLog wl0 = new WorkLog();
+		wl0.setTask(task);
+		wl0.setAccount(testAccount);
+		wl0.setTime(new LocalDate().minusDays(3).toDate());
+		wl0.setTimeLogged(wl0.getRawTime());
+		wl0.setType(LogType.CREATE);
+		WorkLog wl1 = new WorkLog();
+		wl1.setActivity(new Period(1, 0, 0, 0));
+		wl1.setTask(task);
+		wl1.setTime(new LocalDate().minusDays(2).toDate());
+		wl1.setTimeLogged(wl1.getRawTime());
+		wl1.setAccount(testAccount);
+		WorkLog wl2 = new WorkLog();
+		wl2.setTask(task);
+		wl2.setAccount(testAccount);
+		wl2.setTime(new LocalDate().minusDays(1).toDate());
+		wl2.setTimeLogged(wl2.getRawTime());
+		wl2.setType(LogType.CLOSED);
+		task.setState(TaskState.CLOSED);
+		task.setFinishDate(new LocalDate().minusDays(1).toDate());
+		Task task2 = createTask(TEST, 2, project);
+		task2.setRelease(release);
+		WorkLog wl3 = new WorkLog();
+		wl3.setTask(task2);
+		wl3.setAccount(testAccount);
+		wl3.setTime(new LocalDate().minusDays(1).toDate());
+		wl3.setTimeLogged(wl3.getRawTime());
+		wl3.setType(LogType.REOPEN);
+		List<WorkLog> workLogs = new LinkedList<WorkLog>();
+		workLogs.add(wl0);
+		workLogs.add(wl1);
+		workLogs.add(wl2);
+		workLogs.add(wl3);
+		List<Task> taskList = new LinkedList<Task>();
+		taskList.add(task);
+		taskList.add(task2);
+		when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
+		when(agileSrvMock.findByProjectIdAndRelease(1L, RELEASE)).thenReturn(
+				release);
+		when(wrkLogSrvMock.getAllReleaseEvents(release)).thenReturn(workLogs);
+		when(taskSrvMock.findAllByRelease(release)).thenReturn(taskList);
+		when(taskSrvMock.findAllByRelease(null)).thenReturn(taskList);
+		KanbanData data = kanbanCtrl.showBurndownChart(TEST, RELEASE);
+		Assert.assertNotNull(data.getClosed());
+		Assert.assertNotNull(data.getOpen());
+		Assert.assertNotNull(data.getTimeBurned());
+		data = kanbanCtrl.showBurndownChart(TEST, null);
+		Assert.assertNotNull(data.getClosed());
+		Assert.assertNotNull(data.getOpen());
+		Assert.assertNotNull(data.getTimeBurned());
+	}
+	
+	@Test
+	public void checkReleases(){
+		Release release = new Release(project, RELEASE, null);
+		release.setId(1L);
+		Release release2 = new Release(project, RELEASE, null);
+		release2.setId(2L);
+		Assert.assertNotEquals(release, release2);
+		Assert.assertNotEquals(release.hashCode(), release2.hashCode());
 	}
 
 	private List<Account> createList() {

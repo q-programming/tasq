@@ -18,22 +18,23 @@
 					class="fa fa-line-chart"></i> <s:message code="agile.reports" /></a></li>
 		</ul>
 	</div>
-	<div style="display: table-header-group;">
-		<div style="display: table-cell; padding-bottom: 30px;">
-			<span class="btn btn-default pull-left" id="new release" data-toggle="modal" data-target="#releaseModal">
-				<i class="fa fa-clipboard"></i>&nbsp;New release</span>
-		</div>
-		<div style="display: table-cell"></div>
-		<div style="display: table-cell"></div>
-		<div style="display: table-cell"></div>
-		<div style="display: table-cell"></div>
-		<div style="display: table-cell"></div>
-		<div style="display: table-cell">
-			<span class="btn btn-default pull-right" id="save_order"
-				style="display: none"><i class="fa fa-floppy-o"></i>&nbsp;Save
-				order</span>
-		</div>
-	</div>
+	<table style="width:100%">
+		<tr>
+			<td>
+				<span class="btn btn-default pull-left" id="new release" data-toggle="modal" data-target="#releaseModal">
+				<i class="fa fa-clipboard"></i>&nbsp;<s:message code="agile.newRelease"/></span>
+			</td>
+			<td colspan="2" style="vertical-align: initial;">
+				<i class="fa fa-tags"></i>&nbsp;<s:message code="task.tags"/>: <c:forEach items="${tags}" var="tag">
+					<span class="tag label label-info theme tag_filter a-tooltip" title="<s:message code="task.tags.click.filter"/>" data-name="${tag}">${tag}</span>
+				</c:forEach>
+			</td>
+			<td>
+				<span class="btn btn-default pull-right" id="save_order"
+					style="display: none"><i class="fa fa-floppy-o"></i>&nbsp;Save order
+				</span>
+			</td>
+		</tr>
 	<jsp:include page="../agile/board.jsp" />
 </div>
 <jsp:include page="../modals/logWork.jsp" />

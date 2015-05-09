@@ -55,6 +55,16 @@ public class EventsService {
 				.getCurrentAccount().getId());
 		return events != null ? events : new LinkedList<Event>();
 	}
+	
+	/**
+	 * Returns list of all events for task
+	 * 
+	 * @return
+	 */
+	public List<Event> getTaskEvents(String task) {
+		List<Event> events = eventsRepo.findByTask(task);
+		return events != null ? events : new LinkedList<Event>();
+	}
 
 	/**
 	 * Returns list of all events for currently logged account with Pageable
@@ -83,10 +93,10 @@ public class EventsService {
 	 * 
 	 * @param taskID
 	 * @param type
-	 * @param string
+	 * @param wlMessage
 	 * @param when
 	 */
-	public void addWatchEvent(WorkLog log, String string, Date when) {
+	public void addWatchEvent(WorkLog log, String wlMessage, Date when) {
 		String taskID = log.getTask().getId();
 		WatchedTask task = watchSrv.getByTask(taskID);
 		if (task != null) {
@@ -100,7 +110,7 @@ public class EventsService {
 					event.setLogtype((LogType) log.getType());
 					event.setDate(when);
 					event.setType(getEventType((LogType) log.getType()));
-					event.setMessage(string);
+					event.setMessage(wlMessage);
 					eventsRepo.save(event);
 					if (account.getEmail_notifications()) {
 						Locale locale = new Locale(account.getLanguage());
@@ -116,7 +126,7 @@ public class EventsService {
 								.getMessage("event.newEvent.body",
 										new Object[] { account.toString(),
 												Utils.getCurrentAccount(),
-												eventStr, string,
+												eventStr, wlMessage,
 												log.getTask().getId() }, locale);
 						LOG.info(account.getEmail());
 						LOG.info(subject);
@@ -130,7 +140,7 @@ public class EventsService {
 		}
 	}
 
-	public void addSystemEvent(Account account, LogType type, String string) {
+	public void addSystemEvent(Account account, LogType type, String eventMsg) {
 		Event event = new Event();
 		event.setAccount(account);
 		event.setWho(Utils.getCurrentAccount().toString());
@@ -138,7 +148,7 @@ public class EventsService {
 		event.setLogtype(type);
 		event.setDate(new Date());
 		event.setType(getEventType(type));
-		event.setMessage(string);
+		event.setMessage(eventMsg);
 		eventsRepo.save(event);
 		if (account.getEmail_notifications()) {
 			Locale locale = new Locale(account.getLanguage());
@@ -149,7 +159,7 @@ public class EventsService {
 			String message = msg.getMessage(
 					"event.newSystemEvent.body",
 					new Object[] { account.toString(),
-							Utils.getCurrentAccount(), eventStr, string, },
+							Utils.getCurrentAccount(), eventStr, eventMsg, },
 					locale);
 			LOG.info(account.getEmail());
 			LOG.info(subject);

@@ -7,8 +7,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -30,6 +28,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
@@ -48,9 +47,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.agile.Sprint;
-import com.qprogramming.tasq.agile.SprintService;
 import com.qprogramming.tasq.error.TasqAuthException;
+import com.qprogramming.tasq.error.TasqException;
+import com.qprogramming.tasq.events.Event;
+import com.qprogramming.tasq.events.EventsService;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.PeriodHelper;
@@ -61,12 +63,14 @@ import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
 import com.qprogramming.tasq.task.comments.Comment;
 import com.qprogramming.tasq.task.comments.CommentsRepository;
+import com.qprogramming.tasq.task.link.TaskLink;
 import com.qprogramming.tasq.task.link.TaskLinkService;
 import com.qprogramming.tasq.task.link.TaskLinkType;
 import com.qprogramming.tasq.task.tag.Tag;
 import com.qprogramming.tasq.task.tag.TagsRepository;
 import com.qprogramming.tasq.task.watched.WatchedTaskService;
 import com.qprogramming.tasq.task.worklog.LogType;
+import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
 /**
@@ -76,11 +80,6 @@ import com.qprogramming.tasq.task.worklog.WorkLogService;
 @Controller
 public class TaskController {
 
-	private static final String TABLE = "<table class=\"worklog_table\">";
-	private static final String TABLE_END = "</table>";
-	private static final String TD_TR = "</td></tr>";
-	private static final String TD_TD = "</td><td>";
-	private static final String TR_TD = "<tr><td>";
 	private static final String OPEN = "OPEN";
 	private static final String ALL = "ALL";
 	private static final Logger LOG = LoggerFactory
@@ -96,18 +95,19 @@ public class TaskController {
 	private AccountService accSrv;
 	private WorkLogService wlSrv;
 	private MessageSource msg;
-	private SprintService sprintSrv;
+	private AgileService sprintSrv;
 	private TaskLinkService linkService;
 	private WatchedTaskService watchSrv;
 	private CommentsRepository commRepo;
 	private TagsRepository tagsRepo;
+	private EventsService eventSrv;
 
 	@Autowired
 	public TaskController(TaskService taskSrv, ProjectService projectSrv,
 			AccountService accSrv, WorkLogService wlSrv, MessageSource msg,
-			SprintService sprintSrv, TaskLinkService linkService,
+			AgileService sprintSrv, TaskLinkService linkService,
 			CommentsRepository commRepo, TagsRepository tagsRepo,
-			WatchedTaskService watchSrv) {
+			WatchedTaskService watchSrv, EventsService eventSrv) {
 		this.taskSrv = taskSrv;
 		this.projectSrv = projectSrv;
 		this.accSrv = accSrv;
@@ -118,6 +118,7 @@ public class TaskController {
 		this.commRepo = commRepo;
 		this.tagsRepo = tagsRepo;
 		this.watchSrv = watchSrv;
+		this.eventSrv = eventSrv;
 	}
 
 	@RequestMapping(value = "task/create", method = RequestMethod.GET)
@@ -251,15 +252,15 @@ public class TaskController {
 					Utils.getCurrentLocale());
 			return "redirect:" + request.getHeader("Referer");
 		}
-		StringBuilder message = new StringBuilder(TABLE);
+		StringBuilder message = new StringBuilder(Utils.TABLE);
 		if (!task.getName().equalsIgnoreCase(taskForm.getName())) {
-			message.append(changedFromTo("Name", task.getName(),
+			message.append(Utils.changedFromTo("Name", task.getName(),
 					taskForm.getName()));
 			task.setName(taskForm.getName());
 		}
 		if (!task.getDescription().equalsIgnoreCase(taskForm.getDescription())) {
-			message.append(changedFromTo("Description", task.getDescription(),
-					taskForm.getDescription()));
+			message.append(Utils.changedFromTo("Description",
+					task.getDescription(), taskForm.getDescription()));
 			task.setDescription(taskForm.getDescription());
 		}
 		if ((taskForm.getEstimate() != null)
@@ -275,16 +276,16 @@ public class TaskController {
 						PeriodHelper.outFormat(difference), difference,
 						LogType.ESTIMATE);
 			} else {
-				message.append(changedFromTo("Estimate", task.getEstimate(),
-						taskForm.getEstimate()));
+				message.append(Utils.changedFromTo("Estimate",
+						task.getEstimate(), taskForm.getEstimate()));
 			}
 			task.setEstimate(estimate);
 			task.setRemaining(estimate);
 		}
 		boolean notestimated = !taskForm.getEstimated();
 		if (!task.isEstimated().equals(notestimated)) {
-			message.append(changedFromTo("Estimated ", task.getEstimated()
-					.toString(), Boolean.toString(notestimated)));
+			message.append(Utils.changedFromTo("Estimated ", task
+					.getEstimated().toString(), Boolean.toString(notestimated)));
 			task.setEstimated(notestimated);
 			if (!task.isEstimated()) {
 				task.setStory_points(0);
@@ -302,26 +303,25 @@ public class TaskController {
 			}
 		}
 		if (!task.getDue_date().equalsIgnoreCase(taskForm.getDue_date())) {
-			message.append(changedFromTo("Due date", task.getDue_date(),
+			message.append(Utils.changedFromTo("Due date", task.getDue_date(),
 					taskForm.getDue_date()));
 			task.setDue_date(Utils.convertStringToDate(taskForm.getDue_date()));
 		}
 		TaskType type = TaskType.toType(taskForm.getType());
 		if (!task.getType().equals(type)) {
-			message.append(changedFromTo("Type", task.getType().toString(),
-					type.toString()));
+			message.append(Utils.changedFromTo("Type", task.getType()
+					.toString(), type.toString()));
 			task.setType(type);
 		}
 		LOG.debug(message.toString());
 		taskSrv.save(task);
-		message.append(TABLE_END);
+		message.append(Utils.TABLE_END);
 		if (message.length() > 37) {
 			wlSrv.addActivityLog(task, message.toString(), LogType.EDITED);
 		}
 		return "redirect:/task?id=" + taskID;
 	}
 
-	@Transactional
 	@RequestMapping(value = "subtask", method = RequestMethod.GET)
 	public String showSubTaskDetails(@RequestParam(value = "id") String id,
 			Model model, RedirectAttributes ra) {
@@ -594,7 +594,7 @@ public class TaskController {
 			@RequestParam(value = "state") TaskState state,
 			@RequestParam(value = "zero_checkbox", required = false) Boolean remainingZero,
 			@RequestParam(value = "closesubtasks", required = false) Boolean closeSubtasks,
-			@RequestParam(value = "message", required = false) String message) {
+			@RequestParam(value = "message", required = false) String commentMessage) {
 		// check if not admin or user
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
@@ -627,10 +627,9 @@ public class TaskController {
 			}
 
 			TaskState oldState = (TaskState) task.getState();
-
 			task.setState(state);
-			if (message != null && message != "") {
-				if (Utils.containsHTMLTags(message)) {
+			if (commentMessage != null && commentMessage != "") {
+				if (Utils.containsHTMLTags(commentMessage)) {
 					return new ResultData(ResultData.ERROR, msg.getMessage(
 							"comment.htmlTag", null, Utils.getCurrentLocale()));
 				} else {
@@ -638,20 +637,20 @@ public class TaskController {
 					comment.setTask(task);
 					comment.setAuthor(Utils.getCurrentAccount());
 					comment.setDate(new Date());
-					comment.setMessage(message);
+					comment.setMessage(commentMessage);
 					commRepo.save(comment);
 					Hibernate.initialize(task.getComments());
 					task.addComment(comment);
-					wlSrv.addActivityLog(task, message, LogType.COMMENT);
+					wlSrv.addActivityLog(task, commentMessage, LogType.COMMENT);
 				}
 			}
 			// Zero remaining time
 			if (remainingZero != null && remainingZero) {
 				task.setRemaining(PeriodHelper.inFormat("0m"));
 			}
+			String message = worklogStateChange(state, oldState, task);
 			taskSrv.save(task);
-			return new ResultData(ResultData.OK, worklogStateChange(state,
-					oldState, task));
+			return new ResultData(ResultData.OK, message);
 		}
 		return new ResultData(ResultData.ERROR, msg.getMessage("error.unknown",
 				null, Utils.getCurrentLocale()));
@@ -681,6 +680,7 @@ public class TaskController {
 				null, Utils.getCurrentLocale()));
 	}
 
+	@Transactional
 	@RequestMapping(value = "/task/time", method = RequestMethod.GET)
 	public String handleTimer(@RequestParam(value = "id") String taskID,
 			@RequestParam(value = "action") String action,
@@ -709,10 +709,7 @@ public class TaskController {
 				}
 				account.startTimerOnTask(task);
 				accSrv.update(account);
-				if (task.getState().equals(TaskState.TO_DO)) {
-					task.setState(TaskState.ONGOING);
-					taskSrv.save(task);
-				}
+				wlSrv.checkStateAndSave(task);
 			} else if (action.equals(STOP)) {
 				Period logWork = stopTimer(task);
 				MessageHelper.addSuccessAttribute(ra, msg.getMessage(
@@ -749,6 +746,7 @@ public class TaskController {
 			}
 			if (("").equals(email) && task.getAssignee() != null) {
 				task.setAssignee(null);
+				task.setLastUpdate(new Date());
 				taskSrv.save(task);
 				wlSrv.addActivityLog(task, "Unassigned", LogType.ASSIGNED);
 
@@ -764,6 +762,7 @@ public class TaskController {
 						return "redirect:" + request.getHeader("Referer");
 					}
 					task.setAssignee(assignee);
+					task.setLastUpdate(new Date());
 					taskSrv.save(task);
 					watchSrv.addToWatchers(task, assignee);
 					wlSrv.addActivityLog(task, assignee.toString(),
@@ -929,6 +928,14 @@ public class TaskController {
 		return "redirect:" + request.getHeader("Referer");
 	}
 
+	@RequestMapping(value = "/task/{id}/{subid}/file", method = RequestMethod.GET)
+	public @ResponseBody String downloadSubtaskFile(@PathVariable String id,
+			@PathVariable String subid, @RequestParam("get") String filename,
+			HttpServletRequest request, HttpServletResponse response,
+			RedirectAttributes ra) throws IOException {
+		return downloadFile(id + "/" + subid, filename, request, response, ra);
+	}
+
 	@RequestMapping(value = "/task/{id}/imgfile", method = RequestMethod.GET)
 	public @ResponseBody String showImageFile(@PathVariable String id,
 			@RequestParam("get") String filename, HttpServletRequest request,
@@ -955,8 +962,16 @@ public class TaskController {
 		return "redirect:" + request.getHeader("Referer");
 	}
 
-	@RequestMapping(value = "/task/{id}/remove", method = RequestMethod.GET)
-	public String removeFile(@PathVariable String id,
+	@RequestMapping(value = "/task/{id}/{subid}/imgfile", method = RequestMethod.GET)
+	public @ResponseBody String showSubTaskImageFile(@PathVariable String id,
+			@PathVariable String subid, @RequestParam("get") String filename,
+			HttpServletRequest request, HttpServletResponse response,
+			RedirectAttributes ra) throws IOException {
+		return showImageFile(id + "/" + subid, filename, request, response, ra);
+	}
+
+	@RequestMapping(value = "/task/removeFile", method = RequestMethod.GET)
+	public String removeFile(@RequestParam  String id,
 			@RequestParam("file") String filename, HttpServletRequest request,
 			RedirectAttributes ra) {
 		Task task = taskSrv.findById(id);
@@ -978,6 +993,124 @@ public class TaskController {
 			}
 		}
 		return "redirect:" + request.getHeader("Referer");
+	}
+
+	/**
+	 * Convert subtask into new regular task
+	 * 
+	 * @param id
+	 * @param type
+	 * @param request
+	 * @param ra
+	 * @return
+	 * @throws IOException
+	 */
+	@Transactional
+	@RequestMapping(value = "/task/conver2task", method = RequestMethod.POST)
+	public String convert2task(@RequestParam("taskid") String id,
+			@RequestParam("type") TaskType type, HttpServletRequest request,
+			RedirectAttributes ra) throws IOException {
+		Task subtask = taskSrv.findById(id);
+		Project project = projectSrv.findById(subtask.getProject().getId());
+		if (!projectSrv.canEdit(project)
+				&& (!Roles.isReporter() || !subtask.getOwner().equals(
+						Utils.getCurrentAccount()))) {
+			MessageHelper.addErrorAttribute(
+					ra,
+					msg.getMessage("error.accesRights", null,
+							Utils.getCurrentLocale()));
+			return "redirect:" + request.getHeader("Referer");
+		} else {
+			Task parent = taskSrv.findById(subtask.getParent());
+			parent.removeSubTask();
+			taskSrv.save(parent);
+
+			long taskCount = project.getLastTaskNo();
+			taskCount++;
+			String taskID = project.getProjectId() + "-" + taskCount;
+			Task task = cloneTask(subtask, taskID);
+			task.setParent(null);
+			task.setType(type);
+			task.setTaskOrder((long) taskCount);
+			task.setEstimated(false);
+			taskSrv.save(task);
+			List<Event> events = eventSrv.getTaskEvents(id);
+			for (Event event : events) {
+				event.setTask(taskID);
+				eventSrv.save(event);
+			}
+			List<WorkLog> worklogs = wlSrv.getTaskEvents(id);
+			for (WorkLog workLog : worklogs) {
+				workLog.setTask(task);
+			}
+			Set<Comment> comments = commRepo.findByTaskIdOrderByDateDesc(id);
+			for (Comment comment : comments) {
+				comment.setTask(task);
+			}
+			List<TaskLink> links = linkService.findAllTaskLinks(subtask);
+			for (TaskLink taskLink : links) {
+				if (taskLink.getTaskA().equals(id)) {
+					taskLink.setTaskA(taskID);
+				}
+				if (taskLink.getTaskB().equals(id)) {
+					taskLink.setTaskB(taskID);
+				}
+				linkService.save(taskLink);
+			}
+			// files
+			// TODO After TASQ-165 fixed
+			// File oldDir = new File(taskSrv.getTaskDir(subtask));
+			// if (oldDir.exists()){
+			// File newDir = new File(taskSrv.getTaskDir(task));
+			// newDir.mkdirs();
+			// newDir.setWritable(true, false);
+			// newDir.setReadable(true, false);
+			// FileUtils.copyDirectory(oldDir, newDir);
+			// }
+			project.setLastTaskNo(taskCount);
+			project.getTasks().add(task);
+			projectSrv.save(project);
+			// Add log
+			StringBuilder message = new StringBuilder(Utils.TABLE);
+			message.append(Utils.changedFromTo("ID", id, taskID));
+			message.append(Utils.changedFromTo("Type", subtask.getType()
+					.toString(), type.toString()));
+			message.append(Utils.TABLE_END);
+			wlSrv.addActivityLog(task, message.toString(), LogType.SUBTASK2TASK);
+			// cleanup
+			ResultData result = removeTaskRelations(subtask);
+			if (result.code.equals(ResultData.ERROR)) {
+				throw new TasqException(result.message);
+			}
+			taskSrv.save(purgeTask(subtask));
+			MessageHelper.addSuccessAttribute(
+					ra,
+					msg.getMessage("task.subtasks.2task.success", new Object[] {
+							id, taskID }, Utils.getCurrentLocale()));
+			TaskLink link = new TaskLink(parent.getId(), taskID,
+					TaskLinkType.RELATES_TO);
+			linkService.save(link);
+			return "redirect:/task?id=" + taskID;
+		}
+	}
+
+	private Task cloneTask(Task subtask, String taskID) {
+		Task task = new Task();
+		BeanUtils.copyProperties(subtask, task);
+		task.setId(taskID);
+		task.setEstimate(subtask.getRawEstimate());
+		task.setLoggedWork(subtask.getRawLoggedWork());
+		task.setRemaining(subtask.getRawRemaining());
+		task.setDue_date(subtask.getRawDue_date());
+		task.setCreate_date(subtask.getRawCreate_date());
+		task.setLastUpdate(new Date());
+		Hibernate.initialize(subtask.getTags());
+		Set<Tag> tags = subtask.getTags();
+		task.setTags(tags);
+		Hibernate.initialize(subtask.getSprints());
+		Set<Sprint> sprints = subtask.getSprints();
+		task.setSprints(sprints);
+		return task;
 	}
 
 	/**
@@ -1010,6 +1143,45 @@ public class TaskController {
 		}
 	}
 
+	/**
+	 * Helper temp method to eliminate depreciated task without finishDate
+	 * 
+	 * @param ra
+	 * @param request
+	 * @param model
+	 * @return
+	 */
+	@Deprecated
+	@Transactional
+	@RequestMapping(value = "task/updateFinish", method = RequestMethod.GET)
+	public String updateFinishDate(RedirectAttributes ra,
+			HttpServletRequest request, Model model) {
+		if (Roles.isAdmin()) {
+			List<Task> list = taskSrv.findAll();
+			StringBuilder console = new StringBuilder(
+					"Updating logged work on all tasks within application");
+			console.append(BR);
+			for (Task task : list) {
+				List<WorkLog> worklogs = wlSrv.getTaskEvents(task.getId());
+				WorkLog closing = new WorkLog();
+				for (WorkLog workLog : worklogs) {
+					if (workLog.getType().equals(LogType.CLOSED)) {
+						closing = workLog;
+					}
+				}
+				task.setFinishDate(closing.getRawTime());
+				console.append(task.toString());
+				console.append(": finish date set to :");
+				console.append(closing.getRawTime());
+				console.append(BR);
+			}
+			model.addAttribute("console", console.toString());
+			return "other/console";
+		} else {
+			throw new TasqAuthException();
+		}
+	}
+
 	private ResultData taskIsClosed(RedirectAttributes ra,
 			HttpServletRequest request, Task task) {
 		String localized = msg.getMessage(
@@ -1017,22 +1189,6 @@ public class TaskController {
 				Utils.getCurrentLocale());
 		return new ResultData(ResultData.ERROR, msg.getMessage("task.closed",
 				new Object[] { localized }, Utils.getCurrentLocale()));
-	}
-
-	private StringBuilder changedFromTo(String what, String from, String to) {
-		StringBuilder message = new StringBuilder();
-		if (what != null) {
-			message.append("<tr><td colspan=2><b>");
-			message.append(what);
-			message.append(" :</b>");
-			message.append(TD_TR);
-		}
-		message.append(TR_TD);
-		message.append(from);
-		message.append(TD_TD);
-		message.append(to);
-		message.append(TD_TR);
-		return message;
 	}
 
 	/**
@@ -1133,19 +1289,17 @@ public class TaskController {
 	private String worklogStateChange(TaskState state, TaskState oldState,
 			Task task) {
 		if (state.equals(TaskState.CLOSED)) {
+			task.setFinishDate(new Date());
 			wlSrv.addActivityLog(task, "", LogType.CLOSED);
 			return msg.getMessage("task.state.changed.closed",
 					new Object[] { task.getId() }, Utils.getCurrentLocale());
 		} else if (oldState.equals(TaskState.CLOSED)) {
 			wlSrv.addActivityLog(task, "", LogType.REOPEN);
+			task.setFinishDate(null);
 			return msg.getMessage("task.state.changed.reopened",
 					new Object[] { task.getId() }, Utils.getCurrentLocale());
 		} else {
-			StringBuilder message = new StringBuilder(TABLE);
-			message.append(changedFromTo(null, oldState.getDescription(),
-					state.getDescription()));
-			message.append(TABLE_END);
-			wlSrv.addActivityLog(task, message.toString(), LogType.STATUS);
+			wlSrv.changeState(oldState, state, task);
 			String localised = msg.getMessage(state.getCode(), null,
 					Utils.getCurrentLocale());
 			return msg.getMessage("task.state.changed",
@@ -1162,10 +1316,11 @@ public class TaskController {
 							* (task.getStory_points() - storyPoints)),
 					LogType.ESTIMATE);
 		} else {
-			StringBuilder message = new StringBuilder(TABLE);
-			message.append(changedFromTo("Story points", task.getStory_points()
-					.toString(), Integer.toString(storyPoints)));
-			message.append(TABLE_END);
+			StringBuilder message = new StringBuilder(Utils.TABLE);
+			message.append(Utils.changedFromTo("Story points", task
+					.getStory_points().toString(), Integer
+					.toString(storyPoints)));
+			message.append(Utils.TABLE_END);
 			wlSrv.addActivityLog(task, message.toString(), LogType.EDITED);
 		}
 	}
@@ -1270,6 +1425,7 @@ public class TaskController {
 		}
 		Account assignee = Utils.getCurrentAccount();
 		task.setAssignee(assignee);
+		task.setLastUpdate(new Date());
 		taskSrv.save(task);
 		wlSrv.addActivityLog(task, assignee.toString(), LogType.ASSIGNED);
 		watchSrv.startWatching(task);
