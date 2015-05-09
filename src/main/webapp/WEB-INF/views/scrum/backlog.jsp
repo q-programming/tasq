@@ -323,6 +323,7 @@ $(document).ready(function($) {
 	}
 	
 	function checkIfActiveAndSend(taskID,sprintID,task){
+		showWait(true);
 		var url = '<c:url value="/scrum/isActive"/>';
 		$.get(url ,{id:sprintID},function(active){
 			if(active){
@@ -337,7 +338,7 @@ $(document).ready(function($) {
 					}
 	 			}); 					
 			}else{
-				addToSprint(taskID,sprintID,task)
+				addToSprint(taskID,sprintID,task);
 			}
 		});
 	}
@@ -357,9 +358,11 @@ $(document).ready(function($) {
 			}else{
 				showWarning(result.message);
 			}
+			showWait(false);
 		});
 	}
 	function removeFromSprint(taskID,sprintID,task){
+		showWait(true);
 		var url = '<c:url value="/task/sprintRemove"/>';
 		$("#save_order").hide();
 		$.post(url,{taskID:taskID,sprintID:sprintID},function(result){
@@ -373,6 +376,7 @@ $(document).ready(function($) {
 			}else{
 				showWarning(result.message);
 			}
+			showWait(false);
 		});
 	}
 	//points
