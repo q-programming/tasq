@@ -123,19 +123,19 @@
 							<div style="display: table-cell">
 								<c:if test="${task.story_points ne 0 && task.estimated}">
 								<span
-									class="badge theme points-value" data-points="${task.story_points}">
+									class="badge theme point-value" data-points="${task.story_points}">
 									${task.story_points} </span>
 								</c:if>
 								<c:if test="${task.story_points eq 0 && task.estimated}">
 								<span
-									class="badge theme points-value" data-points=0>
+									class="badge theme point-value" data-points=0>
 									? </span>
 								</c:if>
 							</div>
 						</div>
 					</c:forEach>
 				</div>
-				<div style="text-align: right;">
+				<div style="text-align: right;margin-top:5px">
 					<s:message code="agile.storypoints.total" />
 					<span id="sprint_points_${sprint.id}" class="badge theme" style="margin: 0px 5px;">${count}</span>
 				</div>
@@ -169,13 +169,13 @@
 					<c:if test="${task.estimated}">
 					<div class="pointsdiv" style="display: table-cell">
 						<c:if test="${task.story_points == 0 && task.estimated}">
-							<c:set var="points">?</c:set>
+							<c:set var="points_txt">?</c:set>
 						</c:if>
 						<c:if test="${task.story_points ne 0 && task.estimated}">
-							<c:set var="points">${task.story_points}</c:set>
+							<c:set var="points_txt">${task.story_points}</c:set>
 						</c:if>
 						<span class="points badge theme">
-							<span class="point-value" data-points="${points}">${points}</span>
+							<span class="point-value" data-points="${task.story_points}">${points_txt}</span>
 							<input class="point-input" data-id="${task.id}">
 							<span class="point-approve" style="display:none;cursor: pointer;"><i class="fa fa-check" style="vertical-align:text-top"></i></span>
 							<span class="point-cancel" style="display:none;cursor: pointer;"><i class="fa fa-times" style="vertical-align:text-top"></i></span>
@@ -355,6 +355,12 @@ $(document).ready(function($) {
 				$(task).detach().prependTo("#sprint_" + sprintID);
 				reloadEvents();
 				showSuccess(result.message);
+				var task_SP = parseInt($(task).find(".point-value").data("points"));
+				if(!$.isNumeric(task_SP)){
+					task_SP = 0;
+				}
+				var current_SP = parseInt($("#sprint_points_" + sprintID).html()) + task_SP;
+				$("#sprint_points_" + sprintID).html(current_SP);
 			}else{
 				showWarning(result.message);
 			}
@@ -373,6 +379,13 @@ $(document).ready(function($) {
 				$(task).detach().prependTo("#sortable");
 				reloadEvents();
 				showSuccess(result.message);
+				var task_SP = parseInt($(task).find(".point-value").data("points"));
+				if(!$.isNumeric(task_SP)){
+					task_SP = 0;
+				}
+				var current_SP = parseInt($("#sprint_points_" + sprintID).html()) - task_SP;
+				$("#sprint_points_" + sprintID).html(current_SP);
+
 			}else{
 				showWarning(result.message);
 			}
