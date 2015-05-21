@@ -212,14 +212,15 @@ public class TaskController {
 	@RequestMapping(value = "/task/edit", method = RequestMethod.GET)
 	public TaskForm startEditTask(@RequestParam("id") String id, Model model) {
 		Task task = taskSrv.findById(id);
-		if (!Roles.isReporter()
-				|| !task.getOwner().equals(Utils.getCurrentAccount())) {
+		if (Roles.isReporter()
+				|| task.getOwner().equals(Utils.getCurrentAccount())) {
+			Hibernate.initialize(task.getRawWorkLog());
+			model.addAttribute("task", task);
+			model.addAttribute("project", task.getProject());
+			return new TaskForm(task);
+		} else {
 			throw new TasqAuthException(msg);
 		}
-		Hibernate.initialize(task.getRawWorkLog());
-		model.addAttribute("task", task);
-		model.addAttribute("project", task.getProject());
-		return new TaskForm(task);
 	}
 
 	@Transactional
@@ -238,7 +239,7 @@ public class TaskController {
 		}
 		// check if can edit
 		if (!projectSrv.canEdit(task.getProject())
-				&& (!Roles.isReporter() || !task.getOwner().equals(
+				&& (!Roles.isReporter() | !task.getOwner().equals(
 						Utils.getCurrentAccount()))) {
 			MessageHelper.addErrorAttribute(
 					ra,
@@ -971,7 +972,7 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/removeFile", method = RequestMethod.GET)
-	public String removeFile(@RequestParam  String id,
+	public String removeFile(@RequestParam String id,
 			@RequestParam("file") String filename, HttpServletRequest request,
 			RedirectAttributes ra) {
 		Task task = taskSrv.findById(id);

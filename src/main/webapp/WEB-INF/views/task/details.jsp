@@ -18,7 +18,7 @@
 	<c:set var="is_admin" value="true" />
 </security:authorize>
 <security:authentication property="principal" var="user" />
-<c:set var="is_user" value="<%=Roles.isUser()%>" />
+<c:set var="is_user" value="<%=Roles.isReporter()%>" />
 <c:if test="${(myfn:contains(task.project.administrators,user) || is_admin || task.owner.id == user.id)}">
 	<c:set var="can_edit" value="true" />
 </c:if>
