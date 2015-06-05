@@ -44,14 +44,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.qprogramming.tasq.MockSecurityContext;
-import com.qprogramming.tasq.account.Account;
-import com.qprogramming.tasq.account.AccountController;
-import com.qprogramming.tasq.account.AccountService;
-import com.qprogramming.tasq.account.DisplayAccount;
-import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.web.Message;
+import com.qprogramming.tasq.test.MockSecurityContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccountControllerTest {

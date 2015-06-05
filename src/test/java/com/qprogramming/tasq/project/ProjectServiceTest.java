@@ -1,10 +1,8 @@
 package com.qprogramming.tasq.project;
 
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -15,13 +13,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import com.qprogramming.tasq.MockSecurityContext;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountRepository;
 import com.qprogramming.tasq.account.AccountService;
@@ -31,6 +27,7 @@ import com.qprogramming.tasq.projects.NewProjectForm;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectRepository;
 import com.qprogramming.tasq.projects.ProjectService;
+import com.qprogramming.tasq.test.MockSecurityContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectServiceTest {

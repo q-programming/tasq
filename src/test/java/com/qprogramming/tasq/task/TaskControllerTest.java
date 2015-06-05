@@ -33,7 +33,6 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.qprogramming.tasq.MockSecurityContext;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
@@ -45,15 +44,6 @@ import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.ResultData;
 import com.qprogramming.tasq.support.web.Message;
-import com.qprogramming.tasq.task.DisplayTask;
-import com.qprogramming.tasq.task.Task;
-import com.qprogramming.tasq.task.TaskController;
-import com.qprogramming.tasq.task.TaskForm;
-import com.qprogramming.tasq.task.TaskPriority;
-import com.qprogramming.tasq.task.TaskRepository;
-import com.qprogramming.tasq.task.TaskService;
-import com.qprogramming.tasq.task.TaskState;
-import com.qprogramming.tasq.task.TaskType;
 import com.qprogramming.tasq.task.comments.Comment;
 import com.qprogramming.tasq.task.comments.CommentsRepository;
 import com.qprogramming.tasq.task.link.TaskLinkService;
@@ -61,6 +51,7 @@ import com.qprogramming.tasq.task.tag.TagsRepository;
 import com.qprogramming.tasq.task.watched.WatchedTaskService;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
+import com.qprogramming.tasq.test.MockSecurityContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TaskControllerTest {

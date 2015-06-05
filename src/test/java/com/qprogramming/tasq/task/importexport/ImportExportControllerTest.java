@@ -32,7 +32,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.qprogramming.tasq.MockSecurityContext;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
@@ -45,6 +44,7 @@ import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
 import com.qprogramming.tasq.task.TaskType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
+import com.qprogramming.tasq.test.MockSecurityContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ImportExportControllerTest {
@@ -174,7 +174,8 @@ public class ImportExportControllerTest {
 			when(taskSrvMock.findById(TEST_1)).thenReturn(task1);
 			when(taskSrvMock.findById(TEST_2)).thenReturn(task2);
 			String[] idList = { TEST_1, TEST_2 };
-			importExportCtrl.exportTasks(idList, "XLS", responseMock);
+			importExportCtrl.exportTasks(idList, "XLS", responseMock,
+					requestMock);
 		} catch (IOException e) {
 			Assert.fail(e.getMessage());
 		}

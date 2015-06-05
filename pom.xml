@@ -8,7 +8,7 @@
 	<name>Task tracking app</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java-version>1.6</java-version>
+		<java-version>1.7</java-version>
 		<org.springframework-version>4.0.3.RELEASE</org.springframework-version>
 		<org.springframework.security-version>3.2.3.RELEASE</org.springframework.security-version>
 		<org.aspectj-version>1.7.4</org.aspectj-version>
@@ -305,7 +305,7 @@
 				<artifactId>maven-war-plugin</artifactId>
 				<version>2.1.1</version>
 				<configuration>
-					<warSourceExcludes>**/*.css,**/*.js</warSourceExcludes>			
+					<warSourceExcludes>**/*.css,**/*.js</warSourceExcludes>
 					<warName>${project.artifactId}</warName>
 				</configuration>
 			</plugin>
@@ -367,10 +367,10 @@
 					</execution>
 				</executions>
 				<configuration>
-<!-- 					<excludes> -->
-<!-- 						<exclude>**/*.min.js</exclude>						 -->
-<!-- 						<exclude>**/*.min.css</exclude> -->
-<!-- 					</excludes> -->
+					<!-- <excludes> -->
+					<!-- <exclude>**/*.min.js</exclude> -->
+					<!-- <exclude>**/*.min.css</exclude> -->
+					<!-- </excludes> -->
 					<sourceDirectory>resources</sourceDirectory>
 					<nosuffix>true</nosuffix>
 					<jswarn>false</jswarn>

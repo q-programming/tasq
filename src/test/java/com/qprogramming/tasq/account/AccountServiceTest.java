@@ -16,11 +16,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import com.qprogramming.tasq.MockSecurityContext;
-import com.qprogramming.tasq.account.Account;
-import com.qprogramming.tasq.account.AccountRepository;
-import com.qprogramming.tasq.account.AccountService;
-import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.test.MockSecurityContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccountServiceTest {

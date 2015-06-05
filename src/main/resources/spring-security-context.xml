@@ -20,6 +20,7 @@ http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 		<security:intercept-url pattern="/" access="permitAll" />
 		<security:intercept-url pattern="/resources/**" access="permitAll" />
 		<security:intercept-url pattern="/confirm" access="permitAll" />
+		<security:intercept-url pattern="/export_template.xsl" access="permitAll" />
 		<security:intercept-url pattern="/resetPassword" access="permitAll" />
 		<security:intercept-url pattern="/password" access="permitAll" />
 		<security:intercept-url pattern="/signin" access="permitAll" />

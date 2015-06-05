@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.PropertyException;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -198,8 +199,8 @@ public class ImportExportController {
 	@RequestMapping(value = "/task/export", method = RequestMethod.POST)
 	public void exportTasks(@RequestParam(value = "tasks") String[] idList,
 			@RequestParam(value = "type") String type,
-			HttpServletResponse response) throws FileNotFoundException,
-			IOException {
+			HttpServletResponse response, HttpServletRequest request)
+			throws FileNotFoundException, IOException {
 		// Prepare task list
 		List<Task> taskList = taskSrv.finAllById(Arrays.asList(idList));
 		Project project = taskList.get(0).getProject();
@@ -220,14 +221,18 @@ public class ImportExportController {
 			try {
 				JAXBContext jaxbContext = JAXBContext
 						.newInstance(ProjectXML.class);
-				Marshaller marshaler = jaxbContext.createMarshaller();
-				marshaler.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT,
+				Marshaller marshaller = jaxbContext.createMarshaller();
+				Utils.setHttpRequest(request);
+				String templateURL = Utils.getBaseURL()
+						+ "/export_template.xsl";
+//				marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, templateURL);
+				marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT,
 						Boolean.TRUE);
-				// OutputStream output = new BufferedOutputStream(out);
+//				// OutputStream output = new BufferedOutputStream(out);
 				response.setContentType("application/xml");
 				response.setHeader("Content-Disposition",
 						"attachment; filename=" + filename + ".xml");
-				marshaler.marshal(projectXML, out);
+				marshaller.marshal(projectXML, out);
 			} catch (JAXBException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

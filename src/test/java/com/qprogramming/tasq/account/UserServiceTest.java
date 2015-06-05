@@ -16,12 +16,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import com.qprogramming.tasq.MockSecurityContext;
-import com.qprogramming.tasq.account.Account;
-import com.qprogramming.tasq.account.AccountService;
-import com.qprogramming.tasq.account.Roles;
-import com.qprogramming.tasq.account.UserService;
 import com.qprogramming.tasq.support.Utils;
+import com.qprogramming.tasq.test.MockSecurityContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserServiceTest {
