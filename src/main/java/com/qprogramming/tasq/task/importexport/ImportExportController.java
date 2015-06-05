@@ -6,14 +6,18 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -46,6 +50,8 @@ import com.qprogramming.tasq.task.TaskForm;
 import com.qprogramming.tasq.task.TaskPriority;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskType;
+import com.qprogramming.tasq.task.importexport.xml.ProjectXML;
+import com.qprogramming.tasq.task.importexport.xml.TaskXML;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
@@ -75,17 +81,20 @@ public class ImportExportController {
 	private static final Object ROW_SKIPPED = "Row was skipped</br>";
 	private static final String UNDERSCORE = "_";
 
+	private static final Object XML_TYPE = "xml";
+	private static final Object XLS_TYPE = "xls";
+
 	@Autowired
-	public ImportExportController(ProjectService projectSrv,TaskService taskSrv,WorkLogService wlSrv,MessageSource msg) {
+	public ImportExportController(ProjectService projectSrv,
+			TaskService taskSrv, WorkLogService wlSrv, MessageSource msg) {
 		this.projectSrv = projectSrv;
 		this.taskSrv = taskSrv;
 		this.wlSrv = wlSrv;
 		this.msg = msg;
 	}
-	
+
 	@RequestMapping(value = "/task/getTemplateFile", method = RequestMethod.GET)
-	public @ResponseBody
-	String downloadTemplate(HttpServletRequest request,
+	public @ResponseBody String downloadTemplate(HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 		FileInputStream is = getExcelTemplate();
 		response.setHeader("content-Disposition", "attachment; filename="
@@ -166,7 +175,7 @@ public class ImportExportController {
 					String taskID = project.getProjectId() + "-" + taskCount;
 					task.setId(taskID);
 					task.setProject(project);
-					task.setTaskOrder((long)taskCount);
+					task.setTaskOrder((long) taskCount);
 					project.getTasks().add(task);
 					task = taskSrv.save(task);
 					projectSrv.save(project);
@@ -188,46 +197,64 @@ public class ImportExportController {
 
 	@RequestMapping(value = "/task/export", method = RequestMethod.POST)
 	public void exportTasks(@RequestParam(value = "tasks") String[] idList,
+			@RequestParam(value = "type") String type,
 			HttpServletResponse response) throws FileNotFoundException,
 			IOException {
 		// Prepare task list
-		List<Task> taskList = new LinkedList<Task>();
-		Project project = null;
-		for (int i = 0; i < idList.length; i++) {
-			Task task = taskSrv.findById(idList[i]);
-			if (project == null) {
-				project = task.getProject();
-			}
-			if (task != null) {
-				taskList.add(task);
-			}
-		}
+		List<Task> taskList = taskSrv.finAllById(Arrays.asList(idList));
+		Project project = taskList.get(0).getProject();
 		FileInputStream is = getExcelTemplate();
 		String filename = project.getProjectId() + UNDERSCORE
-				+ Utils.convertDateToString(new Date()) + UNDERSCORE
-				+ "export.xls";
-		// pack into excel
-		HSSFWorkbook workbook = new HSSFWorkbook(is);
-		HSSFSheet sheet = workbook.getSheetAt(0);
-		int rowNo = 1;
-		for (Task task : taskList) {
-			HSSFRow row = sheet.createRow(rowNo++);
-			row.createCell(NAME_CELL).setCellValue(task.getName());
-			row.createCell(DESCRIPTION_CELL)
-					.setCellValue(task.getDescription());
-			row.createCell(TYPE_CELL).setCellValue(
-					((TaskType) task.getType()).getEnum());
-			row.createCell(PRIORITY_CELL).setCellValue(
-					((TaskPriority) task.getPriority()).toString());
-			row.createCell(ESTIMATE_CELL).setCellValue(task.getEstimate());
-			row.createCell(SP_CELL).setCellValue(task.getStory_points());
-			row.createCell(DUE_DATE_CELL).setCellValue(task.getDue_date());
-		}
-		response.setContentType("application/vnd.ms-excel");
-		response.setHeader("Content-Disposition", "attachment; filename="
-				+ filename);
+				+ Utils.convertDateToString(new Date()) + UNDERSCORE + "export";
 		ServletOutputStream out = response.getOutputStream();
-		workbook.write(out);
+		if (type.equals(XML_TYPE)) {
+			// pack into xml
+			ProjectXML projectXML = new ProjectXML();
+			projectXML.setName(project.getName());
+			ArrayList<TaskXML> xmltasklist = new ArrayList<TaskXML>();
+			for (Task task : taskList) {
+				TaskXML taskXML = new TaskXML(task);
+				xmltasklist.add(taskXML);
+			}
+			projectXML.setTaskList(xmltasklist);
+			try {
+				JAXBContext jaxbContext = JAXBContext
+						.newInstance(ProjectXML.class);
+				Marshaller marshaler = jaxbContext.createMarshaller();
+				marshaler.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT,
+						Boolean.TRUE);
+				// OutputStream output = new BufferedOutputStream(out);
+				response.setContentType("application/xml");
+				response.setHeader("Content-Disposition",
+						"attachment; filename=" + filename + ".xml");
+				marshaler.marshal(projectXML, out);
+			} catch (JAXBException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else if (type.equals(XLS_TYPE)) {
+			// pack into excel
+			HSSFWorkbook workbook = new HSSFWorkbook(is);
+			HSSFSheet sheet = workbook.getSheetAt(0);
+			int rowNo = 1;
+			for (Task task : taskList) {
+				HSSFRow row = sheet.createRow(rowNo++);
+				row.createCell(NAME_CELL).setCellValue(task.getName());
+				row.createCell(DESCRIPTION_CELL).setCellValue(
+						task.getDescription());
+				row.createCell(TYPE_CELL).setCellValue(
+						((TaskType) task.getType()).getEnum());
+				row.createCell(PRIORITY_CELL).setCellValue(
+						((TaskPriority) task.getPriority()).toString());
+				row.createCell(ESTIMATE_CELL).setCellValue(task.getEstimate());
+				row.createCell(SP_CELL).setCellValue(task.getStory_points());
+				row.createCell(DUE_DATE_CELL).setCellValue(task.getDue_date());
+			}
+			response.setContentType("application/vnd.ms-excel");
+			response.setHeader("Content-Disposition", "attachment; filename="
+					+ filename + ".xls");
+			workbook.write(out);
+		}
 		out.flush();
 		out.close();
 	}

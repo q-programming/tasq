@@ -104,6 +104,7 @@
 			</c:if>
 		</c:if>
 	</div>
+	<%-- EXPORT --%>
 	<div style="display: table-cell; padding-left: 20px;">
 		<div style="display:table-row">
 			<div id="buttDiv" style="display: table-cell;">
@@ -117,9 +118,24 @@
 					<a class="btn export_startstop"><s:message code="main.cancel"/></a>
 				</div>
 				<div style="display: table-cell">
-					<a id="fileExport" class="btn btn-default">
-						<i class="fa fa-long-arrow-down"></i><i class="fa fa-file"></i>  <s:message code="task.export.selected"/>
-					</a>
+					<div class="btn-group"> 
+							<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+							<i class="fa fa-long-arrow-down"></i><i class="fa fa-file"></i>  <s:message code="task.export.selected"/>&nbsp;
+								<b class="caret"></b>
+						</a>
+						<ul class="dropdown-menu " role="menu">
+							<li>
+								<a href="#" class="fileExport" data-type="xls"><i
+									class="fa fa-file-excel-o"></i> <s:message code="task.export.type.excel"/>
+								</a>
+							</li>
+							<li>
+								<a href="#" class="fileExport" data-type="xml"><i
+									class="fa fa-file-code-o"></i> <s:message code="task.export.type.xml"/>
+								</a>
+							</li>
+						</ul>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -188,6 +204,7 @@
 		</thead>
 		<%----------------TASKS -----------------------------%>
 		<form id="exportTaskForm" method="POST"	enctype="multipart/form-data" action="<c:url value="/task/export"/>">
+		<input id="exportType" type="hidden" name="type" value="xml">
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.id eq user.active_task[0]}">
 				<tr style="background: #428bca; color: white">
@@ -302,7 +319,7 @@
 				$("#buttDiv").toggle();
 				$("#fileDiv").toggle();
 		});
-		$("#fileExport").click(function(){
+		$(".fileExport").click(function(){
 			var atLeastOnechecked = false;
 			$('.export').each(function() {
                 if(this.checked){
@@ -311,6 +328,8 @@
                 }           
             });
 		    if (atLeastOnechecked){
+		    	var type = $(this).data('type');
+		    	$("#exportType").val(type);
 				$("#exportTaskForm").submit();
 				$('#loading').modal({
 	 	            show: true,

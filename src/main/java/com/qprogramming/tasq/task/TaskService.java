@@ -120,7 +120,7 @@ public class TaskService {
 	}
 
 	public List<Task> finAllById(List<String> taskIDs) {
-		return taskRepo.findById(taskIDs);
+		return taskRepo.findByIdIn(taskIDs);
 	}
 
 	public List<Task> save(List<Task> taskList) {

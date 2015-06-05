@@ -1,19 +1,15 @@
 package com.qprogramming.tasq.task.importexport;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -43,14 +39,11 @@ import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
-import com.qprogramming.tasq.support.web.Message;
-import com.qprogramming.tasq.task.DisplayTask;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskPriority;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
 import com.qprogramming.tasq.task.TaskType;
-import com.qprogramming.tasq.task.importexport.ImportExportController;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -180,8 +173,8 @@ public class ImportExportControllerTest {
 			when(responseMock.getOutputStream()).thenReturn(outputStreamMock);
 			when(taskSrvMock.findById(TEST_1)).thenReturn(task1);
 			when(taskSrvMock.findById(TEST_2)).thenReturn(task2);
-			String[] idList = {TEST_1,TEST_2};
-			importExportCtrl.exportTasks(idList, responseMock);
+			String[] idList = { TEST_1, TEST_2 };
+			importExportCtrl.exportTasks(idList, "XLS", responseMock);
 		} catch (IOException e) {
 			Assert.fail(e.getMessage());
 		}
