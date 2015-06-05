@@ -5,6 +5,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.qprogramming.tasq.support.ResultData;
+
 @RunWith(MockitoJUnitRunner.class)
 public class PeriodHelperTest {
 

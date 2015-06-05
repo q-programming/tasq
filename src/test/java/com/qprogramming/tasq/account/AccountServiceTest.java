@@ -17,6 +17,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.qprogramming.tasq.MockSecurityContext;
+import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.account.AccountRepository;
+import com.qprogramming.tasq.account.AccountService;
+import com.qprogramming.tasq.account.Roles;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccountServiceTest {

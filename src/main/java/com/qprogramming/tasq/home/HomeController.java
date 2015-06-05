@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.events.Event;
+import com.qprogramming.tasq.events.EventsService;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.Utils;
@@ -20,8 +22,6 @@ import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
-import com.qprogramming.tasq.events.Event;
-import com.qprogramming.tasq.events.EventsService;
 
 @Controller
 public class HomeController {

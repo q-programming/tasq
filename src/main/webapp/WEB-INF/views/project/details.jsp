@@ -8,11 +8,11 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
 <script language="javascript" type="text/javascript"
-	src="<c:url value="/resources/js/jquery.jqplot.js"/>"></script>
+	src="<c:url value="/resources/js/jquery.jqplot.min.js"/>"></script>
 <script language="javascript" type="text/javascript"
-	src="<c:url value="/resources/js/jqplot.highlighter.js"/>"></script>
+	src="<c:url value="/resources/js/jqplot.highlighter.min.js"/>"></script>
 <script language="javascript" type="text/javascript"
-	src="<c:url value="/resources/js/jqplot.dateAxisRenderer.js"/>"></script>
+	src="<c:url value="/resources/js/jqplot.dateAxisRenderer.min.js"/>"></script>
 <script language="javascript" type="text/javascript"
 	src="<c:url value="/resources/js/jqplot.cursor.min.js"/>"></script>
 

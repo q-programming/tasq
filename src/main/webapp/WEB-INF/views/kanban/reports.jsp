@@ -2,19 +2,19 @@
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <script language="javascript" type="text/javascript"
-	src="<c:url value="/resources/js/jquery.jqplot.js"/>"></script>
+	src="<c:url value="/resources/js/jquery.jqplot.min.js"/>"></script>
 <script language="javascript" type="text/javascript"
-	src="<c:url value="/resources/js/jqplot.highlighter.js"/>"></script>
+	src="<c:url value="/resources/js/jqplot.highlighter.min.js"/>"></script>
 <script language="javascript" type="text/javascript"
 	src="<c:url value="/resources/js/jqplot.enhancedLegendRenderer.min.js"/>"></script>
 <script language="javascript" type="text/javascript"
-	src="<c:url value="/resources/js/jqplot.dateAxisRenderer.js"/>"></script>
+	src="<c:url value="/resources/js/jqplot.dateAxisRenderer.min.js"/>"></script>
 <script language="javascript" type="text/javascript"
 	src="<c:url value="/resources/js/jqplot.cursor.min.js"/>"></script>
 <%-- <link href="<c:url value="/resources/css/docs.min.css" />" --%>
 <!-- 	rel="stylesheet" media="screen" /> -->
 <link rel="stylesheet" type="text/css"
-	href="<c:url value="/resources/css/jquery.jqplot.css"/>" />
+	href="<c:url value="/resources/css/jquery.jqplot.min.css"/>" />
 
 <c:set var="tasks_text">
 	<s:message code="task.tasks" text="Tasks" />

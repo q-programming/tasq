@@ -3,6 +3,10 @@ package com.qprogramming.tasq.account;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.account.DisplayAccount;
+import com.qprogramming.tasq.account.Roles;
+
 public class AccountClassTest {
 	private static final String LAMB = "Lamb";
 	private static final String ZOE = "Zoe";

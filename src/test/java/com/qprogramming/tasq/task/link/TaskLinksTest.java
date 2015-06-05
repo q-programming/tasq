@@ -40,6 +40,11 @@ import com.qprogramming.tasq.task.TaskPriority;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
 import com.qprogramming.tasq.task.TaskType;
+import com.qprogramming.tasq.task.link.TaskLink;
+import com.qprogramming.tasq.task.link.TaskLinkController;
+import com.qprogramming.tasq.task.link.TaskLinkRepository;
+import com.qprogramming.tasq.task.link.TaskLinkService;
+import com.qprogramming.tasq.task.link.TaskLinkType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 
 @RunWith(MockitoJUnitRunner.class)

@@ -27,6 +27,9 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.account.UserService;
+import com.qprogramming.tasq.events.EventsService;
+import com.qprogramming.tasq.home.HomeController;
+import com.qprogramming.tasq.home.HomeControllerAdvice;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectRepository;
 import com.qprogramming.tasq.projects.ProjectService;
@@ -34,7 +37,6 @@ import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskPriority;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskType;
-import com.qprogramming.tasq.events.EventsService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HomeControllersTest {

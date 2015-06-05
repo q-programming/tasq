@@ -11,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.qprogramming.tasq.agile.Sprint;
+import com.qprogramming.tasq.support.sorters.SprintSorter;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SprintSorterTest {

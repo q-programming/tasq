@@ -50,6 +50,9 @@ import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.projects.ProjectService;
+import com.qprogramming.tasq.signup.PasswordResetForm;
+import com.qprogramming.tasq.signup.SignupController;
+import com.qprogramming.tasq.signup.SignupForm;
 import com.qprogramming.tasq.support.web.Message;
 
 @RunWith(MockitoJUnitRunner.class)

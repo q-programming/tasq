@@ -4,17 +4,17 @@
 <%@page import="com.qprogramming.tasq.task.worklog.LogType"%>
 
 <script language="javascript" type="text/javascript"
-	src="<c:url value="/resources/js/jquery.jqplot.js"/>"></script>
+	src="<c:url value="/resources/js/jquery.jqplot.min.js"/>"></script>
 <script language="javascript" type="text/javascript"
-	src="<c:url value="/resources/js/jqplot.highlighter.js"/>"></script>
+	src="<c:url value="/resources/js/jqplot.highlighter.min.js"/>"></script>
 <script language="javascript" type="text/javascript"
 	src="<c:url value="/resources/js/jqplot.enhancedLegendRenderer.min.js"/>"></script>
 <script language="javascript" type="text/javascript"
-	src="<c:url value="/resources/js/jqplot.dateAxisRenderer.js"/>"></script>
+	src="<c:url value="/resources/js/jqplot.dateAxisRenderer.min.js"/>"></script>
 <%-- <link href="<c:url value="/resources/css/docs.min.css" />" --%>
 <!-- 	rel="stylesheet" media="screen" /> -->
 <link rel="stylesheet" type="text/css"
-	href="<c:url value="/resources/css/jquery.jqplot.css"/>" />
+	href="<c:url value="/resources/css/jquery.jqplot.min.css"/>" />
 <script language="javascript" type="text/javascript"
 	src="<c:url value="/resources/js/jqplot.cursor.min.js"/>"></script>
 	

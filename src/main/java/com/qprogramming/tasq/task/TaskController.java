@@ -212,8 +212,9 @@ public class TaskController {
 	@RequestMapping(value = "/task/edit", method = RequestMethod.GET)
 	public TaskForm startEditTask(@RequestParam("id") String id, Model model) {
 		Task task = taskSrv.findById(id);
-		if (Roles.isReporter()
-				|| task.getOwner().equals(Utils.getCurrentAccount())) {
+		if (projectSrv.canEdit(task.getProject())
+				&& (Roles.isReporter() | task.getOwner().equals(
+						Utils.getCurrentAccount()))) {
 			Hibernate.initialize(task.getRawWorkLog());
 			model.addAttribute("task", task);
 			model.addAttribute("project", task.getProject());

@@ -12,6 +12,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.support.sorters.AccountSorter;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccountsSorterTest {

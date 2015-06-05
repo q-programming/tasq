@@ -28,6 +28,7 @@ import com.qprogramming.tasq.MockSecurityContext;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.support.Utils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UtilsTest {

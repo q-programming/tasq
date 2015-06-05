@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
+import com.qprogramming.tasq.events.Event;
+import com.qprogramming.tasq.events.EventsService;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.ProjectSorter;
 import com.qprogramming.tasq.task.Task;
-import com.qprogramming.tasq.events.Event;
-import com.qprogramming.tasq.events.EventsService;
 
 @Secured("ROLE_USER")
 @ControllerAdvice
