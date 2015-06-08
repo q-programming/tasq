@@ -170,7 +170,6 @@ public class ImportExportController {
 								.getDateCellValue();
 						task.setDue_date(date);
 					}
-					// Create ID
 					taskCount++;
 					task = finalizeTaskCretion(task, taskCount, project);
 					String logHeader = "[Row " + row.getRowNum() + "]";
@@ -198,10 +197,26 @@ public class ImportExportController {
 							logger.append(logRow);
 							continue;
 						}
+						TaskForm taskForm = new TaskForm();
+						taskForm.setName(taskxml.getName());
+						taskForm.setDescription(taskxml.getDescription());
+						taskForm.setType(taskxml.getType());
+						taskForm.setPriority(taskxml.getPriority());
+						taskForm.setEstimate(taskxml.getEstimate());
+						Task task = taskForm.createTask();
+						task.setDue_date(taskxml.getDue_date());
+						// optional fields
+						if (taskxml.getStory_points() != null) {
+							task.setStory_points(Integer.parseInt(taskxml
+									.getStory_points()));
+						}
+						taskCount++;
+						task = finalizeTaskCretion(task, taskCount, project);
 						String logHeader = "[Task number="
 								+ taskxml.getNumber() + "]";
 						logger.append(logHeader);
 						logger.append("Task ");
+						logger.append(task);
 						logger.append(" succesfully created");
 						logger.append(DIVIDER);
 
@@ -408,12 +423,28 @@ public class ImportExportController {
 			logger.append("Empty or wrong task priority");
 			logger.append(BR);
 		}
+		if (task.getStory_points() != null
+				&& !isNumerical(task.getStory_points())) {
+			logger.append(logHeader);
+			logger.append("Story points must be empty or a number");
+			logger.append(BR);
+		}
 		if (logger.length() > 0) {
 			logger.append(logHeader);
 			logger.append(NODE_SKIPPED);
 			logger.append(DIVIDER);
 		}
 		return logger;
+	}
+
+	private boolean isNumerical(String story_points) {
+		try {
+			Integer.parseInt(story_points);
+			return true;
+		} catch (NumberFormatException e) {
+			LOG.error(e.getLocalizedMessage());
+			return false;
+		}
 	}
 
 	/**

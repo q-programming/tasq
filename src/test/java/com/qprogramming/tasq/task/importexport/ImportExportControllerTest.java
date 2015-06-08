@@ -9,6 +9,9 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 
 import javax.servlet.ServletOutputStream;
@@ -169,11 +172,15 @@ public class ImportExportControllerTest {
 	@Test
 	public void exportTasksTest() {
 		try {
+			List<Task> list = new LinkedList<Task>();
 			task1.setEstimate(new Period());
-			when(responseMock.getOutputStream()).thenReturn(outputStreamMock);
-			when(taskSrvMock.findById(TEST_1)).thenReturn(task1);
-			when(taskSrvMock.findById(TEST_2)).thenReturn(task2);
+			list.add(task1);
+			list.add(task2);
 			String[] idList = { TEST_1, TEST_2 };
+			when(responseMock.getOutputStream()).thenReturn(outputStreamMock);
+			when(taskSrvMock.finAllById(Arrays.asList(idList)))
+					.thenReturn(list);
+			when(taskSrvMock.findById(TEST_2)).thenReturn(task2);
 			importExportCtrl.exportTasks(idList, "XLS", responseMock,
 					requestMock);
 		} catch (IOException e) {
