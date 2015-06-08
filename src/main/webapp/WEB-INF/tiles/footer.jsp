@@ -69,7 +69,8 @@
 	$(document).ajaxError(
 			function(event, jqxhr, settings, thrownError) {
 				if (thrownError.message != "Unexpected end of input"
-						|| thrownError.__proto__.name != 'SyntaxError') {
+						&& thrownError.__proto__.name != 'SyntaxError') 
+				{
 					console.log(thrownError);
 					var message = '<s:message code="error.session"/>';
 					var url = '<c:url value="/"/>';
