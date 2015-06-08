@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.PropertyException;
+import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -69,8 +69,6 @@ public class ImportExportController {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ImportExportController.class);
 	private static final String COLS = "ABCDEFGHIJKLMNOPRSTUVWXYZ";
-	private static final Object XLS = "xls";
-	private static final Object XLM = "xml";
 	private static final int NAME_CELL = 0;
 	private static final int DESCRIPTION_CELL = 1;
 	private static final int TYPE_CELL = 2;
@@ -79,11 +77,12 @@ public class ImportExportController {
 	private static final int SP_CELL = 5;
 	private static final int DUE_DATE_CELL = 6;
 	private static final String BR = "<br>";
-	private static final Object ROW_SKIPPED = "Row was skipped</br>";
+	private static final String ROW_SKIPPED = "Row was skipped";
+	private static final String NODE_SKIPPED = "Node was skipped";
 	private static final String UNDERSCORE = "_";
-
-	private static final Object XML_TYPE = "xml";
-	private static final Object XLS_TYPE = "xls";
+	private static final String XML_TYPE = "xml";
+	private static final String XLS_TYPE = "xls";
+	private static final String DIVIDER = "<br>---------------------------------------------------<br>";
 
 	@Autowired
 	public ImportExportController(ProjectService projectSrv,
@@ -126,11 +125,11 @@ public class ImportExportController {
 					.getOriginalFilename());
 			Project project = projectSrv.findByProjectId(projectName);
 			int taskCount = project.getTasks().size();
-			if (extension.equals(XLS)) {
+			StringBuilder logger = new StringBuilder();
+			if (extension.equals(XLS_TYPE)) {
 				HSSFWorkbook workbook = new HSSFWorkbook(
 						importFile.getInputStream());
 				HSSFSheet sheet = workbook.getSheetAt(0);
-				StringBuilder logger = new StringBuilder();
 				for (Iterator<Row> rowIterator = sheet.iterator(); rowIterator
 						.hasNext();) {
 					Row row = rowIterator.next();
@@ -173,27 +172,60 @@ public class ImportExportController {
 					}
 					// Create ID
 					taskCount++;
-					String taskID = project.getProjectId() + "-" + taskCount;
-					task.setId(taskID);
-					task.setProject(project);
-					task.setTaskOrder((long) taskCount);
-					project.getTasks().add(task);
-					task = taskSrv.save(task);
-					projectSrv.save(project);
-					wlSrv.addActivityLog(task, "", LogType.CREATE);
+					task = finalizeTaskCretion(task, taskCount, project);
 					String logHeader = "[Row " + row.getRowNum() + "]";
 					logger.append(logHeader);
 					logger.append("Task ");
 					logger.append(task);
 					logger.append(" succesfully created");
-					logger.append(BR);
+					logger.append(DIVIDER);
 				}
 				model.addAttribute("logger", logger.toString().trim());
-			} else if (extension.equals(XLM)) {
-				// TODO
+			} else if (extension.equals(XML_TYPE)) {
+				try {
+					JAXBContext jaxbcontext = JAXBContext
+							.newInstance(ProjectXML.class);
+					Unmarshaller unmarshaller = jaxbcontext
+							.createUnmarshaller();
+					File convFile = new File(importFile.getOriginalFilename());
+					importFile.transferTo(convFile);
+					ProjectXML projectXML = (ProjectXML) unmarshaller
+							.unmarshal(convFile);
+					// validate all tasks
+					for (TaskXML taskxml : projectXML.getTaskList()) {
+						StringBuilder logRow = verifyTaskXml(taskxml);
+						if (logRow.length() > 0) {
+							logger.append(logRow);
+							continue;
+						}
+						String logHeader = "[Task number="
+								+ taskxml.getNumber() + "]";
+						logger.append(logHeader);
+						logger.append("Task ");
+						logger.append(" succesfully created");
+						logger.append(DIVIDER);
+
+					}
+				} catch (JAXBException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				model.addAttribute("logger", logger.toString().trim());
 			}
 		}
 		return "/task/importResults";
+	}
+
+	private Task finalizeTaskCretion(Task task, int taskCount, Project project) {
+		String taskID = project.getProjectId() + "-" + taskCount;
+		task.setId(taskID);
+		task.setProject(project);
+		task.setTaskOrder((long) taskCount);
+		project.getTasks().add(task);
+		task = taskSrv.save(task);
+		projectSrv.save(project);
+		wlSrv.addActivityLog(task, "", LogType.CREATE);
+		return task;
 	}
 
 	@RequestMapping(value = "/task/export", method = RequestMethod.POST)
@@ -213,9 +245,12 @@ public class ImportExportController {
 			ProjectXML projectXML = new ProjectXML();
 			projectXML.setName(project.getName());
 			ArrayList<TaskXML> xmltasklist = new ArrayList<TaskXML>();
+			int count = 0;
 			for (Task task : taskList) {
 				TaskXML taskXML = new TaskXML(task);
+				taskXML.setNumber(count);
 				xmltasklist.add(taskXML);
+				count++;
 			}
 			projectXML.setTaskList(xmltasklist);
 			try {
@@ -225,10 +260,11 @@ public class ImportExportController {
 				Utils.setHttpRequest(request);
 				String templateURL = Utils.getBaseURL()
 						+ "/export_template.xsl";
-//				marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, templateURL);
+				// marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION,
+				// templateURL);
 				marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT,
 						Boolean.TRUE);
-//				// OutputStream output = new BufferedOutputStream(out);
+				// // OutputStream output = new BufferedOutputStream(out);
 				response.setContentType("application/xml");
 				response.setHeader("Content-Disposition",
 						"attachment; filename=" + filename + ".xml");
@@ -338,6 +374,44 @@ public class ImportExportController {
 		if (logger.length() > 0) {
 			logger.append(logHeader);
 			logger.append(ROW_SKIPPED);
+			logger.append(DIVIDER);
+		}
+		return logger;
+	}
+
+	private StringBuilder verifyTaskXml(TaskXML task) {
+		StringBuilder logger = new StringBuilder();
+		String logHeader = "[Task number=" + task.getNumber() + "]";
+		if (task.getName() == null) {
+			logger.append(logHeader);
+			logger.append("Name can't be empty");
+			logger.append(BR);
+		}
+		if (task.getDescription() == null) {
+			logger.append(logHeader);
+			logger.append("Description can't be empty");
+			logger.append(BR);
+		}
+		if (task.getDescription() == null) {
+			logger.append(logHeader);
+			logger.append("Description can't be empty");
+			logger.append(BR);
+		}
+		if (task.getType() == null || !isTaskTypeValid(task.getType())) {
+			logger.append(logHeader);
+			logger.append("Empty or wrong task type");
+			logger.append(BR);
+		}
+		if (task.getPriority() == null
+				|| !isTaskPriorityValid(task.getPriority())) {
+			logger.append(logHeader);
+			logger.append("Empty or wrong task priority");
+			logger.append(BR);
+		}
+		if (logger.length() > 0) {
+			logger.append(logHeader);
+			logger.append(NODE_SKIPPED);
+			logger.append(DIVIDER);
 		}
 		return logger;
 	}
@@ -385,15 +459,19 @@ public class ImportExportController {
 	private boolean isTaskTypeValid(Row row) {
 		Cell cell = row.getCell(TYPE_CELL);
 		if (cell != null && cell.getCellType() != Cell.CELL_TYPE_BLANK) {
-			try {
-				TaskType.toType(row.getCell(TYPE_CELL).getStringCellValue());
-				return true;
-			} catch (IllegalArgumentException e) {
-				LOG.error(e.getLocalizedMessage());
-				return false;
-			}
+			return isTaskTypeValid(row.getCell(TYPE_CELL).getStringCellValue());
 		}
 		return true;
+	}
+
+	private boolean isTaskTypeValid(String type) {
+		try {
+			TaskType.toType(type);
+			return true;
+		} catch (IllegalArgumentException e) {
+			LOG.error(e.getLocalizedMessage());
+			return false;
+		}
 	}
 
 	/**
@@ -406,15 +484,19 @@ public class ImportExportController {
 	private boolean isTaskPriorityValid(Row row) {
 		Cell cell = row.getCell(PRIORITY_CELL);
 		if (cell != null && cell.getCellType() != Cell.CELL_TYPE_BLANK) {
-			try {
-				TaskPriority.toPriority(cell.getStringCellValue());
-				return true;
-			} catch (IllegalArgumentException e) {
-				LOG.error(e.getLocalizedMessage());
-				return false;
-			}
+			return isTaskPriorityValid(cell.getStringCellValue());
 		}
 		return true;
+	}
+
+	private boolean isTaskPriorityValid(String priority) {
+		try {
+			TaskPriority.toPriority(priority);
+			return true;
+		} catch (IllegalArgumentException e) {
+			LOG.error(e.getLocalizedMessage());
+			return false;
+		}
 	}
 
 }

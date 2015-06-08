@@ -17,7 +17,7 @@
 		</ul>
 	</div>
 	<div class="help-block">
-		<s:message code="task.import.hint" />
+		<s:message code="task.import.hint" /><br>
 		<a href="<c:url value="/task/getTemplateFile"/>"><i class="fa fa-file-excel-o"></i> <s:message
 				code="task.import.template" /></a>
 	</div>
@@ -32,7 +32,7 @@
 				</div>
 			
 				<input id="file_upload" name="file" type="file" accept=".xls,.xml"
-					title='<i class="fa fa-file-excel-o"></i> <s:message code="task.import.selectFile" />'
+					title='<i class="fa fa-file-o"></i> <s:message code="task.import.selectFile" />'
 					class="inputfiles" data-filename-placement="inside">
 			</div>
 			<div class="form-group">

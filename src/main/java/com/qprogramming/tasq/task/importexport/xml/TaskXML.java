@@ -2,6 +2,7 @@ package com.qprogramming.tasq.task.importexport.xml;
 
 import java.util.Date;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -15,6 +16,7 @@ import com.qprogramming.tasq.task.TaskType;
 @XmlType(propOrder = { "name", "description", "type", "priority", "estimate",
 		"story_points", "due_date" })
 public class TaskXML {
+	private Integer number;
 	private String name;
 	private String description;
 	private String type;
@@ -32,6 +34,15 @@ public class TaskXML {
 		this.type = ((TaskType) task.getType()).getEnum();
 		this.story_points = Integer.toString(task.getStory_points());
 		this.due_date = task.getRawDue_date();
+	}
+
+	@XmlAttribute
+	public Integer getNumber() {
+		return number;
+	}
+
+	public void setNumber(Integer number) {
+		this.number = number;
 	}
 
 	public String getName() {
