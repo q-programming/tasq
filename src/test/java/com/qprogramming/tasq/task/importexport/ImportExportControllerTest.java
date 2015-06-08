@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -178,8 +179,7 @@ public class ImportExportControllerTest {
 			list.add(task2);
 			String[] idList = { TEST_1, TEST_2 };
 			when(responseMock.getOutputStream()).thenReturn(outputStreamMock);
-			when(taskSrvMock.finAllById(Arrays.asList(idList)))
-					.thenReturn(list);
+			when(taskSrvMock.finAllById(Arrays.asList(idList))).thenReturn(list);
 			when(taskSrvMock.findById(TEST_2)).thenReturn(task2);
 			importExportCtrl.exportTasks(idList, "XLS", responseMock,
 					requestMock);

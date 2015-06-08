@@ -66,3 +66,6 @@ span.badge.theme.zero{
 span.tag.label.label-info.theme {
   background-color: skyblue;
 }
+.pagination>.active>a, .pagination>.active>span, .pagination>li>a:focus, .pagination>li>a:hover {
+  background-color: rgba(135, 206, 235, 0.2);
+}

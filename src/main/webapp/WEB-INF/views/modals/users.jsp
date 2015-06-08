@@ -7,6 +7,8 @@
 <%
 	pageContext.setAttribute("roles", Roles.values());
 %>
+<script language="javascript" type="text/javascript"
+	src="<c:url value="/resources/js/bootstrap-paginator.min.js"/>"></script>
 <c:set var="name_text">
 	<s:message code="user.name" text="Name" />
 	<s:message code="user.surname" text="Surname" />
@@ -48,8 +50,8 @@
 					</tr>
 				</thead>
 			</table>
-			<div>
-				<table id="user_nav" style="width: 100%;"></table>
+			<div class="text-center">
+				<ul id="user_nav"></ul>
 			</div>
 <!-- 		<div class="modal-footer"> -->
 <!-- 			<div><button class="btn btn-default">ok</button></div> -->
@@ -170,32 +172,19 @@ function getRoleTypeMsg(role){
 };
 
 function printNavigation(page,data){
-	$("#user_nav tr").remove();
-	var topRow='<tr id="topNavigation">';
-	var prev = '<td style="width:30px"></td>';
-	if(!data.firstPage){
-		prev = '<td style="width:30px"><a class="navBtn btn" data-page="'+ (page -1)+'"><i class="fa fa-arrow-left"></i></a></td>';
-	}
-	topRow+=prev;
-	var numbers = '<td style="text-align:center">';
-	//print numbers
-	for (var i = 0; i < data.totalPages; i++) {
-		var btnClass = "navBtn btn";
-		//active btn
-		if (i == data.number) {
-			btnClass += " btn-default";
-		}
-		var button = '<a class="'+btnClass+'" data-page="'+ i +'">'
-				+ (i + 1) + '</a>';
-				numbers+=button;
-	}
-	topRow+=numbers;
-	var next = '<td style="width:30px"></td>';
-	if(!data.lastPage){
-		next = '<td style="width:30px"><a class="navBtn btn" data-page="'+ (page +1) +'"><i class="fa fa-arrow-right"></i></a></td>';
-	}
-	topRow+=next+'</tr>';
-	$("#user_nav").append(topRow);
+	var options = {
+			bootstrapMajorVersion: 3,
+            currentPage: page+1,
+            totalPages: data.totalPages,
+            itemContainerClass: function (type, page, current) {
+                return (page === current) ? "active" : "pointer-cursor";
+            },
+            numberOfPages:10,
+            onPageChanged: function(e,oldPage,newPage){
+            	fetchUsers(newPage-1,$("#search_field").val());
+            }
+   	}
+	$("#user_nav").bootstrapPaginator(options);
 }
 
 

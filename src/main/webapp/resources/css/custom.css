@@ -442,3 +442,6 @@ td.centerd {
 span.tag.label.label-info.theme.tag_filter.not_selected {
 	background-color: rgba(0, 0, 0, 0.13);
 }
+li.pointer-cursor {
+  cursor: pointer;
+}

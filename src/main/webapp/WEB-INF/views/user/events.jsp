@@ -39,7 +39,9 @@
 				</tr>
 			</thead>
 		</table>
-		<table id="eventsNavigation" style="width: 100%;"></table>
+		<div class="text-center">
+				<ul id="eventsNavigation"></ul>
+		</div>
 	</div>
 </div>
 <script>
@@ -117,32 +119,19 @@ pageContext.setAttribute("types",
 		LogType.values());
 %>
 function printEventsNavigation(page,data){
-	$("#events_nav").remove();
-	var topRow='<tr id="events_nav">';
-	var prev = '<td style="width:30px"></td>';
-	if(!data.firstPage){
-		prev = '<td style="width:30px"><a class="eventNavBtn btn" data-page="'+ (page -1)+'"><i class="fa fa-arrow-left"></i></a></td>';
-	}
-	topRow+=prev;
-	var numbers = '<td style="text-align:center">';
-	//print numbers
-	for (var i = 0; i < data.totalPages; i++) {
-		var btnClass = "eventNavBtn btn";
-		//active btn
-		if (i == data.number) {
-			btnClass += " btn-default";
-		}
-		var button = '<a class="'+btnClass+'" data-page="'+ i +'">'
-				+ (i + 1) + '</a>';
-				numbers+=button;
-	}
-	topRow+=numbers;
-	var next = '<td style="width:30px"></td>';
-	if(!data.lastPage){
-		next = '<td style="width:30px"><a class="navBtn btn" data-page="'+ (page +1) +'"><i class="fa fa-arrow-right"></i></a></td>';
-	}
-	topRow+=next+'</tr>';
-	$("#eventsNavigation").append(topRow);
+	var options = {
+			bootstrapMajorVersion: 3,
+            currentPage: page+1,
+            totalPages: data.totalPages,
+            itemContainerClass: function (type, page, current) {
+                return (page === current) ? "active" : "pointer-cursor";
+            },
+            numberOfPages:10,
+            onPageChanged: function(e,oldPage,newPage){
+            	fetchEvents(newPage-1,'');
+            }
+   	}
+	$("#eventsNavigation").bootstrapPaginator(options);
 }
 
 	$(document).on("click",".showMore",function(e) {

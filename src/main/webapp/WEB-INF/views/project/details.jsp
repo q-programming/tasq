@@ -15,7 +15,6 @@
 	src="<c:url value="/resources/js/jqplot.dateAxisRenderer.min.js"/>"></script>
 <script language="javascript" type="text/javascript"
 	src="<c:url value="/resources/js/jqplot.cursor.min.js"/>"></script>
-
 <security:authorize access="hasRole('ROLE_ADMIN')">
 	<c:set var="is_admin" value="true" />
 </security:authorize>
@@ -111,7 +110,8 @@
 			<h3>
 				<s:message code="project.latestEvents" />
 			</h3>
-			<div>
+			<div class="text-center">
+				<ul id="eventsTable_pagination"></ul>
 				<table id="eventsTable" class="table table-condensed">
 				</table>
 			</div>
@@ -208,15 +208,6 @@ $(document).ready(function($) {
 	printChart();
 });
 
-$(document).on("click",".navBtn",function(e) {
-	var page =  $(this).data('page');
-	//clear everything
-	$("#navigation").html('');
-	$("#topNavigation").html('');
-	$("#eventsTable .projEvent").remove();
-	fetchWorkLogData(page); 
-});
-
 function printChart(){
 	$("#chartdiv").append(loading_indicator);
 	projectId = '${project.id}';
@@ -298,6 +289,7 @@ function fetchWorkLogData(page) {
 	var url = '<c:url value="/projectEvents"/>';
 	var avatarURL = '<c:url value="/../avatar/"/>';
 	var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
+	$("#eventsTable .projEvent").remove();
 	$("#eventsTable").append(loading_indicator);
 	$.get(url, {id : projectID,	page: page}, function(data) {
 		//console.log(data)
@@ -323,42 +315,24 @@ function fetchWorkLogData(page) {
 			row+='</td></tr>';
 			rows+=row;
 		}
-		$(rows).insertAfter("#topNavigation");
+		$("#eventsTable").append(rows);
 	});
 
 }
 function printWorkLogNavigation(page,data){
-	var topRow='<tr id="topNavigation">';
-	var bottomRow='<tr>';
-	var prev = '<td style="width:30px"></td>';
-	if(!data.firstPage){
-		prev = '<td style="width:30px"><a class="navBtn btn" data-page="'+ (page -1)+'"><i class="fa fa-arrow-left"></i></a></td>';
-	}
-	topRow+=prev;
-	bottomRow+=prev;
-	var numbers = '<td style="text-align:center">';
-	//print numbers
-	for (var i = 0; i < data.totalPages; i++) {
-		var btnClass = "navBtn btn";
-		//active btn
-		if (i == data.number) {
-			btnClass += " btn-default";
-		}
-		var button = '<a class="'+btnClass+'" data-page="'+ i +'">'
-				+ (i + 1) + '</a>';
-				numbers+=button;
-	}
-	topRow+=numbers;
-	bottomRow+=numbers;
-	
-	var next = '<td style="width:30px"></td>';
-	if(!data.lastPage){
-		next = '<td style="width:30px"><a class="navBtn btn" data-page="'+ (page +1) +'"><i class="fa fa-arrow-right"></i></a></td>';
-	}
-	topRow+=next+'</tr>';
-	bottomRow+=next+'</tr>';
-	$("#eventsTable").append(topRow);
-	$("#eventsTable").append(bottomRow);
+	var options = {
+			bootstrapMajorVersion: 3,
+            currentPage: page+1,
+            totalPages: data.totalPages,
+            itemContainerClass: function (type, page, current) {
+                return (page === current) ? "active" : "pointer-cursor";
+            },
+            numberOfPages:10,
+            onPageChanged: function(e,oldPage,newPage){
+            	fetchWorkLogData(newPage-1);
+            }
+   	}
+	$("#eventsTable_pagination").bootstrapPaginator(options);
 }
 
 function getEventTypeMsg(type){
