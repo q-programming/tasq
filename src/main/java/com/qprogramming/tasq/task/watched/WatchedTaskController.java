@@ -1,9 +1,15 @@
 package com.qprogramming.tasq.task.watched;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,13 +57,13 @@ public class WatchedTaskController {
 							.contains(Utils.getCurrentAccount())) {
 				watched = watchSrv.stopWatching(task);
 				result.code = ResultData.OK;
-				result.message = msg.getMessage("task.watch.stoped", null,
-						Utils.getCurrentLocale());
+				result.message = msg.getMessage("task.watch.stoped",
+						new Object[] { id }, Utils.getCurrentLocale());
 			} else {
 				watched = watchSrv.startWatching(task);
 				result.code = ResultData.OK;
-				result.message = msg.getMessage("task.watch.started", null,
-						Utils.getCurrentLocale());
+				result.message = msg.getMessage("task.watch.started",
+						new Object[] { id }, Utils.getCurrentLocale());
 			}
 		}
 		return result;
@@ -71,10 +77,20 @@ public class WatchedTaskController {
 	 */
 	@RequestMapping(value = "/watching", method = RequestMethod.GET)
 	public String watching(Model model) {
-		List<WatchedTask> watched = watchSrv.findByWatcher(Utils
-				.getCurrentAccount());
-		model.addAttribute("watching", watched);
 		return "user/watching";
+	}
+
+	@RequestMapping(value = "/listWatches", method = RequestMethod.GET)
+	public @ResponseBody Page<DisplayWatch> getWatches(
+			@RequestParam(required = false) String term,
+			@PageableDefault(size = 25, page = 0, sort = "id", direction = Direction.DESC) Pageable p) {
+		Page<WatchedTask> list = watchSrv.findByWatcher(
+				Utils.getCurrentAccount(), p);
+		List<DisplayWatch> result = new LinkedList<DisplayWatch>();
+		for (WatchedTask watchedTask : list) {
+			result.add(new DisplayWatch(watchedTask));
+		}
+		return new PageImpl<DisplayWatch>(result, p, list.getTotalElements());
 	}
 
 }

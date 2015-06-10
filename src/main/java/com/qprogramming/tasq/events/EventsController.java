@@ -36,8 +36,8 @@ public class EventsController {
 	 */
 	@RequestMapping(value = "/events", method = RequestMethod.GET)
 	public String events(Model model) {
-		List<Event> events = eventSrv.getEvents();
-		model.addAttribute("events", events);
+		// List<Event> events = eventSrv.getEvents();
+		// model.addAttribute("events", events);
 		return "user/events";
 	}
 

@@ -13,7 +13,7 @@
 		</ul>
 	</div>
 	<div>
-		<table class="table table-hover table-condensed">
+		<table id="watchesTable" class="table table-hover table-condensed">
 			<thead class="theme">
 				<tr>
 					<th style="width: 55px;"></th>
@@ -21,22 +21,18 @@
 					<th style="width: 100px;"><s:message code="events.watchers"/></th>
 				</tr>
 			</thead>
-			<c:forEach items="${watching}" var="task">
-				<tr>
-					<td><i
-						class="btn btn-default fa fa-eye-slash stopWatching a-tooltip"
-						data-taskid="${task.id}"
-						title="<s:message code="task.watch.stop"/>"></i></td>
-					<td><t:type type="${task.type}" list="true" /><a
-						href="<c:url value="/task?id=${task.id}"/>">${task}</a></td>
-					<td style="text-align:center">${task.count}&nbsp;<i class="fa fa-eye"></i></td>
-				</tr>
-			</c:forEach>
 		</table>
+		<div class="text-center">
+				<ul id="watchesNavigation"></ul>
+		</div>
+		
 	</div>
 </div>
 <script>
-	$(".stopWatching").click(function() {
+var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><i class="fa fa-cog fa-spin"></i><s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
+fetchWatches(0);
+
+$(document).on("click",".stopWatching",function(e) {
 		var clicked = $(this);
 		var taskID = clicked.data('taskid');
 		var url = '<c:url value="/task/watch"/>';
@@ -50,7 +46,50 @@
 				clicked.closest("tr").remove();
 			}
 		});
-	});
+});
 
+function fetchWatches(page){
+		$("#watchesTable .watchRow").remove();
+		$("#watchesTable").append(loading_indicator);
+		var url = '<c:url value="/listWatches"/>';
+		$.get(url, {page: page}, function(data) {
+			$("#loading").remove();
+			if(data.content.length == 0){
+				var row = '<tr class="watchRow centerPadded"><td colspan="3"><i><s:message code="event.noWatches"/></i></td></tr>';
+				$("#watchesTable").append(row);
+			}
+			for ( var j = 0; j < data.content.length; j++) {
+				var task = data.content[j];
+				var row = '<tr class="watchRow">';
+				var button = '<td><i class="btn btn-default fa fa-eye-slash stopWatching a-tooltip"	'
+							+'data-taskid="'+ task.id + '"title="<s:message code="task.watch.stop"/>"></i></td>';
+				var taskUrl = '<c:url value="/task?id="/>' + task.id;
+				var taskStr = '<td>' + getTaskType(task.type) + '&nbsp;<a href="'+taskUrl + '">[' + task.id +'] ' 
+							+ task.name + '</a></td>';
+				var watches = '<td style="text-align:center">'+ task.watchCount + '&nbsp;<i class="fa fa-eye"></i></td>'
+				row+=button + taskStr + watches + '</tr>'
+				$("#watchesTable").append(row);
+			}
+			printWatchesNavigation(page,data)
+			$('.a-tooltip').tooltip();
+		});
+		
+	}
 	
+function printWatchesNavigation(page,data){
+	var options = {
+			bootstrapMajorVersion: 3,
+            currentPage: page+1,
+            totalPages: data.totalPages,
+            itemContainerClass: function (type, page, current) {
+                return (page === current) ? "active" : "pointer-cursor";
+            },
+            numberOfPages:10,
+            onPageChanged: function(e,oldPage,newPage){
+            	fetchWatches(newPage-1,'');
+            }
+   	}
+	$("#watchesNavigation").bootstrapPaginator(options);
+}
+
 </script>

@@ -5,13 +5,14 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.task.Task;
-import com.qprogramming.tasq.task.TaskState;
 import com.qprogramming.tasq.task.TaskType;
 
 @Service
@@ -58,18 +59,17 @@ public class WatchedTaskService {
 	}
 
 	/**
-	 * Starts watching as given account 
+	 * Starts watching as given account
 	 * 
 	 * @param task
 	 */
 	@Transactional
-	public WatchedTask addToWatchers(Task task,Account account) {
+	public WatchedTask addToWatchers(Task task, Account account) {
 		WatchedTask watchedTask = getWatchedTask(task);
 		watchedTask.getWatchers().add(account);
 		return watchRepo.save(watchedTask);
 	}
-	
-	
+
 	/**
 	 * Starts watching as currently logged-in user Current user will be added to
 	 * watchers list
@@ -128,7 +128,7 @@ public class WatchedTaskService {
 		watchRepo.delete(wpDelete);
 	}
 
-	private WatchedTask getWatchedTask(Task task){
+	private WatchedTask getWatchedTask(Task task) {
 		WatchedTask watchedTask = getByTask(task);
 		if (watchedTask == null) {
 			watchedTask = new WatchedTask();
@@ -143,5 +143,9 @@ public class WatchedTaskService {
 		watchedTask.setName(task.getName());
 		watchedTask.setWatchers(watchers);
 		return watchedTask;
+	}
+
+	public Page<WatchedTask> findByWatcher(Account currentAccount, Pageable p) {
+		return watchRepo.findByWatchersId(currentAccount.getId(), p);
 	}
 }
