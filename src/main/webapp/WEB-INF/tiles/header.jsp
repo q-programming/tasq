@@ -192,7 +192,7 @@
 									code="menu.users" text="Users" />"
 								data-placement="bottom"><i class="fa fa-user"></i></a> <a
 								class="btn btn-default btn-xs a-tooltip"
-								href='<s:url value="/settings"></s:url>'
+								href='<s:url value="/help"></s:url>'
 								title="<s:message
 									code="menu.help" text="Help" />"
 								data-placement="bottom"><i class="fa fa-question-circle"></i></a>

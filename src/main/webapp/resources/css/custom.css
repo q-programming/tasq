@@ -80,10 +80,12 @@ table.button-table tr:hover td .buttons_panel {
 .buttons_panel {
 	display: none;
 }
-.table_sprint{
+
+.table_sprint {
 	min-height: 50px;
 }
-.agile-card{
+
+.agile-card {
 	max-width: 500px
 }
 
@@ -297,6 +299,13 @@ a.anchor {
 	visibility: hidden;
 }
 
+a.anchorL {
+	display: block;
+	position: relative;
+	top: -105px;
+	visibility: hidden;
+}
+
 tr.closed {
 	background: rgba(50, 205, 81, 0.12);
 }
@@ -442,6 +451,116 @@ td.centerd {
 span.tag.label.label-info.theme.tag_filter.not_selected {
 	background-color: rgba(0, 0, 0, 0.13);
 }
+
 li.pointer-cursor {
-  cursor: pointer;
+	cursor: pointer;
+}
+
+.bs-docs-sidenav {
+	margin-top: 20px;
+	margin-bottom: 20px
+}
+
+.bs-docs-sidebar .nav>li>a {
+	display: block;
+	padding: 4px 20px;
+	font-size: 13px;
+	font-weight: 500;
+	color: #767676
+}
+
+.bs-docs-sidebar .nav .nav {
+	display: none;
+	padding-bottom: 10px
+}
+
+.bs-docs-sidebar .nav .nav>li>a {
+	padding-top: 1px;
+	padding-bottom: 1px;
+	padding-left: 30px;
+	font-size: 12px;
+	font-weight: 400
+}
+
+.bs-docs-sidebar .nav .nav>li>a:focus, .bs-docs-sidebar .nav .nav>li>a:hover
+	{
+	padding-left: 29px
+}
+
+.bs-docs-sidebar .nav .nav>.active:focus>a, .bs-docs-sidebar .nav .nav>.active:hover>a,
+	.bs-docs-sidebar .nav .nav>.active>a {
+	padding-left: 28px;
+	font-weight: 500
+}
+
+.back-to-top, .bs-docs-theme-toggle {
+	display: none;
+	padding: 4px 10px;
+	margin-top: 10px;
+	margin-left: 10px;
+	font-size: 12px;
+	font-weight: 500;
+	color: #999
+}
+
+.back-to-top:hover, .bs-docs-theme-toggle:hover {
+	color: #563d7c;
+	text-decoration: none
+}
+
+.bs-docs-theme-toggle {
+	margin-top: 0
+}
+
+@media ( min-width :768px) {
+	.back-to-top, .bs-docs-theme-toggle {
+		display: block
+	}
+}
+
+@media ( min-width :992px) {
+	.bs-docs-sidebar .nav>.active>ul {
+		display: block
+	}
+	.bs-docs-sidebar.affix, .bs-docs-sidebar.affix-bottom {
+		width: 213px
+	}
+	.bs-docs-sidebar.affix {
+		position: fixed;
+	}
+	.bs-docs-sidebar.affix-bottom {
+		position: absolute
+	}
+	.bs-docs-sidebar.affix .bs-docs-sidenav, .bs-docs-sidebar.affix-bottom .bs-docs-sidenav
+		{
+		margin-bottom: 0
+	}
+}
+
+@media ( min-width :1200px) {
+	.bs-docs-sidebar.affix, .bs-docs-sidebar.affix-bottom {
+		width: 263px
+	}
+}
+
+.back-to-top {
+	padding: 4px 10px;
+	margin-top: 10px;
+	margin-left: 10px;
+	font-size: 12px;
+	font-weight: 500;
+	color: #999;
+}
+
+.admin-button {
+	border: 1px solid;
+	border-radius: 5px;
+	padding: 1px 5px 1px 5px;
+	margin: 0px 5px 0px 5px;
+	background-color: orange;
+	font-weight: bold;
+	color: white;
+}
+li.wider{
+	  padding-bottom: 10px;
 }

@@ -42,9 +42,9 @@
 	<div class="row">
 		<a class="anchor" id="sprint"></a>
 		<div class="col-lg-2 col-md-3 col-sm-4">
-			<div id="menu" style="position: fixed;">
+			<div id="menu" class="bs-docs-sidebar hidden-print affix">
 				<nav>
-					<ul class="nav nav-pills nav-stacked">
+					<ul class="nav bs-docs-sidenav">
 						<li>
 							<a href="#" id="sprintNoMenu" class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-expanded="false">
 								<h4><b>Sprint ${ActiveSprint}</b> <span class="caret"></h4></span>
@@ -54,10 +54,10 @@
 									<li><a href="#" class="sprintMenuNo" data-number="${i}"> Sprint ${i}</a></li>
 								</c:forEach>
    							</ul>
-						<li><a href="#burndown_chart"><div class="side-bar theme"></div><s:message code="agile.burndown"/></a></li>
-						<li><a href="#time_chart"><div class="side-bar theme"></div><s:message code="agile.timelogged"/></a></li>
-						<li><a href="#events"><div class="side-bar theme"></div><s:message code="agile.events"/></a></li>
-						<li><a href="#sprintTotal"><div class="side-bar theme"></div><s:message code="agile.total"/></a></li>
+						<li><a href="#burndown_chart"><s:message code="agile.burndown"/></a></li>
+						<li><a href="#time_chart"><s:message code="agile.timelogged"/></a></li>
+						<li><a href="#events"><s:message code="agile.events"/></a></li>
+						<li><a href="#sprintTotal"><s:message code="agile.total"/></a></li>
 					</ul>
 				</nav>
 			</div>

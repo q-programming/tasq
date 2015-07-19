@@ -4,7 +4,13 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +35,9 @@ public class HomeController {
 	private TaskService taskSrv;
 	private ProjectService projSrv;
 	private EventsService eventSrv;
-
+	
+	@Value("${home.directory}")
+	private String appHomeDir;
 	@Autowired
 	public HomeController(TaskService taskSrv, ProjectService projSrv) {
 		this.taskSrv = taskSrv;
@@ -90,6 +98,21 @@ public class HomeController {
 	@ResponseBody int getEventCount(){
 		List<Event> events = eventSrv.getUnread(); 
 		return events.size();
+	}
+	
+	@RequestMapping(value = "/help", method = RequestMethod.GET)
+	public String help(Model model, HttpServletRequest request) {
+		Utils.setHttpRequest(request);
+		Authentication authentication = SecurityContextHolder.getContext()
+				.getAuthentication();
+		String lang = "en";
+//		if (!(authentication instanceof AnonymousAuthenticationToken)) {
+//			lang = Utils.getCurrentAccount().getLanguage();
+//			if (lang == null) {
+//			}
+//		}
+		model.addAttribute("projHome", appHomeDir);
+		return "help/" + lang;
 	}
 	
 }

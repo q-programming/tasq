@@ -23,16 +23,16 @@
 </c:set>
 
 <div class="col-lg-2 col-md-3 col-sm-4">
-	<div id="menu" style="position: fixed;">
-				<nav>
-					<ul class="nav nav-pills nav-stacked">
+	<div id="menu" class="bs-docs-sidebar hidden-print affix">
+<!-- 				<nav> -->
+					<ul class="nav bs-docs-sidenav">
 						<li>&nbsp;</li>
-						<li class=""><a href="#nameA"><div class="side-bar theme"></div>${taskName_text}</a></li>
-						<li class=""><a href="#descA"><div class="side-bar theme"></div>${taskDesc_text}</a></li>
-						<li class=""><a href="#projectA"><div class="side-bar theme"></div>Other</a></li>
-						<li class=""><a href="#createA"><div class="side-bar theme"></div>Create</a></li>
+						<li class=""><a href="#nameA">${taskName_text}</a></li>
+						<li class=""><a href="#descA">${taskDesc_text}</a></li>
+						<li class=""><a href="#projectA">Other</a></li>
+						<li class=""><a href="#createA">Create</a></li>
 					</ul>
-				</nav>
+<!-- 				</nav> -->
 	</div>
 </div>
 <div class="white-frame" style="overflow: auto;display:table">

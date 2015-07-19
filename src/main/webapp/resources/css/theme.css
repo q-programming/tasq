@@ -70,3 +70,18 @@ span.tag.label.label-info.theme {
 .pagination>.active>a, .pagination>.active>span, .pagination>li>a:focus, .pagination>li>a:hover {
   background-color: rgba(44, 90, 160, 0.2);
 }
+.bs-docs-sidebar .nav>.active:focus>a, .bs-docs-sidebar .nav>.active:hover>a,
+	.bs-docs-sidebar .nav>.active>a {
+	padding-left: 18px;
+	font-weight: 700;
+	color: #2c5aa0;
+	background-color: transparent;
+	border-left: 2px solid #2c5aa0;
+}
+.bs-docs-sidebar .nav>li>a:focus, .bs-docs-sidebar .nav>li>a:hover {
+	padding-left: 19px;
+	color: #2c5aa0;
+	text-decoration: none;
+	background-color: transparent;
+	border-left: 1px solid #2c5aa0;
+}

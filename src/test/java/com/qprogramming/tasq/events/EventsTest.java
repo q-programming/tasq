@@ -119,17 +119,6 @@ public class EventsTest {
 	}
 
 	@Test
-	public void getEvetnsTest() {
-		Event event = new Event();
-		List<Event> list = new LinkedList<Event>();
-		list.add(event);
-		when(eventsRepoMock.findByAccountIdOrderByDateDesc(testAccount.getId()))
-				.thenReturn(list);
-		eventsController.events(modelMock);
-		verify(modelMock, times(1)).addAttribute("events", list);
-	}
-
-	@Test
 	public void getEvetnsPagedTest() {
 		Event event = new Event();
 		event.setAccount(testAccount);

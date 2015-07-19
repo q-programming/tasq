@@ -69,3 +69,19 @@ span.tag.label.label-info.theme {
 .pagination>.active>a, .pagination>.active>span, .pagination>li>a:focus, .pagination>li>a:hover {
   background-color: rgba(60, 179, 113, 0.2);
 }
+
+.bs-docs-sidebar .nav>.active:focus>a, .bs-docs-sidebar .nav>.active:hover>a,
+	.bs-docs-sidebar .nav>.active>a {
+	padding-left: 18px;
+	font-weight: 700;
+	color: mediumseagreen;
+	background-color: transparent;
+	border-left: 2px solid mediumseagreen;
+}
+.bs-docs-sidebar .nav>li>a:focus, .bs-docs-sidebar .nav>li>a:hover {
+	padding-left: 19px;
+	color: mediumseagreen;
+	text-decoration: none;
+	background-color: transparent;
+	border-left: 1px solid mediumseagreen;
+}
