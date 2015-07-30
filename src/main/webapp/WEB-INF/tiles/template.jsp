@@ -35,6 +35,12 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 <%-- <link href="<c:url value="/resources/css/font-awesome.min.css" />" rel="stylesheet" --%>
 <!-- 	media="screen" /> -->
+<%-- CUSTOMS --%>
+<link href="<c:url value="/resources/css/custom.css" />"
+	rel="stylesheet" media="screen" />
+<link rel="icon" type="image/png"
+	href="<c:url value="/resources/img/favicon.ico"/>" />
+
 <%-------THEME ------%>
 <security:authorize access="!isAuthenticated()">
 	<link href="<c:url value="/resources/css/theme.css" />"
@@ -51,11 +57,6 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 			rel="stylesheet" media="screen" />
 	</c:if>
 </security:authorize>
-<%-- CUSTOMS --%>
-<link href="<c:url value="/resources/css/custom.css" />"
-	rel="stylesheet" media="screen" />
-<link rel="icon" type="image/png"
-	href="<c:url value="/resources/img/favicon.ico"/>" />
 <%--CUSTOM SCRIPTS --%>
 <script src="<c:url value="/resources/js/tasq.js" />"></script>
 <script src="<c:url value="/resources/js/jquery.mask.min.js" />"></script>

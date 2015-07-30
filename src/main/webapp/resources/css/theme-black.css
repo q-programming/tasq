@@ -8,18 +8,18 @@ a.theme {
 }
 
 div.navbar.navbar-fixed-top.theme {
-	background-color: skyblue;
+	background-color: #282828;
 }
 
 div.modal-header.theme {
-	background-color: skyblue;
+	background-color: #282828;
 	color: white;
 	border-top-left-radius: 5px;
 	border-top-right-radius: 5px;
 }
 
 thead.theme {
-	background: skyblue;
+	background: #282828;
 	color: white;
 }
 .agile-card {
@@ -28,7 +28,7 @@ thead.theme {
 	padding: 5px;
 	margin-bottom: 5px;
 	border-color: lightgray;
-	background-color: rgba(249, 253, 255, 1)
+	background-color: white;
 }
 .agile-list{
 	color: inherit;
@@ -36,7 +36,7 @@ thead.theme {
 	padding: 5px;
 	margin-bottom: 5px;
 	border-color: lightgray;
-	background-color: rgba(249, 253, 255, 1)
+	background-color: #f5f5f5;
 }
 .table_sprint {
 	border-style: dashed;
@@ -47,46 +47,51 @@ thead.theme {
 }
 span.badge.theme{
 	float:right;
-	background-color: rgb(69, 161, 199)
+	background-color: #696969
 }
 span.badge.theme.zero{
-	color: rgb(69, 161, 199)
+	color: #DD6264
 }
 .side-bar.theme{
-	background-color: skyblue;
+	background-color: #282828;
 }
 .nav-pills>li.active>a,.nav-pills>li.active>a:hover,.nav-pills>li.active>a:focus
 	{
 	color: #fff;
-	background-color: skyblue;
+	background-color: #696969;
 }
+ul.nav a:hover { color: lightgray !important; }
+
 .table-hover>tbody>tr:hover>td,.table-hover>tbody>tr:hover>th {
-	background-color: #E6F1F5
+	background-color: #b7b7b7;
 }
 span.tag.label.label-info.theme {
-  background-color: skyblue;
+  background-color: #282828;
 }
 .pagination>.active>a, .pagination>.active>span, .pagination>li>a:focus, .pagination>li>a:hover {
-  background-color: rgba(135, 206, 235, 0.2);
+  background-color: rgba(45, 45, 45, 0.2);
 }
 .bs-docs-sidebar .nav>.active:focus>a, .bs-docs-sidebar .nav>.active:hover>a,
 	.bs-docs-sidebar .nav>.active>a {
 	padding-left: 18px;
 	font-weight: 700;
-	color: skyblue;
+	color: #282828;
 	background-color: transparent;
-	border-left: 2px solid skyblue;
+	border-left: 2px solid #282828;
 }
 .bs-docs-sidebar .nav>li>a:focus, .bs-docs-sidebar .nav>li>a:hover {
 	padding-left: 19px;
-	color: skyblue;
+	color: #282828;
 	text-decoration: none;
 	background-color: transparent;
-	border-left: 1px solid skyblue;
+	border-left: 1px solid #282828;
 }
 .dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
   color: white;
-  background-color: skyblue;
+  background-color: #282828;
   background-image: none;
   filter: none;
+}
+.btn.theme :focus, .btn.theme:hover {
+    color: ligthgray;
 }

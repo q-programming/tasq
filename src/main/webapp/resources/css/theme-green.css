@@ -85,3 +85,9 @@ span.tag.label.label-info.theme {
 	background-color: transparent;
 	border-left: 1px solid mediumseagreen;
 }
+.dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
+  color: white;
+  background-color: mediumseagreen;
+  background-image: none;
+  filter: none;
+}
