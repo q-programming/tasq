@@ -22,7 +22,7 @@
 	<s:message code="task.description" text="Description" />
 </c:set>
 
-<div class="col-lg-2 col-md-3 col-sm-4">
+<div class="col-lg-1 col-md-2 col-sm-3">
 	<div id="menu" class="bs-docs-sidebar hidden-print affix">
 <!-- 				<nav> -->
 					<ul class="nav bs-docs-sidenav">

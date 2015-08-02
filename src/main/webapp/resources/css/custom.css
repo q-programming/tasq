@@ -522,9 +522,6 @@ li.pointer-cursor {
 	.bs-docs-sidebar .nav>.active>ul {
 		display: block
 	}
-	.bs-docs-sidebar.affix, .bs-docs-sidebar.affix-bottom {
-		width: 213px
-	}
 	.bs-docs-sidebar.affix {
 		position: fixed;
 	}
@@ -536,13 +533,6 @@ li.pointer-cursor {
 		margin-bottom: 0
 	}
 }
-
-@media ( min-width :1200px) {
-	.bs-docs-sidebar.affix, .bs-docs-sidebar.affix-bottom {
-		width: 263px
-	}
-}
-
 .back-to-top {
 	padding: 4px 10px;
 	margin-top: 10px;
