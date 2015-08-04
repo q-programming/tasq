@@ -29,12 +29,10 @@ public class EventsService {
 	private WatchedTaskService watchSrv;
 	private MailMail mailer;
 	private MessageSource msg;
-	private static final Logger LOG = LoggerFactory
-			.getLogger(EventsService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(EventsService.class);
 
 	@Autowired
-	public EventsService(EventsRepository eventsRepo,
-			WatchedTaskService watchSrv, MailMail mailer, MessageSource msg) {
+	public EventsService(EventsRepository eventsRepo, WatchedTaskService watchSrv, MailMail mailer, MessageSource msg) {
 		this.watchSrv = watchSrv;
 		this.eventsRepo = eventsRepo;
 		this.mailer = mailer;
@@ -51,11 +49,10 @@ public class EventsService {
 	 * @return
 	 */
 	public List<Event> getEvents() {
-		List<Event> events = eventsRepo.findByAccountIdOrderByDateDesc(Utils
-				.getCurrentAccount().getId());
+		List<Event> events = eventsRepo.findByAccountIdOrderByDateDesc(Utils.getCurrentAccount().getId());
 		return events != null ? events : new LinkedList<Event>();
 	}
-	
+
 	/**
 	 * Returns list of all events for task
 	 * 
@@ -73,8 +70,7 @@ public class EventsService {
 	 * @return
 	 */
 	public Page<Event> getEvents(Pageable page) {
-		return eventsRepo.findByAccountId(Utils.getCurrentAccount().getId(),
-				page);
+		return eventsRepo.findByAccountId(Utils.getCurrentAccount().getId(), page);
 	}
 
 	/**
@@ -83,8 +79,7 @@ public class EventsService {
 	 * @return
 	 */
 	public List<Event> getUnread() {
-		List<Event> unread = eventsRepo.findByAccountIdAndUnreadTrue(Utils
-				.getCurrentAccount().getId());
+		List<Event> unread = eventsRepo.findByAccountIdAndUnreadTrue(Utils.getCurrentAccount().getId());
 		return unread != null ? unread : new LinkedList<Event>();
 	}
 
@@ -114,26 +109,18 @@ public class EventsService {
 					eventsRepo.save(event);
 					if (account.getEmail_notifications()) {
 						Locale locale = new Locale(account.getLanguage());
-						String eventStr = msg.getMessage(
-								((LogType) log.getType()).getCode(), null,
-								locale);
-						String subject = msg.getMessage(
-								"event.newEvent",
-								new Object[] { log.getTask().getId(),
-										Utils.getCurrentAccount(), eventStr },
-								locale);
+						String eventStr = msg.getMessage(((LogType) log.getType()).getCode(), null, locale);
+						String subject = msg.getMessage("event.newEvent",
+								new Object[] { log.getTask().getId(), Utils.getCurrentAccount(), eventStr }, locale);
 						String message = msg
-								.getMessage("event.newEvent.body",
-										new Object[] { account.toString(),
-												Utils.getCurrentAccount(),
-												eventStr, wlMessage,
-												log.getTask().getId() }, locale);
+								.getMessage(
+										"event.newEvent.body", new Object[] { account.toString(),
+												Utils.getCurrentAccount(), eventStr, wlMessage, log.getTask().getId() },
+										locale);
 						LOG.info(account.getEmail());
 						LOG.info(subject);
 						LOG.info(message);
-						// if(mailer.sendMail(mailer.NOTIFICATION, email,
-						// subject,
-						// message)){
+						mailer.sendMail(MailMail.NOTIFICATION, account.getEmail(), subject, message);
 					}
 				}
 			}
@@ -154,19 +141,13 @@ public class EventsService {
 			Locale locale = new Locale(account.getLanguage());
 			String eventStr = msg.getMessage(type.getCode(), null, locale);
 			String subject = msg.getMessage("event.newSystemEvent",
-					new Object[] { Utils.getCurrentAccount(), eventStr },
-					locale);
-			String message = msg.getMessage(
-					"event.newSystemEvent.body",
-					new Object[] { account.toString(),
-							Utils.getCurrentAccount(), eventStr, eventMsg, },
-					locale);
+					new Object[] { Utils.getCurrentAccount(), eventStr }, locale);
+			String message = msg.getMessage("event.newSystemEvent.body",
+					new Object[] { account.toString(), Utils.getCurrentAccount(), eventStr, eventMsg, }, locale);
 			LOG.info(account.getEmail());
 			LOG.info(subject);
 			LOG.info(message);
-			// if(mailer.sendMail(mailer.NOTIFICATION, email,
-			// subject,
-			// message)){
+			mailer.sendMail(MailMail.NOTIFICATION, account.getEmail(), subject, message);
 		}
 
 	}

@@ -9,6 +9,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -19,6 +21,7 @@ import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.velocity.app.VelocityEngine;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +31,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.velocity.VelocityEngineUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,8 +50,7 @@ import com.qprogramming.tasq.support.web.MessageHelper;
 
 @Controller
 public class SignupController {
-	private static final Logger LOG = LoggerFactory
-			.getLogger(SignupController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SignupController.class);
 
 	@Value("${home.directory}")
 	private String tasqRootDir;
@@ -57,13 +60,15 @@ public class SignupController {
 	private AccountService accountSrv;
 	private MailMail mailer;
 	private MessageSource msg;
+	private VelocityEngine velocityEngine;
 
 	@Autowired
-	public SignupController(AccountService accountSrv, MessageSource msg,
-			MailMail mailer) {
+	public SignupController(AccountService accountSrv, MessageSource msg, MailMail mailer,
+			VelocityEngine velocityEngine) {
 		this.accountSrv = accountSrv;
 		this.msg = msg;
 		this.mailer = mailer;
+		this.velocityEngine = velocityEngine;
 	}
 
 	@RequestMapping(value = "signup")
@@ -72,8 +77,8 @@ public class SignupController {
 	}
 
 	@RequestMapping(value = "signup", method = RequestMethod.POST)
-	public String signup(@Valid @ModelAttribute SignupForm signupForm,
-			Errors errors, RedirectAttributes ra, HttpServletRequest request) {
+	public String signup(@Valid @ModelAttribute SignupForm signupForm, Errors errors, RedirectAttributes ra,
+			HttpServletRequest request) {
 		if (errors.hasErrors()) {
 			return null;
 		}
@@ -97,8 +102,7 @@ public class SignupController {
 		ServletContext sc = session.getServletContext();
 		File dest = new File(getAvatar(account.getId()));
 		try {
-			InputStream in = new FileInputStream(
-					sc.getRealPath("/resources/img/avatar.png"));
+			InputStream in = new FileInputStream(sc.getRealPath("/resources/img/avatar.png"));
 			OutputStream out = new FileOutputStream(dest);
 			byte[] buf = new byte[1024];
 			int len;
@@ -112,35 +116,27 @@ public class SignupController {
 		} catch (IOException e) {
 			LOG.error(e.getMessage());
 		}
-		String confirmlink = Utils.getBaseURL() + "/confirm?id="
-				+ account.getUuid();
-		String subject = msg.getMessage("signup.register", null,
-				Utils.getDefaultLocale());
-		String message = msg.getMessage(
-				"signup.register.message",
-				new Object[] { account.getName(), confirmlink,
-						Utils.getBaseURL() }, Utils.getDefaultLocale());
-		LOG.info(confirmlink);
-		// mailer.sendMail(MailMail.REGISTER, account.getEmail(), subject,
-		// message);
-		MessageHelper.addSuccessAttribute(ra, msg.getMessage("signup.success",
-				null, Utils.getDefaultLocale()));
+		String confirmlink = Utils.getBaseURL() + "/confirm?id=" + account.getUuid();
+		String subject = msg.getMessage("signup.register", null, Utils.getDefaultLocale());
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("account", account);
+		model.put("link", confirmlink);
+		model.put("application", Utils.getBaseURL());
+		String message = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
+				"email/" + Utils.getDefaultLocale() + "/register.vm", "UTF-8", model);
+		mailer.sendMail(MailMail.REGISTER, account.getEmail(), subject, message);
+		MessageHelper.addSuccessAttribute(ra, msg.getMessage("signup.success", null, Utils.getDefaultLocale()));
 
 		return "redirect:/";
 	}
 
 	@RequestMapping(value = "/confirm", method = RequestMethod.GET)
-	public String confirm(
-			@RequestParam(value = "id", required = true) String id,
-			RedirectAttributes ra) {
+	public String confirm(@RequestParam(value = "id", required = true) String id, RedirectAttributes ra) {
 		Account account = accountSrv.findByUuid(id);
 		if (account != null) {
 			account.setConfirmed(true);
 			accountSrv.update(account);
-			MessageHelper.addSuccessAttribute(
-					ra,
-					msg.getMessage("signup.confirmed", null,
-							Utils.getDefaultLocale()));
+			MessageHelper.addSuccessAttribute(ra, msg.getMessage("signup.confirmed", null, Utils.getDefaultLocale()));
 		} else {
 			MessageHelper.addErrorAttribute(ra, "Verification error!");
 		}
@@ -148,9 +144,7 @@ public class SignupController {
 	}
 
 	@RequestMapping(value = "/password", method = RequestMethod.GET)
-	public PasswordResetForm reset(
-			@RequestParam(value = "id", required = true) String id,
-			RedirectAttributes ra) {
+	public PasswordResetForm reset(@RequestParam(value = "id", required = true) String id, RedirectAttributes ra) {
 		PasswordResetForm form = new PasswordResetForm();
 		form.setId(id);
 		return form;
@@ -158,8 +152,7 @@ public class SignupController {
 
 	@Transactional
 	@RequestMapping(value = "/password", method = RequestMethod.POST)
-	public String resetSubmit(PasswordResetForm form, Errors errors,
-			RedirectAttributes ra) {
+	public String resetSubmit(PasswordResetForm form, Errors errors, RedirectAttributes ra) {
 		if (!form.isPasswordConfirmed()) {
 			errors.rejectValue("password", "error.notMatchedPasswords");
 			return null;
@@ -170,22 +163,17 @@ public class SignupController {
 			DateTime date = new DateTime(Utils.getTimeFromUUID(uuid));
 			DateTime expireDate = date.plusHours(12);
 			if (date.isAfter(expireDate)) {
-				MessageHelper.addErrorAttribute(ra, msg.getMessage(
-						"signin.password.token.expired", null,
-						Utils.getDefaultLocale()));
+				MessageHelper.addErrorAttribute(ra,
+						msg.getMessage("signin.password.token.expired", null, Utils.getDefaultLocale()));
 			} else {
 				account.setPassword(form.getPassword());
 				accountSrv.save(account, true);
-				MessageHelper.addSuccessAttribute(
-						ra,
-						msg.getMessage("signin.password.success", null,
-								Utils.getDefaultLocale()));
+				MessageHelper.addSuccessAttribute(ra,
+						msg.getMessage("signin.password.success", null, Utils.getDefaultLocale()));
 			}
 		} else {
-			MessageHelper.addErrorAttribute(
-					ra,
-					msg.getMessage("signin.password.token.invalid", null,
-							Utils.getDefaultLocale()));
+			MessageHelper.addErrorAttribute(ra,
+					msg.getMessage("signin.password.token.invalid", null, Utils.getDefaultLocale()));
 		}
 		return "redirect:/";
 	}
@@ -197,14 +185,12 @@ public class SignupController {
 
 	@Transactional
 	@RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
-	public String resetPassword(
-			@RequestParam(value = "email", required = true) String email,
-			RedirectAttributes ra, HttpServletRequest request) {
+	public String resetPassword(@RequestParam(value = "email", required = true) String email, RedirectAttributes ra,
+			HttpServletRequest request) {
 		Account account = accountSrv.findByEmail(email);
 		if (account == null) {
-			MessageHelper.addWarningAttribute(ra, msg.getMessage(
-					"signin.password.notfound", new Object[] { email },
-					Utils.getDefaultLocale()));
+			MessageHelper.addWarningAttribute(ra,
+					msg.getMessage("signin.password.notfound", new Object[] { email }, Utils.getDefaultLocale()));
 			return "redirect:" + request.getHeader("Referer");
 		} else {
 			accountSrv.save(account, false);
@@ -213,20 +199,14 @@ public class SignupController {
 			url.append("/");
 			url.append("password?id=");
 			url.append(account.getUuid());
-			String subject = msg.getMessage("singin.password.reset", null,
-					Utils.getDefaultLocale());
-			String message = msg
-					.getMessage("singin.password.reset.message", new Object[] {
-							account.getName(), url, Utils.getBaseURL() },
-							Utils.getDefaultLocale());
+			String subject = msg.getMessage("singin.password.reset", null, Utils.getDefaultLocale());
+			String message = msg.getMessage("singin.password.reset.message",
+					new Object[] { account.getName(), url, Utils.getBaseURL() }, Utils.getDefaultLocale());
 			LOG.info(url.toString());
-			// mailer.sendMail(MailMail.OTHER, account.getEmail(), subject,
-			// message);
-			MessageHelper.addSuccessAttribute(
-					ra,
-					msg.getMessage("singin.password.token.sent",
-							new Object[] { email }, Utils.getDefaultLocale())
-							+ " " + url);
+			mailer.sendMail(MailMail.OTHER, account.getEmail(), subject, message);
+			MessageHelper.addSuccessAttribute(ra,
+					msg.getMessage("singin.password.token.sent", new Object[] { email }, Utils.getDefaultLocale()) + " "
+							+ url);
 		}
 		return "redirect:/";
 	}

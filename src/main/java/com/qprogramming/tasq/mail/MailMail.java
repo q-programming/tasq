@@ -1,22 +1,31 @@
 package com.qprogramming.tasq.mail;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
+import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.ui.velocity.VelocityEngineUtils;
+
+import com.qprogramming.tasq.config.ResourceService;
+import com.qprogramming.tasq.support.Utils;
 
 @Configuration
 public class MailMail {
@@ -69,6 +78,9 @@ public class MailMail {
 	@Autowired
 	private MailSender mailSender;
 
+	@Autowired
+	private ResourceService resourceSrv;
+
 	@Bean
 	public MailMail mailMail() {
 		MailMail mailMail = new MailMail();
@@ -87,8 +99,7 @@ public class MailMail {
 
 		Properties javaMailProperties = new Properties();
 		javaMailProperties.setProperty("mail.smtp.auth", smtpAuth);
-		javaMailProperties.setProperty("mail.smtp.starttls.enable",
-				smtpStarttls);
+		javaMailProperties.setProperty("mail.smtp.starttls.enable", smtpStarttls);
 		jmsi.setJavaMailProperties(javaMailProperties);
 		mailSender = jmsi;
 		return mailSender;
@@ -109,10 +120,9 @@ public class MailMail {
 	 * @return true if there were no errors while sending
 	 */
 	public boolean sendMail(int type, String to, String subject, String msg) {
-		MimeMessage message = ((JavaMailSenderImpl) mailSender)
-				.createMimeMessage();
-		MimeMessageHelper helper = new MimeMessageHelper(message, encoding);
 		try {
+			MimeMessage message = ((JavaMailSenderImpl) mailSender).createMimeMessage();
+			MimeMessageHelper helper = new MimeMessageHelper(message, true, encoding);
 			switch (type) {
 			case NOTIFICATION:
 				helper.setFrom(NOTIFICATION_TASQ, NOTIFICATION_TASQ_PERSONAL);
@@ -132,7 +142,10 @@ public class MailMail {
 			}
 			helper.setTo(to);
 			helper.setSubject(subject);
-			helper.setText(msg);
+			helper.setText(msg, true);
+			// Load logos and other stuff
+			Resource logoRes = resourceSrv.getResource("classpath:email/img/tasQ_logo_small.png");
+			helper.addInline("logo", logoRes);
 			LOG.debug("Sending e-mail to:" + to);
 			((JavaMailSenderImpl) mailSender).send(message);
 		} catch (MailSendException e) {

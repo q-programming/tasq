@@ -1,7 +1,11 @@
 package com.qprogramming.tasq.config;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 
+import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.exception.VelocityException;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +14,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.data.web.SortHandlerMethodArgumentResolver;
 import org.springframework.security.core.Authentication;
+import org.springframework.ui.velocity.VelocityEngineFactory;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -73,6 +78,16 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
 	public PageableHandlerMethodArgumentResolver createPagableHander() {
 		return new PageableHandlerMethodArgumentResolver(createSorter());
 	}
+	
+    @Bean
+    public VelocityEngine getVelocityEngine() throws VelocityException, IOException{
+        VelocityEngineFactory factory = new VelocityEngineFactory();
+        Properties props = new Properties();
+        props.put("resource.loader", "class");
+        props.put("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+        factory.setVelocityProperties(props);
+        return factory.createVelocityEngine();      
+    }
 
 	@Override
 	public Validator getValidator() {
