@@ -102,7 +102,7 @@ public class HomeController {
 	
 	@RequestMapping(value = "/help", method = RequestMethod.GET)
 	public String help(Model model, HttpServletRequest request) {
-		Utils.setHttpRequest(request);
+//		Utils.setHttpRequest(request);
 		Authentication authentication = SecurityContextHolder.getContext()
 				.getAuthentication();
 		String lang = "en";

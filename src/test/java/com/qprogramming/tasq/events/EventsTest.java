@@ -16,6 +16,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.velocity.app.VelocityEngine;
 import org.joda.time.Period;
 import org.junit.Assert;
 import org.junit.Before;
@@ -38,6 +39,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.config.ResourceService;
 import com.qprogramming.tasq.mail.MailMail;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
@@ -98,6 +100,10 @@ public class EventsTest {
 	private HttpServletRequest requestMock;
 	@Mock
 	private Model modelMock;
+	@Mock
+	private VelocityEngine velMock;
+	@Mock
+	private ResourceService resourceMock;
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -107,14 +113,12 @@ public class EventsTest {
 		testAccount = new Account(EMAIL, "", Roles.ROLE_ADMIN);
 		testAccount.setLanguage("en");
 		testAccount.setId(1L);
-		when(
-				msgMock.getMessage(anyString(), any(Object[].class),
-						any(Locale.class))).thenReturn("MESSAGE");
+		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
-		eventsService = new EventsService(eventsRepoMock, watchedTaskSrvMock,
-				mailerMock, msgMock);
+		eventsService = new EventsService(eventsRepoMock, watchedTaskSrvMock, mailerMock, msgMock, velMock,
+				resourceMock);
 		eventsController = new EventsController(eventsService);
 	}
 
@@ -128,11 +132,8 @@ public class EventsTest {
 		list.add(event);
 		Page<Event> page = new PageImpl<Event>(list);
 		Pageable pageSpecification = new PageRequest(0, 5);
-		when(
-				eventsRepoMock.findByAccountId(testAccount.getId(),
-						pageSpecification)).thenReturn(page);
-		Page<DisplayEvent> result = eventsController.eventsPaged(null,
-				pageSpecification);
+		when(eventsRepoMock.findByAccountId(testAccount.getId(), pageSpecification)).thenReturn(page);
+		Page<DisplayEvent> result = eventsController.eventsPaged(null, pageSpecification);
 		Assert.assertTrue(result.hasContent());
 	}
 
@@ -159,8 +160,7 @@ public class EventsTest {
 		List<Event> list = new LinkedList<Event>();
 		list.add(event);
 		list.add(event1);
-		when(eventsRepoMock.findByAccountIdOrderByDateDesc(testAccount.getId()))
-				.thenReturn(list);
+		when(eventsRepoMock.findByAccountIdOrderByDateDesc(testAccount.getId())).thenReturn(list);
 		ResultData result = eventsController.readAllEvents();
 		Assert.assertTrue(result.code.equals(ResultData.OK));
 		Assert.assertFalse(event.isUnread());
@@ -189,8 +189,7 @@ public class EventsTest {
 		List<Event> list = new LinkedList<Event>();
 		list.add(event);
 		list.add(event1);
-		when(eventsRepoMock.findByAccountIdOrderByDateDesc(testAccount.getId()))
-				.thenReturn(list);
+		when(eventsRepoMock.findByAccountIdOrderByDateDesc(testAccount.getId())).thenReturn(list);
 		ResultData result = eventsController.deleteAllEvents();
 		Assert.assertTrue(result.code.equals(ResultData.OK));
 		verify(eventsRepoMock, times(1)).delete(list);
@@ -227,8 +226,7 @@ public class EventsTest {
 		event.setTask(TASK_NAME);
 		List<Event> list = new LinkedList<Event>();
 		list.add(event);
-		when(eventsRepoMock.findByAccountIdAndUnreadTrue(testAccount.getId()))
-				.thenReturn(list);
+		when(eventsRepoMock.findByAccountIdAndUnreadTrue(testAccount.getId())).thenReturn(list);
 		List<Event> result = eventsService.getUnread();
 		Assert.assertFalse(result.isEmpty());
 
@@ -245,6 +243,7 @@ public class EventsTest {
 		WatchedTask watched = new WatchedTask();
 		watched.setId(TEST_1);
 		watched.setWatchers(watchers);
+		watched.setType(TaskType.ISSUE);
 		Task task = createTask(TASK_NAME, 1, createProject());
 		WorkLog worklog = new WorkLog();
 		worklog.setAccount(testAccount);
@@ -254,7 +253,7 @@ public class EventsTest {
 		when(watchedTaskSrvMock.getByTask(TEST_1)).thenReturn(watched);
 		eventsService.addWatchEvent(worklog, "", new Date());
 		eventsService.addSystemEvent(newAccount, LogType.ASSIGN_PROJ, "");
-		verify(eventsRepoMock,times(2)).save(any(Event.class));
+		verify(eventsRepoMock, times(2)).save(any(Event.class));
 	}
 
 	// @Test

@@ -68,6 +68,7 @@ import com.qprogramming.tasq.task.link.TaskLinkService;
 import com.qprogramming.tasq.task.link.TaskLinkType;
 import com.qprogramming.tasq.task.tag.Tag;
 import com.qprogramming.tasq.task.tag.TagsRepository;
+import com.qprogramming.tasq.task.watched.WatchedTask;
 import com.qprogramming.tasq.task.watched.WatchedTaskService;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLog;
@@ -82,8 +83,7 @@ public class TaskController {
 
 	private static final String OPEN = "OPEN";
 	private static final String ALL = "ALL";
-	private static final Logger LOG = LoggerFactory
-			.getLogger(TaskController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(TaskController.class);
 	private static final String CHANGE_TO = " -> ";
 	private static final String BR = "<br>";
 	private static final String START = "start";
@@ -103,11 +103,9 @@ public class TaskController {
 	private EventsService eventSrv;
 
 	@Autowired
-	public TaskController(TaskService taskSrv, ProjectService projectSrv,
-			AccountService accSrv, WorkLogService wlSrv, MessageSource msg,
-			AgileService sprintSrv, TaskLinkService linkService,
-			CommentsRepository commRepo, TagsRepository tagsRepo,
-			WatchedTaskService watchSrv, EventsService eventSrv) {
+	public TaskController(TaskService taskSrv, ProjectService projectSrv, AccountService accSrv, WorkLogService wlSrv,
+			MessageSource msg, AgileService sprintSrv, TaskLinkService linkService, CommentsRepository commRepo,
+			TagsRepository tagsRepo, WatchedTaskService watchSrv, EventsService eventSrv) {
 		this.taskSrv = taskSrv;
 		this.projectSrv = projectSrv;
 		this.accSrv = accSrv;
@@ -128,10 +126,8 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "task/create", method = RequestMethod.POST)
-	public String createTask(
-			@Valid @ModelAttribute("taskForm") TaskForm taskForm,
-			Errors errors, RedirectAttributes ra, HttpServletRequest request,
-			Model model) {
+	public String createTask(@Valid @ModelAttribute("taskForm") TaskForm taskForm, Errors errors, RedirectAttributes ra,
+			HttpServletRequest request, Model model) {
 		if (!Roles.isReporter()) {
 			throw new TasqAuthException(msg);
 		}
@@ -143,10 +139,8 @@ public class TaskController {
 		if (project != null) {
 			// check if can edit
 			if (!projectSrv.canEdit(project)) {
-				MessageHelper.addErrorAttribute(
-						ra,
-						msg.getMessage("error.accesRights", null,
-								Utils.getCurrentLocale()));
+				MessageHelper.addErrorAttribute(ra,
+						msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
 				return "redirect:" + request.getHeader("Referer");
 			}
 			Task task = null;
@@ -177,15 +171,13 @@ public class TaskController {
 			// Create log work
 			taskSrv.save(task);
 			if (taskForm.getAddToSprint() != null) {
-				Sprint sprint = sprintSrv.findByProjectIdAndSprintNo(
-						project.getId(), taskForm.getAddToSprint());
+				Sprint sprint = sprintSrv.findByProjectIdAndSprintNo(project.getId(), taskForm.getAddToSprint());
 				task.addSprint(sprint);
 				// increase scope
 				if (sprint.isActive()) {
 					if (checkIfNotEstimated(task, project)) {
-						errors.rejectValue("addToSprint",
-								"agile.task2Sprint.Notestimated", new Object[] {
-										"", sprint.getSprintNo() },
+						errors.rejectValue("addToSprint", "agile.task2Sprint.Notestimated",
+								new Object[] { "", sprint.getSprintNo() },
 								"Unable to add not estimated task to active sprint");
 						fillCreateTaskModel(model);
 						return null;
@@ -213,8 +205,7 @@ public class TaskController {
 	public TaskForm startEditTask(@RequestParam("id") String id, Model model) {
 		Task task = taskSrv.findById(id);
 		if (projectSrv.canEdit(task.getProject())
-				&& (Roles.isReporter() | task.getOwner().equals(
-						Utils.getCurrentAccount()))) {
+				&& (Roles.isReporter() | task.getOwner().equals(Utils.getCurrentAccount()))) {
 			Hibernate.initialize(task.getRawWorkLog());
 			model.addAttribute("task", task);
 			model.addAttribute("project", task.getProject());
@@ -226,9 +217,8 @@ public class TaskController {
 
 	@Transactional
 	@RequestMapping(value = "/task/edit", method = RequestMethod.POST)
-	public String editTask(
-			@Valid @ModelAttribute("taskForm") TaskForm taskForm,
-			Errors errors, RedirectAttributes ra, HttpServletRequest request) {
+	public String editTask(@Valid @ModelAttribute("taskForm") TaskForm taskForm, Errors errors, RedirectAttributes ra,
+			HttpServletRequest request) {
 		if (errors.hasErrors()) {
 			return null;
 		}
@@ -240,54 +230,42 @@ public class TaskController {
 		}
 		// check if can edit
 		if (!projectSrv.canEdit(task.getProject())
-				&& (!Roles.isReporter() | !task.getOwner().equals(
-						Utils.getCurrentAccount()))) {
-			MessageHelper.addErrorAttribute(
-					ra,
-					msg.getMessage("error.accesRights", null,
-							Utils.getCurrentLocale()));
+				&& (!Roles.isReporter() | !task.getOwner().equals(Utils.getCurrentAccount()))) {
+			MessageHelper.addErrorAttribute(ra, msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
 			return "redirect:" + request.getHeader("Referer");
 		}
 		if (task.getState().equals(TaskState.CLOSED)) {
 			ResultData result = taskIsClosed(ra, request, task);
-			MessageHelper.addWarningAttribute(ra, result.message,
-					Utils.getCurrentLocale());
+			MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
 			return "redirect:" + request.getHeader("Referer");
 		}
 		StringBuilder message = new StringBuilder(Utils.TABLE);
 		if (!task.getName().equalsIgnoreCase(taskForm.getName())) {
-			message.append(Utils.changedFromTo("Name", task.getName(),
-					taskForm.getName()));
+			message.append(Utils.changedFromTo("Name", task.getName(), taskForm.getName()));
 			task.setName(taskForm.getName());
+			updateWatched(task);
 		}
 		if (!task.getDescription().equalsIgnoreCase(taskForm.getDescription())) {
-			message.append(Utils.changedFromTo("Description",
-					task.getDescription(), taskForm.getDescription()));
+			message.append(Utils.changedFromTo("Description", task.getDescription(), taskForm.getDescription()));
 			task.setDescription(taskForm.getDescription());
 		}
-		if ((taskForm.getEstimate() != null)
-				&& (!task.getEstimate()
-						.equalsIgnoreCase(taskForm.getEstimate()))) {
+		if ((taskForm.getEstimate() != null) && (!task.getEstimate().equalsIgnoreCase(taskForm.getEstimate()))) {
 
 			Period estimate = PeriodHelper.inFormat(taskForm.getEstimate());
-			Period difference = PeriodHelper.minusPeriods(estimate,
-					task.getRawEstimate());
+			Period difference = PeriodHelper.minusPeriods(estimate, task.getRawEstimate());
 			// only add estimate change event if task is in sprint
 			if (task.isInSprint()) {
-				wlSrv.addActivityPeriodLog(task,
-						PeriodHelper.outFormat(difference), difference,
-						LogType.ESTIMATE);
+				wlSrv.addActivityPeriodLog(task, PeriodHelper.outFormat(difference), difference, LogType.ESTIMATE);
 			} else {
-				message.append(Utils.changedFromTo("Estimate",
-						task.getEstimate(), taskForm.getEstimate()));
+				message.append(Utils.changedFromTo("Estimate", task.getEstimate(), taskForm.getEstimate()));
 			}
 			task.setEstimate(estimate);
 			task.setRemaining(estimate);
 		}
 		boolean notestimated = !taskForm.getEstimated();
 		if (!task.isEstimated().equals(notestimated)) {
-			message.append(Utils.changedFromTo("Estimated ", task
-					.getEstimated().toString(), Boolean.toString(notestimated)));
+			message.append(
+					Utils.changedFromTo("Estimated ", task.getEstimated().toString(), Boolean.toString(notestimated)));
 			task.setEstimated(notestimated);
 			if (!task.isEstimated()) {
 				task.setStory_points(0);
@@ -295,25 +273,22 @@ public class TaskController {
 		}
 		// Don't check for SP if task is not estimated
 		if (task.isEstimated()) {
-			int storyPoints = taskForm.getStory_points() == null
-					|| ("").equals(taskForm.getStory_points()) ? 0 : Integer
-					.parseInt(taskForm.getStory_points());
-			if (task.getStory_points() != null
-					&& task.getStory_points() != storyPoints) {
+			int storyPoints = taskForm.getStory_points() == null || ("").equals(taskForm.getStory_points()) ? 0
+					: Integer.parseInt(taskForm.getStory_points());
+			if (task.getStory_points() != null && task.getStory_points() != storyPoints) {
 				addWorklogPointsChanged(task, storyPoints);
 				task.setStory_points(storyPoints);
 			}
 		}
 		if (!task.getDue_date().equalsIgnoreCase(taskForm.getDue_date())) {
-			message.append(Utils.changedFromTo("Due date", task.getDue_date(),
-					taskForm.getDue_date()));
+			message.append(Utils.changedFromTo("Due date", task.getDue_date(), taskForm.getDue_date()));
 			task.setDue_date(Utils.convertStringToDate(taskForm.getDue_date()));
 		}
 		TaskType type = TaskType.toType(taskForm.getType());
 		if (!task.getType().equals(type)) {
-			message.append(Utils.changedFromTo("Type", task.getType()
-					.toString(), type.toString()));
+			message.append(Utils.changedFromTo("Type", task.getType().toString(), type.toString()));
 			task.setType(type);
+			updateWatched(task);
 		}
 		LOG.debug(message.toString());
 		taskSrv.save(task);
@@ -324,21 +299,25 @@ public class TaskController {
 		return "redirect:/task?id=" + taskID;
 	}
 
+	private void updateWatched(Task task) {
+		WatchedTask watched = watchSrv.getByTask(task);
+		if (watched != null) {
+			watched.setName(task.getName());
+			watched.setType((TaskType) task.getType());
+		}
+
+	}
+
 	@RequestMapping(value = "subtask", method = RequestMethod.GET)
-	public String showSubTaskDetails(@RequestParam(value = "id") String id,
-			Model model, RedirectAttributes ra) {
+	public String showSubTaskDetails(@RequestParam(value = "id") String id, Model model, RedirectAttributes ra) {
 		return showTaskDetails(id, model, ra);
 	}
 
 	@RequestMapping(value = "task", method = RequestMethod.GET)
-	public String showTaskDetails(@RequestParam(value = "id") String id,
-			Model model, RedirectAttributes ra) {
+	public String showTaskDetails(@RequestParam(value = "id") String id, Model model, RedirectAttributes ra) {
 		Task task = taskSrv.findById(id);
 		if (task == null) {
-			MessageHelper.addErrorAttribute(
-					ra,
-					msg.getMessage("task.notexists", null,
-							Utils.getCurrentLocale()));
+			MessageHelper.addErrorAttribute(ra, msg.getMessage("task.notexists", null, Utils.getCurrentLocale()));
 			return "redirect:/tasks";
 		}
 		Account account = Utils.getCurrentAccount();
@@ -358,19 +337,15 @@ public class TaskController {
 		account = accSrv.update(account);
 		// TASK
 		Set<Comment> comments = commRepo.findByTaskIdOrderByDateDesc(id);
-		Map<TaskLinkType, List<DisplayTask>> links = linkService
-				.findTaskLinks(id);
+		Map<TaskLinkType, List<DisplayTask>> links = linkService.findTaskLinks(id);
 		if (!task.isSubtask()) {
 
 			List<Task> subtasks = taskSrv.findSubtasks(task);
 			// Add all subtasks into remaining work
 			for (Task subtask : subtasks) {
-				task.setEstimate(PeriodHelper.plusPeriods(
-						task.getRawEstimate(), subtask.getRawEstimate()));
-				task.setLoggedWork(PeriodHelper.plusPeriods(
-						task.getRawLoggedWork(), subtask.getRawLoggedWork()));
-				task.setRemaining(PeriodHelper.plusPeriods(
-						task.getRawRemaining(), subtask.getRawRemaining()));
+				task.setEstimate(PeriodHelper.plusPeriods(task.getRawEstimate(), subtask.getRawEstimate()));
+				task.setLoggedWork(PeriodHelper.plusPeriods(task.getRawLoggedWork(), subtask.getRawLoggedWork()));
+				task.setRemaining(PeriodHelper.plusPeriods(task.getRawRemaining(), subtask.getRawRemaining()));
 			}
 			model.addAttribute("subtasks", subtasks);
 		}
@@ -384,12 +359,10 @@ public class TaskController {
 
 	@Transactional
 	@RequestMapping(value = "tasks", method = RequestMethod.GET)
-	public String listTasks(
-			@RequestParam(value = "projectID", required = false) String projId,
+	public String listTasks(@RequestParam(value = "projectID", required = false) String projId,
 			@RequestParam(value = "state", required = false) String state,
 			@RequestParam(value = "query", required = false) String query,
-			@RequestParam(value = "priority", required = false) String priority,
-			Model model) {
+			@RequestParam(value = "priority", required = false) String priority, Model model) {
 		if (state == null || state == "") {
 			if (query != null) {
 				state = ALL;
@@ -398,9 +371,8 @@ public class TaskController {
 			}
 		}
 		List<Project> projects = projectSrv.findAllByUser();
-		Collections.sort(projects, new ProjectSorter(
-				ProjectSorter.SORTBY.LAST_VISIT, Utils.getCurrentAccount()
-						.getActive_project(), true));
+		Collections.sort(projects, new ProjectSorter(ProjectSorter.SORTBY.LAST_VISIT,
+				Utils.getCurrentAccount().getActive_project(), true));
 		model.addAttribute("projects", projects);
 
 		// Get active or choosen project
@@ -417,18 +389,15 @@ public class TaskController {
 			} else if (ALL.equals(state)) {
 				taskList = taskSrv.findAllByProject(active);
 			} else {
-				taskList = taskSrv.findByProjectAndState(active,
-						TaskState.valueOf(state));
+				taskList = taskSrv.findByProjectAndState(active, TaskState.valueOf(state));
 			}
 			if (query != null && query != "") {
 				Tag tag = tagsRepo.findByName(query);
 				List<Task> searchResult = new LinkedList<Task>();
 				for (Task task : taskList) {
 					if (StringUtils.containsIgnoreCase(task.getId(), query)
-							|| StringUtils.containsIgnoreCase(task.getName(),
-									query)
-							|| StringUtils.containsIgnoreCase(
-									task.getDescription(), query)
+							|| StringUtils.containsIgnoreCase(task.getName(), query)
+							|| StringUtils.containsIgnoreCase(task.getDescription(), query)
 							|| task.getTags().contains(tag)) {
 						searchResult.add(task);
 					}
@@ -438,16 +407,13 @@ public class TaskController {
 			if (priority != null && priority != "") {
 				List<Task> searchResult = new LinkedList<Task>();
 				for (Task task : taskList) {
-					if (task.getPriority() != null
-							&& task.getPriority().equals(
-									TaskPriority.valueOf(priority))) {
+					if (task.getPriority() != null && task.getPriority().equals(TaskPriority.valueOf(priority))) {
 						searchResult.add(task);
 					}
 				}
 				taskList = searchResult;
 			}
-			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID,
-					false));
+			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID, false));
 			model.addAttribute("tasks", taskList);
 			model.addAttribute("active_project", active);
 		}
@@ -467,10 +433,8 @@ public class TaskController {
 
 	@Transactional
 	@RequestMapping(value = "task/{id}/subtask", method = RequestMethod.POST)
-	public String createSubTask(@PathVariable String id,
-			@Valid @ModelAttribute("taskForm") TaskForm taskForm,
-			Errors errors, RedirectAttributes ra, HttpServletRequest request,
-			Model model) {
+	public String createSubTask(@PathVariable String id, @Valid @ModelAttribute("taskForm") TaskForm taskForm,
+			Errors errors, RedirectAttributes ra, HttpServletRequest request, Model model) {
 		if (!Roles.isReporter()) {
 			throw new TasqAuthException(msg);
 		}
@@ -482,10 +446,7 @@ public class TaskController {
 			return null;
 		}
 		if (!projectSrv.canEdit(project)) {
-			MessageHelper.addErrorAttribute(
-					ra,
-					msg.getMessage("error.accesRights", null,
-							Utils.getCurrentLocale()));
+			MessageHelper.addErrorAttribute(ra, msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
 			return "redirect:" + request.getHeader("Referer");
 		}
 		Task subTask = taskForm.createSubTask();
@@ -503,8 +464,7 @@ public class TaskController {
 			subTask.setAssignee(assignee);
 		}
 		if (task.isInSprint()) {
-			Sprint active = sprintSrv.findByProjectIdAndActiveTrue(task
-					.getProject().getId());
+			Sprint active = sprintSrv.findByProjectIdAndActiveTrue(task.getProject().getId());
 			subTask.addSprint(active);
 		}
 		Hibernate.initialize(task.getSubtasks());
@@ -530,21 +490,17 @@ public class TaskController {
 	 * @return
 	 */
 	@RequestMapping(value = "logwork", method = RequestMethod.POST)
-	public String logWork(
-			@RequestParam(value = "taskID") String taskID,
+	public String logWork(@RequestParam(value = "taskID") String taskID,
 			@RequestParam(value = "loggedWork") String loggedWork,
 			@RequestParam(value = "remaining", required = false) String remainingTxt,
-			@RequestParam("date_logged") String dateLogged,
-			@RequestParam("time_logged") String timeLogged,
+			@RequestParam("date_logged") String dateLogged, @RequestParam("time_logged") String timeLogged,
 			RedirectAttributes ra, HttpServletRequest request, Model model) {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
 			if (!projectSrv.canEdit(task.getProject()) || !Roles.isUser()) {
-				MessageHelper.addErrorAttribute(
-						ra,
-						msg.getMessage("error.accesRights", null,
-								Utils.getCurrentLocale()));
+				MessageHelper.addErrorAttribute(ra,
+						msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
 				return "redirect:" + request.getHeader("Referer");
 			}
 			try {
@@ -555,8 +511,7 @@ public class TaskController {
 				StringBuilder message = new StringBuilder(loggedWork);
 				Date when = new Date();
 				if (dateLogged != "" && timeLogged != "") {
-					when = Utils.convertStringToDateAndTime(dateLogged + " "
-							+ timeLogged);
+					when = Utils.convertStringToDateAndTime(dateLogged + " " + timeLogged);
 					message.append(BR);
 					message.append("Date: ");
 					message.append(dateLogged + " " + timeLogged);
@@ -567,21 +522,14 @@ public class TaskController {
 						remainingTxt += "h";
 					}
 					remaining = PeriodHelper.inFormat(remainingTxt);
-					wlSrv.addDatedWorkLog(task, remainingTxt, when,
-							LogType.ESTIMATE);
+					wlSrv.addDatedWorkLog(task, remainingTxt, when, LogType.ESTIMATE);
 				}
-				wlSrv.addTimedWorkLog(task, message.toString(), when,
-						remaining, logged, LogType.LOG);
-				MessageHelper.addSuccessAttribute(
-						ra,
-						msg.getMessage("task.logWork.logged", new Object[] {
-								loggedWork, task.getId() },
-								Utils.getCurrentLocale()));
+				wlSrv.addTimedWorkLog(task, message.toString(), when, remaining, logged, LogType.LOG);
+				MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.logWork.logged",
+						new Object[] { loggedWork, task.getId() }, Utils.getCurrentLocale()));
 			} catch (IllegalArgumentException e) {
-				MessageHelper.addErrorAttribute(
-						ra,
-						msg.getMessage("error.estimateFormat", null,
-								Utils.getCurrentLocale()));
+				MessageHelper.addErrorAttribute(ra,
+						msg.getMessage("error.estimateFormat", null, Utils.getCurrentLocale()));
 				return "redirect:" + request.getHeader("Referer");
 			}
 		}
@@ -591,8 +539,7 @@ public class TaskController {
 	@Transactional
 	@RequestMapping(value = "/task/changeState", method = RequestMethod.POST)
 	@ResponseBody
-	public ResultData changeState(
-			@RequestParam(value = "id") String taskID,
+	public ResultData changeState(@RequestParam(value = "id") String taskID,
 			@RequestParam(value = "state") TaskState state,
 			@RequestParam(value = "zero_checkbox", required = false) Boolean remainingZero,
 			@RequestParam(value = "closesubtasks", required = false) Boolean closeSubtasks,
@@ -607,9 +554,8 @@ public class TaskController {
 			if (state.equals(TaskState.TO_DO)) {
 				Hibernate.initialize(task.getLoggedWork());
 				if (!("0m").equals(task.getLoggedWork())) {
-					return new ResultData(ResultData.ERROR, msg.getMessage(
-							"task.alreadyStarted", null,
-							Utils.getCurrentLocale()));
+					return new ResultData(ResultData.ERROR,
+							msg.getMessage("task.alreadyStarted", null, Utils.getCurrentLocale()));
 				}
 			} else if (state.equals(TaskState.CLOSED)) {
 				ResultData result = checkTaskCanOperated(task, false);
@@ -632,8 +578,8 @@ public class TaskController {
 			task.setState(state);
 			if (commentMessage != null && commentMessage != "") {
 				if (Utils.containsHTMLTags(commentMessage)) {
-					return new ResultData(ResultData.ERROR, msg.getMessage(
-							"comment.htmlTag", null, Utils.getCurrentLocale()));
+					return new ResultData(ResultData.ERROR,
+							msg.getMessage("comment.htmlTag", null, Utils.getCurrentLocale()));
 				} else {
 					Comment comment = new Comment();
 					comment.setTask(task);
@@ -654,14 +600,12 @@ public class TaskController {
 			taskSrv.save(task);
 			return new ResultData(ResultData.OK, message);
 		}
-		return new ResultData(ResultData.ERROR, msg.getMessage("error.unknown",
-				null, Utils.getCurrentLocale()));
+		return new ResultData(ResultData.ERROR, msg.getMessage("error.unknown", null, Utils.getCurrentLocale()));
 	}
 
 	@RequestMapping(value = "/task/changePoints", method = RequestMethod.POST)
 	@ResponseBody
-	public ResultData changeStoryPoints(
-			@RequestParam(value = "id") String taskID,
+	public ResultData changeStoryPoints(@RequestParam(value = "id") String taskID,
 			@RequestParam(value = "points") Integer points) {
 		// check if not admin or user
 		Task task = taskSrv.findById(taskID);
@@ -674,39 +618,31 @@ public class TaskController {
 			addWorklogPointsChanged(task, points);
 			task.setStory_points(points);
 			taskSrv.save(task);
-			return new ResultData(ResultData.OK, msg.getMessage(
-					"task.storypoints.edited", new Object[] { task.getId(),
-							points }, Utils.getCurrentLocale()));
+			return new ResultData(ResultData.OK, msg.getMessage("task.storypoints.edited",
+					new Object[] { task.getId(), points }, Utils.getCurrentLocale()));
 		}
-		return new ResultData(ResultData.ERROR, msg.getMessage("error.unknown",
-				null, Utils.getCurrentLocale()));
+		return new ResultData(ResultData.ERROR, msg.getMessage("error.unknown", null, Utils.getCurrentLocale()));
 	}
 
 	@Transactional
 	@RequestMapping(value = "/task/time", method = RequestMethod.GET)
-	public String handleTimer(@RequestParam(value = "id") String taskID,
-			@RequestParam(value = "action") String action,
+	public String handleTimer(@RequestParam(value = "id") String taskID, @RequestParam(value = "action") String action,
 			RedirectAttributes ra, HttpServletRequest request) {
 		Utils.setHttpRequest(request);
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
 			if (!projectSrv.canEdit(task.getProject()) && !Roles.isUser()) {
-				MessageHelper.addErrorAttribute(
-						ra,
-						msg.getMessage("error.accesRights", null,
-								Utils.getCurrentLocale()));
+				MessageHelper.addErrorAttribute(ra,
+						msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
 				return "redirect:" + request.getHeader("Referer");
 			}
 			if (action.equals(START)) {
 				Account account = Utils.getCurrentAccount();
-				if (account.getActive_task() != null
-						&& account.getActive_task().length > 0
+				if (account.getActive_task() != null && account.getActive_task().length > 0
 						&& !("").equals(account.getActive_task()[0])) {
-					MessageHelper.addWarningAttribute(ra, msg.getMessage(
-							"task.stopTime.warning",
-							new Object[] { account.getActive_task()[0] },
-							Utils.getCurrentLocale()));
+					MessageHelper.addWarningAttribute(ra, msg.getMessage("task.stopTime.warning",
+							new Object[] { account.getActive_task()[0] }, Utils.getCurrentLocale()));
 					return "redirect:" + request.getHeader("Referer");
 				}
 				account.startTimerOnTask(task);
@@ -714,10 +650,8 @@ public class TaskController {
 				wlSrv.checkStateAndSave(task);
 			} else if (action.equals(STOP)) {
 				Period logWork = stopTimer(task);
-				MessageHelper.addSuccessAttribute(ra, msg.getMessage(
-						"task.logWork.logged",
-						new Object[] { PeriodHelper.outFormat(logWork),
-								task.getId() }, Utils.getCurrentLocale()));
+				MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.logWork.logged",
+						new Object[] { PeriodHelper.outFormat(logWork), task.getId() }, Utils.getCurrentLocale()));
 			} else if (action.equals(CANCEL)) {
 				Account account = Utils.getCurrentAccount();
 				account.clearActive_task();
@@ -731,9 +665,8 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/assign", method = RequestMethod.POST)
-	public String assign(@RequestParam(value = "taskID") String taskID,
-			@RequestParam(value = "email") String email, RedirectAttributes ra,
-			HttpServletRequest request) {
+	public String assign(@RequestParam(value = "taskID") String taskID, @RequestParam(value = "email") String email,
+			RedirectAttributes ra, HttpServletRequest request) {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			if (!Roles.isUser()) {
@@ -741,8 +674,7 @@ public class TaskController {
 			}
 			if (task.getState().equals(TaskState.CLOSED)) {
 				ResultData result = taskIsClosed(ra, request, task);
-				MessageHelper.addWarningAttribute(ra, result.message,
-						Utils.getCurrentLocale());
+				MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
 				return "redirect:" + request.getHeader("Referer");
 
 			}
@@ -757,25 +689,17 @@ public class TaskController {
 				if (assignee != null && !assignee.equals(task.getAssignee())) {
 					// check if can edit
 					if (!projectSrv.canEdit(task.getProject())) {
-						MessageHelper.addErrorAttribute(
-								ra,
-								msg.getMessage("error.accesRights", null,
-										Utils.getCurrentLocale()));
+						MessageHelper.addErrorAttribute(ra,
+								msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
 						return "redirect:" + request.getHeader("Referer");
 					}
 					task.setAssignee(assignee);
 					task.setLastUpdate(new Date());
 					taskSrv.save(task);
 					watchSrv.addToWatchers(task, assignee);
-					wlSrv.addActivityLog(task, assignee.toString(),
-							LogType.ASSIGNED);
-					MessageHelper.addSuccessAttribute(
-							ra,
-							msg.getMessage(
-									"task.assigned",
-									new Object[] { task.getId(),
-											assignee.toString() },
-									Utils.getCurrentLocale()));
+					wlSrv.addActivityLog(task, assignee.toString(), LogType.ASSIGNED);
+					MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.assigned",
+							new Object[] { task.getId(), assignee.toString() }, Utils.getCurrentLocale()));
 				}
 			}
 		}
@@ -783,8 +707,8 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/assignMe", method = RequestMethod.GET)
-	public String assignMe(@RequestParam(value = "id") String taskID,
-			RedirectAttributes ra, HttpServletRequest request) {
+	public String assignMe(@RequestParam(value = "id") String taskID, RedirectAttributes ra,
+			HttpServletRequest request) {
 		assignMeToTask(taskID);
 		return "redirect:" + request.getHeader("Referer");
 	}
@@ -797,27 +721,23 @@ public class TaskController {
 			throw new TasqAuthException(msg);
 		}
 		if (assignMeToTask(id)) {
-			return new ResultData(ResultData.OK, msg.getMessage(
-					"task.assinged.me", null, Utils.getCurrentLocale())
-					+ " "
-					+ id);
+			return new ResultData(ResultData.OK,
+					msg.getMessage("task.assinged.me", null, Utils.getCurrentLocale()) + " " + id);
 		} else {
-			return new ResultData(ResultData.ERROR, msg.getMessage(
-					"role.error.task.permission", null,
-					Utils.getCurrentLocale()));
+			return new ResultData(ResultData.ERROR,
+					msg.getMessage("role.error.task.permission", null, Utils.getCurrentLocale()));
 		}
 	}
 
 	@RequestMapping(value = "/task/priority", method = RequestMethod.GET)
 	public String changePriority(@RequestParam(value = "id") String taskID,
-			@RequestParam(value = "priority") String priority,
-			RedirectAttributes ra, HttpServletRequest request) {
+			@RequestParam(value = "priority") String priority, RedirectAttributes ra, HttpServletRequest request) {
+		Utils.setHttpRequest(request);
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			if (task.getState().equals(TaskState.CLOSED)) {
 				ResultData result = taskIsClosed(ra, request, task);
-				MessageHelper.addWarningAttribute(ra, result.message,
-						Utils.getCurrentLocale());
+				MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
 				return "redirect:" + request.getHeader("Referer");
 			}
 			if (projectSrv.canEdit(task.getProject()) && Roles.isUser()) {
@@ -839,8 +759,8 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/delete", method = RequestMethod.GET)
-	public String deleteTask(@RequestParam(value = "id") String taskID,
-			RedirectAttributes ra, HttpServletRequest request) {
+	public String deleteTask(@RequestParam(value = "id") String taskID, RedirectAttributes ra,
+			HttpServletRequest request) {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			Project project = projectSrv.findById(task.getProject().getId());
@@ -852,8 +772,7 @@ public class TaskController {
 				for (Task subtask : subtasks) {
 					result = removeTaskRelations(subtask);
 					if (ResultData.ERROR.equals(result.code)) {
-						MessageHelper.addWarningAttribute(ra, result.message,
-								Utils.getCurrentLocale());
+						MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
 						return "redirect:" + request.getHeader("Referer");
 					}
 				}
@@ -861,8 +780,7 @@ public class TaskController {
 				deleteFiles(task);
 				result = removeTaskRelations(task);
 				if (result.code.equals(ResultData.ERROR)) {
-					MessageHelper.addWarningAttribute(ra, result.message,
-							Utils.getCurrentLocale());
+					MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
 					return "redirect:" + request.getHeader("Referer");
 				}
 				// delete files
@@ -881,8 +799,7 @@ public class TaskController {
 					taskSrv.save(purgeTask(task));
 				}
 				taskSrv.delete(task);
-				wlSrv.addWorkLogNoTask(message.toString(), project,
-						LogType.DELETED);
+				wlSrv.addWorkLogNoTask(message.toString(), project, LogType.DELETED);
 			}
 			// TODO add message about removed task
 			return "redirect:/";
@@ -891,9 +808,8 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/attachFiles", method = RequestMethod.POST)
-	public String attacheFiles(@RequestParam String taskID,
-			@RequestParam List<MultipartFile> files, RedirectAttributes ra,
-			HttpServletRequest request, Model model) {
+	public String attacheFiles(@RequestParam String taskID, @RequestParam List<MultipartFile> files,
+			RedirectAttributes ra, HttpServletRequest request, Model model) {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
@@ -906,92 +822,67 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/{id}/file", method = RequestMethod.GET)
-	public @ResponseBody String downloadFile(@PathVariable String id,
-			@RequestParam("get") String filename, HttpServletRequest request,
-			HttpServletResponse response, RedirectAttributes ra)
-			throws IOException {
+	public @ResponseBody String downloadFile(@PathVariable String id, @RequestParam("get") String filename,
+			HttpServletRequest request, HttpServletResponse response, RedirectAttributes ra) throws IOException {
 		Task task = taskSrv.findById(id);
-		if (task.getProject().getParticipants()
-				.contains(Utils.getCurrentAccount())) {
-			File file = new File(taskSrv.getTaskDirectory(task)
-					+ File.separator + filename);
+		if (task.getProject().getParticipants().contains(Utils.getCurrentAccount())) {
+			File file = new File(taskSrv.getTaskDirectory(task) + File.separator + filename);
 			if (file != null) {
-				response.setHeader("content-Disposition",
-						"attachment; filename=" + filename);
+				response.setHeader("content-Disposition", "attachment; filename=" + filename);
 				InputStream is = new FileInputStream(file);
 				IOUtils.copyLarge(is, response.getOutputStream());
 			}
 		} else {
-			MessageHelper.addErrorAttribute(
-					ra,
-					msg.getMessage("error.accesRights", null,
-							Utils.getCurrentLocale()));
+			MessageHelper.addErrorAttribute(ra, msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
 		}
 		return "redirect:" + request.getHeader("Referer");
 	}
 
 	@RequestMapping(value = "/task/{id}/{subid}/file", method = RequestMethod.GET)
-	public @ResponseBody String downloadSubtaskFile(@PathVariable String id,
-			@PathVariable String subid, @RequestParam("get") String filename,
-			HttpServletRequest request, HttpServletResponse response,
+	public @ResponseBody String downloadSubtaskFile(@PathVariable String id, @PathVariable String subid,
+			@RequestParam("get") String filename, HttpServletRequest request, HttpServletResponse response,
 			RedirectAttributes ra) throws IOException {
 		return downloadFile(id + "/" + subid, filename, request, response, ra);
 	}
 
 	@RequestMapping(value = "/task/{id}/imgfile", method = RequestMethod.GET)
-	public @ResponseBody String showImageFile(@PathVariable String id,
-			@RequestParam("get") String filename, HttpServletRequest request,
-			HttpServletResponse response, RedirectAttributes ra)
-			throws IOException {
+	public @ResponseBody String showImageFile(@PathVariable String id, @RequestParam("get") String filename,
+			HttpServletRequest request, HttpServletResponse response, RedirectAttributes ra) throws IOException {
 		Task task = taskSrv.findById(id);
-		if (task.getProject().getParticipants()
-				.contains(Utils.getCurrentAccount())) {
-			File file = new File(taskSrv.getTaskDirectory(task)
-					+ File.separator + filename);
+		if (task.getProject().getParticipants().contains(Utils.getCurrentAccount())) {
+			File file = new File(taskSrv.getTaskDirectory(task) + File.separator + filename);
 			if (file != null) {
-				response.setHeader("content-Disposition",
-						"attachment; filename=" + filename);
+				response.setHeader("content-Disposition", "attachment; filename=" + filename);
 				InputStream is = new FileInputStream(file);
 				IOUtils.copyLarge(is, response.getOutputStream());
 				response.setContentType("image/png");
 			}
 		} else {
-			MessageHelper.addErrorAttribute(
-					ra,
-					msg.getMessage("error.accesRights", null,
-							Utils.getCurrentLocale()));
+			MessageHelper.addErrorAttribute(ra, msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
 		}
 		return "redirect:" + request.getHeader("Referer");
 	}
 
 	@RequestMapping(value = "/task/{id}/{subid}/imgfile", method = RequestMethod.GET)
-	public @ResponseBody String showSubTaskImageFile(@PathVariable String id,
-			@PathVariable String subid, @RequestParam("get") String filename,
-			HttpServletRequest request, HttpServletResponse response,
+	public @ResponseBody String showSubTaskImageFile(@PathVariable String id, @PathVariable String subid,
+			@RequestParam("get") String filename, HttpServletRequest request, HttpServletResponse response,
 			RedirectAttributes ra) throws IOException {
 		return showImageFile(id + "/" + subid, filename, request, response, ra);
 	}
 
 	@RequestMapping(value = "/task/removeFile", method = RequestMethod.GET)
-	public String removeFile(@RequestParam String id,
-			@RequestParam("file") String filename, HttpServletRequest request,
+	public String removeFile(@RequestParam String id, @RequestParam("file") String filename, HttpServletRequest request,
 			RedirectAttributes ra) {
 		Task task = taskSrv.findById(id);
 		if (!projectSrv.canEdit(task.getProject())
-				&& (!Roles.isReporter() || !task.getOwner().equals(
-						Utils.getCurrentAccount()))) {
-			MessageHelper.addErrorAttribute(
-					ra,
-					msg.getMessage("error.accesRights", null,
-							Utils.getCurrentLocale()));
+				&& (!Roles.isReporter() || !task.getOwner().equals(Utils.getCurrentAccount()))) {
+			MessageHelper.addErrorAttribute(ra, msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
 		} else {
-			File file = new File(taskSrv.getTaskDirectory(task)
-					+ File.separator + filename);
+			File file = new File(taskSrv.getTaskDirectory(task) + File.separator + filename);
 			if (file != null) {
 				file.delete();
-				MessageHelper.addSuccessAttribute(ra, msg.getMessage(
-						"task.file.deleted", new Object[] { filename },
-						Utils.getCurrentLocale()));
+				MessageHelper.addSuccessAttribute(ra,
+						msg.getMessage("task.file.deleted", new Object[] { filename }, Utils.getCurrentLocale()));
 			}
 		}
 		return "redirect:" + request.getHeader("Referer");
@@ -1009,18 +900,13 @@ public class TaskController {
 	 */
 	@Transactional
 	@RequestMapping(value = "/task/conver2task", method = RequestMethod.POST)
-	public String convert2task(@RequestParam("taskid") String id,
-			@RequestParam("type") TaskType type, HttpServletRequest request,
-			RedirectAttributes ra) throws IOException {
+	public String convert2task(@RequestParam("taskid") String id, @RequestParam("type") TaskType type,
+			HttpServletRequest request, RedirectAttributes ra) throws IOException {
 		Task subtask = taskSrv.findById(id);
 		Project project = projectSrv.findById(subtask.getProject().getId());
 		if (!projectSrv.canEdit(project)
-				&& (!Roles.isReporter() || !subtask.getOwner().equals(
-						Utils.getCurrentAccount()))) {
-			MessageHelper.addErrorAttribute(
-					ra,
-					msg.getMessage("error.accesRights", null,
-							Utils.getCurrentLocale()));
+				&& (!Roles.isReporter() || !subtask.getOwner().equals(Utils.getCurrentAccount()))) {
+			MessageHelper.addErrorAttribute(ra, msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
 			return "redirect:" + request.getHeader("Referer");
 		} else {
 			Task parent = taskSrv.findById(subtask.getParent());
@@ -1075,8 +961,7 @@ public class TaskController {
 			// Add log
 			StringBuilder message = new StringBuilder(Utils.TABLE);
 			message.append(Utils.changedFromTo("ID", id, taskID));
-			message.append(Utils.changedFromTo("Type", subtask.getType()
-					.toString(), type.toString()));
+			message.append(Utils.changedFromTo("Type", subtask.getType().toString(), type.toString()));
 			message.append(Utils.TABLE_END);
 			wlSrv.addActivityLog(task, message.toString(), LogType.SUBTASK2TASK);
 			// cleanup
@@ -1085,12 +970,9 @@ public class TaskController {
 				throw new TasqException(result.message);
 			}
 			taskSrv.save(purgeTask(subtask));
-			MessageHelper.addSuccessAttribute(
-					ra,
-					msg.getMessage("task.subtasks.2task.success", new Object[] {
-							id, taskID }, Utils.getCurrentLocale()));
-			TaskLink link = new TaskLink(parent.getId(), taskID,
-					TaskLinkType.RELATES_TO);
+			MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.subtasks.2task.success",
+					new Object[] { id, taskID }, Utils.getCurrentLocale()));
+			TaskLink link = new TaskLink(parent.getId(), taskID, TaskLinkType.RELATES_TO);
 			linkService.save(link);
 			return "redirect:/task?id=" + taskID;
 		}
@@ -1124,12 +1006,10 @@ public class TaskController {
 	 */
 	@Transactional
 	@RequestMapping(value = "task/updatelogs", method = RequestMethod.GET)
-	public String update(RedirectAttributes ra, HttpServletRequest request,
-			Model model) {
+	public String update(RedirectAttributes ra, HttpServletRequest request, Model model) {
 		if (Roles.isAdmin()) {
 			List<Task> list = taskSrv.findAll();
-			StringBuilder console = new StringBuilder(
-					"Updating logged work on all tasks within application");
+			StringBuilder console = new StringBuilder("Updating logged work on all tasks within application");
 			console.append(BR);
 			for (Task task : list) {
 				task.updateLoggedWork();
@@ -1156,12 +1036,10 @@ public class TaskController {
 	@Deprecated
 	@Transactional
 	@RequestMapping(value = "task/updateFinish", method = RequestMethod.GET)
-	public String updateFinishDate(RedirectAttributes ra,
-			HttpServletRequest request, Model model) {
+	public String updateFinishDate(RedirectAttributes ra, HttpServletRequest request, Model model) {
 		if (Roles.isAdmin()) {
 			List<Task> list = taskSrv.findAll();
-			StringBuilder console = new StringBuilder(
-					"Updating logged work on all tasks within application");
+			StringBuilder console = new StringBuilder("Updating logged work on all tasks within application");
 			console.append(BR);
 			for (Task task : list) {
 				List<WorkLog> worklogs = wlSrv.getTaskEvents(task.getId());
@@ -1184,13 +1062,10 @@ public class TaskController {
 		}
 	}
 
-	private ResultData taskIsClosed(RedirectAttributes ra,
-			HttpServletRequest request, Task task) {
-		String localized = msg.getMessage(
-				((TaskState) task.getState()).getCode(), null,
-				Utils.getCurrentLocale());
-		return new ResultData(ResultData.ERROR, msg.getMessage("task.closed",
-				new Object[] { localized }, Utils.getCurrentLocale()));
+	private ResultData taskIsClosed(RedirectAttributes ra, HttpServletRequest request, Task task) {
+		String localized = msg.getMessage(((TaskState) task.getState()).getCode(), null, Utils.getCurrentLocale());
+		return new ResultData(ResultData.ERROR,
+				msg.getMessage("task.closed", new Object[] { localized }, Utils.getCurrentLocale()));
 	}
 
 	/**
@@ -1234,8 +1109,7 @@ public class TaskController {
 
 		for (Account account : accounts) {
 			boolean update = false;
-			if (account.getActive_task() != null
-					&& account.getActive_task().length > 0
+			if (account.getActive_task() != null && account.getActive_task().length > 0
 					&& account.getActive_task()[0].equals(task.getId())) {
 				if (account.equals(Utils.getCurrentAccount())) {
 					if (remove) {
@@ -1251,10 +1125,8 @@ public class TaskController {
 				}
 			}
 			if (accountsWorking.length() > 0) {
-				return new ResultData(ResultData.ERROR, msg.getMessage(
-						"task.changeState.change.working",
-						new Object[] { accountsWorking.toString() },
-						Utils.getCurrentLocale()));
+				return new ResultData(ResultData.ERROR, msg.getMessage("task.changeState.change.working",
+						new Object[] { accountsWorking.toString() }, Utils.getCurrentLocale()));
 			}
 			if (remove) {
 				List<Task> lastVisited = account.getLast_visited_t();
@@ -1288,40 +1160,31 @@ public class TaskController {
 		return false;
 	}
 
-	private String worklogStateChange(TaskState state, TaskState oldState,
-			Task task) {
+	private String worklogStateChange(TaskState state, TaskState oldState, Task task) {
 		if (state.equals(TaskState.CLOSED)) {
 			task.setFinishDate(new Date());
 			wlSrv.addActivityLog(task, "", LogType.CLOSED);
-			return msg.getMessage("task.state.changed.closed",
-					new Object[] { task.getId() }, Utils.getCurrentLocale());
+			return msg.getMessage("task.state.changed.closed", new Object[] { task.getId() }, Utils.getCurrentLocale());
 		} else if (oldState.equals(TaskState.CLOSED)) {
 			wlSrv.addActivityLog(task, "", LogType.REOPEN);
 			task.setFinishDate(null);
-			return msg.getMessage("task.state.changed.reopened",
-					new Object[] { task.getId() }, Utils.getCurrentLocale());
+			return msg.getMessage("task.state.changed.reopened", new Object[] { task.getId() },
+					Utils.getCurrentLocale());
 		} else {
 			wlSrv.changeState(oldState, state, task);
-			String localised = msg.getMessage(state.getCode(), null,
-					Utils.getCurrentLocale());
-			return msg.getMessage("task.state.changed",
-					new Object[] { task.getId(), localised },
+			String localised = msg.getMessage(state.getCode(), null, Utils.getCurrentLocale());
+			return msg.getMessage("task.state.changed", new Object[] { task.getId(), localised },
 					Utils.getCurrentLocale());
 		}
 	}
 
 	private void addWorklogPointsChanged(Task task, int storyPoints) {
 		if (task.isInSprint()) {
-			wlSrv.addActivityLog(
-					task,
-					Integer.toString(-1
-							* (task.getStory_points() - storyPoints)),
-					LogType.ESTIMATE);
+			wlSrv.addActivityLog(task, Integer.toString(-1 * (task.getStory_points() - storyPoints)), LogType.ESTIMATE);
 		} else {
 			StringBuilder message = new StringBuilder(Utils.TABLE);
-			message.append(Utils.changedFromTo("Story points", task
-					.getStory_points().toString(), Integer
-					.toString(storyPoints)));
+			message.append(Utils.changedFromTo("Story points", task.getStory_points().toString(),
+					Integer.toString(storyPoints)));
 			message.append(Utils.TABLE_END);
 			wlSrv.addActivityLog(task, message.toString(), LogType.EDITED);
 		}
@@ -1336,14 +1199,12 @@ public class TaskController {
 	private Period stopTimer(Task task) {
 		Account account = Utils.getCurrentAccount();
 		DateTime now = new DateTime();
-		Period logWork = new Period((DateTime) account.getActive_task_time(),
-				now);
+		Period logWork = new Period((DateTime) account.getActive_task_time(), now);
 		// Only log work if greater than 1 minute
 		if (logWork.toStandardDuration().getMillis() / 1000 / 60 < 1) {
 			logWork = new Period().plusMinutes(1);
 		}
-		wlSrv.addNormalWorkLog(task, PeriodHelper.outFormat(logWork), logWork,
-				LogType.LOG);
+		wlSrv.addNormalWorkLog(task, PeriodHelper.outFormat(logWork), logWork, LogType.LOG);
 		account.clearActive_task();
 		accSrv.update(account);
 		return logWork;
@@ -1358,19 +1219,18 @@ public class TaskController {
 	 */
 	private boolean isAdmin(Task task, Project project) {
 		Account currentAccount = Utils.getCurrentAccount();
-		return project.getAdministrators().contains(currentAccount)
-				|| task.getOwner().equals(currentAccount) || Roles.isAdmin();
+		return project.getAdministrators().contains(currentAccount) || task.getOwner().equals(currentAccount)
+				|| Roles.isAdmin();
 	}
 
 	private boolean saveTaskFiles(List<MultipartFile> files_array, Task task) {
 		// Save
 		for (MultipartFile multipartFile : files_array) {
 			if (!multipartFile.isEmpty()) {
-				File file = new File(taskSrv.getTaskDirectory(task)
-						+ File.separator + multipartFile.getOriginalFilename());
+				File file = new File(
+						taskSrv.getTaskDirectory(task) + File.separator + multipartFile.getOriginalFilename());
 				try {
-					FileUtils.writeByteArrayToFile(file,
-							multipartFile.getBytes());
+					FileUtils.writeByteArrayToFile(file, multipartFile.getBytes());
 				} catch (IOException e) {
 					LOG.error(e.getMessage());
 					return false;

@@ -78,9 +78,6 @@ public class MailMail {
 	@Autowired
 	private MailSender mailSender;
 
-	@Autowired
-	private ResourceService resourceSrv;
-
 	@Bean
 	public MailMail mailMail() {
 		MailMail mailMail = new MailMail();
@@ -119,7 +116,7 @@ public class MailMail {
 	 * @param msg
 	 * @return true if there were no errors while sending
 	 */
-	public boolean sendMail(int type, String to, String subject, String msg) {
+	public boolean sendMail(int type, String to, String subject, String msg, Map<String,Resource> resources) {
 		try {
 			MimeMessage message = ((JavaMailSenderImpl) mailSender).createMimeMessage();
 			MimeMessageHelper helper = new MimeMessageHelper(message, true, encoding);
@@ -144,8 +141,9 @@ public class MailMail {
 			helper.setSubject(subject);
 			helper.setText(msg, true);
 			// Load logos and other stuff
-			Resource logoRes = resourceSrv.getResource("classpath:email/img/tasQ_logo_small.png");
-			helper.addInline("logo", logoRes);
+			for (Map.Entry<String, Resource> entry : resources.entrySet()) {
+				helper.addInline(entry.getKey(), entry.getValue());
+			}
 			LOG.debug("Sending e-mail to:" + to);
 			((JavaMailSenderImpl) mailSender).send(message);
 		} catch (MailSendException e) {

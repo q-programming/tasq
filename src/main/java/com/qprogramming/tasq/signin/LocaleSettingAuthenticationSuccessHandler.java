@@ -39,8 +39,9 @@ public class LocaleSettingAuthenticationSuccessHandler extends
 		String locale = Utils.getCurrentAccount().getLanguage();
 		Locale loc = new Locale(locale);
 		localeResolver.setLocale(request, response, loc);
+		Utils.setHttpRequest(request);
+		Utils.getBaseURL();
 		super.onAuthenticationSuccess(request, response, authentication);
-
 	}
 
 }

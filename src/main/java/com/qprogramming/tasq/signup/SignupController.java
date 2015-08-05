@@ -44,6 +44,7 @@ import com.fasterxml.uuid.Generators;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.config.ResourceService;
 import com.qprogramming.tasq.error.TasqException;
 import com.qprogramming.tasq.mail.MailMail;
 import com.qprogramming.tasq.support.Utils;
@@ -62,14 +63,16 @@ public class SignupController {
 	private MailMail mailer;
 	private MessageSource msg;
 	private VelocityEngine velocityEngine;
+	private ResourceService resourceSrv;
 
 	@Autowired
 	public SignupController(AccountService accountSrv, MessageSource msg, MailMail mailer,
-			VelocityEngine velocityEngine) {
+			VelocityEngine velocityEngine,ResourceService resourceSrv) {
 		this.accountSrv = accountSrv;
 		this.msg = msg;
 		this.mailer = mailer;
 		this.velocityEngine = velocityEngine;
+		this.resourceSrv = resourceSrv;
 	}
 
 	@RequestMapping(value = "signup")
@@ -125,7 +128,7 @@ public class SignupController {
 		model.put("application", Utils.getBaseURL());
 		String message = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
 				"email/" + Utils.getDefaultLocale() + "/register.vm", "UTF-8", model);
-		mailer.sendMail(MailMail.REGISTER, account.getEmail(), subject, message);
+		mailer.sendMail(MailMail.REGISTER, account.getEmail(), subject, message,resourceSrv.getBasicResourceMap());
 		MessageHelper.addSuccessAttribute(ra, msg.getMessage("signup.success", null, Utils.getDefaultLocale()));
 
 		return "redirect:/";
@@ -208,7 +211,7 @@ public class SignupController {
 			String message = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
 					"email/" + account.getLanguage() + "/password.vm", "UTF-8", model);
 			LOG.info(url.toString());
-			mailer.sendMail(MailMail.OTHER, account.getEmail(), subject, message);
+			mailer.sendMail(MailMail.OTHER, account.getEmail(), subject, message,resourceSrv.getBasicResourceMap());
 			MessageHelper.addSuccessAttribute(ra,
 					msg.getMessage("singin.password.token.sent", new Object[] { email }, Utils.getDefaultLocale()));
 		}

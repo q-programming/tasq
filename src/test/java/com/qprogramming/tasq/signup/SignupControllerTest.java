@@ -45,6 +45,7 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountRepository;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.config.ResourceService;
 import com.qprogramming.tasq.mail.MailMail;
 import com.qprogramming.tasq.support.web.Message;
 import com.qprogramming.tasq.test.MockSecurityContext;
@@ -94,6 +95,8 @@ public class SignupControllerTest {
 	@Mock
 	private VelocityEngine velocityMock;
 	@Mock
+	private ResourceService resourceMock;
+	@Mock
 	private MailMail mailerMock;
 
 	@Rule
@@ -116,7 +119,7 @@ public class SignupControllerTest {
 
 	@Before
 	public void setUp() {
-		signupCtr = new SignupController(accountSrv, msgMock, mailerMock, velocityMock);
+		signupCtr = new SignupController(accountSrv, msgMock, mailerMock, velocityMock, resourceMock);
 		testAccount = new Account(EMAIL, "", Roles.ROLE_ADMIN);
 		testAccount.setLanguage("en");
 		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");
