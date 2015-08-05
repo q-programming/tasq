@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -199,14 +200,17 @@ public class SignupController {
 			url.append("/");
 			url.append("password?id=");
 			url.append(account.getUuid());
-			String subject = msg.getMessage("singin.password.reset", null, Utils.getDefaultLocale());
-			String message = msg.getMessage("singin.password.reset.message",
-					new Object[] { account.getName(), url, Utils.getBaseURL() }, Utils.getDefaultLocale());
+			String subject = msg.getMessage("singin.password.reset", null, new Locale(account.getLanguage()));
+			Map<String, Object> model = new HashMap<String, Object>();
+			model.put("account", account);
+			model.put("link", url);
+			model.put("application", Utils.getBaseURL());
+			String message = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
+					"email/" + account.getLanguage() + "/password.vm", "UTF-8", model);
 			LOG.info(url.toString());
 			mailer.sendMail(MailMail.OTHER, account.getEmail(), subject, message);
 			MessageHelper.addSuccessAttribute(ra,
-					msg.getMessage("singin.password.token.sent", new Object[] { email }, Utils.getDefaultLocale()) + " "
-							+ url);
+					msg.getMessage("singin.password.token.sent", new Object[] { email }, Utils.getDefaultLocale()));
 		}
 		return "redirect:/";
 	}

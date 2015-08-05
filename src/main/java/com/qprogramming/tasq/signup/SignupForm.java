@@ -5,29 +5,30 @@ import org.hibernate.validator.constraints.NotBlank;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.support.Utils;
 
 public class SignupForm {
 
 	private static final String NOT_BLANK_MESSAGE = "{notBlank.message}";
 	private static final String EMAIL_MESSAGE = "{email.message}";
 
-    @NotBlank(message = SignupForm.NOT_BLANK_MESSAGE)
+	@NotBlank(message = SignupForm.NOT_BLANK_MESSAGE)
 	@Email(message = SignupForm.EMAIL_MESSAGE)
 	private String email;
-    
-    @NotBlank(message = SignupForm.NOT_BLANK_MESSAGE)
-    private String name;
-    
-    @NotBlank(message = SignupForm.NOT_BLANK_MESSAGE)
-    private String surname;
 
-    @NotBlank(message = SignupForm.NOT_BLANK_MESSAGE)
+	@NotBlank(message = SignupForm.NOT_BLANK_MESSAGE)
+	private String name;
+
+	@NotBlank(message = SignupForm.NOT_BLANK_MESSAGE)
+	private String surname;
+
+	@NotBlank(message = SignupForm.NOT_BLANK_MESSAGE)
 	private String password;
 
-    @NotBlank(message = SignupForm.NOT_BLANK_MESSAGE)
+	@NotBlank(message = SignupForm.NOT_BLANK_MESSAGE)
 	private String confirmPassword;
 
-    public String getEmail() {
+	public String getEmail() {
 		return email;
 	}
 
@@ -63,10 +64,11 @@ public class SignupForm {
 		Account account = new Account(getEmail(), getPassword(), Roles.ROLE_VIEWER);
 		account.setName(getName());
 		account.setSurname(getSurname());
-        return account;
+		account.setLanguage(Utils.getDefaultLocale().getLanguage());
+		return account;
 	}
-	
-	public boolean isPasswordConfirmed(){
+
+	public boolean isPasswordConfirmed() {
 		return password.equals(confirmPassword);
 	}
 

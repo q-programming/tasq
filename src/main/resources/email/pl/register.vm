@@ -2,7 +2,7 @@
 <head>
 <meta name="viewport" content="width=device-width">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Confirmation e-mail</title>
+<title>Potwierdzenie konta</title>
 <style>
 * {
 	margin: 0;
@@ -149,24 +149,23 @@ ul li {
 <body bgcolor="#f6f6f6">
 	<div class="content">
 		<div class="header">
-			<img src='cid:logo'>&nbsp;TasQ : Confirm registration
+			<img src='cid:logo'>&nbsp;TasQ : Potwierdzenie konta
 		</div>
 		<table class="main">
 			<tbody>
 				<tr>
 					<td>
-						<p>Hello ${account} ,</p>
+						<p>Witaj ${account} ,</p>
 						<p>
-							This is confirmation email about new account created in TasQ
-							application using this e-mail. </br>In order to confirm your account
-							please click link below
+							To jest e-mail potwierdzjący założenie nowego konta w aplikacji TasQ
+							</br>Aby zatwierdzić twoje konto, kliknij w link poniżej.
 						</p>
 						<p></p>
 						<p>
 							<a href="${link}" target="_blank">${link}</a>
 						</p>
-						<p>If you have not created new account in TasQ application,
-							please ignore this e-mail.</p>
+						<p>Jeżeli nie tworzyłeś żadnego konta TasQ z użyciem tego adresu e-mail,
+							proszę zignorują tą wiadomość</p>
 						</p>
 					</td>
 				</tr>
@@ -186,8 +185,8 @@ ul li {
 								<tr>
 									<td align="center">
 										<p>
-											This is automated e-mail sent from <a href="${application}" target="_blank">${application}</a>.
-											Please do not reply.
+											To jest automatyczna wiadomość wysłana z <a href="${application}" target="_blank">${application}</a>.
+											Proszę nie odpowiadać
 										</p>
 									</td>
 								</tr>
