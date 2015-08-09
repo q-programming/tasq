@@ -20,14 +20,15 @@
 				title="<s:message code="events.deleteAll"/>">
 				<i class="fa fa-trash"></i>
 			</button>
-		</a> <a href="#" id="readAll" title="Mark all as read"
+		</a> <a href="#" id="readAll" title="<s:message
+							code="events.markAll" text="Mark All read?" />"
 			class="deleteDialog"
 			data-msg="<s:message
-							code="notice.markAll.confirm" text="Mark All read?" />"><button
+							code="events.markAll.confirm" text="Mark All read?" />"><button
 				type="button" class="btn btn-default pull-right a-tooltip"
 				data-toggle="tooltip" data-placement="bottom" data-container='body'
 				title="<s:message
-							code="notice.markAll" text="Mark All read" />">
+							code="events.markAll" text="Mark All read" />">
 				<i class="fa fa-check"></i>
 			</button></a>
 		<table id="eventsTable" class="table table-hover table-condensed">
@@ -35,7 +36,7 @@
 				<tr>
 					<th style="width: 20px;"></th>
 					<th></th>
-					<th style="width: 200px;">Date</th>
+					<th style="width: 200px;"><s:message code="main.date"/></th>
 				</tr>
 			</thead>
 		</table>
@@ -177,7 +178,7 @@ function printEventsNavigation(page,data){
 				$('tr.eventRow.unread').each(function(i, obj) {
 					obj.classList.add("read");
 					obj.classList.remove("unread");
-
+				showSuccess(result.message);
 				});
 			}
 		});
@@ -203,6 +204,7 @@ function printEventsNavigation(page,data){
 										});
 										var row = '<tr class="eventRow centerPadded"><td colspan="3"><i><s:message code="event.noEvents"/></i></td></tr>';
 										$("#eventsTable").append(row);
+										showSuccess(result.message);
 									}
 								});
 							}

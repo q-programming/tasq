@@ -119,7 +119,7 @@ public class EventsTest {
 		SecurityContextHolder.setContext(securityMock);
 		eventsService = new EventsService(eventsRepoMock, watchedTaskSrvMock, mailerMock, msgMock, velMock,
 				resourceMock);
-		eventsController = new EventsController(eventsService);
+		eventsController = new EventsController(eventsService, msgMock);
 	}
 
 	@Test
@@ -234,6 +234,7 @@ public class EventsTest {
 
 	@Test
 	public void addWatchEventTest() {
+		Project project = new Project(PROJECT_NAME, testAccount);
 		testAccount.setEmail_notifications(true);
 		Set<Account> watchers = new HashSet<Account>();
 		Account newAccount = new Account(EMAIL, "", Roles.ROLE_USER);
@@ -251,8 +252,9 @@ public class EventsTest {
 		worklog.setType(LogType.LOG);
 		worklog.setTask(task);
 		when(watchedTaskSrvMock.getByTask(TEST_1)).thenReturn(watched);
+		Utils.setHttpRequest(requestMock);
 		eventsService.addWatchEvent(worklog, "", new Date());
-		eventsService.addSystemEvent(newAccount, LogType.ASSIGN_PROJ, "");
+		eventsService.addProjectEvent(newAccount, LogType.ASSIGN_PROJ, project);
 		verify(eventsRepoMock, times(2)).save(any(Event.class));
 	}
 

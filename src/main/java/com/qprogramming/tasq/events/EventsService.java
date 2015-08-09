@@ -22,6 +22,7 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.config.ResourceService;
 import com.qprogramming.tasq.events.Event.Type;
 import com.qprogramming.tasq.mail.MailMail;
+import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.task.watched.WatchedTask;
 import com.qprogramming.tasq.task.watched.WatchedTaskService;
@@ -138,13 +139,6 @@ public class EventsService {
 						String message;
 						message = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
 								"email/" + account.getLanguage() + "/task.vm", "UTF-8", model);
-						// String message = msg
-						// .getMessage(
-						// "event.newEvent.body", new Object[] {
-						// account.toString(),
-						// Utils.getCurrentAccount(), eventStr, wlMessage,
-						// log.getTask().getId() },
-						// locale);
 						LOG.info(account.getEmail());
 						LOG.info(subject.toString());
 						LOG.info(message);
@@ -158,7 +152,7 @@ public class EventsService {
 		}
 	}
 
-	public void addSystemEvent(Account account, LogType type, String eventMsg) {
+	public void addProjectEvent(Account account, LogType type, Project project) {
 		Event event = new Event();
 		event.setAccount(account);
 		event.setWho(Utils.getCurrentAccount().toString());
@@ -166,18 +160,23 @@ public class EventsService {
 		event.setLogtype(type);
 		event.setDate(new Date());
 		event.setType(getEventType(type));
-		event.setMessage(eventMsg);
+		event.setMessage(project.toString());
 		eventsRepo.save(event);
 		if (account.getEmail_notifications()) {
 			Locale locale = new Locale(account.getLanguage());
 			String eventStr = msg.getMessage(type.getCode(), null, locale);
 			String subject = msg.getMessage("event.newSystemEvent",
 					new Object[] { Utils.getCurrentAccount(), eventStr }, locale);
-			String message = msg.getMessage("event.newSystemEvent.body",
-					new Object[] { account.toString(), Utils.getCurrentAccount(), eventStr, eventMsg, }, locale);
-			LOG.info(account.getEmail());
-			LOG.info(subject);
-			LOG.info(message);
+
+			Map<String, Object> model = new HashMap<String, Object>();
+			model.put("account", account);
+			model.put("type", type);
+			model.put("application", Utils.getBaseURL());
+			model.put("project", project);
+			model.put("curAccount", Utils.getCurrentAccount());
+			String message;
+			message = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
+					"email/" + account.getLanguage() + "/project.vm", "UTF-8", model);
 			mailer.sendMail(MailMail.NOTIFICATION, account.getEmail(), subject, message,
 					resourceSrv.getBasicResourceMap());
 		}

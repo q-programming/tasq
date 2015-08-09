@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -17,15 +18,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.qprogramming.tasq.support.ResultData;
+import com.qprogramming.tasq.support.Utils;
 
 @Controller
 public class EventsController {
 
 	private EventsService eventSrv;
+	private MessageSource msg;
 
 	@Autowired
-	public EventsController(EventsService eventSrv) {
+	public EventsController(EventsService eventSrv, MessageSource msg) {
 		this.eventSrv = eventSrv;
+		this.msg = msg;
 	}
 
 	/**
@@ -48,16 +52,14 @@ public class EventsController {
 	 * @return
 	 */
 	@RequestMapping(value = "/listEvents", method = RequestMethod.GET)
-	public @ResponseBody Page<DisplayEvent> eventsPaged(
-			@RequestParam(required = false) String term,
+	public @ResponseBody Page<DisplayEvent> eventsPaged(@RequestParam(required = false) String term,
 			@PageableDefault(size = 25, page = 0, sort = "date", direction = Direction.DESC) Pageable p) {
 		Page<Event> events = eventSrv.getEvents(p);
 		List<DisplayEvent> eventList = new ArrayList<DisplayEvent>();
 		for (Event event : events) {
 			eventList.add(new DisplayEvent(event));
 		}
-		Page<DisplayEvent> result = new PageImpl<DisplayEvent>(eventList, p,
-				events.getTotalElements());
+		Page<DisplayEvent> result = new PageImpl<DisplayEvent>(eventList, p, events.getTotalElements());
 		return result;
 	}
 
@@ -90,6 +92,7 @@ public class EventsController {
 			}
 		}
 		result.code = ResultData.OK;
+		result.message = msg.getMessage("events.markAll.success", null, Utils.getCurrentLocale());
 		return result;
 	}
 
@@ -116,6 +119,7 @@ public class EventsController {
 		List<Event> events = eventSrv.getEvents();
 		eventSrv.delete(events);
 		result.code = ResultData.OK;
+		result.message = msg.getMessage("events.deleteAll.success", null, Utils.getCurrentLocale());
 		return result;
 	}
 

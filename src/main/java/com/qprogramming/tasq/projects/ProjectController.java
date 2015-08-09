@@ -297,7 +297,7 @@ public class ProjectController {
 				account.setActive_project(id);
 				accSrv.update(account);
 			}
-			eventsSrv.addSystemEvent(account, LogType.ASSIGN_PROJ, project.toString());
+			eventsSrv.addProjectEvent(account, LogType.ASSIGN_PROJ, project);
 			projSrv.save(project);
 		}
 		return "redirect:" + request.getHeader("Referer");
@@ -336,7 +336,7 @@ public class ProjectController {
 
 			}
 			project.removeParticipant(account);
-			eventsSrv.addSystemEvent(account, LogType.REMOVE_PROJ, project.toString());
+			eventsSrv.addProjectEvent(account, LogType.REMOVE_PROJ, project);
 			projSrv.save(project);
 		}
 		return "redirect:" + request.getHeader("Referer");
