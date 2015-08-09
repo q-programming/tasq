@@ -49,8 +49,8 @@ public class WorkLogService {
 	private EventsService eventSrv;
 
 	@Autowired
-	public WorkLogService(WorkLogRepository wlRepo, TaskService taskSrv,
-			ProjectService projSrv, EventsService eventSrv) {
+	public WorkLogService(WorkLogRepository wlRepo, TaskService taskSrv, ProjectService projSrv,
+			EventsService eventSrv) {
 		this.wlRepo = wlRepo;
 		this.taskSrv = taskSrv;
 		this.projSrv = projSrv;
@@ -58,8 +58,7 @@ public class WorkLogService {
 	}
 
 	@Transactional
-	public void addTimedWorkLog(Task task, String msg, Date when,
-			Period remaining, Period activity, LogType type) {
+	public void addTimedWorkLog(Task task, String msg, Date when, Period remaining, Period activity, LogType type) {
 		Task loggedTask = taskSrv.findById(task.getId());
 		if (loggedTask != null) {
 			WorkLog wl = new WorkLog();
@@ -134,8 +133,7 @@ public class WorkLogService {
 	}
 
 	@Transactional
-	public void addActivityPeriodLog(Task task, String msg, Period activity,
-			LogType type) {
+	public void addActivityPeriodLog(Task task, String msg, Period activity, LogType type) {
 		Task loggedTask = taskSrv.findById(task.getId());
 		if (loggedTask != null) {
 			WorkLog wl = new WorkLog();
@@ -152,8 +150,7 @@ public class WorkLogService {
 			loggedTask.addWorkLog(wl);
 			loggedTask.setLastUpdate(new Date());
 			taskSrv.save(loggedTask);
-			eventSrv.addWatchEvent(wl, PeriodHelper.outFormat(activity),
-					new Date());
+			eventSrv.addWatchEvent(wl, PeriodHelper.outFormat(activity), new Date());
 		}
 	}
 
@@ -164,8 +161,7 @@ public class WorkLogService {
 	 * @param log
 	 */
 	@Transactional
-	public void addNormalWorkLog(Task task, String msg, Period activity,
-			LogType type) {
+	public void addNormalWorkLog(Task task, String msg, Period activity, LogType type) {
 		Task loggedTask = taskSrv.findById(task.getId());
 		if (loggedTask != null) {
 			WorkLog wl = new WorkLog();
@@ -188,8 +184,7 @@ public class WorkLogService {
 			} else {
 				taskSrv.save(loggedTask);
 			}
-			eventSrv.addWatchEvent(wl, PeriodHelper.outFormat(activity),
-					new Date());
+			eventSrv.addWatchEvent(wl, PeriodHelper.outFormat(activity), new Date());
 		}
 	}
 
@@ -233,10 +228,8 @@ public class WorkLogService {
 	public List<WorkLog> getAllSprintEvents(Sprint sprint) {
 		DateTime start = new DateTime(sprint.getRawStart_date());
 		DateTime end = new DateTime(sprint.getRawEnd_date()).plusDays(1);
-		List<WorkLog> list = wlRepo
-				.findByProjectIdAndTimeBetweenAndWorklogtaskNotNullOrderByTimeAsc(
-						sprint.getProject().getId(), start.toDate(),
-						end.toDate());
+		List<WorkLog> list = wlRepo.findByProjectIdAndTimeBetweenAndWorklogtaskNotNullOrderByTimeAsc(
+				sprint.getProject().getId(), start.toDate(), end.toDate());
 		List<WorkLog> result = new LinkedList<WorkLog>();
 		// Filter out not important events
 		for (WorkLog workLog : list) {
@@ -252,10 +245,8 @@ public class WorkLogService {
 	public List<WorkLog> getAllReleaseEvents(Release release) {
 		DateTime start = release.getStartDate();
 		DateTime end = release.getEndDate();
-		List<WorkLog> list = wlRepo
-				.findByProjectIdAndTimeBetweenAndWorklogtaskNotNullOrderByTimeAsc(
-						release.getProject().getId(), start.toDate(),
-						end.toDate());
+		List<WorkLog> list = wlRepo.findByProjectIdAndTimeBetweenAndWorklogtaskNotNullOrderByTimeAsc(
+				release.getProject().getId(), start.toDate(), end.toDate());
 		List<WorkLog> result = new LinkedList<WorkLog>();
 		// Filter out events for task which are part of this release
 		for (WorkLog workLog : list) {
@@ -272,12 +263,10 @@ public class WorkLogService {
 	}
 
 	public List<WorkLog> findProjectCreateCloseEvents(Project project) {
-		List<WorkLog> list = wlRepo.findByProjectIdOrderByTimeAsc(project
-				.getId());
+		List<WorkLog> list = wlRepo.findByProjectIdOrderByTimeAsc(project.getId());
 		List<WorkLog> result = new LinkedList<WorkLog>();
 		for (WorkLog workLog : list) {
-			if (LogType.CREATE.equals(workLog.getType())
-					|| LogType.REOPEN.equals(workLog.getType())
+			if (LogType.CREATE.equals(workLog.getType()) || LogType.REOPEN.equals(workLog.getType())
 					|| LogType.CLOSED.equals(workLog.getType())) {
 				result.add(workLog);
 			}
@@ -309,29 +298,20 @@ public class WorkLogService {
 
 	private boolean isSprintRelevant(WorkLog workLog, Sprint sprint) {
 		LogType type = (LogType) workLog.getType();
-		return workLog.getTask().inSprint(sprint)
-				&& (type.equals(LogType.DELETED) || type.equals(LogType.LOG)
-						|| type.equals(LogType.TASKSPRINTREMOVE)
-						|| type.equals(LogType.TASKSPRINTADD)
-						|| type.equals(LogType.ESTIMATE)
-						|| type.equals(LogType.CLOSED) || type
-							.equals(LogType.REOPEN));
+		return workLog.getTask().inSprint(sprint) && (type.equals(LogType.DELETED) || type.equals(LogType.LOG)
+				|| type.equals(LogType.TASKSPRINTREMOVE) || type.equals(LogType.TASKSPRINTADD)
+				|| type.equals(LogType.ESTIMATE) || type.equals(LogType.CLOSED) || type.equals(LogType.REOPEN));
 	}
 
 	private boolean isReleaseRelevant(WorkLog workLog, Release release) {
 		LogType type = (LogType) workLog.getType();
-		return (release.equals(workLog.getTask().getRelease()) || release
-				.isActive())
-				&& (type.equals(LogType.CREATE) || type.equals(LogType.DELETED)
-						|| type.equals(LogType.LOG)
-						|| type.equals(LogType.STATUS)
-						|| type.equals(LogType.CLOSED) || type
-							.equals(LogType.REOPEN));
+		return (release.equals(workLog.getTask().getRelease()) || release.isActive())
+				&& (type.equals(LogType.CREATE) || type.equals(LogType.DELETED) || type.equals(LogType.LOG)
+						|| type.equals(LogType.STATUS) || type.equals(LogType.CLOSED) || type.equals(LogType.REOPEN));
 	}
 
 	public List<DisplayWorkLog> getTaskDisplayEvents(String id) {
-		return packIntoDisplay(wlRepo
-				.findByWorklogtaskIdOrderByTimeLoggedDesc(id));
+		return packIntoDisplay(wlRepo.findByWorklogtaskIdOrderByTimeLoggedDesc(id));
 
 	}
 
@@ -347,11 +327,10 @@ public class WorkLogService {
 	 * @param task
 	 */
 	public void changeState(TaskState oldState, TaskState newState, Task task) {
-		StringBuilder message = new StringBuilder(Utils.TABLE);
-		message.append(Utils.changedFromTo(null, oldState.getDescription(),
-				newState.getDescription()));
-		message.append(Utils.TABLE_END);
-		addActivityLog(task, message.toString(), LogType.STATUS);
+//		StringBuilder message = new StringBuilder(Utils.TABLE);
+//		message.append(Utils.changedFromTo(null, oldState.getDescription(), newState.getDescription()));
+//		message.append(Utils.TABLE_END);
+		addActivityLog(task, Utils.changedFromTo(oldState.getDescription(), newState.getDescription()), LogType.STATUS);
 
 	}
 }

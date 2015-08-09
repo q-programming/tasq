@@ -684,7 +684,7 @@ public class TaskController {
 				task.setAssignee(null);
 				task.setLastUpdate(new Date());
 				taskSrv.save(task);
-				wlSrv.addActivityLog(task, assigneeMessage(previous, UNASSIGNED), LogType.ASSIGNED);
+				wlSrv.addActivityLog(task, Utils.changedFromTo(previous, UNASSIGNED), LogType.ASSIGNED);
 
 			} else {
 				Account assignee = accSrv.findByEmail(email);
@@ -699,7 +699,7 @@ public class TaskController {
 					task.setLastUpdate(new Date());
 					taskSrv.save(task);
 					watchSrv.addToWatchers(task, assignee);
-					wlSrv.addActivityLog(task, assigneeMessage(previous, assignee.toString()), LogType.ASSIGNED);
+					wlSrv.addActivityLog(task, Utils.changedFromTo(previous, assignee.toString()), LogType.ASSIGNED);
 					MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.assigned",
 							new Object[] { task.getId(), assignee.toString() }, Utils.getCurrentLocale()));
 				}
@@ -710,15 +710,6 @@ public class TaskController {
 
 	private String getAssignee(Task task) {
 		return task.getAssignee() == null ? UNASSIGNED : task.getAssignee().toString();
-	}
-
-	private String assigneeMessage(String previous, String current) {
-		StringBuilder message = new StringBuilder("<strike>");
-		message.append(previous);
-		message.append("</strike>");
-		message.append(" &#10151; ");
-		message.append(current);
-		return message.toString();
 	}
 
 	@RequestMapping(value = "/task/assignMe", method = RequestMethod.GET)
@@ -1305,7 +1296,7 @@ public class TaskController {
 		task.setAssignee(assignee);
 		task.setLastUpdate(new Date());
 		taskSrv.save(task);
-		wlSrv.addActivityLog(task, assigneeMessage(previous,assignee.toString()), LogType.ASSIGNED);
+		wlSrv.addActivityLog(task, Utils.changedFromTo(previous,assignee.toString()), LogType.ASSIGNED);
 		watchSrv.startWatching(task);
 		return true;
 	}

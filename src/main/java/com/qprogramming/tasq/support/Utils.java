@@ -224,6 +224,19 @@ public class Utils {
 		message.append(TD_TR);
 		return message;
 	}
+	
+	public static String changedFromTo(String previous, String current) {
+		StringBuilder message = new StringBuilder("<strike>");
+		message.append(previous);
+		message.append("</strike>");
+		message.append(" &#10151; ");
+		message.append(current);
+		return message.toString();
+	}
+
+	
+
+
 
 
 
