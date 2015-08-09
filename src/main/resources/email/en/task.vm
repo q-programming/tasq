@@ -2,7 +2,7 @@
 <head>
 <meta name="viewport" content="width=device-width">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>[${task.id}]	${task.name}</title>
+<title>[${task.id}] ${task.name}</title>
 <style>
 * {
 	margin: 0;
@@ -171,9 +171,17 @@ table.worklog_table {
 table.worklog_table td {
 	width: 50%;
 	border-width: 1px;
-	padding: 1px;
+	padding: 1px 1px 1px 5px;
 	border-style: solid;
 	border-color: lightgray;
+}
+
+.quote {
+	margin: 0 0 20px;
+	border-left: 5px solid #eee;
+	margin-bottom: 0;
+	font-size: smaller;
+	padding: 10px;
 }
 </style>
 <style type="text/css"></style>
@@ -192,12 +200,18 @@ table.worklog_table td {
 								href="${application}/task?id=${task.id}" target="_blank">[${task.id}]
 								${task.name}</a>
 						</p>
-						<p>
-							<a href="${application}/user?id=${curAccount.id}">${curAccount}</a>
-							${eventStr} :
-						</p>
-						<p>${wlMessage}</p>
-						<p></p>
+						#set ($create = "create")
+						#if ($log.type.string == $create)
+							<p>
+								<a href="${application}/user?id=${curAccount.id}">${curAccount}</a> created new task and assigned you to it.
+							</p>
+						#else
+							<p>
+								<a href="${application}/user?id=${curAccount.id}">${curAccount}</a>
+								${eventStr} :
+							</p>
+							<blockquote class="quote">${wlMessage}</blockquote>
+						#end
 					</td>
 				</tr>
 			</tbody>

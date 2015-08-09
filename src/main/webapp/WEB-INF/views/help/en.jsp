@@ -4,7 +4,7 @@
 	prefix="security"%>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<div class="row">
+<div class="row white-frame">
 	<div id="menu" class="col-md-2 col-sm-2 col-lg-2" role="complementary">
 		<nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix">
 			<ul class="nav bs-docs-sidenav">

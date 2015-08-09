@@ -22,7 +22,7 @@
 	<s:message code="task.description" text="Description" />
 </c:set>
 
-<div class="col-lg-1 col-md-2 col-sm-3">
+<div class="col-lg-2 col-md-2">
 	<div id="menu" class="bs-docs-sidebar hidden-print affix">
 <!-- 				<nav> -->
 					<ul class="nav bs-docs-sidenav">
@@ -35,7 +35,7 @@
 <!-- 				</nav> -->
 	</div>
 </div>
-<div class="white-frame" style="overflow: auto;display:table">
+<div class="white-frame col-lg-10 col-md-10" style="overflow: auto;display:table">
 <div style="display:table-caption;margin-left: 10px;">
 	<ul class="nav nav-tabs" style="border-bottom:0">
 			<li class="active"><a style="color: black" href="#"><i class="fa fa-plus"></i> <s:message code="task.create" text="Create task"/></a></li>
