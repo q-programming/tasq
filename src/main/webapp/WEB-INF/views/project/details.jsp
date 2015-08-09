@@ -112,6 +112,8 @@
 			</h3>
 			<div class="text-center">
 				<ul id="eventsTable_pagination"></ul>
+			</div>
+			<div>
 				<table id="eventsTable" class="table table-condensed">
 				</table>
 			</div>
