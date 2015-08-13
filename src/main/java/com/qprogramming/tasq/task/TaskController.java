@@ -159,7 +159,7 @@ public class TaskController {
 			String taskID = project.getProjectId() + "-" + taskCount;
 			task.setId(taskID);
 			task.setProject(project);
-			task.setTaskOrder((long) taskCount);
+			task.setTaskOrder(taskCount);
 			project.getTasks().add(task);
 			project.setLastTaskNo(taskCount);
 			// assigne
@@ -340,7 +340,6 @@ public class TaskController {
 		Set<Comment> comments = commRepo.findByTaskIdOrderByDateDesc(id);
 		Map<TaskLinkType, List<DisplayTask>> links = linkService.findTaskLinks(id);
 		if (!task.isSubtask()) {
-
 			List<Task> subtasks = taskSrv.findSubtasks(task);
 			// Add all subtasks into remaining work
 			for (Task subtask : subtasks) {
@@ -348,6 +347,7 @@ public class TaskController {
 				task.setLoggedWork(PeriodHelper.plusPeriods(task.getRawLoggedWork(), subtask.getRawLoggedWork()));
 				task.setRemaining(PeriodHelper.plusPeriods(task.getRawRemaining(), subtask.getRawRemaining()));
 			}
+			Collections.sort(subtasks, new TaskSorter(TaskSorter.SORTBY.ID, true));
 			model.addAttribute("subtasks", subtasks);
 		}
 		model.addAttribute("watching", watchSrv.isWatching(task.getId()));
@@ -925,7 +925,7 @@ public class TaskController {
 			Task task = cloneTask(subtask, taskID);
 			task.setParent(null);
 			task.setType(type);
-			task.setTaskOrder((long) taskCount);
+			task.setTaskOrder(taskCount);
 			task.setEstimated(false);
 			taskSrv.save(task);
 			List<Event> events = eventSrv.getTaskEvents(id);
@@ -1296,7 +1296,7 @@ public class TaskController {
 		task.setAssignee(assignee);
 		task.setLastUpdate(new Date());
 		taskSrv.save(task);
-		wlSrv.addActivityLog(task, Utils.changedFromTo(previous,assignee.toString()), LogType.ASSIGNED);
+		wlSrv.addActivityLog(task, Utils.changedFromTo(previous, assignee.toString()), LogType.ASSIGNED);
 		watchSrv.startWatching(task);
 		return true;
 	}
