@@ -18,7 +18,7 @@
 	<c:set var="is_admin" value="true" />
 </security:authorize>
 <security:authentication property="principal" var="user" />
-<c:set var="is_user" value="<%=Roles.isReporter()%>" />
+<c:set var="is_user" value="<%=Roles.isUser()%>" />
 <c:if test="${(myfn:contains(task.project.administrators,user) || is_admin || task.owner.id == user.id)}">
 	<c:set var="can_edit" value="true" />
 </c:if>
@@ -84,7 +84,7 @@
 				</c:if>
 			</button>
 
-			<c:if test="${can_edit && user.isUser}">
+			<c:if test="${can_edit && user.isPowerUser}">
 				<a class="btn btn-default btn-sm a-tooltip delete_task"
 					href="<c:url value="task/delete?id=${task.id}"/>"
 					title="<s:message code="task.delete" text="Delete task" />"
@@ -123,7 +123,7 @@
 					<tr>
 						<td style="width: 80px;"><s:message code="task.state" /></td>
 						<td class="left-margin"><c:choose>
-								<c:when test="${can_edit && user.isUser || is_assignee}">
+								<c:when test="${can_edit && user.isPowerUser || is_assignee}">
 									<div class="dropdown pointer">
 										<%
 											pageContext.setAttribute("states", TaskState.values());
@@ -156,7 +156,7 @@
 					<tr>
 						<td><s:message code="task.priority" /></td>
 						<td class="left-margin"><c:choose>
-								<c:when test="${can_edit && user.isUser || is_assignee}">
+								<c:when test="${can_edit && user.isPowerUser || is_assignee}">
 									<div class="dropdown pointer">
 										<%
 											pageContext.setAttribute("priorities",
@@ -245,7 +245,7 @@
 					</h5>
 				</div>
 				<!-- logwork trigger modal -->
-				<c:if test="${can_edit && user.isUser || is_assignee}">
+				<c:if test="${can_edit && user.isPowerUser || is_assignee}">
 					<button class="btn btn-default btn-sm worklog" data-toggle="modal"
 						data-target="#logWorkform" data-taskID="${task.id}">
 						<i class="fa fa-lg fa-calendar"></i>
@@ -440,7 +440,7 @@
 														style="color: inherit;
 												<c:if test="${linkTask.state eq 'CLOSED' }">text-decoration: line-through;</c:if>">
 															[${linkTask.id}] ${linkTask.name}</a></td>
-													<c:if test="${can_edit && user.isUser || is_assignee}">
+													<c:if test="${can_edit && user.isPowerUser || is_assignee}">
 														<td style="width: 30px">
 															<div class="buttons_panel pull-right">
 																<a
@@ -570,7 +570,7 @@
 									</c:if>
 									<a href="<c:url value="task/${task.id}/file?get=${file}"></c:url>">${file}</a>
 									</td>
-									<c:if test="${can_edit && user.isUser || is_assignee}">
+									<c:if test="${can_edit && user.isPowerUser || is_assignee}">
 										<td style="width: 30px">
 											<div class="buttons_panel pull-right">
 												<a
@@ -624,7 +624,7 @@
 									src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />
 								<a href="<c:url value="/user?id=${task.assignee.id}"/>">${task.assignee}</a>
 							</c:if>
-							<c:if test="${user.isUser}">
+							<c:if test="${user.isPowerUser}">
 								<span class="btn btn-default btn-sm a-tooltip assignToTask"
 									title="<s:message code="task.assign"/>" data-toggle="modal"
 									data-target="#assign_modal" data-taskID="${task.id}"
@@ -775,7 +775,7 @@
 						</div>
 					</form>
 				</div>
-				<c:if test="${user.isReporter}">
+				<c:if test="${user.isUser}">
 					<button id="comments_add" class="btn btn-default btn-sm">
 						<i class="fa fa-comment"></i>&nbsp;
 						<s:message code="comment.add" text="Add Comment" />

@@ -9,7 +9,7 @@
 <security:authorize access="hasRole('ROLE_ADMIN')">
 	<c:set var="is_admin" value="true" />
 </security:authorize>
-<c:if test="${myfn:contains(project.participants,user) && user.isUser || is_admin}">
+<c:if test="${myfn:contains(project.participants,user) && user.isPowerUser || is_admin}">
 	<c:set var="can_edit" value="true" />
 </c:if>
 <tr>

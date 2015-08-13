@@ -110,7 +110,7 @@ public class SprintControllerTest {
 	@Before
 	public void setUp() {
 		// ReflectionTestUtils.setField(PeriodHelper.class, "hours", 8);
-		testAccount = new Account(EMAIL, "", Roles.ROLE_USER);
+		testAccount = new Account(EMAIL, "", Roles.ROLE_POWERUSER);
 		project = new Project();
 		project.setName(TEST_PROJ);
 		project.setId(1L);
@@ -233,7 +233,7 @@ public class SprintControllerTest {
 	public void assignToSprintBadAuthTest() {
 		boolean catched = false;
 		project.setAdministrators(new HashSet<Account>());
-		testAccount.setRole(Roles.ROLE_USER);
+		testAccount.setRole(Roles.ROLE_POWERUSER);
 		when(sprintRepoMock.findById(1L)).thenReturn(null);
 		Task task = createTask(TEST, 1, project);
 		when(taskSrvMock.findById(TEST)).thenReturn(task);
@@ -282,7 +282,7 @@ public class SprintControllerTest {
 	public void deleteSprintBadAuthTest() {
 		boolean catched = false;
 		project.setAdministrators(new HashSet<Account>());
-		testAccount.setRole(Roles.ROLE_USER);
+		testAccount.setRole(Roles.ROLE_POWERUSER);
 		Sprint sprint = new Sprint();
 		sprint.setProject(project);
 		when(sprintRepoMock.findById(1L)).thenReturn(sprint);
@@ -317,7 +317,7 @@ public class SprintControllerTest {
 	public void removeSprintBadAuthTest() {
 		boolean catched = false;
 		project.setAdministrators(new HashSet<Account>());
-		testAccount.setRole(Roles.ROLE_USER);
+		testAccount.setRole(Roles.ROLE_POWERUSER);
 		Task task = createTask(TEST, 1, project);
 		when(taskSrvMock.findById(TEST)).thenReturn(task);
 		try {
@@ -401,7 +401,7 @@ public class SprintControllerTest {
 		when(projSrvMock.canAdminister(project)).thenReturn(true);
 		when(sprintRepoMock.findByProjectIdAndActiveTrue(1L)).thenReturn(null);
 		when(taskSrvMock.findAllBySprint(sprint2)).thenReturn(taskList);
-		testAccount.setRole(Roles.ROLE_USER);
+		testAccount.setRole(Roles.ROLE_POWERUSER);
 		ResultData result = sprintCtrl.startSprint(2L, 1L, "06-02-2015",
 				"12-02-2015", "12:25", "23:15");
 		Assert.assertEquals(ResultData.ERROR, result.code);
@@ -629,7 +629,7 @@ public class SprintControllerTest {
 	}
 
 	private Account createAccount(String name, String surname) {
-		Account account = new Account(name + "@test.com", "", Roles.ROLE_USER);
+		Account account = new Account(name + "@test.com", "", Roles.ROLE_POWERUSER);
 		account.setName(name);
 		account.setSurname(surname);
 		return account;

@@ -43,7 +43,7 @@ public class WatchedTaskController {
 	public ResultData watch(@RequestParam(value = "id") String id) {
 		ResultData result = new ResultData();
 		// check if not admin or user
-		if (!Roles.isReporter()) {
+		if (!Roles.isUser()) {
 			String role = msg.getMessage(Utils.getCurrentAccount().getRole()
 					.getCode(), null, Utils.getCurrentLocale());
 			String message = msg.getMessage("role.error.auth",

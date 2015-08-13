@@ -138,7 +138,7 @@ public class TaskControllerTest {
 		}
 		Assert.assertTrue("AuthException not thrown on user roles", catched);
 		// Auth valid
-		testAccount.setRole(Roles.ROLE_REPORTER);
+		testAccount.setRole(Roles.ROLE_USER);
 		catched = false;
 		try {
 			taskCtr.startTaskCreate(modelMock);
@@ -178,7 +178,7 @@ public class TaskControllerTest {
 			catched = true;
 		}
 		Assert.assertTrue("AuthException not thrown on user roles", catched);
-		testAccount.setRole(Roles.ROLE_USER);
+		testAccount.setRole(Roles.ROLE_POWERUSER);
 		errors.rejectValue("name", "Error name");
 		String result = taskCtr.createTask(form, errors, raMock, requestMock,
 				modelMock);
@@ -291,8 +291,8 @@ public class TaskControllerTest {
 			catched = true;
 		}
 		Assert.assertTrue("AuthException not thrown on not reporter", catched);
-		testAccount.setRole(Roles.ROLE_REPORTER);
-		Account owner = new Account(NEW_EMAIL, PASSWORD, Roles.ROLE_USER);
+		testAccount.setRole(Roles.ROLE_USER);
+		Account owner = new Account(NEW_EMAIL, PASSWORD, Roles.ROLE_POWERUSER);
 		task.setOwner(owner);
 		catched = false;
 		try {
@@ -310,7 +310,7 @@ public class TaskControllerTest {
 		Task task = createTask(TASK_NAME, 1, project);
 		when(taskSrv.findById("TEST-1")).thenReturn(task);
 		when(projSrvMock.canEdit(any(Project.class))).thenReturn(true);
-		testAccount.setRole(Roles.ROLE_REPORTER);
+		testAccount.setRole(Roles.ROLE_USER);
 		task.setOwner(testAccount);
 		taskCtr.startEditTask("TEST-1", modelMock);
 		verify(modelMock, times(1)).addAttribute("task", task);
@@ -345,8 +345,8 @@ public class TaskControllerTest {
 		Project project = createProject(1L);
 		project.setLastTaskNo(0L);
 		Task task = createTask(TASK_NAME, 1, project);
-		testAccount.setRole(Roles.ROLE_USER);
-		Account owner = new Account(NEW_EMAIL, PASSWORD, Roles.ROLE_USER);
+		testAccount.setRole(Roles.ROLE_POWERUSER);
+		Account owner = new Account(NEW_EMAIL, PASSWORD, Roles.ROLE_POWERUSER);
 		task.setOwner(owner);
 		TaskForm form = new TaskForm(task);
 		Errors errors = new BeanPropertyBindingResult(form, "form");
@@ -363,8 +363,8 @@ public class TaskControllerTest {
 		project.setLastTaskNo(0L);
 		Task task = createTask(TASK_NAME, 1, project);
 		task.setState(TaskState.CLOSED);
-		testAccount.setRole(Roles.ROLE_USER);
-		Account owner = new Account(NEW_EMAIL, PASSWORD, Roles.ROLE_USER);
+		testAccount.setRole(Roles.ROLE_POWERUSER);
+		Account owner = new Account(NEW_EMAIL, PASSWORD, Roles.ROLE_POWERUSER);
 		task.setOwner(owner);
 		TaskForm form = new TaskForm(task);
 		Errors errors = new BeanPropertyBindingResult(form, "form");
@@ -384,8 +384,8 @@ public class TaskControllerTest {
 		project.setLastTaskNo(0L);
 		Task task = createTask(TASK_NAME, 1, project);
 		task.setInSprint(true);
-		testAccount.setRole(Roles.ROLE_USER);
-		Account owner = new Account(NEW_EMAIL, PASSWORD, Roles.ROLE_USER);
+		testAccount.setRole(Roles.ROLE_POWERUSER);
+		Account owner = new Account(NEW_EMAIL, PASSWORD, Roles.ROLE_POWERUSER);
 		task.setOwner(owner);
 		TaskForm form = new TaskForm(task);
 		form.setName(TASK_NAME + "#");
@@ -589,7 +589,7 @@ public class TaskControllerTest {
 	public void logWorkCantEditTest() {
 		Project project = createProject(1L);
 		Task task = createTask(TASK_NAME, 1, project);
-		testAccount.setRole(Roles.ROLE_USER);
+		testAccount.setRole(Roles.ROLE_POWERUSER);
 		when(taskRepoMock.findById(TASK_ID)).thenReturn(task);
 		when(projSrvMock.canEdit(project)).thenReturn(false);
 		taskCtr.logWork(TASK_ID, null, null, null, null, raMock, requestMock,
@@ -603,7 +603,7 @@ public class TaskControllerTest {
 		Project project = createProject(1L);
 		Task task = createTask(TASK_NAME, 1, project);
 		task.setEstimate(new Period(1, 20, 0, 0));
-		testAccount.setRole(Roles.ROLE_USER);
+		testAccount.setRole(Roles.ROLE_POWERUSER);
 		when(taskRepoMock.findById(TASK_ID)).thenReturn(task);
 		when(projSrvMock.canEdit(project)).thenReturn(true);
 		taskCtr.logWork(TASK_ID, "1", "10m", "1-05-2015", "12:00", raMock,
@@ -658,7 +658,7 @@ public class TaskControllerTest {
 		Task task = createTask(TASK_NAME, 1, project);
 		task.setState(TaskState.CLOSED);
 		task.setComments(new HashSet<Comment>());
-		Account account = new Account(NEW_EMAIL,PASSWORD,Roles.ROLE_USER);
+		Account account = new Account(NEW_EMAIL,PASSWORD,Roles.ROLE_POWERUSER);
 		Object[] activeTask = {task.getId()};
 		account.setActive_task(activeTask);
 		List<Account> accounts = new LinkedList<Account>();

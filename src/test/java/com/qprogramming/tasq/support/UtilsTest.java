@@ -115,8 +115,8 @@ public class UtilsTest {
 }
 	@Test
 	public void rolesTest(){
-		Assert.assertTrue(Roles.isReporter());
 		Assert.assertTrue(Roles.isUser());
+		Assert.assertTrue(Roles.isPowerUser());
 		Assert.assertTrue(Roles.isAdmin());
 		Assert.assertEquals("role.admin",Roles.ROLE_ADMIN.getCode());
 	}

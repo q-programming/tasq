@@ -81,7 +81,7 @@ public class HomeControllersTest {
 
 	@Before
 	public void setUp() {
-		testAccount = new Account(EMAIL, "", Roles.ROLE_USER);
+		testAccount = new Account(EMAIL, "", Roles.ROLE_POWERUSER);
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);

@@ -286,8 +286,8 @@ public class Account implements java.io.Serializable, UserDetails {
 		this.active_project = active_project;
 	}
 
-	public boolean getIsReporter() {
-		return getIsUser() || role.equals(Roles.ROLE_REPORTER);
+	public boolean getIsUser() {
+		return getIsPowerUser() || role.equals(Roles.ROLE_USER);
 	}
 
 	/**
@@ -295,8 +295,8 @@ public class Account implements java.io.Serializable, UserDetails {
 	 * 
 	 * @return
 	 */
-	public boolean getIsUser() {
-		return getIsAdmin() || role.equals(Roles.ROLE_USER);
+	public boolean getIsPowerUser() {
+		return getIsAdmin() || role.equals(Roles.ROLE_POWERUSER);
 	}
 
 	/**

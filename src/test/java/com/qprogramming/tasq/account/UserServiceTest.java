@@ -63,7 +63,7 @@ public class UserServiceTest {
 	public void shouldReturnUserDetails() {
 		// arrange
 		Account demoUser = new Account("user@example.com", "demo",
-				Roles.ROLE_USER);
+				Roles.ROLE_POWERUSER);
 		demoUser.setConfirmed(true);
 		when(accountServiceMock.findByEmail("user@example.com")).thenReturn(
 				demoUser);

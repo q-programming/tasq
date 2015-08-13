@@ -173,7 +173,7 @@ public class CommentsControllerTest {
 		Task task = createTask(TASK_NAME, 1, createProject());
 		Comment comment = new Comment();
 		comment.setId(1L);
-		comment.setAuthor(new Account("email@email.com", "", Roles.ROLE_USER));
+		comment.setAuthor(new Account("email@email.com", "", Roles.ROLE_POWERUSER));
 		comment.setMessage("Comment");
 		Set<Comment> comments = new HashSet<Comment>();
 		comments.add(comment);

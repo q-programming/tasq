@@ -54,7 +54,7 @@ public class HomeController {
 			List<Project> usersProjects = projSrv.findAllByUser();
 			if (usersProjects.size() == 0
 					&& (account.getRole().equals(Roles.ROLE_VIEWER) || account
-							.getRole().equals(Roles.ROLE_REPORTER))) {
+							.getRole().equals(Roles.ROLE_USER))) {
 				return "homeNewUser";
 			}
 			List<Task> allTasks = new LinkedList<Task>();

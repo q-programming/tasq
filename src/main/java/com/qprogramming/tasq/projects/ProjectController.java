@@ -204,7 +204,7 @@ public class ProjectController {
 
 	@RequestMapping(value = "project/create", method = RequestMethod.GET)
 	public NewProjectForm startProjectcreate() {
-		if (!Roles.isUser()) {
+		if (!Roles.isPowerUser()) {
 			throw new TasqAuthException(msg);
 		}
 		return new NewProjectForm();
@@ -214,7 +214,7 @@ public class ProjectController {
 	public String createProject(
 			@Valid @ModelAttribute("newProjectForm") NewProjectForm newProjectForm,
 			Errors errors, RedirectAttributes ra, HttpServletRequest request) {
-		if (!Roles.isUser()) {
+		if (!Roles.isPowerUser()) {
 			throw new TasqAuthException(msg);
 		}
 		if (errors.hasErrors()) {
@@ -259,7 +259,7 @@ public class ProjectController {
 	@RequestMapping(value = "project/manage", method = RequestMethod.GET)
 	public String manageProject(@RequestParam(value = "id") Long id,
 			Model model, RedirectAttributes ra) {
-		if (!Roles.isUser()) {
+		if (!Roles.isPowerUser()) {
 			throw new TasqAuthException(msg);
 		}
 		Project project = projSrv.findById(id);
@@ -279,7 +279,7 @@ public class ProjectController {
 	public String addParticipant(@RequestParam(value = "id") Long id,
 			@RequestParam(value = "email") String email, RedirectAttributes ra,
 			HttpServletRequest request) {
-		if (!Roles.isUser()) {
+		if (!Roles.isPowerUser()) {
 			throw new TasqAuthException(msg);
 		}
 		Account account = accSrv.findByEmail(email);
@@ -309,7 +309,7 @@ public class ProjectController {
 			@RequestParam(value = "project_id") Long projectId,
 			@RequestParam(value = "account_id") Long accountId,
 			RedirectAttributes ra, HttpServletRequest request) {
-		if (!Roles.isUser()) {
+		if (!Roles.isPowerUser()) {
 			throw new TasqAuthException(msg);
 		}
 		Account account = accSrv.findById(accountId);
@@ -348,7 +348,7 @@ public class ProjectController {
 			@RequestParam(value = "project_id") Long projectId,
 			@RequestParam(value = "account_id") Long accountId,
 			RedirectAttributes ra, HttpServletRequest request) {
-		if (!Roles.isUser()) {
+		if (!Roles.isPowerUser()) {
 			throw new TasqAuthException(msg);
 		}
 		Account account = accSrv.findById(accountId);
@@ -373,7 +373,7 @@ public class ProjectController {
 			@RequestParam(value = "project_id") Long projectId,
 			@RequestParam(value = "account_id") Long accountId,
 			RedirectAttributes ra, HttpServletRequest request) {
-		if (!Roles.isUser()) {
+		if (!Roles.isPowerUser()) {
 			throw new TasqAuthException(msg);
 		}
 		Account account = accSrv.findById(accountId);
@@ -533,7 +533,7 @@ public class ProjectController {
 			@RequestParam(value = "default_type") TaskType type,
 			@RequestParam(value = "defaultAssignee") Long assigneId,
 			RedirectAttributes ra, HttpServletRequest request) {
-		if (!Roles.isUser()) {
+		if (!Roles.isPowerUser()) {
 			throw new TasqAuthException(msg);
 		}
 		Project project = projSrv.findById(id);
@@ -568,7 +568,7 @@ public class ProjectController {
 	public String changeDescriptions(@PathVariable Long id,
 			@RequestParam(value = "description") String description,
 			RedirectAttributes ra, HttpServletRequest request) {
-		if (!Roles.isUser()) {
+		if (!Roles.isPowerUser()) {
 			throw new TasqAuthException(msg);
 		}
 		Project project = projSrv.findById(id);

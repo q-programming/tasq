@@ -129,7 +129,7 @@ public class TaskController {
 	@RequestMapping(value = "task/create", method = RequestMethod.POST)
 	public String createTask(@Valid @ModelAttribute("taskForm") TaskForm taskForm, Errors errors, RedirectAttributes ra,
 			HttpServletRequest request, Model model) {
-		if (!Roles.isReporter()) {
+		if (!Roles.isUser()) {
 			throw new TasqAuthException(msg);
 		}
 		if (errors.hasErrors()) {
@@ -206,7 +206,7 @@ public class TaskController {
 	public TaskForm startEditTask(@RequestParam("id") String id, Model model) {
 		Task task = taskSrv.findById(id);
 		if (projectSrv.canEdit(task.getProject())
-				&& (Roles.isReporter() | task.getOwner().equals(Utils.getCurrentAccount()))) {
+				&& (Roles.isUser() | task.getOwner().equals(Utils.getCurrentAccount()))) {
 			Hibernate.initialize(task.getRawWorkLog());
 			model.addAttribute("task", task);
 			model.addAttribute("project", task.getProject());
@@ -231,7 +231,7 @@ public class TaskController {
 		}
 		// check if can edit
 		if (!projectSrv.canEdit(task.getProject())
-				&& (!Roles.isReporter() | !task.getOwner().equals(Utils.getCurrentAccount()))) {
+				&& (!Roles.isUser() | !task.getOwner().equals(Utils.getCurrentAccount()))) {
 			MessageHelper.addErrorAttribute(ra, msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
 			return "redirect:" + request.getHeader("Referer");
 		}
@@ -436,7 +436,7 @@ public class TaskController {
 	@RequestMapping(value = "task/{id}/subtask", method = RequestMethod.POST)
 	public String createSubTask(@PathVariable String id, @Valid @ModelAttribute("taskForm") TaskForm taskForm,
 			Errors errors, RedirectAttributes ra, HttpServletRequest request, Model model) {
-		if (!Roles.isReporter()) {
+		if (!Roles.isUser()) {
 			throw new TasqAuthException(msg);
 		}
 		Task task = taskSrv.findById(id);
@@ -499,7 +499,7 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
-			if (!projectSrv.canEdit(task.getProject()) || !Roles.isUser()) {
+			if (!projectSrv.canEdit(task.getProject()) || !Roles.isPowerUser()) {
 				MessageHelper.addErrorAttribute(ra,
 						msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
 				return "redirect:" + request.getHeader("Referer");
@@ -549,7 +549,7 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
-			if (!projectSrv.canEdit(task.getProject()) || !Roles.isUser()) {
+			if (!projectSrv.canEdit(task.getProject()) || !Roles.isPowerUser()) {
 				throw new TasqAuthException(msg, "role.error.task.permission");
 			}
 			if (state.equals(TaskState.TO_DO)) {
@@ -612,7 +612,7 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
-			if (!projectSrv.canEdit(task.getProject()) || !Roles.isUser()) {
+			if (!projectSrv.canEdit(task.getProject()) || !Roles.isPowerUser()) {
 				throw new TasqAuthException(msg, "role.error.task.permission");
 			}
 			// updatepoints
@@ -633,7 +633,7 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
-			if (!projectSrv.canEdit(task.getProject()) && !Roles.isUser()) {
+			if (!projectSrv.canEdit(task.getProject()) && !Roles.isPowerUser()) {
 				MessageHelper.addErrorAttribute(ra,
 						msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
 				return "redirect:" + request.getHeader("Referer");
@@ -671,7 +671,7 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		String previous = getAssignee(task);
 		if (task != null) {
-			if (!Roles.isUser()) {
+			if (!Roles.isPowerUser()) {
 				throw new TasqAuthException(msg);
 			}
 			if (task.getState().equals(TaskState.CLOSED)) {
@@ -723,7 +723,7 @@ public class TaskController {
 	@ResponseBody
 	public ResultData assignMePOST(@RequestParam(value = "id") String id) {
 		// check if not admin or user
-		if (!Roles.isUser()) {
+		if (!Roles.isPowerUser()) {
 			throw new TasqAuthException(msg);
 		}
 		if (assignMeToTask(id)) {
@@ -746,7 +746,7 @@ public class TaskController {
 				MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
 				return "redirect:" + request.getHeader("Referer");
 			}
-			if (projectSrv.canEdit(task.getProject()) && Roles.isUser()) {
+			if (projectSrv.canEdit(task.getProject()) && Roles.isPowerUser()) {
 				StringBuilder message = new StringBuilder();
 				String oldPriority = "";
 				// TODO temporary due to old DB
@@ -819,7 +819,7 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
-			if (!projectSrv.canEdit(task.getProject()) && !Roles.isUser()) {
+			if (!projectSrv.canEdit(task.getProject()) && !Roles.isPowerUser()) {
 				throw new TasqAuthException(msg, "role.error.task.permission");
 			}
 			saveTaskFiles(files, task);
@@ -881,7 +881,7 @@ public class TaskController {
 			RedirectAttributes ra) {
 		Task task = taskSrv.findById(id);
 		if (!projectSrv.canEdit(task.getProject())
-				&& (!Roles.isReporter() || !task.getOwner().equals(Utils.getCurrentAccount()))) {
+				&& (!Roles.isUser() || !task.getOwner().equals(Utils.getCurrentAccount()))) {
 			MessageHelper.addErrorAttribute(ra, msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
 		} else {
 			File file = new File(taskSrv.getTaskDirectory(task) + File.separator + filename);
@@ -911,7 +911,7 @@ public class TaskController {
 		Task subtask = taskSrv.findById(id);
 		Project project = projectSrv.findById(subtask.getProject().getId());
 		if (!projectSrv.canEdit(project)
-				&& (!Roles.isReporter() || !subtask.getOwner().equals(Utils.getCurrentAccount()))) {
+				&& (!Roles.isUser() || !subtask.getOwner().equals(Utils.getCurrentAccount()))) {
 			MessageHelper.addErrorAttribute(ra, msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
 			return "redirect:" + request.getHeader("Referer");
 		} else {
@@ -1097,7 +1097,7 @@ public class TaskController {
 	 * @param model
 	 */
 	private void fillCreateTaskModel(Model model) {
-		if (!Roles.isReporter()) {
+		if (!Roles.isUser()) {
 			throw new TasqAuthException(msg);
 		}
 		Project project = projectSrv.findUserActiveProject();

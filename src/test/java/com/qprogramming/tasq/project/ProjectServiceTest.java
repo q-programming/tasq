@@ -136,7 +136,7 @@ public class ProjectServiceTest {
 	public void canEditTest() {
 		when(projRepoMock.findById(1L)).thenReturn(testProject);
 		Assert.assertTrue(projSrv.canEdit(1L));
-		testAccount.setRole(Roles.ROLE_USER);
+		testAccount.setRole(Roles.ROLE_POWERUSER);
 		Assert.assertTrue(projSrv.canEdit(1L));
 
 	}

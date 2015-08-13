@@ -237,7 +237,7 @@ public class EventsTest {
 		Project project = new Project(PROJECT_NAME, testAccount);
 		testAccount.setEmail_notifications(true);
 		Set<Account> watchers = new HashSet<Account>();
-		Account newAccount = new Account(EMAIL, "", Roles.ROLE_USER);
+		Account newAccount = new Account(EMAIL, "", Roles.ROLE_POWERUSER);
 		newAccount.setEmail_notifications(true);
 		watchers.add(testAccount);
 		watchers.add(newAccount);

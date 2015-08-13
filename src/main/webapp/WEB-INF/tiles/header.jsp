@@ -49,7 +49,7 @@
 								<li style="margin: 10px;"><a
 									href="<c:url value="/projects"/>"><i class="fa fa-list"></i>
 										<s:message code="project.showAll" text="Projects" /></a></li>
-								<c:if test="${user.isUser == true}">
+								<c:if test="${user.isPowerUser == true}">
 									<li style="margin: 10px;"><a
 										href="<c:url value="/project/create"/>"><i
 											class="fa fa-plus"></i> <s:message code="project.create"
@@ -71,7 +71,7 @@
 										class="fa fa-list"></i> <s:message code="task.showAll"
 											text="Show all" /></a></li>
 
-								<c:if test="${user.isReporter == true}">
+								<c:if test="${user.isUser == true}">
 									<li style="margin: 10px;"><a
 										href="<c:url value="/task/create"/>"><i class="fa fa-plus"></i>
 											<s:message code="task.create" text="Create task" /></a></li>
@@ -101,7 +101,7 @@
 										<s:message code="agile.showAll" text="Show all" /></a></li>
 							</ul></li>
 					<%--Create task button --%>
-					<c:if test="${user.isReporter == true}">
+					<c:if test="${user.isUser == true}">
 						<li>
 							<div style="padding-top: 8px;">
 								<a class="btn btn-xs theme a-tooltip"

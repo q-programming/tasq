@@ -106,7 +106,7 @@ public class ImportExportController {
 	@RequestMapping(value = "/task/import", method = RequestMethod.GET)
 	public String startImportTasks(Model model) {
 		// check if can import/create!
-		if (!Roles.isReporter()) {
+		if (!Roles.isUser()) {
 			throw new TasqAuthException(msg);
 		}
 		model.addAttribute("projects", projectSrv.findAllByUser());
