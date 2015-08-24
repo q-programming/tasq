@@ -98,11 +98,12 @@
 				<li class="wider"><b><a href="#proj"><s:message
 								code="project.projects" text="Projects" /></a></b> Gives access to
 					projects which are created or available for user. First are
-					displayed 5 last visited projects.<br> To show all , choose <i
-					class="fa fa-list"></i> <s:message code="project.showAll"
-						text="Projects" /><br> Nearly every user can create his own
-					project from here using <i class="fa fa-plus"></i> <s:message
-						code="project.create" text="Create project" /></li>
+					displayed 5 last visited projects.<br> To show all , choose <b><a
+						href="#proj-view"><i class="fa fa-list"></i> <s:message
+								code="project.showAll" text="Projects" /></a></b><br> Nearly every
+					user can create his own project from here using <b><a
+						href="#proj-create"><i class="fa fa-plus"></i> <s:message
+								code="project.create" text="Create project" /></a></b></li>
 				<li class="wider"><b><a href="#tasks"><s:message
 								code="task.tasks" text="Tasks" /> </a></b> - Gives access to tasks.
 					Last 5 visited task are shown first, and all tasks can be shown
@@ -219,9 +220,9 @@
 			</h4>
 			<p>
 				New users can be invited to use tasker, by using this form. Input
-				valid e-mail address and click "<i class="fa fa-user-plus"></i>
-				<s:message code="panel.invite" />
-				" to send predefined e-mail to inputed address
+				valid e-mail address and click "<b><i class="fa fa-user-plus"></i>
+					<s:message code="panel.invite" /></b> " to send predefined e-mail to
+				inputed address
 			</p>
 			<hr>
 			<%--------------------------------EVENTS ----------------------------%>
@@ -300,12 +301,64 @@
 			<h2>Projects</h2>
 			<a class="anchor" id="proj-view"></a>
 			<h3>Browsing all projects</h3>
-			<p>TODO</p>
+			<p>
+				Each user can view project to which he is assigned ( or is admin )
+				To do so, please select <b><i class="fa fa-list"></i> <s:message
+						code="project.showAll" text="Projects" /></b> from <b><s:message
+						code="project.projects" text="Projects" /><span class="caret"></span></b>
+				menu
+			</p>
+			<p>On this screen every project into which user is assigned is
+				shown here. Basic information like name , description and who is
+				main administrator of project is displayed.</p>
+			<p>
+				Project that are set as active are highlighted and <i
+					class="fa fa-refresh fa-spin"></i> icon is shown in active button.
+				When creating new task, active project is always taken first. To
+				change active project, please click <span class="btn btn-default "><i
+					class="fa fa-refresh"></i> </span> button in corresponding row
+			</p>
 			<hr>
 			<%-------------------------DETAILS ------------------------------%>
 			<a class="anchor" id="proj-details"></a>
 			<h3>View projects details</h3>
-			<p>TODO</p>
+			<p>
+				In order to show project details , please either select it from <b><s:message
+						code="project.projects" text="Projects" /><span class="caret"></span></b>
+				menu , or click on Project ID , on task screen
+			</p>
+			<p>Project details screen all project information related to this
+				project</p>
+			<div>
+				<img src="<c:url value="/resources/img/help/project_details.png"/>" usemap="#proj_details_map"></img>
+				<map id="proj_details_map" name="proj_details_map">
+					<area class="a-tooltip" shape="rect" coords="6,14,177,33" title="Project Name" alt="" href="#"
+						target="_self">
+					<area shape="rect" coords="6,38,123,55" title="Project description" alt="" href="#"
+						target="_self">
+					<area class="a-tooltip" shape="rect" coords="716,3,771,25" title="Activate / deactivate project " alt="" href="#"
+						target="_self">
+					<area shape="rect" coords="771,4,797,52" title="" alt="" href="#"
+						target="_self">
+					<area shape="rect" coords="7,77,799,101" title="" alt="" href="#"
+						target="_self">
+					<area shape="rect" coords="41,106,755,296" title="" alt="" href="#"
+						target="_self">
+					<area shape="rect" coords="0,300,157,338" title="" alt="" href="#"
+						target="_self">
+					<area shape="rect" coords="196,349,268,385" title="" alt=""
+						href="#" target="_self">
+					<area shape="rect" coords="434,301,618,332" title="" alt=""
+						href="#" target="_self">
+					<area shape="rect" coords="675,302,797,326" title="" alt=""
+						href="#" target="_self">
+					<area shape="rect" coords="676,327,800,350" title="" alt=""
+						href="#" target="_self">
+					<area shape="rect" coords="798,420,799,421"
+						alt="Image HTML map generator" title="HTML Map creator"
+						href="http://www.html-map.com/" target="_self">
+				</map>
+			</div>
 			<%----------------------------CREATE  ---------------------------------------%>
 			<a class="anchor" id="proj-create"></a>
 			<h3>Creating project</h3>
