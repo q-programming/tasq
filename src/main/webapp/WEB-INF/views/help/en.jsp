@@ -330,34 +330,73 @@
 			<p>Project details screen all project information related to this
 				project</p>
 			<div>
-				<img src="<c:url value="/resources/img/help/project_details.png"/>" usemap="#proj_details_map"></img>
+				<img class="responsive"
+					src="<c:url value="/resources/img/help/project_details.png"/>"
+					usemap="#proj_details_map"></img>
 				<map id="proj_details_map" name="proj_details_map">
-					<area class="a-tooltip" shape="rect" coords="6,14,177,33" title="Project Name" alt="" href="#"
+					<area shape="rect" coords="6,14,177,33" title="Project Name" alt=""
+						href="#proj-1" target="_self">
+					<area shape="rect" coords="6,38,123,55" title="Project description"
+						alt="" href="#proj-2" target="_self">
+					<area shape="rect" coords="716,3,771,25"
+						title="Activate / deactivate project " alt="" href="#proj-3"
 						target="_self">
-					<area shape="rect" coords="6,38,123,55" title="Project description" alt="" href="#"
+					<area shape="rect" coords="771,4,797,52" title="Project management"
+						alt="" href="#proj-4" target="_self">
+					<area shape="rect" coords="7,77,799,101"
+						title="Open/Ongoing/Closed tasks " alt="" href="#proj-5"
 						target="_self">
-					<area class="a-tooltip" shape="rect" coords="716,3,771,25" title="Activate / deactivate project " alt="" href="#"
+					<area shape="rect" coords="41,106,755,296"
+						title="Open/Closed Chart" alt="" href="#proj-6" target="_self">
+					<area shape="rect" coords="0,300,157,338"
+						title="Latest events in
+							project" alt="" href="#proj-7"
 						target="_self">
-					<area shape="rect" coords="771,4,797,52" title="" alt="" href="#"
+					<area shape="rect" coords="196,349,268,385"
+						title="Events list
+							pagination" alt="" href="#proj-8"
 						target="_self">
-					<area shape="rect" coords="7,77,799,101" title="" alt="" href="#"
+					<area shape="rect" coords="434,301,618,332" title="Tasks list"
+						alt="" href="#proj-9" target="_self">
+					<area shape="rect" coords="675,302,797,326"
+						title="Hide closed
+							tasks" alt="" href="#proj-10"
 						target="_self">
-					<area shape="rect" coords="41,106,755,296" title="" alt="" href="#"
+					<area shape="rect" coords="676,327,800,350"
+						title="Show all/hide all Subtasks" alt="" href="#proj-11"
 						target="_self">
-					<area shape="rect" coords="0,300,157,338" title="" alt="" href="#"
-						target="_self">
-					<area shape="rect" coords="196,349,268,385" title="" alt=""
-						href="#" target="_self">
-					<area shape="rect" coords="434,301,618,332" title="" alt=""
-						href="#" target="_self">
-					<area shape="rect" coords="675,302,797,326" title="" alt=""
-						href="#" target="_self">
-					<area shape="rect" coords="676,327,800,350" title="" alt=""
-						href="#" target="_self">
-					<area shape="rect" coords="798,420,799,421"
-						alt="Image HTML map generator" title="HTML Map creator"
-						href="http://www.html-map.com/" target="_self">
 				</map>
+				<p>
+				<ol>
+					<li><a class="anchor" id="proj-1"></a><b>Project Name</b></li>
+					<li><a class="anchor" id="proj-2"></a><b>Project
+							description</b></li>
+					<li><a class="anchor" id="proj-3"></a><b>Activate/Deactivate
+							project</b> - set displayed project as active</li>
+					<li><a class="anchor" id="proj-4"></a><b>Project
+							management</b> - set up project, add new users, set admins etc.</li>
+					<li><a class="anchor" id="proj-5"></a><b>Open/Ongoing/Closed
+							tasks</b> - Progress bar showing ratio of open/closed tasks within
+						project</li>
+					<li><a class="anchor" id="proj-6"></a><b>Open/Closed Chart</b>
+						- shows how work was done in project. How many taks were created
+						and closed</li>
+					<li><a class="anchor" id="proj-7"></a><b>Latest events in
+							project</b></li>
+					<li><a class="anchor" id="proj-8"></a><b>Events list
+							pagination</b></li>
+					<li><a class="anchor" id="proj-9"></a><b>Tasks list</b></li>
+					<li><a class="anchor" id="proj-10"></a><b>Hide closed
+							tasks</b> - by default closed tasks are hidden in this view. In order
+						to view all task deselect this checkbox</li>
+					<li><a class="anchor" id="proj-11"></a><b>Show all/hide
+							all Subtasks</b> - if one of tasks have subtasks <i
+						class="fa fa-plus-square"></i> icon will be shown before it's
+						name. After clicking this button all subtasks for every task will
+						be expanded</li>
+
+				</ol>
+				</p>
 			</div>
 			<%----------------------------CREATE  ---------------------------------------%>
 			<a class="anchor" id="proj-create"></a>
@@ -387,8 +426,37 @@
 					<td><b><s:message code="project.agile.type" /></b></td>
 					<td>Choose agile type of newly created project
 						<ul>
-							<li>SCRUM - TODO</li>
-							<li>Kanban - TODO</li>
+							<li><b>SCRUM</b> - is an iterative and incremental agile
+								software development methodology for managing product
+								development. It defines "a flexible, holistic product
+								development strategy where a development team works as a unit to
+								reach a common goal", challenges assumptions of the
+								"traditional, sequential approach" to product development, and
+								enables teams to self-organize by encouraging physical
+								co-location or close online collaboration of all team members,
+								as well as daily face-to-face communication among all team
+								members and disciplines in the project. A key principle of scrum
+								is its recognition that during production processes, the
+								customers can change their minds about what they want and need
+								(often called "requirements churn"), and that unpredicted
+								challenges cannot be easily addressed in a traditional
+								predictive or planned manner. As such, scrum adopts an empirical
+								approach—accepting that the problem cannot be fully understood
+								or defined, focusing instead on maximizing the team's ability to
+								deliver quickly and respond to emerging requirements.<a
+								class="superscript" target="_blank"
+								href="https://en.wikipedia.org/wiki/Scrum_(software_development)">[source]</a></li>
+							<li><b>Kanban</b> - is a method for managing knowledge work
+								with an emphasis on just-in-time delivery while not overloading
+								the team members. In this approach, the process, from definition
+								of a task to its delivery to the customer, is displayed for
+								participants to see. Team members pull work from a queue. Kanban
+								in the context of software development can mean a visual
+								process-management system that tells what to produce, when to
+								produce it, and how much to produce - inspired by the Toyota
+								Production System and by Lean manufacturing.<a
+								class="superscript" target="_blank"
+								href="https://en.wikipedia.org/wiki/Kanban_(development)">[source]</a></li>
 						</ul>
 					</td>
 				</tr>
@@ -589,8 +657,10 @@
 		</div>
 	</div>
 </div>
+<script src="<c:url value="/resources/js/imageMapResizer.min.js" />"></script>
 <script>
 	$(document).ready(function() {
+		$('map').imageMapResize();
 		$('body').scrollspy({
 			target : '#menu'
 		})

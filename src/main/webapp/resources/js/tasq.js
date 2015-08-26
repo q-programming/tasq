@@ -1,3 +1,11 @@
+$(document).on("click","area , a",function(e) {
+    $('html, body').animate({
+        scrollTop: $( $.attr(this, 'href') ).offset().top
+    }, 500);
+    return false;
+
+});
+
 function showError(message){
 	var errorMsg= '<div class="alert alert-danger fade in"	style="position: fixed; bottom: 0px; width:100%">'
 		+'<button type="button" class="close" data-dismiss="alert">&times;</button>'
