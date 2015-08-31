@@ -255,7 +255,7 @@ public class TaskController {
 			Period estimate = PeriodHelper.inFormat(taskForm.getEstimate());
 			Period difference = PeriodHelper.minusPeriods(estimate, task.getRawEstimate());
 			// only add estimate change event if task is in sprint
-			if (task.isInSprint()) {
+			if (sprintSrv.taskInActiveSprint(task)) {
 				wlSrv.addActivityPeriodLog(task, PeriodHelper.outFormat(difference), difference, LogType.ESTIMATE);
 			} else {
 				message.append(Utils.changedFromTo("Estimate", task.getEstimate(), taskForm.getEstimate()));
@@ -464,7 +464,7 @@ public class TaskController {
 			Account assignee = accSrv.findById(taskForm.getAssignee());
 			subTask.setAssignee(assignee);
 		}
-		if (task.isInSprint()) {
+		if (sprintSrv.taskInActiveSprint(task)) {
 			Sprint active = sprintSrv.findByProjectIdAndActiveTrue(task.getProject().getId());
 			subTask.addSprint(active);
 		}
@@ -1185,7 +1185,8 @@ public class TaskController {
 	}
 
 	private void addWorklogPointsChanged(Task task, int storyPoints) {
-		if (task.isInSprint()) {
+
+		if (sprintSrv.taskInActiveSprint(task)) {
 			wlSrv.addActivityLog(task, Integer.toString(-1 * (task.getStory_points() - storyPoints)), LogType.ESTIMATE);
 		} else {
 			StringBuilder message = new StringBuilder(Utils.TABLE);

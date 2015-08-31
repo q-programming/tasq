@@ -47,7 +47,6 @@ thead.theme {
 	border-radius: 5px;
 }
 span.badge.theme{
-	float:right;
 	background-color: rgb(69, 161, 199)
 }
 span.badge.theme.zero{

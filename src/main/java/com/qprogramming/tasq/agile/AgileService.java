@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.support.Utils;
+import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 
 @Service
@@ -23,8 +24,7 @@ public class AgileService {
 	private ReleaseRepository releaseRepo;
 
 	@Autowired
-	public AgileService(SprintRepository sprintRepo,
-			ReleaseRepository releaseRepo) {
+	public AgileService(SprintRepository sprintRepo, ReleaseRepository releaseRepo) {
 		this.sprintRepo = sprintRepo;
 		this.releaseRepo = releaseRepo;
 	}
@@ -65,8 +65,7 @@ public class AgileService {
 		return result;
 	}
 
-	public Map<String, Float> fillTimeBurndownMap(List<WorkLog> wrkList,
-			DateTime startTime, DateTime endTime) {
+	public Map<String, Float> fillTimeBurndownMap(List<WorkLog> wrkList, DateTime startTime, DateTime endTime) {
 		int sprintDays = Days.daysBetween(startTime, endTime).getDays() + 1;
 		Map<LocalDate, Period> timeBurndownMap = fillTimeMap(wrkList);
 		Map<String, Float> resultsBurned = new LinkedHashMap<String, Float>();
@@ -104,8 +103,7 @@ public class AgileService {
 				if (value == null) {
 					value = workLog.getActivity();
 				} else {
-					value = PeriodHelper.plusPeriods(value,
-							workLog.getActivity());
+					value = PeriodHelper.plusPeriods(value, workLog.getActivity());
 				}
 				burndownMap.put(dateLogged, value);
 			}
@@ -137,6 +135,20 @@ public class AgileService {
 			return null;
 		}
 		return list.get(list.size() - 1);
+	}
+
+	public boolean taskInActiveSprint(Task task) {
+		if (!task.isInSprint()) {
+			return false;
+		} else {
+
+			for (Sprint sprint : task.getSprints()) {
+				if (sprint.isActive()) {
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 
 }

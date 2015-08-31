@@ -8,7 +8,7 @@
 	<name>Task tracking app</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java-version>1.7</java-version>
+		<java-version>1.6</java-version>
 		<org.springframework-version>4.0.3.RELEASE</org.springframework-version>
 		<org.springframework.security-version>3.2.3.RELEASE</org.springframework.security-version>
 		<org.aspectj-version>1.7.4</org.aspectj-version>
@@ -189,6 +189,13 @@
 			<artifactId>jstl</artifactId>
 			<version>1.2</version>
 		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.3</version>
+			<scope>provided</scope>
+		</dependency>
+		
 		<!-- JSON -->
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>

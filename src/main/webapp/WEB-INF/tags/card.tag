@@ -11,15 +11,15 @@ type="com.qprogramming.tasq.task.DisplayTask"%>
 <div class="agile-card theme" data-id="${task.id}" state="${task.state}" data-subtasks="${task.subtasks}"
 id="${task.id}" data-tags="<c:forEach items="${task.tags}" var="tag">${tag},</c:forEach>">
 <div style="padding-left: 5px; min-height: 50px;">
+<c:if test="${task.story_points ne 0}">
+<span class="badge theme pull-right">${task.story_points}</span>
+</c:if>
 <t:type type="${task.type}" list="true" />
 <a href="<c:url value="/task?id=${task.id}"/>" style="color: inherit;"
 class="<c:if test="${task.state eq 'CLOSED' }">
 closed
 </c:if>">[${task.id}]
 ${task.name}</a> 
-<c:if test="${task.story_points ne 0}">
-<span class="badge theme">${task.story_points}</span>
-</c:if>
 </div>
 <div
 style="display: table; width: 100%; margin-top: 5px; min-height: 30px;">
