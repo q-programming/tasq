@@ -269,7 +269,7 @@
 			<form action="<c:url value="/project/${project.id}/description"/>" method="post">
 				<div class="modal-header theme">
 					<h4 class="modal-title" id="myModalLabel">
-						[${project.projectId}] project.name
+						[${project.projectId}] ${project.name}
 					</h4>
 				</div>
 				<div class="modal-body">

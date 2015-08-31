@@ -190,7 +190,7 @@
 								data-target="#show_users"
 								title="<s:message
 									code="menu.users" text="Users" />"
-								data-placement="bottom"><i class="fa fa-user"></i></a> <a
+								data-placement="bottom"><i class="fa fa-users"></i></a> <a
 								class="btn btn-default btn-xs a-tooltip"
 								href='<s:url value="/help"></s:url>'
 								title="<s:message

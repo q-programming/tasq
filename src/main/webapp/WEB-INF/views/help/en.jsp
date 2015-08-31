@@ -23,7 +23,7 @@
 						<li><a href="#proj-view">Browsing all projects</a></li>
 						<li><a href="#proj-details">View projects details</a></li>
 						<li><a href="#proj-create">Creating projects</a></li>
-						<li><a href="#proj-edit">Editing and managing projects</a></li>
+						<li><a href="#proj-edit">Managing projects</a></li>
 					</ul></li>
 				<li><a href="#task"><s:message code="task.tasks"
 							text="Tasks" /></a>
@@ -349,19 +349,15 @@
 					<area shape="rect" coords="41,106,755,296"
 						title="Open/Closed Chart" alt="" href="#proj-6" target="_self">
 					<area shape="rect" coords="0,300,157,338"
-						title="Latest events in
-							project" alt="" href="#proj-7"
+						title="Latest events in project" alt="" href="#proj-7"
 						target="_self">
 					<area shape="rect" coords="196,349,268,385"
-						title="Events list
-							pagination" alt="" href="#proj-8"
+						title="Events list pagination" alt="" href="#proj-8"
 						target="_self">
 					<area shape="rect" coords="434,301,618,332" title="Tasks list"
 						alt="" href="#proj-9" target="_self">
 					<area shape="rect" coords="675,302,797,326"
-						title="Hide closed
-							tasks" alt="" href="#proj-10"
-						target="_self">
+						title="Hide closed tasks" alt="" href="#proj-10" target="_self">
 					<area shape="rect" coords="676,327,800,350"
 						title="Show all/hide all Subtasks" alt="" href="#proj-11"
 						target="_self">
@@ -474,10 +470,80 @@
 			<%--------------------------------EDIT ------------------------------------%>
 			<a class="anchor" id="proj-edit"></a>
 			<h3>Editing and managing project</h3>
-			<p>TODO</p>
+			<p>
+				Each project after it has been created can be edited. To manage your
+				project click <span class="btn btn-default"><i
+					class="fa fa-wrench"></i></span> on project details screen
+			</p>
+			<h3>Default project settings</h3>
+			After project has been created you can edit it's description by
+			clicking <i class="fa fa-pencil"></i> icon next to project name.<br>It's
+			imposible to change name of project or it's ID once it has been
+			created
+			<h4>Task progress in project</h4>
+			<p>Tasker has two option two track progress within project.</p>
+			<ul>
+				<li><b>Estimated time tracked</b> - Each task before "sprint"
+					is started, should have estimated time set right away. Sprint is in
+					quotes on purpouse, as if time tracked it's not completely SCRUM
+					anymore. Regardles this option can still be used to track progress
+					for team<br></li>
+				<li><b>Story points</b> recommended for agile projects. Each
+					task then is measured with points - which measures complexity of
+					this task. Each team can freely translate how point is translated
+					to work time. It's important to remember that 1SP is <b>not
+						necessary</b> 1h!</li>
+			</ul>
+			<p>Please note that it's not recomended to switch how progress is
+				tracked while project is ongoing or has already some sprint which
+				were tracked. This can cause some errors and very odd charts in
+				reports</p>
+			<h4>Default task priority</h4>
+			<p>Every new task created within this projcet will have this
+				priority. Of course it can be freely changes by user</p>
+			<h4>Default task type</h4>
+			<p>New task created for this projcet will have this task type. It
+				can be changed by user before creation is finished</p>
+			<h4>Default task asignee</h4>
+			<p>When new task will be created chosen user will be inputed into
+				assignee field. If user would like to assign someone else , he can
+				choose him/her from autocomplete field on task creation screen</p>
+			<h3>People</h3>
+			<h4>Admins</h4>
+			<p>
+				All project admins are listed in here. Project admin has access to
+				this screen, plus additionally can perform any operation on tasks
+				within this project to maintain order etc.<br> To add new
+				project admin , user first has to be added to project as memmber.
+				Next click
+				<button class="btn btn-default btn-sm " title="">
+					<i class="fa fa-plus"></i><i class="fa fa-wrench"></i>
+				</button>
+				in his row. If user is already admin and you would like to remove
+				this priviliges from here , click button located in same place but
+				with minus symbol :
+				<button class="btn btn-default btn-sm " title="">
+					<i class="fa fa-minus"></i><i class="fa fa-wrench"></i>
+				</button>
+			<h4>Project members</h4>
+			<p>
+				Every poroject memmber is listed in here ( with Role in
+				parenthesis). To add new existing user into project click <span
+					class="btn btn-default btn-sm" title=""><i
+					class="fa fa-lg fa-user-plus"></i></span>. This will show field with
+				autocompletion of all application registered users. Chosing one of
+				names will automatically start process of adding user to project. To
+				browse through all application users click <span
+					class="btn btn-default btn-sm" title=""><i
+					class="fa fa-lg fa-users"></i></span> button either next to add button on
+				located in top menu next to avatar. <br> To remove user from
+				project , choose
+				<button class="btn btn-default btn-sm " title="">
+					<i class="fa fa-user-times"></i>
+				</button>
+				button in users row
 			<hr>
-			<%--------------------------------TASKS ------------------------------------%>
-			<a class="anchor" id="task"></a>
+
 			<h2>Tasks</h2>
 			<a class="anchor" id="task-view"></a>
 			<h3>Browsing all tasks</h3>
