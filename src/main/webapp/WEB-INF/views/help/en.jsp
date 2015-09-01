@@ -31,6 +31,8 @@
 						<li><a href="#task-view">Browsing all tasks</a></li>
 						<li><a href="#task-details">View task details</a></li>
 						<li><a href="#task-create">Creating tasks</a></li>
+						<li><a href="#task-import">Importing tasks</a></li>
+						<li><a href="#task-export">Exporting tasks</a></li>
 						<li><a href="#task-edit">Editing tasks</a></li>
 						<li><a href="#task-work">Working with tasks</a></li>
 					</ul></li>
@@ -124,7 +126,10 @@
 							style="border-radius: 10px; width: 150px;" /> - Search input
 						box. Shows all task with inputed text within task name, its
 						description or tag. Additionally when user starts to type keyword,
-						all similar task tags are shown in drop-down list.
+						all similar task tags are shown in drop-down list. After user
+						confirms selection, all tasks matching this criteria are displayed
+						on <b><a href="#task-view">Browse all tasks</a></b> view , with
+						query as one of filters
 					</form></li>
 				<security:authorize access="hasRole('ROLE_ADMIN')">
 					<li class="wider"><a href="#admin"
@@ -134,8 +139,8 @@
 						related actions</li>
 				</security:authorize>
 				<li class="wider"><a href="#users"
-					class="btn btn-default btn-xs"><i class="fa fa-user"></i></a> Shows
-					all users within application</li>
+					class="btn btn-default btn-xs"><i class="fa fa-users"></i></a>
+					Shows all users within application</li>
 				<li class="wider"><i class="fa fa-question-circle"></i> Help
 					(this page)</li>
 				<li><a href="#personal"><img
@@ -543,16 +548,49 @@
 				</button>
 				button in users row
 			<hr>
-
+			<a class="anchor" id="task"></a>
 			<h2>Tasks</h2>
 			<a class="anchor" id="task-view"></a>
 			<h3>Browsing all tasks</h3>
-			<p>TODO</p>
+			<p>
+				To browse all task select <b><i class="fa fa-list"></i> All
+					tasks</b> option from <b>Tasks<span class="caret"></span></b> menu
+			</p>
+			<p>By default all open tasks from currently active project are
+				shown. To show tasks from other project choose it from dropdown
+				list( only your project are listed here )</p>
+			<p>
+				Displayed tasks can be filtered by priority or status.<br> In
+				order to filter by priority select caret(<span class="caret"></span>)
+				near Type text in table header<br> To filter by status , select
+				it from drop down menu in Status<span class="caret"></span> also in
+				table header. <br>Each aplied filter is shown next to Task
+				Project combobox, and can be removed by clicking <i
+					class="fa fa-times"
+					style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
+				symbol
+			</p>
+			<p>
+				If Task has any subtasks <i class="fa fa-plus-square"></i> symbol
+				will be shown next to it's ID. Subtasks can be expanded manually for
+				each task with subtasks, or by clicking <b>Show all subtasks</b> <i
+					class="fa fa-plus-square"></i> in top right corner, just below
+				export button
+			<p>
+				From this view user can also <b><a href="#task-export">Export
+						tasks</a></b> by clicking <a class="btn btn-default"> <i
+					class="fa fa-upload"></i> Export
+				</a> button
 			<hr>
 			<%-------------------------DETAILS ------------------------------%>
 			<a class="anchor" id="task-details"></a>
 			<h3>View task details</h3>
-			<p>TODO</p>
+			<p>
+				<img class="responsive"
+					src="<c:url value="/resources/img/help/task_details.png"/>"
+					usemap="#task_details_map"></img>
+
+			</p>
 			<hr>
 			<%-------------------------CREATING------------------------------%>
 			<a class="anchor" id="task-create"></a>
