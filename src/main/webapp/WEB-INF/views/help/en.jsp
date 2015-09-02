@@ -589,8 +589,124 @@
 				<img class="responsive"
 					src="<c:url value="/resources/img/help/task_details.png"/>"
 					usemap="#task_details_map"></img>
-
+				<map name="task_details_map">
+					<area shape="rect" coords="7, 2, 275, 34" href="#task-1"
+						title="Project ID/ [ Task ID ] Task name" />
+					<area shape="rect" coords="6, 61, 187, 76" href="#task-2"
+						title="Current task status" />
+					<area shape="rect" coords="4, 76, 187, 94" href="#task-3"
+						title="Priority" />
+					<area shape="rect" coords="4, 95, 187, 112" href="#task-4"
+						title="Task tags" />
+					<area shape="rect" coords="4, 115, 371, 149" href="#task-5"
+						title="Description of task" />
+					<area shape="rect" coords="2, 150, 190, 178" href="#task-6"
+						title="Story points ( if task is esitmated)" />
+					<area shape="rect" coords="6, 183, 66, 216" href="#task-7"
+						title="Log work button" />
+					<area shape="rect" coords="70, 185, 143, 214" href="#task-8"
+						title="Start timer" />
+					<area shape="rect" coords="6, 215, 262, 259" href="#task-9"
+						title="Time bars" />
+					<area shape="rect" coords="8, 265, 561, 318" href="#task-10"
+						title="Related tasks list" />
+					<area shape="rect" coords="6, 324, 562, 422" href="#task-11"
+						title="Subtask list" />
+					<area shape="rect" coords="4, 457, 84, 481" href="#task-12"
+						title="Activity log tab" />
+					<area shape="rect" coords="88, 453, 176, 482" href="#task-13"
+						title="Comments tab" />
+					<area shape="rect" coords="714, 0, 740, 35" href="#task-14"
+						title="Show edit menu button" />
+					<area shape="rect" coords="745, 0, 769, 35" href="#task-15"
+						title="Start/stop watching this task" />
+					<area shape="rect" coords="774, 2, 797, 34" href="#task-16"
+						title="Delete task (Admin only)" />
+					<area shape="rect" coords="568, 43, 779, 100" href="#task-17"
+						title="Task owner and current assignee" />
+					<area shape="rect" coords="568, 107, 781, 174" href="#task-18"
+						title="Creation, last update and due dates" />
+					<area shape="rect" coords="568, 181, 786, 235" href="#task-19"
+						title="Sprints" />
+				</map>
 			</p>
+			<p>
+			<ol>
+				<li><a class="anchor" id="task-1"></a><b>Project ID/ [ Task
+						ID ] Task name</b></li>
+				<li><a class="anchor" id="task-2"></a><b>Current task
+						status</b> - in order to change this status click <span class="caret"></span>
+					and choose new one</li>
+				<li><a class="anchor" id="task-3"></a><b>Task priority</b> - to
+					change click <span class="caret"></span> and choose new</li>
+				<li><a class="anchor" id="task-4"></a><b>Tags</b> - to add new
+					tag , input it. If there is similar tag, autocomplete box will
+					popup. To remove tag , click <i class="fa fa-times"
+					style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
+					symbol<br> To view all tasks with this tag, click it. This
+					will move you to <b><a href="#task-view">Browse all tasks</a></b>
+					view with applied tag filter.</li>
+				<li><a class="anchor" id="task-5"></a><b>Task description</b></li>
+				<li><a class="anchor" id="task-6"></a><b>Story points</b> - if
+					task is estimated, story points for it will be shown. If no points
+					were set ,question mark will be shown instead. This value can be
+					changed either from <b><a href="#task-edit">Edit menu</a></b>, or
+					from this view quickly by hovering over <span class="badge theme">?</span>
+					to reveal extra <i class="fa fa-pencil"></i> button .<br>
+					Click it to show input field <span class="badge theme"> <input
+						class="point-input" style="display: inline-block;"> <span
+						style="cursor: pointer;"><i class="fa fa-check"
+							style="vertical-align: text-top"></i></span> <span
+						style="cursor: pointer;"><i class="fa fa-times"
+							style="vertical-align: text-top"></i></span>
+				</span> Confirm it by either enter key, or clicking check-mark sign. Cancel
+					input by clicking x <br>You have to be either task owner or
+					project admin to do so</li>
+				<li><a class="anchor" id="task-7"></a><b>Log work button</b> -
+					use it to log time spent on this task. More information in <b><a
+						href="#task-work">Working with tasks</a></b> section</li>
+				<li><a class="anchor" id="task-8"></a><b>Start timer button</b>
+					- starts/stops active timmer on this task</li>
+				<li><a class="anchor" id="task-9"></a><b>Time bars</b> - shows
+					how much time was estimated, how much logged and remaining</li>
+				<li><a class="anchor" id="task-10"></a><b>Related tasks</b> -
+					Shows list of all task that are related/linked to it. In order to
+					add new link , press <a class="btn btn-default btn-xxs" href="#"
+					title=""> <i class="fa fa-plus"></i><i
+						class="fa fa-lg fa-link fa-flip-horizontal"></i>
+				</a> button ( this option is also avaible under edit menu)</li>
+				<li><a class="anchor" id="task-11"></a><b>Subtasks list</b> -
+					all subtasks are shown here with type, priority and progress. To
+					create new subtask , click <a class="btn btn-default btn-xxs"
+					href="#"> <i class="fa fa-plus"></i> <i
+						class="fa fa-lg fa-sitemap"></i>
+				</a> button ( option available from edit menu as well )</li>
+				<li><a class="anchor" id="task-12"></a><b>Activity log tab</b>
+					- click to show all activities related to this task</li>
+				<li><a class="anchor" id="task-13"></a><b>Comments tab</b> -
+					click to switch to comments tab. All comments related to this task
+					are listed ( sorted from newest).<br> New comment can be added
+					by clicking
+					<button id="comments_add" class="btn btn-default btn-sm">
+						<i class="fa fa-comment"></i>&nbsp; Add comment
+					</button> button</li>
+				<li><a class="anchor" id="task-14"></a><b>Show edit menu</b> -
+					more information in <b><a href="#task-edit">Editing task</a></b>
+					section</li>
+				<li><a class="anchor" id="task-15"></a><b>Start/Stop
+						watching task</b></li>
+				<li><a class="anchor" id="task-16"></a><b>Delete task</b><span
+					class="admin-button">Admin</span> - deletes this task ( Admin only)
+					<security:authorize access="hasRole('ROLE_ADMIN')">
+						More information in <a href="#a_task_remove">Removing tasks</a>
+					</security:authorize></li>
+				<li><a class="anchor" id="task-17"></a><b>Task owner and
+						current assignee</b> - you can quickly assign someone to this task by
+					clicking <span class="btn btn-default btn-sm "><i
+						class="fa fa-lg fa-user-plus"></i> </span> button</li>
+				<li><a class="anchor" id="task-18"></a><b>Creation, last update and due dates</b></li>
+				<li><a class="anchor" id="task-19"></a><b>Sprints</b> - if task belongs or belonged to one of sprints, it will be listed here</li>
+			</ol>
 			<hr>
 			<%-------------------------CREATING------------------------------%>
 			<a class="anchor" id="task-create"></a>
