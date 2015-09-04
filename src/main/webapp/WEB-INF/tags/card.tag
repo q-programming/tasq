@@ -74,9 +74,9 @@ title="<s:message code="task.assignme"/>">
 </div>
 </div>
 </div>
-<div style="display: table">
+<div style="display: table;padding-left:10px;padding-right:10px;width: 100%;">
 <c:if test="${task.estimated}">
-<div class="progress" style="height: 5px; width: 150px;padding-left:5px">
+<div class="progress" style="height: 5px; ">
 <c:set var="logged_class"></c:set>
 <c:set var="percentage">${task.percentage}</c:set>
 <c:if test="${task.state eq 'TO_DO'}">

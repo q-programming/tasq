@@ -1,7 +1,7 @@
 .white-frame {
 	border: 1px solid lightgray;
 	margin-bottom: 10px;
-	border-radius: 5px;
+	/* 	border-radius: 5px; */
 	padding: 10px;
 	margin: 10px auto;
 	background: white;
@@ -33,7 +33,7 @@
 .task-type {
 	border: 1px solid;
 	padding: 8px 10px 5px 10px;
-	border-radius: 5px;
+	/* 	border-radius: 5px; */
 	border-color: darkgray;
 }
 
@@ -45,7 +45,7 @@
 	margin: 0px auto;
 	width: 100%;
 	border: 1px solid lightgray;
-	border-radius: 5px;
+	/* 	border-radius: 5px; */
 	background: white;
 }
 
@@ -119,7 +119,7 @@ form.form-search:before {
 .filter_span {
 	border: 1px solid;
 	padding: 5px;
-	border-radius: 3px;
+	/* 	border-radius: 3px; */
 	background-color: white;
 }
 
@@ -191,14 +191,14 @@ table.togglerContent {
 	border-style: dashed;
 	border-width: 2px;
 	border-color: lightgray;
-	border-radius: 5px;
+	/* 	border-radius: 5px; */
 }
 
 .state_hover {
 	border-style: dashed;
 	border-width: 2px;
 	border-color: blue;
-	border-radius: 5px;
+	/* 	border-radius: 5px; */
 }
 
 .state_highlight {
@@ -440,7 +440,7 @@ td.centerd {
 .tag {
 	cursor: pointer;
 	padding: 5px;
-	border-radius: 4px;
+	/* 	border-radius: 4px; */
 	margin-right: 4px;
 }
 
@@ -533,6 +533,7 @@ li.pointer-cursor {
 		margin-bottom: 0
 	}
 }
+
 .back-to-top {
 	padding: 4px 10px;
 	margin-top: 10px;
@@ -544,23 +545,50 @@ li.pointer-cursor {
 
 .admin-button {
 	border: 1px solid;
-	border-radius: 5px;
+	/* 	border-radius: 5px; */
 	padding: 1px 5px 1px 5px;
 	margin: 0px 5px 0px 5px;
 	background-color: orange;
 	font-weight: bold;
 	color: white;
 }
-li.wider{
-	  padding-bottom: 10px;
+
+li.wider {
+	padding-bottom: 10px;
 }
-.responsive{
-	width:100%
+
+.responsive {
+	width: 100%
 }
-.superscript{
+
+.superscript {
 	font-size: .83em;
-    line-height: 0.5em;
-    vertical-align: baseline;
-    position: relative;
-    top: -0.4em;
+	line-height: 0.5em;
+	vertical-align: baseline;
+	position: relative;
+	top: -0.4em;
+}
+/* override rounded edges of bootsrap */
+.progress {
+	border-radius: 0px;
+}
+
+.btn, .btn-sm, .btn-xs, .btn-xxs {
+	border-radius: 0px;
+}
+
+.form-control {
+	border-radius: 0px;
+}
+
+.input-sm {
+	border-radius: 0px;
+}
+
+.dropdown-menu {
+	border-radius: 0px;
+}
+
+.tag {
+	border-radius: 0px;
 }

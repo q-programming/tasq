@@ -375,7 +375,7 @@
 									code="task.related" />
 							</span>
 						</h5>
-						<a class="btn btn-default btn-xxs a-tooltip pull-right linkButton"
+						<a class="btn btn-default btn-xxs a-tooltip pull-right linkButton" style="min-width: 37px;"
 							href="#" title="" data-placement="top"
 							data-original-title="<s:message code="task.link"/>"> <i
 							class="fa fa-plus"></i><i
@@ -470,7 +470,7 @@
 									code="tasks.subtasks" />
 							</span>
 						</h5>
-						<a class="btn btn-default btn-xxs a-tooltip pull-right"
+						<a class="btn btn-default btn-xxs a-tooltip pull-right" style="min-width: 37px;"
 							href="<c:url value="task/${task.id}/subtask"/>"
 							data-placement="top"
 							data-original-title="<s:message code="task.subtasks.add"/>">

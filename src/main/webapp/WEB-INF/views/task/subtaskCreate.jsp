@@ -59,10 +59,13 @@
 					<s:message code="task.assign" />
 				</h5>
 		</div>
+		<div class="form-inline">
 			<div class="form-group">
 				<input id="assignee_auto" class="form-control" type="text" value="" style="width:300px;">
 				<input id="assignee" type="hidden" name="assignee">
+				&nbsp;<span id="assignMe" class="btn btn-default "><i class="fa fa-user"></i>&nbsp;<s:message code="task.assignme"/></span>
 			</div>
+		</div>
 			<span class="help-block"><s:message code="task.assign.help" /></span>
 		<c:set var="type_error">
 			<form:errors path="type" />
@@ -232,6 +235,12 @@ $(document).ready(function($) {
 	});
 	var cache = {};
 	//Assignee
+	
+	$("#assignMe").click(function() {
+		$("#assignee").val("${user.id}");
+		$("#assignee_auto").val("${user}");
+	});
+	
 	$("#assignee_auto").autocomplete({
 		minLength : 1,
 		delay : 500,

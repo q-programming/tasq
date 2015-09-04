@@ -43,7 +43,7 @@ thead.theme {
 	border-width: 2px;
 	border-color: rgba(205, 236, 252, 1);
 	padding: 5px;
-	border-radius: 5px;
+/* 	border-radius: 5px; */
 }
 span.badge.theme{
 	background-color: rgb(51, 161, 103);
