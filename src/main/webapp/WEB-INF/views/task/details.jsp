@@ -186,7 +186,7 @@
 							</c:choose></td>
 					</tr>
 					<!-------------------------	TAGS ------------------->
-					
+					<c:if test="${not task.subtask}">
 					<tr>
 						<td style="vertical-align: top;">Tags</td>
 						<td class="left-margin">
@@ -202,6 +202,7 @@
 							</c:if>
 						</td>
 					</tr>
+					</c:if>
 					<tr>
 						<td style="vertical-align: top;"><s:message
 								code="task.description" /></td>
@@ -664,8 +665,12 @@
 				</table>
 			</div>
 			<%----------------SPRITNS/RELEASES ----------------------%>
+			<c:set var="hidden">none</c:set>
+			<c:if test="${task.project.agile eq 'KANBAN' && not empty task.release }">
+				<c:set var="hidden">block</c:set>
+			</c:if>
 			<c:if test="${not task.subtask}">
-				<div>
+				<div id="sprint_release" style="display: ${hidden};">
 					<c:if test="${task.project.agile eq 'KANBAN'}">
 						<div class="mod-header">
 							<h5 class="mod-header-title">
@@ -685,13 +690,6 @@
 							</h5>
 						</div>
 						<div id="sprints"></div>
-						<%-- 				<c:forEach items="${sprints}" var="sprint"> --%>
-						<!-- 					<div> -->
-						<!-- 						<a -->
-						<%-- 							href="<c:url value="/${task.project.projectId}/${fn:toLowerCase(task.project.agile)}/reports?sprint=${sprint.sprintNo}"/>">Sprint --%>
-						<%-- 							${sprint.sprintNo}</a> --%>
-						<!-- 					</div> -->
-						<%-- 				</c:forEach> --%>
 					</c:if>
 				</div>
 			</c:if>
@@ -842,7 +840,9 @@
 $(document).ready(function($) {
 	taskID = "${task.id}";
 	updateWatchers();
-	getSprints();
+	<c:if test="${not task.subtask}">
+		getSprints();
+	</c:if>
 	
 	//--------------------------------------Coments----------------------------
 	function toggle_comment() {
@@ -1032,6 +1032,7 @@ $(document).ready(function($) {
 						var url = '<c:url value="/${task.project.projectId}/${fn:toLowerCase(task.project.agile)}/reports?sprint="/>' + sprint.sprintNo;
 						var row = '<div><a href="'+url+'">Sprint ' + sprint.sprintNo+ '</a></div>';
 						$("#sprints").append(row);
+						$('#sprint_release').show();
 			    	});	
 				});
 			}
@@ -1092,6 +1093,7 @@ $(document).on("click",".delete_task",function(e) {
 	});
 	
 	//TAGS
+	<c:if test="${not task.subtask}">
 	var init = true;
 	var noTags = '<s:message code="task.tags.noTags" htmlEscape="false"/>';
 	$('#taskTags').tagsinput(
@@ -1209,6 +1211,7 @@ $(document).on("click",".delete_task",function(e) {
 			}			
 		}
 	}
+	</c:if>
 });
 function getEventTypeMsg(type){
 	switch(type){

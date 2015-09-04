@@ -148,7 +148,7 @@
 					</c:forEach>
 				</ul>
 			</div>
-			<span class="help-block"><s:message code="task.type.help" /> <a href="#" style="color:black">&nbsp;<i class="fa fa-question-circle"></i></a></span>
+			<span class="help-block"><s:message code="task.type.help" /> <a href="<c:url value="/help"/>#task-types" target="_blank" style="color:black">&nbsp;<i class="fa fa-question-circle"></i></a></span>
 			<form:hidden path="type" id="type"/>
 			<form:errors path="type" element="p" class="text-danger" />
 		</div>
@@ -344,11 +344,11 @@ $(document).ready(function($) {
 	}
 	
 	function checkTaskTypeEstimate(type){
-		if (type == 'TASK' || type == 'BUG'){
-			$("#no_estimation").prop("checked", true);
+		if (type == 'TASK' || type == 'BUG' || type == 'IDLE'){
+			$("#estimated").prop("checked", true);
 			toggleEstimation();
 		}else{
-			$("#no_estimation").prop("checked", false);
+			$("#estimated").prop("checked", false);
 			toggleEstimation();
 		}
 	}

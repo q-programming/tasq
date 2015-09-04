@@ -35,6 +35,7 @@
 						<li><a href="#task-export">Exporting tasks</a></li>
 						<li><a href="#task-edit">Editing tasks</a></li>
 						<li><a href="#task-work">Working with tasks</a></li>
+						<li><a href="#task-subtask">Subtasks</a></li>
 					</ul></li>
 				<li><a href="#agile"><s:message code="agile.agile"
 							text="Agile" /></a>
@@ -106,7 +107,7 @@
 					user can create his own project from here using <b><a
 						href="#proj-create"><i class="fa fa-plus"></i> <s:message
 								code="project.create" text="Create project" /></a></b></li>
-				<li class="wider"><b><a href="#tasks"><s:message
+				<li class="wider"><b><a href="#task"><s:message
 								code="task.tasks" text="Tasks" /> </a></b> - Gives access to tasks.
 					Last 5 visited task are shown first, and all tasks can be shown
 					using <i class="fa fa-list"></i> <s:message code="task.showAll"
@@ -480,12 +481,11 @@
 				project click <span class="btn btn-default"><i
 					class="fa fa-wrench"></i></span> on project details screen
 			</p>
-			<h3>Default project settings</h3>
+			<h4>Default project settings</h4>
 			After project has been created you can edit it's description by
 			clicking <i class="fa fa-pencil"></i> icon next to project name.<br>It's
 			imposible to change name of project or it's ID once it has been
-			created
-			<h4>Task progress in project</h4>
+			created <b>Task progress in project</b>
 			<p>Tasker has two option two track progress within project.</p>
 			<ul>
 				<li><b>Estimated time tracked</b> - Each task before "sprint"
@@ -503,18 +503,18 @@
 				tracked while project is ongoing or has already some sprint which
 				were tracked. This can cause some errors and very odd charts in
 				reports</p>
-			<h4>Default task priority</h4>
+			<b>Default task priority</b>
 			<p>Every new task created within this projcet will have this
 				priority. Of course it can be freely changes by user</p>
-			<h4>Default task type</h4>
+			<b>Default task type</b>
 			<p>New task created for this projcet will have this task type. It
 				can be changed by user before creation is finished</p>
-			<h4>Default task asignee</h4>
+			<b>Default task asignee</b>
 			<p>When new task will be created chosen user will be inputed into
 				assignee field. If user would like to assign someone else , he can
 				choose him/her from autocomplete field on task creation screen</p>
-			<h3>People</h3>
-			<h4>Admins</h4>
+			<h4>People</h4>
+			<b>Admins</b>
 			<p>
 				All project admins are listed in here. Project admin has access to
 				this screen, plus additionally can perform any operation on tasks
@@ -530,10 +530,10 @@
 				<button class="btn btn-default btn-sm " title="">
 					<i class="fa fa-minus"></i><i class="fa fa-wrench"></i>
 				</button>
-			<h4>Project members</h4>
+				<b>Project members</b>
 			<p>
-				Every poroject memmber is listed in here ( with Role in
-				parenthesis). To add new existing user into project click <span
+				Every project member is listed in here ( with Role in parenthesis).
+				To add new existing user into project click <span
 					class="btn btn-default btn-sm" title=""><i
 					class="fa fa-lg fa-user-plus"></i></span>. This will show field with
 				autocompletion of all application registered users. Chosing one of
@@ -704,14 +704,146 @@
 						current assignee</b> - you can quickly assign someone to this task by
 					clicking <span class="btn btn-default btn-sm "><i
 						class="fa fa-lg fa-user-plus"></i> </span> button</li>
-				<li><a class="anchor" id="task-18"></a><b>Creation, last update and due dates</b></li>
-				<li><a class="anchor" id="task-19"></a><b>Sprints</b> - if task belongs or belonged to one of sprints, it will be listed here</li>
+				<li><a class="anchor" id="task-18"></a><b>Creation, last
+						update and due dates</b></li>
+				<li><a class="anchor" id="task-19"></a><b>Sprints</b> - if task
+					belongs or belonged to one of sprints, it will be listed here</li>
 			</ol>
 			<hr>
 			<%-------------------------CREATING------------------------------%>
 			<a class="anchor" id="task-create"></a>
 			<h3>Creating tasks</h3>
-			<p>TODO</p>
+			<p>
+				There are two ways to create new task.<br>It's either directly
+				from menu , clicking <a class="btn btn-xs" title=""
+					style="padding: 5px 15px; border: 1px solid"> <i
+					class="fa fa-plus"></i>&nbsp;<i class="fa fa-lg fa-check-square"></i></a>
+				button , or by choosing <b><i class="fa fa-plus"></i> <s:message
+						code="task.create" text="Create task" /></b> from under <b><s:message
+						code="task.tasks" text="Tasks" /><span class="caret"></span></b> menu<br>
+				This will show you "Create task" creation screen on which all
+				details about new task can be filled in. 
+			</p>
+			<table class="table">
+				<tr>
+					<td class="col-md-2"><b><s:message code="task.name"
+								text="Summary" /></b></td>
+					<td>Brief summary of what this task will be about</td>
+				</tr>
+				<tr>
+					<td><b><s:message code="task.description"
+								text="Description" /></b></td>
+					<td>Description of task. All information required to finish it
+						should be placed here. Basic styling is available through built-in
+						rich text editor</td>
+				</tr>
+				<tr>
+					<td><b><s:message code="project.project" /></b></td>
+					<td>Project for which this task will be created.By default
+						user's active project is always selected<br> After user
+						select project , task type and priority will be automatically
+						updated to default project value ( overriding already selected
+						value)
+
+					</td>
+				</tr>
+				<tr>
+					<td><b><s:message code="task.assign" /></b></td>
+					<td>User to whom this task will be assigned. Autocomplete of
+						all project users is added in this field. If input box will be
+						blank , task will be unassigned. Project default assignee is
+						always entered when this screen is viewed. Default assignee can be
+						changed on <b><a href="#proj-edit">Project management</a></b>
+						screen
+					</td>
+				</tr>
+				<tr>
+					<td><a class="anchor" id="task-types"></a> <b><s:message
+								code="task.type" /></b></td>
+					<td>Type of task. This helps to filter task for whole team.
+
+						Additionally types like "Task", "Bug" and "Iddle" have estimation
+						disabled by default. Project default task type is always selected
+						when this screen is viewed. This can be changed on <b><a
+							href="#proj-edit">Project management</a></b> screen <br>There
+						are following task types available:
+						<ul>
+							<li><t:type type="TASK" show_text="false" list="false" /> -
+								a simple activity. Usually not too big, and most of the time
+								without fixed estimation. It can also be used to group other
+								task ( by linking as related )</li>
+							<li><t:type type="USER_STORY" show_text="false" list="false" />
+								- feature, case scenario or bigger thing to be done. In most
+								cases before work has been started on it , it should be
+								estimated</li>
+							<li><t:type type="ISSUE" show_text="false" list="false" />
+								- used mostly report that something is not right within project
+								but not might not be bug at all</li>
+							<li><t:type type="BUG" show_text="false" list="false" /> -
+								if something is broken, task of this type can be created</li>
+							<li><t:type type="IDLE" show_text="false" list="false" />-
+								sometimes it can happen that team is not working, waiting for
+								something to be unblocked, or just waiting idly for new tasks</li>
+						</ul>
+
+					</td>
+				</tr>
+
+				<tr>
+					<td><b><s:message code="task.priority" /></b></td>
+					<td>how important this task is</td>
+				</tr>
+
+				<tr>
+					<td><b>Sprint</b></td>
+					<td>If there is already existing sprint which is not yet
+						finished , newly created task can be added right away after
+						creation by selecting it from combobox. Please note that if sprint
+						is active, its scope can change</td>
+				</tr>
+
+				<tr>
+					<td><b><s:message code="task.estimate" /></b></td>
+					<td>Time estimation of how much this task can take. Standard
+						format should be used : *w *d *h *m (weeks, days, hours, minutes ;
+						where * is any number )</td>
+				</tr>
+				<tr>
+					<td><b><s:message code="task.storyPoints" /></b></td>
+					<td>complexity measurement of newly created task. This value
+						can be changed later on via Edit menu, from Detials screen , or
+						from Backlog view
+						<p></p>
+						<p>
+							<i class="fa fa-exclamation-circle"></i>&nbsp;If task is not
+							estimated, have no points , or optional estimate time, please
+							select <input type="checkbox" name="estimated" id="estimated"
+								value="true"><b>Task without estimation</b> checkbox.<br>If
+							selected this task can be added to sprint ( even active ) and not
+							affecting sprint scope.
+						</p>
+					</td>
+				</tr>
+				<tr>
+					<td><b><s:message code="task.dueDate" /></b></td>
+					<td>If task should be finished before some date, enter this
+						date here. Tasks from user's projects, with due date soon to
+						present day are shown on home page</td>
+				</tr>
+				<tr>
+					<td><b><s:message code="task.files" /></b></td>
+					<td>Choose files that you want to add to this task. This can
+						be some documents, excel sheets or image<br> In order to add
+						more than one file, clicking <span id="addMoreFiles"
+						class="btn btn-default btn-sm"> <i class="fa fa-plus"></i><i
+							class="fa fa-file"></i>&nbsp;Add more files
+					</span> button will add extra slot for it. Attached files are shown on
+						Task detail screen. If file is an image, it will be shown as
+						thumbnail
+					</td>
+				</tr>
+			</table>
+
 			<hr>
 			<%-------------------------EDIT ------------------------------%>
 			<a class="anchor" id="task-edit"></a>

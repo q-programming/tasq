@@ -1,8 +1,9 @@
 $(document).on("click","area , a",function(e) {
-    $('html, body').animate({
-        scrollTop: $($.attr(this, 'href')).offset().top    }, 500);
-    return false;
-
+	if($($.attr(this, 'href')).offset()){
+		$('html, body').animate({
+			scrollTop: $($.attr(this, 'href')).offset().top    }, 500);
+		return false;
+	}
 });
 
 function showError(message){
