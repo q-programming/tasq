@@ -625,7 +625,7 @@
 									src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />
 								<a href="<c:url value="/user?id=${task.assignee.id}"/>">${task.assignee}</a>
 							</c:if>
-							<c:if test="${user.isPowerUser}">
+							<c:if test="${user.isUser}">
 								<span class="btn btn-default btn-sm a-tooltip assignToTask"
 									title="<s:message code="task.assign"/>" data-toggle="modal"
 									data-target="#assign_modal" data-taskID="${task.id}"

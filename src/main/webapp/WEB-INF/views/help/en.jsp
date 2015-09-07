@@ -664,7 +664,7 @@
 					project admin to do so</li>
 				<li><a class="anchor" id="task-7"></a><b>Log work button</b> -
 					use it to log time spent on this task. More information in <b><a
-						href="#task-work">Working with tasks</a></b> section</li>
+						href="#worklogging">Working with tasks</a></b> section</li>
 				<li><a class="anchor" id="task-8"></a><b>Start timer button</b>
 					- starts/stops active timmer on this task</li>
 				<li><a class="anchor" id="task-9"></a><b>Time bars</b> - shows
@@ -703,7 +703,9 @@
 				<li><a class="anchor" id="task-17"></a><b>Task owner and
 						current assignee</b> - you can quickly assign someone to this task by
 					clicking <span class="btn btn-default btn-sm "><i
-						class="fa fa-lg fa-user-plus"></i> </span> button</li>
+						class="fa fa-lg fa-user-plus"></i> </span> button.<br>This will show
+					modal window. Start typing username to show autocomplete hints with
+					all project members</li>
 				<li><a class="anchor" id="task-18"></a><b>Creation, last
 						update and due dates</b></li>
 				<li><a class="anchor" id="task-19"></a><b>Sprints</b> - if task
@@ -784,6 +786,15 @@
 							<li><t:type type="IDLE" show_text="false" list="false" />-
 								sometimes it can happen that team is not working, waiting for
 								something to be unblocked, or just waiting idly for new tasks</li>
+						</ul> and types for subtasks:
+						<ul>
+							<li><t:type type="SUBTASK" show_text="false" list="false" />-
+								most common subtask type</li>
+							<li><t:type type="SUBBUG" show_text="false" list="false" />-
+								If there is some bug related to task , we can either create new
+								bug and link it or create subtask with this type</li>
+							<li><t:type type="IDLE" show_text="false" list="false" />
+								</li>
 						</ul>
 
 					</td>
@@ -852,7 +863,7 @@
 				If user has permission to edit task , extra button <span
 					class="btn btn-default btn-sm a-tooltip"> <i
 					class="fa fa-lg fa-pencil"></i>
-				</span> will be shown on <a href="#task-details"> Task details view</a>
+				</span> will be shown on <b><a href="#task-14"> Task details view</a></b>
 				(14).<br> Following actions are aviable:
 			</p>
 			<table class="table">
@@ -896,12 +907,158 @@
 					</span> button ( shown only if there is at least one file atached )
 					</td>
 				</tr>
+				<tr>
+					<td class="col-md-2"><b><i class="fa fw fa-level-up"></i>&nbsp;Convert
+							to task</b></td>
+					<td>(subtask only) converts one of subtask into regular task.<br>
+						New next free project ID will be assigned to it. Additionally both
+						task will be linked with "relates to"
+					</td>
+				</tr>
 			</table>
+			<hr>
+			<%-------------------------IMPORTING ------------------------------%>
+			<a class="anchor" id="task-import"></a>
+			<h3>Importing tasks</h3>
+			<p>
+				If there is a need to create more than one task, instead of manualy
+				adding them one by one, threre is possibility to import them in one
+				bulk.<br> In order to import tasks, navigate to Task create
+				screen and choose <b><span style="color: black"><i
+						class="fa fa-download"></i> Import</span></b> tab. <br> Here we can
+				either import previously exported file ( either excel or xml) or
+				download template and fill task in it.<br> After file will be
+				completed, it can be then imported using that screen.<br> Every
+				new task will have assigned new ID , based on which project was
+				chosen <br> <br> <i class="fa fa-exclamation-circle"></i>&nbsp;Please
+				remmeber to choose project into which new task will be imported. By
+				default , user's active project is always selected.
+
+
+			</p>
+			<hr>
+			<%-------------------------EXPORTING ------------------------------%>
+			<a class="anchor" id="task-export"></a>
+			<h3>Exporting tasks</h3>
+			<p>
+				If there is a need to transfer task from one project to another or
+				move it to another server, then can be exported using <a
+					class="btn btn-default"> <i class="fa fa-upload"></i> Export
+				</a> button from All tasks screen. <br> Clicking it, will reveal
+				checkboxes next to every visible on screen task. All selected task
+				then can be exported either to excel or xml file.<br> <br>
+				<i class="fa fa-exclamation-circle"></i>&nbsp;Information like: task
+				ID, comments, atached files and worklog is not transfered into
+				exported file in current version
+			</p>
 			<hr>
 			<%-------------------------WORKING ------------------------------%>
 			<a class="anchor" id="task-work"></a>
 			<h3>Working with tasks</h3>
-			<p>TODO</p>
+			<p>
+				There are couple ways to work with task within application. All
+				depends on team agreements and there are no stiff rules how to work
+				with task. <br> Hoever there are couple recommended things and
+				some rules.
+			</p>
+			<ol>
+				<li>Before starting working on task it should be estimated (
+					either time or story points if working in agile)</li>
+				<li>Tasks can be worked on without sprint, but tracking whole
+					project will be then more difficult</li>
+				<li>When sprint was started and one of team members would like
+					to start working on it, he should be assigned to it ( either by
+					project admin, or himslef ussing <b><a href="#task-17">Assign
+							button</a></b>)
+				</li>
+				<li>Add <b><a href="#task-4">tags</a></b> to help categorize
+					project tasks better
+				</li>
+				<li>If project is time tracked, work should be logged. It can
+					be inputed manually by using <b><a href="#worklogging">Log
+							work</a></b> <br>If project is scrum based, time can still be
+					tracked, which is very helpfull especially on earlier stages of
+					project to correctly map how much time is consumed on tasks
+				</li>
+				<li>Inlcude files , docs or pictures to help developer
+					understand task</li>
+				<li>Task type is very good to group many other tasks/user
+					stories. After creating it , all tasks can be linked with "relates
+					to" link type</li>
+				<li>To stay up-to-date with tasks changes , subrscibe as Task
+					watcher , using
+					<button class="btn btn-default btn-sm">
+						<i id="watch_icon" class="fa fa-lg fa-eye"></i>
+					</button> button <b><a href="#task-15">Task detials view</a></b>(15)
+				</li>
+				<li>Comments are very helpfull to post more information or
+					indicate what has been done on task</li>
+			</ol>
+
+			<a class="anchor" id="worklogging"></a>
+			<h4>Logging work</h4>
+			<p>
+				To help better track project it's recomended to track time for each
+				task, regardles if project is time based or scrum type.<br>Time
+				can be logged either from task detials page , or directly from Agile
+				board. Click
+				<button class="btn btn-default btn-sm worklog">
+					<i class="fa fa-lg fa-calendar"></i> Log work
+				</button>
+				button to show logging modal window.<br>On it , input how much
+				time was spent on this task in format <i>*w *d *h *m</i> (weeks,
+				days, hours, minutes ; where * is any number ).<br>If work was
+				done in other date ( for ex. yesterday ) , mark correct date and
+				time in <b>Date</b> and <b>Time</b> fields.<br> <br>By
+				default remaining time will be automatically reduced, or it can be
+				manually set by selecting <b><input type="radio"
+					name="estimate_reduce" id="estimate_manual" value="auto">
+					Set manually</b> radio button and inputing remaining time ( same format
+				applies).<br>The remaining time can never be less than 0.<br>If
+				more work was logged in task, it will be marked on task detials
+				screen acordingly.
+			</p>
+			<h4>Timer</h4>
+			<p>
+				If user would like to track time in real time, timer can be set for
+				task.To do so , click
+				<button class="btn btn-default btn-sm">
+					<i class="fa fa-lg fa-clock-o"></i> Start time
+				</button>
+				button. This action will start timer ( Information about active task
+				will be shown at the bottom of screen). To stop it click <a
+					class="btn btn-default btn-xxs"> <i class="fa fa-lg fa-clock-o"></i>
+				</a> button located on page bottom or
+				<button class="btn btn-default btn-sm">
+					<i class="fa fa-lg fa-clock-o"></i> Stop time
+				</button>
+				on task details page. Timer will also be automatically stoped ( and
+				work logged ) when task is closed. Please note that it won't be
+				possible to close task if there is at least one active timer on this
+				task
+			</p>
+			<p>
+				<i class="fa fa-exclamation-circle"></i>&nbsp;If more than one day
+				is on timer , user will be asked to confirm if he in fact would like
+				to logg this time. Please remmeber that Tasker uses 8h = 1d
+				conversion. This can be changed by admin
+			<hr>
+			<%--------------------------------SUBTASK ------------------------------------%>
+			<a class="anchor" id="task-subtask"></a>
+			<h3>Subtasks</h3>
+			<p>
+				Sometimes task can have multiple things to be done within.<br>
+				In order to better track to do list , subtask can be created for it.<br>
+				Subtask is just like regular task, but without story point estimate
+				, and is permamently linked to parent task. <br> It's creation
+				process is done via <b><a href="#task-edit">Edit menu</a></b>
+			</p>
+			<p>Substaks can always be converted to regular task using Edit
+				menu. It's impossible to do other way</p>
+			<p>
+				<i class="fa fa-exclamation-circle"></i>&nbsp; Time loged within
+				subtaks will always be added to it's parrent task.
+			</p>
 			<hr>
 			<%--------------------------------AGILE ------------------------------------%>
 			<a class="anchor" id="agile"></a>
