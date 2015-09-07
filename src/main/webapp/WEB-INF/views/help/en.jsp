@@ -722,7 +722,7 @@
 						code="task.create" text="Create task" /></b> from under <b><s:message
 						code="task.tasks" text="Tasks" /><span class="caret"></span></b> menu<br>
 				This will show you "Create task" creation screen on which all
-				details about new task can be filled in. 
+				details about new task can be filled in.
 			</p>
 			<table class="table">
 				<tr>
@@ -848,7 +848,55 @@
 			<%-------------------------EDIT ------------------------------%>
 			<a class="anchor" id="task-edit"></a>
 			<h3>Editing tasks</h3>
-			<p>TODO</p>
+			<p>
+				If user has permission to edit task , extra button <span
+					class="btn btn-default btn-sm a-tooltip"> <i
+					class="fa fa-lg fa-pencil"></i>
+				</span> will be shown on <a href="#task-details"> Task details view</a>
+				(14).<br> Following actions are aviable:
+			</p>
+			<table class="table">
+				<tr>
+					<td class="col-md-2"><b><i class="fa fw fa-pencil"></i>&nbsp;Edit
+							task</b></td>
+					<td>allows user to edit already existing task. Each change
+						will be logged and can be reviewed by task "Activity log".<br>
+						<i class="fa fa-exclamation-circle"></i>&nbsp;Please note , that
+						if task is in already started sprint, changing story points value
+						will affect sprint scope
+					</td>
+				</tr>
+				<tr>
+					<td class="col-md-2"><b><i
+							class="fa fw fa-link fa-flip-horizontal"></i>&nbsp;Link</b></td>
+					<td>Starts linking procces. If two tasks have something in
+						common, blocks or are duplicating. They can be linked . Every
+						linked task is shown on task detials screen.<br> To link task
+						, start by clicking this menu action, or <span
+						class="btn btn-default btn-xxs " style="min-width: 37px;">
+							<i class="fa fa-plus"></i><i
+							class="fa fa-lg fa-link fa-flip-horizontal"></i>
+					</span> button. Choose link relation, and then start typing in field ID or
+						name of task that should be linked
+					</td>
+				</tr>
+				<tr>
+					<td class="col-md-2"><b><i class="fa fw fa-sitemap"></i>&nbsp;Add
+							subtask</b></td>
+					<td>shows create subtask screen which is nearly the same as
+						regular task create screen , but without story points section</td>
+				</tr>
+				<tr>
+					<td class="col-md-2"><b><i class="fa fw fa-file"></i>&nbsp;Attach
+							file</b></td>
+					<td>allows to add files ( documentaion , pictures , excels
+						...). The same action is available via <span
+						class="btn btn-default btn-xxs"> <i class="fa fa-plus"></i>
+							<i class="fa fa-lg fa-file"></i>
+					</span> button ( shown only if there is at least one file atached )
+					</td>
+				</tr>
+			</table>
 			<hr>
 			<%-------------------------WORKING ------------------------------%>
 			<a class="anchor" id="task-work"></a>
