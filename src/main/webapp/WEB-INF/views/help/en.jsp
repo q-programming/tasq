@@ -31,9 +31,10 @@
 						<li><a href="#task-view">Browsing all tasks</a></li>
 						<li><a href="#task-details">View task details</a></li>
 						<li><a href="#task-create">Creating tasks</a></li>
+						<li><a href="#task-edit">Editing tasks</a></li>
+						<li><a href="#task-remove">Removing Tasks</a>
 						<li><a href="#task-import">Importing tasks</a></li>
 						<li><a href="#task-export">Exporting tasks</a></li>
-						<li><a href="#task-edit">Editing tasks</a></li>
 						<li><a href="#task-work">Working with tasks</a></li>
 						<li><a href="#task-subtask">Subtasks</a></li>
 					</ul></li>
@@ -58,7 +59,6 @@
 						<ul class="nav">
 							<li><a href="#a_users">Users</a></li>
 							<li><a href="#a_projects">Projects</a>
-							<li><a href="#a_task_remove">Removing Tasks</a>
 							<li><a href="#a_roles">Roles</a></li>
 						</ul></li>
 				</security:authorize>
@@ -381,7 +381,7 @@
 							tasks</b> - Progress bar showing ratio of open/closed tasks within
 						project</li>
 					<li><a class="anchor" id="proj-6"></a><b>Open/Closed Chart</b>
-						- shows how work was done in project. How many taks were created
+						- shows how work was done in project. How many tasks were created
 						and closed</li>
 					<li><a class="anchor" id="proj-7"></a><b>Latest events in
 							project</b></li>
@@ -390,7 +390,7 @@
 					<li><a class="anchor" id="proj-9"></a><b>Tasks list</b></li>
 					<li><a class="anchor" id="proj-10"></a><b>Hide closed
 							tasks</b> - by default closed tasks are hidden in this view. In order
-						to view all task deselect this checkbox</li>
+						to view all task de-select this checkbox</li>
 					<li><a class="anchor" id="proj-11"></a><b>Show all/hide
 							all Subtasks</b> - if one of tasks have subtasks <i
 						class="fa fa-plus-square"></i> icon will be shown before it's
@@ -428,37 +428,10 @@
 					<td><b><s:message code="project.agile.type" /></b></td>
 					<td>Choose agile type of newly created project
 						<ul>
-							<li><b>SCRUM</b> - is an iterative and incremental agile
-								software development methodology for managing product
-								development. It defines "a flexible, holistic product
-								development strategy where a development team works as a unit to
-								reach a common goal", challenges assumptions of the
-								"traditional, sequential approach" to product development, and
-								enables teams to self-organize by encouraging physical
-								co-location or close online collaboration of all team members,
-								as well as daily face-to-face communication among all team
-								members and disciplines in the project. A key principle of scrum
-								is its recognition that during production processes, the
-								customers can change their minds about what they want and need
-								(often called "requirements churn"), and that unpredicted
-								challenges cannot be easily addressed in a traditional
-								predictive or planned manner. As such, scrum adopts an empirical
-								approach—accepting that the problem cannot be fully understood
-								or defined, focusing instead on maximizing the team's ability to
-								deliver quickly and respond to emerging requirements.<a
-								class="superscript" target="_blank"
-								href="https://en.wikipedia.org/wiki/Scrum_(software_development)">[source]</a></li>
-							<li><b>Kanban</b> - is a method for managing knowledge work
-								with an emphasis on just-in-time delivery while not overloading
-								the team members. In this approach, the process, from definition
-								of a task to its delivery to the customer, is displayed for
-								participants to see. Team members pull work from a queue. Kanban
-								in the context of software development can mean a visual
-								process-management system that tells what to produce, when to
-								produce it, and how much to produce - inspired by the Toyota
-								Production System and by Lean manufacturing.<a
-								class="superscript" target="_blank"
-								href="https://en.wikipedia.org/wiki/Kanban_(development)">[source]</a></li>
+							<li><b><a href="#scrum">SCRUM</a></b> with more focus on
+								creation of new features or even whole new project</li>
+							<li><b><a href="#kanban">Kanban</a></b> good choice for
+								already existing projects with maintenace phase</li>
 						</ul>
 					</td>
 				</tr>
@@ -484,14 +457,14 @@
 			<h4>Default project settings</h4>
 			After project has been created you can edit it's description by
 			clicking <i class="fa fa-pencil"></i> icon next to project name.<br>It's
-			imposible to change name of project or it's ID once it has been
+			impossible to change name of project or it's ID once it has been
 			created <b>Task progress in project</b>
 			<p>Tasker has two option two track progress within project.</p>
 			<ul>
 				<li><b>Estimated time tracked</b> - Each task before "sprint"
 					is started, should have estimated time set right away. Sprint is in
-					quotes on purpouse, as if time tracked it's not completely SCRUM
-					anymore. Regardles this option can still be used to track progress
+					quotes on purpose, as if time tracked it's not completely SCRUM
+					anymore. Regardless this option can still be used to track progress
 					for team<br></li>
 				<li><b>Story points</b> recommended for agile projects. Each
 					task then is measured with points - which measures complexity of
@@ -499,17 +472,17 @@
 					to work time. It's important to remember that 1SP is <b>not
 						necessary</b> 1h!</li>
 			</ul>
-			<p>Please note that it's not recomended to switch how progress is
-				tracked while project is ongoing or has already some sprint which
+			<p>Please note that it's not recommended to switch how progress
+				is tracked while project is ongoing or has already some sprint which
 				were tracked. This can cause some errors and very odd charts in
 				reports</p>
 			<b>Default task priority</b>
-			<p>Every new task created within this projcet will have this
+			<p>Every new task created within this project will have this
 				priority. Of course it can be freely changes by user</p>
 			<b>Default task type</b>
-			<p>New task created for this projcet will have this task type. It
+			<p>New task created for this project will have this task type. It
 				can be changed by user before creation is finished</p>
-			<b>Default task asignee</b>
+			<b>Default task assignee</b>
 			<p>When new task will be created chosen user will be inputed into
 				assignee field. If user would like to assign someone else , he can
 				choose him/her from autocomplete field on task creation screen</p>
@@ -519,13 +492,13 @@
 				All project admins are listed in here. Project admin has access to
 				this screen, plus additionally can perform any operation on tasks
 				within this project to maintain order etc.<br> To add new
-				project admin , user first has to be added to project as memmber.
+				project admin , user first has to be added to project as member.
 				Next click
 				<button class="btn btn-default btn-sm " title="">
 					<i class="fa fa-plus"></i><i class="fa fa-wrench"></i>
 				</button>
 				in his row. If user is already admin and you would like to remove
-				this priviliges from here , click button located in same place but
+				this privileges from here , click button located in same place but
 				with minus symbol :
 				<button class="btn btn-default btn-sm " title="">
 					<i class="fa fa-minus"></i><i class="fa fa-wrench"></i>
@@ -536,7 +509,7 @@
 				To add new existing user into project click <span
 					class="btn btn-default btn-sm" title=""><i
 					class="fa fa-lg fa-user-plus"></i></span>. This will show field with
-				autocompletion of all application registered users. Chosing one of
+				autocompletion of all application registered users. Choosing one of
 				names will automatically start process of adding user to project. To
 				browse through all application users click <span
 					class="btn btn-default btn-sm" title=""><i
@@ -564,7 +537,7 @@
 				order to filter by priority select caret(<span class="caret"></span>)
 				near Type text in table header<br> To filter by status , select
 				it from drop down menu in Status<span class="caret"></span> also in
-				table header. <br>Each aplied filter is shown next to Task
+				table header. <br>Each applied filter is shown next to Task
 				Project combobox, and can be removed by clicking <i
 					class="fa fa-times"
 					style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
@@ -666,7 +639,7 @@
 					use it to log time spent on this task. More information in <b><a
 						href="#worklogging">Working with tasks</a></b> section</li>
 				<li><a class="anchor" id="task-8"></a><b>Start timer button</b>
-					- starts/stops active timmer on this task</li>
+					- starts/stops active timer on this task</li>
 				<li><a class="anchor" id="task-9"></a><b>Time bars</b> - shows
 					how much time was estimated, how much logged and remaining</li>
 				<li><a class="anchor" id="task-10"></a><b>Related tasks</b> -
@@ -674,7 +647,7 @@
 					add new link , press <a class="btn btn-default btn-xxs" href="#"
 					title=""> <i class="fa fa-plus"></i><i
 						class="fa fa-lg fa-link fa-flip-horizontal"></i>
-				</a> button ( this option is also avaible under edit menu)</li>
+				</a> button ( this option is also available under edit menu)</li>
 				<li><a class="anchor" id="task-11"></a><b>Subtasks list</b> -
 					all subtasks are shown here with type, priority and progress. To
 					create new subtask , click <a class="btn btn-default btn-xxs"
@@ -695,11 +668,9 @@
 					section</li>
 				<li><a class="anchor" id="task-15"></a><b>Start/Stop
 						watching task</b></li>
-				<li><a class="anchor" id="task-16"></a><b>Delete task</b><span
-					class="admin-button">Admin</span> - deletes this task ( Admin only)
-					<security:authorize access="hasRole('ROLE_ADMIN')">
-						More information in <a href="#a_task_remove">Removing tasks</a>
-					</security:authorize></li>
+				<li><a class="anchor" id="task-16"></a><b>Delete task</b> -
+					deletes this task ( project admin only) More information in <b><a
+						href="#task-remove">Removing tasks</a></b></li>
 				<li><a class="anchor" id="task-17"></a><b>Task owner and
 						current assignee</b> - you can quickly assign someone to this task by
 					clicking <span class="btn btn-default btn-sm "><i
@@ -764,7 +735,7 @@
 								code="task.type" /></b></td>
 					<td>Type of task. This helps to filter task for whole team.
 
-						Additionally types like "Task", "Bug" and "Iddle" have estimation
+						Additionally types like "Task", "Bug" and "Idle" have estimation
 						disabled by default. Project default task type is always selected
 						when this screen is viewed. This can be changed on <b><a
 							href="#proj-edit">Project management</a></b> screen <br>There
@@ -793,8 +764,7 @@
 							<li><t:type type="SUBBUG" show_text="false" list="false" />-
 								If there is some bug related to task , we can either create new
 								bug and link it or create subtask with this type</li>
-							<li><t:type type="IDLE" show_text="false" list="false" />
-								</li>
+							<li><t:type type="IDLE" show_text="false" list="false" /></li>
 						</ul>
 
 					</td>
@@ -822,7 +792,7 @@
 				<tr>
 					<td><b><s:message code="task.storyPoints" /></b></td>
 					<td>complexity measurement of newly created task. This value
-						can be changed later on via Edit menu, from Detials screen , or
+						can be changed later on via Edit menu, from Details screen , or
 						from Backlog view
 						<p></p>
 						<p>
@@ -864,7 +834,7 @@
 					class="btn btn-default btn-sm a-tooltip"> <i
 					class="fa fa-lg fa-pencil"></i>
 				</span> will be shown on <b><a href="#task-14"> Task details view</a></b>
-				(14).<br> Following actions are aviable:
+				(14).<br> Following actions are available:
 			</p>
 			<table class="table">
 				<tr>
@@ -880,9 +850,9 @@
 				<tr>
 					<td class="col-md-2"><b><i
 							class="fa fw fa-link fa-flip-horizontal"></i>&nbsp;Link</b></td>
-					<td>Starts linking procces. If two tasks have something in
+					<td>Starts linking process. If two tasks have something in
 						common, blocks or are duplicating. They can be linked . Every
-						linked task is shown on task detials screen.<br> To link task
+						linked task is shown on task details screen.<br> To link task
 						, start by clicking this menu action, or <span
 						class="btn btn-default btn-xxs " style="min-width: 37px;">
 							<i class="fa fa-plus"></i><i
@@ -900,11 +870,11 @@
 				<tr>
 					<td class="col-md-2"><b><i class="fa fw fa-file"></i>&nbsp;Attach
 							file</b></td>
-					<td>allows to add files ( documentaion , pictures , excels
+					<td>allows to add files ( documentation , pictures , excels
 						...). The same action is available via <span
 						class="btn btn-default btn-xxs"> <i class="fa fa-plus"></i>
 							<i class="fa fa-lg fa-file"></i>
-					</span> button ( shown only if there is at least one file atached )
+					</span> button ( shown only if there is at least one file attached )
 					</td>
 				</tr>
 				<tr>
@@ -917,12 +887,30 @@
 				</tr>
 			</table>
 			<hr>
+			<%-----------------------------REMOVE------------------------------%>
+			<a class="anchor" id="task-remove"></a>
+			<h3>Removing tasks</h3>
+			<p>Sometimes it can happen that task needs to be deleted. This is
+				not recommended course of actions, and in most of the times task
+				should be updated, renamed to match desired state. If task needs to
+				be deleted, only project administrators can perform this operation.</p>
+			<p>Please be aware that removing task should not be used for
+				tasks in active sprints etc. and it should be used in very rare
+				cases</p>
+			<p>
+				<u><i class="fa fa-exclamation-circle"></i> Removing task will
+					purge all worklogs, comments, files and subtasks. Only worklog
+				information about task removal will be added for project.<br> All other
+				information will be lost and cannot be restored!</u>
+			</p>
+
+			<hr>
 			<%-------------------------IMPORTING ------------------------------%>
 			<a class="anchor" id="task-import"></a>
 			<h3>Importing tasks</h3>
 			<p>
-				If there is a need to create more than one task, instead of manualy
-				adding them one by one, threre is possibility to import them in one
+				If there is a need to create more than one task, instead of manually
+				adding them one by one, there is possibility to import them in one
 				bulk.<br> In order to import tasks, navigate to Task create
 				screen and choose <b><span style="color: black"><i
 						class="fa fa-download"></i> Import</span></b> tab. <br> Here we can
@@ -931,7 +919,7 @@
 				completed, it can be then imported using that screen.<br> Every
 				new task will have assigned new ID , based on which project was
 				chosen <br> <br> <i class="fa fa-exclamation-circle"></i>&nbsp;Please
-				remmeber to choose project into which new task will be imported. By
+				remember to choose project into which new task will be imported. By
 				default , user's active project is always selected.
 
 
@@ -948,7 +936,7 @@
 				checkboxes next to every visible on screen task. All selected task
 				then can be exported either to excel or xml file.<br> <br>
 				<i class="fa fa-exclamation-circle"></i>&nbsp;Information like: task
-				ID, comments, atached files and worklog is not transfered into
+				ID, comments, attached files and worklog is not transfered into
 				exported file in current version
 			</p>
 			<hr>
@@ -958,7 +946,7 @@
 			<p>
 				There are couple ways to work with task within application. All
 				depends on team agreements and there are no stiff rules how to work
-				with task. <br> Hoever there are couple recommended things and
+				with task. <br> However there are couple recommended things and
 				some rules.
 			</p>
 			<ol>
@@ -968,7 +956,7 @@
 					project will be then more difficult</li>
 				<li>When sprint was started and one of team members would like
 					to start working on it, he should be assigned to it ( either by
-					project admin, or himslef ussing <b><a href="#task-17">Assign
+					project admin, or himself using <b><a href="#task-17">Assign
 							button</a></b>)
 				</li>
 				<li>Add <b><a href="#task-4">tags</a></b> to help categorize
@@ -976,31 +964,31 @@
 				</li>
 				<li>If project is time tracked, work should be logged. It can
 					be inputed manually by using <b><a href="#worklogging">Log
-							work</a></b> <br>If project is scrum based, time can still be
-					tracked, which is very helpfull especially on earlier stages of
+							work</a></b> <br>If project is Scrum based, time can still be
+					tracked, which is very helpful especially on earlier stages of
 					project to correctly map how much time is consumed on tasks
 				</li>
-				<li>Inlcude files , docs or pictures to help developer
+				<li>Include files , docs or pictures to help developer
 					understand task</li>
 				<li>Task type is very good to group many other tasks/user
 					stories. After creating it , all tasks can be linked with "relates
 					to" link type</li>
-				<li>To stay up-to-date with tasks changes , subrscibe as Task
+				<li>To stay up-to-date with tasks changes , subscribe as Task
 					watcher , using
 					<button class="btn btn-default btn-sm">
 						<i id="watch_icon" class="fa fa-lg fa-eye"></i>
-					</button> button <b><a href="#task-15">Task detials view</a></b>(15)
+					</button> button <b><a href="#task-15">Task details view</a></b>(15)
 				</li>
-				<li>Comments are very helpfull to post more information or
+				<li>Comments are very helpful to post more information or
 					indicate what has been done on task</li>
 			</ol>
 
 			<a class="anchor" id="worklogging"></a>
 			<h4>Logging work</h4>
 			<p>
-				To help better track project it's recomended to track time for each
-				task, regardles if project is time based or scrum type.<br>Time
-				can be logged either from task detials page , or directly from Agile
+				To help better track project it's recommended to track time for each
+				task, regardless if project is time based or Scrum type.<br>Time
+				can be logged either from task details page , or directly from Agile
 				board. Click
 				<button class="btn btn-default btn-sm worklog">
 					<i class="fa fa-lg fa-calendar"></i> Log work
@@ -1016,7 +1004,7 @@
 					Set manually</b> radio button and inputing remaining time ( same format
 				applies).<br>The remaining time can never be less than 0.<br>If
 				more work was logged in task, it will be marked on task detials
-				screen acordingly.
+				screen accordingly.
 			</p>
 			<h4>Timer</h4>
 			<p>
@@ -1032,7 +1020,7 @@
 				<button class="btn btn-default btn-sm">
 					<i class="fa fa-lg fa-clock-o"></i> Stop time
 				</button>
-				on task details page. Timer will also be automatically stoped ( and
+				on task details page. Timer will also be automatically stopped ( and
 				work logged ) when task is closed. Please note that it won't be
 				possible to close task if there is at least one active timer on this
 				task
@@ -1040,7 +1028,7 @@
 			<p>
 				<i class="fa fa-exclamation-circle"></i>&nbsp;If more than one day
 				is on timer , user will be asked to confirm if he in fact would like
-				to logg this time. Please remmeber that Tasker uses 8h = 1d
+				to log this time. Please remember that Tasker uses 8h = 1d
 				conversion. This can be changed by admin
 			<hr>
 			<%--------------------------------SUBTASK ------------------------------------%>
@@ -1050,45 +1038,274 @@
 				Sometimes task can have multiple things to be done within.<br>
 				In order to better track to do list , subtask can be created for it.<br>
 				Subtask is just like regular task, but without story point estimate
-				, and is permamently linked to parent task. <br> It's creation
+				, and is permanently linked to parent task. <br> It's creation
 				process is done via <b><a href="#task-edit">Edit menu</a></b>
 			</p>
 			<p>Substaks can always be converted to regular task using Edit
 				menu. It's impossible to do other way</p>
 			<p>
-				<i class="fa fa-exclamation-circle"></i>&nbsp; Time loged within
-				subtaks will always be added to it's parrent task.
+				<i class="fa fa-exclamation-circle"></i>&nbsp; Time logged within
+				subtasks will always be added to it's parent task.
 			</p>
 			<hr>
 			<%--------------------------------AGILE ------------------------------------%>
 			<a class="anchor" id="agile"></a>
 			<h2>Agile</h2>
-			<p>TODO</p>
+			<p>Main feature in Tasker is a way to track project progress
+				using agile methodology. When used correctly, it can provide very
+				good work feedback, help to plan future features and present big
+				picture on that project.</p>
+			<p>When project is created, it's type is set ( this cannot be
+				changed after creation). Base on this type , correct board will be
+				always shown for end user.</p>
+			<p>
+				Under <b>Agile<span class="caret"></span></b> main menu, last
+				visited project boards are listed (+ active project's board in bold)
+				and additionally all users project's boards are available under <b><i
+					class="fa fa-list"></i> <s:message code="agile.showAll"
+						text="Show all" /></b> menu option
+			</p>
+
+
 			<hr>
-			<%-----------------------------	KANBAN ---------------------------------%>
+			<%-----------------------------	SCRUM ---------------------------------%>
 			<a class="anchor" id="scrum"></a>
 			<h3>SCRUM</h3>
-			<p>TODO</p>
+			<p>
+			<blockquote>
+				SCRUM is an iterative and incremental agile software development
+				methodology for managing product development. It defines "a
+				flexible, holistic product development strategy where a development
+				team works as a unit to reach a common goal", challenges assumptions
+				of the "traditional, sequential approach" to product development,
+				and enables teams to self-organize by encouraging physical
+				co-location or close online collaboration of all team members, as
+				well as daily face-to-face communication among all team members and
+				disciplines in the project. A key principle of Scrum is its
+				recognition that during production processes, the customers can
+				change their minds about what they want and need (often called
+				"requirements churn"), and that unpredicted challenges cannot be
+				easily addressed in a traditional predictive or planned manner. As
+				such, Scrum adopts an empirical approach—accepting that the problem
+				cannot be fully understood or defined, focusing instead on
+				maximizing the team's ability to deliver quickly and respond to
+				emerging requirements.<a class="superscript" target="_blank"
+					href="https://en.wikipedia.org/wiki/Scrum_(software_development)">[source]</a>
+			</blockquote>
+			SCRUM should be project chosen methodology, if there are many things
+			to create from scratch, lots of new features and some bugfixes. It's
+			very good in tracking how team progresses within new areas or known
+			ones, but with new project
+			</p>
 			<a class="anchor" id="scrum-backlog"></a>
-			<h4>Backlog</h4>
-			<p>TODO</p>
+			<h4>
+				<i class="fa fa-book"></i> Backlog
+			</h4>
+			<p>All tasks to be done, or in progress in selected project are
+				displayed here. This is main planning view, on which project
+				administrators (for ex. Scrum Master or Product Owner) can plan
+				future work , and set its priorities</p>
+			<h5>
+				<b>Sprints</b>
+			</h5>
+			<ol>
+				<li>In order to create new sprint , click
+					<button class="btn btn-default btn-sm">
+						<i class="fa fa-lg fa-plus"></i>
+					</button> create sprint button. This will create sprint with next number,
+					and allow to add tasks into it.<br>After creation, this sprint
+					will also be shown on task creation screen, allowing to straight
+					away add new task to it.<br>This sprint won't be active until
+					it's started.
+				</li>
+				<li>To start sprint , click
+					<button class="btn btn-default btn-sm">
+						<i class="fa fa-lg fa-play"></i>&nbsp; Start
+					</button> button , which will be shown, when hover over sprint. This will
+					show Start sprint modal , where sprint start and end date must be
+					inputed.
+				</li>
+				<li>To end sprint, click <a class="btn btn-default btn-sm ">
+						<i class="fa fa-lg fa-check"></i>&nbsp;Finish
+				</a> button , shown on hover of active sprint.<br> All non-finished
+					tasks from that sprint will be moved back to backlog, and then can
+					be added to next sprint.
+				</li>
+			</ol>
+			<p>
+				<i class="fa fa-exclamation-circle"></i> Sprint cannot be started if
+				within it, there is at least one task which is not estimated (
+				unless it has "<b>Task without estimation</b>" marked on <b><a
+					href="#task-create">Create</a></b>/<b><a href="#task-edit">Edit</a></b>
+				view)
+			</p>
+			<p>
+				<i class="fa fa-exclamation-circle"></i> Start date is always taken
+				when generating reports. End date is for team information, and will
+				be overwritten with correct end date and time, when sprint will be
+				ended
+			</p>
+			<p>
+				<i class="fa fa-exclamation-circle"></i> There can be only one
+				active sprint at the time. Also sprint start date can't overlap
+				already finished sprint's end date
+			</p>
+			<h5>
+				<b>Tasks</b>
+			</h5>
+			<p>
+				All task that are not yet done, and not assigned to sprint ,are
+				listed in this section of backlog view. When new sprint is created
+				drag and drop tasks from this section, to assign them to it.<br>
+				You can order tasks based on how tasks are imporant, so that in next
+				sprint they can be taken as first.<br> To order tasks drag and
+				drop them, and confirm new task order by clicking <span
+					class="btn btn-default"><i class="fa fa-floppy-o"></i>&nbsp;Save
+					order </span> button <br>Additionally right clicking on task will
+				show context menu , on which we can assign this task to one of
+				existing sprints, or move this task to top or bottom of backlog.
+				Moving to top/bottom of backlog still requires confirmation of new
+				tasks order.
+			</p>
 			<a class="anchor" id="scrum-board"></a>
-			<h4>Board</h4>
-			<p>TODO</p>
+			<h4>
+				<i class="fa fa-list-alt"></i> Board
+			</h4>
+			<p>
+				This is main agile view for the team. All tasks, that team supposed
+				to work now, on are listed here. Each task is presented in form of
+				card with information like name, task type, story points progress
+				and current assignee.<br> Following actions are available:
+			<ul>
+				<li><b>Change task state</b> - drag and drop task from one
+					section to another to quickly change it's state, without a need to
+					enter task details</li>
+				<li><b>Assign task</b> - if tasks is not yet assigned to
+					anyone, you can assign it to one of team members. Click
+					<button class="btn btn-default btn-xxs">
+						<i class="fa fa-lg fa-user"></i>
+					</button> button on task card to show Assign modal window</li>
+				<li><b>Log work</b> if currently logged user is assigned to one
+					of task, he/she can log time spent on this task from this screen
+					clicking log work button
+					<button class="btn btn-default btn-xxs " style="margin-left: 5px">
+						<i class="fa fa-lg fa-clock-o"></i>
+					</button> in task card.</li>
+				<li><b>Filter tasks by tags</b> Next to Sprint number and date
+					, all tags for tasks within sprint are presented. You can filter
+					task with this tag , by clicking it . Click it again to reset tag
+					filter ( or select another to filter by it now)</li>
+				<li><b>Order tasks</b> as on Backlog view , tasks can be
+					ordered to indicate which task is more important. To order, drag
+					and drop task within "To do" column , and confirm new task order by
+					clicking <span class="btn btn-default"><i
+						class="fa fa-floppy-o"></i>&nbsp;Save order </span> button</li>
+			</ul>
 			<a class="anchor" id="scrum-reports"></a>
-			<h4>Reports</h4>
-			<p>TODO</p>
+			<h4>
+				<i class="fa fa-line-chart"></i> Reports
+			</h4>
+			<p>On this view summary of each sprint is presented. By default
+				last ( or active ) sprint is shown</p>
+			<h5>
+				<b><i class="fa fa-line-chart"></i> Burndown chart</b>
+			</h5>
+			Shows how team was working on assigned tasks. Remaining line should
+			always be near "Ideal" . If it stays above, it means that team is
+			either not working efficiently, or task was underestimated in story
+			points. Staying below means the opposite. In case of bad estimation
+			it should be adjusted in next sprints. All in all, at the end of the
+			sprint Ideal and Remaining should meet.<br> If project is time
+			based, instead of story points , estimated time will be taken to
+			count remaining/burned time
+			<h5>
+				<b><i class="fa fa-bar-chart"></i> Logged time</b>
+			</h5>
+			This chart shows how time was logged per day on whole project
+			<h5>
+				<b><i class="fa fa-calendar"></i> Events in sprint</b>
+			</h5>
+			All sprint events like creation of new tasks added to sprint, work
+			logged or closed tasks are listed in here. Events like comments or
+			task creation for project are omitted on this view as not relevant to
+			sprint
+			<h5>
+				<b><i class="fa fa-list-ul"></i>Sprint summary</b>
+			</h5>
+			This tab summarize how many task were completed ( and their story
+			points value) and which were not. Also total time spent on tasks in
+			this sprint is added and shown here as well
 			<hr>
 			<%-----------------------------	KANBAN ---------------------------------%>
 			<a class="anchor" id="kanban"></a>
 			<h3>Kanban</h3>
-			<p>TODO</p>
+			<p>
+			<blockquote>
+				Kanban is a method for managing knowledge work with an emphasis on
+				just-in-time delivery while not overloading the team members. In
+				this approach, the process, from definition of a task to its
+				delivery to the customer, is displayed for participants to see. Team
+				members pull work from a queue. Kanban in the context of software
+				development can mean a visual process-management system that tells
+				what to produce, when to produce it, and how much to produce -
+				inspired by the Toyota Production System and by Lean manufacturing.<a
+					class="superscript" target="_blank"
+					href="https://en.wikipedia.org/wiki/Kanban_(development)">[source]</a>
+			</blockquote>
+			</p>
 			<a class="anchor" id="kanban-board"></a>
-			<h4>Board</h4>
-			<p>TODO</p>
-			<a class="anchor" id="kanban-reports"></a>
-			<h4>Reports</h4>
-			<p>TODO</p>
+			<h4>
+				<i class="fa fa-list-alt"></i> Board
+			</h4>
+			<p>
+				Main view for Kanban. Most of team work will be done on it. For
+				actions that can be performed please refer to <b><a
+					href="#scrum-board"> Scrum board section</a></b> they are generic
+			</p>
+			<p>
+				The only one big difference compared to Scrum is, that Kanban don't
+				have sprints. To track milestones we use releases in it.<br>
+				Release indicate that some bigger part of changes, features or
+				bugfixes has been done , and it should be delivered (for ex. to
+				client)
+			</p>
+			<p>
+				To create new release, click <span class="btn btn-default"> <i
+					class="fa fa-clipboard"></i>&nbsp;New Release
+				</span> button which is available for project administrators.<br>Clicking
+				it will show modal window, where name of release and optional
+				comment can be inputed. After it , all closed tasks will be moved to
+				this release , and new release will be started.<br>From now on,
+				closed tasks from that release will be hidden, and can be reviewed
+				on reports page only. It can be reopened, but then it will be part
+				of new release
+			</p>
+			<h4>
+				<i class="fa fa-line-chart"></i> Reports
+			</h4>
+			On this view summary of each release is presented. By default last (
+			or current ) release is shown
+			<h5>
+				<b><i class="fa fa-line-chart"></i> Burndown chart</b>
+			</h5>
+			Shows how team was working on during releases. Main chart shows how
+			many tasks were open/in progress/closed in given time frame
+			<h5>
+				<b><i class="fa fa-bar-chart"></i> Logged time</b>
+			</h5>
+			Time logged in project in selected release
+			<h5>
+				<b><i class="fa fa-calendar"></i> Events in release</b>
+			</h5>
+			All release events like creation of new tasks, work logged or closed
+			tasks are listed in here. Events like comments or omitted on this
+			view as not relevant to release
+			<h5>
+				<b><i class="fa fa-list-ul"></i> Release summary</b>
+			</h5>
+			This tab summarize how many task were completed with time spent.
+			Total time spent on all tasks in this sprint is added and shown here
+			as well
 			<hr>
 			<security:authorize access="hasRole('ROLE_ADMIN')">
 				<%------------------------------ADMIN ---------------------------------------%>
@@ -1121,7 +1338,7 @@
 						that it's not possible to remove last admin from application (
 						there has to be at least one at any time)</li>
 					<li><i class="fa fa-lg fa-check-square"></i> <s:message
-							code="menu.manage.tasks" /> - Various task related action,
+							code="menu.manage.tasks" /> - Various task related actions,
 						mostly depreciated, used during development phase</li>
 					<li>Other - option left for future usage</li>
 				</ul>
@@ -1139,10 +1356,6 @@
 						where `ID` is unique project id and
 					</li>
 				</ul>
-				<hr>
-				<a class="anchor" id="task_remove"></a>
-				<h3>Removing tasks</h3>
-				<p>TODO</p>
 				<hr>
 				<a class="anchor" id="a_roles"></a>
 				<h3>Roles</h3>
