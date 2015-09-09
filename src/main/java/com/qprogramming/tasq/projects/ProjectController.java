@@ -445,30 +445,22 @@ public class ProjectController {
 		return result;
 	}
 
-	@RequestMapping(value = "/project/getDefaultAssignee", method = RequestMethod.GET)
-	public @ResponseBody DisplayAccount getDefaultAssignee(@RequestParam Long id, HttpServletResponse response) {
+	/**
+	 * Returns DisplayProject - minified version of project detials to get all
+	 * default values etc.
+	 * 
+	 * @param id
+	 *            id of project
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping(value = "/project/getDefaults", method = RequestMethod.GET)
+	public @ResponseBody DisplayProject getDefaults(@RequestParam Long id, HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(id);
-		Account assignee = accSrv.findById(project.getDefaultAssigneeID());
-		if (assignee == null) {
-			return null;
-		} else {
-			return new DisplayAccount(assignee);
-		}
-	}
-
-	@RequestMapping(value = "/project/getDefaultTaskType", method = RequestMethod.GET)
-	public @ResponseBody TaskType getDefaultTaskType(@RequestParam Long id, HttpServletResponse response) {
-		response.setContentType("application/json");
-		Project project = projSrv.findById(id);
-		return (TaskType) project.getDefault_type();
-	}
-
-	@RequestMapping(value = "/project/getDefaultTaskPriority", method = RequestMethod.GET)
-	public @ResponseBody TaskPriority getDefaultTaskPriority(@RequestParam Long id, HttpServletResponse response) {
-		response.setContentType("application/json");
-		Project project = projSrv.findById(id);
-		return (TaskPriority) project.getDefault_priority();
+		DisplayProject result = new DisplayProject(project);
+		result.setDefaultAssignee(accSrv.findById(project.getDefaultAssigneeID()));
+		return result;
 	}
 
 	@Transactional

@@ -273,6 +273,7 @@
 $(document).ready(function($) {
 	var fileTypes='.doc,.docx,.rtf,.txt,.odt,.xls,.xlsx,.ods,.csv,.pps,.ppt,.pptx,.jpg,.png,.gif';
 	var btnsGrps = jQuery.trumbowyg.btnsGrps;
+	var project;
 	$('#description').trumbowyg({
 		lang: '${user.language}',
 		fullscreenable: false,
@@ -314,7 +315,7 @@ $(document).ready(function($) {
 	
 	$(".taskType").click(function(){
 		var type = $(this).data('type');
-		checkTaskTypeEstimate(type);
+		checkTaskTypeEstimate(type,project);
    	 	$("#task_type").html($(this).html());
    		$("#type").val(type);
 	});
@@ -343,14 +344,15 @@ $(document).ready(function($) {
 		}
 	}
 	
-	function checkTaskTypeEstimate(type){
-		if (type == 'TASK' || type == 'BUG' || type == 'IDLE'){
-			$("#estimated").prop("checked", true);
-			toggleEstimation();
+	function checkTaskTypeEstimate(type,project){
+		var notEstimated = false;
+		if(project.agile == 'KANBAN'){
+			notEstimated = true;
 		}else{
-			$("#estimated").prop("checked", false);
-			toggleEstimation();
+			notEstimated = type == 'BUG' || type =='IDLE' || type == 'TASK'; 
 		}
+		$("#estimated").prop("checked", notEstimated);
+		toggleEstimation();
 	}
 
 	
@@ -364,9 +366,7 @@ $(document).ready(function($) {
 	var currentDue = "${taskForm.due_date}";
 	$("#due_date").val(currentDue);
 	$("#projects_list").change(function(){
-		getDefaultAssignee();
-		getDefaultTaskType();
-		getDefaultTaskPriority();
+		getDefaults();
 		fillSprints();
 	});
 	
@@ -386,9 +386,7 @@ $(document).ready(function($) {
 	
 	//INIT ALL
 	fillSprints();
-	getDefaultAssignee();
-	getDefaultTaskType();
-	getDefaultTaskPriority();
+	getDefaults()
 	addFileInput();
 	$('body').scrollspy({
 		target : '#menu'
@@ -440,44 +438,38 @@ $(document).ready(function($) {
 			}
 		}
 	});
-	function getDefaultTaskType(){
-		var url='<c:url value="/project/getDefaultTaskType"/>';
+	
+	function getDefaults(){
+		var url='<c:url value="/project/getDefaults"/>';
 		$.get(url,{id:$("#projects_list").val()},function(result,status){
-				var thisType = $("#"+result);
+				project = result;
+				//TYPE
+				var thisType = $("#"+project.default_type);
 				var type = thisType.data('type');
-				checkTaskTypeEstimate(type)
 		   	 	$("#task_type").html(thisType.html());
 		   		$("#type").val(type);
-		});
-	}
-	function getDefaultTaskPriority(){
-		var url='<c:url value="/project/getDefaultTaskPriority"/>';
-		$.get(url,{id:$("#projects_list").val()},function(result,status){
-				var thisPriority = $("#"+result);
+		   		checkTaskTypeEstimate(type,project)
+				//ASSIGNEE
+   				$("#assignee").val(null);
+				$("#assignee_auto").val(null);
+				if(!project.defaultAssignee){
+					$("#assignee").val(null);
+				}
+				else{
+					$("#assignee_auto").val(project.defaultAssignee.name + " " + project.defaultAssignee.surname);
+					$("#assignee").val(project.defaultAssignee.id);
+					$("#assignee_auto").removeClass("input-italic");
+				}
+				checkIfEmpty();
+				//PRIORITY
+		   		var thisPriority = $("#"+project.default_priority);
 				var priority = thisPriority.data('priority');
 		   	 	$("#task_priority").html(thisPriority.html());
 		   		$("#priority").val(priority);
+		   		
 		});
 	}
-	
-	function getDefaultAssignee(){
-		$("#assignee").val(null);
-		$("#assignee_auto").val(null);
-		var url='<c:url value="/project/getDefaultAssignee"/>';
-		$.get(url,{id:$("#projects_list").val()},function(result,status){
-			if(!result){
-				$("#assignee").val(null);
-			}
-			else{
-				$("#assignee_auto").val(result.name + " " + result.surname);
-				$("#assignee").val(result.id);
-				$("#assignee_auto").removeClass("input-italic");
-				
-			}
-		});
-		checkIfEmpty();
-	}
-	
+
 	function checkIfEmpty(){
 		if(!$("#assignee").val()){
 			var unassign = '<s:message code="task.unassigned" />';
