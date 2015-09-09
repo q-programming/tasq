@@ -482,17 +482,18 @@ public class ProjectController {
 			project.setDefault_priority(priority);
 		}
 		project.setDefault_type(type);
-		Sprint activeSprint = sprintSrv.findByProjectIdAndActiveTrue(id);
-		if (activeSprint != null) {
-			MessageHelper.addWarningAttribute(ra,
-					msg.getMessage("project.sprintActive", null, Utils.getCurrentLocale()));
-			return "redirect:" + request.getHeader("Referer");
-		}
-		project.setTimeTracked(timeTracked);
 		Account account = accSrv.findById(assigneId);
 		assigneId = account != null ? account.getId() : null;
 		project.setDefaultAssigneeID(assigneId);
 		projSrv.save(project);
+		Sprint activeSprint = sprintSrv.findByProjectIdAndActiveTrue(id);
+		if (activeSprint != null && !project.getTimeTracked().equals(timeTracked)) {
+			MessageHelper.addWarningAttribute(ra,
+					msg.getMessage("project.sprintActive", null, Utils.getCurrentLocale()));
+			return "redirect:" + request.getHeader("Referer");
+		} else {
+			project.setTimeTracked(timeTracked);
+		}
 		return "redirect:" + request.getHeader("Referer");
 	}
 
