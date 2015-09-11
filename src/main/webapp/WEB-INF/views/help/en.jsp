@@ -455,9 +455,9 @@
 					class="fa fa-wrench"></i></span> on project details screen
 			</p>
 			<h4>Default project settings</h4>
-			After project has been created you can edit it's description by
+			After project has been created you can edit it's name or description by
 			clicking <i class="fa fa-pencil"></i> icon next to project name.<br>It's
-			impossible to change name of project or it's ID once it has been
+			impossible to change ID of project, once it has been
 			created <b>Task progress in project</b>
 			<p>Tasker has two option two track progress within project.</p>
 			<ul>

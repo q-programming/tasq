@@ -590,7 +590,7 @@ public class ProjectControllerTest {
 	@Test
 	public void changeDescriptionNoProjectsTest() {
 		when(projSrv.findById(1L)).thenReturn(null);
-		projectCtr.changeDescriptions(1L, NEW_DESCRIPTION, raMock, requestMock);
+		projectCtr.changeNameDescriptions(1L, NEW_DESCRIPTION, raMock, requestMock);
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.WARNING, new Object[] {}));
 	}
@@ -605,13 +605,13 @@ public class ProjectControllerTest {
 		when(projSrv.findById(1L)).thenReturn(project);
 		boolean catched = false;
 		try {
-			projectCtr.changeDescriptions(1L, NEW_DESCRIPTION, raMock, requestMock);
+			projectCtr.changeNameDescriptions(1L, NEW_DESCRIPTION, raMock, requestMock);
 		} catch (TasqAuthException e) {
 			catched = true;
 		}
 		Assert.assertTrue(TASQ_AUTH_MSG, catched);
 		testAccount.setRole(Roles.ROLE_POWERUSER);
-		projectCtr.changeDescriptions(1L, NEW_DESCRIPTION, raMock, requestMock);
+		projectCtr.changeNameDescriptions(1L, NEW_DESCRIPTION, raMock, requestMock);
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.DANGER, new Object[] {}));
 	}
@@ -624,7 +624,7 @@ public class ProjectControllerTest {
 		when(accountServiceMock.findById(1L)).thenReturn(testAccount);
 		when(projSrv.findById(1L)).thenReturn(project);
 		when(projSrv.canEdit(1L)).thenReturn(true);
-		projectCtr.changeDescriptions(1L, NEW_DESCRIPTION, raMock, requestMock);
+		projectCtr.changeNameDescriptions(1L, NEW_DESCRIPTION, raMock, requestMock);
 		Project newProject = project;
 		newProject.setDescription(NEW_DESCRIPTION);
 		verify(projSrv, times(1)).findById(1L);

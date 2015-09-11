@@ -244,6 +244,10 @@ public class ProjectController {
 			MessageHelper.addErrorAttribute(ra, msg.getMessage("project.notexists", null, Utils.getCurrentLocale()));
 			return "redirect:/projects";
 		}
+		if (project.getDefaultAssigneeID() != null) {
+			DisplayAccount assignee = new DisplayAccount(accSrv.findById(project.getDefaultAssigneeID()));
+			model.addAttribute("defaultAssignee", assignee);
+		}
 
 		model.addAttribute("project", project);
 		return "project/manage";
@@ -497,9 +501,10 @@ public class ProjectController {
 		return "redirect:" + request.getHeader("Referer");
 	}
 
-	@RequestMapping(value = "project/{id}/description", method = RequestMethod.POST)
-	public String changeDescriptions(@PathVariable Long id, @RequestParam(value = "description") String description,
-			RedirectAttributes ra, HttpServletRequest request) {
+	@RequestMapping(value = "project/{id}/editDescriptions", method = RequestMethod.POST)
+	public String editDescriptions(@PathVariable Long id, @RequestParam(value = "name") String name,
+			@RequestParam(value = "description") String description, RedirectAttributes ra,
+			HttpServletRequest request) {
 		if (!Roles.isPowerUser()) {
 			throw new TasqAuthException(msg);
 		}
@@ -512,7 +517,13 @@ public class ProjectController {
 			MessageHelper.addErrorAttribute(ra, msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
 			return "redirect:" + request.getHeader("Referer");
 		}
-		project.setDescription(description);
+		if (description != null) {
+			project.setDescription(description);
+		}
+		if (name != null) {
+			project.setName(name);
+		}
+
 		projSrv.save(project);
 		return "redirect:" + request.getHeader("Referer");
 	}
