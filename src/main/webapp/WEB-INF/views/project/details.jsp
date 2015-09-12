@@ -311,7 +311,7 @@ function fetchWorkLogData(page) {
 			}
 			var message = '';
 			if(content.message!=null && content.message!=''){
-				message ='<blockquote class="quote">' + content.message + '</blockquote>';
+				message ='<div class="quote">' + content.message + '</div>';
 			}
 			row+=timeLogged + avatar + account + event + task + message;
 			row+='</td></tr>';

@@ -31,7 +31,7 @@ public class SecurityConfig {
 	@Bean
 	public RememberMeServices rememberMeServices() {
 		PersistentTokenBasedRememberMeServices rememberMeServices = new PersistentTokenBasedRememberMeServices(
-				"test", userService(),
+				"tasq-aWreDWE4343asrwerewraWeFFTgxcv9u1X", userService(),
 				persistentTokenRepository());
 		return rememberMeServices;
 	}

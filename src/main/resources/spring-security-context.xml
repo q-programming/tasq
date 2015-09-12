@@ -12,7 +12,7 @@ http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 			authentication-failure-url="/signin?error=1"
 			always-use-default-target="false" authentication-success-handler-ref="localeSettingAuthenticationSuccessHandler" />
 		<security:logout logout-url="/logout" />
-		<security:remember-me services-ref="rememberMeServices" />
+		<security:remember-me key="tasq-aWreDWE4343asrwerewraWeFFTgxcv9u1X" services-ref="rememberMeServices"/>
 		<security:session-management
 			session-fixation-protection="migrateSession"
 			session-authentication-error-url="/signin?error=1">
