@@ -549,8 +549,8 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
-			if (!projectSrv.canEdit(task.getProject())
-					|| (!Roles.isUser() | !task.getAssignee().equals(Utils.getCurrentAccount()))) {
+			if (!projectSrv.canEdit(task.getProject()) || (!Roles.isUser()
+					| (task.getAssignee() != null && !task.getAssignee().equals(Utils.getCurrentAccount())))) {
 				throw new TasqAuthException(msg, "role.error.task.permission");
 			}
 			if (state.equals(TaskState.TO_DO)) {

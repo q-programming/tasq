@@ -105,11 +105,12 @@ public class Account implements java.io.Serializable, UserDetails {
 
 	}
 
-	public Account(String email, String password, Roles role) {
+	public Account(String email, String password, String username,Roles role) {
 		this.email = email;
 		this.password = password;
 		this.role = role;
-		this.username = email.split("@")[0];
+//		this.username = email.split("@")[0];
+		this.username = username;
 	}
 
 	public Long getId() {

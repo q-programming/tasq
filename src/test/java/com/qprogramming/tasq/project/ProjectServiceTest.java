@@ -36,6 +36,7 @@ public class ProjectServiceTest {
 
 	private static final String PROJ_NAME = "Test project";
 	private static final String PROJ_ID = "TEST";
+	private static final String USERNAME = "user";
 
 	private ProjectService projSrv;
 
@@ -64,7 +65,7 @@ public class ProjectServiceTest {
 
 	@Before
 	public void setUp() {
-		testAccount = new Account(EMAIL, "", Roles.ROLE_ADMIN);
+		testAccount = new Account(EMAIL, "", USERNAME,Roles.ROLE_ADMIN);
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);

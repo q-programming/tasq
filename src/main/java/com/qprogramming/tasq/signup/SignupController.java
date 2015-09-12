@@ -67,7 +67,7 @@ public class SignupController {
 
 	@Autowired
 	public SignupController(AccountService accountSrv, MessageSource msg, MailMail mailer,
-			VelocityEngine velocityEngine,ResourceService resourceSrv) {
+			VelocityEngine velocityEngine, ResourceService resourceSrv) {
 		this.accountSrv = accountSrv;
 		this.msg = msg;
 		this.mailer = mailer;
@@ -93,6 +93,11 @@ public class SignupController {
 		Utils.setHttpRequest(request);
 		if (null != accountSrv.findByEmail(signupForm.getEmail())) {
 			errors.rejectValue("email", "error.email.notunique");
+			return null;
+		}
+
+		if (null != accountSrv.findByUsername((signupForm.getUsername()))) {
+			errors.rejectValue("username", "error.username.notunique");
 			return null;
 		}
 
@@ -128,7 +133,7 @@ public class SignupController {
 		model.put("application", Utils.getBaseURL());
 		String message = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
 				"email/" + Utils.getDefaultLocale() + "/register.vm", "UTF-8", model);
-		mailer.sendMail(MailMail.REGISTER, account.getEmail(), subject, message,resourceSrv.getBasicResourceMap());
+		mailer.sendMail(MailMail.REGISTER, account.getEmail(), subject, message, resourceSrv.getBasicResourceMap());
 		MessageHelper.addSuccessAttribute(ra, msg.getMessage("signup.success", null, Utils.getDefaultLocale()));
 
 		return "redirect:/";
@@ -211,7 +216,7 @@ public class SignupController {
 			String message = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
 					"email/" + account.getLanguage() + "/password.vm", "UTF-8", model);
 			LOG.info(url.toString());
-			mailer.sendMail(MailMail.OTHER, account.getEmail(), subject, message,resourceSrv.getBasicResourceMap());
+			mailer.sendMail(MailMail.OTHER, account.getEmail(), subject, message, resourceSrv.getBasicResourceMap());
 			MessageHelper.addSuccessAttribute(ra,
 					msg.getMessage("singin.password.token.sent", new Object[] { email }, Utils.getDefaultLocale()));
 		}

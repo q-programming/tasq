@@ -22,6 +22,7 @@ import com.qprogramming.tasq.test.MockSecurityContext;
 public class AccountServiceTest {
 
 	private static final String EMAIL = "user@test.com";
+	private static final String USERNAME = "test";
 
 	@InjectMocks
 	private AccountService accountSrv = new AccountService();
@@ -42,7 +43,7 @@ public class AccountServiceTest {
 
 	@Before
 	public void setUp() {
-		testAccount = new Account(EMAIL, "", Roles.ROLE_ADMIN);
+		testAccount = new Account(EMAIL, "",USERNAME, Roles.ROLE_ADMIN);
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);

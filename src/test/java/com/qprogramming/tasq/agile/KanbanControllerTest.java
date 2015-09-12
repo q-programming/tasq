@@ -59,6 +59,7 @@ public class KanbanControllerTest {
 	private static final String TEST = "TEST";
 	private static final String TEST_PROJ = "Test project";
 	private static final String EMAIL = "user@user.com";
+	private static final String USERNAME = "user";
 	private static final String LAMB = "Lamb";
 	private static final String ZOE = "Zoe";
 	private static final String ART = "Art";
@@ -110,15 +111,14 @@ public class KanbanControllerTest {
 	@Before
 	public void setUp() {
 		// ReflectionTestUtils.setField(PeriodHelper.class, "hours", 8);
-		testAccount = new Account(EMAIL, "", Roles.ROLE_POWERUSER);
+		testAccount = new Account(EMAIL, "", USERNAME, Roles.ROLE_POWERUSER);
 		project = new Project();
 		project.setName(TEST_PROJ);
 		project.setId(1L);
 		project.setProjectId(TEST);
 		Set<Account> participants = new HashSet<Account>(createList());
 		project.setParticipants(participants);
-		kanbanCtrl = new KanbanController(taskSrvMock, projSrvMock,
-				wrkLogSrvMock, msgMock, agileSrvMock);
+		kanbanCtrl = new KanbanController(taskSrvMock, projSrvMock, wrkLogSrvMock, msgMock, agileSrvMock);
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
@@ -148,13 +148,9 @@ public class KanbanControllerTest {
 		project.addParticipant(testAccount);
 		when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
 		when(projSrvMock.canEdit(project)).thenReturn(true);
-		when(taskSrvMock.findAllWithoutRelease(project)).thenReturn(
-				createTaskList(project));
-		when(
-				msgMock.getMessage(anyString(), any(Object[].class),
-						any(Locale.class))).thenReturn("TEST");
-		Assert.assertEquals("/kanban/board",
-				kanbanCtrl.showBoard(TEST, modelMock, requestMock, raMock));
+		when(taskSrvMock.findAllWithoutRelease(project)).thenReturn(createTaskList(project));
+		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("TEST");
+		Assert.assertEquals("/kanban/board", kanbanCtrl.showBoard(TEST, modelMock, requestMock, raMock));
 		verify(modelMock, times(3)).addAttribute(anyString(), anyObject());
 	}
 
@@ -163,14 +159,10 @@ public class KanbanControllerTest {
 		project.addParticipant(testAccount);
 		when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
 		when(projSrvMock.canAdminister(project)).thenReturn(true);
-		when(taskSrvMock.findAllToRelease(project)).thenReturn(
-				new LinkedList<Task>());
+		when(taskSrvMock.findAllToRelease(project)).thenReturn(new LinkedList<Task>());
 		kanbanCtrl.newRelease(TEST, RELEASE, null, requestMock, raMock);
-		verify(raMock, times(1))
-				.addFlashAttribute(
-						anyString(),
-						new Message(anyString(), Message.Type.WARNING,
-								new Object[] {}));
+		verify(raMock, times(1)).addFlashAttribute(anyString(),
+				new Message(anyString(), Message.Type.WARNING, new Object[] {}));
 	}
 
 	@Test
@@ -178,14 +170,10 @@ public class KanbanControllerTest {
 		project.addParticipant(testAccount);
 		when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
 		when(projSrvMock.canAdminister(project)).thenReturn(true);
-		when(agileSrvMock.findByProjectIdAndRelease(1L, RELEASE)).thenReturn(
-				new Release(project, RELEASE, null));
+		when(agileSrvMock.findByProjectIdAndRelease(1L, RELEASE)).thenReturn(new Release(project, RELEASE, null));
 		kanbanCtrl.newRelease(TEST, RELEASE, null, requestMock, raMock);
-		verify(raMock, times(1))
-				.addFlashAttribute(
-						anyString(),
-						new Message(anyString(), Message.Type.WARNING,
-								new Object[] {}));
+		verify(raMock, times(1)).addFlashAttribute(anyString(),
+				new Message(anyString(), Message.Type.WARNING, new Object[] {}));
 	}
 
 	@Test
@@ -204,8 +192,7 @@ public class KanbanControllerTest {
 		Assert.assertTrue(taskList.get(0).getRelease() != null);
 		Assert.assertTrue(taskList.get(1).getRelease() != null);
 		Assert.assertTrue(taskList.get(4).getRelease() != null);
-		Assert.assertEquals(taskList.get(0).getRelease(), taskList.get(1)
-				.getRelease());
+		Assert.assertEquals(taskList.get(0).getRelease(), taskList.get(1).getRelease());
 	}
 
 	@Test
@@ -215,11 +202,8 @@ public class KanbanControllerTest {
 		Release release = new Release(project, RELEASE, null);
 		List<Release> list = new LinkedList<Release>();
 		list.add(release);
-		when(
-				agileSrvMock.findReleaseByProjectIdOrderByDateDesc(project
-						.getId())).thenReturn(list);
-		List<Release> result = kanbanCtrl.showProjectReleases(project.getId(),
-				responseMock);
+		when(agileSrvMock.findReleaseByProjectIdOrderByDateDesc(project.getId())).thenReturn(list);
+		List<Release> result = kanbanCtrl.showProjectReleases(project.getId(), responseMock);
 		Assert.assertFalse(result.isEmpty());
 	}
 
@@ -230,9 +214,7 @@ public class KanbanControllerTest {
 		Release release = new Release(project, RELEASE, null);
 		List<Release> releaseList = new LinkedList<Release>();
 		releaseList.add(release);
-		when(
-				agileSrvMock.findReleaseByProjectIdOrderByDateDesc(project
-						.getId())).thenReturn(releaseList);
+		when(agileSrvMock.findReleaseByProjectIdOrderByDateDesc(project.getId())).thenReturn(releaseList);
 		kanbanCtrl.showReport(TEST, null, modelMock, requestMock, raMock);
 		verify(modelMock, times(2)).addAttribute(anyString(), anyObject());
 	}
@@ -280,8 +262,7 @@ public class KanbanControllerTest {
 		taskList.add(task);
 		taskList.add(task2);
 		when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
-		when(agileSrvMock.findByProjectIdAndRelease(1L, RELEASE)).thenReturn(
-				release);
+		when(agileSrvMock.findByProjectIdAndRelease(1L, RELEASE)).thenReturn(release);
 		when(wrkLogSrvMock.getAllReleaseEvents(release)).thenReturn(workLogs);
 		when(taskSrvMock.findAllByRelease(release)).thenReturn(taskList);
 		when(taskSrvMock.findAllByRelease(null)).thenReturn(taskList);
@@ -294,9 +275,9 @@ public class KanbanControllerTest {
 		Assert.assertNotNull(data.getOpen());
 		Assert.assertNotNull(data.getTimeBurned());
 	}
-	
+
 	@Test
-	public void checkReleases(){
+	public void checkReleases() {
 		Release release = new Release(project, RELEASE, null);
 		release.setId(1L);
 		Release release2 = new Release(project, RELEASE, null);
@@ -316,7 +297,7 @@ public class KanbanControllerTest {
 	}
 
 	private Account createAccount(String name, String surname) {
-		Account account = new Account(name + "@test.com", "", Roles.ROLE_POWERUSER);
+		Account account = new Account(name + "@test.com", "", name, Roles.ROLE_POWERUSER);
 		account.setName(name);
 		account.setSurname(surname);
 		return account;

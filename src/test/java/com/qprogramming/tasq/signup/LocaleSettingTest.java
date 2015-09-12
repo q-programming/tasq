@@ -57,15 +57,14 @@ public class LocaleSettingTest {
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	private Account testAccount = new Account("user@test.com", "", Roles.ROLE_ADMIN);
-	
+	private Account testAccount = new Account("user@test.com", "", "user", Roles.ROLE_ADMIN);
+
 	@Before
-	public void setUp(){
+	public void setUp() {
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
 	}
-
 
 	@Test
 	public void testLoggin() {
@@ -73,9 +72,8 @@ public class LocaleSettingTest {
 			when(requestMock.getSession(false)).thenReturn(sessionMock);
 			when(sessionMock.getAttribute(anyString())).thenReturn(savedRequestMock);
 			when(savedRequestMock.getRedirectUrl()).thenReturn("projects/show");
-			localeSettter.onAuthenticationSuccess(requestMock, responseMock,
-					authMock);
-			
+			localeSettter.onAuthenticationSuccess(requestMock, responseMock, authMock);
+
 		} catch (ServletException e) {
 			e.printStackTrace();
 			Assert.fail(e.getMessage());

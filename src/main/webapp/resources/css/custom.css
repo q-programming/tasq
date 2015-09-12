@@ -593,3 +593,13 @@ li.wider {
 .tag {
 	border-radius: 0px;
 }
+.inputcheck{
+	float: right;
+    margin: -25px 5px 0px 0px;
+}
+.inputcheck.invalid{
+	color: red;
+}
+.inputcheck.valid{
+	color: green;
+}

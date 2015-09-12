@@ -13,7 +13,7 @@ public class AccountClassTest {
 
 	@Test
 	public void displayAccountTest() {
-		Account account = new Account(ZOE + "@test.com", "", Roles.ROLE_POWERUSER);
+		Account account = new Account(ZOE + "@test.com", "",ZOE, Roles.ROLE_POWERUSER);
 		account.setName(ZOE);
 		account.setSurname(LAMB);
 		account.setId(1L);
@@ -30,11 +30,11 @@ public class AccountClassTest {
 
 	@Test
 	public void accountTest() {
-		Account account = new Account(ZOE + "@test.com", "", Roles.ROLE_POWERUSER);
+		Account account = new Account(ZOE + "@test.com", "",ZOE, Roles.ROLE_POWERUSER);
 		account.setName(ZOE);
 		account.setSurname(LAMB);
 		account.setId(1L);
-		Account account2 = new Account(ZOE + "@test.com", "", Roles.ROLE_POWERUSER);
+		Account account2 = new Account(ZOE + "@test.com", "",ZOE, Roles.ROLE_POWERUSER);
 		account2.setName(ZOE);
 		account2.setSurname(LAMB);
 		account2.setId(1L);

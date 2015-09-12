@@ -114,13 +114,14 @@ public class SignupControllerTest {
 	private static final String SORT_BY_NAME = "name";
 	private static final String SORT_BY_EMAIL = "email";
 	private static final String SORT_BY_SURNAME = "surname";
+	private static final String USERNAME = "user";
 
 	private List<Account> accountsList;
 
 	@Before
 	public void setUp() {
 		signupCtr = new SignupController(accountSrv, msgMock, mailerMock, velocityMock, resourceMock);
-		testAccount = new Account(EMAIL, "", Roles.ROLE_ADMIN);
+		testAccount = new Account(EMAIL, "", USERNAME, Roles.ROLE_ADMIN);
 		testAccount.setLanguage("en");
 		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");
 		when(securityMock.getAuthentication()).thenReturn(authMock);
@@ -251,7 +252,7 @@ public class SignupControllerTest {
 	}
 
 	private Account createAccount(String name, String surname) {
-		Account account = new Account(name + "@test.com", "", Roles.ROLE_POWERUSER);
+		Account account = new Account(name + "@test.com", "", name, Roles.ROLE_POWERUSER);
 		account.setName(name);
 		account.setSurname(surname);
 		return account;

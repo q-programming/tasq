@@ -1,7 +1,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
 <c:set var="email_txt">
-	<s:message code="signup.email" />
+	<s:message code="signup.email.login" />
 </c:set>
 <c:set var="password_txt">
 	<s:message code="signup.password" />
@@ -16,7 +16,7 @@
     <fieldset>
         <legend>Please Sign In</legend>
         <div class="form-group">
-            <label for="inputEmail" class="col-lg-2 control-label">Email</label>
+            <label for="inputEmail" class="col-lg-2 control-label">Login</label>
             <div class="col-lg-10">
                 <input type="text" class="form-control" id="inputEmail" placeholder="${email_txt}" name="j_username">
             </div>

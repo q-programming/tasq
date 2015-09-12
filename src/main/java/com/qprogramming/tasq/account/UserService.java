@@ -25,6 +25,10 @@ public class UserService implements UserDetailsService {
 	public UserDetails loadUserByUsername(String username)
 			throws UsernameNotFoundException {
 		Account account = accountSrv.findByEmail(username);
+//		try to find by username
+		if(account==null){
+			account = accountSrv.findByUsername(username);
+		}
 		if (account == null || !account.isConfirmed()) {
 			LOG.error("User not found or not confirmed registration.");
 			throw new UsernameNotFoundException(

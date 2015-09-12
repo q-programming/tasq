@@ -83,11 +83,9 @@ public class TagsControllerTest {
 
 	@Before
 	public void setUp() {
-		testAccount = new Account(EMAIL, "", Roles.ROLE_ADMIN);
+		testAccount = new Account(EMAIL, "", "user", Roles.ROLE_ADMIN);
 		testAccount.setLanguage("en");
-		when(
-				msgMock.getMessage(anyString(), any(Object[].class),
-						any(Locale.class))).thenReturn("MESSAGE");
+		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
@@ -106,8 +104,7 @@ public class TagsControllerTest {
 		list.add(tag2);
 		list2.add(tag1);
 		when(tagsRepoMock.findAll()).thenReturn(list);
-		when(tagsRepoMock.findByNameContainingIgnoreCase(TEST_2)).thenReturn(
-				list2);
+		when(tagsRepoMock.findByNameContainingIgnoreCase(TEST_2)).thenReturn(list2);
 		List<Tag> result = tagsRestController.getTags(null, responseMock);
 		Assert.assertTrue(result.size() > 1);
 		result = tagsRestController.getTags(TEST_2, responseMock);
@@ -120,10 +117,8 @@ public class TagsControllerTest {
 		Task task = createTask(TASK_NAME, 1, createProject());
 		when(tagsRepoMock.findByName(TEST_1)).thenReturn(null);
 		when(taskSrvMock.findById(PROJECT_ID + "-1")).thenReturn(task);
-		Assert.assertEquals(ResultData.ERROR,
-				tagsRestController.addTag(TEST_1, PROJECT_ID + "-2"));
-		Assert.assertEquals(ResultData.OK,
-				tagsRestController.addTag(TEST_1, PROJECT_ID + "-1"));
+		Assert.assertEquals(ResultData.ERROR, tagsRestController.addTag(TEST_1, PROJECT_ID + "-2"));
+		Assert.assertEquals(ResultData.OK, tagsRestController.addTag(TEST_1, PROJECT_ID + "-1"));
 		verify(tagsRepoMock, times(1)).save(any(Tag.class));
 	}
 
@@ -136,10 +131,8 @@ public class TagsControllerTest {
 		task.setTags(taskTags);
 		when(tagsRepoMock.findByName(TEST_1)).thenReturn(tag);
 		when(taskSrvMock.findById(PROJECT_ID + "-1")).thenReturn(task);
-		Assert.assertEquals(ResultData.ERROR,
-				tagsRestController.removeTag(TEST_1, PROJECT_ID + "-2"));
-		Assert.assertEquals(ResultData.OK,
-				tagsRestController.removeTag(TEST_1, PROJECT_ID + "-1"));
+		Assert.assertEquals(ResultData.ERROR, tagsRestController.removeTag(TEST_1, PROJECT_ID + "-2"));
+		Assert.assertEquals(ResultData.OK, tagsRestController.removeTag(TEST_1, PROJECT_ID + "-1"));
 		Assert.assertTrue(task.getTags().isEmpty());
 	}
 

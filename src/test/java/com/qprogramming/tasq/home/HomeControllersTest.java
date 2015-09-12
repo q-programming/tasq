@@ -43,6 +43,8 @@ public class HomeControllersTest {
 
 	private static final String EMAIL = "user@test.com";
 
+	private static final String USERNAME = "user";
+
 	private HomeController homeCtrl;
 	private HomeControllerAdvice homeAdvCtrl;
 	private ProjectService projSrv;
@@ -81,7 +83,7 @@ public class HomeControllersTest {
 
 	@Before
 	public void setUp() {
-		testAccount = new Account(EMAIL, "", Roles.ROLE_POWERUSER);
+		testAccount = new Account(EMAIL, "", USERNAME,Roles.ROLE_POWERUSER);
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);

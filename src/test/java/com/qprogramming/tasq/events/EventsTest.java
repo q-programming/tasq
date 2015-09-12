@@ -66,6 +66,7 @@ public class EventsTest {
 	private static final String PROJECT_NAME = "TestProject";
 	private static final String PROJECT_ID = "TEST";
 	private static final String PROJECT_DESCRIPTION = "Description";
+	private static final String USERNAME = "user";
 
 	private Account testAccount;
 	private Task task1;
@@ -110,7 +111,7 @@ public class EventsTest {
 
 	@Before
 	public void setUp() {
-		testAccount = new Account(EMAIL, "", Roles.ROLE_ADMIN);
+		testAccount = new Account(EMAIL, "", USERNAME, Roles.ROLE_ADMIN);
 		testAccount.setLanguage("en");
 		testAccount.setId(1L);
 		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");
@@ -237,7 +238,7 @@ public class EventsTest {
 		Project project = new Project(PROJECT_NAME, testAccount);
 		testAccount.setEmail_notifications(true);
 		Set<Account> watchers = new HashSet<Account>();
-		Account newAccount = new Account(EMAIL, "", Roles.ROLE_POWERUSER);
+		Account newAccount = new Account(EMAIL, "", USERNAME, Roles.ROLE_POWERUSER);
 		newAccount.setEmail_notifications(true);
 		watchers.add(testAccount);
 		watchers.add(newAccount);

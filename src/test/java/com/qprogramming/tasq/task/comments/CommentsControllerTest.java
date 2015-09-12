@@ -54,6 +54,7 @@ public class CommentsControllerTest {
 	private static final String PROJECT_NAME = "TestProject";
 	private static final String PROJECT_ID = "TEST";
 	private static final String PROJECT_DESCRIPTION = "Description";
+	private static final String USERNAME = "user";
 
 	private Account testAccount;
 
@@ -87,16 +88,13 @@ public class CommentsControllerTest {
 
 	@Before
 	public void setUp() {
-		testAccount = new Account(EMAIL, "", Roles.ROLE_ADMIN);
+		testAccount = new Account(EMAIL, "", USERNAME, Roles.ROLE_ADMIN);
 		testAccount.setLanguage("en");
-		when(
-				msgMock.getMessage(anyString(), any(Object[].class),
-						any(Locale.class))).thenReturn("MESSAGE");
+		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
-		commentsController = new CommentsController(commentsRepoMock,
-				taskSrvMock, wrkLogSrvMock, msgMock);
+		commentsController = new CommentsController(commentsRepoMock, taskSrvMock, wrkLogSrvMock, msgMock);
 	}
 
 	@Test
@@ -105,19 +103,15 @@ public class CommentsControllerTest {
 		task.setState(TaskState.CLOSED);
 		when(taskSrvMock.findById(TEST_1)).thenReturn(task);
 		commentsController.addComment(TEST_1, "Comment", requestMock, raMock);
-		verify(raMock, times(1))
-				.addFlashAttribute(
-						anyString(),
-						new Message(anyString(), Message.Type.WARNING,
-								new Object[] {}));
+		verify(raMock, times(1)).addFlashAttribute(anyString(),
+				new Message(anyString(), Message.Type.WARNING, new Object[] {}));
 	}
 
 	@Test
 	public void taskCommentMessageNotValidTest() {
 		Task task = createTask(TASK_NAME, 1, createProject());
 		when(taskSrvMock.findById(TEST_1)).thenReturn(task);
-		commentsController.addComment(TEST_1, "<script>Comment</script>",
-				requestMock, raMock);
+		commentsController.addComment(TEST_1, "<script>Comment</script>", requestMock, raMock);
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.DANGER, new Object[] {}));
 	}
@@ -137,14 +131,10 @@ public class CommentsControllerTest {
 		task.setComments(new HashSet<Comment>());
 		when(taskSrvMock.findById(TEST_1)).thenReturn(task);
 		commentsController.addComment(TEST_1, "Comment", requestMock, raMock);
-		verify(raMock, times(1))
-				.addFlashAttribute(
-						anyString(),
-						new Message(anyString(), Message.Type.SUCCESS,
-								new Object[] {}));
+		verify(raMock, times(1)).addFlashAttribute(anyString(),
+				new Message(anyString(), Message.Type.SUCCESS, new Object[] {}));
 		verify(taskSrvMock, times(1)).save(task);
-		verify(wrkLogSrvMock, times(1)).addActivityLog(any(Task.class),
-				anyString(), any(LogType.class));
+		verify(wrkLogSrvMock, times(1)).addActivityLog(any(Task.class), anyString(), any(LogType.class));
 	}
 
 	@Test
@@ -173,7 +163,7 @@ public class CommentsControllerTest {
 		Task task = createTask(TASK_NAME, 1, createProject());
 		Comment comment = new Comment();
 		comment.setId(1L);
-		comment.setAuthor(new Account("email@email.com", "", Roles.ROLE_POWERUSER));
+		comment.setAuthor(new Account("email@email.com", "", USERNAME, Roles.ROLE_POWERUSER));
 		comment.setMessage("Comment");
 		Set<Comment> comments = new HashSet<Comment>();
 		comments.add(comment);
@@ -184,7 +174,7 @@ public class CommentsControllerTest {
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.DANGER, new Object[] {}));
 	}
-	
+
 	@Test
 	public void taskCommentDeleteTest() {
 		Task task = createTask(TASK_NAME, 1, createProject());
@@ -198,11 +188,11 @@ public class CommentsControllerTest {
 		when(taskSrvMock.findById(TEST_1)).thenReturn(task);
 		when(commentsRepoMock.findById(1L)).thenReturn(comment);
 		commentsController.deleteComment(TEST_1, 1L, requestMock, raMock);
-		verify(commentsRepoMock,times(1)).save(any(Comment.class));
+		verify(commentsRepoMock, times(1)).save(any(Comment.class));
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.SUCCESS, new Object[] {}));
 	}
-	
+
 	@Test
 	public void taskCommentEditNotAllowedTest() {
 		Task task = createTask(TASK_NAME, 1, createProject());
@@ -212,7 +202,7 @@ public class CommentsControllerTest {
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.WARNING, new Object[] {}));
 	}
-	
+
 	@Test
 	public void taskCommentEditInvalidTest() {
 		Task task = createTask(TASK_NAME, 1, createProject());
@@ -221,7 +211,7 @@ public class CommentsControllerTest {
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.DANGER, new Object[] {}));
 	}
-	
+
 	@Test
 	public void taskCommentEditTest() {
 		Task task = createTask(TASK_NAME, 1, createProject());
@@ -235,20 +225,20 @@ public class CommentsControllerTest {
 		when(taskSrvMock.findById(TEST_1)).thenReturn(task);
 		when(commentsRepoMock.findById(1L)).thenReturn(comment);
 		commentsController.editComment(TEST_1, 1L, "new comment content", requestMock, raMock);
-		verify(commentsRepoMock,times(1)).save(any(Comment.class));
+		verify(commentsRepoMock, times(1)).save(any(Comment.class));
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.SUCCESS, new Object[] {}));
 	}
-	
+
 	@Test
-	public void commentsTest(){
+	public void commentsTest() {
 		Comment comment = new Comment();
 		comment.setId(1L);
 		comment.setAuthor(testAccount);
 		comment.setMessage("Comment");
 		comment.setDate(new Date());
 		comment.setDate_edited(new Date());
-		
+
 		Comment comment2 = new Comment();
 		comment2.setId(2L);
 		comment2.setAuthor(testAccount);
@@ -258,7 +248,6 @@ public class CommentsControllerTest {
 		Assert.assertFalse(comment.getId() == comment2.getId());
 		Assert.assertNotNull(comment.getDate_edited());
 	}
-
 
 	private Task createTask(String name, int no, Project project) {
 		Task task = new Task();

@@ -4,7 +4,7 @@
 	prefix="security"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <c:set var="email_txt">
-	<s:message code="signup.email" />
+	<s:message code="signup.email.login" />
 </c:set>
 <c:set var="password_txt">
 	<s:message code="signup.password" />

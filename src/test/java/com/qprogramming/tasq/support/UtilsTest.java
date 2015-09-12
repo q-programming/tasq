@@ -32,38 +32,40 @@ import com.qprogramming.tasq.test.MockSecurityContext;
 @RunWith(MockitoJUnitRunner.class)
 public class UtilsTest {
 
-	private Account testAccount = new Account("user@test.com", "", Roles.ROLE_ADMIN);
+	private Account testAccount = new Account("user@test.com", "", "user", Roles.ROLE_ADMIN);
 
 	@Mock
 	private MockSecurityContext securityMock;
-	
+
 	@Mock
 	private Authentication authMock;
 
 	@Mock
 	private AccountService accountServiceMock;
-	
+
 	@Mock
 	private HttpServletRequest requestMock;
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
-	
+
 	@Before
-	public void setUp(){
+	public void setUp() {
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
 	}
-	
+
 	@Test
 	public void getCurrentUserAndLocaleTest() {
-		Assert.assertEquals(testAccount,Utils.getCurrentAccount());
+		Assert.assertEquals(testAccount, Utils.getCurrentAccount());
 	}
+
 	@Test
 	public void getLocaleTest() {
-		Assert.assertEquals(new Locale("en"),Utils.getCurrentLocale());
+		Assert.assertEquals(new Locale("en"), Utils.getCurrentLocale());
 	}
+
 	@Test
 	public void getDefaultLocaleTest() {
 		Assert.assertNotNull(Utils.getDefaultLocale().toLanguageTag());
@@ -77,7 +79,6 @@ public class UtilsTest {
 		Assert.assertTrue(Utils.containsHTMLTags(test1));
 	}
 
-	
 	@Test
 	public void getBaseURLTest() {
 		when(requestMock.getScheme()).thenReturn("http");
@@ -87,16 +88,15 @@ public class UtilsTest {
 		Assert.assertNotNull(Utils.getBaseURL());
 	}
 
-
 	@Test
 	public void capitalizeFirstTest() {
 		String test = "test_string";
-		String result = "Test string";		
-		Assert.assertEquals(result,Utils.capitalizeFirst(test));
+		String result = "Test string";
+		Assert.assertEquals(result, Utils.capitalizeFirst(test));
 	}
-	
+
 	@Test
-	public void convertDateToStringAndStringToDateTest(){
+	public void convertDateToStringAndStringToDateTest() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.YEAR, 2014);
 		cal.set(Calendar.MONTH, 11);
@@ -104,31 +104,31 @@ public class UtilsTest {
 		cal.set(Calendar.HOUR, 0);
 		cal.set(Calendar.MINUTE, 0);
 		Date testDate = Utils.convertStringToDate("01-12-2014");
-		Assert.assertEquals("01-12-2014",Utils.convertDateToString(testDate));
+		Assert.assertEquals("01-12-2014", Utils.convertDateToString(testDate));
 	}
-	
+
 	@Test
-	public void containsTest(){
+	public void containsTest() {
 		List<Account> test = new LinkedList<Account>();
 		test.add(testAccount);
 		Assert.assertTrue(Utils.contains(test, testAccount));
-}
+	}
+
 	@Test
-	public void rolesTest(){
+	public void rolesTest() {
 		Assert.assertTrue(Roles.isUser());
 		Assert.assertTrue(Roles.isPowerUser());
 		Assert.assertTrue(Roles.isAdmin());
-		Assert.assertEquals("role.admin",Roles.ROLE_ADMIN.getCode());
+		Assert.assertEquals("role.admin", Roles.ROLE_ADMIN.getCode());
 	}
-	
+
 	@Test
-	public void uuidTest(){
+	public void uuidTest() {
 		UUID uuid = Generators.timeBasedGenerator().generate();
 		uuid.timestamp();
-		DateTime date = new  DateTime(Utils.getTimeFromUUID(uuid));
+		DateTime date = new DateTime(Utils.getTimeFromUUID(uuid));
 		DateTime beforedate = new DateTime().minusDays(1);
 		Assert.assertTrue(beforedate.isBefore(date));
 	}
-	
 
 }
