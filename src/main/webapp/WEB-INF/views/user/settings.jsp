@@ -79,20 +79,6 @@
 									${theme.name}
 								</option>
 							</c:forEach>
-<%-- 							<option value="" <c:if test="${empty user.theme}">selected</c:if>><s:message --%>
-<%-- 									code="panel.theme.darkblue" /></option> --%>
-<!-- 							<option value="lightblue" -->
-<%-- 								<c:if test="${user.theme eq 'lightblue'}">selected</c:if>><s:message --%>
-<%-- 									code="panel.theme.lightblue" /></option> --%>
-<!-- 							<option value="green" -->
-<%-- 								<c:if test="${user.theme eq 'green'}">selected</c:if>><s:message --%>
-<%-- 									code="panel.theme.green" /></option> --%>
-<!-- 							<option value="red" -->
-<%-- 								<c:if test="${user.theme eq 'red'}">selected</c:if>><s:message --%>
-<%-- 									code="panel.theme.red" /></option> --%>
-<!-- 							<option value="black" -->
-<%-- 								<c:if test="${user.theme eq 'black'}">selected</c:if>><s:message --%>
-<%-- 									code="panel.theme.black" /></option> --%>
 						</select> <span class="help-block"><s:message
 								code="panel.theme.help" /></span>
 					</div>

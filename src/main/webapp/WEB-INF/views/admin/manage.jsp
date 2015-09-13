@@ -8,15 +8,16 @@
 	${font.link}
 </c:forEach>
 <script src="<c:url value="/resources/js/jquery.minicolors.js" />"></script>
-<link href="<c:url value="/resources/css/jquery.minicolors.css" />" rel="stylesheet" media="screen" />
+<link href="<c:url value="/resources/css/jquery.minicolors.css" />"
+	rel="stylesheet" media="screen" />
 
 <div class="white-frame"
 	style="display: table; width: 100%; height: 80vh">
 	<div style="display: table-caption; margin-left: 10px;">
 		<ul class="nav nav-tabs" style="border-bottom: 0">
-			<li class="active"><a style="color: black"
-				href="#"> <i class="fa fa-cogs"></i>
-					<s:message code="menu.manage" text="Manage application" /></a></li>
+			<li class="active"><a style="color: black" href="#"> <i
+					class="fa fa-cogs"></i> <s:message code="menu.manage"
+						text="Manage application" /></a></li>
 			<li><a style="color: black"
 				href="<c:url value="/manage/users" />"> <i class="fa fa-users"></i>
 					<s:message code="menu.manage.users " text="Manage users" /></a></li>
@@ -31,44 +32,61 @@
 	<hr>
 	<div>
 		<h3>
-			<i class="fa fa-paint-brush"></i> Themes
+			<i class="fa fa-paint-brush"></i> <s:message code="theme.themes"/>
 		</h3>
-		<a id="createBtn" href="#" data-toggle="modal" data-target="#theme-create"> <span
+		<a id="createBtn" href="#" data-toggle="modal"
+			data-target="#theme-create"> <span
 			class="btn btn-default pull-right"><i class="fa fa-plus"></i><i
-				class="fa fa-paint-brush"></i> <s:message code="theme.create"/></span></a>
+				class="fa fa-paint-brush"></i> <s:message code="theme.create" /></span></a>
 		<table class="table table-hover table-condensed">
+			<thead class="theme">
+				<tr>
+					<th><s:message code="main.name" text="Name" /></th>
+					<th><s:message code="theme.font.color" text="Font & color" /></th>
+					<th style="width: 100px"></th>
+				</tr>
+			</thead>
 			<c:forEach items="${themes}" var="theme">
 				<tr>
 					<td>${theme.name}</td>
-					<td style="${theme.font.cssFamily}"><span style="padding: 5px; background-color:${theme.color};color:${theme.invColor}">${theme.font.fontFamily}</span></td> 
-					<td style="width:100px"><i class="fa fa-pencil"></i></td>
+					<td style="${theme.font.cssFamily}"><span
+						style="display:block;width:200px;padding: 5px; background-color:${theme.color};color:${theme.invColor}">${theme.font.fontFamily}</span></td>
+					<td >
+					<c:if test="${theme.name ne 'Default'}">
+						<a href="#" style="color: black"
+							class="edit-theme a-tooltip" data-name="${theme.name}"
+							data-color="${theme.color}" data-invcolor="${theme.invColor}"
+							data-font="${theme.font}" data-themeID="${theme.id}" title="<s:message code="main.edit"/>">
+							<i class="fa fa-pencil"></i>
+						</a>
+					</c:if>
+					</td>
 				</tr>
 			</c:forEach>
 		</table>
 	</div>
 </div>
-<div class="modal fade" id="theme-create" role="dialog"
+<div class="modal fade" id="theme-modal" role="dialog"
 	aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header theme">
-				<h4 class="modal-title" id="theme-label">
-					<i class="fa fa-plus"></i><i class="fa fa-paint-brush"></i><s:message code="theme.create"/>
-				</h4>
+				<h4 class="modal-title" id="theme-label"></h4>
 			</div>
-			<form id="theme-new" action="<c:url value="/manage/createTheme"/>" 	method="POST">
-			<div class="modal-body">
+			<form id="theme-form" action="<c:url value="/manage/manageTheme"/>"
+				method="POST">
+				<input id="themeID" name="themeID" type="hidden">
+				<div class="modal-body">
 					<div class="form-group">
 						<label><s:message code="main.name" text="Name" /></label> <input
-							id="name" name="name" class="form-control">
+							id="name" name="name" class="form-control required">
 					</div>
 					<div class="form-group">
 						<label><s:message code="theme.font" text="Font" /></label>
 						<div class="dropdown">
-							<button id="font_button" class="btn btn-default " type="button"
+							<button id="font_button" class="btn btn-default" type="button"
 								id="fontMenu" data-toggle="dropdown">
-								<div id="theme-font">
-								</div>
+								<div id="theme-font"></div>
 							</button>
 							<ul class="dropdown-menu" role="menu" aria-labelledby="fontMenu">
 								<c:forEach items="${fonts}" var="font">
@@ -79,45 +97,109 @@
 								</c:forEach>
 							</ul>
 						</div>
-						<input name="font" id="font" type="hidden">
+						<input name="font" id="font" type="hidden" class="required">
 					</div>
 					<div class="form-group">
-						<label><s:message code="theme.color" text="Color" /></label>
-						<input
-							id="color" name="color" class="form-control mini-colors" value="#000000">
+						<label><s:message code="theme.color" text="Color" /></label> <input
+							id="color" name="color" class="form-control mini-colors required"
+							value="">
 					</div>
 					<div class="form-group">
-						<label for="invcolor" ><s:message code="theme.invcolor" text="Inverse Color" /></label>
-						<input value="#ffffff"
-							id="invcolor" name="invcolor" class="form-control mini-colors">
-						<span class="help-block"><s:message code="theme.invcolor.help"/></span>
+						<label for="invcolor"><s:message code="theme.invcolor"
+								text="Inverse Color" /></label> <input value="#ffffff" id="invcolor"
+							name="invcolor" class="form-control mini-colors required">
+						<span class="help-block"><s:message
+								code="theme.invcolor.help" /></span>
 					</div>
-				
-			</div>
-			<div class="modal-footer">
-				<a class="btn" data-dismiss="modal"><s:message
-						code="main.cancel" /></a>
-				<button id="create" class="btn btn-default" type="submit">
-					<s:message code="main.create" />
-				</button>
-			</div>
-			</form>
+
+				</div>
+				<div>
+					<p id="error" style="color:red;text-align: center;"></p>
+				</div>
+				</form>
+				<div class="modal-footer">
+					<a class="btn" data-dismiss="modal"><s:message
+							code="main.cancel" /></a>
+					<button id="theme-action" class="btn btn-default"></button>
+				</div>
 		</div>
 	</div>
 </div>
 <script>
-$('input.mini-colors').minicolors();
+	$("#createBtn")
+			.click(
+					function() {
+						var msg = '<s:message code="theme.font.choose"/>&nbsp;<span class="caret">';
+						var label = '<i class="fa fa-plus"></i><i class="fa fa-paint-brush"></i><s:message code="theme.create" />';
+						$("#theme-font").html(msg);
+						$("#theme-label").html(label)
+						$("#name").val("");
+						$("#font").val("");
+						$("#color").val("#000000");
+						$("#invcolor").val("#FFFFFF");
+						$("#themeID").val("");
+						$('input.mini-colors').minicolors();
+						var btnMsg = '<s:message code="main.create" />';
+						$("#theme-action").html(btnMsg);
+						$("#error").html("");
+						$("#theme-modal").modal('show');
 
-$("#createBtn").click(function() {
-	var msg = '<s:message code="theme.font.choose"/>&nbsp;<span class="caret">';
-	$("#theme-font").html(msg);
-	$("#name").val("");
-	$("#font").val("");
-});
-$(".fontType").click(function(){
-	var font = $(this).data('font');
- 	$("#theme-font").html($(this).html() + " <span class='caret'>");
-	$("#font").val(font);
-});
+					});
+	$(".edit-theme")
+			.click(
+					function() {
+						var name = $(this).data('name');
+						var font = $(this).data('font');
+						var color = $(this).data('color');
+						var invcolor = $(this).data('invcolor');
+						var themeID = $(this).data('themeid');
+
+						var label = '<i class="fa fa-paint-brush"></i><s:message code="theme.edit" /> '
+								+ name;
+						$("#theme-label").html(label)
+						$("#theme-font").html(
+								$('#' + font).html() + " <span class='caret'>");
+						$("#font").val(font);
+						$("#name").val(name);
+						$("#color").val(color);
+						$("#invcolor").val(invcolor);
+						$("#themeID").val(themeID);
+						$('input.mini-colors').minicolors();
+						var btnMsg = '<s:message code="main.edit" />';
+						$("#theme-action").html(btnMsg);
+						$("#error").html("");
+						$("#theme-modal").modal('show');
+					});
+
+	$(".fontType").click(function() {
+		var font = $(this).data('font');
+		$("#theme-font").html($(this).html() + " <span class='caret'>");
+		$("#font").val(font);
+	});
+	$(".fontType").click(function() {
+		var font = $(this).data('font');
+		$("#theme-font").html($(this).html() + " <span class='caret'>");
+		$("#font").val(font);
+	});
+	
+	$("#theme-action").click(function() {
+		var valid = true;
+		var fields = '<i class="fa fa-exclamation-circle"></i>&nbsp;<s:message code="theme.required"/>&nbsp;';
+		var delimiter = "";
+		$(".required").each(function() {
+			if ($(this).val()==""){
+				valid = false;
+				fields+= delimiter + $(this).attr('name');
+				delimiter = ","
+			}
+		});
+		if(valid){
+			$("#theme-form").submit();
+		}
+		else{
+			$("#error").html(fields);
+		}
+		
+	});
 </script>
 

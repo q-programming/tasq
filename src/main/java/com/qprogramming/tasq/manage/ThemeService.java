@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ThemeService {
 
-	private static final String DEFAULT = "Default";
+	public static final String DEFAULT = "Default";
 
 	@Value("${default.theme.color}")
 	private String defaultColor;

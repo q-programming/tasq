@@ -14,11 +14,11 @@ import com.qprogramming.tasq.error.TasqAuthException;
 @Controller
 public class ManageController {
 
-	private ThemeRepository themeRepo;
+	private ThemeService themeSrv;
 
 	@Autowired
-	public ManageController(ThemeRepository themeRepo) {
-		this.themeRepo = themeRepo;
+	public ManageController(ThemeService themeSrv) {
+		this.themeSrv = themeSrv;
 	}
 
 	@RequestMapping(value = "manage/tasks", method = RequestMethod.GET)
@@ -42,23 +42,32 @@ public class ManageController {
 		if (!Roles.isAdmin()) {
 			throw new TasqAuthException();
 		}
-		model.addAttribute("themes", themeRepo.findAll());
+		model.addAttribute("themes", themeSrv.findAll());
 		return "admin/manage";
 	}
 
-	@RequestMapping(value = "manage/createTheme", method = RequestMethod.POST)
-	public String createTheme(@RequestParam(value = "name") String name, @RequestParam(value = "font") Font font,
+	@RequestMapping(value = "manage/manageTheme", method = RequestMethod.POST)
+	public String createTheme(@RequestParam(value = "themeID", required = false) Long themeID,
+			@RequestParam(value = "name") String name, @RequestParam(value = "font") Font font,
 			@RequestParam(value = "color") String color, @RequestParam(value = "invcolor") String invcolor,
 			RedirectAttributes ra, Model model) {
 		if (!Roles.isAdmin()) {
 			throw new TasqAuthException();
 		}
-		Theme theme = new Theme();
+		Theme theme;
+		if (themeID != null) {
+			theme = themeSrv.findById(themeID);
+			if (theme == null) {
+				theme = new Theme();
+			}
+		} else {
+			theme = new Theme();
+		}
 		theme.setName(name);
 		theme.setFont(font);
 		theme.setColor(color);
 		theme.setInvColor(invcolor);
-		themeRepo.save(theme);
+		themeSrv.save(theme);
 		return "redirect:/manage/app";
 	}
 
