@@ -49,8 +49,7 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 <security:authorize access="isAuthenticated()">
 	<security:authentication property="principal" var="user" />
 	<c:if test="${not empty user.theme}">
-			<link href="<c:url value="/resources/css/theme-${user.theme}.css" />"
-		rel="stylesheet" media="screen" />
+			<jsp:include page="../views/other/theme.jsp" />
 	</c:if>
 	<c:if test="${empty user.theme}">
 		<link href="<c:url value="/resources/css/theme.css" />"

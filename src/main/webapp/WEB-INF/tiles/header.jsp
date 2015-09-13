@@ -178,12 +178,14 @@
 										code="menu.manage" text="Settings" />"
 									data-placement="bottom"><i class="fa fa-wrench"></i></a>
 								<ul class="dropdown-menu" style="text-align: left;margin-top: 7px;">
+									<li><a href="<s:url value="/manage/app"></s:url>"><i
+											class="fa fa-cogs"></i> <s:message code="menu.manage" text="Manage application" /></a>
+									</li>
 									<li><a href="<s:url value="/manage/users"></s:url>"><i
 											class="fa fa-users"></i> <s:message code="menu.manage.users" /></a></li>
 									<li><a href="<s:url value="/manage/tasks"></s:url>"><i
 											class="fa fa-lg fa-check-square"></i> <s:message
 												code="menu.manage.tasks" /></a></li>
-									<li><a href="#">Other</a></li>
 								</ul>
 							</c:if>
 							<a class="btn btn-default btn-xs a-tooltip" data-toggle="modal"

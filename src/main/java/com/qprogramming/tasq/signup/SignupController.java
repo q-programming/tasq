@@ -47,6 +47,7 @@ import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.config.ResourceService;
 import com.qprogramming.tasq.error.TasqException;
 import com.qprogramming.tasq.mail.MailMail;
+import com.qprogramming.tasq.manage.ThemeService;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.web.MessageHelper;
 
@@ -64,15 +65,17 @@ public class SignupController {
 	private MessageSource msg;
 	private VelocityEngine velocityEngine;
 	private ResourceService resourceSrv;
+	private ThemeService themeSrv;
 
 	@Autowired
 	public SignupController(AccountService accountSrv, MessageSource msg, MailMail mailer,
-			VelocityEngine velocityEngine, ResourceService resourceSrv) {
+			VelocityEngine velocityEngine, ResourceService resourceSrv, ThemeService themeSrv) {
 		this.accountSrv = accountSrv;
 		this.msg = msg;
 		this.mailer = mailer;
 		this.velocityEngine = velocityEngine;
 		this.resourceSrv = resourceSrv;
+		this.themeSrv = themeSrv;
 	}
 
 	@RequestMapping(value = "signup")
@@ -105,6 +108,7 @@ public class SignupController {
 		if (accountSrv.findAll().isEmpty()) {
 			account.setRole(Roles.ROLE_ADMIN);
 		}
+		account.setTheme(themeSrv.getDefault());
 		account = accountSrv.save(account, true);
 		// copy default avatar
 		HttpSession session = request.getSession();

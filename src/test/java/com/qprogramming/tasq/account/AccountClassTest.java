@@ -43,7 +43,6 @@ public class AccountClassTest {
 		Assert.assertEquals(account.getName(), account2.getName());
 		account2.setUsername("newUserName");
 		account2.setEmail("new@test.com");
-		account2.setTheme("red");
 		account2.setRole(Roles.ROLE_ADMIN);
 		Assert.assertNotNull(account2.getTheme());
 		Assert.assertFalse(account.equals(account2));

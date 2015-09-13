@@ -21,6 +21,9 @@
 <div class="white-frame" style="display: table; width: 100%;height:80vh">
 <div style="display: table-caption; margin-left: 10px;">
 		<ul class="nav nav-tabs" style="border-bottom: 0">
+			<li><a style="color: black"
+				href="<c:url value="/manage/app" />"> <i class="fa fa-cogs"></i>
+					<s:message code="menu.manage" text="Manage application" /></a></li>
 			<li class="active"><a style="color: black" href="#"> <i class="fa fa-users"></i>	
 					<s:message code="menu.manage.users " text="Manage users" /></a></li>
 			<li><a style="color: black" href="<c:url value="/manage/tasks"/>"> <i

@@ -13,8 +13,10 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -27,6 +29,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.qprogramming.tasq.manage.Theme;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.task.Task;
@@ -82,8 +85,9 @@ public class Account implements java.io.Serializable, UserDetails {
 	@JoinTable(name = "last_visited_p")
 	private List<Project> last_visited_p = new LinkedList<Project>();
 
-	@Column
-	private String theme;
+	@ManyToOne
+	@JoinColumn(name = "theme")
+	private Theme theme;
 
 	@Transient
 	private Collection<GrantedAuthority> authorities;
@@ -169,11 +173,11 @@ public class Account implements java.io.Serializable, UserDetails {
 		this.surname = surname;
 	}
 
-	public String getTheme() {
+	public Theme getTheme() {
 		return theme;
 	}
 
-	public void setTheme(String theme) {
+	public void setTheme(Theme theme) {
 		this.theme = theme;
 	}
 
