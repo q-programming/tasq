@@ -6,6 +6,7 @@ ${user.theme.font.link}
 <c:set var="color" value="${user.theme.color}"></c:set>
 <c:set var="invcolor" value="${user.theme.invColor}"></c:set>
 <c:set var="rgbcolor">${user.theme.rgbColor.r},${user.theme.rgbColor.g},${user.theme.rgbColor.b}</c:set>
+<c:set var="rgbinvcolor">${user.theme.rgbInvColor.r},${user.theme.rgbInvColor.g},${user.theme.rgbInvColor.b}</c:set>
 <style>
 body {
 	${user.theme.font.cssFamily}	
@@ -16,8 +17,12 @@ a.theme {
 }
 
 .caret.theme {
-	border-top-color: white;
-	border-bottom-color: white;
+	border-top-color: ${invcolor};
+	border-bottom-color: ${invcolor};
+}
+.btn.caret.theme:hover {
+	border-top-color: rgba(${rgbinvcolor}, 0.5);
+	border-bottom-color: rgba(${rgbinvcolor}, 0.5);
 }
 
 div.navbar.navbar-fixed-top.theme {
@@ -77,7 +82,7 @@ span.badge.theme.zero {
 
 .nav-pills>li.active>a, .nav-pills>li.active>a:hover, .nav-pills>li.active>a:focus
 	{
-	color: #fff;
+	color: ${invcolor};
 	background-color: ${color};
 }
 
@@ -109,5 +114,14 @@ span.tag.label.label-info.theme {
 	text-decoration: none;
 	background-color: transparent;
 	border-left: 1px solid ${color};
+}
+.dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
+  color:  ${invcolor};
+  background-color: ${color};
+  background-image: none;
+  filter: none;
+}
+.btn.theme :focus, .btn.theme:hover {
+    color: rgba(${rgbinvcolor}, 0.5);
 }
 </style>

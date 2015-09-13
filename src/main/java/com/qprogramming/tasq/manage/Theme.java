@@ -71,4 +71,8 @@ public class Theme implements Serializable {
 		return new Color(Integer.valueOf(color.substring(1, 3), 16), Integer.valueOf(color.substring(3, 5), 16),
 				Integer.valueOf(color.substring(5, 7), 16));
 	}
+	public Color getRgbInvColor() {
+		return new Color(Integer.valueOf(invColor.substring(1, 3), 16), Integer.valueOf(invColor.substring(3, 5), 16),
+				Integer.valueOf(invColor.substring(5, 7), 16));
+	}
 }

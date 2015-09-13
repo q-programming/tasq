@@ -177,9 +177,9 @@
 						<span class="points badge theme">
 							<span class="point-value" data-points="${task.story_points}">${points_txt}</span>
 							<input class="point-input" data-id="${task.id}">
-							<span class="point-approve" style="display:none;cursor: pointer;"><i class="fa fa-check" style="vertical-align:text-top"></i></span>
-							<span class="point-cancel" style="display:none;cursor: pointer;"><i class="fa fa-times" style="vertical-align:text-top"></i></span>
-							<span class="point-edit"><i class="fa fa-pencil points" style="vertical-align:text-top"></i></span>
+							<span class="point-approve" style="display:none;cursor: pointer;"><i class="fa fa-check"></i></span>
+							<span class="point-cancel" style="display:none;cursor: pointer;"><i class="fa fa-times"></i></span>
+							<span class="point-edit"><i class="fa fa-pencil points"></i></span>
 						</span>
 					</div>
 					</c:if>

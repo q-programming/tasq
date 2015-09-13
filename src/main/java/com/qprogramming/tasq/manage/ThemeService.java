@@ -1,5 +1,7 @@
 package com.qprogramming.tasq.manage;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -8,10 +10,10 @@ import org.springframework.stereotype.Service;
 public class ThemeService {
 
 	private static final String DEFAULT = "Default";
-	
+
 	@Value("${default.theme.color}")
 	private String defaultColor;
-	
+
 	@Value("${default.theme.inverse}")
 	private String defaultInvColor;
 
@@ -38,5 +40,12 @@ public class ThemeService {
 		}
 		return theme;
 	}
+
+	public List<Theme> findAll() {
+		return themeRepo.findAll();
+	}
+
+	public Theme findById(Long themeID) {
+		return themeRepo.findById(themeID);	}
 
 }

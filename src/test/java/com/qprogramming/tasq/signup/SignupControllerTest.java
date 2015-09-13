@@ -47,6 +47,7 @@ import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.config.ResourceService;
 import com.qprogramming.tasq.mail.MailMail;
+import com.qprogramming.tasq.manage.ThemeService;
 import com.qprogramming.tasq.support.web.Message;
 import com.qprogramming.tasq.test.MockSecurityContext;
 
@@ -98,6 +99,8 @@ public class SignupControllerTest {
 	private ResourceService resourceMock;
 	@Mock
 	private MailMail mailerMock;
+	@Mock
+	private ThemeService themeSrvMock;
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -120,7 +123,7 @@ public class SignupControllerTest {
 
 	@Before
 	public void setUp() {
-		signupCtr = new SignupController(accountSrv, msgMock, mailerMock, velocityMock, resourceMock);
+		signupCtr = new SignupController(accountSrv, msgMock, mailerMock, velocityMock, resourceMock,themeSrvMock);
 		testAccount = new Account(EMAIL, "", USERNAME, Roles.ROLE_ADMIN);
 		testAccount.setLanguage("en");
 		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");

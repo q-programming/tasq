@@ -54,15 +54,17 @@ public class AccountController {
 	private SessionLocaleResolver localeResolver;
 	private MessageSource msg;
 	private SessionRegistry sessionRegistry;
+	private ThemeService themeSrv;
 
 	@Autowired
 	public AccountController(AccountService accountSrv, ProjectService projSrv, MessageSource msg,
-			SessionLocaleResolver localeResolver, SessionRegistry sessionRegistry) {
+			SessionLocaleResolver localeResolver, SessionRegistry sessionRegistry,ThemeService themeSrv) {
 		this.accountSrv = accountSrv;
 		this.projSrv = projSrv;
 		this.msg = msg;
 		this.localeResolver = localeResolver;
 		this.sessionRegistry = sessionRegistry;
+		this.themeSrv = themeSrv;
 	}
 
 	private static final Logger LOG = LoggerFactory.getLogger(AccountController.class);
@@ -71,7 +73,8 @@ public class AccountController {
 	private static final String PNG = ".png";
 
 	@RequestMapping(value = "settings", method = RequestMethod.GET)
-	public String settings() {
+	public String settings(Model model) {
+		model.addAttribute("themes", themeSrv.findAll());
 		return "user/settings";
 	}
 
@@ -80,7 +83,7 @@ public class AccountController {
 	public String saveSettings(@RequestParam(value = "avatar", required = false) MultipartFile avatarFile,
 			@RequestParam(value = "emails", required = false) String emails,
 			@RequestParam(value = "language", required = false) String language,
-			@RequestParam(value = "theme", required = false) Theme theme, RedirectAttributes ra,
+			@RequestParam(value = "theme", required = false) Long themeID, RedirectAttributes ra,
 			HttpServletRequest request, HttpServletResponse response) {
 		Account account = Utils.getCurrentAccount();
 		if (avatarFile.getSize() != 0) {
@@ -94,6 +97,7 @@ public class AccountController {
 		account.setLanguage(language);
 		localeResolver.setLocale(request, response, new Locale(language));
 		account.setEmail_notifications(Boolean.parseBoolean(emails));
+		Theme theme = themeSrv.findById(themeID);
 		account.setTheme(theme);
 		accountSrv.update(account);
 		MessageHelper.addSuccessAttribute(ra, msg.getMessage("panel.saved", null, Utils.getCurrentLocale()));

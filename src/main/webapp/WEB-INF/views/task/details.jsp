@@ -224,12 +224,12 @@
 										<input id="point-input" class="point-input">
 										<span id="point_approve"
 											style="display: none; cursor: pointer;"><i
-											class="fa fa-check" style="vertical-align: text-top"></i></span>
+											class="fa fa-check"></i></span>
 										<span id="point_cancel"
 											style="display: none; cursor: pointer;"><i
-											class="fa fa-times" style="vertical-align: text-top"></i></span>
+											class="fa fa-times"></i></span>
 										<span id="point_edit" class="point-edit"><i
-											class="fa fa-pencil points" style="vertical-align: text-top"></i></span>
+											class="fa fa-pencil points"></i></span>
 									</c:if> </span></td>
 						</tr>
 					</c:if>

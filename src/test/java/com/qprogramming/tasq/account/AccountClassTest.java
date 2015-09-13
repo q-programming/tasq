@@ -3,9 +3,7 @@ package com.qprogramming.tasq.account;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.qprogramming.tasq.account.Account;
-import com.qprogramming.tasq.account.DisplayAccount;
-import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.manage.Theme;
 
 public class AccountClassTest {
 	private static final String LAMB = "Lamb";
@@ -44,6 +42,7 @@ public class AccountClassTest {
 		account2.setUsername("newUserName");
 		account2.setEmail("new@test.com");
 		account2.setRole(Roles.ROLE_ADMIN);
+		account2.setTheme(new Theme());
 		Assert.assertNotNull(account2.getTheme());
 		Assert.assertFalse(account.equals(account2));
 		Assert.assertTrue(account.isAccountNonExpired());

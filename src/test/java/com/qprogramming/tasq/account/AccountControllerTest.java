@@ -44,6 +44,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.qprogramming.tasq.manage.Theme;
+import com.qprogramming.tasq.manage.ThemeService;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.web.Message;
 import com.qprogramming.tasq.test.MockSecurityContext;
@@ -83,6 +85,8 @@ public class AccountControllerTest {
 	private SessionLocaleResolver localeResolverMock;
 	@Mock
 	private SessionRegistry sessionRegistry;
+	@Mock
+	private ThemeService themeSrvMock;
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -105,7 +109,8 @@ public class AccountControllerTest {
 
 	@Before
 	public void setUp() {
-		accountCtr = new AccountController(accSrvMock, projSrvMock, msgMock, localeResolverMock, sessionRegistry);
+		accountCtr = new AccountController(accSrvMock, projSrvMock, msgMock, localeResolverMock, sessionRegistry,
+				themeSrvMock);
 		testAccount = new Account(EMAIL, "", USERNAME, Roles.ROLE_ADMIN);
 		testAccount.setLanguage("en");
 		when(securityMock.getAuthentication()).thenReturn(authMock);
@@ -178,7 +183,8 @@ public class AccountControllerTest {
 		try {
 			mockMultipartFile = new MockMultipartFile("content", fileURL.getFile(), "text/plain",
 					getClass().getResourceAsStream("/avatar.png"));
-			accountCtr.saveSettings(mockMultipartFile, EMAIL, "en", "red", raMock, requestMock, responseMock);
+			when(themeSrvMock.findById(1L)).thenReturn(new Theme());
+			accountCtr.saveSettings(mockMultipartFile, EMAIL, "en", 1L, raMock, requestMock, responseMock);
 			verify(accSrvMock, times(1)).update(any(Account.class));
 			verify(localeResolverMock, times(1)).setLocale(requestMock, responseMock, new Locale("en"));
 		} catch (IOException e) {
@@ -195,7 +201,8 @@ public class AccountControllerTest {
 		try {
 			mockMultipartFile = new MockMultipartFile("content", fileURL.getFile(), "text/plain",
 					getClass().getResourceAsStream("/avatar_tooBig.png"));
-			accountCtr.saveSettings(mockMultipartFile, EMAIL, "en", "red", raMock, requestMock, responseMock);
+			when(themeSrvMock.findById(1L)).thenReturn(new Theme());
+			accountCtr.saveSettings(mockMultipartFile, EMAIL, "en", 1L, raMock, requestMock, responseMock);
 			verify(raMock, times(1)).addFlashAttribute(anyString(),
 					new Message(anyString(), Message.Type.DANGER, new Object[] {}));
 		} catch (IOException e) {
@@ -215,7 +222,7 @@ public class AccountControllerTest {
 	}
 
 	private Account createAccount(String name, String surname) {
-		Account account = new Account(name + "@test.com", "", name,Roles.ROLE_POWERUSER);
+		Account account = new Account(name + "@test.com", "", name, Roles.ROLE_POWERUSER);
 		account.setName(name);
 		account.setSurname(surname);
 		return account;
