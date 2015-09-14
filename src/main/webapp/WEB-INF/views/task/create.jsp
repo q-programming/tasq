@@ -264,7 +264,7 @@
 			<span class="btn" onclick="location.href='<c:url value="/"/>';"><s:message
 					code="main.cancel" text="Cancel" /></span>
 			<button type="submit" class="btn btn-success">
-				<s:message code="main.create" text="Create" />
+				<i class="fa fa-plus"></i>&nbsp;<s:message code="main.create" text="Create" />
 			</button>
 		</div>
 	</form:form>

@@ -1,5 +1,12 @@
 package com.qprogramming.tasq.support;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -11,6 +18,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.hibernate.Hibernate;
@@ -38,17 +46,15 @@ public class Utils {
 	private static final String TR_TD = "<tr><td>";
 	private static String baseURL;
 	private static HttpServletRequest request;
-	
+
 	public static final String TABLE = "<table class=\"worklog_table\">";
 	public static final String TABLE_END = "</table>";
-	
 
 	@Value("${default.locale}")
 	private String defaultLang;
 
 	public static Account getCurrentAccount() {
-		return (Account) SecurityContextHolder.getContext().getAuthentication()
-				.getPrincipal();
+		return (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 	}
 
 	public static void setHttpRequest(HttpServletRequest httpServRequest) {
@@ -57,12 +63,14 @@ public class Utils {
 
 	/**
 	 * Returns milis for timestamp of given uuid
+	 * 
 	 * @param uuid
 	 * @return
 	 */
 	public static long getTimeFromUUID(UUID uuid) {
 		return (uuid.timestamp() - NUM_100NS_INTERVALS_SINCE_UUID_EPOCH) / 10000;
 	}
+
 	/**
 	 * Returns true if contents have at least one html tag
 	 * 
@@ -78,8 +86,8 @@ public class Utils {
 	public static String getBaseURL() {
 		// TODO null port and server scheme
 		if (baseURL == null) {
-			baseURL = String.format("%s://%s:%d/tasq", request.getScheme(),
-					request.getServerName(), request.getServerPort());
+			baseURL = String.format("%s://%s:%d/tasq", request.getScheme(), request.getServerName(),
+					request.getServerPort());
 		}
 		return baseURL;
 	}
@@ -111,18 +119,21 @@ public class Utils {
 			Hibernate.initialize(task.getRawWorkLog());
 		}
 	}
+
 	/**
 	 * Eliminates underscores and capitalizes first letter of given string
+	 * 
 	 * @param s
 	 * @return
 	 */
-	public static String capitalizeFirst(String s){
+	public static String capitalizeFirst(String s) {
 		s = s.replaceAll("_", " ");
 		return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
 	}
-	
+
 	/**
 	 * Returns date in simple format
+	 * 
 	 * @param date
 	 * @return
 	 */
@@ -135,9 +146,10 @@ public class Utils {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Returns date in simple format
+	 * 
 	 * @param date
 	 * @return
 	 */
@@ -150,8 +162,10 @@ public class Utils {
 		}
 		return result;
 	}
+
 	/**
-	 * Returns strng with date and time 
+	 * Returns strng with date and time
+	 * 
 	 * @param date
 	 * @return
 	 */
@@ -160,14 +174,13 @@ public class Utils {
 		result = new SimpleDateFormat(DATE_FORMAT_TIME).format(date);
 		return result;
 	}
-	
-	
+
 	public static String convertDateToString(Date date) {
 		String result = null;
 		result = new SimpleDateFormat(DATE_FORMAT).format(date);
 		return result;
 	}
-	
+
 	/**
 	 * Helper method to get float value from Period ( hours )
 	 * 
@@ -178,9 +191,8 @@ public class Utils {
 		if (value == null) {
 			value = new Period();
 		}
-		Float result = Float.valueOf((float) (PeriodHelper.toStandardDuration(
-				value).getMillis() / MILLIS_PER_SECOND)
-				/ SECONDS_PER_HOUR);
+		Float result = Float.valueOf(
+				(float) (PeriodHelper.toStandardDuration(value).getMillis() / MILLIS_PER_SECOND) / SECONDS_PER_HOUR);
 		return result;
 	}
 
@@ -204,12 +216,11 @@ public class Utils {
 	 * @return
 	 */
 	public static Period getPeriodValue(Float timelogged) {
-		Period value = new Period(0, 0, (int) (timelogged * Utils.SECONDS_PER_HOUR),
-				0);
+		Period value = new Period(0, 0, (int) (timelogged * Utils.SECONDS_PER_HOUR), 0);
 		return value;
 	}
-	
-	public static  StringBuilder changedFromTo(String what, String from, String to) {
+
+	public static StringBuilder changedFromTo(String what, String from, String to) {
 		StringBuilder message = new StringBuilder();
 		if (what != null) {
 			message.append("<tr><td colspan=2><b>");
@@ -224,7 +235,7 @@ public class Utils {
 		message.append(TD_TR);
 		return message;
 	}
-	
+
 	public static String changedFromTo(String previous, String current) {
 		StringBuilder message = new StringBuilder("<strike>");
 		message.append(previous);
@@ -234,10 +245,30 @@ public class Utils {
 		return message.toString();
 	}
 
-	
-
-
-
-
+	/**
+	 * Coppy file from source path to destination file Used mostly for getting
+	 * files from resources etc. and coping to some destFile
+	 * 
+	 * @param sc
+	 * @param sourcePath
+	 * @param destFile
+	 */
+	public static void copyFile(ServletContext sc, String sourcePath, File destFile) {
+		try {
+			InputStream in = new FileInputStream(sc.getRealPath(sourcePath));
+			OutputStream out = new FileOutputStream(destFile);
+			byte[] buf = new byte[1024];
+			int len;
+			while ((len = in.read(buf)) > 0) {
+				out.write(buf, 0, len);
+			}
+			out.close();
+			in.close();
+		} catch (FileNotFoundException e) {
+			LOG.error(e.getMessage());
+		} catch (IOException e) {
+			LOG.error(e.getMessage());
+		}
+	}
 
 }

@@ -135,7 +135,7 @@
 <%-- 						code="project.manage.assignee.help" /></span> --%>
 
 			<div style="text-align: center;">
-				<button class="btn btn-success " type="submit">Save</button>
+				<button class="btn btn-success " type="submit"><i class="fa fa-floppy-o"></i>&nbsp;<s:message code="main.save"/></button>
 			</div>
 			</div>
 		</div>
@@ -297,7 +297,7 @@
 					<a class="btn" data-dismiss="modal"><s:message
 								code="main.cancel" /></a>
 					<button id="" class="btn btn-default" type="submit">
-						<s:message code="main.edit" />
+						<i class="fa fa-pencil"></i>&nbsp;<s:message code="main.edit" />
 					</button>
 					</div>
 			</form>

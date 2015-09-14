@@ -11,6 +11,9 @@ ${user.theme.font.link}
 body {
 	${user.theme.font.cssFamily}	
 }
+.theme-text{
+	color: ${invcolor};
+}
 
 a.theme {
 	color: ${invcolor};
@@ -23,6 +26,16 @@ a.theme {
 .btn.caret.theme:hover {
 	border-top-color: rgba(${rgbinvcolor}, 0.5);
 	border-bottom-color: rgba(${rgbinvcolor}, 0.5);
+}
+.bg-color.theme {
+    border: 1px dashed;
+    display: table-cell;
+    text-align: center;
+    min-width: 110px;
+    max-width: 200px;
+    margin: 0 auto;
+	background-color: ${color};
+	border-color: ${invcolor};
 }
 
 div.navbar.navbar-fixed-top.theme {

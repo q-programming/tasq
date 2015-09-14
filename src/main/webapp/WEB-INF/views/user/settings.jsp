@@ -87,7 +87,7 @@
 		</div>
 		<div style="text-align: center;">
 			<button class="btn btn-success" type="submit">
-				<s:message code="panel.save" text="Save settings" />
+				<i class="fa fa-floppy-o"></i>&nbsp;<s:message code="panel.save" text="Save settings" />
 			</button>
 		</div>
 	</form>

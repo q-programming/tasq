@@ -84,23 +84,6 @@ table.footer-wrap a {
 	padding-top: 5px;
 	font-weight: bold;
 }
-
-.header.black {
-	background-color: #282828;
-}
-
-.header.green {
-	background-color: mediumseagreen;
-}
-
-.header.lightblue {
-	background-color: skyblue;
-}
-
-.header.red {
-	background-color: #a12829;
-}
-
 h1, h2, h3 {
 	font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande",
 		sans-serif;
@@ -188,7 +171,7 @@ table.worklog_table td {
 </head>
 <body bgcolor="#f6f6f6">
 	<div class="content">
-		<div class="header ${account.theme}">
+		<div class="header" style="background-color:${account.theme.color}">
 			<img src='cid:logo'>
 		</div>
 		<table class="main">

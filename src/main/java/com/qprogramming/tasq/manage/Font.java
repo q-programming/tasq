@@ -1,10 +1,10 @@
 package com.qprogramming.tasq.manage;
 
 public enum Font {
-	OPEN_SANS("Open+Sans:300", "Open Sans", "sans-serif"), OPEN_SANS_CONDESED("Open+Sans+Condensed:300",
+	OPEN_SANS("Open+Sans", "Open Sans", "sans-serif"), OPEN_SANS_CONDESED("Open+Sans+Condensed:300",
 			"Open Sans Condensed", "sans-serif"), JOSEFIN_SLAB("Josefin+Slab", "Josefin Slab", "serif"), ARVO("Arvo",
 					"Arvo", "serif"), MONTSERRAT("Montserrat", "Montserrat", "sans-serif"), COURGETTE("Courgette",
-							"Courgette", "cursive"), PLAY("Play","Play","sans-serif");
+							"Courgette", "cursive"), PLAY("Play", "Play", "sans-serif");
 	private String font;
 	private String fontFamily;
 	private String fontFamilyType;

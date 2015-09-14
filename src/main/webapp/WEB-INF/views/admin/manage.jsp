@@ -7,7 +7,6 @@
 <c:forEach items="${fonts}" var="font">
 	${font.link}
 </c:forEach>
-<script src="<c:url value="/resources/js/jquery.minicolors.js" />"></script>
 <link href="<c:url value="/resources/css/jquery.minicolors.css" />"
 	rel="stylesheet" media="screen" />
 
@@ -26,9 +25,28 @@
 						code="menu.manage.tasks" /></a></li>
 		</ul>
 	</div>
+	<form id="avatarUpload" name="avatarUpload" enctype="multipart/form-data" action="<c:url value="/manage/logoUpload"/>" method="POST">
 	<div>
-		<h3>Application Avatar</h3>
+		<h3><i class="fa fa-picture-o"></i>&nbsp;<s:message code="manage.logo" text="Application Avatar"/></h3>
+		<div id="avatar" class="bg-color theme"	>
+					<img id="avatar_src" src="<c:url value="/../avatar/logo.png"/>"
+						style="padding: 10px; text-align:center"></img>
+					<div id="avatar_upload" class="hidden" style="margin-top: -30px">
+						<input id="file_upload" name="avatar" type="file" accept=".png"
+							title="Change avatar" class="inputfiles">
+					</div>
+		</div>
+		<div>
+			<span class="help-block">
+				<s:message code="manage.logo.help" htmlEscape="false" />
+			</span>
+		</div>
+		<div>
+			<a href="<c:url value="/manage/logoRestore"/>" class="btn btn-warning"><i class="fa fa-exclamation-circle"></i>&nbsp;<s:message code="manage.logo.restore" /></a>
+			<button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i>&nbsp;<s:message code="panel.save" /></button>
+		</div>
 	</div>
+	</form>
 	<hr>
 	<div>
 		<h3>
@@ -49,8 +67,13 @@
 			<c:forEach items="${themes}" var="theme">
 				<tr>
 					<td>${theme.name}</td>
-					<td style="${theme.font.cssFamily}"><span
-						style="display:block;width:200px;padding: 5px; background-color:${theme.color};color:${theme.invColor}">${theme.font.fontFamily}</span></td>
+					<td style="${theme.font.cssFamily}">
+						<span style="display:block;width:200px;padding: 5px; background-color:${theme.color};color:${theme.invColor}">
+							<img id="avatar_src" src="<c:url value="/../avatar/logo.png"/>"
+							style="height: 25px;"></img>
+							${theme.font.fontFamily}
+						</span>
+					</td>
 					<td >
 					<c:if test="${theme.name ne 'Default'}">
 						<a href="#" style="color: black"
@@ -125,6 +148,8 @@
 		</div>
 	</div>
 </div>
+<script src="<c:url value="/resources/js/jquery.minicolors.js" />"></script>
+<script src="<c:url value="/resources/js/bootstrap.file-input.js"/>"></script>
 <script>
 	$("#createBtn")
 			.click(
@@ -201,5 +226,49 @@
 		}
 		
 	});
+	//AVATAR
+		var imageWRN = '<s:message code="error.file100kb"/>';
+		$("#file_upload").bootstrapFileInput();
+
+		$("#avatar").hover(function() {
+			$('#avatar_upload').removeClass('hidden');
+		}, function() {
+			$('#avatar_upload').addClass('hidden');
+		});
+
+		$("#file_upload").change(function() {
+			readURL(this);
+		});
+
+		function readURL(input) {
+			if (input.files && input.files[0]) {
+				if(input.files[0].size > 100000){
+					showError(imageWRN);
+					return false;
+				}
+				//check before uploading
+				var _URL = window.URL || window.webkitURL;
+				file = input.files[0];
+				img = new Image();
+				img.onload = function() {
+					if (this.width > 150 || this.height > 150) {
+						showError(imageWRN);
+					} else {
+						var reader = new FileReader();
+						reader.onload = function(e) {
+							$('#avatar_src').attr('src', e.target.result);
+						}
+						reader.readAsDataURL(file);
+					}
+				};
+				img.onerror = function() {
+					alert("not a valid file: " + file.type);
+				};
+				img.src = _URL.createObjectURL(file);
+
+			}
+		}
+
+	
 </script>
 

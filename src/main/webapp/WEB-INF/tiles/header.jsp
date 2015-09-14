@@ -18,8 +18,8 @@
 				class="icon-bar"></span>
 		</button>
 		<a class="navbar-brand" href="<c:url value="/"/>"
-			style="padding-top: 0px; padding-bottom: 4px"><img
-			src="<c:url value="/resources/img/tasQ_logo_small.png"/>"></img></a>
+			style="padding-top: 0px; padding-bottom: 4px;"><img
+			src="<c:url value="/../avatar/logo.png"/>" style="height: 50px"></img></a>
 		<div class="nav-collapse collapse">
 			<security:authorize access="isAuthenticated()">
 				<ul class="nav navbar-nav">
@@ -199,7 +199,7 @@
 									code="menu.help" text="Help" />"
 								data-placement="bottom"><i class="fa fa-question-circle"></i></a>
 						</div>
-						<div style="color: white">${user}</div>
+						<div class="theme-text">${user}</div>
 					</li>
 					<li>
 						<div class="pull-right">
