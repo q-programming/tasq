@@ -60,6 +60,11 @@
 							<li><a href="#a_users">Users</a></li>
 							<li><a href="#a_projects">Projects</a>
 							<li><a href="#a_roles">Roles</a></li>
+							<li><a href="#a_manage">Manage application</a>
+								<ul class="nav">
+									<li><a href="#a_logo">Changing logo</a></li>
+									<li><a href="#a_theme">Themes</a></li>
+								</ul></li>
 						</ul></li>
 				</security:authorize>
 			</ul>
@@ -70,6 +75,10 @@
 	<div class="col-md-10 col-sm-10 col-lg-10" role="main">
 		<a class="anchor" id="top"></a>
 		<div>
+			<h2 style="height: 50px; background-color: #2c5aa0; color: white">
+				<img src="<c:url value="/resources/img/logo.png"/>"
+					style="height: 50px; padding: 5px;"></img>Tasker
+			</h2>
 			<a class="anchor" id="about"></a>
 			<h3>About Tasker</h3>
 			<p>
@@ -89,6 +98,11 @@
 					alt="Q-Programming" style="margin-bottom: 0px;"> Jenkins page</a>
 				<br> <br> Application creation process was started on May
 				18 2014 and over a year to have it in stable version
+			</p>
+			<p>
+				Application created by <b>Jakub Romaniszyn</b> <a
+					href="http://q-programming.pl/">http://q-programming.pl/</a> and is
+				under GNU GPL License.
 			</p>
 			<%--------------------------------MAIN MENU ------------------------------------%>
 			<hr>
@@ -183,8 +197,11 @@
 			<p>
 				By default avatar is set to lovely hamster. However it's possible to
 				overwrite the default avatar with custom one. When user uploads new
-				image and saves profile this image will be stored in app home dir:
-				<code>${projHome}/avatar</code>
+				image and saves profile this image will be stored in app home dir<br>
+				<security:authorize access="hasRole('ROLE_ADMIN')">
+					<span class="admin-button">Admin</span>
+					<code>${projHome}/avatar</code>
+				</security:authorize>
 			</p>
 
 			<h4>
@@ -211,14 +228,13 @@
 				<s:message code="panel.theme"></s:message>
 			</h4>
 			<p>
-				Here user can change theme for application. By default it's
-				<s:message code="panel.theme.darkblue" />
-				.<br> On launch date application comes with 3 other themes:
-				<s:message code="panel.theme.lightblue" />
-				,
-				<s:message code="panel.theme.green" />
-				,
-				<s:message code="panel.theme.red" />
+				Here user can change theme for application. By default blue
+				"Default" theme is available, but application administrator can
+				easily create new ones.
+				<security:authorize access="hasRole('ROLE_ADMIN')">
+					<span class="admin-button">Admin</span>
+						To create new theme see <a href="#a_theme">Themes sections</a>
+				</security:authorize>
 			</p>
 			<h4>
 				<i class="fa fa-users"></i>
@@ -455,10 +471,10 @@
 					class="fa fa-wrench"></i></span> on project details screen
 			</p>
 			<h4>Default project settings</h4>
-			After project has been created you can edit it's name or description by
-			clicking <i class="fa fa-pencil"></i> icon next to project name.<br>It's
-			impossible to change ID of project, once it has been
-			created <b>Task progress in project</b>
+			After project has been created you can edit it's name or description
+			by clicking <i class="fa fa-pencil"></i> icon next to project name.<br>It's
+			impossible to change ID of project, once it has been created <b>Task
+				progress in project</b>
 			<p>Tasker has two option two track progress within project.</p>
 			<ul>
 				<li><b>Estimated time tracked</b> - Each task before "sprint"
@@ -900,8 +916,8 @@
 			<p>
 				<u><i class="fa fa-exclamation-circle"></i> Removing task will
 					purge all worklogs, comments, files and subtasks. Only worklog
-				information about task removal will be added for project.<br> All other
-				information will be lost and cannot be restored!</u>
+					information about task removal will be added for project.<br>
+					All other information will be lost and cannot be restored!</u>
 			</p>
 
 			<hr>
@@ -1332,6 +1348,8 @@
 					Option from drop down menu: <a class="anchor" id="a_users"></a>
 				</p>
 				<ul>
+					<li><i class="fa fa-cogs"></i> Manage application - manage
+						application changing logo , or add/edit themes
 					<li><i class="fa fa-users"></i> <s:message
 							code="menu.manage.users" /> - similar to regular Show users
 						screen but with additional option to assign roles. Please be aware
@@ -1340,7 +1358,6 @@
 					<li><i class="fa fa-lg fa-check-square"></i> <s:message
 							code="menu.manage.tasks" /> - Various task related actions,
 						mostly depreciated, used during development phase</li>
-					<li>Other - option left for future usage</li>
 				</ul>
 				<a class="anchor" id="a_projects"></a>
 				<hr>
@@ -1418,9 +1435,108 @@
 							</ul>
 						</td>
 					</tr>
-
-
 				</table>
+				<a class="anchor" id="a_manage"></a>
+				<h3>Manage application</h3>
+				<p>
+					There are some modification that can be set when application is
+					deployed. Application logo and themes can be changed anytime by any
+					administrator.<br> To enter application management use admin
+					<button class="btn btn-default btn-xs" type="button">
+						<i class="fa fa-wrench"></i>
+					</button>
+					button and navigate to <b><i class="fa fa-cogs"></i> Manage
+						application</b> option
+				</p>
+				<a class="anchor" id="a_logo"></a>
+				<h4>Application logo</h4>
+				<p>
+					In order to customize application , and adapt it a bit more to team
+					requirements it's possible to change application logo.<br>
+					This option is available <b><i class="fa fa-cogs"></i> Manage
+						application</b> screen. <br> Logo changing is made by uploading
+					new image which will overwrite logo file in
+					<code>${projHome}/avatar/logo.png</code>
+					<br>This can be done manually but it's recommended to do using
+					application to guarantee best look and feel.<br>To upload new
+					logo , hover mouse cursor over dashed area with current logo , to
+					show <span class="btn btn-default"><s:message
+							code="manage.logo.change" /></span> button. <br> Newly uploaded
+					logo should meet following criteria:
+				<ul>
+					<li>Not bigger than 100Kb</li>
+					<li>Not more than 150px height and 150px width</li>
+					<li>Should be visible on all themes</li>
+				</ul>
+				<p>
+					Logo preview on current users theme is shown after upload. If it
+					looks good, save changes.<br> If for some reason the currently
+					selected logo must be discarded, default logo can be restored, by
+					clicking <span class="btn btn-warning btn-sm"><i
+						class="fa fa-exclamation-circle"></i>&nbsp;Restore default</span> button
+				</p>
+				<p>
+					<i class="fa fa-exclamation-circle"></i>&nbsp; As logo is replaced
+					on server itself it's possible that old logo will still be cached
+					in browser. To view changes , user's should clear cache or force
+					refresh page by pressing Ctrl+F5<br>It's not recommended to
+					change logo too often
+
+				</p>
+				<a class="anchor" id="a_theme"></a>
+				<h4>Themes</h4>
+				<p>
+					Tasker comes with default theme in nice blue color. Application
+					admin can easily add new themes, or edit exisitng ones.<br>
+					Default theme is only one that is blocked for edition.<br>All
+					themes are listed in table with small preview how they look (
+					including application logo)
+				</p>
+				<p>
+				<h5>
+					<b>Create theme</b>
+				</h5>
+					To add new theme, click <span class="btn btn-default btn-sm"><i
+					class="fa fa-plus"></i><i class="fa fa-paint-brush"></i> Create new
+					theme</span> button on <b><i class="fa fa-cogs"></i> Manage
+					application</b> view.<br>Modal window will be shown with fields:
+				<table class="table">
+					<tbody>
+						<tr>
+							<td class="col-md-2"><b>Name</b></td>
+							<td>Name of theme. This name will be shown in combobox for
+								all users on their settings screen. This name must be unique and
+								preferably not to long</td>
+						</tr>
+						<tr>
+							<td><b>Font</b></td>
+							<td>Font in which whole application will be shown (all
+								texts).Couple fonts are available too chose from. Some more can
+								be added within application code itself.</td>
+						</tr>
+						<tr>
+							<td><b>Color</b></td>
+							<td>Theme color for application. All navigation elements,
+								headers , badges will have this color applied</td>
+						</tr>
+
+						<tr>
+							<td><b>Inverse color</b></td>
+							<td>Color that will be applied to any text placed on menus,
+								headers etc.<br>This should be contrasting to theme color
+								to improve readability
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<h5>
+					<b>Edit theme</b>
+				</h5>
+				<p>
+					To edit one of existing themes, click <i class="fa fa-pencil"></i>&nbsp;
+					in corresponding theme row. This will show same modal window as in
+					creation of themes, but with theme filled values.
+				</p>
 
 
 			</security:authorize>

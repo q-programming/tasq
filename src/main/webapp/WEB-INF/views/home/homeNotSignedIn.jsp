@@ -47,7 +47,7 @@
 		<a
 			href="https://github.com/q-programming/spring-mvc-quickstart-archetype.git">
 			Spring MVC 4 Quickstart Maven Archetype</a> <br>
-		<s:message code="view.index.desc.2" />
+<%-- 		<s:message code="view.index.desc.2" /> --%>
 	</p>
 	<p>
 		<a href='<s:url value="/sigin" />' class="btn btn-large btn-success"><s:message

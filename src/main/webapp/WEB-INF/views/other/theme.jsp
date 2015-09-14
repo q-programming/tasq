@@ -28,6 +28,10 @@ a.theme {
 	border-bottom-color: rgba(${rgbinvcolor}, 0.5);
 }
 .bg-color.theme {
+	color: ${invcolor};
+	background-color: ${color};
+}
+.bg-preview.theme {
     border: 1px dashed;
     display: table-cell;
     text-align: center;

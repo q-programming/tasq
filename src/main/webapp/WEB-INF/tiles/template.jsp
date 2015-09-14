@@ -1,4 +1,4 @@
-<%@ page trimDirectiveWhitespaces="true" %>
+<%@ page trimDirectiveWhitespaces="true"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
@@ -23,7 +23,7 @@
 	rel="stylesheet" media="screen" />
 <%-- Fix issue jQueryUI vs Bootstrap argue over tooltip --%>
 <script>
-$.widget.bridge('uitooltip', $.ui.tooltip);
+	$.widget.bridge('uitooltip', $.ui.tooltip);
 </script>
 <%-- BOOTSTRAP --%>
 <script src="<c:url value="/resources/js/bootstrap.min.js" />"></script>
@@ -32,7 +32,8 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 <link href="<c:url value="/resources/css/core.css" />" rel="stylesheet"
 	media="screen" />
 <%-- FONT AWSOME --%>
-<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<link rel="stylesheet"
+	href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 <%-- <link href="<c:url value="/resources/css/font-awesome.min.css" />" rel="stylesheet" --%>
 <!-- 	media="screen" /> -->
 <%-- CUSTOMS --%>
@@ -41,21 +42,6 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 <link rel="icon" type="image/png"
 	href="<c:url value="/resources/img/favicon.ico"/>" />
 
-<%-------THEME ------%>
-<security:authorize access="!isAuthenticated()">
-	<link href="<c:url value="/resources/css/theme.css" />"
-		rel="stylesheet" media="screen" />
-</security:authorize>
-<security:authorize access="isAuthenticated()">
-	<security:authentication property="principal" var="user" />
-	<c:if test="${not empty user.theme}">
-			<jsp:include page="../views/other/theme.jsp" />
-	</c:if>
-	<c:if test="${empty user.theme}">
-		<link href="<c:url value="/resources/css/theme.css" />"
-			rel="stylesheet" media="screen" />
-	</c:if>
-</security:authorize>
 <%--CUSTOM SCRIPTS --%>
 <script src="<c:url value="/resources/js/tasq.js" />"></script>
 <script src="<c:url value="/resources/js/jquery.mask.min.js" />"></script>
@@ -82,7 +68,7 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 	<%
 		/* Show a message. See support.web package */
 	%>
-	<div id="messages_div" >
+	<div id="messages_div">
 		<c:if test="${not empty message}">
 			<c:choose>
 				<c:when test="${message.type == 'WARNING'}">
@@ -104,13 +90,31 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 			</div>
 		</c:if>
 	</div>
+	<%-------THEME ------%>
+	<security:authorize access="!isAuthenticated()">
+		<link href="<c:url value="/resources/css/theme.css" />"
+			rel="stylesheet" media="screen" />
+	</security:authorize>
+	<security:authorize access="isAuthenticated()">
+		<security:authentication property="principal" var="user" />
+		<c:if test="${not empty user.theme}">
+			<jsp:include page="../views/other/theme.jsp" />
+		</c:if>
+		<c:if test="${empty user.theme}">
+			<link href="<c:url value="/resources/css/theme.css" />"
+				rel="stylesheet" media="screen" />
+		</c:if>
+	</security:authorize>
+
 </body>
 <script>
 	$(".alert").alert();
-	window.setTimeout(function() { 
+	window.setTimeout(function() {
 		$(".alert-success").alert('close');
-		$(".alert-info").alert('close'); }
-	,15000);
-	window.setTimeout(function() { $(".alert-warning").alert('close'); }, 20000);
+		$(".alert-info").alert('close');
+	}, 15000);
+	window.setTimeout(function() {
+		$(".alert-warning").alert('close');
+	}, 20000);
 </script>
 </html>

@@ -28,12 +28,12 @@
 	<form id="avatarUpload" name="avatarUpload" enctype="multipart/form-data" action="<c:url value="/manage/logoUpload"/>" method="POST">
 	<div>
 		<h3><i class="fa fa-picture-o"></i>&nbsp;<s:message code="manage.logo" text="Application Avatar"/></h3>
-		<div id="avatar" class="bg-color theme"	>
+		<div id="avatar" class="bg-preview theme"	>
 					<img id="avatar_src" src="<c:url value="/../avatar/logo.png"/>"
 						style="padding: 10px; text-align:center"></img>
 					<div id="avatar_upload" class="hidden" style="margin-top: -30px">
 						<input id="file_upload" name="avatar" type="file" accept=".png"
-							title="Change avatar" class="inputfiles">
+							title="<s:message code="manage.logo.change"/>" class="inputfiles">
 					</div>
 		</div>
 		<div>
