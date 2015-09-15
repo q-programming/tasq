@@ -227,10 +227,10 @@ public class ProjectControllerTest {
 		list.add(w4);
 		Page<WorkLog> page = new PageImpl<WorkLog>(list);
 		when(wrkLogSrv.findByProjectId(anyLong(), any(Pageable.class))).thenReturn(page);
-		when(wrkLogSrv.findProjectCreateCloseEvents(project)).thenReturn(list);
+		when(wrkLogSrv.findProjectCreateCloseEvents(project, false)).thenReturn(list);
 		Pageable p = new PageRequest(0, 5, new Sort(Sort.Direction.ASC, "time"));
 		Page<DisplayWorkLog> result = projectCtr.getProjectEvents(1L, p);
-		ProjectChart chart = projectCtr.getProjectChart(1L, responseMock);
+		ProjectChart chart = projectCtr.getProjectChart(1L, false, responseMock);
 		String today = new LocalDate().toString();
 		Assert.assertEquals(Integer.valueOf(1), chart.getClosed().get(today));
 		Assert.assertEquals(Integer.valueOf(5), chart.getCreated().get(today));

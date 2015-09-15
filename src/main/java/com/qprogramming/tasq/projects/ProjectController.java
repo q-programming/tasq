@@ -388,13 +388,14 @@ public class ProjectController {
 	}
 
 	@RequestMapping(value = "/project/getChart", method = RequestMethod.GET)
-	public @ResponseBody ProjectChart getProjectChart(@RequestParam Long id, HttpServletResponse response) {
+	public @ResponseBody ProjectChart getProjectChart(@RequestParam Long id,
+			@RequestParam(required = false) boolean all, HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(id);
 		Map<String, Integer> created = new HashMap<String, Integer>();
 		Map<String, Integer> closed = new HashMap<String, Integer>();
 		ProjectChart result = new ProjectChart();
-		List<WorkLog> events = wrkLogSrv.findProjectCreateCloseEvents(project);
+		List<WorkLog> events = wrkLogSrv.findProjectCreateCloseEvents(project, all);
 		// Fill maps
 		for (WorkLog workLog : events) {
 			// Don't calculate for subtask ( not important )

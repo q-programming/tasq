@@ -378,10 +378,13 @@
 						target="_self">
 					<area shape="rect" coords="434,301,618,332" title="Tasks list"
 						alt="" href="#proj-9" target="_self">
-					<area shape="rect" coords="675,302,797,326"
+					<area shape="rect" coords="675,322,797,336"
 						title="Hide closed tasks" alt="" href="#proj-10" target="_self">
 					<area shape="rect" coords="676,327,800,350"
 						title="Show all/hide all Subtasks" alt="" href="#proj-11"
+						target="_self">
+					<area shape="rect" coords="655,300,797,322"
+						title="Show more than 30 days on chart" alt="" href="#proj-12"
 						target="_self">
 				</map>
 				<p>
@@ -412,6 +415,12 @@
 						class="fa fa-plus-square"></i> icon will be shown before it's
 						name. After clicking this button all subtasks for every task will
 						be expanded</li>
+					<li><a class="anchor" id="proj-12"></a><b>Show more than 30 days on
+							chart</b> By default events from last 30 days are shown on
+						create/closed chart. If you would like to view all events, from
+						very begining of project, click this checkbox. Please be aware
+						that rendering this chart can take some time, depending on how
+						many tasks were within project</li>
 
 				</ol>
 				</p>

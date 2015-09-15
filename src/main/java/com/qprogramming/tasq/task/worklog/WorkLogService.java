@@ -262,8 +262,14 @@ public class WorkLogService {
 		return wlRepo.findByProjectId(id, p);
 	}
 
-	public List<WorkLog> findProjectCreateCloseEvents(Project project) {
-		List<WorkLog> list = wlRepo.findByProjectIdOrderByTimeAsc(project.getId());
+	public List<WorkLog> findProjectCreateCloseEvents(Project project, boolean all) {
+		DateTime beginDate = new DateTime().minusDays(30);
+		List<WorkLog> list = new LinkedList<WorkLog>();
+		if (all) {
+			list = wlRepo.findByProjectIdOrderByTimeAsc(project.getId());
+		} else {
+			list = wlRepo.findByProjectIdAndTimeBetweenOrderByTimeAsc(project.getId(), beginDate.toDate(), new Date());
+		}
 		List<WorkLog> result = new LinkedList<WorkLog>();
 		for (WorkLog workLog : list) {
 			if (LogType.CREATE.equals(workLog.getType()) || LogType.REOPEN.equals(workLog.getType())
@@ -327,9 +333,10 @@ public class WorkLogService {
 	 * @param task
 	 */
 	public void changeState(TaskState oldState, TaskState newState, Task task) {
-//		StringBuilder message = new StringBuilder(Utils.TABLE);
-//		message.append(Utils.changedFromTo(null, oldState.getDescription(), newState.getDescription()));
-//		message.append(Utils.TABLE_END);
+		// StringBuilder message = new StringBuilder(Utils.TABLE);
+		// message.append(Utils.changedFromTo(null, oldState.getDescription(),
+		// newState.getDescription()));
+		// message.append(Utils.TABLE_END);
 		addActivityLog(task, Utils.changedFromTo(oldState.getDescription(), newState.getDescription()), LogType.STATUS);
 
 	}

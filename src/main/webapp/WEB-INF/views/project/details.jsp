@@ -101,9 +101,15 @@
 		</div>
 	</div>
 	<%----------CHART -----------%>
-	<div class="row" style="height: 300px;width:90%;margin:0 auto">
+	<div class="row" style="height: 300px; width: 90%; margin: 20px auto">
 		<div id="chartdiv"></div>
 	</div>
+		<div style="display: inherit; font-size: small; float: right">
+		<span id="moreEvents" class="clickable" data-all="false"><span id="moreEventsCheck"><i 
+			class="fa fa-square-o"></i></span> <s:message
+				code="project.moreevents.chart" /></span>
+	</div>
+	
 	<div style="display: table; width: 100%">
 		<div style="display: table-cell; width: 600px">
 			<%------------------------------ EVENTS ------------------------%>
@@ -124,30 +130,34 @@
 				<a href="<c:url value="/tasks"/>" style="color: black"><s:message
 						code="task.tasks" /></a>
 				<div class="pull-right">
-				<c:if test="${empty param.closed}">
-					<div>
-					<a
-						href="<s:url value="/project?${show_q}id=${project.id}&closed=yes"></s:url>"><span
+					<c:if test="${empty param.closed}">
+						<div>
+							<a
+								href="<s:url value="/project?${show_q}id=${project.id}&closed=yes"></s:url>"><span
+								style="display: inherit; font-size: small; font-weight: normal; color: black; float: right">
+									<i class="fa fa-check-square-o"></i> <s:message
+										code="project.hideClosed" />
+							</span></a>
+						</div>
+					</c:if>
+					<c:if test="${not empty param.closed}">
+						<div>
+							<a
+								href="<s:url value="/project?${show_q}id=${project.id}"></s:url>"><span
+								style="display: inherit; font-size: small; font-weight: normal; color: black; float: right">
+									<i class="fa fa-square-o"></i> <s:message
+										code="project.hideClosed"></s:message>
+							</span></a>
+						</div>
+					</c:if>
+					<div
 						style="display: inherit; font-size: small; font-weight: normal; color: black; float: right">
-							<i class="fa fa-check-square-o"></i> <s:message
-								code="project.hideClosed"></s:message>
-					</span></a>
-					</div>
-				</c:if>
-				<c:if test="${not empty param.closed}">
-					<div>
-					<a
-						href="<s:url value="/project?${show_q}id=${project.id}"></s:url>"><span
-						style="display: inherit; font-size: small; font-weight: normal; color: black; float: right">
-							<i class="fa fa-square-o"></i> <s:message
-								code="project.hideClosed"></s:message>
-					</span></a>
-					</div>
-				</c:if>
-					<div style="display: inherit; font-size: small; font-weight: normal; color: black; float: right">
-						<s:message code="tasks.subtasks" />&nbsp;
-						<i id="opensubtask" class="fa fa-plus-square clickable a-tooltip" title="<s:message code="task.subtask.showall"/>"></i> 
-						<i id="hidesubtask" class="fa fa-minus-square clickable a-tooltip" title="<s:message code="task.subtask.hideall"/>"></i>
+						<s:message code="tasks.subtasks" />
+						&nbsp; <i id="opensubtask"
+							class="fa fa-plus-square clickable a-tooltip"
+							title="<s:message code="task.subtask.showall"/>"></i> <i
+							id="hidesubtask" class="fa fa-minus-square clickable a-tooltip"
+							title="<s:message code="task.subtask.hideall"/>"></i>
 					</div>
 				</div>
 			</h3>
@@ -156,50 +166,45 @@
 					<tr>
 						<td><t:type type="${task.type}" list="true" /></td>
 						<td><t:priority priority="${task.priority}" list="true" /></td>
-						<td>
-						<c:if test="${task.subtasks gt 0}">
-							<i class="subtasks fa fa-plus-square" data-task="${task.id}" id="subtasks${task.id}"></i>
-						</c:if> <a href="<c:url value="task?id=${task.id}"/>"
+						<td><c:if test="${task.subtasks gt 0}">
+								<i class="subtasks fa fa-plus-square" data-task="${task.id}"
+									id="subtasks${task.id}"></i>
+							</c:if> <a href="<c:url value="task?id=${task.id}"/>"
 							style="<c:if test="${task.state eq 'CLOSED' }">
 							text-decoration: line-through;
 							</c:if>">
-							[${task.id}] ${task.name}</a>
+								[${task.id}] ${task.name}</a>
 						<td>
-						<td>
-							<c:set var="logged_class"></c:set>
-							<c:set var="percentage">${task.percentage_logged}</c:set>
-							<c:if
+						<td><c:set var="logged_class"></c:set> <c:set
+								var="percentage">${task.percentage_logged}</c:set> <c:if
 								test="${task.percentage_logged gt 100 or task.state eq 'BLOCKED'}">
 								<c:set var="logged_class">progress-bar-danger</c:set>
-							</c:if>
-							<c:if test="${task.state eq 'CLOSED'}">
+							</c:if> <c:if test="${task.state eq 'CLOSED'}">
 								<c:set var="logged_class">progress-bar-success</c:set>
 								<c:set var="percentage">100</c:set>
-							</c:if>
-							<c:if test="${task.state eq 'TO_DO'}">
+							</c:if> <c:if test="${task.state eq 'TO_DO'}">
 								<c:set var="logged_class">progress-bar-success</c:set>
 								<c:set var="percentage">0</c:set>
 							</c:if>
 							<div class="progress" style="width: 50px">
-								<div class="progress-bar ${logged_class} a-tooltip" role="progressbar"
-									aria-valuenow="${percentage}" aria-valuemin="0"
-									aria-valuemax="100" style="width:${percentage}%" title="${percentage}%"></div>
-							</div>
-						</td>
+								<div class="progress-bar ${logged_class} a-tooltip"
+									role="progressbar" aria-valuenow="${percentage}"
+									aria-valuemin="0" aria-valuemax="100"
+									style="width:${percentage}%" title="${percentage}%"></div>
+							</div></td>
 					</tr>
 				</c:forEach>
 			</table>
 		</div>
 	</div>
 </div>
-	<%
-	pageContext.setAttribute("types",
-					LogType.values());
-	pageContext.setAttribute("taskTypes",
-			TaskType.values());
-	%>
+<%
+	pageContext.setAttribute("types", LogType.values());
+	pageContext.setAttribute("taskTypes", TaskType.values());
+%>
 <jsp:include page="../task/subtasks.jsp" />
 <script>
+var	plot;
 $(document).ready(function($) {
 	var currentPage = 0
 	taskURL = '<c:url value="/task?id="/>';
@@ -207,13 +212,28 @@ $(document).ready(function($) {
 	small_loading_indicator = '<div id="small_loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br></div>';
 	loading_indicator = '<div id="loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></div>';
 	fetchWorkLogData(currentPage);
-	printChart();
+	printChart(false);
+	
+	$("#moreEvents").click(function() {
+		var all = $(this).data('all');
+		if(all){
+			$("#moreEventsCheck").html('<i class="fa fa-square-o"></i>');
+		}else{
+			$("#moreEventsCheck").html('<i class="fa fa-check-square-o"></i>');
+		}
+		printChart(!all);
+		$(this).data('all',!all);
+	});
 });
 
-function printChart(){
+
+function printChart(all){
+	if(plot){
+		plot.destroy();
+	}
 	$("#chartdiv").append(loading_indicator);
 	projectId = '${project.id}';
-	$.get('<c:url value="/project/getChart"/>',{id:projectId},function(result){
+	$.get('<c:url value="/project/getChart"/>',{id:projectId,all:all},function(result){
 	    	//Fill arrays of data
 	    	$("#loading").remove();
 	    	//console.log(result);
