@@ -75,11 +75,11 @@
 	<div class="col-md-10 col-sm-10 col-lg-10" role="main">
 		<a class="anchor" id="top"></a>
 		<div>
+			<a class="anchor" id="about"></a>
 			<h2 style="height: 50px; background-color: #2c5aa0; color: white">
 				<img src="<c:url value="/resources/img/logo.png"/>"
 					style="height: 50px; padding: 5px;"></img>Tasker
 			</h2>
-			<a class="anchor" id="about"></a>
 			<h3>About Tasker</h3>
 			<p>
 				"Tasker" is application to track progress within project using

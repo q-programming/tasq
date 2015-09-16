@@ -171,6 +171,16 @@ public class AccountController {
 		return result;
 	}
 
+	@RequestMapping(value = "/emailResend", method = RequestMethod.GET)
+	public String resendEmail(RedirectAttributes ra) {
+		Account account = Utils.getCurrentAccount();
+		accountSrv.sendConfirmationLink(account);
+		MessageHelper.addSuccessAttribute(ra, msg.getMessage("panel.emails.resend.sent",
+				new Object[] { account.getEmail() }, Utils.getCurrentLocale()));
+		return "redirect:/settings";
+
+	}
+
 	@RequestMapping(value = "role", method = RequestMethod.POST)
 	@ResponseBody
 	public ResultData setRole(@RequestParam(value = "id") Long id, @RequestParam(value = "role") Roles role) {

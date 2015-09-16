@@ -61,9 +61,9 @@
 							<span style="color: red"> <s:message
 									code="panel.emails.notconfirmed" />
 							&nbsp;
-							<span class="btn btn-default"><i class="fa fa-reply"></i><i
+							<a href="<c:url value="/emailResend"/>" class="btn btn-default"><i class="fa fa-reply"></i><i
 									class="fa fa-envelope"></i>&nbsp;<s:message
-										code="panel.emails.resend" /></span>
+										code="panel.emails.resend" /></a>
 							</span>
 						</div>
 					</div>

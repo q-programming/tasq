@@ -56,6 +56,21 @@
 <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+<%-------THEME ------%>
+<security:authorize access="!isAuthenticated()">
+	<link href="<c:url value="/resources/css/theme.css" />"
+		rel="stylesheet" media="screen" />
+</security:authorize>
+<security:authorize access="isAuthenticated()">
+	<security:authentication property="principal" var="user" />
+	<c:if test="${not empty user.theme}">
+		<jsp:include page="../views/other/theme.jsp" />
+	</c:if>
+	<c:if test="${empty user.theme}">
+		<link href="<c:url value="/resources/css/theme.css" />"
+			rel="stylesheet" media="screen" />
+	</c:if>
+</security:authorize>
 </head>
 <body>
 	<tiles:insertAttribute name="header" defaultValue="" />
@@ -90,22 +105,6 @@
 			</div>
 		</c:if>
 	</div>
-	<%-------THEME ------%>
-	<security:authorize access="!isAuthenticated()">
-		<link href="<c:url value="/resources/css/theme.css" />"
-			rel="stylesheet" media="screen" />
-	</security:authorize>
-	<security:authorize access="isAuthenticated()">
-		<security:authentication property="principal" var="user" />
-		<c:if test="${not empty user.theme}">
-			<jsp:include page="../views/other/theme.jsp" />
-		</c:if>
-		<c:if test="${empty user.theme}">
-			<link href="<c:url value="/resources/css/theme.css" />"
-				rel="stylesheet" media="screen" />
-		</c:if>
-	</security:authorize>
-
 </body>
 <script>
 	$(".alert").alert();
