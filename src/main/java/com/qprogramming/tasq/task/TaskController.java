@@ -251,7 +251,6 @@ public class TaskController {
 			task.setDescription(taskForm.getDescription());
 		}
 		if ((taskForm.getEstimate() != null) && (!task.getEstimate().equalsIgnoreCase(taskForm.getEstimate()))) {
-
 			Period estimate = PeriodHelper.inFormat(taskForm.getEstimate());
 			Period difference = PeriodHelper.minusPeriods(estimate, task.getRawEstimate());
 			// only add estimate change event if task is in sprint
@@ -263,6 +262,14 @@ public class TaskController {
 			task.setEstimate(estimate);
 			task.setRemaining(estimate);
 		}
+		if ((taskForm.getRemaining() != null) && (!task.getRemaining().equalsIgnoreCase(taskForm.getRemaining()))) {
+			Period remaining = PeriodHelper.inFormat(taskForm.getRemaining());
+			Period difference = PeriodHelper.minusPeriods(remaining, task.getRawEstimate());
+			// only add estimate change event if task is in sprint
+			message.append(Utils.changedFromTo("Remaining", task.getRemaining(), taskForm.getRemaining()));
+			task.setRemaining(remaining);
+		}
+
 		boolean notestimated = !taskForm.getEstimated();
 		if (!task.isEstimated().equals(notestimated)) {
 			message.append(

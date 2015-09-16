@@ -382,6 +382,7 @@ $(document).ready(function($) {
 	$("#assignMe").click(function() {
 		$("#assignee").val("${user.id}");
 		$("#assignee_auto").val("${user}");
+		$("#assignee_auto").removeClass("input-italic");
 	});
 	
 	//INIT ALL
