@@ -58,7 +58,7 @@ public class AccountController {
 
 	@Autowired
 	public AccountController(AccountService accountSrv, ProjectService projSrv, MessageSource msg,
-			SessionLocaleResolver localeResolver, SessionRegistry sessionRegistry,ThemeService themeSrv) {
+			SessionLocaleResolver localeResolver, SessionRegistry sessionRegistry, ThemeService themeSrv) {
 		this.accountSrv = accountSrv;
 		this.projSrv = projSrv;
 		this.msg = msg;
@@ -81,6 +81,7 @@ public class AccountController {
 	@Transactional
 	@RequestMapping(value = "settings", method = RequestMethod.POST)
 	public String saveSettings(@RequestParam(value = "avatar", required = false) MultipartFile avatarFile,
+			@RequestParam(value = "email", required = false) String email,
 			@RequestParam(value = "emails", required = false) String emails,
 			@RequestParam(value = "language", required = false) String language,
 			@RequestParam(value = "theme", required = false) Long themeID, RedirectAttributes ra,
@@ -99,8 +100,16 @@ public class AccountController {
 		account.setEmail_notifications(Boolean.parseBoolean(emails));
 		Theme theme = themeSrv.findById(themeID);
 		account.setTheme(theme);
+		String message = "";
+		if (email != null && email != "" && !account.getEmail().equals(email)) {
+			account.setEmail(email);
+			account.setConfirmed(false);
+			accountSrv.sendConfirmationLink(account);
+			message = msg.getMessage("panel.email.confirm", null, Utils.getCurrentLocale());
+		}
 		accountSrv.update(account);
-		MessageHelper.addSuccessAttribute(ra, msg.getMessage("panel.saved", null, Utils.getCurrentLocale()));
+		MessageHelper.addSuccessAttribute(ra,
+				msg.getMessage("panel.saved", null, Utils.getCurrentLocale()) + ". " + message);
 		return "redirect:/settings";
 	}
 

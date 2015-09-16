@@ -157,15 +157,15 @@ ul li {
 					<td>
 						<p>Hello ${account} ,</p>
 						<p>
-							This is confirmation email about new account created in TasQ
-							application using this e-mail. </br>In order to confirm your account
+							This is confirmation message about linking this email to account created in TasQ
+							application. </br>In order to confirm your email
 							please click link below
 						</p>
 						<p></p>
 						<p>
 							<a href="${link}" target="_blank">${link}</a>
 						</p>
-						<p>If you have not created new account in TasQ application,
+						<p>If you have not created account in TasQ application,
 							please ignore this e-mail.</p>
 						</p>
 					</td>

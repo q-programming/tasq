@@ -157,8 +157,8 @@ ul li {
 					<td>
 						<p>Witaj ${account} ,</p>
 						<p>
-							To jest e-mail potwierdzjący założenie nowego konta w aplikacji TasQ
-							</br>Aby zatwierdzić twoje konto, kliknij w link poniżej.
+							To jest e-mail potwierdzjący użycia tego adresu do konta w aplikacji TasQ
+							</br>Aby zatwierdzić twoje ten adres e-mail, kliknij w link poniżej.
 						</p>
 						<p></p>
 						<p>

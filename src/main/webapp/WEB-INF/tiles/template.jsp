@@ -116,5 +116,14 @@
 	window.setTimeout(function() {
 		$(".alert-warning").alert('close');
 	}, 20000);
+
+	//E-mail confirmed ?
+	var emailConfirmed = "${user.confirmed}";
+	if (emailConfirmed === 'false' && !settings) {
+		var msg = '<s:message code="signup.notconfirmed" /> ';
+		var settings = '<s:message code="menu.settings" /> ';
+		var url = '<a href="<c:url value="/settings" />">' + settings + '</a>'
+		showWarning(msg + url);
+	}
 </script>
 </html>

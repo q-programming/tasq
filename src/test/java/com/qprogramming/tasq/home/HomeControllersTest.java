@@ -54,10 +54,10 @@ public class HomeControllersTest {
 
 	@Mock
 	private AccountService accSrvMock;
-	
+
 	@Mock
 	private UserService usrSrvMock;
-	
+
 	@Mock
 	private EventsService eventSrvMock;
 
@@ -83,19 +83,18 @@ public class HomeControllersTest {
 
 	@Before
 	public void setUp() {
-		testAccount = new Account(EMAIL, "", USERNAME,Roles.ROLE_POWERUSER);
+		testAccount = new Account(EMAIL, "", USERNAME, Roles.ROLE_POWERUSER);
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
-		projSrv = new ProjectService(projRepoMock, accSrvMock,usrSrvMock);
+		projSrv = new ProjectService(projRepoMock, accSrvMock, usrSrvMock);
 		homeCtrl = new HomeController(taskSrvMock, projSrv);
-		homeAdvCtrl = new HomeControllerAdvice(accSrvMock,eventSrvMock);
+		homeAdvCtrl = new HomeControllerAdvice(accSrvMock, eventSrvMock);
 	}
 
 	@Test
 	public void newUserLoggedTest() {
-		when(projRepoMock.findByParticipants_Id(1L)).thenReturn(
-				new LinkedList<Project>());
+		when(projRepoMock.findByParticipants_Id(1L)).thenReturn(new LinkedList<Project>());
 		testAccount.setRole(Roles.ROLE_VIEWER);
 		Assert.assertEquals("homeNewUser", homeCtrl.index(testAccount, model));
 
@@ -112,10 +111,8 @@ public class HomeControllersTest {
 		List<Project> projectList = new LinkedList<Project>();
 		Project project = createProject(TEST);
 		projectList.add(project);
-		when(projRepoMock.findByParticipants_Id(anyLong())).thenReturn(
-				projectList);
-		when(taskSrvMock.findAllByProject(project)).thenReturn(
-				createTaskList(project));
+		when(projRepoMock.findByParticipants_Id(anyLong())).thenReturn(projectList);
+		when(taskSrvMock.findAllByProject(project)).thenReturn(createTaskList(project));
 		Assert.assertEquals("homeSignedIn", homeCtrl.index(testAccount, model));
 
 	}
@@ -129,18 +126,16 @@ public class HomeControllersTest {
 		projectList.add(project);
 		projectList.add(createProject("NEW"));
 		testAccount.setLast_visited_p(projectList);
-		when(accSrvMock.findByEmail(anyString())).thenReturn(testAccount);
-		Assert.assertEquals(TEST, homeAdvCtrl.getLastProjects().get(0)
-				.getProjectId());
+		when(accSrvMock.findByUsername(anyString())).thenReturn(testAccount);
+		Assert.assertEquals(TEST, homeAdvCtrl.getLastProjects().get(0).getProjectId());
 	}
 
 	@Test
 	public void getLastTasksTest() {
 		Project project = createProject(TEST);
 		testAccount.setLast_visited_t(createTaskList(project));
-		when(accSrvMock.findByEmail(anyString())).thenReturn(testAccount);
-		Assert.assertEquals("TASK0", homeAdvCtrl.getLastTasks().get(0)
-				.getName());
+		when(accSrvMock.findByUsername(anyString())).thenReturn(testAccount);
+		Assert.assertEquals("TASK0", homeAdvCtrl.getLastTasks().get(0).getName());
 	}
 
 	private List<Task> createTaskList(Project project) {

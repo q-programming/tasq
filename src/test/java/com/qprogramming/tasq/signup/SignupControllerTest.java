@@ -15,6 +15,7 @@ import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -61,16 +62,12 @@ public class SignupControllerTest {
 	private SignupController signupCtr;
 
 	@InjectMocks
-	private AccountService accountSrv = new AccountService();;
+	private AccountService accountSrv;
 
 	@Mock
 	private EntityManager entityManagerMock;
 	@Mock
 	private AccountRepository accRepoMock;
-
-	@Mock
-	private PasswordEncoder passwordEncoder;
-
 	@Mock
 	private MockSecurityContext securityMock;
 	@Mock
@@ -101,6 +98,8 @@ public class SignupControllerTest {
 	private MailMail mailerMock;
 	@Mock
 	private ThemeService themeSrvMock;
+	@Mock
+	private PasswordEncoder encoderMock;
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -123,7 +122,8 @@ public class SignupControllerTest {
 
 	@Before
 	public void setUp() {
-		signupCtr = new SignupController(accountSrv, msgMock, mailerMock, velocityMock, resourceMock,themeSrvMock);
+		accountSrv = new AccountService(accRepoMock, msgMock, velocityMock, resourceMock, mailerMock, encoderMock);
+		signupCtr = new SignupController(accountSrv, msgMock, themeSrvMock);
 		testAccount = new Account(EMAIL, "", USERNAME, Roles.ROLE_ADMIN);
 		testAccount.setLanguage("en");
 		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");
@@ -143,16 +143,19 @@ public class SignupControllerTest {
 			when(responseMock.getOutputStream()).thenReturn(outStreamMock);
 			when(accRepoMock.findAll()).thenReturn(accountsList);
 			when(accRepoMock.findByEmail(NEW_EMAIL)).thenReturn(null);
-			when(passwordEncoder.encode(any(CharSequence.class))).thenReturn("encodedPassword");
+			when(encoderMock.encode(any(CharSequence.class))).thenReturn("encodedPassword");
 			SignupForm form = fillForm();
 			Errors errors = new BeanPropertyBindingResult(form, "form");
 			signupCtr.signup(form, errors, raMock, requestMock);
-			verify(entityManagerMock, times(1)).persist(any(Account.class));
+			verify(accRepoMock, times(1)).save(any(Account.class));
 			when(accRepoMock.findByUuid("confirmMe")).thenReturn(testAccount);
-			signupCtr.confirm("confirmMe", raMock);
+			signupCtr.confirm("confirmMe", raMock, requestMock);
 			verify(accRepoMock, times(1)).save(testAccount);
 		} catch (IOException e) {
 			Assert.fail(e.getMessage());
+		} catch (ServletException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -175,9 +178,9 @@ public class SignupControllerTest {
 	}
 
 	@Test
-	public void confirmErrorTest() {
+	public void confirmErrorTest() throws ServletException {
 		when(accRepoMock.findByUuid("confirmMe")).thenReturn(null);
-		signupCtr.confirm("don't confirm me", raMock);
+		signupCtr.confirm("don't confirm me", raMock, requestMock);
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.DANGER, new Object[] {}));
 
@@ -216,7 +219,7 @@ public class SignupControllerTest {
 	public void resetSubmitTest() {
 		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");
 		when(accountSrv.findByUuid(anyString())).thenReturn(testAccount);
-		when(passwordEncoder.encode(any(CharSequence.class))).thenReturn("encodedPassword");
+		when(encoderMock.encode(any(CharSequence.class))).thenReturn("encodedPassword");
 		PasswordResetForm form = fillPasswordForm();
 		Errors errors = new BeanPropertyBindingResult(form, "form");
 		signupCtr.resetSubmit(form, errors, raMock);

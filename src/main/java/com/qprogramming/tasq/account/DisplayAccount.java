@@ -13,6 +13,7 @@ public class DisplayAccount {
 	private Long id;
 	private Roles role;
 	private boolean online;
+	private boolean confirmed;
 	private String language;
 
 	public DisplayAccount(Account account) {
@@ -75,6 +76,14 @@ public class DisplayAccount {
 		this.online = online;
 	}
 
+	public boolean isConfirmed() {
+		return confirmed;
+	}
+
+	public void setConfirmed(boolean confirmed) {
+		this.confirmed = confirmed;
+	}
+
 	public String getLanguage() {
 		return language;
 	}
@@ -100,8 +109,7 @@ public class DisplayAccount {
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((surname == null) ? 0 : surname.hashCode());
-		result = prime * result
-				+ ((username == null) ? 0 : username.hashCode());
+		result = prime * result + ((username == null) ? 0 : username.hashCode());
 		return result;
 	}
 

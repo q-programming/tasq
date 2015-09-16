@@ -1,26 +1,25 @@
 package com.qprogramming.tasq.signup;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
-import org.apache.velocity.app.VelocityEngine;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.velocity.VelocityEngineUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,8 +30,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
-import com.qprogramming.tasq.config.ResourceService;
-import com.qprogramming.tasq.mail.MailMail;
 import com.qprogramming.tasq.manage.ThemeService;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.web.MessageHelper;
@@ -48,20 +45,13 @@ public class SignupController {
 	private static final String LOGO = "logo";
 
 	private AccountService accountSrv;
-	private MailMail mailer;
 	private MessageSource msg;
-	private VelocityEngine velocityEngine;
-	private ResourceService resourceSrv;
 	private ThemeService themeSrv;
 
 	@Autowired
-	public SignupController(AccountService accountSrv, MessageSource msg, MailMail mailer,
-			VelocityEngine velocityEngine, ResourceService resourceSrv, ThemeService themeSrv) {
+	public SignupController(AccountService accountSrv, MessageSource msg, ThemeService themeSrv) {
 		this.accountSrv = accountSrv;
 		this.msg = msg;
-		this.mailer = mailer;
-		this.velocityEngine = velocityEngine;
-		this.resourceSrv = resourceSrv;
 		this.themeSrv = themeSrv;
 	}
 
@@ -106,28 +96,24 @@ public class SignupController {
 		// copy default avatar
 		File userAvatar = new File(getAvatar(account.getId()));
 		Utils.copyFile(sc, "/resources/img/avatar.png", userAvatar);
-
-		String confirmlink = Utils.getBaseURL() + "/confirm?id=" + account.getUuid();
-		String subject = msg.getMessage("signup.register", null, Utils.getDefaultLocale());
-		Map<String, Object> model = new HashMap<String, Object>();
-		model.put("account", account);
-		model.put("link", confirmlink);
-		model.put("application", Utils.getBaseURL());
-		String message = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
-				"email/" + Utils.getDefaultLocale() + "/register.vm", "UTF-8", model);
-		mailer.sendMail(MailMail.REGISTER, account.getEmail(), subject, message, resourceSrv.getBasicResourceMap());
+		accountSrv.sendConfirmationLink(account);
 		MessageHelper.addSuccessAttribute(ra, msg.getMessage("signup.success", null, Utils.getDefaultLocale()));
 
 		return "redirect:/";
 	}
 
 	@RequestMapping(value = "/confirm", method = RequestMethod.GET)
-	public String confirm(@RequestParam(value = "id", required = true) String id, RedirectAttributes ra) {
+	public String confirm(@RequestParam(value = "id", required = true) String id, RedirectAttributes ra,
+			HttpServletRequest request) throws ServletException {
 		Account account = accountSrv.findByUuid(id);
 		if (account != null) {
 			account.setConfirmed(true);
 			accountSrv.update(account);
 			MessageHelper.addSuccessAttribute(ra, msg.getMessage("signup.confirmed", null, Utils.getDefaultLocale()));
+			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			if (!(authentication instanceof AnonymousAuthenticationToken)) {
+				request.logout();
+			}
 		} else {
 			MessageHelper.addErrorAttribute(ra, "Verification error!");
 		}
@@ -186,19 +172,7 @@ public class SignupController {
 		} else {
 			accountSrv.save(account, false);
 			Utils.setHttpRequest(request);
-			StringBuilder url = new StringBuilder(Utils.getBaseURL());
-			url.append("/");
-			url.append("password?id=");
-			url.append(account.getUuid());
-			String subject = msg.getMessage("singin.password.reset", null, new Locale(account.getLanguage()));
-			Map<String, Object> model = new HashMap<String, Object>();
-			model.put("account", account);
-			model.put("link", url);
-			model.put("application", Utils.getBaseURL());
-			String message = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
-					"email/" + account.getLanguage() + "/password.vm", "UTF-8", model);
-			LOG.info(url.toString());
-			mailer.sendMail(MailMail.OTHER, account.getEmail(), subject, message, resourceSrv.getBasicResourceMap());
+			accountSrv.sendResetLink(account);
 			MessageHelper.addSuccessAttribute(ra,
 					msg.getMessage("singin.password.token.sent", new Object[] { email }, Utils.getDefaultLocale()));
 		}

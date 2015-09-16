@@ -1,7 +1,6 @@
 package com.qprogramming.tasq.mail;
 
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -9,23 +8,17 @@ import java.util.Properties;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
-import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.ui.velocity.VelocityEngineUtils;
-
-import com.qprogramming.tasq.config.ResourceService;
-import com.qprogramming.tasq.support.Utils;
 
 @Configuration
 public class MailMail {
@@ -116,7 +109,7 @@ public class MailMail {
 	 * @param msg
 	 * @return true if there were no errors while sending
 	 */
-	public boolean sendMail(int type, String to, String subject, String msg, Map<String,Resource> resources) {
+	public boolean sendMail(int type, String to, String subject, String msg, Map<String, Resource> resources) {
 		try {
 			MimeMessage message = ((JavaMailSenderImpl) mailSender).createMimeMessage();
 			MimeMessageHelper helper = new MimeMessageHelper(message, true, encoding);
@@ -147,6 +140,7 @@ public class MailMail {
 			LOG.debug("Sending e-mail to:" + to);
 			((JavaMailSenderImpl) mailSender).send(message);
 		} catch (MailSendException e) {
+			LOG.error(e.getLocalizedMessage());
 			return false;
 		} catch (MessagingException e) {
 			LOG.error(e.getLocalizedMessage());

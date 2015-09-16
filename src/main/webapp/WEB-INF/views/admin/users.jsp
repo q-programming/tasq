@@ -184,6 +184,10 @@ function fetchManagedUsers(page,term){
 			}else{
 				online = '<i class="fa fa-user a-tooltip" style="color:lightgray" title="<s:message code="main.offline"/>"></i>';
 			}
+			var confirmed = '';
+			if(!content.confirmed){
+				confirmed = '<span><i style="color: red" class="fa fa-exclamation-triangle a-tooltip"	title="<s:message code="panel.emails.notconfirmed"/>"></i></span>';
+			}
 			var username = content.name + " " + content.surname;
 			var user = userURL + content.id; 
 			var avatar = '<img data-src="holder.js/30x30" style="height: 30px; float: left; padding-right: 10px;" src="' + avatarURL + +data.content[j].id +'.png"/>';
@@ -191,7 +195,7 @@ function fetchManagedUsers(page,term){
 			if(content.id == userID){
 				action='';
 			}else{
-				action='<a href="mailto:'+content.email+'" title="'+email_txt+' ('+content.email+')"><i class="fa fa-envelope" style="color: black;"></span></a>';
+				action='<a href="mailto:'+content.email+'" title="'+email_txt+' ('+content.email+')"><i class="fa fa-envelope" style="color: black;"></span>'+ confirmed +'</a>';
 			}
 			var row = '<tr class="listeduser"><td>'
 						+ online

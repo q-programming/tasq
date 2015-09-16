@@ -262,7 +262,7 @@ public class WorkLogTest {
 		list.add(worklog7);
 		list.add(worklog8);
 		when(wlRepoMock.findByProjectIdOrderByTimeAsc(anyLong())).thenReturn(list);
-		List<WorkLog> result = wlSrv.findProjectCreateCloseEvents(project,false);
+		List<WorkLog> result = wlSrv.findProjectCreateCloseEvents(project, true);
 		Assert.assertEquals(3, result.size());
 	}
 

@@ -6,6 +6,7 @@ http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
 http://www.springframework.org/schema/security
 http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
+	<security:http pattern="/resources/**" security="none"></security:http>
 	<security:http auto-config="true" disable-url-rewriting="true"
 		use-expressions="true">
 		<security:form-login login-page="/signin"
@@ -20,8 +21,6 @@ http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 				expired-url="/signin" session-registry-alias="sessionRegistry" />
 		</security:session-management>
 		<security:intercept-url pattern="/" access="permitAll" />
-		<security:intercept-url pattern="/resources/**"
-			access="permitAll" />
 		<security:intercept-url pattern="/confirm"
 			access="permitAll" />
 		<security:intercept-url pattern="/export_template.xsl"

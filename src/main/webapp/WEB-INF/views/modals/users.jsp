@@ -95,6 +95,10 @@ function fetchUsers(page,term){
 			}else{
 				online = '<i class="fa fa-user a-tooltip" style="color:lightgray" title="<s:message code="main.offline"/>"></i>';
 			}
+			var confirmed = '';
+			if(!content.confirmed){
+				confirmed = '<span><i style="color: red" class="fa fa-exclamation-triangle a-tooltip"	title="<s:message code="panel.emails.notconfirmed"/>"></i></span>';
+			}
 			var user = userURL + content.id; 
 			var avatar = '<img data-src="holder.js/30x30" style="height: 30px; float: left; padding-right: 10px;" src="' + avatarURL + +data.content[j].id +'.png"/>';
 			var row = '<tr class="listeduser"><td>'
@@ -103,7 +107,7 @@ function fetchUsers(page,term){
 						+ avatar
 						+ content.name + " " + content.surname +'</a></td>'
 						+ '<td>'+getRoleTypeMsg(content.role)+'</td>'
-						+ '<td><a href="mailto:'+content.email+'" title="'+email_txt+' ('+content.email+')"><i class="fa fa-envelope" style="color: black;"></span></a></td></tr>';
+						+ '<td><a href="mailto:'+content.email+'" title="'+email_txt+' ('+content.email+')"><i class="fa fa-envelope" style="color: black;"></span>'+ confirmed +'</a></td></tr>';
 			$("#user_table").append(row);
 		}
 		//print Nav

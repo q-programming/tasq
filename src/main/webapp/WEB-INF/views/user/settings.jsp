@@ -15,7 +15,8 @@
 			<div>
 				<div id="avatar"
 					style="border: 1px dashed; display: table-cell; text-align: center; min-width: 110px;">
-					<img id="avatar_src" src="<c:url value="/../avatar/${user.id}.png"/>"
+					<img id="avatar_src"
+						src="<c:url value="/../avatar/${user.id}.png"/>"
 						style="padding: 10px;"></img>
 					<div id="avatar_upload" class="hidden" style="margin-top: -30px">
 						<input id="file_upload" name="avatar" type="file" accept=".png"
@@ -23,8 +24,14 @@
 					</div>
 				</div>
 				<div style="display: table-cell; padding-left: 20px">
-					<h3>${user}</h3>
-					<i>${user.email}</i>
+					<h3>
+						<c:if test="${not user.confirmed}">
+							<i style="color: red"
+								class="fa fa-exclamation-triangle a-tooltip"
+								title="<s:message code="panel.emails.notconfirmed"/>"></i>
+						</c:if>
+						${user}
+					</h3>
 				</div>
 			</div>
 			<div style="display: table-row;">
@@ -34,6 +41,31 @@
 							<i class="fa fa-envelope-o"></i>
 							<s:message code="panel.emails"></s:message>
 						</h5>
+					</div>
+					<div class="" style="padding-left: 20px">
+						<div id="email-group" class="form-inline">
+							<div class="form-group">
+								<div class="input-group">
+									<div class="input-group-addon">
+										<i class="fa fa-envelope-o"></i>
+									</div>
+									<input id ="email" name="email" type="text" class="form-control"
+										placeholder="e-mail" value="${user.email}" style="width:400px">
+									<input
+										id="useremail" type="hidden" value="${user.email}">
+								</div>
+
+							</div>
+						</div>
+						<div id="notConfirmed" <c:if test="${user.confirmed}"> style="display:none" </c:if>>
+							<span style="color: red"> <s:message
+									code="panel.emails.notconfirmed" />
+							&nbsp;
+							<span class="btn btn-default"><i class="fa fa-reply"></i><i
+									class="fa fa-envelope"></i>&nbsp;<s:message
+										code="panel.emails.resend" /></span>
+							</span>
+						</div>
 					</div>
 					<div class="checkbox">
 						<label class="checkbox" style="display: inherit;"> <input
@@ -75,9 +107,9 @@
 					<div style="width: 350px; margin-top: 5px; padding-left: 20px">
 						<select class="form-control input-sm" name="theme">
 							<c:forEach items="${themes}" var="theme">
-								<option value="${theme.id}" <c:if test="${theme.name eq user.theme.name}">selected</c:if>>
-									${theme.name}
-								</option>
+								<option value="${theme.id}"
+									<c:if test="${theme.name eq user.theme.name}">selected</c:if>>
+									${theme.name}</option>
 							</c:forEach>
 						</select> <span class="help-block"><s:message
 								code="panel.theme.help" /></span>
@@ -87,14 +119,29 @@
 		</div>
 		<div style="text-align: center;">
 			<button class="btn btn-success" type="submit">
-				<i class="fa fa-floppy-o"></i>&nbsp;<s:message code="panel.save" text="Save settings" />
+				<i class="fa fa-floppy-o"></i>&nbsp;
+				<s:message code="panel.save" text="Save settings" />
 			</button>
 		</div>
 	</form>
 	<jsp:include page="../other/invite.jsp" />
 </div>
 <script>
+	var settings = true;
 	$(document).ready(function($) {
+		$( "#email" ).change(function() {
+				var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+				if (!regex.test(this.value)) {
+					$("#email-group").removeClass('has-success');
+					$("#email-group").addClass('has-error');
+				}else{
+					$("#email-group").removeClass('has-error');
+					$("#email-group").addClass('has-success');
+				}
+		});
+		
+		
+		
 		var imageWRN = '<s:message code="error.file100kb"/>';
 		$("#file_upload").bootstrapFileInput();
 
@@ -110,7 +157,7 @@
 
 		function readURL(input) {
 			if (input.files && input.files[0]) {
-				if(input.files[0].size > 100000){
+				if (input.files[0].size > 100000) {
 					showError(imageWRN);
 					return false;
 				}

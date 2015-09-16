@@ -184,7 +184,7 @@ public class AccountControllerTest {
 			mockMultipartFile = new MockMultipartFile("content", fileURL.getFile(), "text/plain",
 					getClass().getResourceAsStream("/avatar.png"));
 			when(themeSrvMock.findById(1L)).thenReturn(new Theme());
-			accountCtr.saveSettings(mockMultipartFile, EMAIL, "en", 1L, raMock, requestMock, responseMock);
+			accountCtr.saveSettings(mockMultipartFile, EMAIL, EMAIL, "en", 1L, raMock, requestMock, responseMock);
 			verify(accSrvMock, times(1)).update(any(Account.class));
 			verify(localeResolverMock, times(1)).setLocale(requestMock, responseMock, new Locale("en"));
 		} catch (IOException e) {
@@ -202,7 +202,7 @@ public class AccountControllerTest {
 			mockMultipartFile = new MockMultipartFile("content", fileURL.getFile(), "text/plain",
 					getClass().getResourceAsStream("/avatar_tooBig.png"));
 			when(themeSrvMock.findById(1L)).thenReturn(new Theme());
-			accountCtr.saveSettings(mockMultipartFile, EMAIL, "en", 1L, raMock, requestMock, responseMock);
+			accountCtr.saveSettings(mockMultipartFile, EMAIL, EMAIL, "en", 1L, raMock, requestMock, responseMock);
 			verify(raMock, times(1)).addFlashAttribute(anyString(),
 					new Message(anyString(), Message.Type.DANGER, new Object[] {}));
 		} catch (IOException e) {

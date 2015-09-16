@@ -34,7 +34,7 @@ public class ResourceService implements ResourceLoaderAware {
 	}
 
 	public Resource getLogo() {
-		return getResource("classpath:email/img/tasQ_logo_small.png");
+		return getResource("classpath:email/img/logo.png");
 	}
 
 	public Resource getTaskTypeIcon(String type) {

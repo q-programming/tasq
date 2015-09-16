@@ -35,16 +35,14 @@ public class HomeControllerAdvice {
 
 	@ModelAttribute("last_projects")
 	public List<Project> getLastProjects() {
-		Authentication authentication = SecurityContextHolder.getContext()
-				.getAuthentication();
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (!(authentication instanceof AnonymousAuthenticationToken)) {
 			// Get lasts 5 projects
 			Account currentAccount = Utils.getCurrentAccount();
-			currentAccount = accSrv.findByEmail(currentAccount.getEmail());
+			currentAccount = accSrv.findByUsername(currentAccount.getUsername());
 			List<Project> projects = currentAccount.getLast_visited_p();
-			Collections.sort(projects, new ProjectSorter(
-					ProjectSorter.SORTBY.LAST_VISIT, Utils.getCurrentAccount()
-							.getActive_project(), true));
+			Collections.sort(projects, new ProjectSorter(ProjectSorter.SORTBY.LAST_VISIT,
+					Utils.getCurrentAccount().getActive_project(), true));
 			return projects;
 		}
 		return null;
@@ -52,24 +50,22 @@ public class HomeControllerAdvice {
 
 	@ModelAttribute("last_tasks")
 	public List<Task> getLastTasks() {
-		Authentication authentication = SecurityContextHolder.getContext()
-				.getAuthentication();
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (!(authentication instanceof AnonymousAuthenticationToken)) {
 			// Get lasts 5 Tasks
 			Account current_account = Utils.getCurrentAccount();
-			current_account = accSrv.findByEmail(current_account.getEmail());
+			current_account = accSrv.findByUsername(current_account.getUsername());
 			List<Task> tasks = current_account.getLast_visited_t();
 			return tasks;
 		}
 		return null;
 	}
-	
+
 	@ModelAttribute("eventCount")
 	public int getEvents() {
-		Authentication authentication = SecurityContextHolder.getContext()
-				.getAuthentication();
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (!(authentication instanceof AnonymousAuthenticationToken)) {
-			List<Event> events = eventSrv.getUnread(); 
+			List<Event> events = eventSrv.getUnread();
 			return events.size();
 		}
 		return 0;

@@ -31,7 +31,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.qprogramming.tasq.manage.Theme;
 import com.qprogramming.tasq.projects.Project;
-import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.task.Task;
 
 @SuppressWarnings("serial")
@@ -109,11 +108,11 @@ public class Account implements java.io.Serializable, UserDetails {
 
 	}
 
-	public Account(String email, String password, String username,Roles role) {
+	public Account(String email, String password, String username, Roles role) {
 		this.email = email;
 		this.password = password;
 		this.role = role;
-//		this.username = email.split("@")[0];
+		// this.username = email.split("@")[0];
 		this.username = username;
 	}
 
@@ -129,6 +128,7 @@ public class Account implements java.io.Serializable, UserDetails {
 		this.email = email;
 	}
 
+	@Override
 	public String getPassword() {
 		return password;
 	}
@@ -189,6 +189,7 @@ public class Account implements java.io.Serializable, UserDetails {
 		this.role = role;
 	}
 
+	@Override
 	public Collection<GrantedAuthority> getAuthorities() {
 		return authorities;
 	}
@@ -223,6 +224,7 @@ public class Account implements java.io.Serializable, UserDetails {
 	public void setLast_visited_p(List<Project> last_visited_p) {
 		this.last_visited_p = last_visited_p;
 	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -263,8 +265,7 @@ public class Account implements java.io.Serializable, UserDetails {
 	}
 
 	public void startTimerOnTask(Task task) {
-		active_task = new Object[] { task.getId(), new DateTime(),
-				task.getId() + " - " + task.getName() };
+		active_task = new Object[] { task.getId(), new DateTime(), task.getId() + " - " + task.getName() };
 	}
 
 	public void setActive_task(Object[] task) {
@@ -276,8 +277,7 @@ public class Account implements java.io.Serializable, UserDetails {
 	}
 
 	public long getActive_task_seconds() {
-		if (active_task != null && active_task.length > 0
-				&& !active_task[0].equals("")) {
+		if (active_task != null && active_task.length > 0 && !active_task[0].equals("")) {
 			return ((DateTime) active_task[1]).getMillis() / 1000;
 		}
 		return 0;
@@ -316,9 +316,8 @@ public class Account implements java.io.Serializable, UserDetails {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.springframework.security.core.userdetails.UserDetails#isAccountNonExpired
-	 * ()
+	 * @see org.springframework.security.core.userdetails.UserDetails#
+	 * isAccountNonExpired ()
 	 */
 	@Override
 	public boolean isAccountNonExpired() {
@@ -329,9 +328,8 @@ public class Account implements java.io.Serializable, UserDetails {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.springframework.security.core.userdetails.UserDetails#isAccountNonLocked
-	 * ()
+	 * @see org.springframework.security.core.userdetails.UserDetails#
+	 * isAccountNonLocked ()
 	 */
 	@Override
 	public boolean isAccountNonLocked() {
@@ -383,8 +381,7 @@ public class Account implements java.io.Serializable, UserDetails {
 		int result = 1;
 		result = prime * result + ((email == null) ? 0 : email.hashCode());
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result
-				+ ((username == null) ? 0 : username.hashCode());
+		result = prime * result + ((username == null) ? 0 : username.hashCode());
 		return result;
 	}
 
