@@ -20,7 +20,7 @@
 			<li><a style="color: black"
 				href="<c:url value="/manage/users" />"> <i class="fa fa-users"></i>
 					<s:message code="menu.manage.users " text="Manage users" /></a></li>
-			<li><a style="color: black" href="#"> <i
+			<li><a style="color: black" href="tasks"> <i
 					class="fa fa-lg fa-check-square"></i> <s:message
 						code="menu.manage.tasks" /></a></li>
 		</ul>

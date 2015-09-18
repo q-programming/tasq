@@ -341,10 +341,11 @@ public class WorkLogService {
 
 	}
 
-	public void delete(Long id) {
-		WorkLog wl = wlRepo.findById(id);
-		if (wl != null) {
-			wlRepo.delete(wl);
-		}
+	public void delete(WorkLog log) {
+		wlRepo.delete(log);
+	}
+
+	public WorkLog findById(Long id) {
+		return wlRepo.findById(id);
 	}
 }

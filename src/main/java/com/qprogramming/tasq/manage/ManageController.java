@@ -24,6 +24,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.error.TasqAuthException;
+import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.web.MessageHelper;
 
@@ -40,11 +41,13 @@ public class ManageController {
 
 	private ThemeService themeSrv;
 	private MessageSource msg;
+	private ProjectService projSrv;
 
 	@Autowired
-	public ManageController(ThemeService themeSrv, MessageSource msg) {
+	public ManageController(ThemeService themeSrv, MessageSource msg, ProjectService projSrv) {
 		this.themeSrv = themeSrv;
 		this.msg = msg;
+		this.projSrv = projSrv;
 	}
 
 	@RequestMapping(value = "manage/tasks", method = RequestMethod.GET)
@@ -52,6 +55,7 @@ public class ManageController {
 		if (!Roles.isAdmin()) {
 			throw new TasqAuthException();
 		}
+		model.addAttribute("projects", projSrv.findAll());
 		return "admin/tasks";
 	}
 

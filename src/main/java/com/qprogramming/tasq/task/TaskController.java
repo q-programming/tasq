@@ -1030,10 +1030,16 @@ public class TaskController {
 	public String deleteWorkLog(@RequestParam("id") Long id, RedirectAttributes ra, HttpServletRequest request,
 			Model model) {
 		if (Roles.isAdmin()) {
-			wlSrv.delete(id);
-			MessageHelper.addSuccessAttribute(ra,
-					msg.getMessage("task.worklog.deleted", null, Utils.getCurrentLocale()));
-			return "redirect:/manage/tasks";
+			WorkLog wl = wlSrv.findById(id);
+			if (wl != null) {
+				Long projectID = wl.getTask().getProject().getId();
+				wlSrv.delete(wl);
+				MessageHelper.addSuccessAttribute(ra,
+						msg.getMessage("task.worklog.deleted", null, Utils.getCurrentLocale()));
+				return "redirect:/manage/tasks?project=" + projectID;
+			} else {
+				return "redirect:" + request.getHeader("Referer");
+			}
 		} else {
 			throw new TasqAuthException();
 		}
@@ -1048,9 +1054,15 @@ public class TaskController {
 	 */
 	@Transactional
 	@RequestMapping(value = "task/updatelogs", method = RequestMethod.GET)
-	public String update(RedirectAttributes ra, HttpServletRequest request, Model model) {
+	public String update(@RequestParam(value = "project", required = false) Long project, RedirectAttributes ra,
+			HttpServletRequest request, Model model) {
 		if (Roles.isAdmin()) {
-			List<Task> list = taskSrv.findAll();
+			List<Task> list;
+			if (project != null) {
+				list = taskSrv.findAllByProjectId(project);
+			} else {
+				list = taskSrv.findAll();
+			}
 			StringBuilder console = new StringBuilder("Updating logged work on all tasks within application");
 			console.append(BR);
 			for (Task task : list) {
@@ -1078,10 +1090,16 @@ public class TaskController {
 	@Deprecated
 	@Transactional
 	@RequestMapping(value = "task/updateFinish", method = RequestMethod.GET)
-	public String updateFinishDate(RedirectAttributes ra, HttpServletRequest request, Model model) {
+	public String updateFinishDate(@RequestParam(value = "project", required = false) Long project,
+			RedirectAttributes ra, HttpServletRequest request, Model model) {
 		if (Roles.isAdmin()) {
-			List<Task> list = taskSrv.findAll();
-			StringBuilder console = new StringBuilder("Updating logged work on all tasks within application");
+			List<Task> list;
+			if (project != null) {
+				list = taskSrv.findAllByProjectId(project);
+			} else {
+				list = taskSrv.findAll();
+			}
+			StringBuilder console = new StringBuilder("Updating logged work on tasks within application");
 			console.append(BR);
 			for (Task task : list) {
 				List<WorkLog> worklogs = wlSrv.getTaskEvents(task.getId());
