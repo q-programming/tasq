@@ -57,6 +57,12 @@
 							</a>
 						</li>
 					</c:if>
+					<li>
+						<a href="<c:url value="/task/create"/>?linked=${task.id}&project=${task.project.id}">
+								<i class="fa fw fa-plus"></i>
+								<s:message code="task.linked.create" />
+						</a>
+					</li>
 					<li><a class="addFileButton" href="#" data-toggle="modal"
 						data-target="#files_task" data-taskID="${task.id}"> <i
 							class="fa fw fa-file"></i>&nbsp;<s:message code="task.addFile" />
@@ -73,6 +79,12 @@
 					
 
 				</ul>
+			</c:if>
+			<c:if test="${task.state eq'CLOSED'}">
+				<a href="<c:url value="/task/create"/>?linked=${task.id}&project=${task.project.id}"
+					class="btn btn-default btn-sm a-tooltip" title="<s:message code="task.linked.create" />">
+					<i class="fa fw fa-plus"></i>
+				</a>
 			</c:if>
 			<button id="watch" class="btn btn-default btn-sm a-tooltip" title=""
 				data-html="true">

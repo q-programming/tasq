@@ -415,8 +415,8 @@
 						class="fa fa-plus-square"></i> icon will be shown before it's
 						name. After clicking this button all subtasks for every task will
 						be expanded</li>
-					<li><a class="anchor" id="proj-12"></a><b>Show more than 30 days on
-							chart</b> By default events from last 30 days are shown on
+					<li><a class="anchor" id="proj-12"></a><b>Show more than
+							30 days on chart</b> By default events from last 30 days are shown on
 						create/closed chart. If you would like to view all events, from
 						very begining of project, click this checkbox. Please be aware
 						that rendering this chart can take some time, depending on how
@@ -875,7 +875,7 @@
 				<tr>
 					<td class="col-md-2"><b><i
 							class="fa fw fa-link fa-flip-horizontal"></i>&nbsp;Link</b></td>
-					<td>Starts linking process. If two tasks have something in
+					<td>starts linking process. If two tasks have something in
 						common, blocks or are duplicating. They can be linked . Every
 						linked task is shown on task details screen.<br> To link task
 						, start by clicking this menu action, or <span
@@ -891,6 +891,17 @@
 							subtask</b></td>
 					<td>shows create subtask screen which is nearly the same as
 						regular task create screen , but without story points section</td>
+				</tr>
+				<tr>
+					<td class="col-md-2"><b> <i class="fa fw fa-plus"></i>
+							Create linked task
+					</b></td>
+					<td>starts creation of new task but automatically will link
+						newly created task with currently shown one.<br>Additionally
+						new task's project will be locked to current task project.<br>If task
+						is closed this option will be shown as extra <span
+						class="btn btn-sm btn-default"><i class="fa fw fa-plus"></i></span> button
+					</td>
 				</tr>
 				<tr>
 					<td class="col-md-2"><b><i class="fa fw fa-file"></i>&nbsp;Attach

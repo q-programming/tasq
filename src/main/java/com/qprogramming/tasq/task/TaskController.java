@@ -127,8 +127,9 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "task/create", method = RequestMethod.POST)
-	public String createTask(@Valid @ModelAttribute("taskForm") TaskForm taskForm, Errors errors, RedirectAttributes ra,
-			HttpServletRequest request, Model model) {
+	public String createTask(@Valid @ModelAttribute("taskForm") TaskForm taskForm,
+			@RequestParam("linked") String linked, Errors errors, RedirectAttributes ra, HttpServletRequest request,
+			Model model) {
 		if (!Roles.isUser()) {
 			throw new TasqAuthException(msg);
 		}
@@ -195,7 +196,14 @@ public class TaskController {
 			saveTaskFiles(taskForm.getFiles(), task);
 			wlSrv.addActivityLog(task, "", LogType.CREATE);
 			watchSrv.startWatching(task);
-
+			if (linked != null) {
+				Task linkedTask = taskSrv.findById(linked);
+				if (linkedTask != null) {
+					TaskLink link = new TaskLink(linkedTask.getId(), taskID, TaskLinkType.RELATES_TO);
+					linkService.save(link);
+					wlSrv.addWorkLogNoTask(linked + " - " + taskID, project, LogType.TASK_LINK);
+				}
+			}
 			return "redirect:/task?id=" + taskID;
 		}
 		return null;

@@ -82,6 +82,12 @@
 			<form:errors path="description" element="p" class="text-danger" />
 		</div>
 		<%-------------------------Project ----------------------------------%>
+		<c:if test="${not empty param.project}">
+			<c:set var="chosenProject" value="${param.project}"/>
+		</c:if>
+		<c:if test="${empty param.project}">
+			<c:set var="chosenProject" value="${user.active_project}"/>
+		</c:if>
 		<a class="anchor" id="projectA"></a>
 		<div class="form-group">
 			<div class="mod-header">
@@ -89,10 +95,10 @@
 					<s:message code="project.project" />
 				</h5>
 			</div>
-			<form:select id="projects_list" style="width:300px;" path="project"	class="form-control">
+			<form:select id="projects_list" style="width:300px;" path="project"	class="form-control" disabled="${not empty param.project}">
  				<c:forEach items="${projects_list}" var="list_project">
 					<option id="${list_project.projectId}"
- 						<c:if test="${list_project.id eq user.active_project}">selected style="font-weight:bold"
+ 						<c:if test="${list_project.id eq chosenProject}">selected style="font-weight:bold"
  						</c:if>
  						value="${list_project.id}">${list_project.name}</option>
  				</c:forEach> 
@@ -183,6 +189,17 @@
 			<form:hidden path="priority" id="priority"/>
 			<form:errors path="priority" element="p"/>
 		</div>
+		<%-----------LINKED TASK---------------------------%>
+		<c:if test="${ not empty param.linked}">
+			<div class="form-group" id="#linkedDIV">
+				<div class="mod-header">
+					<h5 class="mod-header-title">
+						<s:message code="task.linked" />
+					</h5>
+				</div>
+				<input class="form-control" id ="linked" name="linked" disabled value="${param.linked}" style="width:150px">
+			</div>
+		</c:if>
 		<%-----------SPRINT---------------------------%>
 		<a class="anchor" id="sprintA"></a>
 		<div>
@@ -274,6 +291,8 @@ $(document).ready(function($) {
 	var fileTypes='.doc,.docx,.rtf,.txt,.odt,.xls,.xlsx,.ods,.csv,.pps,.ppt,.pptx,.jpg,.png,.gif';
 	var btnsGrps = jQuery.trumbowyg.btnsGrps;
 	var project;
+	var paramProject = '${param.project}';
+	
 	$('#description').trumbowyg({
 		lang: '${user.language}',
 		fullscreenable: false,
@@ -365,6 +384,7 @@ $(document).ready(function($) {
 	$('.datepicker').datepicker($.datepicker.regional['${user.language}']);
 	var currentDue = "${taskForm.due_date}";
 	$("#due_date").val(currentDue);
+	
 	$("#projects_list").change(function(){
 		getDefaults();
 		fillSprints();
