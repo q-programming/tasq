@@ -934,7 +934,7 @@ $(document).ready(function($) {
 	   	 	}
 	    	else{
 				$.post('<c:url value="/task/changeState"/>',{id:taskID,state:state},function(result){
-					if(result.code == 'Error'){
+					if(result.code == 'ERROR'){
 						showError(result.message);
 					}
 					else{

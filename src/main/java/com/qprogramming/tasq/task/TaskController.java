@@ -560,6 +560,12 @@ public class TaskController {
 					| (task.getAssignee() != null && !task.getAssignee().equals(Utils.getCurrentAccount())))) {
 				throw new TasqAuthException(msg, "role.error.task.permission");
 			}
+			// check if reopening kanban
+			if (task.getState().equals(TaskState.CLOSED)
+					&& task.getProject().getAgile().equals(Project.AgileType.KANBAN) && task.getRelease() != null) {
+				return new ResultData(ResultData.ERROR, msg.getMessage("task.changeState.change.kanbanRelease",
+						new Object[] { task.getRelease().getRelease() }, Utils.getCurrentLocale()));
+			}
 			if (state.equals(TaskState.TO_DO)) {
 				Hibernate.initialize(task.getLoggedWork());
 				if (!("0m").equals(task.getLoggedWork())) {
