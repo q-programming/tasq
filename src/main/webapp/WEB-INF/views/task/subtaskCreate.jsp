@@ -220,9 +220,7 @@ $(document).ready(function($) {
 	$("#due_date").val(currentDue);
 
 	//INIT ALL
-	getDefaultTaskType();
-	getDefaultAssignee();
-	getDefaultTaskPriority();
+	getDefaults()
 	
 	$("#assignee_auto").click(function(){
 		 $(this).select();
@@ -276,40 +274,40 @@ $(document).ready(function($) {
 			}
 		}
 	});
-	function getDefaultTaskType(){
-		var thisType = $("#SUBTASK");
-		var type = thisType.data('type');
-   	 	$("#task_type").html(thisType.html());
-   		$("#type").val(type);
-	}
-	function getDefaultTaskPriority(){
-		var url='<c:url value="/project/getDefaultTaskPriority"/>';
+	
+	
+	
+	
+	function getDefaults(){
+		var url='<c:url value="/project/getDefaults"/>';
 		$.get(url,{id:$("#projects_list").val()},function(result,status){
-				var thisPriority = $("#"+result);
+				project = result;
+				//TYPE
+				var thisType = $("#SUBTASK");
+				var type = thisType.data('type');
+		   	 	$("#task_type").html(thisType.html());
+		   		$("#type").val(type);
+				//ASSIGNEE
+   				$("#assignee").val(null);
+				$("#assignee_auto").val(null);
+				if(!project.defaultAssignee){
+					$("#assignee").val(null);
+				}
+				else{
+					$("#assignee_auto").val(project.defaultAssignee.name + " " + project.defaultAssignee.surname);
+					$("#assignee").val(project.defaultAssignee.id);
+					$("#assignee_auto").removeClass("input-italic");
+				}
+				checkIfEmpty();
+				//PRIORITY
+		   		var thisPriority = $("#"+project.default_priority);
 				var priority = thisPriority.data('priority');
 		   	 	$("#task_priority").html(thisPriority.html());
 		   		$("#priority").val(priority);
+		   		
 		});
 	}
-	
-	function getDefaultAssignee(){
-		$("#assignee").val(null);
-		$("#assignee_auto").val(null);
-		var url='<c:url value="/project/getDefaultAssignee"/>';
-		$.get(url,{id:$("#projects_list").val()},function(result,status){
-			if(!result){
-				$("#assignee").val(null);
-			}
-			else{
-				$("#assignee_auto").val(result.name + " " + result.surname);
-				$("#assignee").val(result.id);
-				$("#assignee_auto").removeClass("input-italic");
-				
-			}
-		});
-		checkIfEmpty();
-	}
-	
+
 	function checkIfEmpty(){
 		if(!$("#assignee").val()){
 			var unassign = '<s:message code="task.unassigned" />';
