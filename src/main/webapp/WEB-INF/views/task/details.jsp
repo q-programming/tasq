@@ -97,8 +97,8 @@
 			</button>
 
 			<c:if test="${can_edit && user.isPowerUser}">
-				<a class="btn btn-default btn-sm a-tooltip delete_task"
-					href="<c:url value="task/delete?id=${task.id}"/>"
+				<a class="btn btn-default btn-sm a-tooltip delete_btn"
+					href="<c:url value="/task/delete?id=${task.id}"/>"
 					title="<s:message code="task.delete" text="Delete task" />"
 					data-lang="${pageContext.response.locale}"
 					data-msg='<s:message code="task.delete.confirm"></s:message>'>
@@ -794,7 +794,7 @@
 			</div>
 			<%------------------ WORK LOG -------------------------%>
 			<div id="logWork" class="tab-pane fade">
-				<table id="taskworklogs" class="table table-condensed table-hover">
+				<table id="taskworklogs" class="table table-condensed table-hover button-table">
 				</table>
 			</div>
 		</div>
@@ -1062,9 +1062,20 @@ $(document).ready(function($) {
 						if (worklog.message != ""){
 							message = '<div><blockquote class="quote">' + worklog.message + '</blockquote></div>'
 						}
-						
-						var row = '<tr><td><div style="font-size: smaller; color: dimgray;">' + account + ' ' + type + '<div class="time-div">' + worklog.timeLogged + '</div> ' + message + '</td></tr>';
+						var delbtn = '';
+						<security:authorize access="hasRole('ROLE_ADMIN')">
+							var delurl ='<c:url value="/task/delWorklog?id="/>';
+							delbtn = '<div class="buttons_panel" style="float: right;">'
+									+'<a class="a-tooltip delete_btn" style="color:gray" href="' +delurl + worklog.id + '"'
+									+' title = "<s:message code="task.worklog.delete"/>"'
+									+' data-lang="${pageContext.response.locale}"'
+									+' data-msg="<s:message code="task.delete.confirm"/>" >' 
+									+'<i class="fa fa-trash-o"></i></a></div>';
+						</security:authorize>
+						var row = '<tr><td><div style="font-size: smaller; color: dimgray;">' + account + ' ' + type + '<div class="time-div">' + worklog.timeLogged + '</div> ' + delbtn + message 
+								  + '</td></tr>';
 						$("#taskworklogs").append(row);	  
+						$(".a-tooltip").tooltip();
 			    	});	
 				});
 			}
@@ -1088,7 +1099,7 @@ $(document).ready(function($) {
 				});
 			}
 			
-$(document).on("click",".delete_task",function(e) {
+$(document).on("click",".delete_btn",function(e) {
 		var msg = '<p style="text-align:center"><i class="fa fa-lg fa-exclamation-triangle" style="display: initial;"></i>&nbsp'
 					+ $(this).data('msg') + '</p>';
 		var lang = $(this).data('lang');
@@ -1103,7 +1114,7 @@ $(document).on("click",".delete_task",function(e) {
 			}
 		});
 	});
-	
+
 	//TAGS
 	<c:if test="${not task.subtask}">
 	var init = true;

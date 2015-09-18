@@ -340,4 +340,11 @@ public class WorkLogService {
 		addActivityLog(task, Utils.changedFromTo(oldState.getDescription(), newState.getDescription()), LogType.STATUS);
 
 	}
+
+	public void delete(Long id) {
+		WorkLog wl = wlRepo.findById(id);
+		if (wl != null) {
+			wlRepo.delete(wl);
+		}
+	}
 }

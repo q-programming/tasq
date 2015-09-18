@@ -172,14 +172,14 @@ public class TaskControllerTest {
 		when(projSrvMock.findUserActiveProject()).thenReturn(project);
 		when(projSrvMock.findAllByUser()).thenReturn(list);
 		try {
-			taskCtr.createTask(form, errors, raMock, requestMock, modelMock);
+			taskCtr.createTask(form, null, errors, raMock, requestMock, modelMock);
 		} catch (TasqAuthException e) {
 			catched = true;
 		}
 		Assert.assertTrue("AuthException not thrown on user roles", catched);
 		testAccount.setRole(Roles.ROLE_POWERUSER);
 		errors.rejectValue("name", "Error name");
-		String result = taskCtr.createTask(form, errors, raMock, requestMock, modelMock);
+		String result = taskCtr.createTask(form, null, errors, raMock, requestMock, modelMock);
 		Assert.assertNull("No errors", result);
 	}
 
@@ -197,7 +197,7 @@ public class TaskControllerTest {
 		when(projSrvMock.findAllByUser()).thenReturn(list);
 		when(projSrvMock.findById(1L)).thenReturn(project);
 		when(projSrvMock.canEdit(project)).thenReturn(false);
-		String result = taskCtr.createTask(form, errors, raMock, requestMock, modelMock);
+		String result = taskCtr.createTask(form, null, errors, raMock, requestMock, modelMock);
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.DANGER, new Object[] {}));
 	}
@@ -217,7 +217,7 @@ public class TaskControllerTest {
 		when(projSrvMock.findAllByUser()).thenReturn(list);
 		when(projSrvMock.findById(1L)).thenReturn(project);
 		when(projSrvMock.canEdit(project)).thenReturn(true);
-		taskCtr.createTask(form, errors, raMock, requestMock, modelMock);
+		taskCtr.createTask(form, null, errors, raMock, requestMock, modelMock);
 		Assert.assertTrue(errors.hasErrors());
 	}
 
@@ -244,7 +244,7 @@ public class TaskControllerTest {
 		when(projSrvMock.canEdit(project)).thenReturn(true);
 		when(accountServiceMock.findById(1L)).thenReturn(testAccount);
 		when(sprintSrvMock.findByProjectIdAndSprintNo(1L, 1L)).thenReturn(sprint);
-		taskCtr.createTask(form, errors, raMock, requestMock, modelMock);
+		taskCtr.createTask(form, null, errors, raMock, requestMock, modelMock);
 		Assert.assertTrue(errors.hasErrors());
 	}
 
@@ -270,7 +270,7 @@ public class TaskControllerTest {
 		when(projSrvMock.canEdit(project)).thenReturn(true);
 		when(accountServiceMock.findById(1L)).thenReturn(testAccount);
 		when(sprintSrvMock.findByProjectIdAndSprintNo(1L, 1L)).thenReturn(sprint);
-		taskCtr.createTask(form, errors, raMock, requestMock, modelMock);
+		taskCtr.createTask(form, null, errors, raMock, requestMock, modelMock);
 	}
 
 	@Test

@@ -128,8 +128,8 @@ public class TaskController {
 
 	@RequestMapping(value = "task/create", method = RequestMethod.POST)
 	public String createTask(@Valid @ModelAttribute("taskForm") TaskForm taskForm,
-			@RequestParam("linked") String linked, Errors errors, RedirectAttributes ra, HttpServletRequest request,
-			Model model) {
+			@RequestParam(value = "linked", required = false) String linked, Errors errors, RedirectAttributes ra,
+			HttpServletRequest request, Model model) {
 		if (!Roles.isUser()) {
 			throw new TasqAuthException(msg);
 		}
@@ -1023,6 +1023,20 @@ public class TaskController {
 		Set<Sprint> sprints = subtask.getSprints();
 		task.setSprints(sprints);
 		return task;
+	}
+
+	@Transactional
+	@RequestMapping(value = "task/delWorklog", method = RequestMethod.GET)
+	public String deleteWorkLog(@RequestParam("id") Long id, RedirectAttributes ra, HttpServletRequest request,
+			Model model) {
+		if (Roles.isAdmin()) {
+			wlSrv.delete(id);
+			MessageHelper.addSuccessAttribute(ra,
+					msg.getMessage("task.worklog.deleted", null, Utils.getCurrentLocale()));
+			return "redirect:/manage/tasks";
+		} else {
+			throw new TasqAuthException();
+		}
 	}
 
 	/**
