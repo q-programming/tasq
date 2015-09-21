@@ -180,17 +180,17 @@ table.worklog_table td {
 					<td>
 						<p>
 							<img src='cid:${task.type.code}'> <a
-								href="${application}/task?id=${task.id}" target="_blank">[${task.id}]
+								href="${application}/task/${task.id}" target="_blank">[${task.id}]
 								${task.name}</a>
 						</p>
 						#set ($create = "create")
 						#if ($log.type.string == $create)
 							<p>
-								<a href="${application}/user?id=${curAccount.id}">${curAccount}</a> created new task and assigned you to it.
+								<a href="${application}/user/${curAccount.username}">${curAccount}</a> created new task and assigned you to it.
 							</p>
 						#else
 							<p>
-								<a href="${application}/user?id=${curAccount.id}">${curAccount}</a>
+								<a href="${application}/user/${curAccount.username}">${curAccount}</a>
 								${eventStr} :
 							</p>
 							<blockquote class="quote">${wlMessage}</blockquote>

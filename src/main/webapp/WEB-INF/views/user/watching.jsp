@@ -63,7 +63,7 @@ function fetchWatches(page){
 				var row = '<tr class="watchRow">';
 				var button = '<td><i class="btn btn-default fa fa-eye-slash stopWatching a-tooltip"	'
 							+'data-taskid="'+ task.id + '"title="<s:message code="task.watch.stop"/>"></i></td>';
-				var taskUrl = '<c:url value="/task?id="/>' + task.id;
+				var taskUrl = '<c:url value="/task/"/>' + task.id;
 				var taskStr = '<td>' + getTaskType(task.type) + '&nbsp;<a href="'+taskUrl + '">[' + task.id +'] ' 
 							+ task.name + '</a></td>';
 				var watches = '<td style="text-align:center">'+ task.watchCount + '&nbsp;<i class="fa fa-eye"></i></td>'

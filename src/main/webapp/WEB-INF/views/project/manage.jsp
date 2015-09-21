@@ -19,7 +19,7 @@
 </c:if>
 <div class="white-frame" style="overflow: auto;">
 	<h2>
-		<a href="<c:url value="/project?id=${project.id}"/>">[${project.projectId}]
+		<a href="<c:url value="/project/${project.projectId}"/>">[${project.projectId}]
 			${project.name}</a>
 			<a href="" class="showMore a-tooltip" title="<s:message code="project.manage.edit.description"/>" 
 			data-toggle="modal" data-target="#editDescription" data-backdrop="static" data-keyboard="false">

@@ -27,12 +27,12 @@
 			<c:if test="${project.id eq user.active_project}">
 				<tr style="background: #428bca; color: white">
 					<td><a style="color: white"
-						href="<c:url value="project?id=${project.id}"/>"><b>[${project.projectId}]
+						href="<c:url value="/project/${project.projectId}"/>"><b>[${project.projectId}]
 								${project.name}</b></a></td>
 					<td><b>${project.description}</b></td>
 					<td><c:forEach var="admin" items="${project.administrators}"
 							end="0">
-							<a href="<c:url value="/user?id=${admin.id}"/>" style="color:white;">${admin}</a>
+							<a href="<c:url value="/user/${admin.username}"/>" style="color:white;">${admin}</a>
 						</c:forEach></td>
 					<td><a class="btn btn-default a-tooltip pull-right"
 						style="padding: 6px 11px;" href='#'
@@ -43,15 +43,15 @@
 			</c:if>
 			<c:if test="${project.id ne user.active_project}">
 				<tr>
-					<td><a href="<c:url value="project?id=${project.id}"/>">[${project.projectId}]
+					<td><a href="<c:url value="/project/${project.projectId}"/>">[${project.projectId}]
 							${project.name}</a></td>
 					<td>${project.description}</td>
 					<td><c:forEach var="admin" items="${project.administrators}"
 							end="0">
-							<a href="<c:url value="/user?id=${admin.id}"/>" style="color:black;">${admin}</a>
+							<a href="<c:url value="/user/${admin.username}"/>" style="color:black;">${admin}</a>
 						</c:forEach></td>
 					<td><a class="btn btn-default a-tooltip pull-right"
-						href='<s:url value="/project/activate?id=${project.id}"></s:url>'
+						href='<s:url value="/project/activate/${project.projectId}"></s:url>'
 						title="<s:message
 									code="project.activate" text="Set as avtive" />"
 						data-placement="bottom"> <i class="fa fa-refresh"></i>

@@ -15,7 +15,7 @@ id="${task.id}" data-tags="<c:forEach items="${task.tags}" var="tag">${tag},</c:
 <span class="badge theme pull-right">${task.story_points}</span>
 </c:if>
 <t:type type="${task.type}" list="true" />
-<a href="<c:url value="/task?id=${task.id}"/>" style="color: inherit;"
+<a href="<c:url value="/task/${task.id}"/>" style="color: inherit;"
 class="<c:if test="${task.state eq 'CLOSED' }">
 closed
 </c:if>">[${task.id}]
@@ -56,7 +56,7 @@ title="<s:message code="task.assignme"/>">
 </c:if>
 <c:if test="${not empty task.assignee}">
 <a ${link} class="a-tooltip"
-href="<c:url value="/user?id=${task.assignee.id}"/>"
+href="<c:url value="/user/${task.assignee.username}"/>"
 title="${task.assignee}"><img data-src="holder.js/30x30"
 style="height: 30px; padding-right: 5px;"
 src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />

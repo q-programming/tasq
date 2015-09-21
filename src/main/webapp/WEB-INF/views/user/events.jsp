@@ -97,7 +97,7 @@ function fetchEvents(page,term){
 			}
 			row+=link;
 			//more
-			var taskurl = '<c:url value="/task?id="/>'+event.task;
+			var taskurl = '<c:url value="/task/"/>'+event.task;
 			var eventtask = '<s:message code="event.task"/>';
 			var deleteevent= '<s:message code="event.delete"/>';
 			var content = '<blockquote class="eventMore quote">'+event.message+'<div class="pull-right buttons_panel">'

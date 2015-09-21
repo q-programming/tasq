@@ -175,7 +175,7 @@ function fetchManagedUsers(page,term){
 		$("#loading").remove();
 // 		console.log(data);
 		var avatarURL = '<c:url value="/../avatar/"/>';
-		var userURL = '<c:url value="/user?id="/>';
+		var userURL = '<c:url value="/user/"/>';
 		var email_txt = '<s:message code="user.send.mail"/>';
 		for ( var j = 0; j < data.content.length; j++) {
 			var content = data.content[j];
@@ -189,7 +189,7 @@ function fetchManagedUsers(page,term){
 				confirmed = '<span><i style="color: red" class="fa fa-exclamation-triangle a-tooltip"	title="<s:message code="panel.emails.notconfirmed"/>"></i></span>';
 			}
 			var username = content.name + " " + content.surname;
-			var user = userURL + content.id; 
+			var user = userURL + content.username; 
 			var avatar = '<img data-src="holder.js/30x30" style="height: 30px; float: left; padding-right: 10px;" src="' + avatarURL + +data.content[j].id +'.png"/>';
 			var action;
 			if(content.id == userID){

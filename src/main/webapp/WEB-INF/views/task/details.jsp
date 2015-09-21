@@ -109,11 +109,11 @@
 		<h3>
 			<t:type type="${task.type}" />
 			<c:if test="${task.subtask}">
-				<a href='<c:url value="/task?id=${task.parent}"/>'>[${task.parent}]</a>
+				<a href='<c:url value="/task/${task.parent}"/>'>[${task.parent}]</a>
 			/ [${task.id}] ${task.name}
 			</c:if>
 			<c:if test="${not task.subtask}">
-				<a href='<c:url value="/project?id=${task.project.id}"/>'>${task.project.projectId}</a>
+				<a href='<c:url value="/project/${task.project.projectId}"/>'>${task.project.projectId}</a>
 			/ [${task.id}] ${task.name}
 			</c:if>
 		</h3>
@@ -449,7 +449,7 @@
 															type="${linkTask.type}" list="true" /></td>
 													<td style="width: 30px"><t:priority
 															priority="${linkTask.priority}" list="true" /></td>
-													<td><a href="<c:url value="task?id=${linkTask.id}"/>"
+													<td><a href="<c:url value="task/${linkTask.id}"/>"
 														style="color: inherit;
 												<c:if test="${linkTask.state eq 'CLOSED' }">text-decoration: line-through;</c:if>">
 															[${linkTask.id}] ${linkTask.name}</a></td>
@@ -503,7 +503,7 @@
 											priority="${subTask.priority}" list="true" /></td>
 									<td><a
 										style="color: inherit;<c:if test="${subTask.state eq 'CLOSED' }">text-decoration: line-through;</c:if>"
-										href="<c:url value="subtask?id=${subTask.id}"/>">[${subTask.id}]
+										href="<c:url value="/task/${subTask.id}"/>">[${subTask.id}]
 											${subTask.name}</a></td>
 									<td style="width: 100px"><t:state state="${subTask.state}" /></td>
 									<td style="width: 50px; padding-top: 14px;">
@@ -620,7 +620,7 @@
 							<img data-src="holder.js/20x20"
 								style="height: 20px; padding-right: 5px;"
 								src="<c:url value="/../avatar/${task.owner.id}.png"/>" /><a
-								href="<c:url value="/user?id=${task.owner.id}"/>">${task.owner}</a>
+								href="<c:url value="/user/${task.owner.username}"/>">${task.owner}</a>
 						</div>
 					</div>
 					<div id="assign_button_div" style="display: table">
@@ -635,7 +635,7 @@
 							<c:if test="${not empty task.assignee}">
 								<img data-src="holder.js/20x20" style="height: 20px;"
 									src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />
-								<a href="<c:url value="/user?id=${task.assignee.id}"/>">${task.assignee}</a>
+								<a href="<c:url value="/user/${task.assignee.username}"/>">${task.assignee}</a>
 							</c:if>
 							<c:if test="${user.isUser}">
 								<span class="btn btn-default btn-sm a-tooltip assignToTask"
@@ -729,11 +729,11 @@
 									<img data-src="holder.js/30x30"
 										style="height: 30px; float: left; padding-right: 10px;"
 										src="<c:url value="/../avatar/${comment.author.id}.png"/>" />
-									<a href="<c:url value="/user?id=${comment.author.id}"/>">${comment.author}</a>
+									<a href="<c:url value="/user/${comment.author.username}"/>">${comment.author}</a>
 									<div class="time-div">${comment.date}</div>
 								</div> <%-- Comment buttons --%>
 								<div class="buttons_panel" style="float: right">
-									<a href="<c:url value="/task?id=${task.id}#c${comment.id}"/>"
+									<a href="<c:url value="/task/${task.id}#c${comment.id}"/>"
 										title="<s:message code="comment.link" text="Link to this comment" />"
 										style="color: gray"><i class="fa fa-link"></i></a>
 									<c:if test="${user == comment.author }">
@@ -1060,7 +1060,7 @@ $(document).ready(function($) {
 						var type = getEventTypeMsg(worklog.type);
 						var message = "";
 						if (worklog.message != ""){
-							message = '<div><blockquote class="quote">' + worklog.message + '</blockquote></div>'
+							message = '<div class="quote">' + worklog.message + '</div>'
 						}
 						var delbtn = '';
 						<security:authorize access="hasRole('ROLE_ADMIN')">

@@ -53,8 +53,6 @@ import com.qprogramming.tasq.test.MockSecurityContext;
 @RunWith(MockitoJUnitRunner.class)
 public class AccountControllerTest {
 
-	private static final String EMAIL = "user@test.com";
-
 	private AccountController accountCtr;
 
 	@Mock
@@ -100,10 +98,9 @@ public class AccountControllerTest {
 	private static final String JOHN = "John";
 	private static final String ADAM = "Adam";
 	private static final String MARRY = "Marry";
-	private static final String SORT_BY_NAME = "name";
-	private static final String SORT_BY_EMAIL = "email";
-	private static final String SORT_BY_SURNAME = "surname";
-	private static final String USERNAME = "user";
+	private static final String USER = "user";
+	private static final String EMAIL = "user@test.com";
+	private static final String USERNAME = USER;
 
 	private List<Account> accountsList;
 
@@ -121,17 +118,17 @@ public class AccountControllerTest {
 
 	@Test
 	public void getUserTest() {
-		when(accSrvMock.findById(1L)).thenReturn(testAccount);
+		when(accSrvMock.findByUsername(USERNAME)).thenReturn(testAccount);
 		when(projSrvMock.findAllByUser(1L)).thenReturn(null);
-		accountCtr.getUser(1L, modelMock, raMock);
+		accountCtr.getUser(USERNAME, modelMock, raMock);
 		verify(modelMock, times(2)).addAttribute(anyString(), anyObject());
 	}
 
 	@Test
 	public void getUserNotFoundTest() {
-		when(accSrvMock.findById(1L)).thenReturn(null);
+		when(accSrvMock.findByUsername(USERNAME)).thenReturn(null);
 		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("TEST");
-		accountCtr.getUser(1L, modelMock, raMock);
+		accountCtr.getUser(USERNAME, modelMock, raMock);
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.DANGER, new Object[] {}));
 

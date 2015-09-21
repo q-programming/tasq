@@ -32,7 +32,7 @@
 									list="true" /></td>
 							<td style="width: 10px;"><t:priority
 									priority="${task.priority}" list="true" /></td>
-							<td><a href="<c:url value="task?id=${task.id}"/>"
+							<td><a href="<c:url value="task/${task.id}"/>"
 								style="color: inherit;">[${task.id}] ${task.name}</a></td>
 						</tr>
 					</c:forEach>
@@ -52,7 +52,7 @@
 									list="true" /></td>
 							<td style="width: 10px;"><t:priority
 									priority="${open_task.priority}" list="true" /></td>
-							<td><a href="<c:url value="task?id=${open_task.id}"/>"
+							<td><a href="<c:url value="task/${open_task.id}"/>"
 								style="color: inherit;">[${open_task.id}] ${open_task.name}</a></td>
 						</tr>
 					</c:forEach>
@@ -74,7 +74,7 @@
 									background: rgba(205, 50, 50, 0.12);
 								</c:if>">
 						<td style="width: 100px;">${due_task.due_date}</td>
-						<td><a href="<c:url value="task?id=${due_task.id}"/>"
+						<td><a href="<c:url value="task/${due_task.id}"/>"
 							style="color: inherit;">[${due_task.id}] ${due_task.name}</a></td>
 					</tr>
 				</c:forEach>

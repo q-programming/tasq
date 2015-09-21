@@ -27,6 +27,7 @@ import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -113,9 +114,9 @@ public class AccountController {
 		return "redirect:/settings";
 	}
 
-	@RequestMapping(value = "/user", method = RequestMethod.GET)
-	public String getUser(@RequestParam(value = "id") Long id, Model model, RedirectAttributes ra) {
-		Account account = accountSrv.findById(id);
+	@RequestMapping(value = "/user/{username}", method = RequestMethod.GET)
+	public String getUser(@PathVariable(value = "username") String username, Model model, RedirectAttributes ra) {
+		Account account = accountSrv.findByUsername(username);
 		if (account == null) {
 			MessageHelper.addErrorAttribute(ra, msg.getMessage("error.noUser", null, Utils.getCurrentLocale()));
 			return "redirect:/users";

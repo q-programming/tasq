@@ -204,7 +204,7 @@ public class TaskController {
 					wlSrv.addWorkLogNoTask(linked + " - " + taskID, project, LogType.TASK_LINK);
 				}
 			}
-			return "redirect:/task?id=" + taskID;
+			return "redirect:/task/" + taskID;
 		}
 		return null;
 	}
@@ -312,7 +312,7 @@ public class TaskController {
 		if (message.length() > 37) {
 			wlSrv.addActivityLog(task, message.toString(), LogType.EDITED);
 		}
-		return "redirect:/task?id=" + taskID;
+		return "redirect:/task/" + taskID;
 	}
 
 	private void updateWatched(Task task) {
@@ -324,13 +324,14 @@ public class TaskController {
 
 	}
 
-	@RequestMapping(value = "subtask", method = RequestMethod.GET)
-	public String showSubTaskDetails(@RequestParam(value = "id") String id, Model model, RedirectAttributes ra) {
-		return showTaskDetails(id, model, ra);
+	@RequestMapping(value = "task/{id}/{subId}", method = RequestMethod.GET)
+	public String showSubTaskDetails(@PathVariable(value = "id") String id, @PathVariable(value = "subId") String subId,
+			Model model, RedirectAttributes ra) {
+		return showTaskDetails(createSubId(id, subId), model, ra);
 	}
 
-	@RequestMapping(value = "task", method = RequestMethod.GET)
-	public String showTaskDetails(@RequestParam(value = "id") String id, Model model, RedirectAttributes ra) {
+	@RequestMapping(value = "task/{id}", method = RequestMethod.GET)
+	public String showTaskDetails(@PathVariable String id, Model model, RedirectAttributes ra) {
 		Task task = taskSrv.findById(id);
 		if (task == null) {
 			MessageHelper.addErrorAttribute(ra, msg.getMessage("task.notexists", null, Utils.getCurrentLocale()));
@@ -469,7 +470,7 @@ public class TaskController {
 		// build ID
 		int taskCount = task.getSubtasks();
 		taskCount++;
-		String taskID = task.getId() + "/" + taskCount;
+		String taskID = createSubId(task.getId(), String.valueOf(taskCount));
 		subTask.setId(taskID);
 		subTask.setParent(task.getId());
 		subTask.setProject(project);
@@ -489,7 +490,7 @@ public class TaskController {
 		// TODO save in subdir?
 		// saveTaskFiles(taskForm.getFiles(), subTask);
 		wlSrv.addActivityLog(subTask, "", LogType.SUBTASK);
-		return "redirect:/task?id=" + id;
+		return "redirect:/task/" + id;
 	}
 
 	/**
@@ -570,7 +571,7 @@ public class TaskController {
 			}
 			// check if reopening kanban
 			if (task.getState().equals(TaskState.CLOSED)
-					&& task.getProject().getAgile().equals(Project.AgileType.KANBAN) && task.getRelease() != null) {
+					&& Project.AgileType.KANBAN.equals(task.getProject().getAgile()) && task.getRelease() != null) {
 				return new ResultData(ResultData.ERROR, msg.getMessage("task.changeState.change.kanbanRelease",
 						new Object[] { task.getRelease().getRelease() }, Utils.getCurrentLocale()));
 			}
@@ -679,7 +680,7 @@ public class TaskController {
 				Account account = Utils.getCurrentAccount();
 				account.clearActive_task();
 				accSrv.update(account);
-				return "redirect:/task?id=" + taskID;
+				return "redirect:/task/" + taskID;
 			}
 		} else {
 			return "redirect:" + request.getHeader("Referer");
@@ -1002,7 +1003,7 @@ public class TaskController {
 					new Object[] { id, taskID }, Utils.getCurrentLocale()));
 			TaskLink link = new TaskLink(parent.getId(), taskID, TaskLinkType.RELATES_TO);
 			linkService.save(link);
-			return "redirect:/task?id=" + taskID;
+			return "redirect:/task/" + taskID;
 		}
 	}
 
@@ -1120,6 +1121,10 @@ public class TaskController {
 		} else {
 			throw new TasqAuthException();
 		}
+	}
+
+	private String createSubId(String id, String subId) {
+		return id + "/" + subId;
 	}
 
 	private ResultData taskIsClosed(RedirectAttributes ra, HttpServletRequest request, Task task) {

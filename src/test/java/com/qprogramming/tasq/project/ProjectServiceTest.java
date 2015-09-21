@@ -65,7 +65,7 @@ public class ProjectServiceTest {
 
 	@Before
 	public void setUp() {
-		testAccount = new Account(EMAIL, "", USERNAME,Roles.ROLE_ADMIN);
+		testAccount = new Account(EMAIL, "", USERNAME, Roles.ROLE_ADMIN);
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
@@ -121,9 +121,9 @@ public class ProjectServiceTest {
 
 	@Test
 	public void activateTest() {
-		when(projRepoMock.findById(1L)).thenReturn(testProject);
+		when(projRepoMock.findByProjectId(PROJ_ID)).thenReturn(testProject);
 		when(projRepoMock.save(testProject)).thenReturn(testProject);
-		Assert.assertNotNull(projSrv.activate(1L));
+		Assert.assertNotNull(projSrv.activateForCurrentUser(PROJ_ID));
 		verify(accSrvMock, times(1)).update(testAccount);
 	}
 

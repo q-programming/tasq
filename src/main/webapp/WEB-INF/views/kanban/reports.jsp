@@ -101,7 +101,7 @@ $(document).ready(function() {
 	var plot2;
 	var lastSprint = "${ActiveRelease}";
 	var avatarURL = '<c:url value="/../avatar/"/>';
-	var taskURL = '<c:url value="/task?id="/>';
+	var taskURL = '<c:url value="/task/"/>';
 	var relaseTxt = '<s:message code="agile.release"/>&nbsp;';
 	var loading_indicator = '<div id="loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td>';
 	var release = '${param.release}';

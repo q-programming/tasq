@@ -19,9 +19,6 @@
 	<c:set var="is_admin" value="true" />
 </security:authorize>
 <security:authentication property="principal" var="user" />
-<c:if test="${not empty param.show}">
-	<c:set var="show_q">show=${param.show}&</c:set>
-</c:if>
 <c:if test="${not empty param.closed}">
 	<c:set var="closed_q">closed=${param.closed}&</c:set>
 </c:if>
@@ -51,12 +48,12 @@
 			<a class="btn btn-default a-tooltip pull-right"
 				style="padding: 6px 11px;" href='#'
 				title="<s:message
-									code="project.active" text="Set as avtive" />"
+									code="project.active" text="Active project" />"
 				data-placement="bottom"> <i class="fa fa-refresh fa-spin"></i></a>
 		</c:if>
 		<c:if test="${project.id ne user.active_project}">
 			<a class="btn btn-default a-tooltip pull-right"
-				href='<s:url value="/project/activate?id=${project.id}"></s:url>'
+				href='<s:url value="/project/activate/${project.projectId}"></s:url>'
 				title="<s:message
 									code="project.activate" text="Set as avtive" />"
 				data-placement="bottom"> <i class="fa fa-refresh"></i>
@@ -133,7 +130,7 @@
 					<c:if test="${empty param.closed}">
 						<div>
 							<a
-								href="<s:url value="/project?${show_q}id=${project.id}&closed=yes"></s:url>"><span
+								href="<s:url value="/project/${project.projectId}?closed=yes"></s:url>"><span
 								style="display: inherit; font-size: small; font-weight: normal; color: black; float: right">
 									<i class="fa fa-check-square-o"></i> <s:message
 										code="project.hideClosed" />
@@ -143,7 +140,7 @@
 					<c:if test="${not empty param.closed}">
 						<div>
 							<a
-								href="<s:url value="/project?${show_q}id=${project.id}"></s:url>"><span
+								href="<s:url value="/project/${project.projectId}"></s:url>"><span
 								style="display: inherit; font-size: small; font-weight: normal; color: black; float: right">
 									<i class="fa fa-square-o"></i> <s:message
 										code="project.hideClosed"></s:message>
@@ -169,7 +166,7 @@
 						<td><c:if test="${task.subtasks gt 0}">
 								<i class="subtasks fa fa-plus-square" data-task="${task.id}"
 									id="subtasks${task.id}"></i>
-							</c:if> <a href="<c:url value="task?id=${task.id}"/>"
+							</c:if> <a href="<c:url value="task/${task.id}"/>"
 							style="<c:if test="${task.state eq 'CLOSED' }">
 							text-decoration: line-through;
 							</c:if>">
@@ -207,7 +204,7 @@
 var	plot;
 $(document).ready(function($) {
 	var currentPage = 0
-	taskURL = '<c:url value="/task?id="/>';
+	taskURL = '<c:url value="/task/"/>';
 	apiurl = '<c:url value="/task/getSubTasks"/>';
 	small_loading_indicator = '<div id="small_loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br></div>';
 	loading_indicator = '<div id="loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></div>';

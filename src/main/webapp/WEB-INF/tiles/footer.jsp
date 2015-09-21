@@ -10,7 +10,7 @@
 			<div>
 				<s:message code="task.active"/>
 				<a class="a-tooltip"
-					href="<c:url value="/task?id=${user.active_task[0]}"/>"
+					href="<c:url value="/task/${user.active_task[0]}"/>"
 					title='${user.active_task[2]}' data-html="true">${user.active_task[0]}</a>
 				<a class="btn btn-default btn-xxs a-tooltip handleTimerBtn"
 					title="<s:message code="task.stopTime.description"/>">

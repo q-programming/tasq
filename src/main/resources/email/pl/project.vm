@@ -183,22 +183,22 @@ table.worklog_table td {
 						#set ($remove = "removeproj")
 						#if ($type.string == $assign)
 							<p>
-								Użytkownik <a href="${application}/user?id=${curAccount.id}">${curAccount}</a> przypisał Cię do projektu  
+								Użytkownik <a href="${application}/user/${curAccount.username}">${curAccount}</a> przypisał Cię do projektu  
 								<a
-								href="${application}/project?id=${project.id}" target="_blank">[${project.projectId}]
+								href="${application}/project/${project.projectId}" target="_blank">[${project.projectId}]
 								${project.name}</a>
 							</p>
 						#elseif ($type.string == $remove)
 							<p>
-								Użytkownik <a href="${application}/user?id=${curAccount.id}">${curAccount}</a> usunał Cię z projektu
+								Użytkownik <a href="${application}/user/${curAccount.username}">${curAccount}</a> usunał Cię z projektu
 								<a
-								href="${application}/project?id=${project.id}" target="_blank">[${project.projectId}]
+								href="${application}/project/${project.projectId}" target="_blank">[${project.projectId}]
 								${project.name}</a>
 							</p>
 						
 						#else
 							<p>
-								<a href="${application}/user?id=${curAccount.id}">${curAccount}</a>
+								<a href="${application}/user/${curAccount.username}">${curAccount}</a>
 								${project.name}
 							</p>
 						#end

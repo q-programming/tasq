@@ -630,6 +630,7 @@ public class TaskControllerTest {
 	@Test
 	public void changeStateCLOSEDTest() {
 		Project project = createProject(1L);
+		project.setAgile(Project.AgileType.KANBAN.toString());
 		Task task = createTask(TASK_NAME, 1, project);
 		task.setState(TaskState.CLOSED);
 		task.setComments(new HashSet<Comment>());

@@ -1,10 +1,8 @@
 package com.qprogramming.tasq.agile;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -39,9 +37,9 @@ public class AgileController {
 	TaskService taskSrv;
 
 	@RequestMapping(value = "/agile/{id}/", method = RequestMethod.GET)
-	public String listTasks(@PathVariable Long id, Model model,
+	public String listTasks(@PathVariable String id, Model model,
 			HttpServletRequest request) {
-		Project project = projSrv.findById(id);
+		Project project = projSrv.findByProjectId(id);
 		if (project != null) {
 			// TODO check if any active sprints, if not redirect to backlog
 			// instead

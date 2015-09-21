@@ -36,12 +36,12 @@
 								<c:forEach items="${last_projects}" var="l_project">
 									<c:if test="${l_project.id eq user.active_project}">
 										<li><a
-											href="<c:url value="/project?id=${l_project.id}"/>"><b>[${l_project.projectId}]
+											href="<c:url value="/project/${l_project.projectId}"/>"><b>[${l_project.projectId}]
 													${l_project.name}</b></a></li>
 									</c:if>
 									<c:if test="${l_project.id ne user.active_project}">
 										<li><a
-											href="<c:url value="/project?id=${l_project.id}"/>">[${l_project.projectId}]
+											href="<c:url value="/project/${l_project.projectId}"/>">[${l_project.projectId}]
 												${l_project.name}</a></li>
 									</c:if>
 								</c:forEach>
@@ -63,7 +63,7 @@
 									code="task.tasks" text="Tasks" /> <span class="caret theme"></span></a>
 							<ul class="dropdown-menu">
 								<c:forEach items="${last_tasks}" var="l_task">
-									<li><a href="<c:url value="/task?id=${l_task.id}"/>">[${l_task.id}]
+									<li><a href="<c:url value="/task/${l_task.id}"/>">[${l_task.id}]
 											${l_task.name}</a></li>
 								</c:forEach>
 								<li role="presentation" class="divider"></li>
@@ -85,12 +85,12 @@
 							<ul class="dropdown-menu">
 								<c:forEach items="${last_projects}" var="l_project">
 									<c:if test="${l_project.id eq user.active_project}">
-										<li><a href="<c:url value="/agile/${l_project.id}/"/>"><b>${l_project.name}
+										<li><a href="<c:url value="/agile/${l_project.projectId}/"/>"><b>${l_project.name}
 													(<s:message code="agile.board.${l_project.agile}" />)
 											</b></a></li>
 									</c:if>
 									<c:if test="${l_project.id ne user.active_project}">
-										<li><a href="<c:url value="/agile/${l_project.id}/"/>">${l_project.name}
+										<li><a href="<c:url value="/agile/${l_project.projectId}/"/>">${l_project.name}
 												(<s:message code="agile.board.${l_project.agile}" />)
 										</a></li>
 									</c:if>

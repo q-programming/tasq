@@ -83,10 +83,10 @@ public class ProjectController {
 	}
 
 	@Transactional
-	@RequestMapping(value = "project", method = RequestMethod.GET)
-	public String showDetails(@RequestParam(value = "id") Long id,
+	@RequestMapping(value = "project/{id}", method = RequestMethod.GET)
+	public String showDetails(@PathVariable String id,
 			@RequestParam(value = "closed", required = false) String closed, Model model, RedirectAttributes ra) {
-		Project project = projSrv.findById(id);
+		Project project = projSrv.findByProjectId(id);
 		if (project == null) {
 			MessageHelper.addErrorAttribute(ra, msg.getMessage("project.notexists", null, Utils.getCurrentLocale()));
 			return "redirect:/projects";
@@ -175,9 +175,9 @@ public class ProjectController {
 		return "project/list";
 	}
 
-	@RequestMapping(value = "project/activate", method = RequestMethod.GET)
-	public String activate(@RequestParam(value = "id") Long id, HttpServletRequest request, RedirectAttributes ra) {
-		Project activatedProj = projSrv.activate(id);
+	@RequestMapping(value = "project/activate/{id}", method = RequestMethod.GET)
+	public String activate(@PathVariable(value = "id") String id, HttpServletRequest request, RedirectAttributes ra) {
+		Project activatedProj = projSrv.activateForCurrentUser(id);
 		if (activatedProj != null) {
 			MessageHelper.addSuccessAttribute(ra, msg.getMessage("project.activated",
 					new Object[] { activatedProj.getName() }, Utils.getCurrentLocale()));
@@ -231,7 +231,7 @@ public class ProjectController {
 		// TODO Create first release if Kanban ?
 		MessageHelper.addSuccessAttribute(ra,
 				msg.getMessage("project.created", new Object[] { name }, Utils.getCurrentLocale()));
-		return "redirect:/project?id=" + newProject.getId();
+		return "redirect:/project/" + newProject.getId();
 	}
 
 	@RequestMapping(value = "project/manage", method = RequestMethod.GET)

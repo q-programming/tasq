@@ -19,6 +19,10 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
 	List<Task> findAllByProject(Project project);
 
 	List<Task> findAllByProjectAndParentIsNull(Project project);
+	
+	List<Task> findByParentIsNotNull();
+	
+	List<Task> findByProjectAndParentIsNotNull(Project project);
 
 	List<Task> findAllByProjectParticipants_Id(Long id);
 

@@ -33,7 +33,7 @@
 					<td><b>${project.description}</b></td>
 					<td><c:forEach var="admin" items="${project.administrators}"
 							end="0">
-							<a href="<c:url value="/user?id=${admin.id}"/>"
+							<a href="<c:url value="/user/${admin.username}"/>"
 								style="color: white;">${admin}</a>
 						</c:forEach></td>
 				</tr>
@@ -47,7 +47,7 @@
 					<td><b>${project.description}</b></td>
 					<td><c:forEach var="admin" items="${project.administrators}"
 							end="0">
-							<a href="<c:url value="/user?id=${admin.id}"/>"
+							<a href="<c:url value="/user/${admin.username}"/>"
 								style="color: black;">${admin}</a>
 						</c:forEach></td>
 				</tr>

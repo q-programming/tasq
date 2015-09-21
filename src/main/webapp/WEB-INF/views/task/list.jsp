@@ -233,7 +233,7 @@
 				<c:if test="${task.subtasks gt 0}">
 					<i class="subtasks fa fa-plus-square" data-task="${task.id}" id="subtasks${task.id}"></i>
 				</c:if>
-				<a href="<c:url value="task?id=${task.id}"/>"
+				<a href="<c:url value="task/${task.id}"/>"
 				style="color: inherit;<c:if test="${task.state eq 'CLOSED' }">
 							text-decoration: line-through;
 							</c:if>">[${task.id}]
@@ -280,7 +280,7 @@
 					<img data-src="holder.js/20x20"
 						style="height: 20px; padding-right: 5px;"
 						src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />
-					<a ${link} href="<c:url value="/user?id=${task.assignee.id}"/>">${task.assignee}</a>
+					<a ${link} href="<c:url value="/user/${task.assignee.username}"/>">${task.assignee}</a>
 				</c:if></td>
 			</tr>
 		</c:forEach>
@@ -304,7 +304,7 @@
 <jsp:include page="../modals/assign.jsp" />
 <script>
 	$(document).ready(function($) {
-		taskURL = '<c:url value="/task?id="/>';
+		taskURL = '<c:url value="/task/"/>';
 		apiurl = '<c:url value="/task/getSubTasks"/>';
 		small_loading_indicator = '<div id="small_loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br></div>';
 

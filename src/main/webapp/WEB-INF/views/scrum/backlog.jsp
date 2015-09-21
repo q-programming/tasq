@@ -112,7 +112,7 @@
 							</c:if>>
 							<div style="display: table-cell; width: 100%;">
 								<t:type type="${task.type}" list="true" />
-								<a href="<c:url value="/task?id=${task.id}"/>"
+								<a href="<c:url value="/task/${task.id}"/>"
 									style="color: inherit;">[${task.id}] ${task.name}</a>
 								<form id="sprint_remove_${task.id}"
 									action="<c:url value="/${project.projectId}/scrum/sprintRemove"/>"
@@ -157,7 +157,7 @@
 					<div style="display: table-cell; width: 100%;">
 						<t:type type="${task.type}" list="true" />
 						<t:priority priority="${task.priority}" list="true" />
-						<a href="<c:url value="/task?id=${task.id}"/>"
+						<a href="<c:url value="/task/${task.id}"/>"
 							style="color: inherit;">[${task.id}] ${task.name}</a>
 						<form id="sprint_assign_${task.id}"
  							action=""

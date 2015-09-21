@@ -146,9 +146,9 @@ public class ProjectControllerTest {
 		openTaskList.add(task2);
 
 		project.setTasks(taskList);
-		when(projSrv.findById(1L)).thenReturn(project);
+		when(projSrv.findByProjectId(PROJ_ID)).thenReturn(project);
 		when(taskSrv.findByProjectAndOpen(project)).thenReturn(openTaskList);
-		projectCtr.showDetails(1L, null, modelMock, raMock);
+		projectCtr.showDetails(PROJ_ID, null, modelMock, raMock);
 		verify(modelMock, times(1)).addAttribute("TO_DO", 1);
 		verify(modelMock, times(1)).addAttribute("ONGOING", 1);
 		verify(modelMock, times(1)).addAttribute("CLOSED", 1);
@@ -160,7 +160,7 @@ public class ProjectControllerTest {
 	@Test
 	public void showDetailsNoProjectsTest() {
 		when(projSrv.findById(1L)).thenReturn(null);
-		projectCtr.showDetails(1L, null, modelMock, raMock);
+		projectCtr.showDetails(PROJ_ID, null, modelMock, raMock);
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.WARNING, new Object[] {}));
 
@@ -171,10 +171,10 @@ public class ProjectControllerTest {
 		Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
 		testAccount.setRole(Roles.ROLE_POWERUSER);
 		project.removeParticipant(testAccount);
-		when(projSrv.findById(1L)).thenReturn(project);
+		when(projSrv.findByProjectId(PROJ_ID)).thenReturn(project);
 		boolean catched = false;
 		try {
-			projectCtr.showDetails(1L, null, modelMock, raMock);
+			projectCtr.showDetails(PROJ_ID, null, modelMock, raMock);
 		} catch (TasqAuthException e) {
 			catched = true;
 		}
@@ -417,8 +417,8 @@ public class ProjectControllerTest {
 
 	@Test
 	public void activateProjectFailTest() {
-		when(projSrv.activate(1L)).thenReturn(null);
-		projectCtr.activate(1L, requestMock, raMock);
+		when(projSrv.activateForCurrentUser(PROJ_ID)).thenReturn(null);
+		projectCtr.activate(PROJ_ID, requestMock, raMock);
 		verify(raMock, never()).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.SUCCESS, new Object[] {}));
 	}
@@ -427,8 +427,8 @@ public class ProjectControllerTest {
 	public void activateProjectSuccesTest() {
 		NewProjectForm form = createForm(PROJ_NAME, PROJ_ID);
 		Project project = form.createProject();
-		when(projSrv.activate(1L)).thenReturn(project);
-		projectCtr.activate(1L, requestMock, raMock);
+		when(projSrv.activateForCurrentUser(PROJ_ID)).thenReturn(project);
+		projectCtr.activate(PROJ_ID, requestMock, raMock);
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.SUCCESS, new Object[] {}));
 	}
