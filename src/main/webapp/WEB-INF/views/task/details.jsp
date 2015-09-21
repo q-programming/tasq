@@ -51,7 +51,7 @@
 								code="task.link" />
 					</a></li>
 					<c:if test="${not task.subtask}">
-						<li><a href="<c:url value="task/${task.id}/subtask"/>">
+						<li><a href="<c:url value="/task/${task.id}/subtask"/>">
 								<i class="fa fw fa-sitemap"></i>&nbsp;<s:message
 								code="task.subtasks.add" />
 							</a>
@@ -484,7 +484,7 @@
 							</span>
 						</h5>
 						<a class="btn btn-default btn-xxs a-tooltip pull-right" style="min-width: 37px;"
-							href="<c:url value="task/${task.id}/subtask"/>"
+							href="<c:url value="/task/${task.id}/subtask"/>"
 							data-placement="top"
 							data-original-title="<s:message code="task.subtasks.add"/>">
 							<i class="fa fa-plus"></i> <i class="fa fa-lg fa-sitemap"></i>
