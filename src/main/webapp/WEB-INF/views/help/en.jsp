@@ -65,6 +65,7 @@
 									<li><a href="#a_logo">Changing logo</a></li>
 									<li><a href="#a_theme">Themes</a></li>
 								</ul></li>
+							<li><a href="#a_manage_task">Manage tasks</a></li>
 						</ul></li>
 				</security:authorize>
 			</ul>
@@ -898,9 +899,10 @@
 					</b></td>
 					<td>starts creation of new task but automatically will link
 						newly created task with currently shown one.<br>Additionally
-						new task's project will be locked to current task project.<br>If task
-						is closed this option will be shown as extra <span
-						class="btn btn-sm btn-default"><i class="fa fw fa-plus"></i></span> button
+						new task's project will be locked to current task project.<br>If
+						task is closed this option will be shown as extra <span
+						class="btn btn-sm btn-default"><i class="fa fw fa-plus"></i></span>
+						button
 					</td>
 				</tr>
 				<tr>
@@ -1557,8 +1559,31 @@
 					in corresponding theme row. This will show same modal window as in
 					creation of themes, but with theme filled values.
 				</p>
-
-
+				<a class="anchor" id="a_manage_task"></a>
+				<h3>Manage tasks</h3>
+				<p>It's somtimes possible that some bad error was made while
+					performing operations on tasks. In that case application
+					administrator have a possibility to remove single work log from
+					task</p>
+				<p>
+					To remove worklog , enter task details page , and switch to <span
+						class="btn btn-default btn-sm"><i class="fa fa-newspaper-o"></i>
+						Activity log</span> tab at the bottom of the page. All activities
+					worklogs related to this task will be shown here. Hover mouse over
+					log that should be deleted and click on <i class="fa fa-trash-o"></i>
+					to remove it.
+				</p>
+				<p>
+					After successful deletion you will be moved to Manage tasks page to
+					force reload logs of all tasks within that project. <br> This
+					step is mandatory after every work log deletion!
+				</p>
+				<p>
+					<i class="fa fa-exclamation-circle"></i> <u>Please note this
+						option should'n be used to frequently as it can produce very bad
+						results in sprints, logged work etc. It's reserved only for cases
+						when everything else fails.</u>
+				</p>
 			</security:authorize>
 		</div>
 	</div>
