@@ -195,7 +195,7 @@
 			<version>2.3</version>
 			<scope>provided</scope>
 		</dependency>
-		
+
 		<!-- JSON -->
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
@@ -324,6 +324,22 @@
 				<configuration>
 					<warSourceExcludes>**/*.css,**/*.js</warSourceExcludes>
 					<warName>${project.artifactId}</warName>
+					<nonFilteredFileExtensions>
+						<nonFilteredFileExtension>gif</nonFilteredFileExtension>
+						<nonFilteredFileExtension>ico</nonFilteredFileExtension>
+						<nonFilteredFileExtension>jpg</nonFilteredFileExtension>
+						<nonFilteredFileExtension>png</nonFilteredFileExtension>
+						<nonFilteredFileExtension>pdf</nonFilteredFileExtension>
+						<nonFilteredFileExtension>xls</nonFilteredFileExtension>
+						<nonFilteredFileExtension>css</nonFilteredFileExtension>
+						<nonFilteredFileExtension>js</nonFilteredFileExtension>
+					</nonFilteredFileExtensions>
+					<webResources>
+						<webResource>
+							<directory>src/main/webapp</directory>
+							<filtering>true</filtering>
+						</webResource>
+					</webResources>
 				</configuration>
 			</plugin>
 			<plugin>

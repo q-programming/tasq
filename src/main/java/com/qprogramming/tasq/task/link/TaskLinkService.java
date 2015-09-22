@@ -43,7 +43,11 @@ public class TaskLinkService {
 	 */
 	public TaskLink findLink(String taskA, String taskB, TaskLinkType type) {
 		if (type.equals(TaskLinkType.RELATES_TO)) {
-			return linkRepo.findByTaskAAndTaskBAndLinkType(taskA, taskB, type);
+			TaskLink link = linkRepo.findByTaskAAndTaskBAndLinkType(taskA, taskB, type);
+			if (link == null) {
+				link = linkRepo.findByTaskAAndTaskBAndLinkType(taskB, taskA, type);
+			}
+			return link;
 		} else {
 			return searchLinkAndCounterLink(taskA, taskB, type);
 		}
@@ -62,20 +66,17 @@ public class TaskLinkService {
 		List<TaskLink> listA = linkRepo.findByTaskA(taskID);
 		for (TaskLink taskLink : listA) {
 			List<DisplayTask> tasks = result.get(taskLink.getLinkType());
-			DisplayTask displayTask = new DisplayTask(taskSrv.findById(taskLink
-					.getTaskB()));
+			DisplayTask displayTask = new DisplayTask(taskSrv.findById(taskLink.getTaskB()));
 			tasks.add(displayTask);
 			result.put(taskLink.getLinkType(), tasks);
 		}
 		List<TaskLink> listB = linkRepo.findByTaskB(taskID);
 		for (TaskLink taskLink : listB) {
-			List<DisplayTask> tasks = result.get(switchType(taskLink
-					.getLinkType()));
+			List<DisplayTask> tasks = result.get(switchType(taskLink.getLinkType()));
 			if (tasks == null) {
 				tasks = new LinkedList<DisplayTask>();
 			}
-			DisplayTask displayTask = new DisplayTask(taskSrv.findById(taskLink
-					.getTaskA()));
+			DisplayTask displayTask = new DisplayTask(taskSrv.findById(taskLink.getTaskA()));
 			tasks.add(displayTask);
 			result.put(switchType(taskLink.getLinkType()), tasks);
 		}
@@ -93,7 +94,7 @@ public class TaskLinkService {
 		listA.addAll(linkRepo.findByTaskB(task.getId()));
 		linkRepo.delete(listA);
 	}
-	
+
 	public List<TaskLink> findAllTaskLinks(Task task) {
 		List<TaskLink> list = linkRepo.findByTaskA(task.getId());
 		list.addAll(linkRepo.findByTaskB(task.getId()));
@@ -109,16 +110,13 @@ public class TaskLinkService {
 	 * @param type
 	 * @return
 	 */
-	private TaskLink searchLinkAndCounterLink(String taskA, String taskB,
-			TaskLinkType type) {
+	private TaskLink searchLinkAndCounterLink(String taskA, String taskB, TaskLinkType type) {
 		TaskLink link;
 		link = linkRepo.findByTaskAAndTaskBAndLinkType(taskA, taskB, type);
 		if (link == null) {
-			link = linkRepo.findByTaskAAndTaskBAndLinkType(taskB, taskA,
-					switchType(type));
+			link = linkRepo.findByTaskAAndTaskBAndLinkType(taskB, taskA, switchType(type));
 			if (link == null) {
-				return linkRepo.findByTaskBAndTaskAAndLinkType(taskA, taskB,
-						type);
+				return linkRepo.findByTaskBAndTaskAAndLinkType(taskA, taskB, type);
 			}
 		}
 		return link;
