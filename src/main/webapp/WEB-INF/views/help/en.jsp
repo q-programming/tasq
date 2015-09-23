@@ -81,7 +81,8 @@
 				<img src="<c:url value="/resources/img/logo.png"/>"
 					style="height: 50px; padding: 5px;"></img>Tasker
 			</h2>
-			<p style="text-align:center">v.${project.version}</p>
+			<p style="text-align:center">v.${version}</p>
+			
 			<h3>About Tasker</h3>
 			<p>
 				"Tasker" is application to track progress within project using
@@ -1587,7 +1588,7 @@
 				</p>
 			</security:authorize>
 			<hr>
-			Tasker v. ${project.version} created by <b>Jakub Romaniszyn</b> <a
+			Tasker v. ${version} created by <b>Jakub Romaniszyn</b> <a
 				href="http://q-programming.pl/">http://q-programming.pl/</a> and is
 			under GNU GPL License.
 		</div>

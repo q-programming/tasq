@@ -42,7 +42,7 @@
 				</a>
 				<ul class="dropdown-menu" style="top: inherit; right: inherit;">
 					<c:if test="${can_edit}">
-						<li><a href="<c:url value="task/edit?id=${task.id}"/>"> <i
+						<li><a href="<c:url value="/task/edit?id=${task.id}"/>"> <i
 								class="fa fw fa-pencil"></i> <s:message code="task.edit" />
 						</a></li>
 					</c:if>
@@ -184,7 +184,7 @@
 											aria-labelledby="dropdownMenu2">
 											<c:forEach items="${priorities}" var="enum_priority">
 												<li><a tabindex="-1"
-													href='<c:url value="task/priority?id=${task.id}&priority=${enum_priority}"></c:url>'
+													href='<c:url value="/task/priority?id=${task.id}&priority=${enum_priority}"></c:url>'
 													id="${enum_priority}"> <t:priority
 															priority="${enum_priority}" />
 												</a></li>
@@ -449,7 +449,7 @@
 															type="${linkTask.type}" list="true" /></td>
 													<td style="width: 30px"><t:priority
 															priority="${linkTask.priority}" list="true" /></td>
-													<td><a href="<c:url value="task/${linkTask.id}"/>"
+													<td><a href="<c:url value="/task/${linkTask.id}"/>"
 														style="color: inherit;
 												<c:if test="${linkTask.state eq 'CLOSED' }">text-decoration: line-through;</c:if>">
 															[${linkTask.id}] ${linkTask.name}</a></td>
@@ -579,15 +579,15 @@
 									<c:if test="${file_type eq 'fa-file-image-o'}">
 										<img data-src="holder.js/50x50"
 											style="height: 50px;" 
-											src="<c:url value="task/${task.id}/imgfile?get=${file}"/>" />
+											src="<c:url value="/task/${task.id}/imgfile?get=${file}"/>" />
 									</c:if>
-									<a href="<c:url value="task/${task.id}/file?get=${file}"></c:url>">${file}</a>
+									<a href="<c:url value="/task/${task.id}/file?get=${file}"></c:url>">${file}</a>
 									</td>
 									<c:if test="${can_edit && user.isPowerUser || is_assignee}">
 										<td style="width: 30px">
 											<div class="buttons_panel pull-right">
 												<a
-													href='<c:url value="task/removeFile?id=${task.id}&file=${file}"/>'>
+													href='<c:url value="/task/removeFile?id=${task.id}&file=${file}"/>'>
 													<i class="fa fa-trash-o" style="color: gray"></i>
 												</a>
 											</div>

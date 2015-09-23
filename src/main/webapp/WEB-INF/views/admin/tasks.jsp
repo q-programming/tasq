@@ -28,7 +28,7 @@
 						<option id="${project.projectId}"
 							<c:if test="${project.id eq param.project}">selected style="font-weight:bold"
  						</c:if>
-							value="${project.id}">${project.name}</option>
+							value="${project.id}">${project}</option>
 					</c:forEach>
 				</select>
 			</div>
