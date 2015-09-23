@@ -1,7 +1,6 @@
 package com.qprogramming.tasq.projects;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -65,7 +64,7 @@ public class Project implements Serializable {
 	@Column
 	private Date startDate;
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "project", orphanRemoval=true)
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "project", orphanRemoval = true)
 	private List<Task> tasks;
 
 	@Column
@@ -82,7 +81,7 @@ public class Project implements Serializable {
 
 	@Column
 	private Long defaultAssigneeID;
-	
+
 	@Column
 	private Long lastTaskNo;
 
@@ -115,7 +114,8 @@ public class Project implements Serializable {
 	public String getStartDate() {
 		return Utils.convertDateTimeToString(startDate);
 	}
-	public Date getRawStartDate(){
+
+	public Date getRawStartDate() {
 		return startDate;
 	}
 
@@ -234,7 +234,7 @@ public class Project implements Serializable {
 	}
 
 	public Long getLastTaskNo() {
-		return lastTaskNo==null?0:lastTaskNo;
+		return lastTaskNo == null ? 0 : lastTaskNo;
 	}
 
 	public void setLastTaskNo(Long lastTaskNo) {
@@ -248,7 +248,7 @@ public class Project implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return getName();
+		return "[" + getProjectId() + "] " + getName();
 	}
 
 	@Override
@@ -257,10 +257,8 @@ public class Project implements Serializable {
 		int result = 1;
 		result = prime * result + ((agile == null) ? 0 : agile.hashCode());
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result
-				+ ((projectId == null) ? 0 : projectId.hashCode());
-		result = prime * result
-				+ ((startDate == null) ? 0 : startDate.hashCode());
+		result = prime * result + ((projectId == null) ? 0 : projectId.hashCode());
+		result = prime * result + ((startDate == null) ? 0 : startDate.hashCode());
 		return result;
 	}
 
@@ -302,5 +300,5 @@ public class Project implements Serializable {
 		}
 		return true;
 	}
-	
+
 }

@@ -28,7 +28,7 @@
 	</h2>
 	
 	<form id="priority_form"
-		action="<c:url value="/project/${project.id}/update"/>" method="post">
+		action="<c:url value="/project/${project.projectId}/update"/>" method="post">
 		<div>
 			<div class="mod-header">
 				<h3 class="mod-header-title">
@@ -196,7 +196,7 @@
 					</div>
 					<form id="added" action="<c:url value="/project/useradd"/>"
 						method="post">
-						<input type="hidden" name="id" value="${project.id}">
+						<input type="hidden" name="id" value="${project.projectId}">
 						<!-- 				<div id="added"></div> -->
 					</form>
 				</div>
@@ -225,7 +225,7 @@
 								<div class="pull-right">
 									<form action="<c:url value="/project/userRemove"/>"
 										method="post">
-										<input type="hidden" name="project_id" value="${project.id}">
+										<input type="hidden" name="project_id" value="${project.projectId}">
 										<input type="hidden" name="account_id"
 											value="${participant.id}">
 										<button type="submit"
@@ -240,7 +240,7 @@
 									<div class="pull-right">
 										<form action="<c:url value="/project/removeAdmin"/>"
 											method="post">
-											<input type="hidden" name="project_id" value="${project.id}">
+											<input type="hidden" name="project_id" value="${project.projectId}">
 											<input type="hidden" name="account_id"
 												value="${participant.id}">
 											<button type="submit"
@@ -256,7 +256,7 @@
 									<div class="pull-right">
 										<form action="<c:url value="/project/grantAdmin"/>"
 											method="post">
-											<input type="hidden" name="project_id" value="${project.id}">
+											<input type="hidden" name="project_id" value="${project.projectId}">
 											<input type="hidden" name="account_id"
 												value="${participant.id}">
 											<button type="submit"
@@ -278,7 +278,7 @@
 	aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">
-			<form action="<c:url value="/project/${project.id}/editDescriptions"/>" method="post">
+			<form action="<c:url value="/project/${project.projectId}/editDescriptions"/>" method="post">
 				<div class="modal-header theme">
 					<h4 class="modal-title" id="myModalLabel">
 						[${project.projectId}] ${project.name}
@@ -377,7 +377,7 @@ $(document).ready(function($) {
     	source : function(request, response) {
     		$("#assignUsersLoader").show();
     		var term = request.term;
-    		var projectID = "${project.id}";
+    		var projectID = "${project.projectId}";
     		if ( term in cache ) {
     			response( cache[ term ] );
     			return;

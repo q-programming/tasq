@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -41,6 +40,9 @@ public class HomeController {
 
 	@Value("${skip.landing.page}")
 	private String skipLandingPage;
+
+	@Value("1.0")
+	private String version;
 
 	@Autowired
 	public HomeController(TaskService taskSrv, ProjectService projSrv) {
@@ -113,6 +115,7 @@ public class HomeController {
 		// if (lang == null) {
 		// }
 		// }
+		model.addAttribute("version", version);
 		model.addAttribute("projHome", appHomeDir);
 		return "help/" + lang;
 	}

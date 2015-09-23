@@ -35,7 +35,7 @@
 					<c:if test="${active_project eq project.projectId}">
 						selected
 					</c:if>
-					value="${project.projectId}">${project.name}</option>
+					value="${project.projectId}">${project}</option>
 			</c:forEach>
 		</select>
 	</div>
@@ -66,14 +66,14 @@
 			<c:if test="${not empty param.projectID}">
 				<span><s:message code="project.project" />: <span
 					class="filter_span"> ${param.projectID}<a
-						href="<c:url value="tasks?${state_url}${query_url}${priority_url}"/>">
+						href="<c:url value="/tasks?${state_url}${query_url}${priority_url}"/>">
 						<i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
 						</a></span></span>
 			</c:if>
 			<c:if test="${not empty param.state}">
 				<span><s:message code="task.state" />: <span
 					class="filter_span"><t:state state="${param.state}" /> <a
-						href="<c:url value="tasks?${projID_url}${query_url}${priority_url}"/>">
+						href="<c:url value="/tasks?${projID_url}${query_url}${priority_url}"/>">
 						<i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i></a>
 						</span></span>
 			</c:if>
@@ -81,7 +81,7 @@
 				<span><s:message code="task.priority" />: <span
 					class="filter_span"><t:priority priority="${param.priority}" />
 						<a
-						href="<c:url value="tasks?${projID_url}${query_url}${state_url}"/>">
+						href="<c:url value="/tasks?${projID_url}${query_url}${state_url}"/>">
 						<i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
 						</a></span></span>
 			</c:if>
@@ -98,7 +98,7 @@
 				
 				<span style="white-space:nowrap;"><s:message code="main.search" />: <span
 					class="filter_span"> ${searchQueryTag}<a
-						href="<c:url value="tasks?${projID_url}${state_url}${priority_url}"/>">
+						href="<c:url value="/tasks?${projID_url}${state_url}${priority_url}"/>">
 						<i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
 						</a></span></span>
 			</c:if>
@@ -168,7 +168,7 @@
 						<ul class="dropdown-menu">
 							<c:forEach items="${priorities}" var="priority">
 								<li><a
-									href="<c:url value="tasks?${projID_url}${query_url}${state_url}priority=${priority}"/>"><t:priority
+									href="<c:url value="/tasks?${projID_url}${query_url}${state_url}priority=${priority}"/>"><t:priority
 											priority="${priority}"></t:priority></a></li>
 							</c:forEach>
 						</ul>
@@ -186,12 +186,12 @@
 						<ul class="dropdown-menu">
 							<c:forEach items="${states}" var="state">
 								<li><a
-									href="<c:url value="tasks?${projID_url}${query_url}${priority_url}state=${state}"/>"><t:state
+									href="<c:url value="/tasks?${projID_url}${query_url}${priority_url}state=${state}"/>"><t:state
 											state="${state}"></t:state></a></li>
 							</c:forEach>
 							<li class="divider"></li>
 							<li><a
-								href="<c:url value="tasks?${projID_url}${query_url}${priority_url}state=ALL"/>">
+								href="<c:url value="/tasks?${projID_url}${query_url}${priority_url}state=ALL"/>">
 									<t:state state="ALL"></t:state>
 								</a>
 							</li>
@@ -233,7 +233,7 @@
 				<c:if test="${task.subtasks gt 0}">
 					<i class="subtasks fa fa-plus-square" data-task="${task.id}" id="subtasks${task.id}"></i>
 				</c:if>
-				<a href="<c:url value="task/${task.id}"/>"
+				<a href="<c:url value="/task/${task.id}"/>"
 				style="color: inherit;<c:if test="${task.state eq 'CLOSED' }">
 							text-decoration: line-through;
 							</c:if>">[${task.id}]

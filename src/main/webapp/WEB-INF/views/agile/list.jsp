@@ -27,7 +27,7 @@
 			<c:if test="${project.id eq user.active_project}">
 				<tr style="background: #428bca; color: white">
 					<td><a style="color: white"
-						href="<c:url value="agile/${project.id}/"/>"><b>[${project.projectId}]
+						href="<c:url value="agile/${project.projectId}/"/>"><b>[${project.projectId}]
 								${project.name}</b></a></td>
 					<td><b>${project.agile}</b></td>
 					<td><b>${project.description}</b></td>
@@ -41,7 +41,7 @@
 			<c:if test="${project.id ne user.active_project}">
 				<tr>
 					<td><a style="color: black"
-						href="<c:url value="agile/${project.id}/"/>"><b>[${project.projectId}]
+						href="<c:url value="agile/${project.projectId}/"/>"><b>[${project.projectId}]
 								${project.name}</b></a></td>
 					<td><b>${project.agile}</b></td>
 					<td><b>${project.description}</b></td>

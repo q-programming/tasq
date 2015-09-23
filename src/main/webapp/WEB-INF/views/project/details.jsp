@@ -38,7 +38,7 @@
 		<div class="pull-right">
 			<a class="btn btn-default a-tooltip pull-right"
 				style="padding: 6px 11px;"
-				href='<s:url value="/project/manage?id=${project.id}"></s:url>'
+				href='<s:url value="/project/${project.projectId}/manage"></s:url>'
 				title="<s:message code="project.manage" text="Set as avtive" />"
 				data-placement="bottom"><i class="fa fa-wrench"></i></a>
 		</div>
@@ -166,7 +166,7 @@
 						<td><c:if test="${task.subtasks gt 0}">
 								<i class="subtasks fa fa-plus-square" data-task="${task.id}"
 									id="subtasks${task.id}"></i>
-							</c:if> <a href="<c:url value="task/${task.id}"/>"
+							</c:if> <a href="<c:url value="/task/${task.id}"/>"
 							style="<c:if test="${task.state eq 'CLOSED' }">
 							text-decoration: line-through;
 							</c:if>">
@@ -229,7 +229,7 @@ function printChart(all){
 		plot.destroy();
 	}
 	$("#chartdiv").append(loading_indicator);
-	projectId = '${project.id}';
+	projectId = '${project.projectId}';
 	$.get('<c:url value="/project/getChart"/>',{id:projectId,all:all},function(result){
 	    	//Fill arrays of data
 	    	$("#loading").remove();
@@ -304,7 +304,7 @@ function printChart(all){
 }
 
 function fetchWorkLogData(page) {
-	var projectID = '${project.id}';
+	var projectID = '${project.projectId}';
 	var url = '<c:url value="/projectEvents"/>';
 	var avatarURL = '<c:url value="/../avatar/"/>';
 	var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';

@@ -41,7 +41,7 @@
 		<table class="table table-condensed table-hover">
 			<c:forEach items="${projects}" var="project">
 				<tr>
-					<td><a href="<c:url value="project/${project.id}"/>">[${project.projectId}]
+					<td><a href="<c:url value="/project/${project.projectId}"/>">[${project.projectId}]
 							${project.name}</a></td>
 				</tr>
 			</c:forEach>
