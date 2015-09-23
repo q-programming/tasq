@@ -17,9 +17,10 @@ Installation
 * Setup either local or remote PostgreSQL create 'tasq' DB and change parameters in 
 	`/src/main/resources/persistence.properties`. Schema will be created on first app boot
 * Update `/src/main/resources/email.properties` to point to your account
-* Default app language is set as well in  `/src/main/resources/project.properties`.
+* Default app language in  `/src/main/resources/project.properties`.
 * Default app directory is also set in `project.properties`
-* Deploy on tomcat 
+* Build with maven using command `mvn package`
+* Deploy on tomcat ( copy to webapp dir)
 * Create directory on server to match app dir ( default is `/usr/local/tasq` ) 
 * Make sure that tomcat7 is owner of this dir , execute ux command ( for tomcat7 it's ) : 
 <br>`chwon -R tomcat7:tomcat7 /usr/local/tasq`
@@ -27,7 +28,7 @@ Installation
 <br> `<Context docBase="/usr/local/tasq/avatar" path="/avatar" />` in 
 `<Host name="localhost"  appBase="webapps"unpackWARs="true" autoDeploy="true">` section ( at the bottom of config )
 * First registered user will be made application administrator, default theme will also be created
-* To show sign in form right away for not logged user, change `skip.landing.page` property in `project.properties` to true. Otherwise landing page will be shown with basic application information
+* To show signin form right away for not logged user, change `skip.landing.page` property in `project.properties` to true. Otherwise landing page will be shown with basic application information
 
 Language
 --------
