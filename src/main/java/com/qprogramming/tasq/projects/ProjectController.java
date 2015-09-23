@@ -460,9 +460,9 @@ public class ProjectController {
 	 * @return
 	 */
 	@RequestMapping(value = "/project/getDefaults", method = RequestMethod.GET)
-	public @ResponseBody DisplayProject getDefaults(@RequestParam String id, HttpServletResponse response) {
+	public @ResponseBody DisplayProject getDefaults(@RequestParam Long id, HttpServletResponse response) {
 		response.setContentType("application/json");
-		Project project = projSrv.findByProjectId(id);
+		Project project = projSrv.findById(id);
 		DisplayProject result = new DisplayProject(project);
 		result.setDefaultAssignee(accSrv.findById(project.getDefaultAssigneeID()));
 		return result;
