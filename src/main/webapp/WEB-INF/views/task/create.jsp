@@ -100,7 +100,7 @@
 					<option id="${list_project.projectId}"
  						<c:if test="${list_project.id eq chosenProject}">selected style="font-weight:bold"
  						</c:if>
- 						value="${list_project.id}">${list_project.name}</option>
+ 						value="${list_project.id}">${list_project}</option>
  				</c:forEach> 
 			</form:select>
 			<span class="help-block"><s:message code="task.project.help" /></span>
