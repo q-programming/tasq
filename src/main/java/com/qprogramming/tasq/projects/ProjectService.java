@@ -55,8 +55,8 @@ public class ProjectService {
 		return projRepo.findByParticipants_Id(id);
 	}
 
-	public Project activate(Long id) {
-		Project project = projRepo.findById(id);
+	public Project activateForCurrentUser(String id) {
+		Project project = projRepo.findByProjectId(id);
 		if (project != null) {
 			Account account = Utils.getCurrentAccount();
 			account.setActive_project(project.getId());

@@ -16,8 +16,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import com.qprogramming.tasq.MockSecurityContext;
 import com.qprogramming.tasq.support.Utils;
+import com.qprogramming.tasq.test.MockSecurityContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserServiceTest {
@@ -41,7 +41,7 @@ public class UserServiceTest {
 
 	@Before
 	public void setUp() {
-		testAccount = new Account("user@test.com", "", Roles.ROLE_ADMIN);
+		testAccount = new Account("user@test.com", "", "user", Roles.ROLE_ADMIN);
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
@@ -53,8 +53,7 @@ public class UserServiceTest {
 		thrown.expect(UsernameNotFoundException.class);
 		thrown.expectMessage("User not found or is not confirmed");
 
-		when(accountServiceMock.findByEmail("user@example.com")).thenReturn(
-				null);
+		when(accountServiceMock.findByEmail("user@example.com")).thenReturn(null);
 		// act
 		userService.loadUserByUsername("user@example.com");
 	}
@@ -62,19 +61,14 @@ public class UserServiceTest {
 	@Test
 	public void shouldReturnUserDetails() {
 		// arrange
-		Account demoUser = new Account("user@example.com", "demo",
-				Roles.ROLE_USER);
+		Account demoUser = new Account("user@example.com", "demo", "user", Roles.ROLE_POWERUSER);
 		demoUser.setConfirmed(true);
-		when(accountServiceMock.findByEmail("user@example.com")).thenReturn(
-				demoUser);
+		when(accountServiceMock.findByEmail("user@example.com")).thenReturn(demoUser);
 		// act
-		UserDetails userDetails = userService
-				.loadUserByUsername("user@example.com");
+		UserDetails userDetails = userService.loadUserByUsername("user@example.com");
 		// assert
-		Assert.assertTrue(demoUser.getUsername().equals(
-				userDetails.getUsername()));
-		Assert.assertTrue(demoUser.getPassword().equals(
-				userDetails.getPassword()));
+		Assert.assertTrue(demoUser.getUsername().equals(userDetails.getUsername()));
+		Assert.assertTrue(demoUser.getPassword().equals(userDetails.getPassword()));
 	}
 
 	@Test

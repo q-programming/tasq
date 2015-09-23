@@ -12,6 +12,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.support.sorters.AccountSorter;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccountsSorterTest {
@@ -33,22 +34,19 @@ public class AccountsSorterTest {
 
 	@Test
 	public void sortAccountsTest() {
-		Collections.sort(accountsList, new AccountSorter(
-				AccountSorter.SORTBY.NAME, true));
+		Collections.sort(accountsList, new AccountSorter(AccountSorter.SORTBY.NAME, true));
 		Assert.assertEquals(MARRY, accountsList.get(0).getName());
 	}
 
 	@Test
 	public void sortAccountsSurnameTest() {
-		Collections.sort(accountsList, new AccountSorter(
-				AccountSorter.SORTBY.SURNAME, false));
+		Collections.sort(accountsList, new AccountSorter(AccountSorter.SORTBY.SURNAME, false));
 		Assert.assertEquals(ART, accountsList.get(0).getSurname());
 	}
 
 	@Test
 	public void sortAccountsEmailTest() {
-		Collections.sort(accountsList, new AccountSorter(
-				AccountSorter.SORTBY.EMAIL, true));
+		Collections.sort(accountsList, new AccountSorter(AccountSorter.SORTBY.EMAIL, true));
 		Assert.assertEquals(LAMB, accountsList.get(0).getSurname());
 	}
 
@@ -63,7 +61,7 @@ public class AccountsSorterTest {
 	}
 
 	private Account createAccount(String name, String surname) {
-		Account account = new Account(name + "@test.com", "", Roles.ROLE_USER);
+		Account account = new Account(name + "@test.com", "", name, Roles.ROLE_POWERUSER);
 		account.setName(name);
 		account.setSurname(surname);
 		return account;

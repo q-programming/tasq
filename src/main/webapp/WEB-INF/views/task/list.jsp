@@ -104,6 +104,7 @@
 			</c:if>
 		</c:if>
 	</div>
+	<%-- EXPORT --%>
 	<div style="display: table-cell; padding-left: 20px;">
 		<div style="display:table-row">
 			<div id="buttDiv" style="display: table-cell;">
@@ -117,9 +118,24 @@
 					<a class="btn export_startstop"><s:message code="main.cancel"/></a>
 				</div>
 				<div style="display: table-cell">
-					<a id="fileExport" class="btn btn-default">
-						<i class="fa fa-long-arrow-down"></i><i class="fa fa-file"></i>  <s:message code="task.export.selected"/>
-					</a>
+					<div class="btn-group"> 
+							<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+							<i class="fa fa-long-arrow-down"></i><i class="fa fa-file"></i>  <s:message code="task.export.selected"/>&nbsp;
+								<b class="caret"></b>
+						</a>
+						<ul class="dropdown-menu " role="menu">
+							<li>
+								<a href="#" class="fileExport" data-type="xls"><i
+									class="fa fa-file-excel-o"></i> <s:message code="task.export.type.excel"/>
+								</a>
+							</li>
+							<li>
+								<a href="#" class="fileExport" data-type="xml"><i
+									class="fa fa-file-code-o"></i> <s:message code="task.export.type.xml"/>
+								</a>
+							</li>
+						</ul>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -188,6 +204,7 @@
 		</thead>
 		<%----------------TASKS -----------------------------%>
 		<form id="exportTaskForm" method="POST"	enctype="multipart/form-data" action="<c:url value="/task/export"/>">
+		<input id="exportType" type="hidden" name="type" value="xml">
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.id eq user.active_task[0]}">
 				<tr style="background: #428bca; color: white">
@@ -216,7 +233,7 @@
 				<c:if test="${task.subtasks gt 0}">
 					<i class="subtasks fa fa-plus-square" data-task="${task.id}" id="subtasks${task.id}"></i>
 				</c:if>
-				<a href="<c:url value="task?id=${task.id}"/>"
+				<a href="<c:url value="task/${task.id}"/>"
 				style="color: inherit;<c:if test="${task.state eq 'CLOSED' }">
 							text-decoration: line-through;
 							</c:if>">[${task.id}]
@@ -263,7 +280,7 @@
 					<img data-src="holder.js/20x20"
 						style="height: 20px; padding-right: 5px;"
 						src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />
-					<a ${link} href="<c:url value="/user?id=${task.assignee.id}"/>">${task.assignee}</a>
+					<a ${link} href="<c:url value="/user/${task.assignee.username}"/>">${task.assignee}</a>
 				</c:if></td>
 			</tr>
 		</c:forEach>
@@ -287,7 +304,7 @@
 <jsp:include page="../modals/assign.jsp" />
 <script>
 	$(document).ready(function($) {
-		taskURL = '<c:url value="/task?id="/>';
+		taskURL = '<c:url value="/task/"/>';
 		apiurl = '<c:url value="/task/getSubTasks"/>';
 		small_loading_indicator = '<div id="small_loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br></div>';
 
@@ -302,7 +319,7 @@
 				$("#buttDiv").toggle();
 				$("#fileDiv").toggle();
 		});
-		$("#fileExport").click(function(){
+		$(".fileExport").click(function(){
 			var atLeastOnechecked = false;
 			$('.export').each(function() {
                 if(this.checked){
@@ -311,6 +328,8 @@
                 }           
             });
 		    if (atLeastOnechecked){
+		    	var type = $(this).data('type');
+		    	$("#exportType").val(type);
 				$("#exportTaskForm").submit();
 				$('#loading').modal({
 	 	            show: true,

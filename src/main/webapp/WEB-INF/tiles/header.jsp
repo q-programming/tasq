@@ -4,7 +4,7 @@
 	prefix="security"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <c:set var="email_txt">
-	<s:message code="signup.email" />
+	<s:message code="signup.email.login" />
 </c:set>
 <c:set var="password_txt">
 	<s:message code="signup.password" />
@@ -18,8 +18,8 @@
 				class="icon-bar"></span>
 		</button>
 		<a class="navbar-brand" href="<c:url value="/"/>"
-			style="padding-top: 0px; padding-bottom: 4px"><img
-			src="<c:url value="/resources/img/tasQ_logo_small.png"/>"></img></a>
+			style="padding-top: 0px; padding-bottom: 4px;"><img
+			src="<c:url value="/../avatar/logo.png"/>" style="height: 50px"></img></a>
 		<div class="nav-collapse collapse">
 			<security:authorize access="isAuthenticated()">
 				<ul class="nav navbar-nav">
@@ -36,12 +36,12 @@
 								<c:forEach items="${last_projects}" var="l_project">
 									<c:if test="${l_project.id eq user.active_project}">
 										<li><a
-											href="<c:url value="/project?id=${l_project.id}"/>"><b>[${l_project.projectId}]
+											href="<c:url value="/project/${l_project.projectId}"/>"><b>[${l_project.projectId}]
 													${l_project.name}</b></a></li>
 									</c:if>
 									<c:if test="${l_project.id ne user.active_project}">
 										<li><a
-											href="<c:url value="/project?id=${l_project.id}"/>">[${l_project.projectId}]
+											href="<c:url value="/project/${l_project.projectId}"/>">[${l_project.projectId}]
 												${l_project.name}</a></li>
 									</c:if>
 								</c:forEach>
@@ -49,7 +49,7 @@
 								<li style="margin: 10px;"><a
 									href="<c:url value="/projects"/>"><i class="fa fa-list"></i>
 										<s:message code="project.showAll" text="Projects" /></a></li>
-								<c:if test="${user.isUser == true}">
+								<c:if test="${user.isPowerUser == true}">
 									<li style="margin: 10px;"><a
 										href="<c:url value="/project/create"/>"><i
 											class="fa fa-plus"></i> <s:message code="project.create"
@@ -63,7 +63,7 @@
 									code="task.tasks" text="Tasks" /> <span class="caret theme"></span></a>
 							<ul class="dropdown-menu">
 								<c:forEach items="${last_tasks}" var="l_task">
-									<li><a href="<c:url value="/task?id=${l_task.id}"/>">[${l_task.id}]
+									<li><a href="<c:url value="/task/${l_task.id}"/>">[${l_task.id}]
 											${l_task.name}</a></li>
 								</c:forEach>
 								<li role="presentation" class="divider"></li>
@@ -71,7 +71,7 @@
 										class="fa fa-list"></i> <s:message code="task.showAll"
 											text="Show all" /></a></li>
 
-								<c:if test="${user.isReporter == true}">
+								<c:if test="${user.isUser == true}">
 									<li style="margin: 10px;"><a
 										href="<c:url value="/task/create"/>"><i class="fa fa-plus"></i>
 											<s:message code="task.create" text="Create task" /></a></li>
@@ -85,12 +85,12 @@
 							<ul class="dropdown-menu">
 								<c:forEach items="${last_projects}" var="l_project">
 									<c:if test="${l_project.id eq user.active_project}">
-										<li><a href="<c:url value="/agile/${l_project.id}/"/>"><b>${l_project.name}
+										<li><a href="<c:url value="/agile/${l_project.projectId}/"/>"><b>${l_project.name}
 													(<s:message code="agile.board.${l_project.agile}" />)
 											</b></a></li>
 									</c:if>
 									<c:if test="${l_project.id ne user.active_project}">
-										<li><a href="<c:url value="/agile/${l_project.id}/"/>">${l_project.name}
+										<li><a href="<c:url value="/agile/${l_project.projectId}/"/>">${l_project.name}
 												(<s:message code="agile.board.${l_project.agile}" />)
 										</a></li>
 									</c:if>
@@ -101,7 +101,7 @@
 										<s:message code="agile.showAll" text="Show all" /></a></li>
 							</ul></li>
 					<%--Create task button --%>
-					<c:if test="${user.isReporter == true}">
+					<c:if test="${user.isUser == true}">
 						<li>
 							<div style="padding-top: 8px;">
 								<a class="btn btn-xs theme a-tooltip"
@@ -166,7 +166,7 @@
 							<input id="searchField" type="text" name="query"
 								class="form-control search-query input-sm"
 								placeholder="<s:message code="task.search"/>"
-								style="border-radius: 10px" />
+								/>
 							<div id="tagsLoading" class="ui-widget-content ui-corner-all" style="display:none"><i class="fa fa-cog fa-spin"></i>&nbsp;<s:message code="main.loading" /></div>
 						</form></li>
 					<li>
@@ -178,26 +178,28 @@
 										code="menu.manage" text="Settings" />"
 									data-placement="bottom"><i class="fa fa-wrench"></i></a>
 								<ul class="dropdown-menu" style="text-align: left;margin-top: 7px;">
+									<li><a href="<s:url value="/manage/app"></s:url>"><i
+											class="fa fa-cogs"></i> <s:message code="menu.manage" text="Manage application" /></a>
+									</li>
 									<li><a href="<s:url value="/manage/users"></s:url>"><i
 											class="fa fa-users"></i> <s:message code="menu.manage.users" /></a></li>
 									<li><a href="<s:url value="/manage/tasks"></s:url>"><i
 											class="fa fa-lg fa-check-square"></i> <s:message
 												code="menu.manage.tasks" /></a></li>
-									<li><a href="#">Other</a></li>
 								</ul>
 							</c:if>
 							<a class="btn btn-default btn-xs a-tooltip" data-toggle="modal"
 								data-target="#show_users"
 								title="<s:message
 									code="menu.users" text="Users" />"
-								data-placement="bottom"><i class="fa fa-user"></i></a> <a
+								data-placement="bottom"><i class="fa fa-users"></i></a> <a
 								class="btn btn-default btn-xs a-tooltip"
-								href='<s:url value="/settings"></s:url>'
+								href='<s:url value="/help"></s:url>'
 								title="<s:message
 									code="menu.help" text="Help" />"
 								data-placement="bottom"><i class="fa fa-question-circle"></i></a>
 						</div>
-						<div style="color: white">${user}</div>
+						<div class="theme-text">${user}</div>
 					</li>
 					<li>
 						<div class="pull-right">

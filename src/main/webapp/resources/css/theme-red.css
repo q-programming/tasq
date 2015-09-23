@@ -43,10 +43,9 @@ thead.theme {
 	border-width: 2px;
 	border-color: rgba(205, 236, 252, 1);
 	padding: 5px;
-	border-radius: 5px;
+/* 	border-radius: 5px; */
 }
 span.badge.theme{
-	float:right;
 	background-color: #DD6264
 }
 span.badge.theme.zero{
@@ -65,4 +64,28 @@ span.badge.theme.zero{
 }
 span.tag.label.label-info.theme {
   background-color: #a12829;
+}
+.pagination>.active>a, .pagination>.active>span, .pagination>li>a:focus, .pagination>li>a:hover {
+  background-color: rgba(161, 40, 41, 0.2);
+}
+.bs-docs-sidebar .nav>.active:focus>a, .bs-docs-sidebar .nav>.active:hover>a,
+	.bs-docs-sidebar .nav>.active>a {
+	padding-left: 18px;
+	font-weight: 700;
+	color: #a12829;
+	background-color: transparent;
+	border-left: 2px solid #a12829;
+}
+.bs-docs-sidebar .nav>li>a:focus, .bs-docs-sidebar .nav>li>a:hover {
+	padding-left: 19px;
+	color: #a12829;
+	text-decoration: none;
+	background-color: transparent;
+	border-left: 1px solid #a12829;
+}
+.dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
+  color: white;
+  background-color: #a12829;
+  background-image: none;
+  filter: none;
 }

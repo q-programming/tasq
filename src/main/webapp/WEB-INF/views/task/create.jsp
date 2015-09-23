@@ -22,20 +22,20 @@
 	<s:message code="task.description" text="Description" />
 </c:set>
 
-<div class="col-lg-2 col-md-3 col-sm-4">
-	<div id="menu" style="position: fixed;">
-				<nav>
-					<ul class="nav nav-pills nav-stacked">
+<div class="col-lg-2 col-md-2">
+	<div id="menu" class="bs-docs-sidebar hidden-print affix">
+<!-- 				<nav> -->
+					<ul class="nav bs-docs-sidenav">
 						<li>&nbsp;</li>
-						<li class=""><a href="#nameA"><div class="side-bar theme"></div>${taskName_text}</a></li>
-						<li class=""><a href="#descA"><div class="side-bar theme"></div>${taskDesc_text}</a></li>
-						<li class=""><a href="#projectA"><div class="side-bar theme"></div>Other</a></li>
-						<li class=""><a href="#createA"><div class="side-bar theme"></div>Create</a></li>
+						<li class=""><a href="#nameA">${taskName_text}</a></li>
+						<li class=""><a href="#descA">${taskDesc_text}</a></li>
+						<li class=""><a href="#projectA">Other</a></li>
+						<li class=""><a href="#createA">Create</a></li>
 					</ul>
-				</nav>
+<!-- 				</nav> -->
 	</div>
 </div>
-<div class="white-frame" style="overflow: auto;display:table">
+<div class="white-frame col-lg-10 col-md-10" style="overflow: auto;display:table">
 <div style="display:table-caption;margin-left: 10px;">
 	<ul class="nav nav-tabs" style="border-bottom:0">
 			<li class="active"><a style="color: black" href="#"><i class="fa fa-plus"></i> <s:message code="task.create" text="Create task"/></a></li>
@@ -82,6 +82,12 @@
 			<form:errors path="description" element="p" class="text-danger" />
 		</div>
 		<%-------------------------Project ----------------------------------%>
+		<c:if test="${not empty param.project}">
+			<c:set var="chosenProject" value="${param.project}"/>
+		</c:if>
+		<c:if test="${empty param.project}">
+			<c:set var="chosenProject" value="${user.active_project}"/>
+		</c:if>
 		<a class="anchor" id="projectA"></a>
 		<div class="form-group">
 			<div class="mod-header">
@@ -89,10 +95,10 @@
 					<s:message code="project.project" />
 				</h5>
 			</div>
-			<form:select id="projects_list" style="width:300px;" path="project"	class="form-control">
+			<form:select id="projects_list" style="width:300px;" path="project"	class="form-control" disabled="${not empty param.project}">
  				<c:forEach items="${projects_list}" var="list_project">
 					<option id="${list_project.projectId}"
- 						<c:if test="${list_project.id eq user.active_project}">selected style="font-weight:bold"
+ 						<c:if test="${list_project.id eq chosenProject}">selected style="font-weight:bold"
  						</c:if>
  						value="${list_project.id}">${list_project.name}</option>
  				</c:forEach> 
@@ -105,9 +111,12 @@
 					<s:message code="task.assign" />
 				</h5>
 			</div>
-			<div class="form-group">
-				<input id="assignee_auto" class="form-control" type="text" value="" style="width:300px;">
-				<input id="assignee" type="hidden" name="assignee">
+			<div class="form-inline">
+				<div class="form-group">
+					<input id="assignee_auto" class="form-control" type="text" value="" style="width:300px;">
+					<input id="assignee" type="hidden" name="assignee">
+					&nbsp;<span id="assignMe" class="btn btn-default "><i class="fa fa-user"></i>&nbsp;<s:message code="task.assignme"/></span>
+				</div>
 			</div>
 			<span class="help-block"><s:message code="task.assign.help" /></span>
 		</div>
@@ -145,7 +154,7 @@
 					</c:forEach>
 				</ul>
 			</div>
-			<span class="help-block"><s:message code="task.type.help" /> <a href="#" style="color:black">&nbsp;<i class="fa fa-question-circle"></i></a></span>
+			<span class="help-block"><s:message code="task.type.help" /> <a href="<c:url value="/help"/>#task-types" target="_blank" style="color:black">&nbsp;<i class="fa fa-question-circle"></i></a></span>
 			<form:hidden path="type" id="type"/>
 			<form:errors path="type" element="p" class="text-danger" />
 		</div>
@@ -180,6 +189,17 @@
 			<form:hidden path="priority" id="priority"/>
 			<form:errors path="priority" element="p"/>
 		</div>
+		<%-----------LINKED TASK---------------------------%>
+		<c:if test="${ not empty param.linked}">
+			<div class="form-group" id="#linkedDIV">
+				<div class="mod-header">
+					<h5 class="mod-header-title">
+						<s:message code="task.linked" />
+					</h5>
+				</div>
+				<input class="form-control" id ="linked" name="linked" disabled value="${param.linked}" style="width:150px">
+			</div>
+		</c:if>
 		<%-----------SPRINT---------------------------%>
 		<a class="anchor" id="sprintA"></a>
 		<div>
@@ -261,7 +281,7 @@
 			<span class="btn" onclick="location.href='<c:url value="/"/>';"><s:message
 					code="main.cancel" text="Cancel" /></span>
 			<button type="submit" class="btn btn-success">
-				<s:message code="main.create" text="Create" />
+				<i class="fa fa-plus"></i>&nbsp;<s:message code="main.create" text="Create" />
 			</button>
 		</div>
 	</form:form>
@@ -270,6 +290,9 @@
 $(document).ready(function($) {
 	var fileTypes='.doc,.docx,.rtf,.txt,.odt,.xls,.xlsx,.ods,.csv,.pps,.ppt,.pptx,.jpg,.png,.gif';
 	var btnsGrps = jQuery.trumbowyg.btnsGrps;
+	var project;
+	var paramProject = '${param.project}';
+	
 	$('#description').trumbowyg({
 		lang: '${user.language}',
 		fullscreenable: false,
@@ -311,7 +334,7 @@ $(document).ready(function($) {
 	
 	$(".taskType").click(function(){
 		var type = $(this).data('type');
-		checkTaskTypeEstimate(type);
+		checkTaskTypeEstimate(type,project);
    	 	$("#task_type").html($(this).html());
    		$("#type").val(type);
 	});
@@ -340,14 +363,15 @@ $(document).ready(function($) {
 		}
 	}
 	
-	function checkTaskTypeEstimate(type){
-		if (type == 'TASK' || type == 'BUG'){
-			$("#no_estimation").prop("checked", true);
-			toggleEstimation();
+	function checkTaskTypeEstimate(type,project){
+		var notEstimated = false;
+		if(project.agile == 'KANBAN'){
+			notEstimated = true;
 		}else{
-			$("#no_estimation").prop("checked", false);
-			toggleEstimation();
+			notEstimated = type == 'BUG' || type =='IDLE' || type == 'TASK'; 
 		}
+		$("#estimated").prop("checked", notEstimated);
+		toggleEstimation();
 	}
 
 	
@@ -360,10 +384,9 @@ $(document).ready(function($) {
 	$('.datepicker').datepicker($.datepicker.regional['${user.language}']);
 	var currentDue = "${taskForm.due_date}";
 	$("#due_date").val(currentDue);
+	
 	$("#projects_list").change(function(){
-		getDefaultAssignee();
-		getDefaultTaskType();
-		getDefaultTaskPriority();
+		getDefaults();
 		fillSprints();
 	});
 	
@@ -376,12 +399,15 @@ $(document).ready(function($) {
 			$("#sprintWarning").html(message);
 		}
 	});
+	$("#assignMe").click(function() {
+		$("#assignee").val("${user.id}");
+		$("#assignee_auto").val("${user}");
+		$("#assignee_auto").removeClass("input-italic");
+	});
 	
 	//INIT ALL
 	fillSprints();
-	getDefaultAssignee();
-	getDefaultTaskType();
-	getDefaultTaskPriority();
+	getDefaults()
 	addFileInput();
 	$('body').scrollspy({
 		target : '#menu'
@@ -433,44 +459,38 @@ $(document).ready(function($) {
 			}
 		}
 	});
-	function getDefaultTaskType(){
-		var url='<c:url value="/project/getDefaultTaskType"/>';
+	
+	function getDefaults(){
+		var url='<c:url value="/project/getDefaults"/>';
 		$.get(url,{id:$("#projects_list").val()},function(result,status){
-				var thisType = $("#"+result);
+				project = result;
+				//TYPE
+				var thisType = $("#"+project.default_type);
 				var type = thisType.data('type');
-				checkTaskTypeEstimate(type)
 		   	 	$("#task_type").html(thisType.html());
 		   		$("#type").val(type);
-		});
-	}
-	function getDefaultTaskPriority(){
-		var url='<c:url value="/project/getDefaultTaskPriority"/>';
-		$.get(url,{id:$("#projects_list").val()},function(result,status){
-				var thisPriority = $("#"+result);
+		   		checkTaskTypeEstimate(type,project)
+				//ASSIGNEE
+   				$("#assignee").val(null);
+				$("#assignee_auto").val(null);
+				if(!project.defaultAssignee){
+					$("#assignee").val(null);
+				}
+				else{
+					$("#assignee_auto").val(project.defaultAssignee.name + " " + project.defaultAssignee.surname);
+					$("#assignee").val(project.defaultAssignee.id);
+					$("#assignee_auto").removeClass("input-italic");
+				}
+				checkIfEmpty();
+				//PRIORITY
+		   		var thisPriority = $("#"+project.default_priority);
 				var priority = thisPriority.data('priority');
 		   	 	$("#task_priority").html(thisPriority.html());
 		   		$("#priority").val(priority);
+		   		
 		});
 	}
-	
-	function getDefaultAssignee(){
-		$("#assignee").val(null);
-		$("#assignee_auto").val(null);
-		var url='<c:url value="/project/getDefaultAssignee"/>';
-		$.get(url,{id:$("#projects_list").val()},function(result,status){
-			if(!result){
-				$("#assignee").val(null);
-			}
-			else{
-				$("#assignee_auto").val(result.name + " " + result.surname);
-				$("#assignee").val(result.id);
-				$("#assignee_auto").removeClass("input-italic");
-				
-			}
-		});
-		checkIfEmpty();
-	}
-	
+
 	function checkIfEmpty(){
 		if(!$("#assignee").val()){
 			var unassign = '<s:message code="task.unassigned" />';

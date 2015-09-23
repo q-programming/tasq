@@ -37,7 +37,6 @@ public class MailerController {
 		Account sender = Utils.getCurrentAccount();
 		String subject = msg.getMessage("panel.invite.subject", null,
 				Utils.getCurrentLocale());
-		Utils.setHttpRequest(request);
 		String link = Utils.getBaseURL() + "/signup";
 		String message = msg.getMessage("panel.invite.body", new Object[] {
 				sender.toString(), link }, mailer.getDefaultLang());

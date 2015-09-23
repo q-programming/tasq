@@ -44,14 +44,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.qprogramming.tasq.MockSecurityContext;
+import com.qprogramming.tasq.manage.Theme;
+import com.qprogramming.tasq.manage.ThemeService;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.web.Message;
+import com.qprogramming.tasq.test.MockSecurityContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccountControllerTest {
-
-	private static final String EMAIL = "user@test.com";
 
 	private AccountController accountCtr;
 
@@ -81,8 +81,10 @@ public class AccountControllerTest {
 	private ServletOutputStream outStreamMock;
 	@Mock
 	private SessionLocaleResolver localeResolverMock;
-	@Mock 
+	@Mock
 	private SessionRegistry sessionRegistry;
+	@Mock
+	private ThemeService themeSrvMock;
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -96,17 +98,17 @@ public class AccountControllerTest {
 	private static final String JOHN = "John";
 	private static final String ADAM = "Adam";
 	private static final String MARRY = "Marry";
-	private static final String SORT_BY_NAME = "name";
-	private static final String SORT_BY_EMAIL = "email";
-	private static final String SORT_BY_SURNAME = "surname";
+	private static final String USER = "user";
+	private static final String EMAIL = "user@test.com";
+	private static final String USERNAME = USER;
 
 	private List<Account> accountsList;
 
 	@Before
 	public void setUp() {
-		accountCtr = new AccountController(accSrvMock, projSrvMock, msgMock,
-				localeResolverMock,sessionRegistry);
-		testAccount = new Account(EMAIL, "", Roles.ROLE_ADMIN);
+		accountCtr = new AccountController(accSrvMock, projSrvMock, msgMock, localeResolverMock, sessionRegistry,
+				themeSrvMock);
+		testAccount = new Account(EMAIL, "", USERNAME, Roles.ROLE_ADMIN);
 		testAccount.setLanguage("en");
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
@@ -116,19 +118,17 @@ public class AccountControllerTest {
 
 	@Test
 	public void getUserTest() {
-		when(accSrvMock.findById(1L)).thenReturn(testAccount);
+		when(accSrvMock.findByUsername(USERNAME)).thenReturn(testAccount);
 		when(projSrvMock.findAllByUser(1L)).thenReturn(null);
-		accountCtr.getUser(1L, modelMock, raMock);
+		accountCtr.getUser(USERNAME, modelMock, raMock);
 		verify(modelMock, times(2)).addAttribute(anyString(), anyObject());
 	}
 
 	@Test
 	public void getUserNotFoundTest() {
-		when(accSrvMock.findById(1L)).thenReturn(null);
-		when(
-				msgMock.getMessage(anyString(), any(Object[].class),
-						any(Locale.class))).thenReturn("TEST");
-		accountCtr.getUser(1L, modelMock, raMock);
+		when(accSrvMock.findByUsername(USERNAME)).thenReturn(null);
+		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("TEST");
+		accountCtr.getUser(USERNAME, modelMock, raMock);
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.DANGER, new Object[] {}));
 
@@ -150,10 +150,11 @@ public class AccountControllerTest {
 		when(accSrvMock.findAll(p)).thenReturn(result);
 		when(sessionRegistry.getAllPrincipals()).thenReturn(principals);
 		when(sessionRegistry.getAllSessions(testAccount, false)).thenReturn(sessions);
-		Assert.assertEquals(5, accountCtr.listUsers(null, p).getTotalElements());  accountCtr.listUsers(null, p);
-		Assert.assertEquals(1, accountCtr.listUsers("Do", p).getTotalElements());  accountCtr.listUsers(null, p);
+		Assert.assertEquals(5, accountCtr.listUsers(null, p).getTotalElements());
+		accountCtr.listUsers(null, p);
+		Assert.assertEquals(1, accountCtr.listUsers("Do", p).getTotalElements());
+		accountCtr.listUsers(null, p);
 	}
-
 
 	@Test
 	public void getAccountsTest() {
@@ -168,7 +169,7 @@ public class AccountControllerTest {
 		admins.add(testAccount);
 		when(accSrvMock.findById(anyLong())).thenReturn(testAccount);
 		when(accSrvMock.findAdmins()).thenReturn(admins);
-		Assert.assertNotEquals("OK", accountCtr.setRole(1L, Roles.ROLE_USER));
+		Assert.assertNotEquals("OK", accountCtr.setRole(1L, Roles.ROLE_POWERUSER));
 
 	}
 
@@ -177,14 +178,12 @@ public class AccountControllerTest {
 		URL fileURL = getClass().getResource("/avatar.png");
 		MockMultipartFile mockMultipartFile;
 		try {
-			mockMultipartFile = new MockMultipartFile("content",
-					fileURL.getFile(), "text/plain", getClass()
-							.getResourceAsStream("/avatar.png"));
-			accountCtr.saveSettings(mockMultipartFile, EMAIL, "en", "red",
-					raMock, requestMock, responseMock);
+			mockMultipartFile = new MockMultipartFile("content", fileURL.getFile(), "text/plain",
+					getClass().getResourceAsStream("/avatar.png"));
+			when(themeSrvMock.findById(1L)).thenReturn(new Theme());
+			accountCtr.saveSettings(mockMultipartFile, EMAIL, EMAIL, "en", 1L, raMock, requestMock, responseMock);
 			verify(accSrvMock, times(1)).update(any(Account.class));
-			verify(localeResolverMock, times(1)).setLocale(requestMock,
-					responseMock, new Locale("en"));
+			verify(localeResolverMock, times(1)).setLocale(requestMock, responseMock, new Locale("en"));
 		} catch (IOException e) {
 			e.printStackTrace();
 			Assert.fail(e.getMessage());
@@ -193,21 +192,16 @@ public class AccountControllerTest {
 
 	@Test
 	public void saveSettingsAvatarTooBigTest() {
-		when(
-				msgMock.getMessage(anyString(), any(Object[].class),
-						any(Locale.class))).thenReturn("TEST");
+		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("TEST");
 		URL fileURL = getClass().getResource("/avatar_tooBig.png");
 		MockMultipartFile mockMultipartFile;
 		try {
-			mockMultipartFile = new MockMultipartFile("content",
-					fileURL.getFile(), "text/plain", getClass()
-							.getResourceAsStream("/avatar_tooBig.png"));
-			accountCtr.saveSettings(mockMultipartFile, EMAIL, "en", "red",
-					raMock, requestMock, responseMock);
-			verify(raMock, times(1)).addFlashAttribute(
-					anyString(),
-					new Message(anyString(), Message.Type.DANGER,
-							new Object[] {}));
+			mockMultipartFile = new MockMultipartFile("content", fileURL.getFile(), "text/plain",
+					getClass().getResourceAsStream("/avatar_tooBig.png"));
+			when(themeSrvMock.findById(1L)).thenReturn(new Theme());
+			accountCtr.saveSettings(mockMultipartFile, EMAIL, EMAIL, "en", 1L, raMock, requestMock, responseMock);
+			verify(raMock, times(1)).addFlashAttribute(anyString(),
+					new Message(anyString(), Message.Type.DANGER, new Object[] {}));
 		} catch (IOException e) {
 			e.printStackTrace();
 			Assert.fail(e.getMessage());
@@ -225,7 +219,7 @@ public class AccountControllerTest {
 	}
 
 	private Account createAccount(String name, String surname) {
-		Account account = new Account(name + "@test.com", "", Roles.ROLE_USER);
+		Account account = new Account(name + "@test.com", "", name, Roles.ROLE_POWERUSER);
 		account.setName(name);
 		account.setSurname(surname);
 		return account;

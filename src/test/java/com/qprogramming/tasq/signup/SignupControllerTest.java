@@ -1,7 +1,6 @@
 package com.qprogramming.tasq.signup;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -16,11 +15,13 @@ import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.velocity.app.VelocityEngine;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -31,7 +32,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.context.MessageSource;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,15 +42,15 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.fasterxml.uuid.Generators;
-import com.qprogramming.tasq.MockSecurityContext;
 import com.qprogramming.tasq.account.Account;
-import com.qprogramming.tasq.account.AccountController;
 import com.qprogramming.tasq.account.AccountRepository;
 import com.qprogramming.tasq.account.AccountService;
-import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.account.Roles;
-import com.qprogramming.tasq.projects.ProjectService;
+import com.qprogramming.tasq.config.ResourceService;
+import com.qprogramming.tasq.mail.MailMail;
+import com.qprogramming.tasq.manage.ThemeService;
 import com.qprogramming.tasq.support.web.Message;
+import com.qprogramming.tasq.test.MockSecurityContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SignupControllerTest {
@@ -62,16 +62,12 @@ public class SignupControllerTest {
 	private SignupController signupCtr;
 
 	@InjectMocks
-	private AccountService accountSrv = new AccountService();;
+	private AccountService accountSrv;
 
 	@Mock
 	private EntityManager entityManagerMock;
 	@Mock
 	private AccountRepository accRepoMock;
-
-	@Mock
-	private PasswordEncoder passwordEncoder;
-
 	@Mock
 	private MockSecurityContext securityMock;
 	@Mock
@@ -94,6 +90,16 @@ public class SignupControllerTest {
 	private ServletContext scMock;
 	@Mock
 	private ServletOutputStream outStreamMock;
+	@Mock
+	private VelocityEngine velocityMock;
+	@Mock
+	private ResourceService resourceMock;
+	@Mock
+	private MailMail mailerMock;
+	@Mock
+	private ThemeService themeSrvMock;
+	@Mock
+	private PasswordEncoder encoderMock;
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -110,17 +116,17 @@ public class SignupControllerTest {
 	private static final String SORT_BY_NAME = "name";
 	private static final String SORT_BY_EMAIL = "email";
 	private static final String SORT_BY_SURNAME = "surname";
+	private static final String USERNAME = "user";
 
 	private List<Account> accountsList;
 
 	@Before
 	public void setUp() {
-		signupCtr = new SignupController(accountSrv, msgMock, null);
-		testAccount = new Account(EMAIL, "", Roles.ROLE_ADMIN);
+		accountSrv = new AccountService(accRepoMock, msgMock, velocityMock, resourceMock, mailerMock, encoderMock);
+		signupCtr = new SignupController(accountSrv, msgMock, themeSrvMock);
+		testAccount = new Account(EMAIL, "", USERNAME, Roles.ROLE_ADMIN);
 		testAccount.setLanguage("en");
-		when(
-				msgMock.getMessage(anyString(), any(Object[].class),
-						any(Locale.class))).thenReturn("MESSAGE");
+		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
@@ -137,17 +143,19 @@ public class SignupControllerTest {
 			when(responseMock.getOutputStream()).thenReturn(outStreamMock);
 			when(accRepoMock.findAll()).thenReturn(accountsList);
 			when(accRepoMock.findByEmail(NEW_EMAIL)).thenReturn(null);
-			when(passwordEncoder.encode(any(CharSequence.class))).thenReturn(
-					"encodedPassword");
+			when(encoderMock.encode(any(CharSequence.class))).thenReturn("encodedPassword");
 			SignupForm form = fillForm();
 			Errors errors = new BeanPropertyBindingResult(form, "form");
 			signupCtr.signup(form, errors, raMock, requestMock);
-			verify(entityManagerMock, times(1)).persist(any(Account.class));
+			verify(accRepoMock, times(1)).save(any(Account.class));
 			when(accRepoMock.findByUuid("confirmMe")).thenReturn(testAccount);
-			signupCtr.confirm("confirmMe", raMock);
+			signupCtr.confirm("confirmMe", raMock, requestMock);
 			verify(accRepoMock, times(1)).save(testAccount);
 		} catch (IOException e) {
 			Assert.fail(e.getMessage());
+		} catch (ServletException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -170,9 +178,9 @@ public class SignupControllerTest {
 	}
 
 	@Test
-	public void confirmErrorTest() {
+	public void confirmErrorTest() throws ServletException {
 		when(accRepoMock.findByUuid("confirmMe")).thenReturn(null);
-		signupCtr.confirm("don't confirm me", raMock);
+		signupCtr.confirm("don't confirm me", raMock, requestMock);
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.DANGER, new Object[] {}));
 
@@ -198,9 +206,7 @@ public class SignupControllerTest {
 
 	@Test
 	public void resetSubmitNoAccountTest() {
-		when(
-				msgMock.getMessage(anyString(), any(Object[].class),
-						any(Locale.class))).thenReturn("MESSAGE");
+		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");
 
 		PasswordResetForm form = fillPasswordForm();
 		Errors errors = new BeanPropertyBindingResult(form, "form");
@@ -211,12 +217,9 @@ public class SignupControllerTest {
 
 	@Test
 	public void resetSubmitTest() {
-		when(
-				msgMock.getMessage(anyString(), any(Object[].class),
-						any(Locale.class))).thenReturn("MESSAGE");
+		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");
 		when(accountSrv.findByUuid(anyString())).thenReturn(testAccount);
-		when(passwordEncoder.encode(any(CharSequence.class))).thenReturn(
-				"encodedPassword");
+		when(encoderMock.encode(any(CharSequence.class))).thenReturn("encodedPassword");
 		PasswordResetForm form = fillPasswordForm();
 		Errors errors = new BeanPropertyBindingResult(form, "form");
 		signupCtr.resetSubmit(form, errors, raMock);
@@ -226,34 +229,23 @@ public class SignupControllerTest {
 
 	@Test
 	public void resetPasswordNoAccountTest() {
-		when(
-				msgMock.getMessage(anyString(), any(Object[].class),
-						any(Locale.class))).thenReturn("MESSAGE");
+		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");
 		signupCtr.resetPassword(EMAIL, raMock, requestMock);
-		verify(raMock, times(1))
-				.addFlashAttribute(
-						anyString(),
-						new Message(anyString(), Message.Type.WARNING,
-								new Object[] {}));
+		verify(raMock, times(1)).addFlashAttribute(anyString(),
+				new Message(anyString(), Message.Type.WARNING, new Object[] {}));
 	}
-	
+
 	@Test
 	public void resetPasswordTest() {
-		when(
-				msgMock.getMessage(anyString(), any(Object[].class),
-						any(Locale.class))).thenReturn("MESSAGE");
+		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");
 		when(accountSrv.findByEmail(EMAIL)).thenReturn(testAccount);
 		when(requestMock.getScheme()).thenReturn("http");
 		when(requestMock.getServerName()).thenReturn("testServer");
 		when(requestMock.getServerPort()).thenReturn(8080);
 		signupCtr.resetPassword(EMAIL, raMock, requestMock);
-		verify(raMock, times(1))
-				.addFlashAttribute(
-						anyString(),
-						new Message(anyString(), Message.Type.WARNING,
-								new Object[] {}));
+		verify(raMock, times(1)).addFlashAttribute(anyString(),
+				new Message(anyString(), Message.Type.WARNING, new Object[] {}));
 	}
-
 
 	private List<Account> createList() {
 		List<Account> accountsList = new LinkedList<Account>();
@@ -266,7 +258,7 @@ public class SignupControllerTest {
 	}
 
 	private Account createAccount(String name, String surname) {
-		Account account = new Account(name + "@test.com", "", Roles.ROLE_USER);
+		Account account = new Account(name + "@test.com", "", name, Roles.ROLE_POWERUSER);
 		account.setName(name);
 		account.setSurname(surname);
 		return account;

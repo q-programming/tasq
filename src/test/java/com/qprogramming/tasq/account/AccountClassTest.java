@@ -3,13 +3,15 @@ package com.qprogramming.tasq.account;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.qprogramming.tasq.manage.Theme;
+
 public class AccountClassTest {
 	private static final String LAMB = "Lamb";
 	private static final String ZOE = "Zoe";
 
 	@Test
 	public void displayAccountTest() {
-		Account account = new Account(ZOE + "@test.com", "", Roles.ROLE_USER);
+		Account account = new Account(ZOE + "@test.com", "",ZOE, Roles.ROLE_POWERUSER);
 		account.setName(ZOE);
 		account.setSurname(LAMB);
 		account.setId(1L);
@@ -26,11 +28,11 @@ public class AccountClassTest {
 
 	@Test
 	public void accountTest() {
-		Account account = new Account(ZOE + "@test.com", "", Roles.ROLE_USER);
+		Account account = new Account(ZOE + "@test.com", "",ZOE, Roles.ROLE_POWERUSER);
 		account.setName(ZOE);
 		account.setSurname(LAMB);
 		account.setId(1L);
-		Account account2 = new Account(ZOE + "@test.com", "", Roles.ROLE_USER);
+		Account account2 = new Account(ZOE + "@test.com", "",ZOE, Roles.ROLE_POWERUSER);
 		account2.setName(ZOE);
 		account2.setSurname(LAMB);
 		account2.setId(1L);
@@ -39,8 +41,8 @@ public class AccountClassTest {
 		Assert.assertEquals(account.getName(), account2.getName());
 		account2.setUsername("newUserName");
 		account2.setEmail("new@test.com");
-		account2.setTheme("red");
 		account2.setRole(Roles.ROLE_ADMIN);
+		account2.setTheme(new Theme());
 		Assert.assertNotNull(account2.getTheme());
 		Assert.assertFalse(account.equals(account2));
 		Assert.assertTrue(account.isAccountNonExpired());

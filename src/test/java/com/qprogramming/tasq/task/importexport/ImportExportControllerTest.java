@@ -1,19 +1,19 @@
 package com.qprogramming.tasq.task.importexport;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -36,21 +36,19 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.qprogramming.tasq.MockSecurityContext;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
-import com.qprogramming.tasq.support.web.Message;
-import com.qprogramming.tasq.task.DisplayTask;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskPriority;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
 import com.qprogramming.tasq.task.TaskType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
+import com.qprogramming.tasq.test.MockSecurityContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ImportExportControllerTest {
@@ -105,11 +103,9 @@ public class ImportExportControllerTest {
 
 	@Before
 	public void setUp() {
-		testAccount = new Account(EMAIL, "", Roles.ROLE_ADMIN);
+		testAccount = new Account(EMAIL, "", "user", Roles.ROLE_ADMIN);
 		testAccount.setLanguage("en");
-		when(
-				msgMock.getMessage(anyString(), any(Object[].class),
-						any(Locale.class))).thenReturn("MESSAGE");
+		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		Project project = createProject();
@@ -118,8 +114,7 @@ public class ImportExportControllerTest {
 		when(taskSrvMock.findById(TEST_1)).thenReturn(task1);
 		when(taskSrvMock.findById(TEST_2)).thenReturn(task2);
 		SecurityContextHolder.setContext(securityMock);
-		importExportCtrl = new ImportExportController(projSrvMock, taskSrvMock,
-				wlSrvMock, msgMock);
+		importExportCtrl = new ImportExportController(projSrvMock, taskSrvMock, wlSrvMock, msgMock);
 	}
 
 	@Test
@@ -127,10 +122,8 @@ public class ImportExportControllerTest {
 		try {
 			when(responseMock.getOutputStream()).thenReturn(outputStreamMock);
 			importExportCtrl.downloadTemplate(requestMock, responseMock);
-			verify(responseMock, times(1)).setHeader("content-Disposition",
-					"attachment; filename=" + TEMPLATE_XLS);
-			verify(outputStreamMock, times(7)).write(any(byte[].class),
-					anyInt(), anyInt());
+			verify(responseMock, times(1)).setHeader("content-Disposition", "attachment; filename=" + TEMPLATE_XLS);
+			verify(outputStreamMock, times(7)).write(any(byte[].class), anyInt(), anyInt());
 		} catch (IOException e) {
 			Assert.fail(e.getMessage());
 		}
@@ -151,8 +144,7 @@ public class ImportExportControllerTest {
 	@Test
 	public void startImportTaskTest() {
 		importExportCtrl.startImportTasks(modelMock);
-		verify(modelMock, times(1)).addAttribute(anyString(),
-				Matchers.anyListOf(Project.class));
+		verify(modelMock, times(1)).addAttribute(anyString(), Matchers.anyListOf(Project.class));
 	}
 
 	@Test
@@ -161,11 +153,9 @@ public class ImportExportControllerTest {
 		Project project = createProject();
 		when(projSrvMock.findByProjectId(PROJECT_ID)).thenReturn(project);
 		try {
-			mockMultipartFile = new MockMultipartFile("content",
-					fileURL.getFile(), "text/plain", getClass()
-							.getResourceAsStream("/sampleImport.xls"));
-			importExportCtrl.importTasks(mockMultipartFile, PROJECT_ID,
-					modelMock);
+			mockMultipartFile = new MockMultipartFile("content", fileURL.getFile(), "text/plain",
+					getClass().getResourceAsStream("/sampleImport.xls"));
+			importExportCtrl.importTasks(mockMultipartFile, PROJECT_ID, modelMock);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -175,12 +165,15 @@ public class ImportExportControllerTest {
 	@Test
 	public void exportTasksTest() {
 		try {
+			List<Task> list = new LinkedList<Task>();
 			task1.setEstimate(new Period());
+			list.add(task1);
+			list.add(task2);
+			String[] idList = { TEST_1, TEST_2 };
 			when(responseMock.getOutputStream()).thenReturn(outputStreamMock);
-			when(taskSrvMock.findById(TEST_1)).thenReturn(task1);
+			when(taskSrvMock.finAllById(Arrays.asList(idList))).thenReturn(list);
 			when(taskSrvMock.findById(TEST_2)).thenReturn(task2);
-			String[] idList = {TEST_1,TEST_2};
-			importExportCtrl.exportTasks(idList, responseMock);
+			importExportCtrl.exportTasks(idList, "XLS", responseMock, requestMock);
 		} catch (IOException e) {
 			Assert.fail(e.getMessage());
 		}

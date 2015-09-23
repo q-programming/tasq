@@ -1,8 +1,8 @@
-TasQ - Project tracking application
+Tasker - Project tracking application
 =========================================
 Appliation to track progress within project using either time estimation based or Agile style.
 Designed and implemented from scratch using [Spring MVC 4 Quickstart Maven Archetype](https://github.com/q-programming/spring-mvc-quickstart-archetype.git)
-Still lots of work left here but it's pretty functionalbe already
+It was developed from 18 March 2014 and finished in September 2015.
 
 Live
 ----
@@ -17,16 +17,18 @@ Installation
 * Setup either local or remote PostgreSQL create 'tasq' DB and change parameters in 
 	`/src/main/resources/persistence.properties`. Schema will be created on first app boot
 * Update `/src/main/resources/email.properties` to point to your account
-* Default app language is set as well in  `/src/main/resources/project.properties`.
+* Default app language in  `/src/main/resources/project.properties`.
 * Default app directory is also set in `project.properties`
-* Deploy on tomcat 
+* Build with maven using command `mvn package`
+* Deploy on tomcat ( copy to webapp dir)
 * Create directory on server to match app dir ( default is `/usr/local/tasq` ) 
 * Make sure that tomcat7 is owner of this dir , execute ux command ( for tomcat7 it's ) : 
 <br>`chwon -R tomcat7:tomcat7 /usr/local/tasq`
 * Map avatar directory in tomcat config `/etc/tomcat7/server.xml` 
 <br> `<Context docBase="/usr/local/tasq/avatar" path="/avatar" />` in 
 `<Host name="localhost"  appBase="webapps"unpackWARs="true" autoDeploy="true">` section ( at the bottom of config )
-* First registered user will be made application administrator
+* First registered user will be made application administrator, default theme will also be created
+* To show signin form right away for not logged user, change `skip.landing.page` property in `project.properties` to true. Otherwise landing page will be shown with basic application information
 
 Language
 --------
@@ -38,4 +40,9 @@ and adding select option to settings panel : `src\main\webapp\WEB-INF\views\user
 	     <s:message code="lang.XX" text="XXXXXX" />
 	</option>
 
-Also recomended to add lang.xx code to other languages properties files . This will be changed later to facilitate whole process,
+Also recommended to add lang.xx code to other languages properties files . This will be changed later to facilitate whole process,
+
+Licence
+--------
+This application was created only be me , if you would like to change something , please notify me . I would love to see it :)
+All application is under GNU GPL License and uses some components under Apache License

@@ -45,8 +45,7 @@ public class TaskService {
 	}
 
 	public List<Task> findByProjectAndOpen(Project project) {
-		return taskRepo.findByProjectAndStateNotAndParentIsNull(project,
-				TaskState.CLOSED);
+		return taskRepo.findByProjectAndStateNotAndParentIsNull(project, TaskState.CLOSED);
 	}
 
 	public List<Task> findAllWithoutRelease(Project project) {
@@ -54,8 +53,7 @@ public class TaskService {
 	}
 
 	public List<Task> findAllToRelease(Project project) {
-		return taskRepo.findByProjectAndStateAndParentIsNullAndReleaseIsNull(
-				project, TaskState.CLOSED);
+		return taskRepo.findByProjectAndStateAndParentIsNullAndReleaseIsNull(project, TaskState.CLOSED);
 	}
 
 	/**
@@ -79,8 +77,7 @@ public class TaskService {
 	}
 
 	public List<Task> findAllBySprint(Sprint sprint) {
-		return taskRepo.findByProjectAndSprintsId(sprint.getProject(),
-				sprint.getId());
+		return taskRepo.findByProjectAndSprintsId(sprint.getProject(), sprint.getId());
 	}
 
 	public List<Task> findAllByRelease(Release release) {
@@ -89,6 +86,15 @@ public class TaskService {
 
 	public List<Task> findAllByRelease(Project project, Release release) {
 		return taskRepo.findByProjectAndRelease(project, release);
+	}
+
+	public List<Task> findSubtasksForProject(Project project) {
+		if (project == null) {
+			return taskRepo.findByParentIsNotNull();
+		} else {
+
+		}
+		return taskRepo.findByProjectAndParentIsNotNull(project);
 	}
 
 	public List<Task> findSubtasks(String taskID) {
@@ -115,12 +121,11 @@ public class TaskService {
 	}
 
 	public String getTaskDir(Task task) {
-		return tasqRootDir + File.separator + task.getProject().getProjectId()
-				+ File.separator + task.getId();
+		return tasqRootDir + File.separator + task.getProject().getProjectId() + File.separator + task.getId();
 	}
 
 	public List<Task> finAllById(List<String> taskIDs) {
-		return taskRepo.findById(taskIDs);
+		return taskRepo.findByIdIn(taskIDs);
 	}
 
 	public List<Task> save(List<Task> taskList) {

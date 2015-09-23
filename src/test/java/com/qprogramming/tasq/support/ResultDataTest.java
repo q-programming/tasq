@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.qprogramming.tasq.support.PeriodHelper;
+
 @RunWith(MockitoJUnitRunner.class)
 public class ResultDataTest {
 

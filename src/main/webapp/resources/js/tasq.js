@@ -1,3 +1,11 @@
+$(document).on("click","area , a",function(e) {
+	if($($.attr(this, 'href')).offset()){
+		$('html, body').animate({
+			scrollTop: $($.attr(this, 'href')).offset().top    }, 500);
+		return false;
+	}
+});
+
 function showError(message){
 	var errorMsg= '<div class="alert alert-danger fade in"	style="position: fixed; bottom: 0px; width:100%">'
 		+'<button type="button" class="close" data-dismiss="alert">&times;</button>'
@@ -60,3 +68,31 @@ $(document).on("click",".toggler",function(e) {
 	$(this).toggleClass('fa-caret-down');
 	$(this).toggleClass('fa-caret-right');
 });
+
+function getTaskType(type){
+		switch(type){
+			case "TASK":
+				var type='<i class="fa fa-lg fa-fw fa-check-square"></i> ';
+				return type;
+			case "USER_STORY":
+				var type='<i class="fa fa-lg fa-fw fa-lightbulb-o"></i> ';
+				return type;
+			case "ISSUE":
+				var type='<i class="fa fa-lg fa-fw fa-exclamation-triangle"></i> ';
+				return type;
+			case "BUG":
+				var type='<i class="fa fa-lg fa-fw fa-bug"></i> ';
+				return type;
+			case "IDLE":
+				var type='<i class="fa fa-lg fa-fw fa-coffee"></i> ';
+				return type;
+			case "SUBTASK":
+				var type='<i class="fa fa-lg fa-fw fa-check-circle-o"></i> ';
+				return type;
+			case "SUBBUG":
+				var type='<i class="fa fa-lg fa-fw fa-bug"></i> ';
+				return type;
+			default:
+				return 'not yet added ';
+	};
+}

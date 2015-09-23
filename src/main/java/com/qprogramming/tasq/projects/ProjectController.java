@@ -40,13 +40,10 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.account.Roles;
-import com.qprogramming.tasq.agile.Release;
-import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.agile.AgileService;
+import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.error.TasqAuthException;
-import com.qprogramming.tasq.events.Event;
 import com.qprogramming.tasq.events.EventsService;
-import com.qprogramming.tasq.projects.Project.AgileType;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.ProjectSorter;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
@@ -64,8 +61,7 @@ import com.qprogramming.tasq.task.worklog.WorkLogService;
 @Controller
 public class ProjectController {
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(ProjectController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ProjectController.class);
 	private ProjectService projSrv;
 	private AccountService accSrv;
 	private TaskService taskSrv;
@@ -75,9 +71,8 @@ public class ProjectController {
 	private EventsService eventsSrv;
 
 	@Autowired
-	public ProjectController(ProjectService projSrv, AccountService accSrv,
-			TaskService taskSrv, AgileService sprintSrv,
-			WorkLogService wrklSrv, MessageSource msg,EventsService eventsSrv) {
+	public ProjectController(ProjectService projSrv, AccountService accSrv, TaskService taskSrv, AgileService sprintSrv,
+			WorkLogService wrklSrv, MessageSource msg, EventsService eventsSrv) {
 		this.projSrv = projSrv;
 		this.accSrv = accSrv;
 		this.taskSrv = taskSrv;
@@ -88,25 +83,21 @@ public class ProjectController {
 	}
 
 	@Transactional
-	@RequestMapping(value = "project", method = RequestMethod.GET)
-	public String showDetails(@RequestParam(value = "id") Long id,
-			@RequestParam(value = "closed", required = false) String closed,
-			Model model, RedirectAttributes ra) {
-		Project project = projSrv.findById(id);
+	@RequestMapping(value = "project/{id}", method = RequestMethod.GET)
+	public String showDetails(@PathVariable String id,
+			@RequestParam(value = "closed", required = false) String closed, Model model, RedirectAttributes ra) {
+		Project project = projSrv.findByProjectId(id);
 		if (project == null) {
-			MessageHelper.addErrorAttribute(
-					ra,
-					msg.getMessage("project.notexists", null,
-							Utils.getCurrentLocale()));
+			MessageHelper.addErrorAttribute(ra, msg.getMessage("project.notexists", null, Utils.getCurrentLocale()));
 			return "redirect:/projects";
 		}
-		if (!project.getParticipants().contains(Utils.getCurrentAccount())
-				&& !Roles.isAdmin()) {
+		if (!project.getParticipants().contains(Utils.getCurrentAccount()) && !Roles.isAdmin()) {
 			throw new TasqAuthException(msg, "role.error.project.permission");
 		}
 		// set last visited
 		Account current = Utils.getCurrentAccount();
 		List<Project> lastVisited = current.getLast_visited_p();
+		lastVisited.add(0, project);
 		List<Project> clean = new ArrayList<Project>();
 		Set<Project> lookup = new HashSet<Project>();
 		for (Project item : lastVisited) {
@@ -150,17 +141,14 @@ public class ProjectController {
 	}
 
 	@RequestMapping(value = "projectEvents", method = RequestMethod.GET)
-	public @ResponseBody
-	Page<DisplayWorkLog> getProjectEvents(
-			@RequestParam(value = "id") Long id,
+	public @ResponseBody Page<DisplayWorkLog> getProjectEvents(@RequestParam(value = "id") Long id,
 			@PageableDefault(size = 25, page = 0, sort = "time", direction = Direction.DESC) Pageable p) {
 		Project project = projSrv.findById(id);
 		if (project == null) {
 			// NULL
 			return null;
 		}
-		if (!project.getParticipants().contains(Utils.getCurrentAccount())
-				&& !Roles.isAdmin()) {
+		if (!project.getParticipants().contains(Utils.getCurrentAccount()) && !Roles.isAdmin()) {
 			throw new TasqAuthException(msg, "role.error.project.permission");
 		}
 		// Fetch events
@@ -169,8 +157,7 @@ public class ProjectController {
 		for (WorkLog workLog : page) {
 			list.add(new DisplayWorkLog(workLog));
 		}
-		Page<DisplayWorkLog> result = new PageImpl<DisplayWorkLog>(list, p,
-				page.getTotalElements());
+		Page<DisplayWorkLog> result = new PageImpl<DisplayWorkLog>(list, p, page.getTotalElements());
 		return result;
 	}
 
@@ -182,39 +169,34 @@ public class ProjectController {
 		} else {
 			projects = projSrv.findAllByUser();
 		}
-		Collections.sort(projects, new ProjectSorter(
-				ProjectSorter.SORTBY.LAST_VISIT, Utils.getCurrentAccount()
-						.getActive_project(), true));
+		Collections.sort(projects, new ProjectSorter(ProjectSorter.SORTBY.LAST_VISIT,
+				Utils.getCurrentAccount().getActive_project(), true));
 		model.addAttribute("projects", projects);
 		return "project/list";
 	}
 
-	@RequestMapping(value = "project/activate", method = RequestMethod.GET)
-	public String activate(@RequestParam(value = "id") Long id,
-			HttpServletRequest request, RedirectAttributes ra) {
-		Project activatedProj = projSrv.activate(id);
+	@RequestMapping(value = "project/activate/{id}", method = RequestMethod.GET)
+	public String activate(@PathVariable(value = "id") String id, HttpServletRequest request, RedirectAttributes ra) {
+		Project activatedProj = projSrv.activateForCurrentUser(id);
 		if (activatedProj != null) {
-			MessageHelper.addSuccessAttribute(ra, msg.getMessage(
-					"project.activated",
-					new Object[] { activatedProj.getName() },
-					Utils.getCurrentLocale()));
+			MessageHelper.addSuccessAttribute(ra, msg.getMessage("project.activated",
+					new Object[] { activatedProj.getName() }, Utils.getCurrentLocale()));
 		}
 		return "redirect:" + request.getHeader("Referer");
 	}
 
 	@RequestMapping(value = "project/create", method = RequestMethod.GET)
 	public NewProjectForm startProjectcreate() {
-		if (!Roles.isUser()) {
+		if (!Roles.isPowerUser()) {
 			throw new TasqAuthException(msg);
 		}
 		return new NewProjectForm();
 	}
 
 	@RequestMapping(value = "project/create", method = RequestMethod.POST)
-	public String createProject(
-			@Valid @ModelAttribute("newProjectForm") NewProjectForm newProjectForm,
-			Errors errors, RedirectAttributes ra, HttpServletRequest request) {
-		if (!Roles.isUser()) {
+	public String createProject(@Valid @ModelAttribute("newProjectForm") NewProjectForm newProjectForm, Errors errors,
+			RedirectAttributes ra, HttpServletRequest request) {
+		if (!Roles.isPowerUser()) {
 			throw new TasqAuthException(msg);
 		}
 		if (errors.hasErrors()) {
@@ -231,14 +213,12 @@ public class ProjectController {
 		Utils.setHttpRequest(request);
 		String name = newProjectForm.getName();
 		if (null != projSrv.findByName(name)) {
-			errors.rejectValue("name", "project.exists", new Object[] { name },
-					"");
+			errors.rejectValue("name", "project.exists", new Object[] { name }, "");
 			return null;
 		}
 		String projectId = newProjectForm.getProject_id();
 		if (null != projSrv.findByProjectId(projectId)) {
-			errors.rejectValue("project_id", "project.idunique",
-					new Object[] { projectId }, "");
+			errors.rejectValue("project_id", "project.idunique", new Object[] { projectId }, "");
 			return null;
 		}
 		Project newProject = newProjectForm.createProject();
@@ -248,27 +228,25 @@ public class ProjectController {
 			account.setActive_project(newProject.getId());
 			accSrv.update(account);
 		}
-		//TODO Create first release if Kanban ?
-		MessageHelper.addSuccessAttribute(
-				ra,
-				msg.getMessage("project.created", new Object[] { name },
-						Utils.getCurrentLocale()));
-		return "redirect:/project?id=" + newProject.getId();
+		// TODO Create first release if Kanban ?
+		MessageHelper.addSuccessAttribute(ra,
+				msg.getMessage("project.created", new Object[] { name }, Utils.getCurrentLocale()));
+		return "redirect:/project/" + newProject.getId();
 	}
 
 	@RequestMapping(value = "project/manage", method = RequestMethod.GET)
-	public String manageProject(@RequestParam(value = "id") Long id,
-			Model model, RedirectAttributes ra) {
-		if (!Roles.isUser()) {
+	public String manageProject(@RequestParam(value = "id") Long id, Model model, RedirectAttributes ra) {
+		if (!Roles.isPowerUser()) {
 			throw new TasqAuthException(msg);
 		}
 		Project project = projSrv.findById(id);
 		if (project == null) {
-			MessageHelper.addErrorAttribute(
-					ra,
-					msg.getMessage("project.notexists", null,
-							Utils.getCurrentLocale()));
+			MessageHelper.addErrorAttribute(ra, msg.getMessage("project.notexists", null, Utils.getCurrentLocale()));
 			return "redirect:/projects";
+		}
+		if (project.getDefaultAssigneeID() != null) {
+			DisplayAccount assignee = new DisplayAccount(accSrv.findById(project.getDefaultAssigneeID()));
+			model.addAttribute("defaultAssignee", assignee);
 		}
 
 		model.addAttribute("project", project);
@@ -276,20 +254,17 @@ public class ProjectController {
 	}
 
 	@RequestMapping(value = "project/useradd", method = RequestMethod.POST)
-	public String addParticipant(@RequestParam(value = "id") Long id,
-			@RequestParam(value = "email") String email, RedirectAttributes ra,
-			HttpServletRequest request) {
-		if (!Roles.isUser()) {
+	public String addParticipant(@RequestParam(value = "id") Long id, @RequestParam(value = "email") String email,
+			RedirectAttributes ra, HttpServletRequest request) {
+		if (!Roles.isPowerUser()) {
 			throw new TasqAuthException(msg);
 		}
 		Account account = accSrv.findByEmail(email);
 		if (account != null) {
 			Project project = projSrv.findById(id);
 			if (project == null) {
-				MessageHelper.addErrorAttribute(
-						ra,
-						msg.getMessage("project.notexists", null,
-								Utils.getCurrentLocale()));
+				MessageHelper.addErrorAttribute(ra,
+						msg.getMessage("project.notexists", null, Utils.getCurrentLocale()));
 				return "redirect:/projects";
 			}
 			project.addParticipant(account);
@@ -297,7 +272,7 @@ public class ProjectController {
 				account.setActive_project(id);
 				accSrv.update(account);
 			}
-			eventsSrv.addSystemEvent(account, LogType.ASSIGN_PROJ, project.toString());
+			eventsSrv.addProjectEvent(account, LogType.ASSIGN_PROJ, project);
 			projSrv.save(project);
 		}
 		return "redirect:" + request.getHeader("Referer");
@@ -305,30 +280,24 @@ public class ProjectController {
 
 	@Transactional
 	@RequestMapping(value = "project/userRemove", method = RequestMethod.POST)
-	public String removeParticipant(
-			@RequestParam(value = "project_id") Long projectId,
-			@RequestParam(value = "account_id") Long accountId,
-			RedirectAttributes ra, HttpServletRequest request) {
-		if (!Roles.isUser()) {
+	public String removeParticipant(@RequestParam(value = "project_id") Long projectId,
+			@RequestParam(value = "account_id") Long accountId, RedirectAttributes ra, HttpServletRequest request) {
+		if (!Roles.isPowerUser()) {
 			throw new TasqAuthException(msg);
 		}
 		Account account = accSrv.findById(accountId);
 		if (account != null) {
 			Project project = projSrv.findById(projectId);
 			if (project == null) {
-				MessageHelper.addErrorAttribute(
-						ra,
-						msg.getMessage("project.notexists", null,
-								Utils.getCurrentLocale()));
+				MessageHelper.addErrorAttribute(ra,
+						msg.getMessage("project.notexists", null, Utils.getCurrentLocale()));
 				return "redirect:" + request.getHeader("Referer");
 			}
 			Set<Account> admins = project.getAdministrators();
 			if (admins.contains(account)) {
 				if (admins.size() == 1) {
-					MessageHelper.addErrorAttribute(
-							ra,
-							msg.getMessage("project.lastAdmin", null,
-									Utils.getCurrentLocale()));
+					MessageHelper.addErrorAttribute(ra,
+							msg.getMessage("project.lastAdmin", null, Utils.getCurrentLocale()));
 					return "redirect:" + request.getHeader("Referer");
 				} else {
 					project.removeAdministrator(account);
@@ -336,7 +305,7 @@ public class ProjectController {
 
 			}
 			project.removeParticipant(account);
-			eventsSrv.addSystemEvent(account, LogType.REMOVE_PROJ, project.toString());
+			eventsSrv.addProjectEvent(account, LogType.REMOVE_PROJ, project);
 			projSrv.save(project);
 		}
 		return "redirect:" + request.getHeader("Referer");
@@ -344,21 +313,17 @@ public class ProjectController {
 
 	@Transactional
 	@RequestMapping(value = "project/grantAdmin", method = RequestMethod.POST)
-	public String grantAdmin(
-			@RequestParam(value = "project_id") Long projectId,
-			@RequestParam(value = "account_id") Long accountId,
-			RedirectAttributes ra, HttpServletRequest request) {
-		if (!Roles.isUser()) {
+	public String grantAdmin(@RequestParam(value = "project_id") Long projectId,
+			@RequestParam(value = "account_id") Long accountId, RedirectAttributes ra, HttpServletRequest request) {
+		if (!Roles.isPowerUser()) {
 			throw new TasqAuthException(msg);
 		}
 		Account account = accSrv.findById(accountId);
 		if (account != null) {
 			Project project = projSrv.findById(projectId);
 			if (project == null) {
-				MessageHelper.addErrorAttribute(
-						ra,
-						msg.getMessage("project.notexists", null,
-								Utils.getCurrentLocale()));
+				MessageHelper.addErrorAttribute(ra,
+						msg.getMessage("project.notexists", null, Utils.getCurrentLocale()));
 				return "redirect:/projects";
 			}
 			project.addAdministrator(account);
@@ -369,28 +334,22 @@ public class ProjectController {
 
 	@Transactional
 	@RequestMapping(value = "project/removeAdmin", method = RequestMethod.POST)
-	public String removeAdmin(
-			@RequestParam(value = "project_id") Long projectId,
-			@RequestParam(value = "account_id") Long accountId,
-			RedirectAttributes ra, HttpServletRequest request) {
-		if (!Roles.isUser()) {
+	public String removeAdmin(@RequestParam(value = "project_id") Long projectId,
+			@RequestParam(value = "account_id") Long accountId, RedirectAttributes ra, HttpServletRequest request) {
+		if (!Roles.isPowerUser()) {
 			throw new TasqAuthException(msg);
 		}
 		Account account = accSrv.findById(accountId);
 		if (account != null) {
 			Project project = projSrv.findById(projectId);
 			if (project == null) {
-				MessageHelper.addErrorAttribute(
-						ra,
-						msg.getMessage("project.notexists", null,
-								Utils.getCurrentLocale()));
+				MessageHelper.addErrorAttribute(ra,
+						msg.getMessage("project.notexists", null, Utils.getCurrentLocale()));
 				return "redirect:/projects";
 			}
 			if (project.getAdministrators().size() == 1) {
-				MessageHelper.addErrorAttribute(
-						ra,
-						msg.getMessage("project.lastAdmin", null,
-								Utils.getCurrentLocale()));
+				MessageHelper.addErrorAttribute(ra,
+						msg.getMessage("project.lastAdmin", null, Utils.getCurrentLocale()));
 				return "redirect:" + request.getHeader("Referer");
 			}
 			project.removeAdministrator(account);
@@ -400,9 +359,8 @@ public class ProjectController {
 	}
 
 	@RequestMapping(value = "/project/getParticipants", method = RequestMethod.GET)
-	public @ResponseBody
-	List<DisplayAccount> listParticipants(@RequestParam String id,
-			@RequestParam String term, HttpServletResponse response) {
+	public @ResponseBody List<DisplayAccount> listParticipants(@RequestParam String id, @RequestParam String term,
+			HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findByProjectId(id);
 		if (project == null) {
@@ -430,15 +388,14 @@ public class ProjectController {
 	}
 
 	@RequestMapping(value = "/project/getChart", method = RequestMethod.GET)
-	public @ResponseBody
-	ProjectChart getProjectChart(@RequestParam Long id,
-			HttpServletResponse response) {
+	public @ResponseBody ProjectChart getProjectChart(@RequestParam Long id,
+			@RequestParam(required = false) boolean all, HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(id);
 		Map<String, Integer> created = new HashMap<String, Integer>();
 		Map<String, Integer> closed = new HashMap<String, Integer>();
 		ProjectChart result = new ProjectChart();
-		List<WorkLog> events = wrkLogSrv.findProjectCreateCloseEvents(project);
+		List<WorkLog> events = wrkLogSrv.findProjectCreateCloseEvents(project, all);
 		// Fill maps
 		for (WorkLog workLog : events) {
 			// Don't calculate for subtask ( not important )
@@ -493,100 +450,81 @@ public class ProjectController {
 		return result;
 	}
 
-	@RequestMapping(value = "/project/getDefaultAssignee", method = RequestMethod.GET)
-	public @ResponseBody
-	DisplayAccount getDefaultAssignee(@RequestParam Long id,
-			HttpServletResponse response) {
+	/**
+	 * Returns DisplayProject - minified version of project detials to get all
+	 * default values etc.
+	 * 
+	 * @param id
+	 *            id of project
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping(value = "/project/getDefaults", method = RequestMethod.GET)
+	public @ResponseBody DisplayProject getDefaults(@RequestParam Long id, HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(id);
-		Account assignee = accSrv.findById(project.getDefaultAssigneeID());
-		if (assignee == null) {
-			return null;
-		} else {
-			return new DisplayAccount(assignee);
-		}
-	}
-
-	@RequestMapping(value = "/project/getDefaultTaskType", method = RequestMethod.GET)
-	public @ResponseBody
-	TaskType getDefaultTaskType(@RequestParam Long id,
-			HttpServletResponse response) {
-		response.setContentType("application/json");
-		Project project = projSrv.findById(id);
-		return (TaskType) project.getDefault_type();
-	}
-
-	@RequestMapping(value = "/project/getDefaultTaskPriority", method = RequestMethod.GET)
-	public @ResponseBody
-	TaskPriority getDefaultTaskPriority(@RequestParam Long id,
-			HttpServletResponse response) {
-		response.setContentType("application/json");
-		Project project = projSrv.findById(id);
-		return (TaskPriority) project.getDefault_priority();
+		DisplayProject result = new DisplayProject(project);
+		result.setDefaultAssignee(accSrv.findById(project.getDefaultAssigneeID()));
+		return result;
 	}
 
 	@Transactional
 	@RequestMapping(value = "project/{id}/update", method = RequestMethod.POST)
-	public String updateProperties(@PathVariable Long id,
-			@RequestParam(value = "timeTracked") Boolean timeTracked,
+	public String updateProperties(@PathVariable Long id, @RequestParam(value = "timeTracked") Boolean timeTracked,
 			@RequestParam(value = "default_priority") TaskPriority priority,
 			@RequestParam(value = "default_type") TaskType type,
-			@RequestParam(value = "defaultAssignee") Long assigneId,
-			RedirectAttributes ra, HttpServletRequest request) {
-		if (!Roles.isUser()) {
+			@RequestParam(value = "defaultAssignee") Long assigneId, RedirectAttributes ra,
+			HttpServletRequest request) {
+		if (!Roles.isPowerUser()) {
 			throw new TasqAuthException(msg);
 		}
 		Project project = projSrv.findById(id);
 		if (project == null) {
-			MessageHelper.addErrorAttribute(
-					ra,
-					msg.getMessage("project.notexists", null,
-							Utils.getCurrentLocale()));
+			MessageHelper.addErrorAttribute(ra, msg.getMessage("project.notexists", null, Utils.getCurrentLocale()));
 			return "redirect:/projects";
 		}
 		if (priority != null) {
 			project.setDefault_priority(priority);
 		}
 		project.setDefault_type(type);
-		Sprint activeSprint = sprintSrv.findByProjectIdAndActiveTrue(id);
-		if (activeSprint != null) {
-			MessageHelper.addWarningAttribute(
-					ra,
-					msg.getMessage("project.sprintActive", null,
-							Utils.getCurrentLocale()));
-			return "redirect:" + request.getHeader("Referer");
-		}
-		project.setTimeTracked(timeTracked);
 		Account account = accSrv.findById(assigneId);
 		assigneId = account != null ? account.getId() : null;
 		project.setDefaultAssigneeID(assigneId);
 		projSrv.save(project);
+		Sprint activeSprint = sprintSrv.findByProjectIdAndActiveTrue(id);
+		if (activeSprint != null && !project.getTimeTracked().equals(timeTracked)) {
+			MessageHelper.addWarningAttribute(ra,
+					msg.getMessage("project.sprintActive", null, Utils.getCurrentLocale()));
+			return "redirect:" + request.getHeader("Referer");
+		} else {
+			project.setTimeTracked(timeTracked);
+		}
 		return "redirect:" + request.getHeader("Referer");
 	}
 
-	@RequestMapping(value = "project/{id}/description", method = RequestMethod.POST)
-	public String changeDescriptions(@PathVariable Long id,
-			@RequestParam(value = "description") String description,
-			RedirectAttributes ra, HttpServletRequest request) {
-		if (!Roles.isUser()) {
+	@RequestMapping(value = "project/{id}/editDescriptions", method = RequestMethod.POST)
+	public String editDescriptions(@PathVariable Long id, @RequestParam(value = "name") String name,
+			@RequestParam(value = "description") String description, RedirectAttributes ra,
+			HttpServletRequest request) {
+		if (!Roles.isPowerUser()) {
 			throw new TasqAuthException(msg);
 		}
 		Project project = projSrv.findById(id);
 		if (project == null) {
-			MessageHelper.addErrorAttribute(
-					ra,
-					msg.getMessage("project.notexists", null,
-							Utils.getCurrentLocale()));
+			MessageHelper.addErrorAttribute(ra, msg.getMessage("project.notexists", null, Utils.getCurrentLocale()));
 			return "redirect:/projects";
 		}
 		if (!projSrv.canEdit(id)) {
-			MessageHelper.addErrorAttribute(
-					ra,
-					msg.getMessage("error.accesRights", null,
-							Utils.getCurrentLocale()));
+			MessageHelper.addErrorAttribute(ra, msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
 			return "redirect:" + request.getHeader("Referer");
 		}
-		project.setDescription(description);
+		if (description != null) {
+			project.setDescription(description);
+		}
+		if (name != null) {
+			project.setName(name);
+		}
+
 		projSrv.save(project);
 		return "redirect:" + request.getHeader("Referer");
 	}

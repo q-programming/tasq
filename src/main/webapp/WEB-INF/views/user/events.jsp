@@ -20,14 +20,15 @@
 				title="<s:message code="events.deleteAll"/>">
 				<i class="fa fa-trash"></i>
 			</button>
-		</a> <a href="#" id="readAll" title="Mark all as read"
+		</a> <a href="#" id="readAll" title="<s:message
+							code="events.markAll" text="Mark All read?" />"
 			class="deleteDialog"
 			data-msg="<s:message
-							code="notice.markAll.confirm" text="Mark All read?" />"><button
+							code="events.markAll.confirm" text="Mark All read?" />"><button
 				type="button" class="btn btn-default pull-right a-tooltip"
 				data-toggle="tooltip" data-placement="bottom" data-container='body'
 				title="<s:message
-							code="notice.markAll" text="Mark All read" />">
+							code="events.markAll" text="Mark All read" />">
 				<i class="fa fa-check"></i>
 			</button></a>
 		<table id="eventsTable" class="table table-hover table-condensed">
@@ -35,11 +36,13 @@
 				<tr>
 					<th style="width: 20px;"></th>
 					<th></th>
-					<th style="width: 200px;">Date</th>
+					<th style="width: 200px;"><s:message code="main.date"/></th>
 				</tr>
 			</thead>
 		</table>
-		<table id="eventsNavigation" style="width: 100%;"></table>
+		<div class="text-center">
+				<ul id="eventsNavigation"></ul>
+		</div>
 	</div>
 </div>
 <script>
@@ -94,7 +97,7 @@ function fetchEvents(page,term){
 			}
 			row+=link;
 			//more
-			var taskurl = '<c:url value="/task?id="/>'+event.task;
+			var taskurl = '<c:url value="/task/"/>'+event.task;
 			var eventtask = '<s:message code="event.task"/>';
 			var deleteevent= '<s:message code="event.delete"/>';
 			var content = '<blockquote class="eventMore quote">'+event.message+'<div class="pull-right buttons_panel">'
@@ -117,32 +120,19 @@ pageContext.setAttribute("types",
 		LogType.values());
 %>
 function printEventsNavigation(page,data){
-	$("#events_nav").remove();
-	var topRow='<tr id="events_nav">';
-	var prev = '<td style="width:30px"></td>';
-	if(!data.firstPage){
-		prev = '<td style="width:30px"><a class="eventNavBtn btn" data-page="'+ (page -1)+'"><i class="fa fa-arrow-left"></i></a></td>';
-	}
-	topRow+=prev;
-	var numbers = '<td style="text-align:center">';
-	//print numbers
-	for (var i = 0; i < data.totalPages; i++) {
-		var btnClass = "eventNavBtn btn";
-		//active btn
-		if (i == data.number) {
-			btnClass += " btn-default";
-		}
-		var button = '<a class="'+btnClass+'" data-page="'+ i +'">'
-				+ (i + 1) + '</a>';
-				numbers+=button;
-	}
-	topRow+=numbers;
-	var next = '<td style="width:30px"></td>';
-	if(!data.lastPage){
-		next = '<td style="width:30px"><a class="navBtn btn" data-page="'+ (page +1) +'"><i class="fa fa-arrow-right"></i></a></td>';
-	}
-	topRow+=next+'</tr>';
-	$("#eventsNavigation").append(topRow);
+	var options = {
+			bootstrapMajorVersion: 3,
+            currentPage: page+1,
+            totalPages: data.totalPages,
+            itemContainerClass: function (type, page, current) {
+                return (page === current) ? "active" : "pointer-cursor";
+            },
+            numberOfPages:10,
+            onPageChanged: function(e,oldPage,newPage){
+            	fetchEvents(newPage-1,'');
+            }
+   	}
+	$("#eventsNavigation").bootstrapPaginator(options);
 }
 
 	$(document).on("click",".showMore",function(e) {
@@ -188,7 +178,7 @@ function printEventsNavigation(page,data){
 				$('tr.eventRow.unread').each(function(i, obj) {
 					obj.classList.add("read");
 					obj.classList.remove("unread");
-
+				showSuccess(result.message);
 				});
 			}
 		});
@@ -214,6 +204,7 @@ function printEventsNavigation(page,data){
 										});
 										var row = '<tr class="eventRow centerPadded"><td colspan="3"><i><s:message code="event.noEvents"/></i></td></tr>';
 										$("#eventsTable").append(row);
+										showSuccess(result.message);
 									}
 								});
 							}

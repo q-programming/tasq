@@ -28,7 +28,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.qprogramming.tasq.MockSecurityContext;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
@@ -41,6 +40,7 @@ import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
 import com.qprogramming.tasq.task.TaskType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
+import com.qprogramming.tasq.test.MockSecurityContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TaskLinksTest {
@@ -88,11 +88,9 @@ public class TaskLinksTest {
 
 	@Before
 	public void setUp() {
-		testAccount = new Account(EMAIL, "", Roles.ROLE_ADMIN);
+		testAccount = new Account(EMAIL, "", "user", Roles.ROLE_ADMIN);
 		testAccount.setLanguage("en");
-		when(
-				msgMock.getMessage(anyString(), any(Object[].class),
-						any(Locale.class))).thenReturn("MESSAGE");
+		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		Project project = createProject();
@@ -102,8 +100,7 @@ public class TaskLinksTest {
 		when(taskSrvMock.findById(TEST_2)).thenReturn(task2);
 		SecurityContextHolder.setContext(securityMock);
 		taskLinkSrv = new TaskLinkService(taskLinkRepoMock, taskSrvMock);
-		taskLinkController = new TaskLinkController(taskSrvMock, wrkLogSrvMock,
-				msgMock, taskLinkSrv);
+		taskLinkController = new TaskLinkController(taskSrvMock, wrkLogSrvMock, msgMock, taskLinkSrv);
 
 	}
 
@@ -113,42 +110,33 @@ public class TaskLinksTest {
 		link.setTaskA(TEST_1);
 		link.setTaskA(TEST_2);
 		link.setLinkType(TaskLinkType.RELATES_TO);
-		when(
-				taskLinkRepoMock.findByTaskAAndTaskBAndLinkType(TEST_1, TEST_2,
-						TaskLinkType.RELATES_TO)).thenReturn(link);
+		when(taskLinkRepoMock.findByTaskAAndTaskBAndLinkType(TEST_1, TEST_2, TaskLinkType.RELATES_TO)).thenReturn(link);
 		when(taskSrvMock.findById(TEST_1)).thenReturn(task1);
 		when(taskSrvMock.findById(TEST_2)).thenReturn(task2);
-		taskLinkController.linkTasks(TEST_1, TEST_2, TaskLinkType.RELATES_TO,
-				raMock, requestMock);
+		taskLinkController.linkTasks(TEST_1, TEST_2, TaskLinkType.RELATES_TO, raMock, requestMock);
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.DANGER, new Object[] {}));
 	}
 
 	@Test
 	public void linkTasksLinkABlocksBTest() {
-		taskLinkController.linkTasks(TEST_1, TEST_2, TaskLinkType.BLOCKS,
-				raMock, requestMock);
+		taskLinkController.linkTasks(TEST_1, TEST_2, TaskLinkType.BLOCKS, raMock, requestMock);
 		Assert.assertTrue(task2.getState().equals(TaskState.BLOCKED));
 		verify(taskSrvMock, times(1)).save(any(Task.class));
 		verify(taskLinkRepoMock, times(1)).save(any(TaskLink.class));
-		verify(raMock, times(1))
-				.addFlashAttribute(
-						anyString(),
-						new Message(anyString(), Message.Type.SUCCESS,
-								new Object[] {}));
+		verify(raMock, times(1)).addFlashAttribute(anyString(),
+				new Message(anyString(), Message.Type.SUCCESS, new Object[] {}));
 	}
 
 	@Test
 	public void linkTasksLinkAIsBlockedBTest() {
-		taskLinkController.linkTasks(TEST_2, TEST_1,
-				TaskLinkType.IS_BLOCKED_BY, raMock, requestMock);
+		taskLinkController.linkTasks(TEST_2, TEST_1, TaskLinkType.IS_BLOCKED_BY, raMock, requestMock);
 		Assert.assertTrue(task2.getState().equals(TaskState.BLOCKED));
 	}
 
 	@Test
 	public void deleteLinkEmptyTest() {
-		taskLinkController.deleteLinks(TEST_1, TEST_2, TaskLinkType.BLOCKS,
-				raMock, requestMock);
+		taskLinkController.deleteLinks(TEST_1, TEST_2, TaskLinkType.BLOCKS, raMock, requestMock);
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.DANGER, new Object[] {}));
 	}
@@ -159,16 +147,10 @@ public class TaskLinksTest {
 		link.setTaskA(TEST_1);
 		link.setTaskB(TEST_2);
 		link.setLinkType(TaskLinkType.DUPLICATES);
-		when(
-				taskLinkRepoMock.findByTaskBAndTaskAAndLinkType(TEST_1, TEST_2,
-						TaskLinkType.DUPLICATES)).thenReturn(link);
-		taskLinkController.deleteLinks(TEST_1, TEST_2, TaskLinkType.DUPLICATES,
-				raMock, requestMock);
-		verify(raMock, times(1))
-				.addFlashAttribute(
-						anyString(),
-						new Message(anyString(), Message.Type.SUCCESS,
-								new Object[] {}));
+		when(taskLinkRepoMock.findByTaskBAndTaskAAndLinkType(TEST_1, TEST_2, TaskLinkType.DUPLICATES)).thenReturn(link);
+		taskLinkController.deleteLinks(TEST_1, TEST_2, TaskLinkType.DUPLICATES, raMock, requestMock);
+		verify(raMock, times(1)).addFlashAttribute(anyString(),
+				new Message(anyString(), Message.Type.SUCCESS, new Object[] {}));
 		verify(taskLinkRepoMock, times(1)).delete(any(TaskLink.class));
 	}
 
@@ -211,8 +193,7 @@ public class TaskLinksTest {
 		list2.add(link4);
 		when(taskLinkRepoMock.findByTaskA(TEST_1)).thenReturn(list);
 		when(taskLinkRepoMock.findByTaskB(TEST_1)).thenReturn(list2);
-		Map<TaskLinkType, List<DisplayTask>> map = taskLinkSrv
-				.findTaskLinks(TEST_1);
+		Map<TaskLinkType, List<DisplayTask>> map = taskLinkSrv.findTaskLinks(TEST_1);
 		Assert.assertTrue(map.size() == 4);
 	}
 

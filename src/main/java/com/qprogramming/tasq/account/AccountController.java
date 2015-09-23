@@ -27,6 +27,7 @@ import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,6 +36,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.qprogramming.tasq.manage.Theme;
+import com.qprogramming.tasq.manage.ThemeService;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.ResultData;
 import com.qprogramming.tasq.support.Utils;
@@ -52,38 +55,38 @@ public class AccountController {
 	private SessionLocaleResolver localeResolver;
 	private MessageSource msg;
 	private SessionRegistry sessionRegistry;
+	private ThemeService themeSrv;
 
 	@Autowired
-	public AccountController(AccountService accountSrv, ProjectService projSrv,
-			MessageSource msg, SessionLocaleResolver localeResolver,
-			SessionRegistry sessionRegistry) {
+	public AccountController(AccountService accountSrv, ProjectService projSrv, MessageSource msg,
+			SessionLocaleResolver localeResolver, SessionRegistry sessionRegistry, ThemeService themeSrv) {
 		this.accountSrv = accountSrv;
 		this.projSrv = projSrv;
 		this.msg = msg;
 		this.localeResolver = localeResolver;
 		this.sessionRegistry = sessionRegistry;
+		this.themeSrv = themeSrv;
 	}
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(AccountController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(AccountController.class);
 
 	private static final String AVATAR_DIR = "avatar";
 	private static final String PNG = ".png";
 
 	@RequestMapping(value = "settings", method = RequestMethod.GET)
-	public String settings() {
+	public String settings(Model model) {
+		model.addAttribute("themes", themeSrv.findAll());
 		return "user/settings";
 	}
 
 	@Transactional
 	@RequestMapping(value = "settings", method = RequestMethod.POST)
-	public String saveSettings(
-			@RequestParam(value = "avatar", required = false) MultipartFile avatarFile,
+	public String saveSettings(@RequestParam(value = "avatar", required = false) MultipartFile avatarFile,
+			@RequestParam(value = "email", required = false) String email,
 			@RequestParam(value = "emails", required = false) String emails,
 			@RequestParam(value = "language", required = false) String language,
-			@RequestParam(value = "theme", required = false) String theme,
-			RedirectAttributes ra, HttpServletRequest request,
-			HttpServletResponse response) {
+			@RequestParam(value = "theme", required = false) Long themeID, RedirectAttributes ra,
+			HttpServletRequest request, HttpServletResponse response) {
 		Account account = Utils.getCurrentAccount();
 		if (avatarFile.getSize() != 0) {
 			File file = new File(getAvatar(account.getId()));
@@ -96,28 +99,31 @@ public class AccountController {
 		account.setLanguage(language);
 		localeResolver.setLocale(request, response, new Locale(language));
 		account.setEmail_notifications(Boolean.parseBoolean(emails));
+		Theme theme = themeSrv.findById(themeID);
 		account.setTheme(theme);
+		String message = "";
+		if (email != null && email != "" && !account.getEmail().equals(email)) {
+			account.setEmail(email);
+			account.setConfirmed(false);
+			accountSrv.sendConfirmationLink(account);
+			message = msg.getMessage("panel.email.confirm", null, Utils.getCurrentLocale());
+		}
 		accountSrv.update(account);
 		MessageHelper.addSuccessAttribute(ra,
-				msg.getMessage("panel.saved", null, Utils.getCurrentLocale()));
+				msg.getMessage("panel.saved", null, Utils.getCurrentLocale()) + ". " + message);
 		return "redirect:/settings";
 	}
 
-	@RequestMapping(value = "/user", method = RequestMethod.GET)
-	public String getUser(@RequestParam(value = "id") Long id, Model model,
-			RedirectAttributes ra) {
-		Account account = accountSrv.findById(id);
+	@RequestMapping(value = "/user/{username}", method = RequestMethod.GET)
+	public String getUser(@PathVariable(value = "username") String username, Model model, RedirectAttributes ra) {
+		Account account = accountSrv.findByUsername(username);
 		if (account == null) {
-			MessageHelper.addErrorAttribute(
-					ra,
-					msg.getMessage("error.noUser", null,
-							Utils.getCurrentLocale()));
+			MessageHelper.addErrorAttribute(ra, msg.getMessage("error.noUser", null, Utils.getCurrentLocale()));
 			return "redirect:/users";
 		}
 		List<Object> principals = sessionRegistry.getAllPrincipals();
 		DisplayAccount dispAccount = new DisplayAccount(account);
-		List<SessionInformation> sessions = sessionRegistry.getAllSessions(
-				account, false);
+		List<SessionInformation> sessions = sessionRegistry.getAllSessions(account, false);
 		if (!sessions.isEmpty() && principals.contains(account)) {
 			dispAccount.setOnline(true);
 		}
@@ -127,9 +133,7 @@ public class AccountController {
 	}
 
 	@RequestMapping(value = "/getAccounts", method = RequestMethod.GET)
-	public @ResponseBody
-	List<DisplayAccount> listAccounts(@RequestParam String term,
-			HttpServletResponse response) {
+	public @ResponseBody List<DisplayAccount> listAccounts(@RequestParam String term, HttpServletResponse response) {
 		response.setContentType("application/json");
 		List<Account> accounts = new LinkedList<Account>();
 		if (term == null) {
@@ -146,9 +150,7 @@ public class AccountController {
 	}
 
 	@RequestMapping(value = "/users", method = RequestMethod.GET)
-	public @ResponseBody
-	Page<DisplayAccount> listUsers(
-			@RequestParam(required = false) String term,
+	public @ResponseBody Page<DisplayAccount> listUsers(@RequestParam(required = false) String term,
 			@PageableDefault(size = 25, page = 0, sort = "surname", direction = Direction.ASC) Pageable p) {
 		Page<Account> page;
 		if (term != null) {
@@ -160,37 +162,41 @@ public class AccountController {
 		List<Object> principals = sessionRegistry.getAllPrincipals();
 		for (Account account : page) {
 			DisplayAccount dispAccount = new DisplayAccount(account);
-			List<SessionInformation> sessions = sessionRegistry.getAllSessions(
-					account, false);
+			List<SessionInformation> sessions = sessionRegistry.getAllSessions(account, false);
 			if (!sessions.isEmpty() && principals.contains(account)) {
 				dispAccount.setOnline(true);
 			}
 			list.add(dispAccount);
 		}
-		Page<DisplayAccount> result = new PageImpl<DisplayAccount>(list, p,
-				page.getTotalElements());
+		Page<DisplayAccount> result = new PageImpl<DisplayAccount>(list, p, page.getTotalElements());
 		return result;
+	}
+
+	@RequestMapping(value = "/emailResend", method = RequestMethod.GET)
+	public String resendEmail(RedirectAttributes ra) {
+		Account account = Utils.getCurrentAccount();
+		accountSrv.sendConfirmationLink(account);
+		MessageHelper.addSuccessAttribute(ra, msg.getMessage("panel.emails.resend.sent",
+				new Object[] { account.getEmail() }, Utils.getCurrentLocale()));
+		return "redirect:/settings";
+
 	}
 
 	@RequestMapping(value = "role", method = RequestMethod.POST)
 	@ResponseBody
-	public ResultData setRole(@RequestParam(value = "id") Long id,
-			@RequestParam(value = "role") Roles role) {
+	public ResultData setRole(@RequestParam(value = "id") Long id, @RequestParam(value = "role") Roles role) {
 		Account account = accountSrv.findById(id);
 		if (account != null) {
 			// check if not admin or user
 			List<Account> admins = accountSrv.findAdmins();
-			if (account.getRole().equals(Roles.ROLE_ADMIN)
-					&& admins.size() == 1) {
-				return new ResultData(ResultData.ERROR, msg.getMessage(
-						"role.last.admin", null, Utils.getCurrentLocale()));
+			if (account.getRole().equals(Roles.ROLE_ADMIN) && admins.size() == 1) {
+				return new ResultData(ResultData.ERROR,
+						msg.getMessage("role.last.admin", null, Utils.getCurrentLocale()));
 			} else {
-				String rolemsg = msg.getMessage(role.getCode(), null,
-						Utils.getCurrentLocale());
+				String rolemsg = msg.getMessage(role.getCode(), null, Utils.getCurrentLocale());
 				account.setRole(role);
 				accountSrv.update(account);
-				String resultMsg = msg.getMessage("role.change.succes",
-						new Object[] { account.toString(), rolemsg },
+				String resultMsg = msg.getMessage("role.change.succes", new Object[] { account.toString(), rolemsg },
 						Utils.getCurrentLocale());
 				return new ResultData(ResultData.OK, resultMsg);
 			}

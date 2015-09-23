@@ -11,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.qprogramming.tasq.support.Utils;
+import com.qprogramming.tasq.support.sorters.CommentsSorter;
 import com.qprogramming.tasq.task.comments.Comment;
 
 @RunWith(MockitoJUnitRunner.class)

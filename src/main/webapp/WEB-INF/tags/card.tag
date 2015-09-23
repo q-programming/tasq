@@ -11,15 +11,15 @@ type="com.qprogramming.tasq.task.DisplayTask"%>
 <div class="agile-card theme" data-id="${task.id}" state="${task.state}" data-subtasks="${task.subtasks}"
 id="${task.id}" data-tags="<c:forEach items="${task.tags}" var="tag">${tag},</c:forEach>">
 <div style="padding-left: 5px; min-height: 50px;">
+<c:if test="${task.story_points ne 0}">
+<span class="badge theme pull-right">${task.story_points}</span>
+</c:if>
 <t:type type="${task.type}" list="true" />
-<a href="<c:url value="/task?id=${task.id}"/>" style="color: inherit;"
+<a href="<c:url value="/task/${task.id}"/>" style="color: inherit;"
 class="<c:if test="${task.state eq 'CLOSED' }">
 closed
 </c:if>">[${task.id}]
 ${task.name}</a> 
-<c:if test="${task.story_points ne 0}">
-<span class="badge theme">${task.story_points}</span>
-</c:if>
 </div>
 <div
 style="display: table; width: 100%; margin-top: 5px; min-height: 30px;">
@@ -56,7 +56,7 @@ title="<s:message code="task.assignme"/>">
 </c:if>
 <c:if test="${not empty task.assignee}">
 <a ${link} class="a-tooltip"
-href="<c:url value="/user?id=${task.assignee.id}"/>"
+href="<c:url value="/user/${task.assignee.username}"/>"
 title="${task.assignee}"><img data-src="holder.js/30x30"
 style="height: 30px; padding-right: 5px;"
 src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />
@@ -74,9 +74,9 @@ title="<s:message code="task.assignme"/>">
 </div>
 </div>
 </div>
-<div style="display: table">
+<div style="display: table;padding-left:10px;padding-right:10px;width: 100%;">
 <c:if test="${task.estimated}">
-<div class="progress" style="height: 5px; width: 150px;padding-left:5px">
+<div class="progress" style="height: 5px; ">
 <c:set var="logged_class"></c:set>
 <c:set var="percentage">${task.percentage}</c:set>
 <c:if test="${task.state eq 'TO_DO'}">

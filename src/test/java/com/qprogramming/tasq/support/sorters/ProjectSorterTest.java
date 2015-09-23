@@ -13,6 +13,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.support.Utils;
+import com.qprogramming.tasq.support.sorters.ProjectSorter;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 
 @RunWith(MockitoJUnitRunner.class)

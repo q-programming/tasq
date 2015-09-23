@@ -13,6 +13,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.qprogramming.tasq.support.web.Message;
+import com.qprogramming.tasq.support.web.MessageHelper;
+
 @RunWith(MockitoJUnitRunner.class)
 public class MessageHelperTest {
 

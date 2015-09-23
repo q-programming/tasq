@@ -19,7 +19,7 @@
 </c:if>
 <div class="white-frame" style="overflow: auto;">
 	<h2>
-		<a href="<c:url value="/project?id=${project.id}"/>">[${project.projectId}]
+		<a href="<c:url value="/project/${project.projectId}"/>">[${project.projectId}]
 			${project.name}</a>
 			<a href="" class="showMore a-tooltip" title="<s:message code="project.manage.edit.description"/>" 
 			data-toggle="modal" data-target="#editDescription" data-backdrop="static" data-keyboard="false">
@@ -113,18 +113,30 @@
 				<h5>
 					<b><s:message code="project.manage.assignee" /></b>
 				</h5>
-				<select id="defaultAssignes" name="defaultAssignee"
-					class="form-control" style="width: 200px">
-					<option value="-1"
-						<c:if test="${empty project.defaultAssigneeID}"> selected</c:if>><s:message
-							code="task.unassigned" /></option>
-					<c:forEach items="${project.participants}" var="participant">
-						<option value="${participant.id}"
-							<c:if test="${participant.id eq project.defaultAssigneeID}">selected</c:if>>${participant}</option>
-					</c:forEach>
-				</select> <span class="help-block"><s:message
-						code="project.manage.assignee.help" /></span>
+				<input id="assign_taskID" name="defaultAssignee" type="hidden" value="${project.defaultAssigneeID}">
+				<input name="account" class="form-control" style="width:250px" id="assignee_input" value="${defaultAssignee}">
+				<div id="assignUsersLoader" style="display: none">
+					<i class="fa fa-cog fa-spin"></i>
+					<s:message code="main.loading" />
+					<br>
+				</div>
+				<span class="help-block"><s:message	code="project.manage.assignee.help" htmlEscape="false" /></span>
+				
+<%-- 				<select id="defaultAssignes" name="defaultAssignee" --%>
+<%-- 					class="form-control" style="width: 200px"> --%>
+<!-- 					<option value="-1" -->
+<%-- 						<c:if test="${empty project.defaultAssigneeID}"> selected</c:if>><s:message --%>
+<%-- 							code="task.unassigned" /></option> --%>
+<%-- 					<c:forEach items="${project.participants}" var="participant"> --%>
+<%-- 						<option value="${participant.id}" --%>
+<%-- 							<c:if test="${participant.id eq project.defaultAssigneeID}">selected</c:if>>${participant}</option> --%>
+<%-- 					</c:forEach> --%>
+<%-- 				</select> <span class="help-block"><s:message --%>
+<%-- 						code="project.manage.assignee.help" /></span> --%>
 
+			<div style="text-align: center;">
+				<button class="btn btn-success " type="submit"><i class="fa fa-floppy-o"></i>&nbsp;<s:message code="main.save"/></button>
+			</div>
 			</div>
 		</div>
 	</form>
@@ -266,14 +278,18 @@
 	aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">
-			<form action="<c:url value="/project/${project.id}/description"/>" method="post">
+			<form action="<c:url value="/project/${project.id}/editDescriptions"/>" method="post">
 				<div class="modal-header theme">
 					<h4 class="modal-title" id="myModalLabel">
-						[${project.projectId}] project.name
+						[${project.projectId}] ${project.name}
 					</h4>
 				</div>
 				<div class="modal-body">
 					<div class="form-group">
+						<label for="projectName"><s:message code="project.name" />:</label>
+						<input class="form-control"
+							name="name" id="projectName" value="${project.name}">
+						<label for="projectDescription"><s:message code="project.description" />:</label>
 						<textarea name="description" id="projectDescription">${project.description}</textarea>
 					</div>
 				</div>
@@ -281,7 +297,7 @@
 					<a class="btn" data-dismiss="modal"><s:message
 								code="main.cancel" /></a>
 					<button id="" class="btn btn-default" type="submit">
-						<s:message code="main.edit" />
+						<i class="fa fa-pencil"></i>&nbsp;<s:message code="main.edit" />
 					</button>
 					</div>
 			</form>
@@ -293,21 +309,24 @@
 
 <script>
 $(document).ready(function($) {
+	checkIfEmpty();
 	<c:forEach items="${types}" var="enum_type">
 		$("#${enum_type.code}").click(function() {
 			$("#default_type").val("${enum_type}");
-			$("#priority_form").submit();
+	   	 	$("#task_type").html($(this).html());
+// 			$("#priority_form").submit();
 		});
 	</c:forEach>
 
 	<c:forEach items="${priorities}" var="enum_priority">
 	$("#${enum_priority}").click(function() {
 		$("#default_priority").val("${enum_priority}");
-		$("#priority_form").submit();
+		$("#task_priority").html($(this).html());
+// 		$("#priority_form").submit();
 	});	
 	</c:forEach>
 	$("#timeTracked, #defaultAssignes").change(function() {
-		$("#priority_form").submit();
+// 		$("#priority_form").submit();
 	});
 	
 	var btnsGrps = jQuery.trumbowyg.btnsGrps;
@@ -350,6 +369,68 @@ $(document).ready(function($) {
             }
         }
     });
+	
+	//Default assignee
+    $("#assignee_input").autocomplete({
+    	minLength : 1,
+    	delay : 500,
+    	source : function(request, response) {
+    		$("#assignUsersLoader").show();
+    		var term = request.term;
+    		var projectID = "${project.id}";
+    		if ( term in cache ) {
+    			response( cache[ term ] );
+    			return;
+    	    }
+            var url='<c:url value="/project/getParticipants"/>';
+            $.get(url,{id:projectID,term:term},function(data) {
+            	$("#assignUsersLoader").hide();
+            	var results = [];
+            	$.each(data, function(i, item) {
+                	var itemToAdd = {
+                    	value : item.email,
+                        label : item.name+ " "+ item.surname,
+                        id: 	item.id
+					};
+                	results.push(itemToAdd);
+                });
+				cache[ term ] = results;
+                return response(results);
+            });
+		},
+        //define select handler
+        select : function(event, ui) {
+        	if (ui.item) {
+        		event.preventDefault();
+                $("#assignee_input").val("");
+                $("#assign_taskID").val(ui.item.id);
+                $("#assignee_input").val(ui.item.label);
+                checkIfEmpty();
+                return false;
+			}
+		}
+    });
+	
+	$("#assignee_input").click(function(){
+		 $(this).select();
+	});
+
+	$("#assignee_input").change(function(){
+		 if(!$("#assignee_input").val()){
+			 $("#assign_taskID").val(null);
+		 }
+		 checkIfEmpty();
+	});
+function checkIfEmpty(){
+	if(!$("#assign_taskID").val()){
+		var unassign = '<s:message code="task.unassigned" />';
+		$("#assignee_input").val(unassign);
+		$("#assignee_input").addClass("input-italic");
+	}else{
+		$("#assignee_input").removeClass("input-italic");
+	}
+}	
+	
 	$("#add_button").click(function(){
 		$('#add_button_div').toggle();
 		$('#add_div').toggle("slide");

@@ -51,12 +51,18 @@
 								code="task.link" />
 					</a></li>
 					<c:if test="${not task.subtask}">
-						<li><a href="<c:url value="task/${task.id}/subtask"/>">
+						<li><a href="<c:url value="/task/${task.id}/subtask"/>">
 								<i class="fa fw fa-sitemap"></i>&nbsp;<s:message
 								code="task.subtasks.add" />
 							</a>
 						</li>
 					</c:if>
+					<li>
+						<a href="<c:url value="/task/create"/>?linked=${task.id}&project=${task.project.id}">
+								<i class="fa fw fa-plus"></i>
+								<s:message code="task.linked.create" />
+						</a>
+					</li>
 					<li><a class="addFileButton" href="#" data-toggle="modal"
 						data-target="#files_task" data-taskID="${task.id}"> <i
 							class="fa fw fa-file"></i>&nbsp;<s:message code="task.addFile" />
@@ -74,6 +80,12 @@
 
 				</ul>
 			</c:if>
+			<c:if test="${task.state eq'CLOSED'}">
+				<a href="<c:url value="/task/create"/>?linked=${task.id}&project=${task.project.id}"
+					class="btn btn-default btn-sm a-tooltip" title="<s:message code="task.linked.create" />">
+					<i class="fa fw fa-plus"></i>
+				</a>
+			</c:if>
 			<button id="watch" class="btn btn-default btn-sm a-tooltip" title=""
 				data-html="true">
 				<c:if test="${watching}">
@@ -84,9 +96,9 @@
 				</c:if>
 			</button>
 
-			<c:if test="${can_edit && user.isUser}">
-				<a class="btn btn-default btn-sm a-tooltip delete_task"
-					href="<c:url value="task/delete?id=${task.id}"/>"
+			<c:if test="${can_edit && user.isPowerUser}">
+				<a class="btn btn-default btn-sm a-tooltip delete_btn"
+					href="<c:url value="/task/delete?id=${task.id}"/>"
 					title="<s:message code="task.delete" text="Delete task" />"
 					data-lang="${pageContext.response.locale}"
 					data-msg='<s:message code="task.delete.confirm"></s:message>'>
@@ -97,11 +109,11 @@
 		<h3>
 			<t:type type="${task.type}" />
 			<c:if test="${task.subtask}">
-				<a href='<c:url value="/task?id=${task.parent}"/>'>[${task.parent}]</a>
+				<a href='<c:url value="/task/${task.parent}"/>'>[${task.parent}]</a>
 			/ [${task.id}] ${task.name}
 			</c:if>
 			<c:if test="${not task.subtask}">
-				<a href='<c:url value="/project?id=${task.project.id}"/>'>${task.project.projectId}</a>
+				<a href='<c:url value="/project/${task.project.projectId}"/>'>${task.project.projectId}</a>
 			/ [${task.id}] ${task.name}
 			</c:if>
 		</h3>
@@ -123,7 +135,7 @@
 					<tr>
 						<td style="width: 80px;"><s:message code="task.state" /></td>
 						<td class="left-margin"><c:choose>
-								<c:when test="${can_edit && user.isUser || is_assignee}">
+								<c:when test="${can_edit && user.isPowerUser || is_assignee}">
 									<div class="dropdown pointer">
 										<%
 											pageContext.setAttribute("states", TaskState.values());
@@ -156,7 +168,7 @@
 					<tr>
 						<td><s:message code="task.priority" /></td>
 						<td class="left-margin"><c:choose>
-								<c:when test="${can_edit && user.isUser || is_assignee}">
+								<c:when test="${can_edit && user.isPowerUser || is_assignee}">
 									<div class="dropdown pointer">
 										<%
 											pageContext.setAttribute("priorities",
@@ -186,7 +198,7 @@
 							</c:choose></td>
 					</tr>
 					<!-------------------------	TAGS ------------------->
-					
+					<c:if test="${not task.subtask}">
 					<tr>
 						<td style="vertical-align: top;">Tags</td>
 						<td class="left-margin">
@@ -202,6 +214,7 @@
 							</c:if>
 						</td>
 					</tr>
+					</c:if>
 					<tr>
 						<td style="vertical-align: top;"><s:message
 								code="task.description" /></td>
@@ -223,12 +236,12 @@
 										<input id="point-input" class="point-input">
 										<span id="point_approve"
 											style="display: none; cursor: pointer;"><i
-											class="fa fa-check" style="vertical-align: text-top"></i></span>
+											class="fa fa-check"></i></span>
 										<span id="point_cancel"
 											style="display: none; cursor: pointer;"><i
-											class="fa fa-times" style="vertical-align: text-top"></i></span>
+											class="fa fa-times"></i></span>
 										<span id="point_edit" class="point-edit"><i
-											class="fa fa-pencil points" style="vertical-align: text-top"></i></span>
+											class="fa fa-pencil points"></i></span>
 									</c:if> </span></td>
 						</tr>
 					</c:if>
@@ -245,7 +258,7 @@
 					</h5>
 				</div>
 				<!-- logwork trigger modal -->
-				<c:if test="${can_edit && user.isUser || is_assignee}">
+				<c:if test="${can_edit && user.isPowerUser || is_assignee}">
 					<button class="btn btn-default btn-sm worklog" data-toggle="modal"
 						data-target="#logWorkform" data-taskID="${task.id}">
 						<i class="fa fa-lg fa-calendar"></i>
@@ -375,7 +388,7 @@
 									code="task.related" />
 							</span>
 						</h5>
-						<a class="btn btn-default btn-xxs a-tooltip pull-right linkButton"
+						<a class="btn btn-default btn-xxs a-tooltip pull-right linkButton" style="min-width: 37px;"
 							href="#" title="" data-placement="top"
 							data-original-title="<s:message code="task.link"/>"> <i
 							class="fa fa-plus"></i><i
@@ -436,11 +449,11 @@
 															type="${linkTask.type}" list="true" /></td>
 													<td style="width: 30px"><t:priority
 															priority="${linkTask.priority}" list="true" /></td>
-													<td><a href="<c:url value="task?id=${linkTask.id}"/>"
+													<td><a href="<c:url value="task/${linkTask.id}"/>"
 														style="color: inherit;
 												<c:if test="${linkTask.state eq 'CLOSED' }">text-decoration: line-through;</c:if>">
 															[${linkTask.id}] ${linkTask.name}</a></td>
-													<c:if test="${can_edit && user.isUser || is_assignee}">
+													<c:if test="${can_edit && user.isPowerUser || is_assignee}">
 														<td style="width: 30px">
 															<div class="buttons_panel pull-right">
 																<a
@@ -470,8 +483,8 @@
 									code="tasks.subtasks" />
 							</span>
 						</h5>
-						<a class="btn btn-default btn-xxs a-tooltip pull-right"
-							href="<c:url value="task/${task.id}/subtask"/>"
+						<a class="btn btn-default btn-xxs a-tooltip pull-right" style="min-width: 37px;"
+							href="<c:url value="/task/${task.id}/subtask"/>"
 							data-placement="top"
 							data-original-title="<s:message code="task.subtasks.add"/>">
 							<i class="fa fa-plus"></i> <i class="fa fa-lg fa-sitemap"></i>
@@ -490,7 +503,7 @@
 											priority="${subTask.priority}" list="true" /></td>
 									<td><a
 										style="color: inherit;<c:if test="${subTask.state eq 'CLOSED' }">text-decoration: line-through;</c:if>"
-										href="<c:url value="subtask?id=${subTask.id}"/>">[${subTask.id}]
+										href="<c:url value="/task/${subTask.id}"/>">[${subTask.id}]
 											${subTask.name}</a></td>
 									<td style="width: 100px"><t:state state="${subTask.state}" /></td>
 									<td style="width: 50px; padding-top: 14px;">
@@ -570,7 +583,7 @@
 									</c:if>
 									<a href="<c:url value="task/${task.id}/file?get=${file}"></c:url>">${file}</a>
 									</td>
-									<c:if test="${can_edit && user.isUser || is_assignee}">
+									<c:if test="${can_edit && user.isPowerUser || is_assignee}">
 										<td style="width: 30px">
 											<div class="buttons_panel pull-right">
 												<a
@@ -607,7 +620,7 @@
 							<img data-src="holder.js/20x20"
 								style="height: 20px; padding-right: 5px;"
 								src="<c:url value="/../avatar/${task.owner.id}.png"/>" /><a
-								href="<c:url value="/user?id=${task.owner.id}"/>">${task.owner}</a>
+								href="<c:url value="/user/${task.owner.username}"/>">${task.owner}</a>
 						</div>
 					</div>
 					<div id="assign_button_div" style="display: table">
@@ -622,7 +635,7 @@
 							<c:if test="${not empty task.assignee}">
 								<img data-src="holder.js/20x20" style="height: 20px;"
 									src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />
-								<a href="<c:url value="/user?id=${task.assignee.id}"/>">${task.assignee}</a>
+								<a href="<c:url value="/user/${task.assignee.username}"/>">${task.assignee}</a>
 							</c:if>
 							<c:if test="${user.isUser}">
 								<span class="btn btn-default btn-sm a-tooltip assignToTask"
@@ -664,8 +677,12 @@
 				</table>
 			</div>
 			<%----------------SPRITNS/RELEASES ----------------------%>
+			<c:set var="hidden">none</c:set>
+			<c:if test="${task.project.agile eq 'KANBAN' && not empty task.release }">
+				<c:set var="hidden">block</c:set>
+			</c:if>
 			<c:if test="${not task.subtask}">
-				<div>
+				<div id="sprint_release" style="display: ${hidden};">
 					<c:if test="${task.project.agile eq 'KANBAN'}">
 						<div class="mod-header">
 							<h5 class="mod-header-title">
@@ -685,13 +702,6 @@
 							</h5>
 						</div>
 						<div id="sprints"></div>
-						<%-- 				<c:forEach items="${sprints}" var="sprint"> --%>
-						<!-- 					<div> -->
-						<!-- 						<a -->
-						<%-- 							href="<c:url value="/${task.project.projectId}/${fn:toLowerCase(task.project.agile)}/reports?sprint=${sprint.sprintNo}"/>">Sprint --%>
-						<%-- 							${sprint.sprintNo}</a> --%>
-						<!-- 					</div> -->
-						<%-- 				</c:forEach> --%>
 					</c:if>
 				</div>
 			</c:if>
@@ -719,11 +729,11 @@
 									<img data-src="holder.js/30x30"
 										style="height: 30px; float: left; padding-right: 10px;"
 										src="<c:url value="/../avatar/${comment.author.id}.png"/>" />
-									<a href="<c:url value="/user?id=${comment.author.id}"/>">${comment.author}</a>
+									<a href="<c:url value="/user/${comment.author.username}"/>">${comment.author}</a>
 									<div class="time-div">${comment.date}</div>
 								</div> <%-- Comment buttons --%>
 								<div class="buttons_panel" style="float: right">
-									<a href="<c:url value="/task?id=${task.id}#c${comment.id}"/>"
+									<a href="<c:url value="/task/${task.id}#c${comment.id}"/>"
 										title="<s:message code="comment.link" text="Link to this comment" />"
 										style="color: gray"><i class="fa fa-link"></i></a>
 									<c:if test="${user == comment.author }">
@@ -775,7 +785,7 @@
 						</div>
 					</form>
 				</div>
-				<c:if test="${user.isReporter}">
+				<c:if test="${user.isUser}">
 					<button id="comments_add" class="btn btn-default btn-sm">
 						<i class="fa fa-comment"></i>&nbsp;
 						<s:message code="comment.add" text="Add Comment" />
@@ -784,7 +794,7 @@
 			</div>
 			<%------------------ WORK LOG -------------------------%>
 			<div id="logWork" class="tab-pane fade">
-				<table id="taskworklogs" class="table table-condensed table-hover">
+				<table id="taskworklogs" class="table table-condensed table-hover button-table">
 				</table>
 			</div>
 		</div>
@@ -842,7 +852,9 @@
 $(document).ready(function($) {
 	taskID = "${task.id}";
 	updateWatchers();
-	getSprints();
+	<c:if test="${not task.subtask}">
+		getSprints();
+	</c:if>
 	
 	//--------------------------------------Coments----------------------------
 	function toggle_comment() {
@@ -934,7 +946,7 @@ $(document).ready(function($) {
 	   	 	}
 	    	else{
 				$.post('<c:url value="/task/changeState"/>',{id:taskID,state:state},function(result){
-					if(result.code == 'Error'){
+					if(result.code == 'ERROR'){
 						showError(result.message);
 					}
 					else{
@@ -1032,6 +1044,7 @@ $(document).ready(function($) {
 						var url = '<c:url value="/${task.project.projectId}/${fn:toLowerCase(task.project.agile)}/reports?sprint="/>' + sprint.sprintNo;
 						var row = '<div><a href="'+url+'">Sprint ' + sprint.sprintNo+ '</a></div>';
 						$("#sprints").append(row);
+						$('#sprint_release').show();
 			    	});	
 				});
 			}
@@ -1047,11 +1060,22 @@ $(document).ready(function($) {
 						var type = getEventTypeMsg(worklog.type);
 						var message = "";
 						if (worklog.message != ""){
-							message = '<div><blockquote class="quote">' + worklog.message + '</blockquote></div>'
+							message = '<div class="quote">' + worklog.message + '</div>'
 						}
-						
-						var row = '<tr><td><div style="font-size: smaller; color: dimgray;">' + account + ' ' + type + '<div class="time-div">' + worklog.timeLogged + '</div> ' + message + '</td></tr>';
+						var delbtn = '';
+						<security:authorize access="hasRole('ROLE_ADMIN')">
+							var delurl ='<c:url value="/task/delWorklog?id="/>';
+							delbtn = '<div class="buttons_panel" style="float: right;">'
+									+'<a class="a-tooltip delete_btn" style="color:gray" href="' +delurl + worklog.id + '"'
+									+' title = "<s:message code="task.worklog.delete"/>"'
+									+' data-lang="${pageContext.response.locale}"'
+									+' data-msg="<s:message code="task.delete.confirm"/>" >' 
+									+'<i class="fa fa-trash-o"></i></a></div>';
+						</security:authorize>
+						var row = '<tr><td><div style="font-size: smaller; color: dimgray;">' + account + ' ' + type + '<div class="time-div">' + worklog.timeLogged + '</div> ' + delbtn + message 
+								  + '</td></tr>';
 						$("#taskworklogs").append(row);	  
+						$(".a-tooltip").tooltip();
 			    	});	
 				});
 			}
@@ -1075,7 +1099,7 @@ $(document).ready(function($) {
 				});
 			}
 			
-$(document).on("click",".delete_task",function(e) {
+$(document).on("click",".delete_btn",function(e) {
 		var msg = '<p style="text-align:center"><i class="fa fa-lg fa-exclamation-triangle" style="display: initial;"></i>&nbsp'
 					+ $(this).data('msg') + '</p>';
 		var lang = $(this).data('lang');
@@ -1090,8 +1114,9 @@ $(document).on("click",".delete_task",function(e) {
 			}
 		});
 	});
-	
+
 	//TAGS
+	<c:if test="${not task.subtask}">
 	var init = true;
 	var noTags = '<s:message code="task.tags.noTags" htmlEscape="false"/>';
 	$('#taskTags').tagsinput(
@@ -1209,6 +1234,7 @@ $(document).on("click",".delete_task",function(e) {
 			}			
 		}
 	}
+	</c:if>
 });
 function getEventTypeMsg(type){
 	switch(type){

@@ -1,21 +1,28 @@
 package com.qprogramming.tasq.events;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
+import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.velocity.VelocityEngineUtils;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.config.ResourceService;
 import com.qprogramming.tasq.events.Event.Type;
 import com.qprogramming.tasq.mail.MailMail;
+import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.task.watched.WatchedTask;
 import com.qprogramming.tasq.task.watched.WatchedTaskService;
@@ -29,16 +36,20 @@ public class EventsService {
 	private WatchedTaskService watchSrv;
 	private MailMail mailer;
 	private MessageSource msg;
-	private static final Logger LOG = LoggerFactory
-			.getLogger(EventsService.class);
+	private VelocityEngine velocityEngine;
+	private ResourceService resourceSrv;
+
+	private static final Logger LOG = LoggerFactory.getLogger(EventsService.class);
 
 	@Autowired
-	public EventsService(EventsRepository eventsRepo,
-			WatchedTaskService watchSrv, MailMail mailer, MessageSource msg) {
+	public EventsService(EventsRepository eventsRepo, WatchedTaskService watchSrv, MailMail mailer, MessageSource msg,
+			VelocityEngine velocityEngine, ResourceService resourceSrv) {
 		this.watchSrv = watchSrv;
 		this.eventsRepo = eventsRepo;
 		this.mailer = mailer;
 		this.msg = msg;
+		this.velocityEngine = velocityEngine;
+		this.resourceSrv = resourceSrv;
 	}
 
 	public Event getById(Long id) {
@@ -51,11 +62,10 @@ public class EventsService {
 	 * @return
 	 */
 	public List<Event> getEvents() {
-		List<Event> events = eventsRepo.findByAccountIdOrderByDateDesc(Utils
-				.getCurrentAccount().getId());
+		List<Event> events = eventsRepo.findByAccountIdOrderByDateDesc(Utils.getCurrentAccount().getId());
 		return events != null ? events : new LinkedList<Event>();
 	}
-	
+
 	/**
 	 * Returns list of all events for task
 	 * 
@@ -73,8 +83,7 @@ public class EventsService {
 	 * @return
 	 */
 	public Page<Event> getEvents(Pageable page) {
-		return eventsRepo.findByAccountId(Utils.getCurrentAccount().getId(),
-				page);
+		return eventsRepo.findByAccountId(Utils.getCurrentAccount().getId(), page);
 	}
 
 	/**
@@ -83,8 +92,7 @@ public class EventsService {
 	 * @return
 	 */
 	public List<Event> getUnread() {
-		List<Event> unread = eventsRepo.findByAccountIdAndUnreadTrue(Utils
-				.getCurrentAccount().getId());
+		List<Event> unread = eventsRepo.findByAccountIdAndUnreadTrue(Utils.getCurrentAccount().getId());
 		return unread != null ? unread : new LinkedList<Event>();
 	}
 
@@ -114,33 +122,37 @@ public class EventsService {
 					eventsRepo.save(event);
 					if (account.getEmail_notifications()) {
 						Locale locale = new Locale(account.getLanguage());
-						String eventStr = msg.getMessage(
-								((LogType) log.getType()).getCode(), null,
-								locale);
-						String subject = msg.getMessage(
-								"event.newEvent",
-								new Object[] { log.getTask().getId(),
-										Utils.getCurrentAccount(), eventStr },
-								locale);
-						String message = msg
-								.getMessage("event.newEvent.body",
-										new Object[] { account.toString(),
-												Utils.getCurrentAccount(),
-												eventStr, wlMessage,
-												log.getTask().getId() }, locale);
+						String eventStr = msg.getMessage(((LogType) log.getType()).getCode(), null, locale);
+						StringBuilder subject = new StringBuilder("[");
+						subject.append(taskID);
+						subject.append("] ");
+						subject.append(task.getName());
+						String type = task.getType().getCode();
+						Map<String, Object> model = new HashMap<String, Object>();
+						model.put("account", account);
+						model.put("application", Utils.getBaseURL());
+						model.put("task", task);
+						model.put("wlMessage", wlMessage);
+						model.put("log", log);
+						model.put("curAccount", Utils.getCurrentAccount());
+						model.put("eventStr", eventStr);
+						String message;
+						message = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
+								"email/" + account.getLanguage() + "/task.vm", "UTF-8", model);
 						LOG.info(account.getEmail());
-						LOG.info(subject);
+						LOG.info(subject.toString());
 						LOG.info(message);
-						// if(mailer.sendMail(mailer.NOTIFICATION, email,
-						// subject,
-						// message)){
+						Map<String, Resource> resources = resourceSrv.getBasicResourceMap();
+						resources.put(type, resourceSrv.getTaskTypeIcon(type));
+						mailer.sendMail(MailMail.NOTIFICATION, account.getEmail(), subject.toString(), message,
+								resources);
 					}
 				}
 			}
 		}
 	}
 
-	public void addSystemEvent(Account account, LogType type, String eventMsg) {
+	public void addProjectEvent(Account account, LogType type, Project project) {
 		Event event = new Event();
 		event.setAccount(account);
 		event.setWho(Utils.getCurrentAccount().toString());
@@ -148,25 +160,25 @@ public class EventsService {
 		event.setLogtype(type);
 		event.setDate(new Date());
 		event.setType(getEventType(type));
-		event.setMessage(eventMsg);
+		event.setMessage(project.toString());
 		eventsRepo.save(event);
 		if (account.getEmail_notifications()) {
 			Locale locale = new Locale(account.getLanguage());
 			String eventStr = msg.getMessage(type.getCode(), null, locale);
 			String subject = msg.getMessage("event.newSystemEvent",
-					new Object[] { Utils.getCurrentAccount(), eventStr },
-					locale);
-			String message = msg.getMessage(
-					"event.newSystemEvent.body",
-					new Object[] { account.toString(),
-							Utils.getCurrentAccount(), eventStr, eventMsg, },
-					locale);
-			LOG.info(account.getEmail());
-			LOG.info(subject);
-			LOG.info(message);
-			// if(mailer.sendMail(mailer.NOTIFICATION, email,
-			// subject,
-			// message)){
+					new Object[] { Utils.getCurrentAccount(), eventStr }, locale);
+
+			Map<String, Object> model = new HashMap<String, Object>();
+			model.put("account", account);
+			model.put("type", type);
+			model.put("application", Utils.getBaseURL());
+			model.put("project", project);
+			model.put("curAccount", Utils.getCurrentAccount());
+			String message;
+			message = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
+					"email/" + account.getLanguage() + "/project.vm", "UTF-8", model);
+			mailer.sendMail(MailMail.NOTIFICATION, account.getEmail(), subject, message,
+					resourceSrv.getBasicResourceMap());
 		}
 
 	}

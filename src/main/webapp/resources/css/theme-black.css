@@ -1,0 +1,96 @@
+a.theme {
+	color: white;
+}
+
+.caret.theme {
+	border-top-color: white;
+	border-bottom-color: white;
+}
+
+div.navbar.navbar-fixed-top.theme {
+	background-color: #282828;
+}
+
+div.modal-header.theme {
+	background-color: #282828;
+	color: white;
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+}
+
+thead.theme {
+	background: #282828;
+	color: white;
+}
+.agile-card {
+	color: inherit;
+	border: 1px solid;
+	padding: 5px;
+	margin-bottom: 5px;
+	border-color: lightgray;
+	background-color: white;
+}
+.agile-list{
+	color: inherit;
+	border: 1px solid;
+	padding: 5px;
+	margin-bottom: 5px;
+	border-color: lightgray;
+	background-color: #f5f5f5;
+}
+.table_sprint {
+	border-style: dashed;
+	border-width: 2px;
+	border-color: rgba(205, 236, 252, 1);
+	padding: 5px;
+/* 	border-radius: 5px; */
+}
+span.badge.theme{
+	background-color: #696969
+}
+span.badge.theme.zero{
+	color: #DD6264
+}
+.side-bar.theme{
+	background-color: #282828;
+}
+.nav-pills>li.active>a,.nav-pills>li.active>a:hover,.nav-pills>li.active>a:focus
+	{
+	color: #fff;
+	background-color: #696969;
+}
+ul.nav a:hover { color: lightgray !important; }
+
+.table-hover>tbody>tr:hover>td,.table-hover>tbody>tr:hover>th {
+	background-color: #b7b7b7;
+}
+span.tag.label.label-info.theme {
+  background-color: #282828;
+}
+.pagination>.active>a, .pagination>.active>span, .pagination>li>a:focus, .pagination>li>a:hover {
+  background-color: rgba(45, 45, 45, 0.2);
+}
+.bs-docs-sidebar .nav>.active:focus>a, .bs-docs-sidebar .nav>.active:hover>a,
+	.bs-docs-sidebar .nav>.active>a {
+	padding-left: 18px;
+	font-weight: 700;
+	color: #282828;
+	background-color: transparent;
+	border-left: 2px solid #282828;
+}
+.bs-docs-sidebar .nav>li>a:focus, .bs-docs-sidebar .nav>li>a:hover {
+	padding-left: 19px;
+	color: #282828;
+	text-decoration: none;
+	background-color: transparent;
+	border-left: 1px solid #282828;
+}
+.dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
+  color: white;
+  background-color: #282828;
+  background-image: none;
+  filter: none;
+}
+.btn.theme :focus, .btn.theme:hover {
+    color: ligthgray;
+}

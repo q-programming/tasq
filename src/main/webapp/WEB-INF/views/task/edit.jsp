@@ -172,12 +172,13 @@
 		</div>
 
 		<div style="margin: 10px auto; text-align: right;">
-			<button type="submit" class="btn btn-success">
-				<s:message code="task.edit" text="Edit"></s:message>
-			</button>
 			<span class="btn"
-				onclick="location.href='<c:url value="/task?id=${task.id}"/>';"><s:message
+				onclick="location.href='<c:url value="/task/${task.id}"/>';"><s:message
 					code="main.cancel" text="Cancel" /></span>
+			<button type="submit" class="btn btn-success">
+				<i class="fa fa-pencil"></i>&nbsp;<s:message code="task.edit" text="Edit"></s:message>
+			</button>
+			
 		</div>
 	</form:form>
 </div>

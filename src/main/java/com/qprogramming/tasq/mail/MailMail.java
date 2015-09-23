@@ -2,6 +2,7 @@ package com.qprogramming.tasq.mail;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.mail.MessagingException;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.Resource;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -87,8 +89,7 @@ public class MailMail {
 
 		Properties javaMailProperties = new Properties();
 		javaMailProperties.setProperty("mail.smtp.auth", smtpAuth);
-		javaMailProperties.setProperty("mail.smtp.starttls.enable",
-				smtpStarttls);
+		javaMailProperties.setProperty("mail.smtp.starttls.enable", smtpStarttls);
 		jmsi.setJavaMailProperties(javaMailProperties);
 		mailSender = jmsi;
 		return mailSender;
@@ -108,11 +109,10 @@ public class MailMail {
 	 * @param msg
 	 * @return true if there were no errors while sending
 	 */
-	public boolean sendMail(int type, String to, String subject, String msg) {
-		MimeMessage message = ((JavaMailSenderImpl) mailSender)
-				.createMimeMessage();
-		MimeMessageHelper helper = new MimeMessageHelper(message, encoding);
+	public boolean sendMail(int type, String to, String subject, String msg, Map<String, Resource> resources) {
 		try {
+			MimeMessage message = ((JavaMailSenderImpl) mailSender).createMimeMessage();
+			MimeMessageHelper helper = new MimeMessageHelper(message, true, encoding);
 			switch (type) {
 			case NOTIFICATION:
 				helper.setFrom(NOTIFICATION_TASQ, NOTIFICATION_TASQ_PERSONAL);
@@ -132,10 +132,15 @@ public class MailMail {
 			}
 			helper.setTo(to);
 			helper.setSubject(subject);
-			helper.setText(msg);
+			helper.setText(msg, true);
+			// Load logos and other stuff
+			for (Map.Entry<String, Resource> entry : resources.entrySet()) {
+				helper.addInline(entry.getKey(), entry.getValue());
+			}
 			LOG.debug("Sending e-mail to:" + to);
 			((JavaMailSenderImpl) mailSender).send(message);
 		} catch (MailSendException e) {
+			LOG.error(e.getLocalizedMessage());
 			return false;
 		} catch (MessagingException e) {
 			LOG.error(e.getLocalizedMessage());

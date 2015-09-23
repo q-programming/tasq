@@ -2,19 +2,19 @@
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <script language="javascript" type="text/javascript"
-	src="<c:url value="/resources/js/jquery.jqplot.js"/>"></script>
+	src="<c:url value="/resources/js/jquery.jqplot.min.js"/>"></script>
 <script language="javascript" type="text/javascript"
-	src="<c:url value="/resources/js/jqplot.highlighter.js"/>"></script>
+	src="<c:url value="/resources/js/jqplot.highlighter.min.js"/>"></script>
 <script language="javascript" type="text/javascript"
 	src="<c:url value="/resources/js/jqplot.enhancedLegendRenderer.min.js"/>"></script>
 <script language="javascript" type="text/javascript"
-	src="<c:url value="/resources/js/jqplot.dateAxisRenderer.js"/>"></script>
+	src="<c:url value="/resources/js/jqplot.dateAxisRenderer.min.js"/>"></script>
 <script language="javascript" type="text/javascript"
 	src="<c:url value="/resources/js/jqplot.cursor.min.js"/>"></script>
 <%-- <link href="<c:url value="/resources/css/docs.min.css" />" --%>
 <!-- 	rel="stylesheet" media="screen" /> -->
 <link rel="stylesheet" type="text/css"
-	href="<c:url value="/resources/css/jquery.jqplot.css"/>" />
+	href="<c:url value="/resources/css/jquery.jqplot.min.css"/>" />
 
 <c:set var="tasks_text">
 	<s:message code="task.tasks" text="Tasks" />
@@ -38,9 +38,9 @@
 		<div class="row">
 		<a class="anchor" id="sprint"></a>
 		<div class="col-lg-2 col-md-3 col-sm-4">
-			<div id="menu" style="position: fixed;">
-				<nav>
-					<ul class="nav nav-pills nav-stacked">
+			<div id="menu" class="bs-docs-sidebar hidden-print affix">
+<!-- 				<nav> -->
+					<ul class="nav bs-docs-sidenav">
 						<li>
 							<a href="#" id="releaseNoMenu" class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-expanded="false">
 								<h4><b>${ActiveRelease}</b> <span class="caret"></h4></span>
@@ -51,12 +51,12 @@
 									<li><a href="#" class="releaseMenuNo" data-number="${release.release}"><s:message code="agile.release"/> ${release.release}</a></li>
 								</c:forEach>
    							</ul>
-						<li><a href="#chart"><div class="side-bar theme"></div><s:message code="agile.release.chart"/></a></li>
-						<li><a href="#time_chart"><div class="side-bar theme"></div><s:message code="agile.timelogged"/></a></li>
-						<li><a href="#events"><div class="side-bar theme"></div><s:message code="agile.events"/></a></li>
-						<li><a href="#releaseTotal"><div class="side-bar theme"></div><s:message code="agile.total"/></a></li>
+						<li><a href="#chart"><s:message code="agile.release.chart"/></a></li>
+						<li><a href="#time_chart"><s:message code="agile.timelogged"/></a></li>
+						<li><a href="#events"><s:message code="agile.events"/></a></li>
+						<li><a href="#releaseTotal"><s:message code="agile.total"/></a></li>
 					</ul>
-				</nav>
+<!-- 				</nav> -->
 			</div>
 		</div>
 	</div>
@@ -101,7 +101,7 @@ $(document).ready(function() {
 	var plot2;
 	var lastSprint = "${ActiveRelease}";
 	var avatarURL = '<c:url value="/../avatar/"/>';
-	var taskURL = '<c:url value="/task?id="/>';
+	var taskURL = '<c:url value="/task/"/>';
 	var relaseTxt = '<s:message code="agile.release"/>&nbsp;';
 	var loading_indicator = '<div id="loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td>';
 	var release = '${param.release}';
@@ -371,33 +371,6 @@ function renderReleaseData(releaseNo){
 				return '<s:message code="task.state.tasksprintremove"/>';
 			case "ESTIMATE":
 				return '<s:message code="task.state.estimatechange"/>';
-			default:
-				return 'not yet added ';
-		};
-	}
-	function getTaskType(type){
-		switch(type){
-			case "TASK":
-				var type='<i class="fa fa-lg fa-fw fa-check-square"></i> ';
-				return type;
-			case "USER_STORY":
-				var type='<i class="fa fa-lg fa-fw fa-lightbulb-o"></i> ';
-				return type;
-			case "ISSUE":
-				var type='<i class="fa fa-lg fa-fw fa-exclamation-triangle"></i> ';
-				return type;
-			case "BUG":
-				var type='<i class="fa fa-lg fa-fw fa-bug"></i> ';
-				return type;
-			case "IDLE":
-				var type='<i class="fa fa-lg fa-fw fa-coffee"></i> ';
-				return type;
-			case "SUBTASK":
-				var type='<i class="fa fa-lg fa-fw fa-check-circle-o"></i> ';
-				return type;
-			case "SUBBUG":
-				var type='<i class="fa fa-lg fa-fw fa-bug"></i> ';
-				return type;
 			default:
 				return 'not yet added ';
 		};

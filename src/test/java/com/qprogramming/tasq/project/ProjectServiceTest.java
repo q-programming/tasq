@@ -1,10 +1,8 @@
 package com.qprogramming.tasq.project;
 
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -15,13 +13,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import com.qprogramming.tasq.MockSecurityContext;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountRepository;
 import com.qprogramming.tasq.account.AccountService;
@@ -31,6 +27,7 @@ import com.qprogramming.tasq.projects.NewProjectForm;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectRepository;
 import com.qprogramming.tasq.projects.ProjectService;
+import com.qprogramming.tasq.test.MockSecurityContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectServiceTest {
@@ -39,6 +36,7 @@ public class ProjectServiceTest {
 
 	private static final String PROJ_NAME = "Test project";
 	private static final String PROJ_ID = "TEST";
+	private static final String USERNAME = "user";
 
 	private ProjectService projSrv;
 
@@ -67,7 +65,7 @@ public class ProjectServiceTest {
 
 	@Before
 	public void setUp() {
-		testAccount = new Account(EMAIL, "", Roles.ROLE_ADMIN);
+		testAccount = new Account(EMAIL, "", USERNAME, Roles.ROLE_ADMIN);
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
@@ -123,9 +121,9 @@ public class ProjectServiceTest {
 
 	@Test
 	public void activateTest() {
-		when(projRepoMock.findById(1L)).thenReturn(testProject);
+		when(projRepoMock.findByProjectId(PROJ_ID)).thenReturn(testProject);
 		when(projRepoMock.save(testProject)).thenReturn(testProject);
-		Assert.assertNotNull(projSrv.activate(1L));
+		Assert.assertNotNull(projSrv.activateForCurrentUser(PROJ_ID));
 		verify(accSrvMock, times(1)).update(testAccount);
 	}
 
@@ -139,7 +137,7 @@ public class ProjectServiceTest {
 	public void canEditTest() {
 		when(projRepoMock.findById(1L)).thenReturn(testProject);
 		Assert.assertTrue(projSrv.canEdit(1L));
-		testAccount.setRole(Roles.ROLE_USER);
+		testAccount.setRole(Roles.ROLE_POWERUSER);
 		Assert.assertTrue(projSrv.canEdit(1L));
 
 	}

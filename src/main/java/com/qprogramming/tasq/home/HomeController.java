@@ -4,7 +4,13 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +19,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.events.Event;
+import com.qprogramming.tasq.events.EventsService;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.Utils;
@@ -20,8 +28,6 @@ import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
-import com.qprogramming.tasq.events.Event;
-import com.qprogramming.tasq.events.EventsService;
 
 @Controller
 public class HomeController {
@@ -29,6 +35,12 @@ public class HomeController {
 	private TaskService taskSrv;
 	private ProjectService projSrv;
 	private EventsService eventSrv;
+
+	@Value("${home.directory}")
+	private String appHomeDir;
+
+	@Value("${skip.landing.page}")
+	private String skipLandingPage;
 
 	@Autowired
 	public HomeController(TaskService taskSrv, ProjectService projSrv) {
@@ -41,12 +53,15 @@ public class HomeController {
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String index(Account account, Model model) {
 		if (account == null) {
-			return "homeNotSignedIn";
+			if (Boolean.parseBoolean(skipLandingPage)) {
+				return "signin";
+			} else {
+				return "homeNotSignedIn";
+			}
 		} else {
 			List<Project> usersProjects = projSrv.findAllByUser();
 			if (usersProjects.size() == 0
-					&& (account.getRole().equals(Roles.ROLE_VIEWER) || account
-							.getRole().equals(Roles.ROLE_REPORTER))) {
+					&& (account.getRole().equals(Roles.ROLE_VIEWER) || account.getRole().equals(Roles.ROLE_USER))) {
 				return "homeNewUser";
 			}
 			List<Task> allTasks = new LinkedList<Task>();
@@ -59,26 +74,20 @@ public class HomeController {
 			for (Task task : allTasks) {
 				TaskState state = (TaskState) task.getState();
 				if (task.getRawDue_date() != null
-						&& (task.getRawDue_date().getTime()
-								- System.currentTimeMillis() < week)
-						& !TaskState.CLOSED.equals(state)) {
+						&& (task.getRawDue_date().getTime() - System.currentTimeMillis() < week)
+								& !TaskState.CLOSED.equals(state)) {
 					dueTasks.add(task);
 				}
-				if (task.getAssignee() == null
-						& !TaskState.CLOSED.equals(state)) {
+				if (task.getAssignee() == null & !TaskState.CLOSED.equals(state)) {
 					unassignedTasks.add(task);
 				}
-				if (Utils.getCurrentAccount().equals(task.getAssignee())
-						&& !TaskState.CLOSED.equals(state)) {
+				if (Utils.getCurrentAccount().equals(task.getAssignee()) && !TaskState.CLOSED.equals(state)) {
 					currentAccTasks.add(task);
 				}
 			}
-			Collections.sort(dueTasks, new TaskSorter(
-					TaskSorter.SORTBY.DUE_DATE, false));
-			Collections.sort(currentAccTasks, new TaskSorter(
-					TaskSorter.SORTBY.PRIORITY, true));
-			Collections.sort(unassignedTasks, new TaskSorter(
-					TaskSorter.SORTBY.PRIORITY, true));
+			Collections.sort(dueTasks, new TaskSorter(TaskSorter.SORTBY.DUE_DATE, false));
+			Collections.sort(currentAccTasks, new TaskSorter(TaskSorter.SORTBY.PRIORITY, true));
+			Collections.sort(unassignedTasks, new TaskSorter(TaskSorter.SORTBY.PRIORITY, true));
 
 			model.addAttribute("myTasks", currentAccTasks);
 			model.addAttribute("unassignedTasks", unassignedTasks);
@@ -86,10 +95,26 @@ public class HomeController {
 			return "homeSignedIn";
 		}
 	}
+
 	@RequestMapping(value = "/eventCount", method = RequestMethod.GET)
-	@ResponseBody int getEventCount(){
-		List<Event> events = eventSrv.getUnread(); 
+	@ResponseBody
+	int getEventCount() {
+		List<Event> events = eventSrv.getUnread();
 		return events.size();
 	}
-	
+
+	@RequestMapping(value = "/help", method = RequestMethod.GET)
+	public String help(Model model, HttpServletRequest request) {
+		// Utils.setHttpRequest(request);
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String lang = "en";
+		// if (!(authentication instanceof AnonymousAuthenticationToken)) {
+		// lang = Utils.getCurrentAccount().getLanguage();
+		// if (lang == null) {
+		// }
+		// }
+		model.addAttribute("projHome", appHomeDir);
+		return "help/" + lang;
+	}
+
 }

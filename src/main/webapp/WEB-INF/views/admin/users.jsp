@@ -21,6 +21,9 @@
 <div class="white-frame" style="display: table; width: 100%;height:80vh">
 <div style="display: table-caption; margin-left: 10px;">
 		<ul class="nav nav-tabs" style="border-bottom: 0">
+			<li><a style="color: black"
+				href="<c:url value="/manage/app" />"> <i class="fa fa-cogs"></i>
+					<s:message code="menu.manage" text="Manage application" /></a></li>
 			<li class="active"><a style="color: black" href="#"> <i class="fa fa-users"></i>	
 					<s:message code="menu.manage.users " text="Manage users" /></a></li>
 			<li><a style="color: black" href="<c:url value="/manage/tasks"/>"> <i
@@ -172,7 +175,7 @@ function fetchManagedUsers(page,term){
 		$("#loading").remove();
 // 		console.log(data);
 		var avatarURL = '<c:url value="/../avatar/"/>';
-		var userURL = '<c:url value="/user?id="/>';
+		var userURL = '<c:url value="/user/"/>';
 		var email_txt = '<s:message code="user.send.mail"/>';
 		for ( var j = 0; j < data.content.length; j++) {
 			var content = data.content[j];
@@ -181,14 +184,18 @@ function fetchManagedUsers(page,term){
 			}else{
 				online = '<i class="fa fa-user a-tooltip" style="color:lightgray" title="<s:message code="main.offline"/>"></i>';
 			}
+			var confirmed = '';
+			if(!content.confirmed){
+				confirmed = '<span><i style="color: red" class="fa fa-exclamation-triangle a-tooltip"	title="<s:message code="panel.emails.notconfirmed"/>"></i></span>';
+			}
 			var username = content.name + " " + content.surname;
-			var user = userURL + content.id; 
+			var user = userURL + content.username; 
 			var avatar = '<img data-src="holder.js/30x30" style="height: 30px; float: left; padding-right: 10px;" src="' + avatarURL + +data.content[j].id +'.png"/>';
 			var action;
 			if(content.id == userID){
 				action='';
 			}else{
-				action='<a href="mailto:'+content.email+'" title="'+email_txt+' ('+content.email+')"><i class="fa fa-envelope" style="color: black;"></span></a>';
+				action='<a href="mailto:'+content.email+'" title="'+email_txt+' ('+content.email+')"><i class="fa fa-envelope" style="color: black;"></span>'+ confirmed +'</a>';
 			}
 			var row = '<tr class="listeduser"><td>'
 						+ online

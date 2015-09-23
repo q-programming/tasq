@@ -59,10 +59,13 @@
 					<s:message code="task.assign" />
 				</h5>
 		</div>
+		<div class="form-inline">
 			<div class="form-group">
 				<input id="assignee_auto" class="form-control" type="text" value="" style="width:300px;">
 				<input id="assignee" type="hidden" name="assignee">
+				&nbsp;<span id="assignMe" class="btn btn-default "><i class="fa fa-user"></i>&nbsp;<s:message code="task.assignme"/></span>
 			</div>
+		</div>
 			<span class="help-block"><s:message code="task.assign.help" /></span>
 		<c:set var="type_error">
 			<form:errors path="type" />
@@ -145,12 +148,12 @@
 					<s:message code="task.estimate.help.pattern" /> </span>
 			</div>
 		</div>
-		<label class="checkbox" style="display: inherit; font-weight: normal">
-			<input type="checkbox" name="no_estimation" id="no_estimation"
-			value="true"> <s:message code="task.withoutEstimation" />&nbsp;<i class="fa fa-question-circle a-tooltip"
-			title="<s:message code ="task.withoutEstimation.help"/>"
-			data-placement="right" data-html="true"></i>
-		</label>
+<!-- 		<label class="checkbox" style="display: inherit; font-weight: normal"> -->
+<!-- 			<input type="checkbox" name="no_estimation" id="no_estimation" -->
+<%-- 			value="true"> <s:message code="task.withoutEstimation" />&nbsp;<i class="fa fa-question-circle a-tooltip" --%>
+<%-- 			title="<s:message code ="task.withoutEstimation.help"/>" --%>
+<!-- 			data-placement="right" data-html="true"></i> -->
+<!-- 		</label> -->
 		<%----------DUE DATE --------------------------%>
 		<div>
 			<div class="mod-header">
@@ -217,9 +220,7 @@ $(document).ready(function($) {
 	$("#due_date").val(currentDue);
 
 	//INIT ALL
-	getDefaultTaskType();
-	getDefaultAssignee();
-	getDefaultTaskPriority();
+	getDefaults()
 	
 	$("#assignee_auto").click(function(){
 		 $(this).select();
@@ -232,6 +233,12 @@ $(document).ready(function($) {
 	});
 	var cache = {};
 	//Assignee
+	
+	$("#assignMe").click(function() {
+		$("#assignee").val("${user.id}");
+		$("#assignee_auto").val("${user}");
+	});
+	
 	$("#assignee_auto").autocomplete({
 		minLength : 1,
 		delay : 500,
@@ -267,40 +274,40 @@ $(document).ready(function($) {
 			}
 		}
 	});
-	function getDefaultTaskType(){
-		var thisType = $("#SUBTASK");
-		var type = thisType.data('type');
-   	 	$("#task_type").html(thisType.html());
-   		$("#type").val(type);
-	}
-	function getDefaultTaskPriority(){
-		var url='<c:url value="/project/getDefaultTaskPriority"/>';
+	
+	
+	
+	
+	function getDefaults(){
+		var url='<c:url value="/project/getDefaults"/>';
 		$.get(url,{id:$("#projects_list").val()},function(result,status){
-				var thisPriority = $("#"+result);
+				project = result;
+				//TYPE
+				var thisType = $("#SUBTASK");
+				var type = thisType.data('type');
+		   	 	$("#task_type").html(thisType.html());
+		   		$("#type").val(type);
+				//ASSIGNEE
+   				$("#assignee").val(null);
+				$("#assignee_auto").val(null);
+				if(!project.defaultAssignee){
+					$("#assignee").val(null);
+				}
+				else{
+					$("#assignee_auto").val(project.defaultAssignee.name + " " + project.defaultAssignee.surname);
+					$("#assignee").val(project.defaultAssignee.id);
+					$("#assignee_auto").removeClass("input-italic");
+				}
+				checkIfEmpty();
+				//PRIORITY
+		   		var thisPriority = $("#"+project.default_priority);
 				var priority = thisPriority.data('priority');
 		   	 	$("#task_priority").html(thisPriority.html());
 		   		$("#priority").val(priority);
+		   		
 		});
 	}
-	
-	function getDefaultAssignee(){
-		$("#assignee").val(null);
-		$("#assignee_auto").val(null);
-		var url='<c:url value="/project/getDefaultAssignee"/>';
-		$.get(url,{id:$("#projects_list").val()},function(result,status){
-			if(!result){
-				$("#assignee").val(null);
-			}
-			else{
-				$("#assignee_auto").val(result.name + " " + result.surname);
-				$("#assignee").val(result.id);
-				$("#assignee_auto").removeClass("input-italic");
-				
-			}
-		});
-		checkIfEmpty();
-	}
-	
+
 	function checkIfEmpty(){
 		if(!$("#assignee").val()){
 			var unassign = '<s:message code="task.unassigned" />';

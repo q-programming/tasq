@@ -1,9 +1,9 @@
 package com.qprogramming.tasq.task;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -13,16 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.agile.DisplaySprint;
 import com.qprogramming.tasq.agile.Sprint;
-import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
-import com.qprogramming.tasq.task.comments.Comment;
-import com.qprogramming.tasq.task.comments.CommentsRepository;
+import com.qprogramming.tasq.support.sorters.DisplayTaskSorter;
 import com.qprogramming.tasq.task.watched.WatchedTask;
 import com.qprogramming.tasq.task.watched.WatchedTaskService;
 import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
@@ -38,8 +36,8 @@ public class TaskRestController {
 	private WorkLogService wlSrv;
 
 	@Autowired
-	public TaskRestController(TaskService taskSrv, WatchedTaskService watchSrv,
-			AgileService sprintSrv, ProjectService projSrv,WorkLogService wlSrv) {
+	public TaskRestController(TaskService taskSrv, WatchedTaskService watchSrv, AgileService sprintSrv,
+			ProjectService projSrv, WorkLogService wlSrv) {
 		this.taskSrv = taskSrv;
 		this.watchSrv = watchSrv;
 		this.sprintSrv = sprintSrv;
@@ -69,14 +67,14 @@ public class TaskRestController {
 	}
 
 	@RequestMapping(value = "/task/getSubTasks", method = RequestMethod.GET)
-	public List<DisplayTask> showSubTasks(@RequestParam String taskID,
-			HttpServletResponse response) {
+	public List<DisplayTask> showSubTasks(@RequestParam String taskID, HttpServletResponse response) {
 		response.setContentType("application/json");
 		List<Task> allSubTasks = taskSrv.findSubtasks(taskID);
 		List<DisplayTask> result = new ArrayList<DisplayTask>();
 		for (Task task : allSubTasks) {
 			result.add(new DisplayTask(task));
 		}
+		Collections.sort(result, new DisplayTaskSorter(DisplayTaskSorter.SORTBY.ID, true));
 		return result;
 	}
 
@@ -90,8 +88,7 @@ public class TaskRestController {
 	 * @return
 	 */
 	@RequestMapping(value = "/getTasks", method = RequestMethod.GET)
-	public List<DisplayTask> showTasks(@RequestParam Long projectID,
-			@RequestParam(required = false) String taskID,
+	public List<DisplayTask> showTasks(@RequestParam Long projectID, @RequestParam(required = false) String taskID,
 			@RequestParam String term, HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(projectID);
@@ -113,10 +110,10 @@ public class TaskRestController {
 		}
 		return result;
 	}
-	
+
 	@RequestMapping(value = "/task/getWorklogs", method = RequestMethod.GET)
 	public List<DisplayWorkLog> getWorklogs(@RequestParam String taskID) {
 		return wlSrv.getTaskDisplayEvents(taskID);
 	}
-	
+
 }

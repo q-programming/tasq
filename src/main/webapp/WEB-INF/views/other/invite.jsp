@@ -36,35 +36,23 @@
 	</form>
 </div>
 <script>
-	$("form#invite :input")
-			.each(
-					function() {
-						$('#inviteField')
-								.blur(
-										function() {
-											var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
-											if (regex.test(this.value)) {
-												console.log("valid");
-												$("#invite_div").removeClass(
-														'has-error');
-												$("#invite_div").addClass(
-														'has-success');
-												$("#valid").show();
-												$("#invalid").hide();
-												$("#inviteBtn").removeAttr(
-														"disabled");
-											} else {
-												$("#invite_div").addClass(
-														'has-error');
-												$("#invite_div").removeClass(
-														'has-success');
-												$("#valid").hide();
-												$("#invalid").show();
-												$("#inviteBtn").attr(
-														"disabled", 'disabled');
-											}
-										});
-					});
-
-	
+	$("form#invite :input").each(function() {
+		$('#inviteField').blur(function() {
+			var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+				if (regex.test(this.value)) {
+					console.log("valid");
+					$("#invite_div").removeClass('has-error');
+					$("#invite_div").addClass('has-success');
+					$("#valid").show();
+					$("#invalid").hide();
+					$("#inviteBtn").removeAttr("disabled");
+				} else {
+					$("#invite_div").addClass('has-error');
+					$("#invite_div").removeClass('has-success');
+					$("#valid").hide();
+					$("#invalid").show();
+					$("#inviteBtn").attr("disabled", 'disabled');
+				}
+		});
+	});
 </script>
