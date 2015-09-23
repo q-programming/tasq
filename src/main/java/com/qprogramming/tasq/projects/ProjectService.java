@@ -3,8 +3,6 @@ package com.qprogramming.tasq.projects;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,8 +20,7 @@ public class ProjectService {
 	private UserService userSrv;
 
 	@Autowired
-	public ProjectService(ProjectRepository projRepo, AccountService accSrv,
-			UserService userSrv) {
+	public ProjectService(ProjectRepository projRepo, AccountService accSrv, UserService userSrv) {
 		this.projRepo = projRepo;
 		this.accSrv = accSrv;
 		this.userSrv = userSrv;
@@ -48,7 +45,11 @@ public class ProjectService {
 
 	public List<Project> findAllByUser() {
 		Account curent_user = Utils.getCurrentAccount();
-		return projRepo.findByParticipants_Id(curent_user.getId());
+		if (curent_user.getIsAdmin()) {
+			return projRepo.findAll();
+		} else {
+			return projRepo.findByParticipants_Id(curent_user.getId());
+		}
 	}
 
 	public List<Project> findAllByUser(Long id) {
@@ -103,15 +104,13 @@ public class ProjectService {
 	public boolean canEdit(Project project) {
 		Account currentAccount = Utils.getCurrentAccount();
 		return project.getAdministrators().contains(currentAccount)
-				|| project.getParticipants().contains(currentAccount)
-				|| Roles.isAdmin();
+				|| project.getParticipants().contains(currentAccount) || Roles.isAdmin();
 
 	}
 
 	public boolean canAdminister(Project project) {
 		Account currentAccount = Utils.getCurrentAccount();
-		return project.getAdministrators().contains(currentAccount)
-				|| Roles.isAdmin();
+		return project.getAdministrators().contains(currentAccount) || Roles.isAdmin();
 
 	}
 }
