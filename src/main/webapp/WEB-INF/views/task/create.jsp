@@ -82,10 +82,10 @@
 			<form:errors path="description" element="p" class="text-danger" />
 		</div>
 		<%-------------------------Project ----------------------------------%>
-		<c:if test="${not empty param.project}">
-			<c:set var="chosenProject" value="${param.project}"/>
+		<c:if test="${not empty param.p}">
+			<c:set var="chosenProject" value="${param.p}"/>
 		</c:if>
-		<c:if test="${empty param.project}">
+		<c:if test="${empty param.p}">
 			<c:set var="chosenProject" value="${user.active_project}"/>
 		</c:if>
 		<a class="anchor" id="projectA"></a>

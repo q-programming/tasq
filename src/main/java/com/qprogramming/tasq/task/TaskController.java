@@ -627,6 +627,7 @@ public class TaskController {
 		return new ResultData(ResultData.ERROR, msg.getMessage("error.unknown", null, Utils.getCurrentLocale()));
 	}
 
+	@Transactional
 	@RequestMapping(value = "/task/changePoints", method = RequestMethod.POST)
 	@ResponseBody
 	public ResultData changeStoryPoints(@RequestParam(value = "id") String taskID,
