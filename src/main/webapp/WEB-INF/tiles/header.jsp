@@ -85,12 +85,14 @@
 							<ul class="dropdown-menu">
 								<c:forEach items="${last_projects}" var="l_project">
 									<c:if test="${l_project.id eq user.active_project}">
-										<li><a href="<c:url value="/agile/${l_project.projectId}/"/>"><b>${l_project.name}
+										<li><a
+											href="<c:url value="/agile/${l_project.projectId}/"/>"><b>${l_project.name}
 													(<s:message code="agile.board.${l_project.agile}" />)
 											</b></a></li>
 									</c:if>
 									<c:if test="${l_project.id ne user.active_project}">
-										<li><a href="<c:url value="/agile/${l_project.projectId}/"/>">${l_project.name}
+										<li><a
+											href="<c:url value="/agile/${l_project.projectId}/"/>">${l_project.name}
 												(<s:message code="agile.board.${l_project.agile}" />)
 										</a></li>
 									</c:if>
@@ -119,43 +121,31 @@
 			<ul class="nav navbar-nav pull-right">
 				<security:authorize access="!isAuthenticated()">
 					<li>
-						<div class="dropdown" style="padding-top: 5px">
-							<a class="dropdown-toggle btn theme" type="button"
-								id="dropdownMenu1" data-toggle="dropdown"><s:message
-									code="menu.signin" text="Sign in" /></a>
-							<ul class="dropdown-menu">
-								<li style="margin: 10px;">
-									<form action='<s:url value="/j_spring_security_check"/>'
-										method="post">
-										<div class="form-group">
-											<div class="col-xs-2" style="padding-bottom: 5px">
-												<input type="text" class="form-control input-sm"
-													id="inputEmail" placeholder="${email_txt}"
-													name="j_username">
-											</div>
-											<div class="col-xs-2 signin">
-												<input type="password" class="form-control input-sm"
-													id="inputPassword" placeholder="${password_txt}"
-													name="j_password">
-											</div>
-											<div class="col-xs-2 signin">
-												<div class="checkbox">
-													<label> <input type="checkbox"
-														name="_spring_security_remember_me"> <s:message
-															code="menu.remmember" />
-													</label>
-												</div>
-											</div>
-											<div class="col-xs-2 signin">
-												<button type="submit" class="btn btn-default btn-sm">
-													<s:message code="menu.signin" />
-												</button>
-											</div>
-										</div>
-									</form>
-								</li>
-							</ul>
-						</div>
+						<div style="display: table">
+							<form action='<s:url value="/j_spring_security_check"/>'
+								method="post">
+								<div style="display: table-row">
+									<div style="display: table-cell; padding-right: 10px;">
+										<input type="text" class="form-control input-sm"
+											id="inputEmail" placeholder="${email_txt}" name="j_username">
+									</div>
+									<div style="display: table-cell padding-right: 10px;">
+										<input type="password" class="form-control input-sm"
+											style="display: table-cell" id="inputPassword"
+											placeholder="${password_txt}" name="j_password">
+										
+									</div>
+									<div style="padding: 5px 0px 3px 0px;">
+									<input type="checkbox"
+										name="_spring_security_remember_me"> <span class="theme text" style="padding-right: 5px;"><s:message
+											code="menu.remmember" /></span>
+									<button type="submit" class="btn btn-default btn-sm">
+										<s:message code="menu.signin" />
+									</button>
+									</div>
+								</div>
+							</form>
+						</div> 
 					</li>
 				</security:authorize>
 				<%-- Logged in user --%>
@@ -165,9 +155,12 @@
 							action="<s:url value="/tasks"></s:url>">
 							<input id="searchField" type="text" name="query"
 								class="form-control search-query input-sm"
-								placeholder="<s:message code="task.search"/>"
-								/>
-							<div id="tagsLoading" class="ui-widget-content ui-corner-all" style="display:none"><i class="fa fa-cog fa-spin"></i>&nbsp;<s:message code="main.loading" /></div>
+								placeholder="<s:message code="task.search"/>" />
+							<div id="tagsLoading" class="ui-widget-content ui-corner-all"
+								style="display: none">
+								<i class="fa fa-cog fa-spin"></i>&nbsp;
+								<s:message code="main.loading" />
+							</div>
 						</form></li>
 					<li>
 						<div style="text-align: right;">
@@ -177,10 +170,11 @@
 									title="<s:message
 										code="menu.manage" text="Settings" />"
 									data-placement="bottom"><i class="fa fa-wrench"></i></a>
-								<ul class="dropdown-menu" style="text-align: left;margin-top: 7px;">
+								<ul class="dropdown-menu"
+									style="text-align: left; margin-top: 7px;">
 									<li><a href="<s:url value="/manage/app"></s:url>"><i
-											class="fa fa-cogs"></i> <s:message code="menu.manage" text="Manage application" /></a>
-									</li>
+											class="fa fa-cogs"></i> <s:message code="menu.manage"
+												text="Manage application" /></a></li>
 									<li><a href="<s:url value="/manage/users"></s:url>"><i
 											class="fa fa-users"></i> <s:message code="menu.manage.users" /></a></li>
 									<li><a href="<s:url value="/manage/tasks"></s:url>"><i
@@ -203,10 +197,11 @@
 					</li>
 					<li>
 						<div class="pull-right">
-							<a href="#" data-toggle="dropdown"><img src="<c:url value="/../avatar/${user.id}.png"/>"
-								style="height: 50px; padding-left: 5px;" ><span class="caret theme"></span>
-							</a>
-							
+							<a href="#" data-toggle="dropdown"><img
+								src="<c:url value="/../avatar/${user.id}.png"/>"
+								style="height: 50px; padding-left: 5px;"><span
+								class="caret theme"></span> </a>
+
 							<c:if test="${eventCount gt 0}">
 								<div class="message_div">
 									<span class="badge theme">${eventCount}</span>
@@ -216,21 +211,19 @@
 								<li><a href='<c:url value="/settings"/>'><i
 										class="fa fa-cog"></i> <s:message code="menu.settings"
 											text="Settings" /></a></li>
-								<li>
-								<c:if test="${eventCount eq 0}">
-									<a href='<c:url value="/events"/>'>
-									<i class="fa fa-bell-o"></i>&nbsp;<s:message code="events.events"/>
-								 </a>
-								</c:if>
-								<c:if test="${eventCount gt 0}">
-									<a href='<c:url value="/events"/>'>
-									<i class="fa fa-bell"></i>&nbsp;<s:message code="events.events"/>&nbsp;(${eventCount})
-								 	</a>
-								</c:if>
-								 </li>
-								 <li><a href='<c:url value="/watching"/>'>
-								<i class="fa fa-eye"></i>&nbsp;<s:message code="events.watching"/>
-								 </a></li>
+								<li><c:if test="${eventCount eq 0}">
+										<a href='<c:url value="/events"/>'> <i
+											class="fa fa-bell-o"></i>&nbsp;<s:message
+												code="events.events" />
+										</a>
+									</c:if> <c:if test="${eventCount gt 0}">
+										<a href='<c:url value="/events"/>'> <i class="fa fa-bell"></i>&nbsp;<s:message
+												code="events.events" />&nbsp;(${eventCount})
+										</a>
+									</c:if></li>
+								<li><a href='<c:url value="/watching"/>'> <i
+										class="fa fa-eye"></i>&nbsp;<s:message code="events.watching" />
+								</a></li>
 								<li class="divider"></li>
 								<li><a href='<s:url value="/logout"></s:url>'><i
 										class="fa fa-power-off"></i> <s:message code="menu.logout"

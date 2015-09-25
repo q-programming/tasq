@@ -2,6 +2,9 @@ a.theme {
 	color: white;
 }
 
+.theme.text{
+	color:white
+}
 .caret.theme {
 	border-top-color: white;
 	border-bottom-color: white;
