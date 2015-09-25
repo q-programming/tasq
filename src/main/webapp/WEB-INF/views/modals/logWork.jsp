@@ -70,11 +70,16 @@
 	</div>
 </div>
 <script>
+	$('#logWorkform').on('shown.bs.modal', function() {
+		console.log("show!");
+		$("#loggedWork").focus();
+	})
 	$(".worklog").click(function() {
 		var taskID = $(this).data('taskid');
 		var title = '<i class="fa fa-calendar"></i> <s:message code="task.logWork" /> ' + taskID;
 		$("#myModalLabel").html(title);
 		$("#modal_taskID").val(taskID);
+		$("#loggedWork").focus();
 	});
 
 	$(".datepicker").datepicker({

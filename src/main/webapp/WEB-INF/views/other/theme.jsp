@@ -6,6 +6,7 @@ ${user.theme.font.link}
 <c:set var="color" value="${user.theme.color}"></c:set>
 <c:set var="invcolor" value="${user.theme.invColor}"></c:set>
 <c:set var="rgbcolor">${user.theme.rgbColor.r},${user.theme.rgbColor.g},${user.theme.rgbColor.b}</c:set>
+<c:set var="rgbcolor10">${user.theme.rgbColor.r + 70},${user.theme.rgbColor.g + 70},${user.theme.rgbColor.b + 70}</c:set>
 <c:set var="rgbinvcolor">${user.theme.rgbInvColor.r},${user.theme.rgbInvColor.g},${user.theme.rgbInvColor.b}</c:set>
 <style>
 body {
@@ -86,7 +87,7 @@ thead.theme {
 }
 
 span.badge.theme {
-	background-color: ${color};
+	background-color: rgb(${rgbcolor10});
 }
 
 span.badge.theme.zero {

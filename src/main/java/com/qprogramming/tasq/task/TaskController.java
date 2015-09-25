@@ -515,38 +515,39 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
-			if (!projectSrv.canEdit(task.getProject()) || !Roles.isPowerUser()) {
+			if (Roles.isPowerUser() | projectSrv.canEdit(task.getProject())) {
+				try {
+					if (loggedWork.matches("[0-9]+")) {
+						loggedWork += "h";
+					}
+					Period logged = PeriodHelper.inFormat(loggedWork);
+					StringBuilder message = new StringBuilder(loggedWork);
+					Date when = new Date();
+					if (dateLogged != "" && timeLogged != "") {
+						when = Utils.convertStringToDateAndTime(dateLogged + " " + timeLogged);
+						message.append(BR);
+						message.append("Date: ");
+						message.append(dateLogged + " " + timeLogged);
+					}
+					Period remaining = null;
+					if (remainingTxt != null && remainingTxt != "") {
+						if (remainingTxt.matches("[0-9]+")) {
+							remainingTxt += "h";
+						}
+						remaining = PeriodHelper.inFormat(remainingTxt);
+						wlSrv.addDatedWorkLog(task, remainingTxt, when, LogType.ESTIMATE);
+					}
+					wlSrv.addTimedWorkLog(task, message.toString(), when, remaining, logged, LogType.LOG);
+					MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.logWork.logged",
+							new Object[] { loggedWork, task.getId() }, Utils.getCurrentLocale()));
+				} catch (IllegalArgumentException e) {
+					MessageHelper.addErrorAttribute(ra,
+							msg.getMessage("error.estimateFormat", null, Utils.getCurrentLocale()));
+					return "redirect:" + request.getHeader("Referer");
+				}
+			} else {
 				MessageHelper.addErrorAttribute(ra,
 						msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
-				return "redirect:" + request.getHeader("Referer");
-			}
-			try {
-				if (loggedWork.matches("[0-9]+")) {
-					loggedWork += "h";
-				}
-				Period logged = PeriodHelper.inFormat(loggedWork);
-				StringBuilder message = new StringBuilder(loggedWork);
-				Date when = new Date();
-				if (dateLogged != "" && timeLogged != "") {
-					when = Utils.convertStringToDateAndTime(dateLogged + " " + timeLogged);
-					message.append(BR);
-					message.append("Date: ");
-					message.append(dateLogged + " " + timeLogged);
-				}
-				Period remaining = null;
-				if (remainingTxt != null && remainingTxt != "") {
-					if (remainingTxt.matches("[0-9]+")) {
-						remainingTxt += "h";
-					}
-					remaining = PeriodHelper.inFormat(remainingTxt);
-					wlSrv.addDatedWorkLog(task, remainingTxt, when, LogType.ESTIMATE);
-				}
-				wlSrv.addTimedWorkLog(task, message.toString(), when, remaining, logged, LogType.LOG);
-				MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.logWork.logged",
-						new Object[] { loggedWork, task.getId() }, Utils.getCurrentLocale()));
-			} catch (IllegalArgumentException e) {
-				MessageHelper.addErrorAttribute(ra,
-						msg.getMessage("error.estimateFormat", null, Utils.getCurrentLocale()));
 				return "redirect:" + request.getHeader("Referer");
 			}
 		}

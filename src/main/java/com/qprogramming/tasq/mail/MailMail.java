@@ -58,15 +58,15 @@ public class MailMail {
 	public static final int OTHER = -1;
 
 	private static final String TASQ = "tasq@tasq.com";
-	private static final String TASQ_PERSONAL = "TasQ";
+	private static final String TASQ_PERSONAL = "Tasker";
 	private static final String TASQ_REGISTER = "registration@tasq.com";
-	private static final String TASQ__REGISTER_PERSONAL = "Registration at TasQ";
+	private static final String TASQ__REGISTER_PERSONAL = "Registration at Tasker";
 	private static final String NOTIFICATION_TASQ = "notification@tasq.com";
-	private static final String NOTIFICATION_TASQ_PERSONAL = "TasQ notifier";
+	private static final String NOTIFICATION_TASQ_PERSONAL = "Tasker notifier";
 	private static final String MESSAGE_TASQ = "messages@tasq.com";
-	private static final String MESSAGE_TASQ_PERSONAL = "TasQ messenger";
+	private static final String MESSAGE_TASQ_PERSONAL = "Tasker messenger";
 	private static final String PROJECT_TASQ = "projects@tasq.com";
-	private static final String PROJECT_TASQ_PERSONAL = "TasQ projects";
+	private static final String PROJECT_TASQ_PERSONAL = "Tasker projects";
 
 	@Autowired
 	private MailSender mailSender;
