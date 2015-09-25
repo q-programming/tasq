@@ -22,6 +22,9 @@
 <c:if test="${(myfn:contains(task.project.administrators,user) || is_admin || task.owner.id == user.id)}">
 	<c:set var="can_edit" value="true" />
 </c:if>
+<c:if test="${((myfn:contains(task.project.participants,user) && is_user) || task.owner.id == user.id ) || is_admin}">
+	<c:set var="project_participant" value="true" />
+</c:if>
 <c:if test="${task.assignee.id == user.id}">
 	<c:set var="is_assignee" value="true" />
 </c:if>
@@ -36,7 +39,7 @@
 	<%----------------------EDIT MENU-----------------------------%>
 	<div>
 		<div class="pull-right">
-			<c:if test="${is_user  && task.state ne'CLOSED'}">
+			<c:if test="${project_participant  && task.state ne'CLOSED'}">
 				<a class="btn btn-default btn-sm a-tooltip" href="#"
 					data-toggle="dropdown"> <i class="fa fa-lg fa-pencil"></i>
 				</a>
@@ -80,7 +83,7 @@
 
 				</ul>
 			</c:if>
-			<c:if test="${task.state eq'CLOSED'}">
+			<c:if test="${task.state eq'CLOSED' && project_participant}">
 				<a href="<c:url value="/task/create"/>?linked=${task.id}&p=${task.project.id}"
 					class="btn btn-default btn-sm a-tooltip" title="<s:message code="task.linked.create" />">
 					<i class="fa fw fa-plus"></i>
@@ -135,7 +138,7 @@
 					<tr>
 						<td style="width: 80px;"><s:message code="task.state" /></td>
 						<td class="left-margin"><c:choose>
-								<c:when test="${can_edit && user.isPowerUser || is_assignee}">
+								<c:when test="${(can_edit && user.isPowerUser) || is_assignee}">
 									<div class="dropdown pointer">
 										<%
 											pageContext.setAttribute("states", TaskState.values());
@@ -168,7 +171,7 @@
 					<tr>
 						<td><s:message code="task.priority" /></td>
 						<td class="left-margin"><c:choose>
-								<c:when test="${can_edit && user.isPowerUser || is_assignee}">
+								<c:when test="${(can_edit && user.isPowerUser) || is_assignee}">
 									<div class="dropdown pointer">
 										<%
 											pageContext.setAttribute("priorities",
@@ -388,12 +391,14 @@
 									code="task.related" />
 							</span>
 						</h5>
-						<a class="btn btn-default btn-xxs a-tooltip pull-right linkButton" style="min-width: 37px;"
-							href="#" title="" data-placement="top"
-							data-original-title="<s:message code="task.link"/>"> <i
-							class="fa fa-plus"></i><i
-							class="fa fa-lg fa-link fa-flip-horizontal"></i>
-						</a>
+						<c:if test="${project_participant}">
+							<a class="btn btn-default btn-xxs a-tooltip pull-right linkButton" style="min-width: 37px;"
+								href="#" title="" data-placement="top"
+								data-original-title="<s:message code="task.link"/>"> <i
+								class="fa fa-plus"></i><i
+								class="fa fa-lg fa-link fa-flip-horizontal"></i>
+							</a>
+						</c:if>
 					</div>
 					<div id="linkDiv" style="display: none" class="form-group">
 						<form id="linkTask" name="mainForm" method="post"
@@ -483,12 +488,14 @@
 									code="tasks.subtasks" />
 							</span>
 						</h5>
-						<a class="btn btn-default btn-xxs a-tooltip pull-right" style="min-width: 37px;"
-							href="<c:url value="/task/${task.id}/subtask"/>"
-							data-placement="top"
-							data-original-title="<s:message code="task.subtasks.add"/>">
-							<i class="fa fa-plus"></i> <i class="fa fa-lg fa-sitemap"></i>
-						</a>
+						<c:if test="${project_participant}">
+							<a class="btn btn-default btn-xxs a-tooltip pull-right" style="min-width: 37px;"
+								href="<c:url value="/task/${task.id}/subtask"/>"
+								data-placement="top"
+								data-original-title="<s:message code="task.subtasks.add"/>">
+								<i class="fa fa-plus"></i> <i class="fa fa-lg fa-sitemap"></i>
+							</a>
+						</c:if>
 					</div>
 					<div id="subTask" class="form-group togglerContent"
 						style="padding-left: 15px;">
@@ -543,10 +550,12 @@
 								class="fa fa-lg fa-files-o"></i> <s:message code="task.files" />
 							</span>
 						</h5>
-						<a class="btn btn-default btn-xxs a-tooltip pull-right addFileButton" href="#" data-toggle="modal"
-						data-target="#files_task" data-taskID="${task.id}">
-							<i class="fa fa-plus"></i> <i class="fa fa-lg fa-file"></i>
-						</a>
+						<c:if test="${project_participant}">
+							<a class="btn btn-default btn-xxs a-tooltip pull-right addFileButton" href="#" data-toggle="modal"
+							data-target="#files_task" data-taskID="${task.id}">
+								<i class="fa fa-plus"></i> <i class="fa fa-lg fa-file"></i>
+							</a>
+						</c:if>
 					</div>
 					<div>
 						<table id="filesToggle"
@@ -583,7 +592,7 @@
 									</c:if>
 									<a href="<c:url value="/task/${task.id}/file?get=${file}"></c:url>">${file}</a>
 									</td>
-									<c:if test="${can_edit && user.isPowerUser || is_assignee}">
+									<c:if test="${(can_edit && user.isPowerUser) || is_assignee}">
 										<td style="width: 30px">
 											<div class="buttons_panel pull-right">
 												<a
@@ -637,7 +646,7 @@
 									src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />
 								<a href="<c:url value="/user/${task.assignee.username}"/>">${task.assignee}</a>
 							</c:if>
-							<c:if test="${user.isUser}">
+							<c:if test="${project_participant}">
 								<span class="btn btn-default btn-sm a-tooltip assignToTask"
 									title="<s:message code="task.assign"/>" data-toggle="modal"
 									data-target="#assign_modal" data-taskID="${task.id}"
@@ -785,7 +794,7 @@
 						</div>
 					</form>
 				</div>
-				<c:if test="${user.isUser}">
+				<c:if test="${project_participant}">
 					<button id="comments_add" class="btn btn-default btn-sm">
 						<i class="fa fa-comment"></i>&nbsp;
 						<s:message code="comment.add" text="Add Comment" />
