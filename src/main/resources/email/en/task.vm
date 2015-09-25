@@ -172,7 +172,7 @@ table.worklog_table td {
 <body bgcolor="#f6f6f6">
 	<div class="content">
 		<div class="header" style="background-color:${account.theme.color}">
-			<img src='cid:logo'>
+			<img src='cid:logo' style="height:50px; padding:2px">
 		</div>
 		<table class="main">
 			<tbody>

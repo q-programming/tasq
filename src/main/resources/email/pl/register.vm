@@ -149,7 +149,7 @@ ul li {
 <body bgcolor="#f6f6f6">
 	<div class="content">
 		<div class="header">
-			<img src='cid:logo'>&nbsp;TasQ : Potwierdzenie konta
+			<img src='cid:logo' style="height:50px; padding:2px">&nbsp;TasQ : Potwierdzenie konta
 		</div>
 		<table class="main">
 			<tbody>

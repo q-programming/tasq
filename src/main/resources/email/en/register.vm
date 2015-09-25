@@ -149,7 +149,7 @@ ul li {
 <body bgcolor="#f6f6f6">
 	<div class="content">
 		<div class="header">
-			<img src='cid:logo'>&nbsp;TasQ : Confirm registration
+			<img src='cid:logo' style="height:50px; padding:2px">&nbsp;TasQ : Confirm registration
 		</div>
 		<table class="main">
 			<tbody>
