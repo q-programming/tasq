@@ -146,7 +146,7 @@
 										<div id="task_state" class="image-combo a-tooltip"
 											data-toggle="dropdown" data-placement="top"
 											title="<s:message code="main.click"/>">
-											<div id="current_state"
+											<div id="current_state" data-state="${task.state}"
 												style="float: left; padding-right: 5px;">
 												<t:state state="${task.state}" />
 											</div>
@@ -178,6 +178,7 @@
 															TaskPriority.values());
 										%>
 										<div id="task_priority" class="image-combo a-tooltip"
+											data-priority="${task.priority}"
 											data-toggle="dropdown" data-placement=top
 											title="<s:message code="main.click"/>">
 											<t:priority priority="${task.priority}" />
@@ -955,27 +956,31 @@ $(document).ready(function($) {
 // 			change state
 	$(".change_state").click(function() {
 	  	 var state = $(this).data('state');
+	  	 var current_state = $("#current_state").data('state');
 	  	 var newState = $(this).html();
 		 var subTasks = "${task.subtasks}";
-	   	 if(state == 'CLOSED'){
-	   		 	 $('#modal_subtaskCount').html(subTasks);
-	    		 $('#close_task').modal({
-	    	            show: true,
-	    	            keyboard: false,
-	    	            backdrop: 'static'
-	    	     });
-	   	 	}
-	    	else{
-				$.post('<c:url value="/task/changeState"/>',{id:taskID,state:state},function(result){
-					if(result.code == 'ERROR'){
-						showError(result.message);
-					}
-					else{
-						$("#current_state").html(newState);
-						showSuccess(result.message);
-					}
-					});
-		    	}
+		 if(state!=current_state){
+		   	 if(state == 'CLOSED'){
+		   		 	 $('#modal_subtaskCount').html(subTasks);
+		    		 $('#close_task').modal({
+		    	            show: true,
+		    	            keyboard: false,
+		    	            backdrop: 'static'
+		    	     });
+		   	 	}
+		    	else{
+					$.post('<c:url value="/task/changeState"/>',{id:taskID,state:state},function(result){
+						if(result.code == 'ERROR'){
+							showError(result.message);
+						}
+						else{
+							$("#current_state").data('state',state);
+							$("#current_state").html(newState);
+							showSuccess(result.message);
+						}
+						});
+			    	}
+				}
 			});
 			
 			$(".linkButton").click(function() {

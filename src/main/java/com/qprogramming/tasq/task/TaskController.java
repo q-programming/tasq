@@ -771,7 +771,9 @@ public class TaskController {
 				MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
 				return "redirect:" + request.getHeader("Referer");
 			}
-			if (projectSrv.canEdit(task.getProject()) && Roles.isPowerUser()) {
+			TaskPriority newPriority = TaskPriority.valueOf(priority);
+			if (!task.getPriority().equals(newPriority) && projectSrv.canEdit(task.getProject())
+					&& Roles.isPowerUser()) {
 				StringBuilder message = new StringBuilder();
 				String oldPriority = "";
 				// TODO temporary due to old DB
@@ -780,7 +782,7 @@ public class TaskController {
 				}
 				message.append(oldPriority);
 				message.append(CHANGE_TO);
-				task.setPriority(TaskPriority.valueOf(priority));
+				task.setPriority(newPriority);
 				message.append(task.getPriority().toString());
 				taskSrv.save(task);
 				wlSrv.addActivityLog(task, message.toString(), LogType.PRIORITY);
@@ -1355,12 +1357,15 @@ public class TaskController {
 			return false;
 		}
 		Account assignee = Utils.getCurrentAccount();
-		task.setAssignee(assignee);
-		task.setLastUpdate(new Date());
-		taskSrv.save(task);
-		wlSrv.addActivityLog(task, Utils.changedFromTo(previous, assignee.toString()), LogType.ASSIGNED);
-		watchSrv.startWatching(task);
-		return true;
+		if (!assignee.equals(task.getAssignee())) {
+			task.setAssignee(assignee);
+			task.setLastUpdate(new Date());
+			taskSrv.save(task);
+			wlSrv.addActivityLog(task, Utils.changedFromTo(previous, assignee.toString()), LogType.ASSIGNED);
+			watchSrv.startWatching(task);
+			return true;
+		}
+		return false;
 	}
 
 	/**
