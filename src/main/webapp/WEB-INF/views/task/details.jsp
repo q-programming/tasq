@@ -99,7 +99,7 @@
 				</c:if>
 			</button>
 
-			<c:if test="${can_edit && user.isPowerUser}">
+			<c:if test="${can_edit}">
 				<a class="btn btn-default btn-sm a-tooltip delete_btn"
 					href="<c:url value="/task/delete?id=${task.id}"/>"
 					title="<s:message code="task.delete" text="Delete task" />"
@@ -902,10 +902,11 @@ $(document).ready(function($) {
 	});
 	
 	$("#task_link").autocomplete({
-				minLength : 1,
+				minLength : 2,
 				delay : 500,
 				//define callback to format results
 				source : function(request, response) {
+					$(this).closest(".ui-menu").hide();
 					$("#linkLoader").show();
 					var url = '<c:url value="/getTasks?taskID=${task.id}&projectID=${task.project.id}"/>';
 					$.getJSON(url,request,function(result) {
@@ -917,9 +918,20 @@ $(document).ready(function($) {
 									value : item.id,
 									}
 								}));
+							$(this).closest(".ui-menu").show();
 							});
 					},
-					//define select handler
+				open: function(e,ui) {
+				    	var termTemplate = "<span class='ui-autocomplete-term'>%s</span>";
+				        var acData = $(this).data('uiAutocomplete');
+				        var styledTerm = termTemplate.replace('%s', acData.term);
+				        acData.menu.element.find('a').each(function () {
+				          	var me = $(this);
+				           	var keywords = acData.term.split(' ').join('|');
+				           	me.html(me.text().replace(new RegExp("(" + keywords + ")", "gi"), '<b>$1</b>'));
+				        });
+				},
+				//define select handler
 				select : function(event, ui) {
 					if (ui.item) {
 						event.preventDefault();
@@ -1156,6 +1168,7 @@ $(document).on("click",".delete_btn",function(e) {
 
 	$( "#tagsinput" ).autocomplete({
     	source: function(request, response) {
+    		$(this).closest(".ui-menu").hide();
     		$("#searchFieldHelp").show();
     		var term = request.term;
     		if ( term in cache ) {
@@ -1174,6 +1187,7 @@ $(document).on("click",".delete_btn",function(e) {
                     results.push(itemToAdd);
                 });
                 cache[ term ] = results;
+                $(this).closest(".ui-menu").show();
                 return response(results);
     		});
     	},

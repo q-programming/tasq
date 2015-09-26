@@ -603,3 +603,4 @@ li.wider {
 .inputcheck.valid{
 	color: green;
 }
+.ui-autocomplete-term { font-weight: bold;}
