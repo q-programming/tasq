@@ -171,7 +171,7 @@
 					<tr>
 						<td><s:message code="task.priority" /></td>
 						<td class="left-margin"><c:choose>
-								<c:when test="${(can_edit && user.isPowerUser) || is_assignee}">
+								<c:when test="${(can_edit || user.isPowerUser) || is_assignee}">
 									<div class="dropdown pointer">
 										<%
 											pageContext.setAttribute("priorities",

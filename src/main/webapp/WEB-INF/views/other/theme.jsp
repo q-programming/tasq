@@ -142,4 +142,20 @@ span.tag.label.label-info.theme {
 .btn.theme :focus, .btn.theme:hover {
     color: rgba(${rgbinvcolor}, 0.5);
 }
+.back-to-top {
+	display: none;
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+	color: ${invcolor};
+	text-decoration: none;
+	padding: 10px 15px 10px 15px;
+	background-color: rgba(${rgbcolor}, 0.4);
+	text-align: center;
+}
+.back-to-top:hover {
+	text-decoration: none;
+	color: ${invcolor};
+	background-color: rgba(${rgbcolor}, 0.7);
+}
 </style>
