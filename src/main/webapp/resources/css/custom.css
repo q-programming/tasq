@@ -194,13 +194,6 @@ table.togglerContent {
 	/* 	border-radius: 5px; */
 }
 
-.state_hover {
-	border-style: dashed;
-	border-width: 2px;
-	border-color: blue;
-	/* 	border-radius: 5px; */
-}
-
 .state_highlight {
 	background: blue;
 }
