@@ -57,15 +57,15 @@ public class MailMail {
 	public static final int REGISTER = 3;
 	public static final int OTHER = -1;
 
-	private static final String TASQ = "tasq@tasq.com";
+	private static final String TASQ = "tasq@tasq.qprogramming.pl";
 	private static final String TASQ_PERSONAL = "Tasker";
-	private static final String TASQ_REGISTER = "registration@tasq.com";
+	private static final String TASQ_REGISTER = "registration@tasq.qprogramming.pl";
 	private static final String TASQ__REGISTER_PERSONAL = "Registration at Tasker";
-	private static final String NOTIFICATION_TASQ = "notification@tasq.com";
+	private static final String NOTIFICATION_TASQ = "notification@tasq.qprogramming.pl";
 	private static final String NOTIFICATION_TASQ_PERSONAL = "Tasker notifier";
 	private static final String MESSAGE_TASQ = "messages@tasq.com";
 	private static final String MESSAGE_TASQ_PERSONAL = "Tasker messenger";
-	private static final String PROJECT_TASQ = "projects@tasq.com";
+	private static final String PROJECT_TASQ = "projects@tasq.qprogramming.pl";
 	private static final String PROJECT_TASQ_PERSONAL = "Tasker projects";
 
 	@Autowired
@@ -82,7 +82,6 @@ public class MailMail {
 	public MailSender mailSender() {
 		jmsi = new JavaMailSenderImpl();
 		jmsi.setHost(host);
-
 		jmsi.setPort(Integer.parseInt(port));
 		jmsi.setUsername(username);
 		jmsi.setPassword(pass);

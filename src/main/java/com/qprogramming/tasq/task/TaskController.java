@@ -658,7 +658,7 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
-			if (!projectSrv.canEdit(task.getProject()) && !Roles.isPowerUser()) {
+			if (!projectSrv.canEdit(task.getProject()) || !Roles.isPowerUser()) {
 				MessageHelper.addErrorAttribute(ra,
 						msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
 				return "redirect:" + request.getHeader("Referer");
@@ -696,41 +696,44 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		String previous = getAssignee(task);
 		if (task != null) {
-			if (!Roles.isPowerUser()) {
-				throw new TasqAuthException(msg);
-			}
-			if (task.getState().equals(TaskState.CLOSED)) {
-				ResultData result = taskIsClosed(ra, request, task);
-				MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
-				return "redirect:" + request.getHeader("Referer");
+			if (Roles.isPowerUser() | projectSrv.canEdit(task.getProject())) {
+				if (task.getState().equals(TaskState.CLOSED)) {
+					ResultData result = taskIsClosed(ra, request, task);
+					MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
+					return "redirect:" + request.getHeader("Referer");
 
-			}
-			if (("").equals(email) && task.getAssignee() != null) {
-				task.setAssignee(null);
-				task.setLastUpdate(new Date());
-				taskSrv.save(task);
-				wlSrv.addActivityLog(task, Utils.changedFromTo(previous, UNASSIGNED), LogType.ASSIGNED);
-
-			} else {
-				Account assignee = accSrv.findByEmail(email);
-				if (assignee != null && !assignee.equals(task.getAssignee())) {
-					// check if can edit
-					if (!projectSrv.canEdit(task.getProject())) {
-						MessageHelper.addErrorAttribute(ra,
-								msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
-						return "redirect:" + request.getHeader("Referer");
-					}
-					task.setAssignee(assignee);
+				}
+				if (("").equals(email) && task.getAssignee() != null) {
+					task.setAssignee(null);
 					task.setLastUpdate(new Date());
 					taskSrv.save(task);
-					watchSrv.addToWatchers(task, assignee);
-					wlSrv.addActivityLog(task, Utils.changedFromTo(previous, assignee.toString()), LogType.ASSIGNED);
-					MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.assigned",
-							new Object[] { task.getId(), assignee.toString() }, Utils.getCurrentLocale()));
+					wlSrv.addActivityLog(task, Utils.changedFromTo(previous, UNASSIGNED), LogType.ASSIGNED);
+
+				} else {
+					Account assignee = accSrv.findByEmail(email);
+					if (assignee != null && !assignee.equals(task.getAssignee())) {
+						// check if can edit
+						if (!projectSrv.canEdit(task.getProject())) {
+							MessageHelper.addErrorAttribute(ra,
+									msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
+							return "redirect:" + request.getHeader("Referer");
+						}
+						task.setAssignee(assignee);
+						task.setLastUpdate(new Date());
+						taskSrv.save(task);
+						watchSrv.addToWatchers(task, assignee);
+						wlSrv.addActivityLog(task, Utils.changedFromTo(previous, assignee.toString()),
+								LogType.ASSIGNED);
+						MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.assigned",
+								new Object[] { task.getId(), assignee.toString() }, Utils.getCurrentLocale()));
+					}
 				}
+			} else {
+				throw new TasqAuthException(msg);
 			}
 		}
 		return "redirect:" + request.getHeader("Referer");
+
 	}
 
 	private String getAssignee(Task task) {

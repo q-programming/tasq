@@ -21,12 +21,10 @@
 <c:set var="confirmPassword_txt">
 	<s:message code="signup.confirmPassword" />
 </c:set>
-<p style="text-align: center;
-  border-radius: 5px;
-  background: papayawhip;
-  padding: 10px;
-  width: 700px;
-  margin: 0 auto 20px auto;"><i class="fa fa-lg fa-exclamation-circle"></i>&nbsp;Please note that confirmation mail sending is currently disabled and you will have to be manually confirmed by administrator &nbsp;</p>
+<!-- UNCOMMENT IF YOU DON'T HAVE SMTP -->
+<!-- <p style="text-align: center;border-radius: 5px;background: papayawhip;padding: 10px;width: 700px; margin: 0 auto 20px auto;"> -->
+<!-- 	<i class="fa fa-lg fa-exclamation-circle"></i>&nbsp;Please note that confirmation mail sending is currently disabled and you will have to be manually confirmed by administrator &nbsp; -->
+<!-- </p> -->
 <form:form class="form-narrow form-horizontal" method="post"
 	modelAttribute="signupForm">
 	<fieldset>

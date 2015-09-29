@@ -144,6 +144,7 @@ public class EventsService {
 						LOG.info(message);
 						Map<String, Resource> resources = resourceSrv.getBasicResourceMap();
 						resources.put(type, resourceSrv.getTaskTypeIcon(type));
+						resources.put("avatar", resourceSrv.getUserAvatar());
 						mailer.sendMail(MailMail.NOTIFICATION, account.getEmail(), subject.toString(), message,
 								resources);
 					}

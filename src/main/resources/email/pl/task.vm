@@ -191,7 +191,7 @@ table.worklog_table td {
 							</p>
 						#else
 							<p>
-								<a href="${application}/user/=${curAccount.username}">${curAccount}</a>
+								<img src='cid:avatar' style="height:50px; padding:2px"><a href="${application}/user/=${curAccount.username}">${curAccount}</a>
 								${eventStr} :
 							</p>
 							<blockquote class="quote">${wlMessage}</blockquote>

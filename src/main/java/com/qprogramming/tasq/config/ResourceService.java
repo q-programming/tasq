@@ -13,13 +13,16 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 
+import com.qprogramming.tasq.support.Utils;
+
 @Service
 public class ResourceService implements ResourceLoaderAware {
 
 	@Value("${home.directory}")
 	private String tasqRootDir;
 	private static final String AVATAR_DIR = "avatar";
-	private static final String SMALL_LOGO = "small_logo.png";
+	private static final String SMALL_LOGO = "small_logo";
+	private static final String PNG = ".png";
 	private ResourceLoader resourceLoader;
 
 	private static final Logger LOG = LoggerFactory.getLogger(ResourceService.class);
@@ -49,11 +52,15 @@ public class ResourceService implements ResourceLoaderAware {
 	}
 
 	public Resource getLogo() throws IOException {
-		return getResource("file:" + getAvatarDir() + SMALL_LOGO);
+		return getResource("file:" + getAvatarDir() + SMALL_LOGO + PNG);
+	}
+
+	public Resource getUserAvatar() {
+		return getResource("file:" + getAvatarDir() + Utils.getCurrentAccount().getId() + PNG);
 	}
 
 	public Resource getTaskTypeIcon(String type) {
-		return getResource("classpath:email/img/" + type + ".png");
+		return getResource("classpath:email/img/" + type + PNG);
 	}
 
 	private String getAvatarDir() {
