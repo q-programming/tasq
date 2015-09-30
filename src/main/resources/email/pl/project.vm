@@ -1,8 +1,9 @@
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta name="viewport" content="width=device-width">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Przypisano do projektu[${project.projectId}] ${project.name}</title>
+<title>${project}</title>
 <style>
 * {
 	margin: 0;
@@ -15,6 +16,7 @@
 img {
 	vertical-align: middle;
 	max-width: 100%;
+	display:block;
 }
 
 body {
@@ -77,13 +79,15 @@ table.footer-wrap a {
 }
 
 .header {
-	background-color: #2c5aa0;
-	color: white;
-	padding-left: 5px;
-	padding-bottom: 5px;
-	padding-top: 5px;
+	background-color: ${account.theme.color};
+	color: ${account.theme.invColor};
+	padding: 5px;
 	font-weight: bold;
+	vertical-align: middle;
 }
+.text {
+	vertical-align: middle;
+	}
 
 h1, h2, h3 {
 	font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande",
@@ -168,12 +172,12 @@ table.worklog_table td {
 	padding: 10px;
 }
 </style>
-<style type="text/css"></style>
 </head>
 <body bgcolor="#f6f6f6">
 	<div class="content">
 		<div class="header" style="background-color:${account.theme.color}">
 			<img src='cid:logo' style="height:50px; padding:2px">
+			&nbps;${project}
 		</div>
 		<table class="main">
 			<tbody>

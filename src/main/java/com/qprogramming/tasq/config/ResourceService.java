@@ -1,10 +1,14 @@
 package com.qprogramming.tasq.config;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
+
+import org.imgscalr.Scalr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +25,8 @@ public class ResourceService implements ResourceLoaderAware {
 	@Value("${home.directory}")
 	private String tasqRootDir;
 	private static final String AVATAR_DIR = "avatar";
-	private static final String SMALL_LOGO = "small_logo";
+	private static final String SMALL = "small_";
+	private static final String LOGO = "logo";
 	private static final String PNG = ".png";
 	private ResourceLoader resourceLoader;
 
@@ -52,11 +57,16 @@ public class ResourceService implements ResourceLoaderAware {
 	}
 
 	public Resource getLogo() throws IOException {
-		return getResource("file:" + getAvatarDir() + SMALL_LOGO + PNG);
+		return getResource("file:" + getAvatarDir() + SMALL + LOGO + PNG);
 	}
 
 	public Resource getUserAvatar() {
-		return getResource("file:" + getAvatarDir() + Utils.getCurrentAccount().getId() + PNG);
+		try {
+			resizeAvatar();
+		} catch (IOException e) {
+			LOG.error(e.getMessage());
+		}
+		return getResource("file:" + getAvatarDir() + SMALL + Utils.getCurrentAccount().getId() + PNG);
 	}
 
 	public Resource getTaskTypeIcon(String type) {
@@ -65,6 +75,22 @@ public class ResourceService implements ResourceLoaderAware {
 
 	private String getAvatarDir() {
 		return tasqRootDir + File.separator + AVATAR_DIR + File.separator;
+	}
+
+	private void resizeAvatar() throws IOException {
+		String avatar = getAvatarDir() + Utils.getCurrentAccount().getId() + PNG;
+		String resizedavatar = getAvatarDir() + SMALL + Utils.getCurrentAccount().getId() + PNG;
+		BufferedImage originalImage = ImageIO.read(new File(avatar));
+		BufferedImage scaledImg = Scalr.resize(originalImage, 50);
+		ImageIO.write(scaledImg, "png", new File(resizedavatar));
+	}
+
+	public void clean() {
+		String resizedavatar = getAvatarDir() + SMALL + Utils.getCurrentAccount().getId() + PNG;
+		File file = new File(resizedavatar);
+		if (file.exists()) {
+			file.delete();
+		}
 	}
 
 }

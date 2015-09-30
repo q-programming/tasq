@@ -147,6 +147,7 @@ public class EventsService {
 						resources.put("avatar", resourceSrv.getUserAvatar());
 						mailer.sendMail(MailMail.NOTIFICATION, account.getEmail(), subject.toString(), message,
 								resources);
+						resourceSrv.clean();
 					}
 				}
 			}

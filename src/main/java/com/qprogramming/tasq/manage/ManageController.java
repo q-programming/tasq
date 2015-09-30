@@ -39,7 +39,7 @@ public class ManageController {
 	private static final String AVATAR_DIR = "avatar";
 	private static final String PNG = ".png";
 	private static final String LOGO = "logo";
-	private static final String SMALL_LOGO = "small_logo";
+	private static final String SMALL = "small_";
 
 	private static final Logger LOG = LoggerFactory.getLogger(ManageController.class);
 
@@ -146,7 +146,7 @@ public class ManageController {
 	private void resizeLogo() throws IOException {
 		BufferedImage originalImage = ImageIO.read(new File(getAvatarDir() + LOGO + PNG));
 		BufferedImage scaledImg = Scalr.resize(originalImage, 50);
-		ImageIO.write(scaledImg, "png", new File(getAvatarDir() + SMALL_LOGO + PNG));
+		ImageIO.write(scaledImg, "png", new File(getAvatarDir() + SMALL + LOGO + PNG));
 	}
 
 	private String getAvatarDir() {

@@ -1,6 +1,7 @@
 package com.qprogramming.tasq.home;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +16,11 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.events.Event;
 import com.qprogramming.tasq.events.EventsService;
+import com.qprogramming.tasq.projects.DisplayProject;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.ProjectSorter;
+import com.qprogramming.tasq.task.DisplayTask;
 import com.qprogramming.tasq.task.Task;
 
 @Secured("ROLE_USER")
@@ -34,7 +37,7 @@ public class HomeControllerAdvice {
 	}
 
 	@ModelAttribute("last_projects")
-	public List<Project> getLastProjects() {
+	public List<DisplayProject> getLastProjects() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (!(authentication instanceof AnonymousAuthenticationToken)) {
 			// Get lasts 5 projects
@@ -43,20 +46,28 @@ public class HomeControllerAdvice {
 			List<Project> projects = currentAccount.getLast_visited_p();
 			Collections.sort(projects, new ProjectSorter(ProjectSorter.SORTBY.LAST_VISIT,
 					Utils.getCurrentAccount().getActive_project(), true));
-			return projects;
+			List<DisplayProject> result = new LinkedList<DisplayProject>();
+			for (Project project : projects) {
+				result.add(new DisplayProject(project));
+			}
+			return result;
 		}
 		return null;
 	}
 
 	@ModelAttribute("last_tasks")
-	public List<Task> getLastTasks() {
+	public List<DisplayTask> getLastTasks() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (!(authentication instanceof AnonymousAuthenticationToken)) {
 			// Get lasts 5 Tasks
 			Account current_account = Utils.getCurrentAccount();
 			current_account = accSrv.findByUsername(current_account.getUsername());
 			List<Task> tasks = current_account.getLast_visited_t();
-			return tasks;
+			List<DisplayTask> result = new LinkedList<DisplayTask>();
+			for (Task task : tasks) {
+				result.add(new DisplayTask(task));
+			}
+			return result;
 		}
 		return null;
 	}
