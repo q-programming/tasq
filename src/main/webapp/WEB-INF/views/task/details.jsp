@@ -732,8 +732,9 @@
 			<%--------------------------------- Comments -----------------------------%>
 			<div id="comments" class="tab-pane fade in active">
 				<table class="table table-hover button-table">
+					<thead><th id="sorter" class="time-header clickable"><span id="indicator"><i class="fa fa-caret-down"></i></span>&nbsp;Date</th></thead>
 					<c:forEach items="${comments}" var="comment">
-						<tr id="c${comment.id}">
+						<tr id="c${comment.id}" data-date="${comment.date}">
 							<td>
 								<div>
 									<img data-src="holder.js/30x30"
@@ -1264,6 +1265,37 @@ $(document).on("click",".delete_btn",function(e) {
 	}
 	</c:if>
 });
+$('#sorter').click(function() {
+	var table = $(this).parents('table').eq(0)
+	var rows = table.find("tr:not(:has('th'))").toArray().sort(function (a,b){
+		var dateA = convertToDate($(a).attr("data-date"));
+		var dateB = convertToDate($(b).attr("data-date"));
+		return dateA - dateB;
+	});
+	this.asc = !this.asc
+	if (!this.asc) {
+		rows = rows.reverse();
+		$("#indicator").html('<i class="fa fa-caret-down">');
+	} else {
+		$("#indicator").html('<i class="fa fa-caret-up">');
+	}
+	for (var i = 0; i < rows.length; i++) {
+		table.append(rows[i])
+	}
+});
+
+function convertToDate(str){
+	var reggie = /(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})/;
+	var dateArray = reggie.exec(str); 
+	return new Date(
+	    (+dateArray[3]),
+	    (+dateArray[2])-1, // Careful, month starts at 0!
+	    (+dateArray[1]),
+	    (+dateArray[4]),
+	    (+dateArray[5])
+	);
+}
+
 function getEventTypeMsg(type){
 	switch(type){
 		<c:forEach items="${types}" var="enum_type">

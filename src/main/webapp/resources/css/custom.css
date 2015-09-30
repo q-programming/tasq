@@ -271,6 +271,11 @@ span.badge.left {
 	float: right;
 	padding-left: 10px;
 }
+.time-header{
+	font-size: smaller;
+	width: 110px;
+    text-align: right;
+}
 
 .input-italic {
 	font-style: italic;
