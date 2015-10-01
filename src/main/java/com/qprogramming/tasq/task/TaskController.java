@@ -231,6 +231,19 @@ public class TaskController {
 			throw new TasqAuthException(msg);
 		}
 	}
+	@Transactional
+	@RequestMapping(value = "/task/{id}/{subid}/edit", method = RequestMethod.GET)
+	public TaskForm startEditSubTask(@PathVariable("id") String id,@PathVariable("subid") String subid ,Model model) {
+		return startEditTask(createSubId(id, subid), model);
+	}
+	
+	@Transactional
+	@RequestMapping(value = "/task/{id}/{subid}/edit", method = RequestMethod.POST)
+	public String editSubTask(@Valid @ModelAttribute("taskForm") TaskForm taskForm, Errors errors, RedirectAttributes ra,
+			HttpServletRequest request) {
+		return editTask(taskForm, errors, ra, request);
+	}
+	
 
 	@Transactional
 	@RequestMapping(value = "/task/{id}/edit", method = RequestMethod.POST)
