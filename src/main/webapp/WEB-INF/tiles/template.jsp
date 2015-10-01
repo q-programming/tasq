@@ -80,6 +80,7 @@
 	</div>
 	<!-- End of page content -->
 	<tiles:insertAttribute name="footer" defaultValue="" />
+	<a href="#" class="back-to-top a-tooltip" title="<s:message code="main.backToTop"/>"><i class="fa fa-2x fa-angle-up"></i></a>
 	<%
 		/* Show a message. See support.web package */
 	%>
@@ -107,6 +108,21 @@
 	</div>
 </body>
 <script>
+$(document).ready(function () {
+	  $('.back-to-top').hide();
+	  $(window).scroll(function () {
+	  if ($(this).scrollTop() > 200) {
+	    $('.back-to-top').fadeIn();
+	  } else {
+	    $('.back-to-top').fadeOut();
+	  }
+	});
+	 
+	$('.back-to-top').click(function () {
+	  $('html, body').animate({ scrollTop: 0 }, 800);
+	  return false;
+	  });
+});
 	$(".alert").alert();
 	window.setTimeout(function() {
 		$(".alert-success").alert('close');
@@ -124,5 +140,6 @@
 		var url = '<a href="<c:url value="/settings" />">' + settings + '</a>'
 		showWarning(msg + url);
 	}
+	
 </script>
 </html>

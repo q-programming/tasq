@@ -86,8 +86,12 @@ public class Utils {
 	public static String getBaseURL() {
 		// TODO null port and server scheme
 		if (baseURL == null) {
-			baseURL = String.format("%s://%s:%d/tasq", request.getScheme(), request.getServerName(),
-					request.getServerPort());
+			int port = request.getServerPort();
+			if (port == 80) {
+				baseURL = String.format("%s://%s/tasq", request.getScheme(), request.getServerName());
+			} else {
+				baseURL = String.format("%s://%s:%d/tasq", request.getScheme(), request.getServerName(), port);
+			}
 		}
 		return baseURL;
 	}

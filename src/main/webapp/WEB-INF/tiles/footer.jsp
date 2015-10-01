@@ -81,6 +81,7 @@
 	$("#searchField").autocomplete({
 		appendTo : ".container",
 		source : function(request, response) {
+			$(".ui-menu").hide();
 			$("#tagsLoading").show();
 			var term = request.term;
 			if (term in cache) {
@@ -91,6 +92,7 @@
 			$.get(url, {
 				term : term
 			}, function(data) {
+				$(".ui-menu").show();
 				$("#tagsLoading").hide();
 				var results = [];
 				$.each(data, function(i, item) {
@@ -104,6 +106,16 @@
 				return response(results);
 			});
 		},
+	    open: function(e,ui) {
+	    	var termTemplate = "<span class='ui-autocomplete-term'>%s</span>";
+	        var acData = $(this).data('uiAutocomplete');
+	        var styledTerm = termTemplate.replace('%s', acData.term);
+	        acData.menu.element.find('a').each(function () {
+	          	var me = $(this);
+	           	var keywords = acData.term.split(' ').join('|');
+	           	me.html(me.text().replace(new RegExp("(" + keywords + ")", "gi"), '<b>$1</b>'));
+	        });
+	    },
 		select : function(event, ui) {
 			$("#searchField").val(ui.item.value);
 			$("#searchForm").submit();

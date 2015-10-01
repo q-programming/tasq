@@ -569,7 +569,7 @@ public class TaskControllerTest {
 	public void logWorkCantEditTest() {
 		Project project = createProject(1L);
 		Task task = createTask(TASK_NAME, 1, project);
-		testAccount.setRole(Roles.ROLE_POWERUSER);
+		testAccount.setRole(Roles.ROLE_USER);
 		when(taskRepoMock.findById(TASK_ID)).thenReturn(task);
 		when(projSrvMock.canEdit(project)).thenReturn(false);
 		taskCtr.logWork(TASK_ID, null, null, null, null, raMock, requestMock, modelMock);

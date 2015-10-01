@@ -82,10 +82,10 @@
 			<form:errors path="description" element="p" class="text-danger" />
 		</div>
 		<%-------------------------Project ----------------------------------%>
-		<c:if test="${not empty param.project}">
-			<c:set var="chosenProject" value="${param.project}"/>
+		<c:if test="${not empty param.p}">
+			<c:set var="chosenProject" value="${param.p}"/>
 		</c:if>
-		<c:if test="${empty param.project}">
+		<c:if test="${empty param.p}">
 			<c:set var="chosenProject" value="${user.active_project}"/>
 		</c:if>
 		<a class="anchor" id="projectA"></a>
@@ -148,7 +148,7 @@
 					%>
 					<c:forEach items="${types}" var="enum_type">
 						<c:if test="${not enum_type.subtask}">
-							<li><a class="taskType" tabindex="-1" href="#" id="${enum_type}" data-type="${enum_type}"><t:type
+							<li><a class="taskType clickable" tabindex="-1" id="${enum_type}" data-type="${enum_type}"><t:type
 										type="${enum_type}" show_text="true" list="true" /></a></li>
 						</c:if>
 					</c:forEach>
@@ -180,7 +180,7 @@
 				<ul class="dropdown-menu" role="menu"
 					aria-labelledby="dropdownMenu2">
 					<c:forEach items="${priorities}" var="enum_priority">
-						<li><a class="taskPriority" tabindex="-1" href="#" data-priority="${enum_priority}" id="${enum_priority}">
+						<li><a class="taskPriority clickable" tabindex="-1"  data-priority="${enum_priority}" id="${enum_priority}">
 							<t:priority priority="${enum_priority}"/></a>
 						</li>
 					</c:forEach>
@@ -239,7 +239,7 @@
 				</div>
 			</div>
 		</div>
-		<label class="checkbox" style="display: inherit; font-weight: normal">
+		<label class="checkbox clickable" style="display: inherit; font-weight: normal">
 			<input type="checkbox" name="estimated" id="estimated"
 			value="true"> <s:message code="task.withoutEstimation"  />&nbsp;<i class="fa fa-question-circle a-tooltip"
 			data-html="true" title="<s:message  code ="task.withoutEstimation.help" />"

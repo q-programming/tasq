@@ -1,14 +1,17 @@
 package com.qprogramming.tasq.manage;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.FileUtils;
+import org.imgscalr.Scalr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +39,7 @@ public class ManageController {
 	private static final String AVATAR_DIR = "avatar";
 	private static final String PNG = ".png";
 	private static final String LOGO = "logo";
+	private static final String SMALL = "small_";
 
 	private static final Logger LOG = LoggerFactory.getLogger(ManageController.class);
 
@@ -111,6 +115,8 @@ public class ManageController {
 			File file = new File(getAvatarDir() + LOGO + PNG);
 			try {
 				FileUtils.writeByteArrayToFile(file, logoFile.getBytes());
+				// Resize and save email logo
+				resizeLogo();
 			} catch (IOException e) {
 				LOG.error(e.getMessage());
 			}
@@ -128,8 +134,19 @@ public class ManageController {
 		ServletContext sc = session.getServletContext();
 		File file = new File(getAvatarDir() + LOGO + PNG);
 		Utils.copyFile(sc, "/resources/img/logo.png", file);
+		try {
+			resizeLogo();
+		} catch (IOException e) {
+			LOG.error(e.getMessage());
+		}
 		MessageHelper.addSuccessAttribute(ra, msg.getMessage("manage.logo.restored", null, Utils.getCurrentLocale()));
 		return "redirect:/manage/app";
+	}
+
+	private void resizeLogo() throws IOException {
+		BufferedImage originalImage = ImageIO.read(new File(getAvatarDir() + LOGO + PNG));
+		BufferedImage scaledImg = Scalr.resize(originalImage, 50);
+		ImageIO.write(scaledImg, "png", new File(getAvatarDir() + SMALL + LOGO + PNG));
 	}
 
 	private String getAvatarDir() {

@@ -114,12 +114,16 @@
 				<s:message code="project.latestEvents" />
 			</h3>
 			<div class="text-center">
-				<ul id="eventsTable_pagination"></ul>
+				<ul id="eventsTable_pagination_top"></ul>
 			</div>
 			<div>
 				<table id="eventsTable" class="table table-condensed">
 				</table>
 			</div>
+			<div class="text-center">
+				<ul id="eventsTable_pagination_bot"></ul>
+			</div>
+			
 		</div>
 		<%------------------------TASKS -------------------------------%>
 		<div style="display: table-cell; padding-left: 30px">
@@ -351,7 +355,8 @@ function printWorkLogNavigation(page,data){
             	fetchWorkLogData(newPage-1);
             }
    	}
-	$("#eventsTable_pagination").bootstrapPaginator(options);
+	$("#eventsTable_pagination_top").bootstrapPaginator(options);
+	$("#eventsTable_pagination_bot").bootstrapPaginator(options);
 }
 
 function getEventTypeMsg(type){

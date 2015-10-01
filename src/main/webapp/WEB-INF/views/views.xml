@@ -9,6 +9,12 @@
 	<definition name="task/*/subtask" extends="default">
 		<put-attribute name="body" value="/WEB-INF/views/task/subtaskCreate.jsp"></put-attribute>
 	</definition>
+	<definition name="task/*/edit" extends="default">
+		<put-attribute name="body" value="/WEB-INF/views/task/edit.jsp"></put-attribute>
+	</definition>
+	<definition name="task/*/*/edit" extends="default">
+		<put-attribute name="body" value="/WEB-INF/views/task/edit.jsp"></put-attribute>
+	</definition>		
 	<definition name="*/*/*" extends="default">
 		<put-attribute name="body" value="/WEB-INF/views/{1}/{2}/{3}.jsp"></put-attribute>
 	</definition>

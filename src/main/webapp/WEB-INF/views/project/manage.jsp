@@ -346,9 +346,11 @@ $(document).ready(function($) {
         delay: 500,
         //define callback to format results
         source: function (request, response) {
+        	$(this).closest(".ui-menu").hide();
         	$("#participantsLoader").show();
             $.getJSON("<c:url value="/getAccounts"/>", request, function(result) {
             	$("#participantsLoader").hide();
+            	$(this).closest(".ui-menu").show();
                 response($.map(result, function(item) {
                     return {
                         // following property gets displayed in drop down
@@ -356,6 +358,16 @@ $(document).ready(function($) {
                         value: item.email,
                     }
                 }));
+            });
+        },
+        open: function(e,ui) {
+        	var termTemplate = "<span class='ui-autocomplete-term'>%s</span>";
+            var acData = $(this).data('uiAutocomplete');
+            var styledTerm = termTemplate.replace('%s', acData.term);
+            acData.menu.element.find('a').each(function () {
+              	var me = $(this);
+               	var keywords = acData.term.split(' ').join('|');
+               	me.html(me.text().replace(new RegExp("(" + keywords + ")", "gi"), '<b>$1</b>'));
             });
         },
         //define select handler
@@ -376,10 +388,12 @@ $(document).ready(function($) {
     	delay : 500,
     	source : function(request, response) {
     		$("#assignUsersLoader").show();
+    		$(this).closest(".ui-menu").hide();
     		var term = request.term;
     		var projectID = "${project.projectId}";
     		if ( term in cache ) {
     			response( cache[ term ] );
+    			$(".ui-menu").hide();
     			return;
     	    }
             var url='<c:url value="/project/getParticipants"/>';
@@ -395,9 +409,20 @@ $(document).ready(function($) {
                 	results.push(itemToAdd);
                 });
 				cache[ term ] = results;
+				$(this).closest(".ui-menu").show();
                 return response(results);
             });
 		},
+	    open: function(e,ui) {
+	    	var termTemplate = "<span class='ui-autocomplete-term'>%s</span>";
+	        var acData = $(this).data('uiAutocomplete');
+	        var styledTerm = termTemplate.replace('%s', acData.term);
+	        acData.menu.element.find('a').each(function () {
+	          	var me = $(this);
+	           	var keywords = acData.term.split(' ').join('|');
+	           	me.html(me.text().replace(new RegExp("(" + keywords + ")", "gi"), '<b>$1</b>'));
+	        });
+	    },
         //define select handler
         select : function(event, ui) {
         	if (ui.item) {

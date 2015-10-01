@@ -94,10 +94,10 @@
 					%>
 					<c:forEach items="${types}" var="enum_type">
 						<c:if test="${enum_type.subtask}">
-							<li><a class="taskType" tabindex="-1" href="#" id="${enum_type}" data-type="${enum_type}"><t:type type="${enum_type}" show_text="true" list="true"/></a></li>
+							<li><a class="taskType clickable" tabindex="-1" id="${enum_type}" data-type="${enum_type}"><t:type type="${enum_type}" show_text="true" list="true"/></a></li>
 						</c:if>
 					</c:forEach>
-					<li><a class="taskType" tabindex="-1" href="#" id="IDLE" data-type="IDLE"><t:type type="IDLE" show_text="true" list="true"/></a></li>
+					<li><a class="taskType clickable" tabindex="-1" id="IDLE" data-type="IDLE"><t:type type="IDLE" show_text="true" list="true"/></a></li>
 				</ul>
 			</div>
 			<span class="help-block"><s:message code="task.type.help" /> <a href="#" style="color:black">&nbsp;<i class="fa fa-question-circle"></i></a></span>
@@ -125,7 +125,7 @@
 				<ul class="dropdown-menu" role="menu"
 					aria-labelledby="dropdownMenu2">
 					<c:forEach items="${priorities}" var="enum_priority">
-						<li><a class="taskPriority" tabindex="-1" href="#" data-priority="${enum_priority}" id="${enum_priority}">
+						<li><a class="taskPriority clickable" tabindex="-1" data-priority="${enum_priority}" id="${enum_priority}">
 							<t:priority priority="${enum_priority}"/></a>
 						</li>
 					</c:forEach>

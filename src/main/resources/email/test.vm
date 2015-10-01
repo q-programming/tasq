@@ -1,9 +1,0 @@
-<html>
-    <body>
-        <h3>Hi ${user.username}, welcome to the Chipping Sodbury On-the-Hill message boards!</h3>
-
-        <div>
-            Your email address is <a href="mailto:${user.email}">${user.email}</a>.
-        </div>
-    </body>
-</html>

@@ -91,7 +91,7 @@ title="<s:message code="task.assignme"/>">
 </c:if>
 <div class="progress-bar ${logged_class} a-tooltip" title="${percentage}%" role="progressbar"
 aria-valuenow="${percentage}" aria-valuemin="0"
-aria-valuemax="100" style="width:${percentage}%"></div>
+aria-valuemax="100" style="width:${percentage}%; margin-top:1px"></div>
 </div>
 </c:if>
 </div>

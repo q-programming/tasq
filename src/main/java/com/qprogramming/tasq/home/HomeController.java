@@ -41,7 +41,7 @@ public class HomeController {
 	@Value("${skip.landing.page}")
 	private String skipLandingPage;
 
-	@Value("1.0")
+	@Value("1.0.1")
 	private String version;
 
 	@Autowired
@@ -61,7 +61,7 @@ public class HomeController {
 				return "homeNotSignedIn";
 			}
 		} else {
-			List<Project> usersProjects = projSrv.findAllByUser();
+			List<Project> usersProjects = projSrv.findAllByUser(account.getId());
 			if (usersProjects.size() == 0
 					&& (account.getRole().equals(Roles.ROLE_VIEWER) || account.getRole().equals(Roles.ROLE_USER))) {
 				return "homeNewUser";

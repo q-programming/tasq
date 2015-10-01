@@ -6,6 +6,7 @@ ${user.theme.font.link}
 <c:set var="color" value="${user.theme.color}"></c:set>
 <c:set var="invcolor" value="${user.theme.invColor}"></c:set>
 <c:set var="rgbcolor">${user.theme.rgbColor.r},${user.theme.rgbColor.g},${user.theme.rgbColor.b}</c:set>
+<c:set var="rgbcolor10">${user.theme.rgbColor.r + 60},${user.theme.rgbColor.g + 60},${user.theme.rgbColor.b + 60}</c:set>
 <c:set var="rgbinvcolor">${user.theme.rgbInvColor.r},${user.theme.rgbInvColor.g},${user.theme.rgbInvColor.b}</c:set>
 <style>
 body {
@@ -80,13 +81,19 @@ thead.theme {
 .table_sprint {
 	border-style: dashed;
 	border-width: 2px;
-	border-color: rgba(205, 236, 252, 1);
+	border-color: rgba(${rgbcolor}, 0.5);
 	padding: 5px;
+	/* 	border-radius: 5px; */
+}
+.state_hover {
+	border-style: dashed;
+	border-width: 2px;
+	border-color: ${color};
 	/* 	border-radius: 5px; */
 }
 
 span.badge.theme {
-	background-color: ${color};
+	background-color: rgb(${rgbcolor10});
 }
 
 span.badge.theme.zero {
@@ -140,5 +147,21 @@ span.tag.label.label-info.theme {
 }
 .btn.theme :focus, .btn.theme:hover {
     color: rgba(${rgbinvcolor}, 0.5);
+}
+.back-to-top {
+	display: none;
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+	color: ${invcolor};
+	text-decoration: none;
+	padding: 10px 15px 10px 15px;
+	background-color: rgba(${rgbcolor}, 0.4);
+	text-align: center;
+}
+.back-to-top:hover {
+	text-decoration: none;
+	color: ${invcolor};
+	background-color: rgba(${rgbcolor}, 0.7);
 }
 </style>

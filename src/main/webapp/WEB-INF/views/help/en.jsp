@@ -69,8 +69,6 @@
 						</ul></li>
 				</security:authorize>
 			</ul>
-			<a href="#top" class="back-to-top"><s:message
-					code="main.backtotop" /></a>
 		</nav>
 	</div>
 	<div class="col-md-10 col-sm-10 col-lg-10" role="main">

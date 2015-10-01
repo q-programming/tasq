@@ -158,6 +158,7 @@ public class HomeControllersTest {
 		Task task = new Task();
 		task.setName(name);
 		task.setId(project.getProjectId() + "-" + no);
+		task.setProject(project);
 		task.setPriority(TaskPriority.MAJOR);
 		task.setType(TaskType.USER_STORY);
 		return task;

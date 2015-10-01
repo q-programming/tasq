@@ -26,6 +26,7 @@
 			<h3>
 				<t:type type="${taskForm.type}" />
 				[${taskForm.id}] - ${taskForm.name}
+				<form:hidden path="id"></form:hidden>
 			</h3>
 		</div>
 		<div>
@@ -86,11 +87,12 @@
 											type="${enum_type}" show_text="true" list="true" /></a></li>
 							</c:if>
 						</c:forEach>
+						<li><a class="taskType clickable" tabindex="-1" id="IDLE" data-type="IDLE"><t:type type="IDLE" show_text="true" list="true"/></a></li>
 					</c:if>
 					<c:if test="${not task.subtask}">
 						<c:forEach items="${types}" var="enum_type">
 							<c:if test="${not enum_type.subtask}">
-								<li><a class="taskType" tabindex="-1" href="#" id="${enum_type}" data-type="${enum_type}"><t:type
+								<li><a class="taskType clickable" tabindex="-1" id="${enum_type}" data-type="${enum_type}"><t:type
 											type="${enum_type}" show_text="true" list="true" /></a></li>
 							</c:if>
 						</c:forEach>
@@ -134,14 +136,15 @@
 							code="task.estimate.help.pattern" /> </span>
 				</c:if>
 			</div>
-			
-			<div id="storyPoints" <c:if test="${not task.estimated}">style="display:none"</c:if>>
-				<label><s:message code="task.storyPoints" /></label>
-				<form:input path="story_points" class="form-control"
-					style="width:150px" />
-				<span class="help-block"><s:message
-						code="task.storyPoints.help" /></span>
-			</div>
+			<c:if test="${not task.subtask}">
+				<div id="storyPoints" <c:if test="${not task.estimated}">style="display:none"</c:if>>
+					<label><s:message code="task.storyPoints" /></label>
+					<form:input path="story_points" class="form-control"
+						style="width:150px" />
+					<span class="help-block"><s:message
+							code="task.storyPoints.help" /></span>
+				</div>
+			</c:if>
 			
 		</div>
 			<c:if test="${not task.inSprint}">
@@ -150,7 +153,7 @@
 						checked="checked" 
 					</c:set>
 				</c:if>
-				<label class="checkbox" style="display: inherit; font-weight: normal">
+				<label class="checkbox clickable" style="display: inherit; font-weight: normal">
 					<input type="checkbox" name="estimated" id="estimated" ${checked}/>
 					<s:message code="task.withoutEstimation"  />&nbsp;
 					<i class="fa fa-question-circle a-tooltip"

@@ -191,11 +191,10 @@ function fetchManagedUsers(page,term){
 			var username = content.name + " " + content.surname;
 			var user = userURL + content.username; 
 			var avatar = '<img data-src="holder.js/30x30" style="height: 30px; float: left; padding-right: 10px;" src="' + avatarURL + +data.content[j].id +'.png"/>';
-			var action;
-			if(content.id == userID){
-				action='';
-			}else{
-				action='<a href="mailto:'+content.email+'" title="'+email_txt+' ('+content.email+')"><i class="fa fa-envelope" style="color: black;"></span>'+ confirmed +'</a>';
+			var avatarResetUrl = userURL + content.username + "/reset-avatar"
+			var action = '<a href="'+ avatarResetUrl + '" class="a-tooltip" style="color: black;" title="<s:message code="user.reset.avatar"/>"><i class="fa fa-times"></i><i class="fa fa-picture-o"></i></span></a>&nbsp;';
+			if(content.id != userID){
+				action= action + '<a href="mailto:'+content.email+'" ><i title="'+email_txt+' ('+content.email+')" class="a-tooltip fa fa-envelope" style="color: black;"></i>'+ confirmed +'</a>';
 			}
 			var row = '<tr class="listeduser"><td>'
 						+ online

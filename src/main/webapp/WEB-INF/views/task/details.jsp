@@ -22,6 +22,9 @@
 <c:if test="${(myfn:contains(task.project.administrators,user) || is_admin || task.owner.id == user.id)}">
 	<c:set var="can_edit" value="true" />
 </c:if>
+<c:if test="${((myfn:contains(task.project.participants,user) && is_user) || task.owner.id == user.id ) || is_admin}">
+	<c:set var="project_participant" value="true" />
+</c:if>
 <c:if test="${task.assignee.id == user.id}">
 	<c:set var="is_assignee" value="true" />
 </c:if>
@@ -36,13 +39,13 @@
 	<%----------------------EDIT MENU-----------------------------%>
 	<div>
 		<div class="pull-right">
-			<c:if test="${is_user  && task.state ne'CLOSED'}">
+			<c:if test="${project_participant  && task.state ne'CLOSED'}">
 				<a class="btn btn-default btn-sm a-tooltip" href="#"
 					data-toggle="dropdown"> <i class="fa fa-lg fa-pencil"></i>
 				</a>
 				<ul class="dropdown-menu" style="top: inherit; right: inherit;">
 					<c:if test="${can_edit}">
-						<li><a href="<c:url value="/task/edit?id=${task.id}"/>"> <i
+						<li><a href="<c:url value="/task/${task.id}/edit"/>"> <i
 								class="fa fw fa-pencil"></i> <s:message code="task.edit" />
 						</a></li>
 					</c:if>
@@ -58,7 +61,7 @@
 						</li>
 					</c:if>
 					<li>
-						<a href="<c:url value="/task/create"/>?linked=${task.id}&project=${task.project.id}">
+						<a href="<c:url value="/task/create"/>?linked=${task.id}&p=${task.project.id}">
 								<i class="fa fw fa-plus"></i>
 								<s:message code="task.linked.create" />
 						</a>
@@ -80,8 +83,8 @@
 
 				</ul>
 			</c:if>
-			<c:if test="${task.state eq'CLOSED'}">
-				<a href="<c:url value="/task/create"/>?linked=${task.id}&project=${task.project.id}"
+			<c:if test="${task.state eq'CLOSED' && project_participant}">
+				<a href="<c:url value="/task/create"/>?linked=${task.id}&p=${task.project.id}"
 					class="btn btn-default btn-sm a-tooltip" title="<s:message code="task.linked.create" />">
 					<i class="fa fw fa-plus"></i>
 				</a>
@@ -96,7 +99,7 @@
 				</c:if>
 			</button>
 
-			<c:if test="${can_edit && user.isPowerUser}">
+			<c:if test="${can_edit}">
 				<a class="btn btn-default btn-sm a-tooltip delete_btn"
 					href="<c:url value="/task/delete?id=${task.id}"/>"
 					title="<s:message code="task.delete" text="Delete task" />"
@@ -135,7 +138,7 @@
 					<tr>
 						<td style="width: 80px;"><s:message code="task.state" /></td>
 						<td class="left-margin"><c:choose>
-								<c:when test="${can_edit && user.isPowerUser || is_assignee}">
+								<c:when test="${(can_edit && user.isPowerUser) || is_assignee}">
 									<div class="dropdown pointer">
 										<%
 											pageContext.setAttribute("states", TaskState.values());
@@ -143,7 +146,7 @@
 										<div id="task_state" class="image-combo a-tooltip"
 											data-toggle="dropdown" data-placement="top"
 											title="<s:message code="main.click"/>">
-											<div id="current_state"
+											<div id="current_state" data-state="${task.state}"
 												style="float: left; padding-right: 5px;">
 												<t:state state="${task.state}" />
 											</div>
@@ -168,13 +171,14 @@
 					<tr>
 						<td><s:message code="task.priority" /></td>
 						<td class="left-margin"><c:choose>
-								<c:when test="${can_edit && user.isPowerUser || is_assignee}">
+								<c:when test="${(can_edit || user.isPowerUser) || is_assignee}">
 									<div class="dropdown pointer">
 										<%
 											pageContext.setAttribute("priorities",
 															TaskPriority.values());
 										%>
 										<div id="task_priority" class="image-combo a-tooltip"
+											data-priority="${task.priority}"
 											data-toggle="dropdown" data-placement=top
 											title="<s:message code="main.click"/>">
 											<t:priority priority="${task.priority}" />
@@ -388,12 +392,14 @@
 									code="task.related" />
 							</span>
 						</h5>
-						<a class="btn btn-default btn-xxs a-tooltip pull-right linkButton" style="min-width: 37px;"
-							href="#" title="" data-placement="top"
-							data-original-title="<s:message code="task.link"/>"> <i
-							class="fa fa-plus"></i><i
-							class="fa fa-lg fa-link fa-flip-horizontal"></i>
-						</a>
+						<c:if test="${project_participant}">
+							<a class="btn btn-default btn-xxs a-tooltip pull-right linkButton" style="min-width: 37px;"
+								href="#" title="" data-placement="top"
+								data-original-title="<s:message code="task.link"/>"> <i
+								class="fa fa-plus"></i><i
+								class="fa fa-lg fa-link fa-flip-horizontal"></i>
+							</a>
+						</c:if>
 					</div>
 					<div id="linkDiv" style="display: none" class="form-group">
 						<form id="linkTask" name="mainForm" method="post"
@@ -483,12 +489,14 @@
 									code="tasks.subtasks" />
 							</span>
 						</h5>
-						<a class="btn btn-default btn-xxs a-tooltip pull-right" style="min-width: 37px;"
-							href="<c:url value="/task/${task.id}/subtask"/>"
-							data-placement="top"
-							data-original-title="<s:message code="task.subtasks.add"/>">
-							<i class="fa fa-plus"></i> <i class="fa fa-lg fa-sitemap"></i>
-						</a>
+						<c:if test="${project_participant}">
+							<a class="btn btn-default btn-xxs a-tooltip pull-right" style="min-width: 37px;"
+								href="<c:url value="/task/${task.id}/subtask"/>"
+								data-placement="top"
+								data-original-title="<s:message code="task.subtasks.add"/>">
+								<i class="fa fa-plus"></i> <i class="fa fa-lg fa-sitemap"></i>
+							</a>
+						</c:if>
 					</div>
 					<div id="subTask" class="form-group togglerContent"
 						style="padding-left: 15px;">
@@ -543,10 +551,12 @@
 								class="fa fa-lg fa-files-o"></i> <s:message code="task.files" />
 							</span>
 						</h5>
-						<a class="btn btn-default btn-xxs a-tooltip pull-right addFileButton" href="#" data-toggle="modal"
-						data-target="#files_task" data-taskID="${task.id}">
-							<i class="fa fa-plus"></i> <i class="fa fa-lg fa-file"></i>
-						</a>
+						<c:if test="${project_participant}">
+							<a class="btn btn-default btn-xxs a-tooltip pull-right addFileButton" href="#" data-toggle="modal"
+							data-target="#files_task" data-taskID="${task.id}">
+								<i class="fa fa-plus"></i> <i class="fa fa-lg fa-file"></i>
+							</a>
+						</c:if>
 					</div>
 					<div>
 						<table id="filesToggle"
@@ -583,7 +593,7 @@
 									</c:if>
 									<a href="<c:url value="/task/${task.id}/file?get=${file}"></c:url>">${file}</a>
 									</td>
-									<c:if test="${can_edit && user.isPowerUser || is_assignee}">
+									<c:if test="${(can_edit && user.isPowerUser) || is_assignee}">
 										<td style="width: 30px">
 											<div class="buttons_panel pull-right">
 												<a
@@ -637,7 +647,7 @@
 									src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />
 								<a href="<c:url value="/user/${task.assignee.username}"/>">${task.assignee}</a>
 							</c:if>
-							<c:if test="${user.isUser}">
+							<c:if test="${project_participant}">
 								<span class="btn btn-default btn-sm a-tooltip assignToTask"
 									title="<s:message code="task.assign"/>" data-toggle="modal"
 									data-target="#assign_modal" data-taskID="${task.id}"
@@ -722,8 +732,9 @@
 			<%--------------------------------- Comments -----------------------------%>
 			<div id="comments" class="tab-pane fade in active">
 				<table class="table table-hover button-table">
+					<thead><th id="sorter" class="time-header clickable"><span id="indicator"><i class="fa fa-caret-down"></i></span>&nbsp;Date</th></thead>
 					<c:forEach items="${comments}" var="comment">
-						<tr id="c${comment.id}">
+						<tr id="c${comment.id}" data-date="${comment.date}">
 							<td>
 								<div>
 									<img data-src="holder.js/30x30"
@@ -785,7 +796,7 @@
 						</div>
 					</form>
 				</div>
-				<c:if test="${user.isUser}">
+				<c:if test="${project_participant}">
 					<button id="comments_add" class="btn btn-default btn-sm">
 						<i class="fa fa-comment"></i>&nbsp;
 						<s:message code="comment.add" text="Add Comment" />
@@ -893,10 +904,11 @@ $(document).ready(function($) {
 	});
 	
 	$("#task_link").autocomplete({
-				minLength : 1,
+				minLength : 2,
 				delay : 500,
 				//define callback to format results
 				source : function(request, response) {
+					$(this).closest(".ui-menu").hide();
 					$("#linkLoader").show();
 					var url = '<c:url value="/getTasks?taskID=${task.id}&projectID=${task.project.id}"/>';
 					$.getJSON(url,request,function(result) {
@@ -908,9 +920,20 @@ $(document).ready(function($) {
 									value : item.id,
 									}
 								}));
+							$(this).closest(".ui-menu").show();
 							});
 					},
-					//define select handler
+				open: function(e,ui) {
+				    	var termTemplate = "<span class='ui-autocomplete-term'>%s</span>";
+				        var acData = $(this).data('uiAutocomplete');
+				        var styledTerm = termTemplate.replace('%s', acData.term);
+				        acData.menu.element.find('a').each(function () {
+				          	var me = $(this);
+				           	var keywords = acData.term.split(' ').join('|');
+				           	me.html(me.text().replace(new RegExp("(" + keywords + ")", "gi"), '<b>$1</b>'));
+				        });
+				},
+				//define select handler
 				select : function(event, ui) {
 					if (ui.item) {
 						event.preventDefault();
@@ -934,27 +957,31 @@ $(document).ready(function($) {
 // 			change state
 	$(".change_state").click(function() {
 	  	 var state = $(this).data('state');
+	  	 var current_state = $("#current_state").data('state');
 	  	 var newState = $(this).html();
 		 var subTasks = "${task.subtasks}";
-	   	 if(state == 'CLOSED'){
-	   		 	 $('#modal_subtaskCount').html(subTasks);
-	    		 $('#close_task').modal({
-	    	            show: true,
-	    	            keyboard: false,
-	    	            backdrop: 'static'
-	    	     });
-	   	 	}
-	    	else{
-				$.post('<c:url value="/task/changeState"/>',{id:taskID,state:state},function(result){
-					if(result.code == 'ERROR'){
-						showError(result.message);
-					}
-					else{
-						$("#current_state").html(newState);
-						showSuccess(result.message);
-					}
-					});
-		    	}
+		 if(state!=current_state){
+		   	 if(state == 'CLOSED'){
+		   		 	 $('#modal_subtaskCount').html(subTasks);
+		    		 $('#close_task').modal({
+		    	            show: true,
+		    	            keyboard: false,
+		    	            backdrop: 'static'
+		    	     });
+		   	 	}
+		    	else{
+					$.post('<c:url value="/task/changeState"/>',{id:taskID,state:state},function(result){
+						if(result.code == 'ERROR'){
+							showError(result.message);
+						}
+						else{
+							$("#current_state").data('state',state);
+							$("#current_state").html(newState);
+							showSuccess(result.message);
+						}
+						});
+			    	}
+				}
 			});
 			
 			$(".linkButton").click(function() {
@@ -1147,6 +1174,7 @@ $(document).on("click",".delete_btn",function(e) {
 
 	$( "#tagsinput" ).autocomplete({
     	source: function(request, response) {
+    		$(this).closest(".ui-menu").hide();
     		$("#searchFieldHelp").show();
     		var term = request.term;
     		if ( term in cache ) {
@@ -1165,6 +1193,7 @@ $(document).on("click",".delete_btn",function(e) {
                     results.push(itemToAdd);
                 });
                 cache[ term ] = results;
+                $(this).closest(".ui-menu").show();
                 return response(results);
     		});
     	},
@@ -1236,6 +1265,37 @@ $(document).on("click",".delete_btn",function(e) {
 	}
 	</c:if>
 });
+$('#sorter').click(function() {
+	var table = $(this).parents('table').eq(0)
+	var rows = table.find("tr:not(:has('th'))").toArray().sort(function (a,b){
+		var dateA = convertToDate($(a).attr("data-date"));
+		var dateB = convertToDate($(b).attr("data-date"));
+		return dateA - dateB;
+	});
+	this.asc = !this.asc
+	if (!this.asc) {
+		rows = rows.reverse();
+		$("#indicator").html('<i class="fa fa-caret-down">');
+	} else {
+		$("#indicator").html('<i class="fa fa-caret-up">');
+	}
+	for (var i = 0; i < rows.length; i++) {
+		table.append(rows[i])
+	}
+});
+
+function convertToDate(str){
+	var reggie = /(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})/;
+	var dateArray = reggie.exec(str); 
+	return new Date(
+	    (+dateArray[3]),
+	    (+dateArray[2])-1, // Careful, month starts at 0!
+	    (+dateArray[1]),
+	    (+dateArray[4]),
+	    (+dateArray[5])
+	);
+}
+
 function getEventTypeMsg(type){
 	switch(type){
 		<c:forEach items="${types}" var="enum_type">

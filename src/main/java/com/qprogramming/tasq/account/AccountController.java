@@ -7,8 +7,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -36,6 +38,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.manage.Theme;
 import com.qprogramming.tasq.manage.ThemeService;
 import com.qprogramming.tasq.projects.ProjectService;
@@ -170,6 +173,25 @@ public class AccountController {
 		}
 		Page<DisplayAccount> result = new PageImpl<DisplayAccount>(list, p, page.getTotalElements());
 		return result;
+	}
+
+	@RequestMapping(value = "/user/{username}/reset-avatar", method = RequestMethod.GET)
+	public String resetAvatar(@PathVariable(value = "username") String username, HttpServletRequest request,
+			RedirectAttributes ra) {
+		if (!Roles.isAdmin()) {
+			throw new TasqAuthException(msg);
+		}
+		Account account = accountSrv.findByUsername(username);
+		if (account == null) {
+			MessageHelper.addErrorAttribute(ra, msg.getMessage("error.noUser", null, Utils.getCurrentLocale()));
+		} else {
+			HttpSession session = request.getSession();
+			ServletContext sc = session.getServletContext();
+			File userAvatar = new File(getAvatar(account.getId()));
+			Utils.copyFile(sc, "/resources/img/avatar.png", userAvatar);
+			MessageHelper.addSuccessAttribute(ra, msg.getMessage("user.reset.success", null, Utils.getCurrentLocale()));
+		}
+		return "redirect:" + request.getHeader("Referer");
 	}
 
 	@RequestMapping(value = "/emailResend", method = RequestMethod.GET)
