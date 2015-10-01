@@ -45,7 +45,7 @@
 				</a>
 				<ul class="dropdown-menu" style="top: inherit; right: inherit;">
 					<c:if test="${can_edit}">
-						<li><a href="<c:url value="/task/edit?id=${task.id}"/>"> <i
+						<li><a href="<c:url value="/task/${task.id}/edit"/>"> <i
 								class="fa fw fa-pencil"></i> <s:message code="task.edit" />
 						</a></li>
 					</c:if>

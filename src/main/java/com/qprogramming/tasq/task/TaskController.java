@@ -81,6 +81,14 @@ import com.qprogramming.tasq.task.worklog.WorkLogService;
 @Controller
 public class TaskController {
 
+	private static final String TYPE_TXT = "Type";
+	private static final String ESTIMATED_TXT = "Estimated ";
+	private static final String REMAINING_TXT = "Remaining";
+	private static final String ESTIMATE_TXT = "Estimate";
+	private static final String DESCRIPTION_TXT = "Description";
+	private static final String NAME_TXT = "Name";
+	private static final String STORY_POINTS_TXT = "Story points";
+
 	private static final String UNASSIGNED = "<i>Unassigned</i>";
 	private static final String OPEN = "OPEN";
 	private static final String ALL = "ALL";
@@ -210,8 +218,8 @@ public class TaskController {
 	}
 
 	@Transactional
-	@RequestMapping(value = "/task/edit", method = RequestMethod.GET)
-	public TaskForm startEditTask(@RequestParam("id") String id, Model model) {
+	@RequestMapping(value = "/task/{id}/edit", method = RequestMethod.GET)
+	public TaskForm startEditTask(@PathVariable("id") String id, Model model) {
 		Task task = taskSrv.findById(id);
 		if (projectSrv.canEdit(task.getProject())
 				&& (Roles.isUser() | task.getOwner().equals(Utils.getCurrentAccount()))) {
@@ -225,7 +233,7 @@ public class TaskController {
 	}
 
 	@Transactional
-	@RequestMapping(value = "/task/edit", method = RequestMethod.POST)
+	@RequestMapping(value = "/task/{id}/edit", method = RequestMethod.POST)
 	public String editTask(@Valid @ModelAttribute("taskForm") TaskForm taskForm, Errors errors, RedirectAttributes ra,
 			HttpServletRequest request) {
 		if (errors.hasErrors()) {
@@ -250,12 +258,12 @@ public class TaskController {
 		}
 		StringBuilder message = new StringBuilder(Utils.TABLE);
 		if (!task.getName().equalsIgnoreCase(taskForm.getName())) {
-			message.append(Utils.changedFromTo("Name", task.getName(), taskForm.getName()));
+			message.append(Utils.changedFromTo(NAME_TXT, task.getName(), taskForm.getName()));
 			task.setName(taskForm.getName());
 			updateWatched(task);
 		}
 		if (!task.getDescription().equalsIgnoreCase(taskForm.getDescription())) {
-			message.append(Utils.changedFromTo("Description", task.getDescription(), taskForm.getDescription()));
+			message.append(Utils.changedFromTo(DESCRIPTION_TXT, task.getDescription(), taskForm.getDescription()));
 			task.setDescription(taskForm.getDescription());
 		}
 		if ((taskForm.getEstimate() != null) && (!task.getEstimate().equalsIgnoreCase(taskForm.getEstimate()))) {
@@ -265,7 +273,7 @@ public class TaskController {
 			if (sprintSrv.taskInActiveSprint(task)) {
 				wlSrv.addActivityPeriodLog(task, PeriodHelper.outFormat(difference), difference, LogType.ESTIMATE);
 			} else {
-				message.append(Utils.changedFromTo("Estimate", task.getEstimate(), taskForm.getEstimate()));
+				message.append(Utils.changedFromTo(ESTIMATE_TXT, task.getEstimate(), taskForm.getEstimate()));
 			}
 			task.setEstimate(estimate);
 			task.setRemaining(estimate);
@@ -274,14 +282,14 @@ public class TaskController {
 			Period remaining = PeriodHelper.inFormat(taskForm.getRemaining());
 			Period difference = PeriodHelper.minusPeriods(remaining, task.getRawEstimate());
 			// only add estimate change event if task is in sprint
-			message.append(Utils.changedFromTo("Remaining", task.getRemaining(), taskForm.getRemaining()));
+			message.append(Utils.changedFromTo(REMAINING_TXT, task.getRemaining(), taskForm.getRemaining()));
 			task.setRemaining(remaining);
 		}
 
 		boolean notestimated = !taskForm.getEstimated();
 		if (!task.isEstimated().equals(notestimated)) {
 			message.append(
-					Utils.changedFromTo("Estimated ", task.getEstimated().toString(), Boolean.toString(notestimated)));
+					Utils.changedFromTo(ESTIMATED_TXT, task.getEstimated().toString(), Boolean.toString(notestimated)));
 			task.setEstimated(notestimated);
 			if (!task.isEstimated()) {
 				task.setStory_points(0);
@@ -289,11 +297,19 @@ public class TaskController {
 		}
 		// Don't check for SP if task is not estimated
 		if (task.isEstimated()) {
-			int storyPoints = taskForm.getStory_points() == null || ("").equals(taskForm.getStory_points()) ? 0
-					: Integer.parseInt(taskForm.getStory_points());
-			if (task.getStory_points() != null && task.getStory_points() != storyPoints) {
-				addWorklogPointsChanged(task, storyPoints);
-				task.setStory_points(storyPoints);
+			try {
+				int storyPoints = taskForm.getStory_points() == null || ("").equals(taskForm.getStory_points()) ? 0
+						: Integer.parseInt(taskForm.getStory_points());
+
+				if (task.getStory_points() != null && task.getStory_points() != storyPoints) {
+					if (shouldAddWorklogPointsChanged(task, storyPoints)) {
+						message.append(Utils.changedFromTo(STORY_POINTS_TXT, task.getStory_points().toString(),
+								Integer.toString(storyPoints)));
+					}
+					task.setStory_points(storyPoints);
+				}
+			} catch (NumberFormatException e) {
+				throw new TasqException("Please use only full numbers");
 			}
 		}
 		if (!task.getDue_date().equalsIgnoreCase(taskForm.getDue_date())) {
@@ -302,7 +318,7 @@ public class TaskController {
 		}
 		TaskType type = TaskType.toType(taskForm.getType());
 		if (!task.getType().equals(type)) {
-			message.append(Utils.changedFromTo("Type", task.getType().toString(), type.toString()));
+			message.append(Utils.changedFromTo(TYPE_TXT, task.getType().toString(), type.toString()));
 			task.setType(type);
 			updateWatched(task);
 		}
@@ -641,7 +657,14 @@ public class TaskController {
 				throw new TasqAuthException(msg, "role.error.task.permission");
 			}
 			// updatepoints
-			addWorklogPointsChanged(task, points);
+			if (shouldAddWorklogPointsChanged(task, points)) {
+				StringBuilder message = new StringBuilder(Utils.TABLE);
+				message.append(Utils.changedFromTo(STORY_POINTS_TXT, task.getStory_points().toString(),
+						Integer.toString(points)));
+				message.append(Utils.TABLE_END);
+				wlSrv.addActivityLog(task, message.toString(), LogType.EDITED);
+
+			}
 			task.setStory_points(points);
 			taskSrv.save(task);
 			return new ResultData(ResultData.OK, msg.getMessage("task.storypoints.edited",
@@ -997,7 +1020,7 @@ public class TaskController {
 			// Add log
 			StringBuilder message = new StringBuilder(Utils.TABLE);
 			message.append(Utils.changedFromTo("ID", id, taskID));
-			message.append(Utils.changedFromTo("Type", subtask.getType().toString(), type.toString()));
+			message.append(Utils.changedFromTo(TYPE_TXT, subtask.getType().toString(), type.toString()));
 			message.append(Utils.TABLE_END);
 			wlSrv.addActivityLog(task, message.toString(), LogType.SUBTASK2TASK);
 			// cleanup
@@ -1250,16 +1273,21 @@ public class TaskController {
 		}
 	}
 
-	private void addWorklogPointsChanged(Task task, int storyPoints) {
+	/**
+	 * Checks if worklog point changes should be added. If task is in active
+	 * sprint , work log is added and false is returned
+	 * 
+	 * @param task
+	 * @param storyPoints
+	 * @return
+	 */
+	private boolean shouldAddWorklogPointsChanged(Task task, int storyPoints) {
 
 		if (sprintSrv.taskInActiveSprint(task)) {
 			wlSrv.addActivityLog(task, Integer.toString(-1 * (task.getStory_points() - storyPoints)), LogType.ESTIMATE);
+			return false;
 		} else {
-			StringBuilder message = new StringBuilder(Utils.TABLE);
-			message.append(Utils.changedFromTo("Story points", task.getStory_points().toString(),
-					Integer.toString(storyPoints)));
-			message.append(Utils.TABLE_END);
-			wlSrv.addActivityLog(task, message.toString(), LogType.EDITED);
+			return true;
 		}
 	}
 
