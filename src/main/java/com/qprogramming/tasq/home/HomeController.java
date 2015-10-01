@@ -41,7 +41,7 @@ public class HomeController {
 	@Value("${skip.landing.page}")
 	private String skipLandingPage;
 
-	@Value("1.0")
+	@Value("1.0.1")
 	private String version;
 
 	@Autowired
