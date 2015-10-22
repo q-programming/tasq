@@ -25,6 +25,7 @@ import org.springframework.ui.velocity.VelocityEngineUtils;
 import com.fasterxml.uuid.Generators;
 import com.qprogramming.tasq.config.ResourceService;
 import com.qprogramming.tasq.mail.MailMail;
+import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.support.Utils;
 
 /**
@@ -51,19 +52,21 @@ public class AccountService {
 	private ResourceService resourceSrv;
 	private MailMail mailer;
 	private PasswordEncoder passwordEncoder;
+	private AppService appSrv;
 
 	// @PersistenceContext
 	// private EntityManager entityManager;
 
 	@Autowired
 	public AccountService(AccountRepository accRepo, MessageSource msg, VelocityEngine velocityEngine,
-			ResourceService resourceSrv, MailMail mailer, PasswordEncoder passwordEncoder) {
+			ResourceService resourceSrv, MailMail mailer, PasswordEncoder passwordEncoder, AppService appSrv) {
 		this.accRepo = accRepo;
 		this.msg = msg;
 		this.velocityEngine = velocityEngine;
 		this.resourceSrv = resourceSrv;
 		this.mailer = mailer;
 		this.passwordEncoder = passwordEncoder;
+		this.appSrv = appSrv;
 	}
 
 	@Transactional
@@ -129,19 +132,21 @@ public class AccountService {
 	}
 
 	public void sendConfirmationLink(Account account) {
-		String confirmlink = Utils.getBaseURL() + "/confirm?id=" + account.getUuid();
+		String baseUrl = appSrv.getProperty(AppService.URL);
+		String confirmlink = baseUrl + "/confirm?id=" + account.getUuid();
 		String subject = msg.getMessage("signup.register", null, Utils.getDefaultLocale());
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put(ACCOUNT, account);
 		model.put(LINK, confirmlink);
-		model.put(APPLICATION, Utils.getBaseURL());
+		model.put(APPLICATION, appSrv.getProperty(AppService.URL));
 		String message = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
 				"email/" + Utils.getDefaultLocale() + "/register.vm", "UTF-8", model);
 		mailer.sendMail(MailMail.REGISTER, account.getEmail(), subject, message, resourceSrv.getBasicResourceMap());
 	}
 
 	public void sendResetLink(Account account) {
-		StringBuilder url = new StringBuilder(Utils.getBaseURL());
+		String baseUrl = appSrv.getProperty(AppService.URL);
+		StringBuilder url = new StringBuilder(baseUrl);
 		url.append("/");
 		url.append("password?id=");
 		url.append(account.getUuid());
@@ -149,7 +154,7 @@ public class AccountService {
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put(ACCOUNT, account);
 		model.put(LINK, url);
-		model.put(APPLICATION, Utils.getBaseURL());
+		model.put(APPLICATION, baseUrl);
 		String message = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
 				"email/" + account.getLanguage() + "/password.vm", "UTF-8", model);
 		LOG.info(url.toString());

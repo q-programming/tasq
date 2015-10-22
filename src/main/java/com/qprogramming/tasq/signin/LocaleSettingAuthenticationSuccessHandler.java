@@ -18,18 +18,15 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import com.qprogramming.tasq.support.Utils;
 
 @Component
-public class LocaleSettingAuthenticationSuccessHandler extends
-		SavedRequestAwareAuthenticationSuccessHandler {
+public class LocaleSettingAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 	@Autowired
 	private SessionLocaleResolver localeResolver;
 
 	@Override
-	public void onAuthenticationSuccess(HttpServletRequest request,
-			HttpServletResponse response, Authentication authentication)
-			throws ServletException, IOException {
-		//Eliminate signin error on saved request
-		SavedRequest savedRequest = new HttpSessionRequestCache().getRequest(
-				request, response);
+	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+			Authentication authentication) throws ServletException, IOException {
+		// Eliminate signin error on saved request
+		SavedRequest savedRequest = new HttpSessionRequestCache().getRequest(request, response);
 		if (savedRequest != null) {
 			String[] redirectUlr = savedRequest.getRedirectUrl().split("/");
 			if (redirectUlr[redirectUlr.length - 1].equals("sigin")) {
@@ -39,8 +36,6 @@ public class LocaleSettingAuthenticationSuccessHandler extends
 		String locale = Utils.getCurrentAccount().getLanguage();
 		Locale loc = new Locale(locale);
 		localeResolver.setLocale(request, response, loc);
-		Utils.setHttpRequest(request);
-		Utils.getBaseURL();
 		super.onAuthenticationSuccess(request, response, authentication);
 	}
 

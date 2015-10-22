@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.web.MessageHelper;
 
@@ -21,33 +22,32 @@ public class MailerController {
 
 	private MailMail mailer;
 	private MessageSource msg;
+	private AppService appSrv;
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(MailerController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(MailerController.class);
 
 	@Autowired
-	public MailerController(MessageSource msg, MailMail mailer) {
+	public MailerController(MessageSource msg, MailMail mailer, AppService appSrv) {
 		this.msg = msg;
 		this.mailer = mailer;
+		this.appSrv = appSrv;
 	}
 
 	@RequestMapping(value = "/inviteUsers", method = RequestMethod.GET)
-	public String getUser(@RequestParam(value = "email") String email,
-			HttpServletRequest request,RedirectAttributes ra) {
+	public String getUser(@RequestParam(value = "email") String email, HttpServletRequest request,
+			RedirectAttributes ra) {
 		Account sender = Utils.getCurrentAccount();
-		String subject = msg.getMessage("panel.invite.subject", null,
-				Utils.getCurrentLocale());
-		String link = Utils.getBaseURL() + "/signup";
-		String message = msg.getMessage("panel.invite.body", new Object[] {
-				sender.toString(), link }, mailer.getDefaultLang());
+		String subject = msg.getMessage("panel.invite.subject", null, Utils.getCurrentLocale());
+		String baseUrl = appSrv.getProperty(AppService.URL);
+		String link = baseUrl + "/signup";
+		String message = msg.getMessage("panel.invite.body", new Object[] { sender.toString(), link },
+				mailer.getDefaultLang());
 		LOG.info(email);
 		LOG.info(subject);
 		LOG.info(message);
-		//if(mailer.sendMail(mailer.NOTIFICATION, email, subject, message)){
-		MessageHelper.addSuccessAttribute(
-				ra,
-				msg.getMessage("panel.invite.sent", new Object[] {email},
-						Utils.getCurrentLocale()));
+		// if(mailer.sendMail(mailer.NOTIFICATION, email, subject, message)){
+		MessageHelper.addSuccessAttribute(ra,
+				msg.getMessage("panel.invite.sent", new Object[] { email }, Utils.getCurrentLocale()));
 		return "redirect:" + request.getHeader("Referer");
 	}
 }
