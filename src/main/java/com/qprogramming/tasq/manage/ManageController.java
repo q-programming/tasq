@@ -46,12 +46,14 @@ public class ManageController {
 	private ThemeService themeSrv;
 	private MessageSource msg;
 	private ProjectService projSrv;
+	private AppService appSrv;
 
 	@Autowired
-	public ManageController(ThemeService themeSrv, MessageSource msg, ProjectService projSrv) {
+	public ManageController(ThemeService themeSrv, MessageSource msg, ProjectService projSrv, AppService appSrv) {
 		this.themeSrv = themeSrv;
 		this.msg = msg;
 		this.projSrv = projSrv;
+		this.appSrv = appSrv;
 	}
 
 	@RequestMapping(value = "manage/tasks", method = RequestMethod.GET)
@@ -71,12 +73,25 @@ public class ManageController {
 		return "admin/users";
 	}
 
+	@RequestMapping(value = "/manage/seturl", method = RequestMethod.POST)
+	public String setUrl(@RequestParam(value = "url") String url, HttpServletRequest request, RedirectAttributes ra) {
+		if (!Roles.isAdmin()) {
+			throw new TasqAuthException();
+		}
+		appSrv.setProperty(AppService.URL, url);
+		MessageHelper.addSuccessAttribute(ra,
+				msg.getMessage("manage.prop.url.success", new Object[] { url }, Utils.getCurrentLocale()));
+		return "redirect:" + request.getHeader("Referer");
+	}
+
 	@RequestMapping(value = "manage/app", method = RequestMethod.GET)
 	public String manageApplication(RedirectAttributes ra, Model model) {
 		if (!Roles.isAdmin()) {
 			throw new TasqAuthException();
 		}
 		model.addAttribute("themes", themeSrv.findAll());
+		model.addAttribute("url", appSrv.getProperty(AppService.URL));
+		model.addAttribute("host", appSrv.getProperty(AppService.HOST));
 		return "admin/manage";
 	}
 

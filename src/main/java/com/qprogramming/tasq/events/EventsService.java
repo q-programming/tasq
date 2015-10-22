@@ -22,6 +22,7 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.config.ResourceService;
 import com.qprogramming.tasq.events.Event.Type;
 import com.qprogramming.tasq.mail.MailMail;
+import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.task.watched.WatchedTask;
@@ -38,18 +39,20 @@ public class EventsService {
 	private MessageSource msg;
 	private VelocityEngine velocityEngine;
 	private ResourceService resourceSrv;
+	private AppService appSrv;
 
 	private static final Logger LOG = LoggerFactory.getLogger(EventsService.class);
 
 	@Autowired
 	public EventsService(EventsRepository eventsRepo, WatchedTaskService watchSrv, MailMail mailer, MessageSource msg,
-			VelocityEngine velocityEngine, ResourceService resourceSrv) {
+			VelocityEngine velocityEngine, ResourceService resourceSrv, AppService appSrv) {
 		this.watchSrv = watchSrv;
 		this.eventsRepo = eventsRepo;
 		this.mailer = mailer;
 		this.msg = msg;
 		this.velocityEngine = velocityEngine;
 		this.resourceSrv = resourceSrv;
+		this.appSrv = appSrv;
 	}
 
 	public Event getById(Long id) {
@@ -121,6 +124,7 @@ public class EventsService {
 					event.setMessage(wlMessage);
 					eventsRepo.save(event);
 					if (account.getEmail_notifications()) {
+						String baseUrl = appSrv.getProperty(AppService.URL);
 						Locale locale = new Locale(account.getLanguage());
 						String eventStr = msg.getMessage(((LogType) log.getType()).getCode(), null, locale);
 						StringBuilder subject = new StringBuilder("[");
@@ -130,7 +134,7 @@ public class EventsService {
 						String type = task.getType().getCode();
 						Map<String, Object> model = new HashMap<String, Object>();
 						model.put("account", account);
-						model.put("application", Utils.getBaseURL());
+						model.put("application", baseUrl);
 						model.put("task", task);
 						model.put("wlMessage", wlMessage);
 						model.put("log", log);
@@ -165,6 +169,7 @@ public class EventsService {
 		event.setMessage(project.toString());
 		eventsRepo.save(event);
 		if (account.getEmail_notifications()) {
+			String baseUrl = appSrv.getProperty(AppService.URL);
 			Locale locale = new Locale(account.getLanguage());
 			String eventStr = msg.getMessage(type.getCode(), null, locale);
 			String subject = msg.getMessage("event.newSystemEvent",
@@ -173,7 +178,7 @@ public class EventsService {
 			Map<String, Object> model = new HashMap<String, Object>();
 			model.put("account", account);
 			model.put("type", type);
-			model.put("application", Utils.getBaseURL());
+			model.put("application", baseUrl);
 			model.put("project", project);
 			model.put("curAccount", Utils.getCurrentAccount());
 			String message;

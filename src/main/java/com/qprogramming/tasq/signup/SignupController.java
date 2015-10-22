@@ -30,6 +30,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.manage.ThemeService;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.web.MessageHelper;
@@ -47,12 +48,14 @@ public class SignupController {
 	private AccountService accountSrv;
 	private MessageSource msg;
 	private ThemeService themeSrv;
+	private AppService appSrv;
 
 	@Autowired
-	public SignupController(AccountService accountSrv, MessageSource msg, ThemeService themeSrv) {
+	public SignupController(AccountService accountSrv, MessageSource msg, ThemeService themeSrv, AppService appSrv) {
 		this.accountSrv = accountSrv;
 		this.msg = msg;
 		this.themeSrv = themeSrv;
+		this.appSrv = appSrv;
 	}
 
 	@RequestMapping(value = "signup")
@@ -90,6 +93,10 @@ public class SignupController {
 			// Copy logo
 			File appLogo = new File(getAvatarDir() + LOGO + PNG);
 			Utils.copyFile(sc, "/resources/img/logo.png", appLogo);
+			// set base url
+			Utils.setHttpRequest(request);
+			String url = Utils.getBaseURL();
+			appSrv.setProperty(AppService.URL, url);
 		}
 		account.setTheme(themeSrv.getDefault());
 		account = accountSrv.save(account, true);
