@@ -21,7 +21,7 @@
 					<s:message code="main.loading" />
 					<br>
 				</div>
-				<table style="width:100%;margin-top: 30px;">
+				<table style="width:100%;margin-top: 20px;">
 					<tr>
 						<td>
 							<s:message code="task.assignee" />:
@@ -29,17 +29,18 @@
 						</td>
 						<td class="pull-right">
 							<button id="unassign_btn" class="btn btn-default a-tooltip" title="<s:message code="task.unassign"/>"><i class="fa fa-user-times"></i></button>	
-							<button id="assign_btn" class="btn btn-default" disabled="disabled" style="width:150px">
-								<i class="fa fa-user"></i> <s:message code="task.assign" />
-							</button>
+							
 						</td>
 					</tr>
 					<tr>
 						<td></td>
-						<td class="pull-right">
+						<td class="pull-right" style="margin-top:20px">
 							<span id="assign_me_btn" class="btn btn-default" style="width:150px">
 								<i class="fa fa-user"></i> <s:message code="task.assignme" />
 							</span>
+							<button id="assign_btn" class="btn btn-default" disabled="disabled" style="width:150px">
+								<i class="fa fa-user"></i> <s:message code="task.assign" />
+							</button>
 						</td>
 					</tr>
 				</table>
@@ -82,7 +83,7 @@ $("#assign_me_btn").click(function() {
 
 $("#unassign_btn").click(function() {
 	$("#assignModalForm").append('<input id="assignEmail" type="hidden" name="email" value="">');
-	$("#assign").submit();
+	$("#assignModalForm").submit();
 });
 
 
