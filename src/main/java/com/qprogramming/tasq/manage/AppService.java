@@ -11,7 +11,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class AppService {
 
-	public static final String HOST = "host";
+	public static final String EMAIL_HOST = "emailHost";
+	public static final String EMAIL_PORT = "emailPort";
+	public static final String EMAIL_USERNAME = "emailUsername";
+	public static final String EMAIL_PASS = "emailPass";
+	public static final String EMAIL_SMTPAUTH = "emailSmtpAuth";
+	public static final String EMAIL_SMTPSTARTTLS = "emailSmtpStarttls";
+	public static final String EMAIL_ENCODING = "emailEncoding";
+	public static final String DEFAULTLANG = "defaultLang";
+	public static final String TASQROOTDIR = "tasqRootDir";
 	public static final String URL = "url";
 
 	private static final Logger LOG = LoggerFactory.getLogger(AppService.class);
@@ -19,25 +27,25 @@ public class AppService {
 	private String url;
 
 	@Value("${email.host}")
-	private String host;
+	private String emailHost;
 
 	@Value("${email.port}")
-	private String port;
+	private String emailPort;
 
 	@Value("${email.username}")
-	private String username;
+	private String emailUsername;
 
 	@Value("${email.pass}")
-	private String pass;
+	private String emailPass;
 
 	@Value("${email.smtp.auth}")
-	private String smtpAuth;
+	private String emailSmtpAuth;
 
 	@Value("${email.smtp.starttls}")
-	private String smtpStarttls;
+	private String emailSmtpStarttls;
 
 	@Value("${email.encoding}")
-	private String encoding;
+	private String emailEncoding;
 
 	@Value("${default.locale}")
 	private String defaultLang;

@@ -84,6 +84,28 @@ public class ManageController {
 		return "redirect:" + request.getHeader("Referer");
 	}
 
+	@RequestMapping(value = "/manage/setemail", method = RequestMethod.POST)
+	public String setEmail(@RequestParam(value = "emailHost") String emailHost,
+			@RequestParam(value = "emailPort") String emailPort,
+			@RequestParam(value = "emailUsername") String emailUsername,
+			@RequestParam(value = "emailPass") String emailPass,
+			@RequestParam(value = "emailSmtpAuth", required = false) boolean emailSmtpAuth,
+			@RequestParam(value = "emailSmtpStarttls", required = false) boolean emailSmtpStarttls,
+			HttpServletRequest request, RedirectAttributes ra) {
+		if (!Roles.isAdmin()) {
+			throw new TasqAuthException();
+		}
+		appSrv.setProperty(AppService.EMAIL_HOST, emailHost);
+		appSrv.setProperty(AppService.EMAIL_PORT, emailPort);
+		appSrv.setProperty(AppService.EMAIL_USERNAME, emailUsername);
+		appSrv.setProperty(AppService.EMAIL_PASS, emailPass);
+		appSrv.setProperty(AppService.EMAIL_SMTPAUTH, Boolean.toString(emailSmtpAuth));
+		appSrv.setProperty(AppService.EMAIL_SMTPSTARTTLS, Boolean.toString(emailSmtpStarttls));
+		MessageHelper.addSuccessAttribute(ra,
+				msg.getMessage("manage.prop.email.success", null, Utils.getCurrentLocale()));
+		return "redirect:" + request.getHeader("Referer");
+	}
+
 	@RequestMapping(value = "manage/app", method = RequestMethod.GET)
 	public String manageApplication(RedirectAttributes ra, Model model) {
 		if (!Roles.isAdmin()) {
@@ -91,7 +113,14 @@ public class ManageController {
 		}
 		model.addAttribute("themes", themeSrv.findAll());
 		model.addAttribute("url", appSrv.getProperty(AppService.URL));
-		model.addAttribute("host", appSrv.getProperty(AppService.HOST));
+		model.addAttribute("emailHost", appSrv.getProperty(AppService.EMAIL_HOST));
+		model.addAttribute("emailPort", appSrv.getProperty(AppService.EMAIL_PORT));
+		model.addAttribute("emailUsername", appSrv.getProperty(AppService.EMAIL_USERNAME));
+		model.addAttribute("emailPass", appSrv.getProperty(AppService.EMAIL_PASS));
+		model.addAttribute("emailSmtpAuth", appSrv.getProperty(AppService.EMAIL_SMTPAUTH));
+		model.addAttribute("emailSmtpStarttls", appSrv.getProperty(AppService.EMAIL_SMTPSTARTTLS));
+		model.addAttribute("emailEncoding", appSrv.getProperty(AppService.EMAIL_ENCODING));
+
 		return "admin/manage";
 	}
 

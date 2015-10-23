@@ -88,18 +88,52 @@
 			</h5>
 		</div>
 		<div id="emailToggle">
-			 <div style="padding-top: 10px; padding-left: 20px;">
-			 	<form action="<c:url value="/manage/setemail"/>" method="POST">
-<%-- 					<input class="form-control" id="url" name="url" value="${url}" style="width: 350px;float:left"> --%>
-<%-- 					<a id="getURL" class="btn btn-default clickable"><i class="fa fa-arrow-down"></i>&nbsp;<s:message code="manage.prop.url.current" /></a> --%>
-<%-- 					<button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i>&nbsp;<s:message code="main.save" /></button> --%>
-				</form>
-			</div>
-			<span class="help-block">
-<%-- 				<s:message code="manage.prop.url.help" htmlEscape="false" /> --%>
-			</span>
+			 <form action="<c:url value="/manage/setemail"/>" method="POST">
+				 	<label><s:message code="manage.prop.email.url" /></label>:
+					<label><s:message code="manage.prop.email.port" /></label>
+				 <div class="row" style="padding-top: 10px; padding-left: 20px;">
+					<input class="form-control" id="emailHost" name="emailHost" value="${emailHost}" style="width: 300px;float:left">
+					<span style="float:left;margin: 5px;">:</span>
+					<input class="form-control" id="emailPort" name="emailPort" maxlength="4" value="${emailPort}" style="width: 60px;float:left">
+				</div>
+				<div>
+					<span class="help-block">
+						<s:message code="manage.prop.email.help" htmlEscape="false" />
+					</span>
+				</div>
+				<hr>
+				<div class="row" style="padding-top: 10px; padding-left: 20px;">
+					<label><s:message code="manage.prop.username" /></label>:
+					<input class="form-control" id="emailUsername" name="emailUsername" value="${emailUsername}" style="width: 300px;">
+					<label><s:message code="manage.prop.pass" /></label>:
+					<input type="password" class="form-control" id="emailPass" name="emailPass" value="${emailPass}" style="width: 300px;">
+				</div>
+				<div>
+					<span class="help-block">
+						<s:message code="manage.prop.username.help" htmlEscape="false" />
+					</span>
+				</div>
+				<hr>
+				<div class="row" style="padding-top: 10px; padding-left: 20px;">
+					<label> <s:message code="manage.prop.emailSmtpAuth" /></label>
+					<div class="checkbox">
+					    <label>
+					      <input type="checkbox" id="emailSmtpAuth" name="emailSmtpAuth" <c:if test="${emailSmtpAuth}">checked</c:if>><s:message code="manage.prop.emailSmtpAuth.help" htmlEscape="false" />
+					    </label>
+					 </div>
+					 <label> <s:message code="manage.prop.emailSmtpStarttls" /></label>
+					 <div class="checkbox">
+					    <label>
+					      <input type="checkbox" id="emailSmtpStarttls" name="emailSmtpStarttls" <c:if test="${emailSmtpStarttls}">checked</c:if>><s:message code="manage.prop.emailSmtpStarttls.help" htmlEscape="false" />
+					    </label>
+					 </div>
+				</div>
+				<hr>
+				<button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i>&nbsp;<s:message code="main.save" /></button>
+			</form>
 		</div>
 	</div>
+	<c:if test=""></c:if>
 	
 	<div>
 		<div class="mod-header">

@@ -20,6 +20,8 @@ import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
+import com.qprogramming.tasq.manage.AppService;
+
 @Configuration
 public class MailMail {
 
@@ -70,6 +72,8 @@ public class MailMail {
 
 	@Autowired
 	private MailSender mailSender;
+	@Autowired
+	private AppService appSrv;
 
 	@Bean
 	public MailMail mailMail() {
@@ -79,16 +83,17 @@ public class MailMail {
 	}
 
 	@Bean
-	public MailSender mailSender() {
+	@Autowired
+	public MailSender mailSender(AppService appSrv) {
+		this.appSrv = appSrv;
 		jmsi = new JavaMailSenderImpl();
-		jmsi.setHost(host);
-		jmsi.setPort(Integer.parseInt(port));
-		jmsi.setUsername(username);
-		jmsi.setPassword(pass);
-
+		jmsi.setHost(appSrv.getProperty(AppService.EMAIL_HOST));
+		jmsi.setPort(Integer.parseInt(appSrv.getProperty(AppService.EMAIL_PORT)));
+		jmsi.setUsername(appSrv.getProperty(AppService.EMAIL_USERNAME));
+		jmsi.setPassword(appSrv.getProperty(AppService.EMAIL_PASS));
 		Properties javaMailProperties = new Properties();
-		javaMailProperties.setProperty("mail.smtp.auth", smtpAuth);
-		javaMailProperties.setProperty("mail.smtp.starttls.enable", smtpStarttls);
+		javaMailProperties.setProperty("mail.smtp.auth", appSrv.getProperty(AppService.EMAIL_SMTPAUTH));
+		javaMailProperties.setProperty("mail.smtp.starttls.enable", appSrv.getProperty(AppService.EMAIL_SMTPSTARTTLS));
 		jmsi.setJavaMailProperties(javaMailProperties);
 		mailSender = jmsi;
 		return mailSender;
@@ -111,7 +116,8 @@ public class MailMail {
 	public boolean sendMail(int type, String to, String subject, String msg, Map<String, Resource> resources) {
 		try {
 			MimeMessage message = ((JavaMailSenderImpl) mailSender).createMimeMessage();
-			MimeMessageHelper helper = new MimeMessageHelper(message, true, encoding);
+			MimeMessageHelper helper = new MimeMessageHelper(message, true,
+					appSrv.getProperty(AppService.EMAIL_ENCODING));
 			switch (type) {
 			case NOTIFICATION:
 				helper.setFrom(NOTIFICATION_TASQ, NOTIFICATION_TASQ_PERSONAL);
