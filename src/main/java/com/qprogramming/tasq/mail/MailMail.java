@@ -59,15 +59,15 @@ public class MailMail {
 	public static final int REGISTER = 3;
 	public static final int OTHER = -1;
 
-	private static final String TASQ = "tasq@tasq.qprogramming.pl";
+	private static final String TASQ = "tasq@";
 	private static final String TASQ_PERSONAL = "Tasker";
-	private static final String TASQ_REGISTER = "registration@tasq.qprogramming.pl";
+	private static final String TASQ_REGISTER = "registration@";
 	private static final String TASQ__REGISTER_PERSONAL = "Registration at Tasker";
-	private static final String NOTIFICATION_TASQ = "notification@tasq.qprogramming.pl";
+	private static final String NOTIFICATION_TASQ = "notification@";
 	private static final String NOTIFICATION_TASQ_PERSONAL = "Tasker notifier";
-	private static final String MESSAGE_TASQ = "messages@tasq.com";
+	private static final String MESSAGE_TASQ = "messages@";
 	private static final String MESSAGE_TASQ_PERSONAL = "Tasker messenger";
-	private static final String PROJECT_TASQ = "projects@tasq.qprogramming.pl";
+	private static final String PROJECT_TASQ = "projects@";
 	private static final String PROJECT_TASQ_PERSONAL = "Tasker projects";
 
 	@Autowired
@@ -120,19 +120,19 @@ public class MailMail {
 					appSrv.getProperty(AppService.EMAIL_ENCODING));
 			switch (type) {
 			case NOTIFICATION:
-				helper.setFrom(NOTIFICATION_TASQ, NOTIFICATION_TASQ_PERSONAL);
+				helper.setFrom(domain(NOTIFICATION_TASQ), NOTIFICATION_TASQ_PERSONAL);
 				break;
 			case MESSAGE:
-				helper.setFrom(MESSAGE_TASQ, MESSAGE_TASQ_PERSONAL);
+				helper.setFrom(domain(MESSAGE_TASQ), MESSAGE_TASQ_PERSONAL);
 				break;
 			case PROJECT:
-				helper.setFrom(PROJECT_TASQ, PROJECT_TASQ_PERSONAL);
+				helper.setFrom(domain(PROJECT_TASQ), PROJECT_TASQ_PERSONAL);
 				break;
 			case REGISTER:
-				helper.setFrom(TASQ_REGISTER, TASQ__REGISTER_PERSONAL);
+				helper.setFrom(domain(TASQ_REGISTER), TASQ__REGISTER_PERSONAL);
 				break;
 			default:
-				helper.setFrom(TASQ, TASQ_PERSONAL);
+				helper.setFrom(domain(TASQ), TASQ_PERSONAL);
 				break;
 			}
 			helper.setTo(to);
@@ -163,5 +163,9 @@ public class MailMail {
 
 	public void setDefaultLang(String defaultLang) {
 		this.defaultLang = defaultLang;
+	}
+
+	private String domain(String var) {
+		return var + appSrv.getProperty(AppService.EMAIL_DOMAIN);
 	}
 }

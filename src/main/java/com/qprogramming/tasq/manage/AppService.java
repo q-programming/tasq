@@ -18,6 +18,7 @@ public class AppService {
 	public static final String EMAIL_SMTPAUTH = "emailSmtpAuth";
 	public static final String EMAIL_SMTPSTARTTLS = "emailSmtpStarttls";
 	public static final String EMAIL_ENCODING = "emailEncoding";
+	public static final String EMAIL_DOMAIN = "emailDomain";
 	public static final String DEFAULTLANG = "defaultLang";
 	public static final String TASQROOTDIR = "tasqRootDir";
 	public static final String URL = "url";
@@ -46,6 +47,9 @@ public class AppService {
 
 	@Value("${email.encoding}")
 	private String emailEncoding;
+
+	@Value("${email.domain}")
+	private String emailDomain;
 
 	@Value("${default.locale}")
 	private String defaultLang;

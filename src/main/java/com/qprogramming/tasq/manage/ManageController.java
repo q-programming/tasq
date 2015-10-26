@@ -91,7 +91,9 @@ public class ManageController {
 			@RequestParam(value = "emailPass") String emailPass,
 			@RequestParam(value = "emailSmtpAuth", required = false) boolean emailSmtpAuth,
 			@RequestParam(value = "emailSmtpStarttls", required = false) boolean emailSmtpStarttls,
-			HttpServletRequest request, RedirectAttributes ra) {
+			@RequestParam(value = "emailDomain") String emailDomain,
+			@RequestParam(value = "emailEncoding") String emailEncoding, HttpServletRequest request,
+			RedirectAttributes ra) {
 		if (!Roles.isAdmin()) {
 			throw new TasqAuthException();
 		}
@@ -101,6 +103,8 @@ public class ManageController {
 		appSrv.setProperty(AppService.EMAIL_PASS, emailPass);
 		appSrv.setProperty(AppService.EMAIL_SMTPAUTH, Boolean.toString(emailSmtpAuth));
 		appSrv.setProperty(AppService.EMAIL_SMTPSTARTTLS, Boolean.toString(emailSmtpStarttls));
+		appSrv.setProperty(AppService.EMAIL_DOMAIN, emailDomain);
+		appSrv.setProperty(AppService.EMAIL_ENCODING, emailEncoding);
 		MessageHelper.addSuccessAttribute(ra,
 				msg.getMessage("manage.prop.email.success", null, Utils.getCurrentLocale()));
 		return "redirect:" + request.getHeader("Referer");
@@ -120,6 +124,7 @@ public class ManageController {
 		model.addAttribute("emailSmtpAuth", appSrv.getProperty(AppService.EMAIL_SMTPAUTH));
 		model.addAttribute("emailSmtpStarttls", appSrv.getProperty(AppService.EMAIL_SMTPSTARTTLS));
 		model.addAttribute("emailEncoding", appSrv.getProperty(AppService.EMAIL_ENCODING));
+		model.addAttribute("emailDomain", appSrv.getProperty(AppService.EMAIL_DOMAIN));
 
 		return "admin/manage";
 	}

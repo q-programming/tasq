@@ -89,19 +89,43 @@
 		</div>
 		<div id="emailToggle">
 			 <form action="<c:url value="/manage/setemail"/>" method="POST">
+			 	<div>
+			 		<label><s:message code="manage.prop.emailaddress" /></label>
+			 		<div class="row" style="padding-top: 10px; padding-left: 20px;">
+			 			<table>
+			 				<tr>
+				 				<td><input class="form-control" value="tasq@" style="width: 125px;float:left" disabled></td>
+				 				<td rowspan="5"><input name="emailDomain" class="form-control" style="width: 300px" value="${emailDomain}"></td>
+			 				</tr>
+			 				<tr>
+				 				<td><input class="form-control" value="notification@" style="width: 125px;float:left" disabled></td>
+			 				</tr>
+			 				<tr>
+				 				<td><input class="form-control" value="messages@" style="width: 125px;float:left" disabled></td>
+			 				</tr>
+			 				<tr>
+				 				<td><input class="form-control" value="projects@" style="width: 125px;float:left" disabled></td>
+			 				</tr>
+			 				<tr>
+				 				<td><input class="form-control" value="registration@" style="width: 125px;float:left" disabled></td>
+			 				</tr>
+			 			</table>
+			 		</div>
+			 	</div>
+			 	 <div class="row" style="padding-top: 10px; padding-left: 20px;">
 				 	<label><s:message code="manage.prop.email.url" /></label>:
 					<label><s:message code="manage.prop.email.port" /></label>
-				 <div class="row" style="padding-top: 10px; padding-left: 20px;">
-					<input class="form-control" id="emailHost" name="emailHost" value="${emailHost}" style="width: 300px;float:left">
-					<span style="float:left;margin: 5px;">:</span>
-					<input class="form-control" id="emailPort" name="emailPort" maxlength="4" value="${emailPort}" style="width: 60px;float:left">
+				 	<div class="row" style="padding-top: 10px; padding-left: 20px;">
+						<input class="form-control" id="emailHost" name="emailHost" value="${emailHost}" style="width: 300px;float:left">
+						<span style="float:left;margin: 5px;">:</span>
+						<input class="form-control" id="emailPort" name="emailPort" maxlength="4" value="${emailPort}" style="width: 60px;float:left">
+					</div>
 				</div>
 				<div>
 					<span class="help-block">
 						<s:message code="manage.prop.email.help" htmlEscape="false" />
 					</span>
 				</div>
-				<hr>
 				<div class="row" style="padding-top: 10px; padding-left: 20px;">
 					<label><s:message code="manage.prop.username" /></label>:
 					<input class="form-control" id="emailUsername" name="emailUsername" value="${emailUsername}" style="width: 300px;">
@@ -113,7 +137,6 @@
 						<s:message code="manage.prop.username.help" htmlEscape="false" />
 					</span>
 				</div>
-				<hr>
 				<div class="row" style="padding-top: 10px; padding-left: 20px;">
 					<label> <s:message code="manage.prop.emailSmtpAuth" /></label>
 					<div class="checkbox">
@@ -126,6 +149,10 @@
 					    <label>
 					      <input type="checkbox" id="emailSmtpStarttls" name="emailSmtpStarttls" <c:if test="${emailSmtpStarttls}">checked</c:if>><s:message code="manage.prop.emailSmtpStarttls.help" htmlEscape="false" />
 					    </label>
+					 </div>
+					 <div>
+					 	<label><s:message code="manage.prop.emailEncoding" /></label>
+					 	<input class="form-control" id="emailEncoding" name="emailEncoding" value="${emailEncoding}" style="width: 300px;">
 					 </div>
 				</div>
 				<hr>
