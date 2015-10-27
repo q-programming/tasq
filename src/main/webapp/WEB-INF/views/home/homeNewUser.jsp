@@ -14,8 +14,8 @@
 				arguments="${user}" />
 			<br>
 			<s:message code="view.index.new.help" />
-			<a class="btn btn-default btn-xxs a-tooltip" data-toggle="modal"
-				href='#' data-target="#show_users"
+			<a class="show_users_btn btn btn-default btn-xxs a-tooltip" 
+				href='#' 
 				title="<s:message
 									code="menu.users" text="Settings" />"
 				data-placement="bottom"><i class="fa fa-user"></i></a>

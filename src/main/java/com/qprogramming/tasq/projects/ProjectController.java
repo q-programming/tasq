@@ -397,55 +397,57 @@ public class ProjectController {
 		ProjectChart result = new ProjectChart();
 		List<WorkLog> events = wrkLogSrv.findProjectCreateCloseEvents(project, all);
 		// Fill maps
-		for (WorkLog workLog : events) {
-			// Don't calculate for subtask ( not important )
-			if (workLog.getTask() != null && !workLog.getTask().isSubtask()) {
-				LocalDate date = new LocalDate(workLog.getRawTime());
-				if (LogType.CREATE.equals(workLog.getType())) {
-					Integer value = created.get(date.toString());
-					if (value == null) {
-						value = 0;
+		if (events.size() > 0) {
+			for (WorkLog workLog : events) {
+				// Don't calculate for subtask ( not important )
+				if (workLog.getTask() != null && !workLog.getTask().isSubtask()) {
+					LocalDate date = new LocalDate(workLog.getRawTime());
+					if (LogType.CREATE.equals(workLog.getType())) {
+						Integer value = created.get(date.toString());
+						if (value == null) {
+							value = 0;
+						}
+						value++;
+						created.put(date.toString(), value);
+					} else if (LogType.REOPEN.equals(workLog.getType())) {
+						Integer value = closed.get(date.toString());
+						if (value == null) {
+							value = 0;
+						}
+						value--;
+						closed.put(date.toString(), value);
+					} else {
+						Integer value = closed.get(date.toString());
+						if (value == null) {
+							value = 0;
+						}
+						value++;
+						closed.put(date.toString(), value);
 					}
-					value++;
-					created.put(date.toString(), value);
-				} else if (LogType.REOPEN.equals(workLog.getType())) {
-					Integer value = closed.get(date.toString());
-					if (value == null) {
-						value = 0;
-					}
-					value--;
-					closed.put(date.toString(), value);
-				} else {
-					Integer value = closed.get(date.toString());
-					if (value == null) {
-						value = 0;
-					}
-					value++;
-					closed.put(date.toString(), value);
 				}
 			}
-		}
-		// Look for the first event ever (they are sorted)
-		LocalDate start = new LocalDate(events.get(0).getRawTime());
-		LocalDate end = new LocalDate().plusDays(1);
-		LocalDate counter = start;
-		Integer taskCreated = 0;
-		Integer taskClosed = 0;
-		while (counter.isBefore(end)) {
-			Integer createValue = created.get(counter.toString());
-			if (createValue == null) {
-				createValue = 0;
-			}
-			taskCreated += createValue;
-			result.getCreated().put(counter.toString(), taskCreated);
+			// Look for the first event ever (they are sorted)
+			LocalDate start = new LocalDate(events.get(0).getRawTime());
+			LocalDate end = new LocalDate().plusDays(1);
+			LocalDate counter = start;
+			Integer taskCreated = 0;
+			Integer taskClosed = 0;
+			while (counter.isBefore(end)) {
+				Integer createValue = created.get(counter.toString());
+				if (createValue == null) {
+					createValue = 0;
+				}
+				taskCreated += createValue;
+				result.getCreated().put(counter.toString(), taskCreated);
 
-			Integer closeValue = closed.get(counter.toString());
-			if (closeValue == null) {
-				closeValue = 0;
+				Integer closeValue = closed.get(counter.toString());
+				if (closeValue == null) {
+					closeValue = 0;
+				}
+				taskClosed += closeValue;
+				result.getClosed().put(counter.toString(), taskClosed);
+				counter = counter.plusDays(1);
 			}
-			taskClosed += closeValue;
-			result.getClosed().put(counter.toString(), taskClosed);
-			counter = counter.plusDays(1);
 		}
 		return result;
 	}

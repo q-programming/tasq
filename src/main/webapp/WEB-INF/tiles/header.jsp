@@ -182,8 +182,7 @@
 												code="menu.manage.tasks" /></a></li>
 								</ul>
 							</c:if>
-							<a class="btn btn-default btn-xs a-tooltip" data-toggle="modal"
-								data-target="#show_users"
+							<a class="show_users_btn btn btn-default btn-xs a-tooltip" data-toggle="modal"
 								title="<s:message
 									code="menu.users" text="Users" />"
 								data-placement="bottom"><i class="fa fa-users"></i></a> <a

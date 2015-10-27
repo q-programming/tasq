@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +43,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.manage.Theme;
 import com.qprogramming.tasq.manage.ThemeService;
+import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.ResultData;
 import com.qprogramming.tasq.support.Utils;
@@ -125,11 +128,7 @@ public class AccountController {
 			return "redirect:/users";
 		}
 		List<Object> principals = sessionRegistry.getAllPrincipals();
-		DisplayAccount dispAccount = new DisplayAccount(account);
-		List<SessionInformation> sessions = sessionRegistry.getAllSessions(account, false);
-		if (!sessions.isEmpty() && principals.contains(account)) {
-			dispAccount.setOnline(true);
-		}
+		DisplayAccount dispAccount = accountWithSession(principals, account);
 		model.addAttribute("projects", projSrv.findAllByUser(account.getId()));
 		model.addAttribute("account", dispAccount);
 		return "user/details";
@@ -164,15 +163,54 @@ public class AccountController {
 		List<DisplayAccount> list = new LinkedList<DisplayAccount>();
 		List<Object> principals = sessionRegistry.getAllPrincipals();
 		for (Account account : page) {
-			DisplayAccount dispAccount = new DisplayAccount(account);
-			List<SessionInformation> sessions = sessionRegistry.getAllSessions(account, false);
-			if (!sessions.isEmpty() && principals.contains(account)) {
-				dispAccount.setOnline(true);
-			}
+			DisplayAccount dispAccount = accountWithSession(principals, account);
 			list.add(dispAccount);
 		}
 		Page<DisplayAccount> result = new PageImpl<DisplayAccount>(list, p, page.getTotalElements());
 		return result;
+	}
+
+	@RequestMapping(value = "/project/participants", method = RequestMethod.GET)
+	public @ResponseBody Page<DisplayAccount> listParticipants(@RequestParam(required = false) String term,
+			@RequestParam String projId,
+			@PageableDefault(size = 25, page = 0, sort = "surname", direction = Direction.ASC) Pageable p) {
+
+		Project project = projSrv.findByProjectId(projId);
+		if (project == null) {
+			try {
+				Long projectID = Long.valueOf(projId);
+				project = projSrv.findById(projectID);
+			} catch (NumberFormatException e) {
+				LOG.error(e.getMessage());
+			}
+		}
+		Set<Account> allParticipants = project.getParticipants();
+		List<Object> principals = sessionRegistry.getAllPrincipals();
+		List<DisplayAccount> participants = new ArrayList<DisplayAccount>();
+		for (Account account : allParticipants) {
+			if (term == null) {
+				participants.add(accountWithSession(principals, account));
+			} else {
+				if (StringUtils.containsIgnoreCase(account.toString(), term)) {
+					participants.add(accountWithSession(principals, account));
+				}
+			}
+		}
+		int totalParticipants = participants.size();
+		if (participants.size() > p.getPageSize()) {
+			participants = participants.subList(p.getOffset(), p.getOffset() + p.getPageSize());
+		}
+		Page<DisplayAccount> result = new PageImpl<DisplayAccount>(participants, p, totalParticipants);
+		return result;
+	}
+
+	private DisplayAccount accountWithSession(List<Object> principals, Account account) {
+		DisplayAccount sAccount = new DisplayAccount(account);
+		List<SessionInformation> sessions = sessionRegistry.getAllSessions(account, false);
+		if (!sessions.isEmpty() && principals.contains(account)) {
+			sAccount.setOnline(true);
+		}
+		return sAccount;
 	}
 
 	@RequestMapping(value = "/user/{username}/reset-avatar", method = RequestMethod.GET)

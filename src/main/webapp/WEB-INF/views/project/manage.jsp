@@ -202,7 +202,7 @@
 				</div>
 			</div>
 			<div style="display: table-cell; padding-left: 5px;">
-				<a data-toggle="modal" data-target="#show_users"><span
+				<a class="show_users_btn"><span
 					class="btn btn-default btn-sm a-tooltip"
 					title="<s:message
 					code="menu.users" />"><i class="fa fa-lg fa-users"></i></span></a>

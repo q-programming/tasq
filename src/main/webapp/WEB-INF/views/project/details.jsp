@@ -59,6 +59,10 @@
 				data-placement="bottom"> <i class="fa fa-refresh"></i>
 			</a>
 		</c:if>
+			<a class="show_participants_btn btn btn-default a-tooltip pull-right" 
+				title="" data-placement="bottom" data-original-title="<s:message code="project.members"/>">
+					<i class="fa fa-users"></i>
+			</a>
 	</div>
 	<h3>[${project.projectId}] ${project.name}</h3>
 	${project.description}
@@ -98,8 +102,11 @@
 		</div>
 	</div>
 	<%----------CHART -----------%>
-	<div class="row" style="height: 300px; width: 90%; margin: 20px auto">
+	<div id="chart_divarea" class="row" style="height: 300px; width: 90%; margin: 20px auto">
 		<div id="chartdiv"></div>
+	</div>
+	<div id="no_events" style="text-align: center;padding: 20px;display:none">
+		No events
 	</div>
 		<div style="display: inherit; font-size: small; float: right">
 		<span id="moreEvents" class="clickable" data-all="false"><span id="moreEventsCheck"><i 
@@ -232,6 +239,8 @@ function printChart(all){
 	if(plot){
 		plot.destroy();
 	}
+	$("#chart_divarea").show('slow');
+	$("#no_events").hide('slow');
 	$("#chartdiv").append(loading_indicator);
 	projectId = '${project.projectId}';
 	$.get('<c:url value="/project/getChart"/>',{id:projectId,all:all},function(result){
@@ -248,6 +257,8 @@ function printChart(all){
 	    	$.each(result.closed, function(key,val){
 	    		closedData.push([key, val]);
 	    	});
+	    	if(createdData.length > 0 && closedData.length > 0)
+	    	{
 	    	plot = $.jqplot('chartdiv', [ createdData , closedData ], {
 	    		title : '<s:message code="task.created"/>/<s:message code="task.state.closed"/>',
 	            seriesDefaults: {
@@ -304,6 +315,10 @@ function printChart(all){
 			        show: false,
 			    }
 	    	});
+		}else{
+			$("#chart_divarea").hide('slow');
+			$("#no_events").show('slow');
+		}
 	});
 }
 

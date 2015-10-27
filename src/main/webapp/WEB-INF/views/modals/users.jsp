@@ -10,7 +10,7 @@
 <script language="javascript" type="text/javascript"
 	src="<c:url value="/resources/js/bootstrap-paginator.min.js"/>"></script>
 <c:set var="name_text">
-	<s:message code="user.name" text="Name" />
+	<s:message code="user.name" text="Name" />&nbsp;
 	<s:message code="user.surname" text="Surname" />
 </c:set>
 <c:set var="role_text">
@@ -18,6 +18,9 @@
 </c:set>
 <c:set var="userList_text">
 	<s:message code="user.users" text="User List" />
+</c:set>
+<c:set var="participants_text">
+	<s:message code="project.members" text="Project Members" />
 </c:set>
 <c:set var="action_text">
 	<s:message code="main.action" text="Action" />
@@ -32,7 +35,7 @@
 					aria-hidden="true">&times;</button>
 				<i id="search_users" class="fa fa-search search-btn a-tooltip" data-html="true" data-placement="left" title="<s:message code="user.search"/>"></i>
 				<h4 class="modal-title" id="myModalLabel">
-					<i class="fa fa-users"></i> ${userList_text}
+					<i class="fa fa-users"></i>&nbsp;<span id="users_modalLable">${userList_text}</span>
 				</h4>
 			</div>
 			<table id="user_table" class="table table-hover table-condensed" style="width: 95%;margin: 15px;">
@@ -60,13 +63,36 @@
 	</div>
 </div>
 <script>
-var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><i class="fa fa-cog fa-spin"></i><s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
+var user_loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="4"><i class="fa fa-cog fa-spin"></i><s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
+var url;
+var projId;
+var show;
+$('.show_users_btn').click(function() {
+	$("#user_table .listeduser").remove();
+	url = '<c:url value="/users"/>';
+	$("#users_modalLable").html('${userList_text}');
+	$('#filterrow').hide();
+	$('#search_field').val('');
+	$("#show_users").modal('show');
+	projId = '';
+	if($("#user_table tr").length<3){
+		fetchUsers(0);
+		}
+});
 
-$('#show_users').on('shown.bs.modal', function (e) {
+$('.show_participants_btn').click(function() {
+	$("#user_table .listeduser").remove();
+	url = '<c:url value="/project/participants"/>';
+	projId = '${project.projectId}';
+	$("#users_modalLable").html('${participants_text}');
+	$('#filterrow').hide();
+	$('#search_field').val('');
+	$("#show_users").modal('show');
 	if($("#user_table tr").length<3){
 		fetchUsers(0);
 		}
 	});
+
 
 $(document).on("click",".navBtn",function(e) {
 	var page =  $(this).data('page');
@@ -79,9 +105,9 @@ $("#search_field").change(function() {
 	
 function fetchUsers(page,term){
 	$("#user_table .listeduser").remove();
-	$("#user_table").append(loading_indicator);
-	var url = '<c:url value="/users"/>';
-	$.get(url, {page: page,term:term}, function(data) {
+	$("#user_table").append(user_loading_indicator);
+	
+	$.get(url, {projId: projId, page: page,term:term}, function(data) {
 		$("#loading").remove();
 // 		console.log(data);
 		var avatarURL = '<c:url value="/../avatar/"/>';
@@ -114,6 +140,8 @@ function fetchUsers(page,term){
 		$("#user_nav tr").remove();
 		if(data.totalPages > 1){
 			printNavigation(page,data);
+		}else{
+			$("#user_nav").html('');
 		}
 		$('.a-tooltip').tooltip();
 	});
@@ -128,13 +156,15 @@ $.expr[":"].contains = $.expr.createPseudo(function(arg) {
 var previous;
 $('#search_users').click(function() {
 	if($(this).attr("shown") && $('#search_field').val()!=''){
+		$('#filterrow').toggle();
 		fetchUsers(0);
 		$(this).removeAttr("shown");
 	}
 	else{
+		$('#filterrow').toggle();
+		$('#search_field').focus();
 		$(this).attr("shown",true);
 	}
-	$('#filterrow').toggle();
 	$('#search_field').val('');
 });
 
