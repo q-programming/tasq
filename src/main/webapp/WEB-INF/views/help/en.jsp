@@ -79,8 +79,8 @@
 				<img src="<c:url value="/resources/img/logo.png"/>"
 					style="height: 50px; padding: 5px;"></img>Tasker
 			</h2>
-			<p style="text-align:center">v.${version}</p>
-			
+			<p style="text-align: center">v.${version}</p>
+
 			<h3>About Tasker</h3>
 			<p>
 				"Tasker" is application to track progress within project using
@@ -1461,8 +1461,10 @@
 				<a class="anchor" id="a_manage"></a>
 				<h3>Manage application</h3>
 				<p>
-					There are some modification that can be set when application is
-					deployed. Application logo and themes can be changed anytime by any
+					Tasker comes with some predefines settings that are included in
+					<code>tasq.war</code>
+					which should be overrides while setting application. Application
+					logo and themes and e-mail settings can be changed anytime by any
 					administrator.<br> To enter application management use admin
 					<button class="btn btn-default btn-xs" type="button">
 						<i class="fa fa-wrench"></i>
@@ -1505,6 +1507,22 @@
 					change logo too often
 
 				</p>
+				<a class="anchor" id="a_url"></a>
+				<h4>Application URL</h4>
+				<p>
+					URL of application is used in all e-mails sent by application (
+					like events or account approving ). It must be valid url, otherwise
+					e-mails will be sent with wrong url's to task, account confirmation
+					etc. In order to obtain current url from browser click <a
+						class="btn btn-default btn-sm clickable"><i
+						class="fa fa-arrow-down"></i>&nbsp;Get url</a> button
+				</p>
+				<a class="anchor" id="a_email"></a>
+				<h4>Email settings</h4>
+				<p>In this section , you can set all Email related settings.
+					SMTP host name, port username and password. Default value points to
+					localhost server on port 25 without user and password.</p>
+
 				<a class="anchor" id="a_theme"></a>
 				<h4>Themes</h4>
 				<p>

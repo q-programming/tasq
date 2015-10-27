@@ -112,6 +112,11 @@
 			 			</table>
 			 		</div>
 			 	</div>
+			 	<div>
+					<span class="help-block">
+						<s:message code="manage.prop.email.domain.help" htmlEscape="false" />
+					</span>
+				</div>
 			 	 <div class="row" style="padding-top: 10px; padding-left: 20px;">
 				 	<label><s:message code="manage.prop.email.url" /></label>:
 					<label><s:message code="manage.prop.email.port" /></label>
