@@ -466,7 +466,10 @@ public class ProjectController {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(id);
 		DisplayProject result = new DisplayProject(project);
-		result.setDefaultAssignee(accSrv.findById(project.getDefaultAssigneeID()));
+		Account account = accSrv.findById(project.getDefaultAssigneeID());
+		if(account != null){
+			result.setDefaultAssignee(new DisplayAccount(account));
+		}
 		return result;
 	}
 

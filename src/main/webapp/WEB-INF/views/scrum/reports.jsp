@@ -26,7 +26,7 @@
 	<c:set var="ActiveSprint">${param.sprint}</c:set>
 </c:if>
 	
-<h3>[${project.projectId}] ${project}</h3>
+<h3>${project}</h3>
 <div class="white-frame" style="display: table; width: 100%;">
 	<div style="display: table-caption; margin-left: 10px;">
 		<ul class="nav nav-tabs" style="border-bottom: 0">

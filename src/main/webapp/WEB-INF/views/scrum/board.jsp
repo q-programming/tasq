@@ -22,7 +22,7 @@
 	test="${(myfn:contains(project.participants,user) && user.isUser) || is_admin}">
 	<c:set var="can_edit" value="true" />
 </c:if>
-<h3>[${project.projectId}] ${project}</h3>
+<h3>${project}</h3>
 <div class="white-frame"
 	style="display: table; width: 100%; height: 85vh">
 	<div style="display: table-caption; margin-left: 10px;">

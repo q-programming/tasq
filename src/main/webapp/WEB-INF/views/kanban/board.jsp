@@ -6,7 +6,7 @@
 <c:set var="taskDesc_text">
 	<s:message code="task.description" text="Description" arguments="" />
 </c:set>
-<h3>[${project.projectId}] ${project}</h3>
+<h3>${project}</h3>
 <div class="white-frame"
 	style="display: table; width: 100%; height: 85vh">
 	<div style="display: table-caption; margin-left: 10px;">
