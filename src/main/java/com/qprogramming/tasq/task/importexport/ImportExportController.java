@@ -119,7 +119,7 @@ public class ImportExportController {
 		if (importFile.getSize() != 0) {
 			String extension = FilenameUtils.getExtension(importFile.getOriginalFilename());
 			Project project = projectSrv.findByProjectId(projectName);
-			int taskCount = project.getTasks().size();
+			Long taskCount = project.getLastTaskNo();
 			StringBuilder logger = new StringBuilder();
 			if (extension.equals(XLS_TYPE)) {
 				HSSFWorkbook workbook = new HSSFWorkbook(importFile.getInputStream());
@@ -211,12 +211,13 @@ public class ImportExportController {
 		return "/task/importResults";
 	}
 
-	private Task finalizeTaskCretion(Task task, int taskCount, Project project) {
+	private Task finalizeTaskCretion(Task task, long taskCount, Project project) {
 		String taskID = project.getProjectId() + "-" + taskCount;
 		task.setId(taskID);
 		task.setProject(project);
-		task.setTaskOrder((long) taskCount);
+		task.setTaskOrder(taskCount);
 		project.getTasks().add(task);
+		project.setLastTaskNo(taskCount);
 		task = taskSrv.save(task);
 		projectSrv.save(project);
 		wlSrv.addActivityLog(task, "", LogType.CREATE);
@@ -423,7 +424,8 @@ public class ImportExportController {
 	 * @return
 	 */
 	private boolean isNumericCellValid(Row row, int cell) {
-		return row.getCell(cell) != null && row.getCell(cell).getCellType() == Cell.CELL_TYPE_NUMERIC;
+		return !(row.getCell(cell) != null)
+				|| (row.getCell(cell) != null && row.getCell(cell).getCellType() == Cell.CELL_TYPE_NUMERIC);
 	}
 
 	/**
