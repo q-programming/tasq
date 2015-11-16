@@ -86,6 +86,15 @@ public class MailMail {
 	@Autowired
 	public MailSender mailSender(AppService appSrv) {
 		this.appSrv = appSrv;
+		initMailSender();
+		return mailSender;
+
+	}
+
+	/**
+	 * Initialize mail sender with properties form DB/properties file
+	 */
+	public void initMailSender() {
 		jmsi = new JavaMailSenderImpl();
 		jmsi.setHost(appSrv.getProperty(AppService.EMAIL_HOST));
 		jmsi.setPort(Integer.parseInt(appSrv.getProperty(AppService.EMAIL_PORT)));
@@ -96,8 +105,6 @@ public class MailMail {
 		javaMailProperties.setProperty("mail.smtp.starttls.enable", appSrv.getProperty(AppService.EMAIL_SMTPSTARTTLS));
 		jmsi.setJavaMailProperties(javaMailProperties);
 		mailSender = jmsi;
-		return mailSender;
-
 	}
 
 	public void setMailSender(MailSender mailSender) {

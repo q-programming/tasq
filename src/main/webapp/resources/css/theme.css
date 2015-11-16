@@ -1,6 +1,9 @@
 a.theme {
 	color: white;
 }
+a.btn.login.theme:hover {
+	color: #b7dbff;
+}
 
 .theme.text{
 	color:white

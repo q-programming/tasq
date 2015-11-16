@@ -27,6 +27,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.error.TasqAuthException;
+import com.qprogramming.tasq.mail.MailMail;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.web.MessageHelper;
@@ -47,13 +48,16 @@ public class ManageController {
 	private MessageSource msg;
 	private ProjectService projSrv;
 	private AppService appSrv;
+	private MailMail mailer;
 
 	@Autowired
-	public ManageController(ThemeService themeSrv, MessageSource msg, ProjectService projSrv, AppService appSrv) {
+	public ManageController(ThemeService themeSrv, MessageSource msg, ProjectService projSrv, AppService appSrv,
+			MailMail mailer) {
 		this.themeSrv = themeSrv;
 		this.msg = msg;
 		this.projSrv = projSrv;
 		this.appSrv = appSrv;
+		this.mailer = mailer;
 	}
 
 	@RequestMapping(value = "manage/tasks", method = RequestMethod.GET)
@@ -105,6 +109,7 @@ public class ManageController {
 		appSrv.setProperty(AppService.EMAIL_SMTPSTARTTLS, Boolean.toString(emailSmtpStarttls));
 		appSrv.setProperty(AppService.EMAIL_DOMAIN, emailDomain);
 		appSrv.setProperty(AppService.EMAIL_ENCODING, emailEncoding);
+		mailer.initMailSender();
 		MessageHelper.addSuccessAttribute(ra,
 				msg.getMessage("manage.prop.email.success", null, Utils.getCurrentLocale()));
 		return "redirect:" + request.getHeader("Referer");

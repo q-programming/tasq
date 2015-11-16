@@ -121,31 +121,34 @@
 			<ul class="nav navbar-nav pull-right">
 				<security:authorize access="!isAuthenticated()">
 					<li>
-						<div style="display: table">
-							<form action='<s:url value="/j_spring_security_check"/>'
-								method="post">
-								<div style="display: table-row">
-									<div style="display: table-cell; padding-right: 10px;">
-										<input type="text" class="form-control input-sm"
-											id="inputEmail" placeholder="${email_txt}" name="j_username">
-									</div>
-									<div style="display: table-cell padding-right: 10px;">
-										<input type="password" class="form-control input-sm"
-											style="display: table-cell" id="inputPassword"
-											placeholder="${password_txt}" name="j_password">
+					<div style="padding-top: 5px; padding: 5px">
+						<a class="btn login theme" href="<c:url value="/signin"></c:url>"><s:message code="menu.signin" /></a>
+					</div>
+<!-- 						<div style="display: table"> -->
+<%-- 							<form action='<s:url value="/j_spring_security_check"/>' --%>
+<!-- 								method="post"> -->
+<!-- 								<div style="display: table-row"> -->
+<!-- 									<div style="display: table-cell; padding-right: 10px;"> -->
+<!-- 										<input type="text" class="form-control input-sm" -->
+<%-- 											id="inputEmail" placeholder="${email_txt}" name="j_username"> --%>
+<!-- 									</div> -->
+<!-- 									<div style="display: table-cell padding-right: 10px;"> -->
+<!-- 										<input type="password" class="form-control input-sm" -->
+<!-- 											style="display: table-cell" id="inputPassword" -->
+<%-- 											placeholder="${password_txt}" name="j_password"> --%>
 										
-									</div>
-									<div style="padding: 5px 0px 3px 0px;">
-									<input type="checkbox"
-										name="_spring_security_remember_me"> <span class="theme text" style="padding-right: 5px;"><s:message
-											code="menu.remmember" /></span>
-									<button type="submit" class="btn btn-default btn-sm">
-										<s:message code="menu.signin" />
-									</button>
-									</div>
-								</div>
-							</form>
-						</div> 
+<!-- 									</div> -->
+<!-- 									<div style="padding: 5px 0px 3px 0px;"> -->
+<!-- 									<input type="checkbox" -->
+<%-- 										name="_spring_security_remember_me"> <span class="theme text" style="padding-right: 5px;"><s:message --%>
+<%-- 											code="menu.remmember" /></span> --%>
+<!-- 									<button type="submit" class="btn btn-default btn-sm"> -->
+<%-- 										<s:message code="menu.signin" /> --%>
+<!-- 									</button> -->
+<!-- 									</div> -->
+<!-- 								</div> -->
+<!-- 							</form> -->
+<!-- 						</div>  -->
 					</li>
 				</security:authorize>
 				<%-- Logged in user --%>
