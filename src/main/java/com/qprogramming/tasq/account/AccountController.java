@@ -41,6 +41,7 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.error.TasqAuthException;
+import com.qprogramming.tasq.error.TasqException;
 import com.qprogramming.tasq.manage.Theme;
 import com.qprogramming.tasq.manage.ThemeService;
 import com.qprogramming.tasq.projects.Project;
@@ -85,7 +86,7 @@ public class AccountController {
 		return "user/settings";
 	}
 
-	@Transactional
+	@Transactional(rollbackFor = { TasqException.class })
 	@RequestMapping(value = "settings", method = RequestMethod.POST)
 	public String saveSettings(@RequestParam(value = "avatar", required = false) MultipartFile avatarFile,
 			@RequestParam(value = "email", required = false) String email,
@@ -111,8 +112,9 @@ public class AccountController {
 		if (email != null && email != "" && !account.getEmail().equals(email)) {
 			account.setEmail(email);
 			account.setConfirmed(false);
-			accountSrv.sendConfirmationLink(account);
-			message = msg.getMessage("panel.email.confirm", null, Utils.getCurrentLocale());
+			if (!accountSrv.sendConfirmationLink(account)) {
+				throw new TasqException(msg.getMessage("error.email.sending", null, Utils.getCurrentLocale()));
+			}
 		}
 		accountSrv.update(account);
 		MessageHelper.addSuccessAttribute(ra,
@@ -235,11 +237,12 @@ public class AccountController {
 	@RequestMapping(value = "/emailResend", method = RequestMethod.GET)
 	public String resendEmail(RedirectAttributes ra) {
 		Account account = Utils.getCurrentAccount();
-		accountSrv.sendConfirmationLink(account);
+		if (!accountSrv.sendConfirmationLink(account)) {
+			throw new TasqException(msg.getMessage("error.email.sending", null, Utils.getCurrentLocale()));
+		}
 		MessageHelper.addSuccessAttribute(ra, msg.getMessage("panel.emails.resend.sent",
 				new Object[] { account.getEmail() }, Utils.getCurrentLocale()));
 		return "redirect:/settings";
-
 	}
 
 	@RequestMapping(value = "role", method = RequestMethod.POST)
@@ -262,6 +265,25 @@ public class AccountController {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Sends email with invite to indicated email
+	 * 
+	 * @param email
+	 * @param request
+	 * @param ra
+	 * @return
+	 */
+	@RequestMapping(value = "/inviteUsers", method = RequestMethod.GET)
+	public String sendInvite(@RequestParam(value = "email") String email, HttpServletRequest request,
+			RedirectAttributes ra) {
+		if (!accountSrv.sendInvite(email, themeSrv.getDefault())) {
+			throw new TasqException(msg.getMessage("error.email.sending", null, Utils.getCurrentLocale()));
+		}
+		MessageHelper.addSuccessAttribute(ra,
+				msg.getMessage("panel.invite.sent", new Object[] { email }, Utils.getCurrentLocale()));
+		return "redirect:" + request.getHeader("Referer");
 	}
 
 	private String getAvatarDir() {

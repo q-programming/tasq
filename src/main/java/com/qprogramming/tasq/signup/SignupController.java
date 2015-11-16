@@ -30,6 +30,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.error.TasqException;
 import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.manage.ThemeService;
 import com.qprogramming.tasq.support.Utils;
@@ -103,9 +104,10 @@ public class SignupController {
 		// copy default avatar
 		File userAvatar = new File(getAvatar(account.getId()));
 		Utils.copyFile(sc, "/resources/img/avatar.png", userAvatar);
-		accountSrv.sendConfirmationLink(account);
+		if (!accountSrv.sendConfirmationLink(account)) {
+			throw new TasqException(msg.getMessage("error.email.sending", null, Utils.getCurrentLocale()));
+		}
 		MessageHelper.addSuccessAttribute(ra, msg.getMessage("signup.success", null, Utils.getDefaultLocale()));
-
 		return "redirect:/";
 	}
 
@@ -167,7 +169,7 @@ public class SignupController {
 		return "signin/resetPassword";
 	}
 
-	@Transactional
+	@Transactional(rollbackFor = TasqException.class)
 	@RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
 	public String resetPassword(@RequestParam(value = "email", required = true) String email, RedirectAttributes ra,
 			HttpServletRequest request) {
@@ -179,7 +181,9 @@ public class SignupController {
 		} else {
 			accountSrv.save(account, false);
 			Utils.setHttpRequest(request);
-			accountSrv.sendResetLink(account);
+			if (!accountSrv.sendResetLink(account)) {
+				throw new TasqException(msg.getMessage("error.email.sending", null, Utils.getCurrentLocale()));
+			}
 			MessageHelper.addSuccessAttribute(ra,
 					msg.getMessage("singin.password.token.sent", new Object[] { email }, Utils.getDefaultLocale()));
 		}
