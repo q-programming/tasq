@@ -202,7 +202,7 @@
 		</c:if>
 		<%-----------SPRINT---------------------------%>
 		<a class="anchor" id="sprintA"></a>
-		<div>
+		<div id="sprintDiv">
 			<div class="mod-header">
 				<h5 class="mod-header-title">
 					Sprint
@@ -487,6 +487,12 @@ $(document).ready(function($) {
 				var priority = thisPriority.data('priority');
 		   	 	$("#task_priority").html(thisPriority.html());
 		   		$("#priority").val(priority);
+		   		//AGILE
+		   		if(project.agile=='KANBAN'){
+		   			$("#sprintDiv").slideUp("slow");
+		   		}else{
+		   			$("#sprintDiv").slideDown("slow");
+		   		}
 		   		
 		});
 	}
