@@ -1093,10 +1093,10 @@ $(document).ready(function($) {
 						<security:authorize access="hasRole('ROLE_ADMIN')">
 							var delurl ='<c:url value="/task/delWorklog?id="/>';
 							delbtn = '<div class="buttons_panel" style="float: right;">'
-									+'<a class="a-tooltip delete_btn" style="color:gray" href="' +delurl + worklog.id + '"'
+									+'<a class="delete_btn a-tooltip" style="color: #555;" href="' +delurl + worklog.id + '"'
 									+' title = "<s:message code="task.worklog.delete"/>"'
 									+' data-lang="${pageContext.response.locale}"'
-									+' data-msg="<s:message code="task.delete.confirm"/>" >' 
+									+' data-msg="<s:message code="task.worklog.delete.confirm"/>" >' 
 									+'<i class="fa fa-trash-o"></i></a></div>';
 						</security:authorize>
 						var row = '<tr><td><div style="font-size: smaller; color: dimgray;">' + account + ' ' + type + '<div class="time-div">' + worklog.timeLogged + '</div> ' + delbtn + message 
@@ -1125,8 +1125,7 @@ $(document).ready(function($) {
 					$("#watch").attr('data-original-title',msg + current + watchers);
 				});
 			}
-			
-$(document).on("click",".delete_btn",function(e) {
+$('body').on('click', 'a.delete_btn', function(e) {			
 		var msg = '<p style="text-align:center"><i class="fa fa-lg fa-exclamation-triangle" style="display: initial;"></i>&nbsp'
 					+ $(this).data('msg') + '</p>';
 		var lang = $(this).data('lang');
