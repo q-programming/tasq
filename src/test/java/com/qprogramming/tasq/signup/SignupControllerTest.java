@@ -2,6 +2,9 @@ package com.qprogramming.tasq.signup;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyMapOf;
+
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,6 +23,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.springframework.core.io.Resource;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.junit.Assert;
@@ -148,6 +152,9 @@ public class SignupControllerTest {
 			when(accRepoMock.findAll()).thenReturn(accountsList);
 			when(accRepoMock.findByEmail(NEW_EMAIL)).thenReturn(null);
 			when(encoderMock.encode(any(CharSequence.class))).thenReturn("encodedPassword");
+			when(appSrvMock.getProperty(AppService.URL)).thenReturn("http://dummy.com");
+			when(mailerMock.sendMail(anyInt(), anyString(), anyString(), anyString(),
+					anyMapOf(String.class, Resource.class))).thenReturn(true);
 			SignupForm form = fillForm();
 			Errors errors = new BeanPropertyBindingResult(form, "form");
 			signupCtr.signup(form, errors, raMock, requestMock);
@@ -247,6 +254,8 @@ public class SignupControllerTest {
 		when(requestMock.getServerName()).thenReturn("testServer");
 		when(requestMock.getServerPort()).thenReturn(8080);
 		when(appSrvMock.getProperty(AppService.URL)).thenReturn("http://dummy.com");
+		when(mailerMock.sendMail(anyInt(), anyString(), anyString(), anyString(),
+				anyMapOf(String.class, Resource.class))).thenReturn(true);
 		signupCtr.resetPassword(EMAIL, raMock, requestMock);
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.WARNING, new Object[] {}));

@@ -40,8 +40,6 @@ import com.qprogramming.tasq.support.web.MessageHelper;
 public class SignupController {
 	private static final Logger LOG = LoggerFactory.getLogger(SignupController.class);
 
-	@Value("${home.directory}")
-	private String tasqRootDir;
 	private static final String AVATAR_DIR = "avatar";
 	private static final String PNG = ".png";
 	private static final String LOGO = "logo";
@@ -191,7 +189,7 @@ public class SignupController {
 	}
 
 	private String getAvatarDir() {
-		return tasqRootDir + File.separator + AVATAR_DIR + File.separator;
+		return appSrv.getProperty(AppService.TASQROOTDIR) + File.separator + AVATAR_DIR + File.separator;
 	}
 
 	private String getAvatar(Long id) {

@@ -20,6 +20,7 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.events.Event;
 import com.qprogramming.tasq.events.EventsService;
+import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.Utils;
@@ -34,9 +35,7 @@ public class HomeController {
 	private TaskService taskSrv;
 	private ProjectService projSrv;
 	private EventsService eventSrv;
-
-	@Value("${home.directory}")
-	private String appHomeDir;
+	private AppService appSrv;
 
 	@Value("${skip.landing.page}")
 	private String skipLandingPage;
@@ -45,9 +44,10 @@ public class HomeController {
 	private String version;
 
 	@Autowired
-	public HomeController(TaskService taskSrv, ProjectService projSrv) {
+	public HomeController(TaskService taskSrv, ProjectService projSrv, AppService appSrv) {
 		this.taskSrv = taskSrv;
 		this.projSrv = projSrv;
+		this.appSrv = appSrv;
 	}
 
 	int week = 7 * 24 * 60 * 60 * 1000;
@@ -116,7 +116,7 @@ public class HomeController {
 		// }
 		// }
 		model.addAttribute("version", version);
-		model.addAttribute("projHome", appHomeDir);
+		model.addAttribute("projHome", appSrv.getProperty(AppService.TASQROOTDIR));
 		return "help/" + lang;
 	}
 

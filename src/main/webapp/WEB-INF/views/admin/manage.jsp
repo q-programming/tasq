@@ -25,6 +25,7 @@
 						code="menu.manage.tasks" /></a></li>
 		</ul>
 	</div>
+	<!-- 	AVATAR -->
 	<div>
 		<form id="avatarUpload" name="avatarUpload" enctype="multipart/form-data" action="<c:url value="/manage/logoUpload"/>" method="POST">
 			<div class="mod-header">
@@ -56,6 +57,7 @@
 			</div>
 		</form>
 	</div>
+	<!-- 	APPLICATION URL -->
 	<div>
 		<div class="mod-header">
 			<h5 class="mod-header-title">	
@@ -78,7 +80,30 @@
 			</span>
 		</div>
 	</div>
-		<div>
+	<!-- 	APPLICATION DIR -->
+	<div>
+		<div class="mod-header">
+			<h5 class="mod-header-title">	
+				<i class="fa fa-fw fa-caret-down toggler" data-tab="dirToggle"></i>
+				<span class="mod-header-title-txt">
+					<i class="fa fa-folder-open"></i>&nbsp;<s:message code="manage.prop.dir" text="Application directory"/>
+				</span>
+			</h5>
+		</div>
+		<div id="dirToggle">
+			 <div style="padding-top: 10px; padding-left: 20px;">
+			 	<form action="<c:url value="/manage/setdir"/>" method="POST">
+					<input class="form-control" id="dir" name="dir" value="${tasqRootDir}" style="width: 350px;float:left">
+					<button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i>&nbsp;<s:message code="main.save" /></button>
+				</form>
+			</div>
+			<span class="help-block">
+				<s:message code="manage.prop.dir.help" htmlEscape="false" />
+			</span>
+		</div>
+	</div>
+	<!-- 	E_MAIL SETTINGS -->
+	<div>
 		<div class="mod-header">
 			<h5 class="mod-header-title">	
 				<i class="fa fa-fw fa-caret-down toggler" data-tab="emailToggle"></i>
@@ -165,8 +190,7 @@
 			</form>
 		</div>
 	</div>
-	<c:if test=""></c:if>
-	
+	<!-- 	THEMES -->
 	<div>
 		<div class="mod-header">
 			<h5 class="mod-header-title">	

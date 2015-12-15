@@ -25,8 +25,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.google.common.io.Files;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.error.TasqAuthException;
+import com.qprogramming.tasq.error.TasqException;
 import com.qprogramming.tasq.mail.MailMail;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.Utils;
@@ -35,8 +37,6 @@ import com.qprogramming.tasq.support.web.MessageHelper;
 @Controller
 public class ManageController {
 
-	@Value("${home.directory}")
-	private String tasqRootDir;
 	private static final String AVATAR_DIR = "avatar";
 	private static final String PNG = ".png";
 	private static final String LOGO = "logo";
@@ -75,6 +75,37 @@ public class ManageController {
 			throw new TasqAuthException();
 		}
 		return "admin/users";
+	}
+
+	@RequestMapping(value = "/manage/setdir", method = RequestMethod.POST)
+	public String setDir(@RequestParam(value = "dir") String newPath, HttpServletRequest request,
+			RedirectAttributes ra) {
+		if (!Roles.isAdmin()) {
+			throw new TasqAuthException();
+		}
+		String oldPath = appSrv.getProperty(AppService.TASQROOTDIR);
+		if (!oldPath.equals(newPath)) {
+			File newDir = new File(newPath);
+			if (!newDir.mkdirs()) {
+				MessageHelper.addErrorAttribute(ra, msg.getMessage("manage.prop.dir.error.create",
+						new Object[] { newPath }, Utils.getCurrentLocale()));
+				return "redirect:" + request.getHeader("Referer");
+			} else {
+				File oldDir = new File(oldPath);
+				try {
+					Files.move(oldDir, newDir);
+				} catch (IOException e) {
+					MessageHelper.addErrorAttribute(ra, msg.getMessage("manage.prop.dir.error.move",
+							new Object[] { newPath }, Utils.getCurrentLocale()));
+					LOG.error(e.getMessage());
+					return "redirect:" + request.getHeader("Referer");
+				}
+				appSrv.setProperty(AppService.TASQROOTDIR, newPath);
+			}
+		}
+		MessageHelper.addSuccessAttribute(ra,
+				msg.getMessage("manage.prop.dir.success", new Object[] { newPath }, Utils.getCurrentLocale()));
+		return "redirect:" + request.getHeader("Referer");
 	}
 
 	@RequestMapping(value = "/manage/seturl", method = RequestMethod.POST)
@@ -130,7 +161,7 @@ public class ManageController {
 		model.addAttribute("emailSmtpStarttls", appSrv.getProperty(AppService.EMAIL_SMTPSTARTTLS));
 		model.addAttribute("emailEncoding", appSrv.getProperty(AppService.EMAIL_ENCODING));
 		model.addAttribute("emailDomain", appSrv.getProperty(AppService.EMAIL_DOMAIN));
-
+		model.addAttribute("tasqRootDir", appSrv.getProperty(AppService.TASQROOTDIR));
 		return "admin/manage";
 	}
 
@@ -204,7 +235,7 @@ public class ManageController {
 	}
 
 	private String getAvatarDir() {
-		return tasqRootDir + File.separator + AVATAR_DIR + File.separator;
+		return appSrv.getProperty(AppService.TASQROOTDIR) + File.separator + AVATAR_DIR + File.separator;
 	}
 
 }

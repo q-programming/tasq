@@ -42,6 +42,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.error.TasqException;
+import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.manage.Theme;
 import com.qprogramming.tasq.manage.ThemeService;
 import com.qprogramming.tasq.projects.Project;
@@ -54,25 +55,25 @@ import com.qprogramming.tasq.support.web.MessageHelper;
 @Secured("ROLE_USER")
 public class AccountController {
 
-	@Value("${home.directory}")
-	private String tasqRootDir;
-
 	private AccountService accountSrv;
 	private ProjectService projSrv;
 	private SessionLocaleResolver localeResolver;
 	private MessageSource msg;
 	private SessionRegistry sessionRegistry;
 	private ThemeService themeSrv;
+	private AppService appSrv;
 
 	@Autowired
 	public AccountController(AccountService accountSrv, ProjectService projSrv, MessageSource msg,
-			SessionLocaleResolver localeResolver, SessionRegistry sessionRegistry, ThemeService themeSrv) {
+			SessionLocaleResolver localeResolver, SessionRegistry sessionRegistry, ThemeService themeSrv,
+			AppService appSrv) {
 		this.accountSrv = accountSrv;
 		this.projSrv = projSrv;
 		this.msg = msg;
 		this.localeResolver = localeResolver;
 		this.sessionRegistry = sessionRegistry;
 		this.themeSrv = themeSrv;
+		this.appSrv = appSrv;
 	}
 
 	private static final Logger LOG = LoggerFactory.getLogger(AccountController.class);
@@ -287,7 +288,7 @@ public class AccountController {
 	}
 
 	private String getAvatarDir() {
-		return tasqRootDir + File.separator + AVATAR_DIR + File.separator;
+		return appSrv.getProperty(AppService.TASQROOTDIR) + File.separator + AVATAR_DIR + File.separator;
 	}
 
 	private String getAvatar(Long id) {
