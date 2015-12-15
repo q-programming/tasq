@@ -63,6 +63,7 @@
 							<li><a href="#a_manage">Manage application</a>
 								<ul class="nav">
 									<li><a href="#a_logo">Changing logo</a></li>
+									<li><a href="#a_dir">Changing main directory</a></li>
 									<li><a href="#a_theme">Themes</a></li>
 								</ul></li>
 							<li><a href="#a_manage_task">Manage tasks</a></li>
@@ -1517,6 +1518,18 @@
 						class="btn btn-default btn-sm clickable"><i
 						class="fa fa-arrow-down"></i>&nbsp;Get url</a> button
 				</p>
+				<a class="anchor" id="a_dir"></a>
+				<h4>Application Directory</h4>
+				<p>Default directory where all files are stored can be changed
+					in this section. When changing to new path, application will try to
+					move all currently existing files to new location Please ensure
+					that application has correct privileges to access new directory</p>
+				<p>
+					<i class="fa fa-exclamation-circle"></i>&nbsp; Do not change
+					application directory wheb application is live and used by users,
+					as it might produce some errors for users currently using it
+				</p>
+
 				<a class="anchor" id="a_email"></a>
 				<h4>Email settings</h4>
 				<p>In this section , you can set all Email related settings.
