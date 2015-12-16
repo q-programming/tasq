@@ -15,7 +15,6 @@ import org.imgscalr.Scalr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,7 +27,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.google.common.io.Files;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.error.TasqAuthException;
-import com.qprogramming.tasq.error.TasqException;
 import com.qprogramming.tasq.mail.MailMail;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.Utils;
@@ -119,6 +117,18 @@ public class ManageController {
 		return "redirect:" + request.getHeader("Referer");
 	}
 
+	@RequestMapping(value = "/manage/setlang", method = RequestMethod.POST)
+	public String setLang(@RequestParam(value = "language") String language, HttpServletRequest request,
+			RedirectAttributes ra) {
+		if (!Roles.isAdmin()) {
+			throw new TasqAuthException();
+		}
+		appSrv.setProperty(AppService.DEFAULTLANG, language);
+		MessageHelper.addSuccessAttribute(ra,
+				msg.getMessage("manage.prop.defaultLang.success", null, Utils.getCurrentLocale()));
+		return "redirect:" + request.getHeader("Referer");
+	}
+
 	@RequestMapping(value = "/manage/setemail", method = RequestMethod.POST)
 	public String setEmail(@RequestParam(value = "emailHost") String emailHost,
 			@RequestParam(value = "emailPort") String emailPort,
@@ -152,16 +162,17 @@ public class ManageController {
 			throw new TasqAuthException();
 		}
 		model.addAttribute("themes", themeSrv.findAll());
-		model.addAttribute("url", appSrv.getProperty(AppService.URL));
-		model.addAttribute("emailHost", appSrv.getProperty(AppService.EMAIL_HOST));
-		model.addAttribute("emailPort", appSrv.getProperty(AppService.EMAIL_PORT));
-		model.addAttribute("emailUsername", appSrv.getProperty(AppService.EMAIL_USERNAME));
-		model.addAttribute("emailPass", appSrv.getProperty(AppService.EMAIL_PASS));
-		model.addAttribute("emailSmtpAuth", appSrv.getProperty(AppService.EMAIL_SMTPAUTH));
-		model.addAttribute("emailSmtpStarttls", appSrv.getProperty(AppService.EMAIL_SMTPSTARTTLS));
-		model.addAttribute("emailEncoding", appSrv.getProperty(AppService.EMAIL_ENCODING));
-		model.addAttribute("emailDomain", appSrv.getProperty(AppService.EMAIL_DOMAIN));
-		model.addAttribute("tasqRootDir", appSrv.getProperty(AppService.TASQROOTDIR));
+		model.addAttribute(AppService.URL, appSrv.getProperty(AppService.URL));
+		model.addAttribute(AppService.EMAIL_HOST, appSrv.getProperty(AppService.EMAIL_HOST));
+		model.addAttribute(AppService.EMAIL_PORT, appSrv.getProperty(AppService.EMAIL_PORT));
+		model.addAttribute(AppService.EMAIL_USERNAME, appSrv.getProperty(AppService.EMAIL_USERNAME));
+		model.addAttribute(AppService.EMAIL_PASS, appSrv.getProperty(AppService.EMAIL_PASS));
+		model.addAttribute(AppService.EMAIL_SMTPAUTH, appSrv.getProperty(AppService.EMAIL_SMTPAUTH));
+		model.addAttribute(AppService.EMAIL_SMTPSTARTTLS, appSrv.getProperty(AppService.EMAIL_SMTPSTARTTLS));
+		model.addAttribute(AppService.EMAIL_ENCODING, appSrv.getProperty(AppService.EMAIL_ENCODING));
+		model.addAttribute(AppService.EMAIL_DOMAIN, appSrv.getProperty(AppService.EMAIL_DOMAIN));
+		model.addAttribute(AppService.TASQROOTDIR, appSrv.getProperty(AppService.TASQROOTDIR));
+		model.addAttribute(AppService.DEFAULTLANG, appSrv.getProperty(AppService.DEFAULTLANG));
 		return "admin/manage";
 	}
 

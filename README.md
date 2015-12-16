@@ -19,6 +19,7 @@ Installation
 * Update `/src/main/resources/email.properties` to point to your account
 * Default app language in  `/src/main/resources/project.properties`.
 * Default app directory is also set in `project.properties`
+* All properties (including e-mail) can be changed later on by Administrator in "Manage application" view
 * Build with maven using command `mvn package`
 * Deploy on tomcat ( copy to webapp dir)
 * Create directory on server to match app dir ( default is `/usr/local/tasq` ) 
@@ -29,6 +30,7 @@ Installation
 `<Host name="localhost"  appBase="webapps"unpackWARs="true" autoDeploy="true">` section ( at the bottom of config )
 * First registered user will be made application administrator, default theme will also be created
 * To show signin form right away for not logged user, change `skip.landing.page` property in `project.properties` to true. Otherwise landing page will be shown with basic application information
+* Be sure to read help, especially Administrator section to know how to work with application 
 
 Language
 --------

@@ -63,7 +63,7 @@
 			<h5 class="mod-header-title">	
 				<i class="fa fa-fw fa-caret-down toggler" data-tab="urlToggle"></i>
 				<span class="mod-header-title-txt">
-					<i class="fa fa-globe"></i>&nbsp;<s:message code="manage.prop.url" text="Application url"/>
+					<i class="fa fa-link"></i>&nbsp;<s:message code="manage.prop.url" text="Application url"/>
 				</span>
 			</h5>
 		</div>
@@ -99,6 +99,35 @@
 			</div>
 			<span class="help-block">
 				<s:message code="manage.prop.dir.help" htmlEscape="false" />
+			</span>
+		</div>
+	</div>
+	<!-- 	DEFAULT LANGUAGE -->
+	<div>
+		<div class="mod-header">
+			<h5 class="mod-header-title">	
+				<i class="fa fa-fw fa-caret-down toggler" data-tab="langToggle"></i>
+				<span class="mod-header-title-txt">
+					<i class="fa fa-globe"></i>&nbsp;<s:message code="manage.prop.defaultLang" text="Default language"/>
+				</span>
+			</h5>
+		</div>
+		<div id="langToggle">
+			 <div style="padding-top: 10px; padding-left: 20px;">
+			 	<form action="<c:url value="/manage/setlang"/>" method="POST">
+			 			<select class="form-control" name="language" style="width: 350px;float:left">
+							<option value="en"
+								<c:if test="${defaultLang eq 'en'}">selected</c:if>><s:message
+									code="lang.en" text="English" /></option>
+							<option value="pl"
+								<c:if test="${defaultLang eq 'pl'}">selected</c:if>><s:message
+									code="lang.pl" text="Polish" /></option>
+						</select>
+					<button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i>&nbsp;<s:message code="main.save" /></button>
+				</form>
+			</div>
+			<span class="help-block">
+				<s:message code="manage.prop.defaultLang.hint" htmlEscape="false" />
 			</span>
 		</div>
 	</div>
