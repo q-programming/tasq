@@ -23,8 +23,13 @@
 	</td>
 	<td class="table_header">
 		<i class="fa fa-check"></i>
+		<s:message code="task.state.complete" />
+	</td>
+	<td class="table_header">
+		<i class="fa fa-archive"></i>
 		<s:message code="task.state.closed" />
 	</td>
+	
 	<td class="table_header">
 		<i class="fa fa-ban"></i>
 		<s:message code="task.state.blocked" />
@@ -47,6 +52,15 @@
 				<t:card task="${task}" can_edit="${can_edit}" />
 			</c:if>
 		</c:forEach>
+	</div>
+</td>
+<td style="vertical-align: top;">
+	<div class="well table_state notsortable_tasks" data-state="COMPLETE">
+	<c:forEach items="${tasks}" var="task">
+		<c:if test="${task.state eq 'COMPLETE' && not task.subtask}">
+			<t:card task="${task}" can_edit="${can_edit}" />
+		</c:if>
+	</c:forEach>
 	</div>
 </td>
 <td style="vertical-align: top;">
@@ -175,7 +189,7 @@
 			    		showWait(true);
 			    		$("#save_order").hide();
 						$.post('<c:url value="/task/changeState"/>',{id:taskID,state:state},function(result){
-							if(result.code == 'Error'){
+							if(result.code == 'ERROR'){
 								reloadmsg = ' <s:message code="main.pageReload" arguments="5"/>';
 								showError(result.message + reloadmsg);
 								window.setTimeout('location.reload()', 5000);

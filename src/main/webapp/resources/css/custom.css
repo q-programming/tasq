@@ -180,18 +180,15 @@ table.togglerContent {
 }
 
 .table_header {
-	/* 	margin-top: -25px; */
-	/* 	margin-bottom: 20px; */
 	font-size: large;
 	text-align: center;
-	width: 24%;
+	width: 19%;
 }
 
 .state_default {
 	border-style: dashed;
 	border-width: 2px;
 	border-color: lightgray;
-	/* 	border-radius: 5px; */
 }
 
 .state_highlight {

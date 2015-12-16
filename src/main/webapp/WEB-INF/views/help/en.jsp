@@ -636,7 +636,8 @@
 						ID ] Task name</b></li>
 				<li><a class="anchor" id="task-2"></a><b>Current task
 						status</b> - in order to change this status click <span class="caret"></span>
-					and choose new one</li>
+					and choose new one</li> More about
+				<b><a href="#taskstatus">task statuses</a></b>
 				<li><a class="anchor" id="task-3"></a><b>Task priority</b> - to
 					change click <span class="caret"></span> and choose new</li>
 				<li><a class="anchor" id="task-4"></a><b>Tags</b> - to add new
@@ -1044,6 +1045,22 @@
 				applies).<br>The remaining time can never be less than 0.<br>If
 				more work was logged in task, it will be marked on task detials
 				screen accordingly.
+			</p>
+			<a class="anchor" id="taskstatus"></a>
+			<h4>Task status</h4>
+			<p>Tasks can be in following statuses:
+			<ul>
+				<li><t:state state="TO_DO" /> - new task, which can be taken
+					by developer</li>
+				<li><t:state state="ONGOING" /> - some work has been started
+					on this task.</li>
+				<li><t:state state="BLOCKED" /> - task on hold, because one
+					some issues are preventing from continuing work on it</li>
+				<li><t:state state="COMPLETE" /> - task has been completed,
+					only some review or testing left to be done</li>
+				<li><t:state state="CLOSED" /> - finished task, all work done</li>
+			</ul>
+
 			</p>
 			<h4>Timer</h4>
 			<p>

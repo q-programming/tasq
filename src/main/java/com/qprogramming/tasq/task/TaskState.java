@@ -3,7 +3,7 @@ package com.qprogramming.tasq.task;
 public enum TaskState {
 
 	TO_DO("task.state.todo"), ONGOING("task.state.ongoing"), BLOCKED(
-			"task.state.blocked"), CLOSED("task.state.closed");
+			"task.state.blocked"),COMPLETE("task.state.complete"), CLOSED("task.state.closed");
 
 	private String localCode;
 

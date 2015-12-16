@@ -231,19 +231,19 @@ public class TaskController {
 			throw new TasqAuthException(msg);
 		}
 	}
+
 	@Transactional
 	@RequestMapping(value = "/task/{id}/{subid}/edit", method = RequestMethod.GET)
-	public TaskForm startEditSubTask(@PathVariable("id") String id,@PathVariable("subid") String subid ,Model model) {
+	public TaskForm startEditSubTask(@PathVariable("id") String id, @PathVariable("subid") String subid, Model model) {
 		return startEditTask(createSubId(id, subid), model);
 	}
-	
+
 	@Transactional
 	@RequestMapping(value = "/task/{id}/{subid}/edit", method = RequestMethod.POST)
-	public String editSubTask(@Valid @ModelAttribute("taskForm") TaskForm taskForm, Errors errors, RedirectAttributes ra,
-			HttpServletRequest request) {
+	public String editSubTask(@Valid @ModelAttribute("taskForm") TaskForm taskForm, Errors errors,
+			RedirectAttributes ra, HttpServletRequest request) {
 		return editTask(taskForm, errors, ra, request);
 	}
-	
 
 	@Transactional
 	@RequestMapping(value = "/task/{id}/edit", method = RequestMethod.POST)
@@ -595,66 +595,70 @@ public class TaskController {
 		Task task = taskSrv.findById(taskID);
 		if (task != null) {
 			// check if can edit
-			if (!projectSrv.canEdit(task.getProject()) || (!Roles.isUser()
-					| (task.getAssignee() != null && !task.getAssignee().equals(Utils.getCurrentAccount())))) {
-				throw new TasqAuthException(msg, "role.error.task.permission");
-			}
-			// check if reopening kanban
-			if (task.getState().equals(TaskState.CLOSED)
-					&& Project.AgileType.KANBAN.equals(task.getProject().getAgile()) && task.getRelease() != null) {
-				return new ResultData(ResultData.ERROR, msg.getMessage("task.changeState.change.kanbanRelease",
-						new Object[] { task.getRelease().getRelease() }, Utils.getCurrentLocale()));
-			}
-			if (state.equals(TaskState.TO_DO)) {
-				Hibernate.initialize(task.getLoggedWork());
-				if (!("0m").equals(task.getLoggedWork())) {
-					return new ResultData(ResultData.ERROR,
-							msg.getMessage("task.alreadyStarted", null, Utils.getCurrentLocale()));
+			if ((Utils.getCurrentAccount().equals(task.getOwner())
+					|| Utils.getCurrentAccount().equals(task.getAssignee()))
+					|| (Roles.isPowerUser() | projectSrv.canEdit(task.getProject()))) {
+				// check if reopening kanban
+				if (task.getState().equals(TaskState.CLOSED)
+						&& Project.AgileType.KANBAN.equals(task.getProject().getAgile()) && task.getRelease() != null) {
+					return new ResultData(ResultData.ERROR, msg.getMessage("task.changeState.change.kanbanRelease",
+							new Object[] { task.getRelease().getRelease() }, Utils.getCurrentLocale()));
 				}
-			} else if (state.equals(TaskState.CLOSED)) {
-				ResultData result = checkTaskCanOperated(task, false);
-				if (result.code.equals(ResultData.ERROR)) {
-					return result;
-				}
-			}
-			if (closeSubtasks != null && closeSubtasks) {
-				if (task.getSubtasks() > 0) {
-					List<Task> subtasks = taskSrv.findSubtasks(task);
-					for (Task subtask : subtasks) {
-						wlSrv.addActivityLog(subtask, "", LogType.CLOSED);
-						subtask.setState(TaskState.CLOSED);
+				if (state.equals(TaskState.TO_DO)) {
+					Hibernate.initialize(task.getLoggedWork());
+					if (!("0m").equals(task.getLoggedWork())) {
+						return new ResultData(ResultData.ERROR,
+								msg.getMessage("task.alreadyStarted", null, Utils.getCurrentLocale()));
 					}
-					taskSrv.save(subtasks);
+				} else if (state.equals(TaskState.CLOSED)) {
+					ResultData result = checkTaskCanOperated(task, false);
+					if (result.code.equals(ResultData.ERROR)) {
+						return result;
+					}
 				}
-			}
+				if (closeSubtasks != null && closeSubtasks) {
+					if (task.getSubtasks() > 0) {
+						List<Task> subtasks = taskSrv.findSubtasks(task);
+						for (Task subtask : subtasks) {
+							wlSrv.addActivityLog(subtask, "", LogType.CLOSED);
+							subtask.setState(TaskState.CLOSED);
+						}
+						taskSrv.save(subtasks);
+					}
+				}
 
-			TaskState oldState = (TaskState) task.getState();
-			task.setState(state);
-			if (commentMessage != null && commentMessage != "") {
-				if (Utils.containsHTMLTags(commentMessage)) {
-					return new ResultData(ResultData.ERROR,
-							msg.getMessage("comment.htmlTag", null, Utils.getCurrentLocale()));
-				} else {
-					Comment comment = new Comment();
-					comment.setTask(task);
-					comment.setAuthor(Utils.getCurrentAccount());
-					comment.setDate(new Date());
-					comment.setMessage(commentMessage);
-					commRepo.save(comment);
-					Hibernate.initialize(task.getComments());
-					task.addComment(comment);
-					wlSrv.addActivityLog(task, commentMessage, LogType.COMMENT);
+				TaskState oldState = (TaskState) task.getState();
+				task.setState(state);
+				if (commentMessage != null && commentMessage != "") {
+					if (Utils.containsHTMLTags(commentMessage)) {
+						return new ResultData(ResultData.ERROR,
+								msg.getMessage("comment.htmlTag", null, Utils.getCurrentLocale()));
+					} else {
+						Comment comment = new Comment();
+						comment.setTask(task);
+						comment.setAuthor(Utils.getCurrentAccount());
+						comment.setDate(new Date());
+						comment.setMessage(commentMessage);
+						commRepo.save(comment);
+						Hibernate.initialize(task.getComments());
+						task.addComment(comment);
+						wlSrv.addActivityLog(task, commentMessage, LogType.COMMENT);
+					}
 				}
+				// Zero remaining time
+				if (remainingZero != null && remainingZero) {
+					task.setRemaining(PeriodHelper.inFormat("0m"));
+				}
+				String message = worklogStateChange(state, oldState, task);
+				taskSrv.save(task);
+				return new ResultData(ResultData.OK, message);
 			}
-			// Zero remaining time
-			if (remainingZero != null && remainingZero) {
-				task.setRemaining(PeriodHelper.inFormat("0m"));
-			}
-			String message = worklogStateChange(state, oldState, task);
-			taskSrv.save(task);
-			return new ResultData(ResultData.OK, message);
+			return new ResultData(ResultData.ERROR, msg.getMessage("error.unknown", null, Utils.getCurrentLocale()));
+		} else {
+			return new ResultData(ResultData.ERROR,
+					msg.getMessage("role.error.task.permission", null, Utils.getCurrentLocale()));
 		}
-		return new ResultData(ResultData.ERROR, msg.getMessage("error.unknown", null, Utils.getCurrentLocale()));
+
 	}
 
 	@Transactional
