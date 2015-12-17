@@ -38,15 +38,17 @@
 }
 
 .footer-time {
-	padding: 10px;
-	position: fixed;
-	bottom: 0;
-	margin-bottom: 0;
-	margin: 0px auto;
-	width: 100%;
-	border: 1px solid lightgray;
-	/* 	border-radius: 5px; */
-	background: white;
+    padding: 10px;
+    position: fixed;
+    bottom: 0;
+    margin-bottom: 0;
+    margin: 0px auto;
+    width: 100%;
+    border: 1px solid lightgray;
+    /* border-radius: 5px; */
+    background: white;
+    z-index: 1001;
+    padding-left: 30px;
 }
 
 /* Blink */
@@ -268,10 +270,11 @@ span.badge.left {
 	float: right;
 	padding-left: 10px;
 }
-.time-header{
+
+.time-header {
 	font-size: smaller;
 	width: 110px;
-    text-align: right;
+	text-align: right;
 }
 
 .input-italic {
@@ -589,4 +592,181 @@ li.wider {
 
 .ui-autocomplete-term {
 	font-weight: bold;
+}
+
+.active-task {
+	font-size: small;
+	margin-left: -19px;
+}
+
+/* BOOTSRAP FIXES AND TWEAKS */
+.btn-xxs {
+	font-size: x-small;
+}
+
+.progress {
+	height: 15px;
+	margin-bottom: 0px;
+}
+
+.alert-overlay {
+	position: fixed;
+	bottom: 0px;
+	margin-bottom: 0px;
+	width: 100%;
+	z-index: 2000
+}
+
+/*
+ * Dashboard
+ */
+
+/* Move down content because we have a fixed navbar that is 50px tall */
+body {
+	padding-top: 50px;
+}
+
+/*
+ * Global add-ons
+ */
+.sub-header {
+	padding-bottom: 10px;
+	border-bottom: 1px solid #eee;
+}
+
+/*
+ * Top navigation
+ * Hide default border to remove 1px line.
+ */
+.navbar-fixed-top {
+	border: 0;
+}
+
+/*
+ * Sidebar
+ */
+
+/* Hide for mobile, show later */
+.sidebar {
+	display: none;
+}
+
+@media ( min-width : 768px) {
+	.sidebar {
+		position: fixed;
+		top: 51px;
+		bottom: 0;
+		left: 0;
+		z-index: 1000;
+		display: block;
+		padding: 20px;
+		overflow-x: hidden;
+		overflow-y: auto;
+		/* Scrollable contents if viewport is shorter than content. */
+		background-color: #f5f5f5;
+		border-right: 1px solid #eee;
+	}
+}
+
+/* Sidebar navigation */
+.nav-sidebar {
+	margin-right: -21px; /* 20px padding + 1px border */
+	margin-bottom: 20px;
+	margin-left: -20px;
+}
+
+.nav-sidebar>li>a {
+	padding-right: 20px;
+	padding-left: 20px;
+}
+
+.nav-sidebar>li>a {
+	position: relative;
+	display: block;
+	padding: 5px 15px;
+	font-size: smaller;
+}
+
+
+
+.nav>li>a {
+	color: black;
+}
+
+.menu-items>li>a {
+	color: black;
+}
+
+li.divider {
+	height: 1px;
+	margin: 9px 0;
+	overflow: hidden;
+	background-color: #e5e5e5;
+}
+
+.menu-header {
+	list-style: none outside none;
+	position: relative;
+}
+
+.menu-items {
+	list-style: none outside none;
+	position: relative;
+	font-size: smaller;
+}
+
+.menu-indicator {
+	float: right;
+}
+
+.create-menu {
+	display: none;
+}
+
+.project-menu {
+	display: none;
+}
+
+.agile-menu {
+	display: none;
+}
+/*
+ * Main content
+ */
+.main {
+	/*   padding: 20px; */
+	
+}
+
+@media ( min-width : 768px) {
+	.main {
+		/*     padding-right: 40px; */
+		/*     padding-left: 40px; */
+		
+	}
+}
+
+.main .page-header {
+	margin-top: 0;
+}
+
+/*
+ * Placeholder dashboard ideas
+ */
+.placeholders {
+	margin-bottom: 30px;
+	text-align: center;
+}
+
+.placeholders h4 {
+	margin-bottom: 0;
+}
+
+.placeholder {
+	margin-bottom: 20px;
+}
+
+.placeholder img {
+	display: inline-block;
+	border-radius: 50%;
 }

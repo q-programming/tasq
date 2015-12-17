@@ -7,7 +7,7 @@ $(document).on("click","area , a",function(e) {
 });
 
 function showError(message){
-	var errorMsg= '<div class="alert alert-danger fade in"	style="position: fixed; bottom: 0px; width:100%">'
+	var errorMsg= '<div class="alert alert-danger fade in alert-overlay">'
 		+'<button type="button" class="close" data-dismiss="alert">&times;</button>'
 		+ message
 		+'</div>';
@@ -15,7 +15,7 @@ function showError(message){
 };
 
 function showSuccess(message){
-	var successMsg= '<div class="alert alert-success fade in"	style="position: fixed; bottom: 0px; width:100%">'
+	var successMsg= '<div class="alert alert-success fade in alert-overlay">'
 		+'<button type="button" class="close" data-dismiss="alert">&times;</button>'
 		+ message
 		+'</div>';
@@ -28,7 +28,7 @@ function showSuccess(message){
 };
 
 function showWarning(message){
-	var warningMsg= '<div class="alert alert-warning fade in"	style="position: fixed; bottom: 0px; width:100%">'
+	var warningMsg= '<div class="alert alert-warning fade in alert-overlay">'
 		+'<button type="button" class="close" data-dismiss="alert">&times;</button>'
 		+ message
 		+'</div>';
@@ -67,6 +67,14 @@ $(document).on("click",".toggler",function(e) {
 	$(this).toggleClass('closed');
 	$(this).toggleClass('fa-caret-down');
 	$(this).toggleClass('fa-caret-right');
+});
+
+$(document).on("click",".menu-toggle",function(e) {
+	var targetClass = "." + $(this).data('type');
+	$(targetClass).toggle("blind");
+	var indicator = $(this).find(".menu-indicator");
+	indicator.toggleClass('fa-caret-down');
+	indicator.toggleClass('fa-caret-left');
 });
 
 function getTaskType(type){

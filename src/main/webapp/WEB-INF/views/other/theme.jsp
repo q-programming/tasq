@@ -109,6 +109,16 @@ span.badge.theme.zero {
 	color: ${invcolor};
 	background-color: ${color};
 }
+.nav-sidebar>.active>a, .nav-sidebar>.active>a:hover, .nav-sidebar>.active>a:focus
+	{
+	color: ${invcolor};
+	background-color: ${color};
+}
+.nav>li>a:focus, .nav>li>a:hover {
+    text-decoration: none;
+	color: ${invcolor};
+	background-color: ${color};
+}
 
 .table-hover>tbody>tr:hover>td, .table-hover>tbody>tr:hover>th {
 	background-color: rgba(${rgbcolor}, 0.1);

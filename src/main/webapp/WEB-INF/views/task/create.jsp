@@ -21,20 +21,6 @@
 <c:set var="taskDesc_text">
 	<s:message code="task.description" text="Description" />
 </c:set>
-
-<div class="col-lg-2 col-md-2">
-	<div id="menu" class="bs-docs-sidebar hidden-print affix">
-<!-- 				<nav> -->
-					<ul class="nav bs-docs-sidenav">
-						<li>&nbsp;</li>
-						<li class=""><a href="#nameA">${taskName_text}</a></li>
-						<li class=""><a href="#descA">${taskDesc_text}</a></li>
-						<li class=""><a href="#projectA">Other</a></li>
-						<li class=""><a href="#createA">Create</a></li>
-					</ul>
-<!-- 				</nav> -->
-	</div>
-</div>
 <div class="white-frame col-lg-10 col-md-10" style="overflow: auto;display:table">
 <div style="display:table-caption;margin-left: 10px;">
 	<ul class="nav nav-tabs" style="border-bottom:0">
@@ -285,6 +271,19 @@
 			</button>
 		</div>
 	</form:form>
+</div>
+<div class="col-lg-2 col-md-2">
+	<div id="menu" class="bs-docs-sidebar hidden-print affix">
+<!-- 				<nav> -->
+					<ul class="nav bs-docs-sidenav">
+						<li>&nbsp;</li>
+						<li class=""><a href="#nameA">${taskName_text}</a></li>
+						<li class=""><a href="#descA">${taskDesc_text}</a></li>
+						<li class=""><a href="#projectA">Other</a></li>
+						<li class=""><a href="#createA">Create</a></li>
+					</ul>
+<!-- 				</nav> -->
+	</div>
 </div>
 <script>
 $(document).ready(function($) {

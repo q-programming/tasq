@@ -5,73 +5,7 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <div class="row white-frame">
-	<div id="menu" class="col-md-2 col-sm-2 col-lg-2" role="complementary">
-		<nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix">
-			<ul class="nav bs-docs-sidenav">
-				<li><a href="#about">About Tasker</a></li>
-				<li><a href="#main">Main menu</a>
-					<ul class="nav">
-						<li><a href="#personal">Personal menu</a></li>
-						<li><a href="#settings">User Settings menu</a></li>
-						<li><a href="#events">Events</a></li>
-						<li><a href="#watch">Watching</a></li>
-					</ul></li>
-				<li><a href="#users">Users</a></li>
-				<li><a href="#proj"><s:message code="project.projects"
-							text="Projects" /></a>
-					<ul class="nav">
-						<li><a href="#proj-view">Browsing all projects</a></li>
-						<li><a href="#proj-details">View projects details</a></li>
-						<li><a href="#proj-create">Creating projects</a></li>
-						<li><a href="#proj-edit">Managing projects</a></li>
-					</ul></li>
-				<li><a href="#task"><s:message code="task.tasks"
-							text="Tasks" /></a>
-					<ul class="nav">
-						<li><a href="#task-view">Browsing all tasks</a></li>
-						<li><a href="#task-details">View task details</a></li>
-						<li><a href="#task-create">Creating tasks</a></li>
-						<li><a href="#task-edit">Editing tasks</a></li>
-						<li><a href="#task-remove">Removing Tasks</a>
-						<li><a href="#task-import">Importing tasks</a></li>
-						<li><a href="#task-export">Exporting tasks</a></li>
-						<li><a href="#task-work">Working with tasks</a></li>
-						<li><a href="#task-subtask">Subtasks</a></li>
-					</ul></li>
-				<li><a href="#agile"><s:message code="agile.agile"
-							text="Agile" /></a>
-					<ul class="nav">
-						<li><a href="#scrum">SCRUM</a>
-							<ul class="nav">
-								<li><a href="#scrum-backlog">Backlog</a></li>
-								<li><a href="#scrum-board">Board</a></li>
-								<li><a href="#scrum-reports">Reports</a></li>
-							</ul></li>
-						<li><a href="#kanban">Kanban</a>
-							<ul class="nav">
-								<li><a href="#kanban-board">Board</a></li>
-								<li><a href="#kanban-reports">Reports</a></li>
-							</ul></li>
-					</ul></li>
-
-				<security:authorize access="hasRole('ROLE_ADMIN')">
-					<li><a href="#admin">Administration</a>
-						<ul class="nav">
-							<li><a href="#a_users">Users</a></li>
-							<li><a href="#a_projects">Projects</a>
-							<li><a href="#a_roles">Roles</a></li>
-							<li><a href="#a_manage">Manage application</a>
-								<ul class="nav">
-									<li><a href="#a_logo">Changing logo</a></li>
-									<li><a href="#a_dir">Changing main directory</a></li>
-									<li><a href="#a_theme">Themes</a></li>
-								</ul></li>
-							<li><a href="#a_manage_task">Manage tasks</a></li>
-						</ul></li>
-				</security:authorize>
-			</ul>
-		</nav>
-	</div>
+	
 	<div class="col-md-10 col-sm-10 col-lg-10" role="main">
 		<a class="anchor" id="top"></a>
 		<div>
@@ -1638,6 +1572,73 @@
 				href="http://q-programming.pl/">http://q-programming.pl/</a> and is
 			under GNU GPL License.
 		</div>
+	</div>
+	<div id="menu" class="col-md-2 col-sm-2 col-lg-2" role="complementary">
+		<nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix">
+			<ul class="nav bs-docs-sidenav">
+				<li><a href="#about">About Tasker</a></li>
+				<li><a href="#main">Main menu</a>
+					<ul class="nav">
+						<li><a href="#personal">Personal menu</a></li>
+						<li><a href="#settings">User Settings menu</a></li>
+						<li><a href="#events">Events</a></li>
+						<li><a href="#watch">Watching</a></li>
+					</ul></li>
+				<li><a href="#users">Users</a></li>
+				<li><a href="#proj"><s:message code="project.projects"
+							text="Projects" /></a>
+					<ul class="nav">
+						<li><a href="#proj-view">Browsing all projects</a></li>
+						<li><a href="#proj-details">View projects details</a></li>
+						<li><a href="#proj-create">Creating projects</a></li>
+						<li><a href="#proj-edit">Managing projects</a></li>
+					</ul></li>
+				<li><a href="#task"><s:message code="task.tasks"
+							text="Tasks" /></a>
+					<ul class="nav">
+						<li><a href="#task-view">Browsing all tasks</a></li>
+						<li><a href="#task-details">View task details</a></li>
+						<li><a href="#task-create">Creating tasks</a></li>
+						<li><a href="#task-edit">Editing tasks</a></li>
+						<li><a href="#task-remove">Removing Tasks</a>
+						<li><a href="#task-import">Importing tasks</a></li>
+						<li><a href="#task-export">Exporting tasks</a></li>
+						<li><a href="#task-work">Working with tasks</a></li>
+						<li><a href="#task-subtask">Subtasks</a></li>
+					</ul></li>
+				<li><a href="#agile"><s:message code="agile.agile"
+							text="Agile" /></a>
+					<ul class="nav">
+						<li><a href="#scrum">SCRUM</a>
+							<ul class="nav">
+								<li><a href="#scrum-backlog">Backlog</a></li>
+								<li><a href="#scrum-board">Board</a></li>
+								<li><a href="#scrum-reports">Reports</a></li>
+							</ul></li>
+						<li><a href="#kanban">Kanban</a>
+							<ul class="nav">
+								<li><a href="#kanban-board">Board</a></li>
+								<li><a href="#kanban-reports">Reports</a></li>
+							</ul></li>
+					</ul></li>
+
+				<security:authorize access="hasRole('ROLE_ADMIN')">
+					<li><a href="#admin">Administration</a>
+						<ul class="nav">
+							<li><a href="#a_users">Users</a></li>
+							<li><a href="#a_projects">Projects</a>
+							<li><a href="#a_roles">Roles</a></li>
+							<li><a href="#a_manage">Manage application</a>
+								<ul class="nav">
+									<li><a href="#a_logo">Changing logo</a></li>
+									<li><a href="#a_dir">Changing main directory</a></li>
+									<li><a href="#a_theme">Themes</a></li>
+								</ul></li>
+							<li><a href="#a_manage_task">Manage tasks</a></li>
+						</ul></li>
+				</security:authorize>
+			</ul>
+		</nav>
 	</div>
 </div>
 <script src="<c:url value="/resources/js/imageMapResizer.min.js" />"></script>
