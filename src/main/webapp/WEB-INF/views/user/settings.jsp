@@ -17,7 +17,7 @@
 					style="border: 1px dashed; display: table-cell; text-align: center; min-width: 110px;">
 					<img id="avatar_src"
 						src="<c:url value="/../avatar/${user.id}.png"/>"
-						style="padding: 10px;"></img>
+						style="padding: 10px;border-radius:50%"></img>
 					<div id="avatar_upload" class="hidden" style="margin-top: -30px">
 						<input id="file_upload" name="avatar" type="file" accept=".png"
 							title="Change avatar" class="inputfiles">

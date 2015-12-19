@@ -121,7 +121,7 @@
 						<button type="button" class="close" data-dismiss="alert">&times;</button>
 						<%
 							/* Display a message by its code. If the code was not found, it will be displayed as default text */
-						%>jakis tekts
+						%>
 						<s:message code="${message.message}" arguments="${message.args}"
 							text="${message.message}" />
 					</div>

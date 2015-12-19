@@ -73,8 +73,8 @@ $(document).on("click",".menu-toggle",function(e) {
 	var targetClass = "." + $(this).data('type');
 	$(targetClass).toggle("blind");
 	var indicator = $(this).find(".menu-indicator");
-	indicator.toggleClass('fa-caret-down');
-	indicator.toggleClass('fa-caret-left');
+	indicator.toggleClass('fa-toggle-down');
+	indicator.toggleClass('fa-toggle-right');
 });
 
 function getTaskType(type){

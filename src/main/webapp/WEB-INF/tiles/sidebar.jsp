@@ -8,10 +8,10 @@
 <ul class="nav nav-sidebar">
 	<!-- CREATE -->
 	<li><c:if test="${user.isUser == true}">
-			<a class="menu-toggle btn btn-default" type="button"
+			<a class="secondaryPanelButton menu-toggle" type="button"
 				data-type="create-menu" style="width: 200px; margin: 0 auto;"><i
 				class="fa fa-plus"></i> Create <span class="caret"></span></a>
-			<ul class="menu-items create-menu">
+			<ul class="menu-items create-menu" style="margin-left: 25px;">
 				<li><a href="<c:url value="/task/create"/>"><i
 						class="fa fa-plus"></i> <s:message code="task.create"
 							text="Create task" /></a></li>
@@ -25,13 +25,13 @@
 	<li role="presentation" class="divider"></li>
 	<!-- 		PROJECTS -->
 	<li><a href="#" class="menu-toggle" data-type="project-menu"><i
+			class="menu-indicator fa fw fa-toggle-right"></i><i
 			class="fa fa-list"></i>&nbsp;<strong><s:message
-					code="project.projects" text="Projects" /></strong><i
-			class="menu-indicator fa fw fa-caret-left"></i></a>
+					code="project.projects" text="Projects" /></strong></a>
 		<ul class="menu-items">
 			<c:forEach items="${last_projects}" var="l_project">
 				<c:if test="${l_project.id eq user.active_project}">
-					<li><a href="<c:url value="/project/${l_project.projectId}"/>">[${l_project.projectId}]
+					<li ><a href="<c:url value="/project/${l_project.projectId}"/>">[${l_project.projectId}]
 							${l_project.name}</a></li>
 				</c:if>
 				<c:if test="${l_project.id ne user.active_project}">
@@ -48,20 +48,20 @@
 	<li role="presentation" class="divider"></li>
 	<!-- 		TASKS -->
 	<li><a href="#" class="menu-toggle" data-type="task-menu"><i
+			class="menu-indicator fa fw fa-toggle-down"></i><i
 			class="fa fa-lg fa-check-square"></i>&nbsp;<strong><s:message
-					code="task.tasks" text="Tasks" /></strong><i
-			class="menu-indicator fa fw fa-caret-down"></i></a>
+					code="task.tasks" text="Tasks" /></strong></a>
 		<ul class="menu-items">
 			<c:forEach items="${last_tasks}" var="l_task">
 				<c:if test="${l_task.id eq user.active_task[0]}">
 					<li><span class="active-task"><i
 							class="fa fa-lg fa-spin fa-repeat"></i></span> <t:type
-							type="${task.type}" list="true" /><a
+							type="${l_task.type}" list="true" /><a
 						href="<c:url value="/task/${l_task.id}"/>">[${l_task.id}]
 							${l_task.name}</a></li>
 				</c:if>
 				<c:if test="${l_task.id ne user.active_task[0]}">
-					<li class="task-menu"><t:type type="${task.type}" list="true" /><a
+					<li class="task-menu"><t:type type="${l_task.type}" list="true" /><a
 						href="<c:url value="/task/${l_task.id}"/>">[${l_task.id}]
 							${l_task.name}</a></li>
 				</c:if>
@@ -75,9 +75,9 @@
 	<li role="presentation" class="divider"></li>
 	<!-- 		AGILE -->
 	<li><a href="#" class="menu-toggle" data-type="agile-menu"><i
+			class="menu-indicator fa fw fa-toggle-right"></i><i
 			class="fa fa-lg fa-desktop"></i>&nbsp;<strong><s:message
-					code="agile.agile" text="Agile" /></strong><i
-			class="menu-indicator fa fw fa-caret-left"></i></a>
+					code="agile.agile" text="Agile" /></strong></a>
 		<ul class="menu-items">
 			<c:forEach items="${last_projects}" var="l_project">
 				<c:if test="${l_project.id eq user.active_project}">

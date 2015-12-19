@@ -13,11 +13,11 @@ body {
 	${user.theme.font.cssFamily}	
 }
 .theme-text{
-	color: ${invcolor};
+	color: ${invcolor} !important;
 }
 
 a.theme {
-	color: ${invcolor};
+	color: ${invcolor} !important;
 }
 
 .caret.theme {
@@ -43,7 +43,7 @@ a.theme {
 	border-color: ${invcolor};
 }
 
-div.navbar.navbar-fixed-top.theme {
+nav.navbar.navbar-fixed-top.theme {
 	background-color: ${color};
 }
 
@@ -119,6 +119,12 @@ span.badge.theme.zero {
 	color: ${invcolor};
 	background-color: ${color};
 }
+.navbar-toggle {
+	border-color:  ${invcolor};
+}
+.navbar-toggle .icon-bar {
+	background:  ${invcolor};
+}
 
 .table-hover>tbody>tr:hover>td, .table-hover>tbody>tr:hover>th {
 	background-color: rgba(${rgbcolor}, 0.1);
@@ -173,5 +179,34 @@ span.tag.label.label-info.theme {
 	text-decoration: none;
 	color: ${invcolor};
 	background-color: rgba(${rgbcolor}, 0.7);
+}
+.nav .open>a, .nav .open>a:focus, .nav .open>a:hover {
+    background-color: transparent;
+    
+}
+.header-time{
+	color: ${invcolor};
+	font-size: xx-large;
+}
+
+.form-control::-webkit-input-placeholder { color: ${invcolor}; }
+.form-control:-moz-placeholder { color: ${invcolor}; }
+.form-control::-moz-placeholder { color: ${invcolor}; }
+.form-control:-ms-input-placeholder { color: ${invcolor}; }
+
+.nav-search{
+	height: 52px;
+	background: ${color};
+	color: ${invcolor};
+	border-color: transparent;
+}
+.nav-search:FOCUS{
+	border-color: transparent;
+}
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+    border: 1px solid rgb(${rgbcolor10});
+    background: ${color} url("images/ui-bg_flat_75_428bca_40x100.png") 50% 50% repeat-x;
+    font-weight: normal;
+    color: ${invcolor};
 }
 </style>
