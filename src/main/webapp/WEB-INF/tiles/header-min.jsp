@@ -17,13 +17,15 @@
 			<a class="navbar-brand" href="<c:url value="/"/>"
 				style="padding-top: 0px; padding-bottom: 4px;"><img
 				src="<c:url value="/../avatar/logo.png"/>"
-				style="height: 50px; margin-top: 1px;"></img></a>
+				style="height: 50px; margin-top: 1px;"></img></a> <span
+				class="theme-text" style="font-size: xx-large">Tasker</span>
 		</div>
 		<div id="navbar" class="navbar-collapse collapse">
 			<ul class="nav navbar-nav navbar-right hidden-xs">
 				<security:authorize access="isAuthenticated()">
-					<li><a href="#" class="header-date" data-toggle="dropdown"><span
-							id="header_time_span" class="header-time"></span></a>
+					<li class="hidden-sm"><a href="#" class="header-date"
+						data-toggle="dropdown"><span id="header_time_span"
+							class="header-time"><span class="theme-inv-text">00:00</span></span></a>
 						<ul class="dropdown-menu" style="margin-top: 3px;">
 							<li><div id="header-date"></div></li>
 						</ul></li>
@@ -81,21 +83,55 @@
 				</security:authorize>
 			</ul>
 			<security:authorize access="isAuthenticated()">
-				<form class="navbar-form navbar-right custom-search" id="searchForm"
+				<form class="navbar-form navbar-right custom-search hidden-xs" id="searchForm"
 					action="<s:url value="/tasks"></s:url>">
 					<div class="form-group has-feedback">
-					<input id="searchField" type="text" name="query"
-						class="form-control nav-search search-query input-sm"
-						placeholder="<s:message code="task.search"/>" />
-						<span class="fa fa-2x fa-search theme-text form-control-feedback" style="margin-top:10px"></span>
+						<input id="searchField" type="text" name="query"
+							class="form-control nav-search search-query input-sm"
+							placeholder="<s:message code="task.search"/>" /> <span
+							class="fa fa-2x fa-search theme-text form-control-feedback"
+							style="margin-top: 10px"></span>
 					</div>
 					<div id="tagsLoading" class="ui-widget-content ui-corner-all"
-						style="display: none">
+						style="display: none; position: absolute; width: 208px;">
 						<i class="fa fa-cog fa-spin"></i>&nbsp;
 						<s:message code="main.loading" />
 					</div>
 				</form>
 			</security:authorize>
+			<!-- 			MOBILE MENU -->
+			<ul class="nav navbar-nav navbar-right visible-xs">
+				<li><a href="<c:url value="/task/create"/>" class="theme"><i
+						class="fa fa-plus"></i>&nbsp;<s:message code="task.create"
+							text="Create task" /></a></li>
+				<li><a href="<c:url value="/projects"/>" class="theme"><i
+						class="fa fa-list"></i>&nbsp;<s:message code="project.projects"
+							text="Projects" /></a></li>
+				<li><a href="<c:url value="/tasks"/>" class="theme"><i
+						class="fa fa-lg fa-check-square"></i>&nbsp;<s:message
+							code="task.tasks" text="Tasks" /></a></li>
+				<li><a href="<c:url value="/boards"/>" class="theme"><i
+						class="fa fa-lg fa-desktop"></i>&nbsp;<s:message
+							code="agile.agile" text="Agile" /></a></li>
+				<li role="presentation" class="divider"></li>
+				<li><a href='<c:url value="/settings"/>' class="theme"><i
+						class="fa fa-cog"></i> <s:message code="menu.settings"
+							text="Settings" /></a></li>
+				<li><c:if test="${eventCount eq 0}">
+						<a class="theme a-tooltip" href='<c:url value="/events"/>'
+							title=""> <i class="fa fa-bell-o">&nbsp;<s:message
+									code="events.events" /></i>
+						</a>
+					</c:if> <c:if test="${eventCount gt 0}">
+						<a href='<c:url value="/events"/>' class="theme a-tooltip"
+							title=""><i class="fa fa-bell"></i>&nbsp;<s:message
+								code="events.events" />&nbsp;(${eventCount})</a>
+					</c:if></li>
+				<li role="presentation" class="divider"></li>
+				<li><a href='<c:url value="/logout"></c:url>' class="theme"><i
+						class="fa fa-power-off"></i> <s:message code="menu.logout"
+							text="Log out" /></a></li>
+			</ul>
 		</div>
 	</div>
 </nav>
