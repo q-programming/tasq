@@ -15,6 +15,9 @@ body {
 .theme-text{
 	color: ${invcolor} !important;
 }
+.theme-inv-text{
+	color: ${color} !important;
+}
 
 a.theme {
 	color: ${invcolor} !important;
@@ -30,6 +33,9 @@ a.theme {
 }
 .bg-color.theme {
 	color: ${invcolor};
+	background-color: ${color};
+}
+.bg.theme{
 	background-color: ${color};
 }
 .bg-preview.theme {
@@ -116,8 +122,14 @@ span.badge.theme.zero {
 }
 .nav>li>a:focus, .nav>li>a:hover {
     text-decoration: none;
-	color: ${invcolor};
-	background-color: ${color};
+	color: ${invcolor} !important;
+	background-color: ${color} !important;
+}
+.nav>li.active>a:focus, .nav>li.active>a:hover {
+    text-decoration: none;
+    color: #555 !important;
+	background-color: white !important;
+    
 }
 .navbar-toggle {
 	border-color:  ${invcolor};
@@ -125,9 +137,16 @@ span.badge.theme.zero {
 .navbar-toggle .icon-bar {
 	background:  ${invcolor};
 }
+.pagination>li.active>a{
+	color: ${invcolor} !important;
+	background-color: ${color} !important;
+}
 
 .table-hover>tbody>tr:hover>td, .table-hover>tbody>tr:hover>th {
 	background-color: rgba(${rgbcolor}, 0.1);
+}
+.table-hover>tbody>tr.bg-color:hover>td, .table-hover>tbody>tr.bg-color:hover>th {
+	background-color: rgb(${rgbcolor10});
 }
 
 span.tag.label.label-info.theme {
@@ -167,7 +186,7 @@ span.tag.label.label-info.theme {
 .back-to-top {
 	display: none;
 	position: fixed;
-	bottom: 20px;
+	bottom: 55px;
 	right: 20px;
 	color: ${invcolor};
 	text-decoration: none;

@@ -207,10 +207,10 @@
 		<input id="exportType" type="hidden" name="type" value="xml">
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${task.id eq user.active_task[0]}">
-				<tr style="background: #428bca; color: white">
+				<tr class="bg-color theme">
 					<c:set var="blinker" value="blink" />
 					<c:set var="link">
-						style="color:white"
+						class="theme"
 					</c:set>
 			</c:if>
 			<c:if test="${task.id ne user.active_task[0]}">

@@ -225,9 +225,9 @@
 				</div>
 			</div>
 		</div>
-		<label class="checkbox clickable" style="display: inherit; font-weight: normal">
+		<label class="checkbox clickable" style="display: inherit; font-weight: normal;    margin-left: 22px;">
 			<input type="checkbox" name="estimated" id="estimated"
-			value="true"> <s:message code="task.withoutEstimation"  />&nbsp;<i class="fa fa-question-circle a-tooltip"
+			value="true" style=""> <s:message code="task.withoutEstimation"  />&nbsp;<i class="fa fa-question-circle a-tooltip"
 			data-html="true" title="<s:message  code ="task.withoutEstimation.help" />"
 			data-placement="right"></i>
 		</label>

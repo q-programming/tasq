@@ -65,7 +65,7 @@ to {
 .blink {
 	text-decoration: blink;
 	-webkit-animation-name: blinker;
-	-webkit-animation-duration: 0.8s;
+	-webkit-animation-duration: 1s;
 	-webkit-animation-iteration-count: infinite;
 	-webkit-animation-timing-function: ease-in-out;
 	-webkit-animation-direction: alternate;
@@ -596,7 +596,11 @@ li.wider {
 
 .active-task {
 	font-size: small;
-	margin-left: -19px;
+	margin-left: -22px;
+	margin-right: 5px;
+}
+.bg-color.theme>span.active-task {
+    color: black;
 }
 
 /* BOOTSRAP FIXES AND TWEAKS */
@@ -624,6 +628,15 @@ li.wider {
 
 .navbar {
 	min-height: 52px;
+}
+.alert{
+	background-color: peru;
+	color:white;
+}
+.alert-success {
+    color: #fff;
+    background-color: #468847;
+    border-color: #d6e9c6;
 }
 
 /*
@@ -704,6 +717,10 @@ body {
 	color: black;
 }
 
+.menu-items>li {
+	padding-left: 5px;
+}
+
 li.divider {
 	height: 1px;
 	margin: 9px 0;
@@ -720,6 +737,7 @@ li.divider {
 	list-style: none outside none;
 	position: relative;
 	font-size: smaller;
+	margin-left: -10px;
 }
 
 .menu-indicator {
@@ -735,6 +753,10 @@ li.divider {
 }
 
 .agile-menu {
+	display: none;
+}
+
+.manage-menu {
 	display: none;
 }
 /*
