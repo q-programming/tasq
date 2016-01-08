@@ -326,6 +326,7 @@ function fetchWorkLogData(page) {
 	var projectID = '${project.projectId}';
 	var url = '<c:url value="/projectEvents"/>';
 	var avatarURL = '<c:url value="/../avatar/"/>';
+	var accountURL = '<c:url value="/user/"/>';
 	var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
 	$("#eventsTable .projEvent").remove();
 	$("#eventsTable").append(loading_indicator);
@@ -335,13 +336,13 @@ function fetchWorkLogData(page) {
 		printWorkLogNavigation(page, data);
 		var rows = "";
 		for ( var j = 0; j < data.content.length; j++) {
-			var row = '<tr class="projEvent"><td colspan="3">';
 			var content = data.content[j];
 			var timeLogged = '<div class="time-div">'+ content.time +'</div>';
-			var avatar = '<img data-src="holder.js/30x30" style="height: 30px; float: left; padding-right: 10px;" src="' + avatarURL + content.account.id +'.png"/>';
-			var account = content.account.name + " " + content.account.surname + " ";
+			var avatar = '<img data-src="holder.js/30x30" class="avatar small" src="' + avatarURL + content.account.id +'.png"/>';
+			var account = '<a href="' + accountURL + content.account.username + '">'+ content.account.name + " " + content.account.surname + '</a>&nbsp;';
 			var event = getEventTypeMsg(content.type);
 			var task = '';
+			var row = '<tr class="projEvent"><td>'+ avatar + '</td><td>';
 			if(content.task!=null){
 				task = '<a href="'+taskURL+content.task.id + '">[' + content.task.id +'] '+ content.task.name + '</a>';
 			}
@@ -349,7 +350,7 @@ function fetchWorkLogData(page) {
 			if(content.message!=null && content.message!=''){
 				message ='<div class="quote">' + content.message + '</div>';
 			}
-			row+=timeLogged + avatar + account + event + task + message;
+			row+=timeLogged + account + event + task + message;
 			row+='</td></tr>';
 			rows+=row;
 		}

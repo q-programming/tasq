@@ -45,8 +45,9 @@
 					<li>
 						<div class="pull-right" style="margin-right: 40px">
 							<a href="#" class="theme nav-dropdown" data-toggle="dropdown">
+								<span class="padding-right10">
 								<img src="<c:url value="/../avatar/${user.id}.png"/>"
-								style="height: 50px; padding-left: 5px; border-radius: 50%">&nbsp;<strong>${user}</strong><span
+								class="avatar"></span><strong>${user}</strong><span
 								class="caret theme"></span>
 							</a>
 							<ul class="dropdown-menu" style="margin-top: 3px;">
