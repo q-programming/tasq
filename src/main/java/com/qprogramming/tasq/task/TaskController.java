@@ -922,28 +922,28 @@ public class TaskController {
 	}
 
 	@RequestMapping(value = "/task/{id}/imgfile", method = RequestMethod.GET)
-	public @ResponseBody String showImageFile(@PathVariable String id, @RequestParam("get") String filename,
-			HttpServletRequest request, HttpServletResponse response, RedirectAttributes ra) throws IOException {
+	public void showImageFile(@PathVariable String id, @RequestParam("get") String filename, HttpServletRequest request,
+			HttpServletResponse response, RedirectAttributes ra) throws IOException {
 		Task task = taskSrv.findById(id);
 		if (task.getProject().getParticipants().contains(Utils.getCurrentAccount())) {
 			File file = new File(taskSrv.getTaskDirectory(task) + File.separator + filename);
 			if (file != null) {
 				response.setHeader("content-Disposition", "attachment; filename=" + filename);
 				InputStream is = new FileInputStream(file);
+				response.setContentType("image/jpeg, image/jpg, image/png, image/gif");
 				IOUtils.copyLarge(is, response.getOutputStream());
-				response.setContentType("image/png");
+				response.getOutputStream().close();
 			}
 		} else {
 			MessageHelper.addErrorAttribute(ra, msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
 		}
-		return "redirect:" + request.getHeader("Referer");
 	}
 
 	@RequestMapping(value = "/task/{id}/{subid}/imgfile", method = RequestMethod.GET)
-	public @ResponseBody String showSubTaskImageFile(@PathVariable String id, @PathVariable String subid,
+	public void showSubTaskImageFile(@PathVariable String id, @PathVariable String subid,
 			@RequestParam("get") String filename, HttpServletRequest request, HttpServletResponse response,
 			RedirectAttributes ra) throws IOException {
-		return showImageFile(id + "/" + subid, filename, request, response, ra);
+		showImageFile(id + "/" + subid, filename, request, response, ra);
 	}
 
 	@RequestMapping(value = "/task/removeFile", method = RequestMethod.GET)
