@@ -17,7 +17,7 @@
 			<a class="navbar-brand" href="<c:url value="/"/>"
 				style="padding-top: 0px; padding-bottom: 4px;"><img
 				src="<c:url value="/../avatar/logo.png"/>"
-				style="height: 50px; margin-top: 1px;"></img></a> <span
+				style="height: 50px; margin-top: 2px;"></img></a> <span
 				class="theme-text" style="font-size: xx-large">Tasker</span>
 		</div>
 		<div id="navbar" class="navbar-collapse collapse">
