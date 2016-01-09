@@ -11,15 +11,18 @@
 </c:set>
 <security:authentication property="principal" var="user" />
 <div class="navbar navbar-fixed-top theme">
-	<div class="container">
-		<button type="button" class="navbar-toggle" data-toggle="collapse"
-			data-target=".nav-collapse">
-			<span class="icon-bar"></span> <span class="icon-bar"></span> <span
-				class="icon-bar"></span>
-		</button>
-		<a class="navbar-brand" href="<c:url value="/"/>"
-			style="padding-top: 0px; padding-bottom: 4px;"><img
-			src="<c:url value="/../avatar/logo.png"/>" style="height: 50px"></img></a>
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse"
+				data-target=".nav-collapse">
+				<span class="icon-bar"></span> <span class="icon-bar"></span> <span
+					class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="<c:url value="/"/>"
+				style="padding-top: 0px; padding-bottom: 4px;"><img
+				src="<c:url value="/../avatar/logo.png"/>"
+				style="height: 50px; margin-top: 1px;"></img></a>
+		</div>
 		<div class="nav-collapse collapse">
 			<security:authorize access="isAuthenticated()">
 				<ul class="nav navbar-nav">
@@ -121,34 +124,10 @@
 			<ul class="nav navbar-nav pull-right">
 				<security:authorize access="!isAuthenticated()">
 					<li>
-					<div style="padding-top: 5px; padding: 5px">
-						<a class="btn login theme" href="<c:url value="/signin"></c:url>"><s:message code="menu.signin" /></a>
-					</div>
-<!-- 						<div style="display: table"> -->
-<%-- 							<form action='<s:url value="/j_spring_security_check"/>' --%>
-<!-- 								method="post"> -->
-<!-- 								<div style="display: table-row"> -->
-<!-- 									<div style="display: table-cell; padding-right: 10px;"> -->
-<!-- 										<input type="text" class="form-control input-sm" -->
-<%-- 											id="inputEmail" placeholder="${email_txt}" name="j_username"> --%>
-<!-- 									</div> -->
-<!-- 									<div style="display: table-cell padding-right: 10px;"> -->
-<!-- 										<input type="password" class="form-control input-sm" -->
-<!-- 											style="display: table-cell" id="inputPassword" -->
-<%-- 											placeholder="${password_txt}" name="j_password"> --%>
-										
-<!-- 									</div> -->
-<!-- 									<div style="padding: 5px 0px 3px 0px;"> -->
-<!-- 									<input type="checkbox" -->
-<%-- 										name="_spring_security_remember_me"> <span class="theme text" style="padding-right: 5px;"><s:message --%>
-<%-- 											code="menu.remmember" /></span> --%>
-<!-- 									<button type="submit" class="btn btn-default btn-sm"> -->
-<%-- 										<s:message code="menu.signin" /> --%>
-<!-- 									</button> -->
-<!-- 									</div> -->
-<!-- 								</div> -->
-<!-- 							</form> -->
-<!-- 						</div>  -->
+						<div style="padding-top: 5px; padding: 5px">
+							<a class="btn login theme" href="<c:url value="/signin"></c:url>"><s:message
+									code="menu.signin" /></a>
+						</div>
 					</li>
 				</security:authorize>
 				<%-- Logged in user --%>
@@ -185,7 +164,8 @@
 												code="menu.manage.tasks" /></a></li>
 								</ul>
 							</c:if>
-							<a class="show_users_btn btn btn-default btn-xs a-tooltip" data-toggle="modal"
+							<a class="show_users_btn btn btn-default btn-xs a-tooltip"
+								data-toggle="modal"
 								title="<s:message
 									code="menu.users" text="Users" />"
 								data-placement="bottom"><i class="fa fa-users"></i></a> <a

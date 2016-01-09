@@ -86,7 +86,11 @@ public class Project implements Serializable {
 	private Long lastTaskNo;
 
 	public enum AgileType {
-		KANBAN, SCRUM
+		KANBAN, SCRUM;
+
+		public String getCode() {
+			return toString().toLowerCase();
+		}
 	}
 
 	public Project() {

@@ -28,11 +28,11 @@
 	<%--MENU --%>
 	<div style="display: table-caption; margin-left: 10px;">
 		<ul class="nav nav-tabs" style="border-bottom: 0">
-			<li class="active"><a style="color: black" href="#"><i class="fa fa-book"></i> Backlog</a></li>
-			<li><a style="color: black"
+			<li class="active"><a><i class="fa fa-book"></i> Backlog</a></li>
+			<li><a 
 				href="<c:url value="/${project.projectId}/scrum/board"/>"><i class="fa fa-list-alt"></i> <s:message
 						code="agile.board" /></a></li>
-			<li><a style="color: black"
+			<li><a 
 				href="<c:url value="/${project.projectId}/scrum/reports"/>"><i class="fa fa-line-chart"></i> <s:message
 						code="agile.reports" /></a></li>
 		</ul>
@@ -153,7 +153,6 @@
 		<c:forEach items="${tasks}" var="task">
 			<c:if test="${not task.inSprint && task.state ne 'CLOSED'}">
 				<div class="agile-card" data-id="${task.id}" id="${task.id}">
-					<div class="side-bar theme"></div>
 					<div style="display: table-cell; width: 100%;">
 						<t:type type="${task.type}" list="true" />
 						<t:priority priority="${task.priority}" list="true" />

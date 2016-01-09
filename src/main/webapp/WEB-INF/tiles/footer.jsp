@@ -6,6 +6,7 @@
 <security:authorize access="isAuthenticated()">
 	<c:set var="active_task_seconds">${user.active_task_seconds}</c:set>
 	<c:if test="${not empty user.active_task }">
+	<div class="row">
 		<div class="footer-time">
 			<div>
 				<s:message code="task.active"/>
@@ -18,6 +19,7 @@
 				</a> <span id="activeTaskTimer" class="timer"></span>
 			</div>
 		</div>
+	</div>
 	</c:if>
 	<jsp:include page="../views/modals/users.jsp" />
 <c:if test="${not empty user.active_task }">

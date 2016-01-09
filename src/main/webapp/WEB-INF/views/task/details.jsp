@@ -732,14 +732,17 @@
 			<%--------------------------------- Comments -----------------------------%>
 			<div id="comments" class="tab-pane fade in active">
 				<table class="table table-hover button-table">
-					<thead><th id="sorter" class="time-header clickable"><span id="indicator"><i class="fa fa-caret-down"></i></span>&nbsp;Date</th></thead>
+					<thead><th style="width:30px"></th><th></th><th id="sorter" class="time-header clickable"><span id="indicator"><i class="fa fa-caret-down"></i></span>&nbsp;Date</th></thead>
 					<c:forEach items="${comments}" var="comment">
 						<tr id="c${comment.id}" data-date="${comment.date}">
 							<td>
-								<div>
-									<img data-src="holder.js/30x30"
-										style="height: 30px; float: left; padding-right: 10px;"
+							<img data-src="holder.js/30x30"
+										class="avatar small"
 										src="<c:url value="/../avatar/${comment.author.id}.png"/>" />
+							</td>
+							<td colspan="2">
+								<div>
+									
 									<a href="<c:url value="/user/${comment.author.username}"/>">${comment.author}</a>
 									<div class="time-div">${comment.date}</div>
 								</div> <%-- Comment buttons --%>
@@ -1078,12 +1081,17 @@ $(document).ready(function($) {
 			
 			function getWorklogs(){
 				var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
-				var url ='<c:url value="/task/getWorklogs"/>'
+				var url ='<c:url value="/task/getWorklogs"/>';
+				var accountURL = '<c:url value="/user/"/>';
+				var avatarURL = '<c:url value="/../avatar/"/>';
+
 				$("#taskworklogs").append(loading_indicator);
 				$.get(url ,{taskID:taskID},function(result){
 					$.each(result, function(key,worklog){
 						$("#loading").remove();
-						var account = worklog.account.name + ' ' +worklog.account.surname;
+						
+						var account = '<a href="' + accountURL + worklog.account.username + '">'+ worklog.account.name + ' ' +worklog.account.surname + '</a>';
+						var avatar = '<img data-src="holder.js/30x30" class="avatar small" src="' + avatarURL + worklog.account.id +'.png"/>';
 						var type = getEventTypeMsg(worklog.type);
 						var message = "";
 						if (worklog.message != ""){
@@ -1099,7 +1107,7 @@ $(document).ready(function($) {
 									+' data-msg="<s:message code="task.worklog.delete.confirm"/>" >' 
 									+'<i class="fa fa-trash-o"></i></a></div>';
 						</security:authorize>
-						var row = '<tr><td><div style="font-size: smaller; color: dimgray;">' + account + ' ' + type + '<div class="time-div">' + worklog.timeLogged + '</div> ' + delbtn + message 
+						var row = '<tr><td>'+ avatar +'</td><td style="font-size: smaller; color: dimgray;width: 100%;">' + account + '&nbsp;'+ type + '<div class="time-div">' + worklog.timeLogged + '</div> ' + delbtn + message 
 								  + '</td></tr>';
 						$("#taskworklogs").append(row);	  
 						$(".a-tooltip").tooltip();

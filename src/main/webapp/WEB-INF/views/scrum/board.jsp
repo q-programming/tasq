@@ -27,12 +27,12 @@
 	style="display: table; width: 100%; height: 85vh">
 	<div style="display: table-caption; margin-left: 10px;">
 		<ul class="nav nav-tabs" style="border-bottom: 0">
-			<li><a style="color: black"
+			<li><a 
 				href="<c:url value="/${project.projectId}/scrum/backlog"/>"><i
 					class="fa fa-book"></i> Backlog</a></li>
-			<li class="active"><a style="color: black" href="#"><i
+			<li class="active"><a><i
 					class="fa fa-list-alt"></i> <s:message code="agile.board" /></a></li>
-			<li><a style="color: black"
+			<li><a 
 				href="<c:url value="/${project.projectId}/scrum/reports"/>"><i
 					class="fa fa-line-chart"></i> <s:message code="agile.reports" /></a></li>
 		</ul>

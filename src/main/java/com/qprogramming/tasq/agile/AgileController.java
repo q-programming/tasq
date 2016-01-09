@@ -36,23 +36,6 @@ public class AgileController {
 	@Autowired
 	TaskService taskSrv;
 
-	@RequestMapping(value = "/agile/{id}/", method = RequestMethod.GET)
-	public String listTasks(@PathVariable String id, Model model,
-			HttpServletRequest request) {
-		Project project = projSrv.findByProjectId(id);
-		if (project != null) {
-			// TODO check if any active sprints, if not redirect to backlog
-			// instead
-			if (project.getAgile().equals(Project.AgileType.KANBAN)) {
-				return "redirect:/" + project.getProjectId() + "/kanban/board";
-			} else if (project.getAgile().equals(Project.AgileType.SCRUM)) {
-				// /TODO check for active
-				return "redirect:/" + project.getProjectId() + "/scrum/board";
-			}
-		}
-		return "";
-	}
-
 	@RequestMapping(value = "boards", method = RequestMethod.GET)
 	public String listBoards(Model model) {
 		List<Project> projects;
@@ -61,21 +44,18 @@ public class AgileController {
 		} else {
 			projects = projSrv.findAllByUser();
 		}
-		Collections.sort(projects, new ProjectSorter(
-				ProjectSorter.SORTBY.LAST_VISIT, Utils.getCurrentAccount()
-						.getActive_project(), true));
+		Collections.sort(projects, new ProjectSorter(ProjectSorter.SORTBY.LAST_VISIT,
+				Utils.getCurrentAccount().getActive_project(), true));
 		model.addAttribute("projects", projects);
 		return "agile/list";
 	}
 
 	@RequestMapping(value = "/agile/order", method = RequestMethod.POST)
-	public @ResponseBody
-	boolean saveOrder(@RequestParam(value = "ids[]") String[] ids,
-			@RequestParam(value = "project") Long project,
-			HttpServletResponse response) {
+	public @ResponseBody boolean saveOrder(@RequestParam(value = "ids[]") String[] ids,
+			@RequestParam(value = "project") Long project, HttpServletResponse response) {
 		int order = 0;
 		List<Task> allTasks = taskSrv.findAllByProjectId(project);
-		//build map of all tasks
+		// build map of all tasks
 		Map<String, Task> map = new HashMap<String, Task>();
 		for (Task i : allTasks) {
 			map.put(i.getId(), i);
@@ -88,7 +68,7 @@ public class AgileController {
 			taskList.add(task);
 		}
 		Collections.sort(newTaskOrder);
-		for(Task task : taskList){
+		for (Task task : taskList) {
 			task.setTaskOrder(newTaskOrder.get(order));
 			order++;
 		}

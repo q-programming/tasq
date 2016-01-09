@@ -25,8 +25,8 @@
 		</thead>
 		<c:forEach items="${projects}" var="project">
 			<c:if test="${project.id eq user.active_project}">
-				<tr style="background: #428bca; color: white">
-					<td><a style="color: white"
+				<tr class="bg-color theme">
+					<td><a class="theme"
 						href="<c:url value="/project/${project.projectId}"/>"><b>[${project.projectId}]
 								${project.name}</b></a></td>
 					<td><b>${project.description}</b></td>

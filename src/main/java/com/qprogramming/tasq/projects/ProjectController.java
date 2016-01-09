@@ -231,7 +231,7 @@ public class ProjectController {
 		// TODO Create first release if Kanban ?
 		MessageHelper.addSuccessAttribute(ra,
 				msg.getMessage("project.created", new Object[] { name }, Utils.getCurrentLocale()));
-		return "redirect:/project/" + newProject.getId();
+		return "redirect:/project/" + newProject.getProjectId();
 	}
 
 	@RequestMapping(value = "project/{id}/manage", method = RequestMethod.GET)
