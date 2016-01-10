@@ -6,24 +6,19 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 
 <div class="white-frame" style="overflow: auto">
-	<div class="pull-left">
-		<s:message code="home.hello"/>&nbsp;
-		<security:authentication property="principal" />
-	</div>
-	<div class="pull-right">
-		<i class="fa fa-calendar"></i> <span
-			id="date_span"></span> <i class="fa fa-clock-o"></i>
-
-		<span id="time_span"></span>
-	</div>
-	<div style="display: table; width: 100%">
-		<div style="display: table-cell; width: 500px">
+<!-- 	<div class="pull-left"> -->
+<%-- 		<s:message code="home.hello" /> --%>
+<!-- 		&nbsp; -->
+<%-- 		<security:authentication property="principal" /> --%>
+<!-- 	</div> -->
+	<div class="row">
+		<div class="primary col-md-6 col-sm-12 col-xs-12">
 			<div>
 				<table class="table table-hover table-condensed">
 					<thead class="theme">
 						<tr>
-							<th colspan="3"><i class="fa fa-user"></i> 
-								<s:message code="home.mineAssigned"/></th>
+							<th colspan="3"><i class="fa fa-user"></i> <s:message
+									code="home.mineAssigned" /></th>
 						</tr>
 					</thead>
 					<c:forEach items="${myTasks}" var="task">
@@ -42,8 +37,8 @@
 				<table class="table table-hover table-condensed">
 					<thead class="theme">
 						<tr>
-							<th colspan="3"><i class="fa fa-list-alt"></i> 
-								<s:message code="home.open"/></th>
+							<th colspan="3"><i class="fa fa-list-alt"></i> <s:message
+									code="home.open" /></th>
 						</tr>
 					</thead>
 					<c:forEach items="${unassignedTasks}" var="open_task">
@@ -59,47 +54,54 @@
 				</table>
 			</div>
 		</div>
-		<div style="display: table-cell; width: 500px; padding-left: 30px">
-			<%------DUE TASKS -----------%>
-			<c:set var="now" value="<%=new java.util.Date()%>" />
-			<table class="table table-condensed table table-hover">
+		<div class="secondary col-md-6 col-sm-12 col-xs-12">
+			<table class="table table-condensed table" style="margin-bottom: 0px;">
 				<thead class="theme">
 					<tr>
-						<th colspan="3"><i class="fa fa-calendar"></i> 
-							<s:message code="home.due"/></th>
+						<th colspan="3"><i class="fa fa-calendar"></i> <s:message code="project.latestEvents" /></th>
 					</tr>
 				</thead>
-				<c:forEach items="${dueTasks}" var="due_task">
-					<tr style="<c:if test="${due_task.rawDue_date lt now}">
-									background: rgba(205, 50, 50, 0.12);
-								</c:if>">
-						<td style="width: 100px;">${due_task.due_date}</td>
-						<td><a href="<c:url value="/task/${due_task.id}"/>"
-							style="color: inherit;">[${due_task.id}] ${due_task.name}</a></td>
-					</tr>
-				</c:forEach>
 			</table>
+
+			<%------EVENTS IN USERS PROJECTS-----------%>
+<!-- 			<div class="text-center"> -->
+<!-- 				<ul id="eventsTable_pagination_top"></ul> -->
+<!-- 			</div> -->
+			<div>
+				<table id="eventsTable" class="table table-condensed">
+				</table>
+			</div>
+			<div class="text-center">
+				<ul id="eventsTable_pagination_bot"></ul>
+			</div>
+
+
+			<%-- 			<table class="table table-condensed table table-hover"> --%>
+			<%-- 				<thead class="theme"> --%>
+			<%-- 					<tr> --%>
+			<%-- 						<th colspan="3"><i class="fa fa-calendar"></i>  --%>
+			<%-- 							<s:message code="home.due"/></th> --%>
+			<%-- 					</tr> --%>
+			<%-- 				</thead> --%>
+			<%-- 				<c:forEach items="${dueTasks}" var="due_task"> --%>
+			<%-- 					<tr style="<c:if test="${due_task.rawDue_date lt now}"> --%>
+			<%-- 									background: rgba(205, 50, 50, 0.12); --%>
+			<%-- 								</c:if>"> --%>
+			<%-- 						<td style="width: 100px;">${due_task.due_date}</td> --%>
+			<%-- 						<td><a href="<c:url value="/task/${due_task.id}"/>" --%>
+			<%-- 							style="color: inherit;">[${due_task.id}] ${due_task.name}</a></td> --%>
+			<%-- 					</tr> --%>
+			<%-- 				</c:forEach> --%>
+			<%-- 			</table> --%>
 		</div>
 	</div>
 </div>
-
+<jsp:include page="../other/events.jsp" />
 <script>
-	$(document).ready(
-			function($) {
-				$("#date_span").text(
-						$.datepicker.formatDate('DD,d MM yy', new Date()));
-				setTimeout(display, 1000);
-
-			});
-	function display() {
-		var currentTime = new Date();
-		var hours = currentTime.getHours();
-		var minutes = currentTime.getMinutes();
-		var seconds = currentTime.getSeconds();
-		var time=('0'  + hours).slice(-2)+':'+ ('0'  + minutes).slice(-2)+':'+('0' + seconds).slice(-2);
-		$("#time_span").text(time);
-		setTimeout(display, 1000);
-	}
+	$(document).ready(function($) {
+		var currentPage = 0
+		fetchWorkLogData(currentPage);
+	});
 
 	
 </script>

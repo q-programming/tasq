@@ -134,7 +134,7 @@ public class ProjectController {
 		Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID, false));
 		// Initilize getRawWorkLog for all task in this project . Otherwise lazy
 		// init exception is thrown
-		Utils.initializeWorkLogs(taskList);
+		// Utils.initializeWorkLogs(taskList);
 		model.addAttribute("tasks", taskList);
 		model.addAttribute("project", project);
 		return "project/details";
@@ -153,6 +153,25 @@ public class ProjectController {
 		}
 		// Fetch events
 		Page<WorkLog> page = wrkLogSrv.findByProjectId(project.getId(), p);
+		List<DisplayWorkLog> list = new LinkedList<DisplayWorkLog>();
+		for (WorkLog workLog : page) {
+			list.add(new DisplayWorkLog(workLog));
+		}
+		Page<DisplayWorkLog> result = new PageImpl<DisplayWorkLog>(list, p, page.getTotalElements());
+		return result;
+	}
+
+	@RequestMapping(value = "/usersProjectsEvents", method = RequestMethod.GET)
+	@ResponseBody
+	Page<DisplayWorkLog> getProjectsLogs(
+			@PageableDefault(size = 25, page = 0, sort = "time", direction = Direction.DESC) Pageable p) {
+		Account account = Utils.getCurrentAccount();
+		List<Project> usersProjects = projSrv.findAllByUser(account.getId());
+		List<Long> ids = new LinkedList<Long>();
+		for (Project project : usersProjects) {
+			ids.add(project.getId());
+		}
+		Page<WorkLog> page = wrkLogSrv.findByProjectIdIn(ids, p);
 		List<DisplayWorkLog> list = new LinkedList<DisplayWorkLog>();
 		for (WorkLog workLog : page) {
 			list.add(new DisplayWorkLog(workLog));
@@ -467,7 +486,7 @@ public class ProjectController {
 		Project project = projSrv.findById(id);
 		DisplayProject result = new DisplayProject(project);
 		Account account = accSrv.findById(project.getDefaultAssigneeID());
-		if(account != null){
+		if (account != null) {
 			result.setDefaultAssignee(new DisplayAccount(account));
 		}
 		return result;

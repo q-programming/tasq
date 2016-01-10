@@ -604,13 +604,13 @@ public class TaskController {
 					return new ResultData(ResultData.ERROR, msg.getMessage("task.changeState.change.kanbanRelease",
 							new Object[] { task.getRelease().getRelease() }, Utils.getCurrentLocale()));
 				}
-				if (state.equals(TaskState.TO_DO)) {
+				if (TaskState.TO_DO.equals(state)) {
 					Hibernate.initialize(task.getLoggedWork());
 					if (!("0m").equals(task.getLoggedWork())) {
 						return new ResultData(ResultData.ERROR,
 								msg.getMessage("task.alreadyStarted", null, Utils.getCurrentLocale()));
 					}
-				} else if (state.equals(TaskState.CLOSED)) {
+				} else if (TaskState.CLOSED.equals(state)) {
 					ResultData result = checkTaskCanOperated(task, false);
 					if (result.code.equals(ResultData.ERROR)) {
 						return result;
@@ -1273,11 +1273,11 @@ public class TaskController {
 	}
 
 	private String worklogStateChange(TaskState state, TaskState oldState, Task task) {
-		if (state.equals(TaskState.CLOSED)) {
+		if (TaskState.CLOSED.equals(state)) {
 			task.setFinishDate(new Date());
 			wlSrv.addActivityLog(task, "", LogType.CLOSED);
 			return msg.getMessage("task.state.changed.closed", new Object[] { task.getId() }, Utils.getCurrentLocale());
-		} else if (oldState.equals(TaskState.CLOSED)) {
+		} else if (TaskState.CLOSED.equals(oldState)) {
 			wlSrv.addActivityLog(task, "", LogType.REOPEN);
 			task.setFinishDate(null);
 			return msg.getMessage("task.state.changed.reopened", new Object[] { task.getId() },

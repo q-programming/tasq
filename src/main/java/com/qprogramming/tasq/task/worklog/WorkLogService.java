@@ -3,6 +3,7 @@
  */
 package com.qprogramming.tasq.task.worklog;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
@@ -260,6 +261,10 @@ public class WorkLogService {
 
 	public Page<WorkLog> findByProjectId(Long id, Pageable p) {
 		return wlRepo.findByProjectId(id, p);
+	}
+
+	public Page<WorkLog> findByProjectIdIn(Collection<Long> id, Pageable p) {
+		return wlRepo.findByProjectIdIn(id, p);
 	}
 
 	public List<WorkLog> findProjectCreateCloseEvents(Project project, boolean all) {
