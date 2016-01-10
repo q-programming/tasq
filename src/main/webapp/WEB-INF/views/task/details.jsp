@@ -627,9 +627,9 @@
 							:
 						</div>
 						<div style="display: table-cell">
-							<img data-src="holder.js/20x20"
-								style="height: 20px; padding-right: 5px;"
-								src="<c:url value="/../avatar/${task.owner.id}.png"/>" /><a
+							<img data-src="holder.js/30x30"
+								class="avatar small"
+								src="<c:url value="/../avatar/${task.owner.id}.png"/>" />&nbsp;<a
 								href="<c:url value="/user/${task.owner.username}"/>">${task.owner}</a>
 						</div>
 					</div>
@@ -643,9 +643,8 @@
 								<i><s:message code="task.unassigned" /></i>
 							</c:if>
 							<c:if test="${not empty task.assignee}">
-								<img data-src="holder.js/20x20" style="height: 20px;"
-									src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />
-								<a href="<c:url value="/user/${task.assignee.username}"/>">${task.assignee}</a>
+								<img data-src="holder.js/30x30" class="avatar small"
+									src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />&nbsp;<a href="<c:url value="/user/${task.assignee.username}"/>">${task.assignee}</a>
 							</c:if>
 							<c:if test="${project_participant}">
 								<span class="btn btn-default btn-sm a-tooltip assignToTask"

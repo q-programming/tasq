@@ -126,7 +126,7 @@ function fetchUsers(page,term){
 				confirmed = '<span><i style="color: red" class="fa fa-exclamation-triangle a-tooltip"	title="<s:message code="panel.emails.notconfirmed"/>"></i></span>';
 			}
 			var user = userURL + content.username; 
-			var avatar = '<img data-src="holder.js/30x30" style="height: 30px; float: left; padding-right: 10px;" src="' + avatarURL + +data.content[j].id +'.png"/>';
+			var avatar = '<img data-src="holder.js/30x30" class="avatar small" src="' + avatarURL + +data.content[j].id +'.png"/>&nbsp;';
 			var row = '<tr class="listeduser"><td>'
 						+ online
 						+ '<a href="' + user + '" class="btn">'

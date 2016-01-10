@@ -1,5 +1,6 @@
 package com.qprogramming.tasq.task.worklog;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -19,17 +20,16 @@ public interface WorkLogRepository extends JpaRepository<WorkLog, Integer> {
 
 	Page<WorkLog> findByProjectId(Long id, Pageable page);
 
-	List<WorkLog> findByProjectIdAndTimeBetweenAndActivityNotNullOrderByTimeAsc(
-			Long id, Date start, Date end);
+	Page<WorkLog> findByProjectIdIn(Collection<Long> id, Pageable page);
 
-	List<WorkLog> findByProjectIdAndTimeBetweenAndTypeOrTypeOrderByTimeAsc(
-			Long id, Date start, Date end, LogType closed, LogType reopen);
+	List<WorkLog> findByProjectIdAndTimeBetweenAndActivityNotNullOrderByTimeAsc(Long id, Date start, Date end);
 
-	List<WorkLog> findByProjectIdAndTimeBetweenOrderByTimeAsc(Long id,
-			Date start, Date end);
+	List<WorkLog> findByProjectIdAndTimeBetweenAndTypeOrTypeOrderByTimeAsc(Long id, Date start, Date end,
+			LogType closed, LogType reopen);
 
-	List<WorkLog> findByProjectIdAndTimeBetweenAndWorklogtaskNotNullOrderByTimeAsc(
-			Long id, Date start, Date end);
+	List<WorkLog> findByProjectIdAndTimeBetweenOrderByTimeAsc(Long id, Date start, Date end);
+
+	List<WorkLog> findByProjectIdAndTimeBetweenAndWorklogtaskNotNullOrderByTimeAsc(Long id, Date start, Date end);
 
 	List<WorkLog> findByWorklogtaskIdOrderByTimeLoggedDesc(String id);
 

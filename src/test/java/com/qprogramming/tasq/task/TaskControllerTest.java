@@ -599,16 +599,11 @@ public class TaskControllerTest {
 		Project project = createProject(1L);
 		Task task = createTask(TASK_NAME, 1, project);
 		when(taskRepoMock.findById(TASK_ID)).thenReturn(task);
-		when(projSrvMock.canEdit(project)).thenReturn(true);
+		when(projSrvMock.canEdit(project)).thenReturn(false);
 		testAccount.setRole(Roles.ROLE_VIEWER);
+		ResultData data = taskCtr.changeState(TASK_ID, TaskState.COMPLETE, null, null, null);
+		Assert.assertEquals(ResultData.ERROR, data.code);
 		boolean catched = false;
-		try {
-			taskCtr.changeState(TASK_ID, null, null, null, null);
-		} catch (TasqAuthException e) {
-			catched = true;
-		}
-		Assert.assertTrue(TASQ_AUTH_MSG, catched);
-		catched = false;
 		try {
 			taskCtr.changeStoryPoints(TASK_ID, 2);
 		} catch (TasqAuthException e) {

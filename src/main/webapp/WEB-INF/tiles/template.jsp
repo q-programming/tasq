@@ -65,6 +65,7 @@
     <![endif]-->
 <%-------THEME ------%>
 <security:authorize access="!isAuthenticated()">
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
 	<link href="<c:url value="/resources/css/theme.css" />"
 		rel="stylesheet" media="screen" />
 </security:authorize>

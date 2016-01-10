@@ -67,9 +67,10 @@
 	<h3>[${project.projectId}] ${project.name}</h3>
 	${project.description}
 	<hr>
-	<c:set var="tasks_total">${TO_DO + ONGOING+ CLOSED+ BLOCKED}</c:set>
+	<c:set var="tasks_total">${TO_DO + ONGOING + COMPLETE + CLOSED + BLOCKED}</c:set>
 	<c:set var="tasks_todo">${TO_DO * 100 / tasks_total }</c:set>
 	<c:set var="tasks_ongoing">${ONGOING * 100 / tasks_total}</c:set>
+	<c:set var="tasks_complete">${COMPLETE *100 / tasks_total}</c:set>
 	<c:set var="tasks_closed">${CLOSED *100 / tasks_total}</c:set>
 	<c:set var="tasks_blocked">${BLOCKED*100 / tasks_total}</c:set>
 	<div class="progress">
@@ -86,7 +87,14 @@
 				<span>${ONGOING}&nbsp;<s:message code="task.state.ongoing" /></span>
 			</c:if>
 		</div>
-		<div class="progress-bar progress-bar-success a-tooltip"
+		<div class="progress-bar progress-bar-success a-tooltip" style="width: ${tasks_complete}%"
+			title="${COMPLETE}&nbsp;<s:message code="task.state.complete"/>">
+			<c:if test="${tasks_complete gt 10.0}">
+				<span>${COMPLETE}&nbsp;<s:message code="task.state.complete" /></span>
+			</c:if>
+		</div>
+		
+		<div class="progress-bar progress-bar-closed  a-tooltip"
 			style="width: ${tasks_closed}%"
 			title="${CLOSED}&nbsp;<s:message code="task.state.closed"/>">
 			<c:if test="${tasks_closed gt 10.0}">
@@ -206,20 +214,14 @@
 		</div>
 	</div>
 </div>
-<%
-	pageContext.setAttribute("types", LogType.values());
-	pageContext.setAttribute("taskTypes", TaskType.values());
-%>
 <jsp:include page="../task/subtasks.jsp" />
+<jsp:include page="../other/events.jsp" />
 <script>
 var	plot;
 $(document).ready(function($) {
 	var currentPage = 0
-	taskURL = '<c:url value="/task/"/>';
-	apiurl = '<c:url value="/task/getSubTasks"/>';
-	small_loading_indicator = '<div id="small_loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br></div>';
-	loading_indicator = '<div id="loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></div>';
-	fetchWorkLogData(currentPage);
+	var projectID = '${project.projectId}';
+	fetchWorkLogData(currentPage, projectID);
 	printChart(false);
 	
 	$("#moreEvents").click(function() {
@@ -321,68 +323,4 @@ function printChart(all){
 		}
 	});
 }
-
-function fetchWorkLogData(page) {
-	var projectID = '${project.projectId}';
-	var url = '<c:url value="/projectEvents"/>';
-	var avatarURL = '<c:url value="/../avatar/"/>';
-	var accountURL = '<c:url value="/user/"/>';
-	var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
-	$("#eventsTable .projEvent").remove();
-	$("#eventsTable").append(loading_indicator);
-	$.get(url, {id : projectID,	page: page}, function(data) {
-		//console.log(data)
-		$("#eventsTable tr").remove();
-		printWorkLogNavigation(page, data);
-		var rows = "";
-		for ( var j = 0; j < data.content.length; j++) {
-			var content = data.content[j];
-			var timeLogged = '<div class="time-div">'+ content.time +'</div>';
-			var avatar = '<img data-src="holder.js/30x30" class="avatar small" src="' + avatarURL + content.account.id +'.png"/>';
-			var account = '<a href="' + accountURL + content.account.username + '">'+ content.account.name + " " + content.account.surname + '</a>&nbsp;';
-			var event = getEventTypeMsg(content.type);
-			var task = '';
-			var row = '<tr class="projEvent"><td>'+ avatar + '</td><td>';
-			if(content.task!=null){
-				task = '<a href="'+taskURL+content.task.id + '">[' + content.task.id +'] '+ content.task.name + '</a>';
-			}
-			var message = '';
-			if(content.message!=null && content.message!=''){
-				message ='<div class="quote">' + content.message + '</div>';
-			}
-			row+=timeLogged + account + event + task + message;
-			row+='</td></tr>';
-			rows+=row;
-		}
-		$("#eventsTable").append(rows);
-	});
-
-}
-function printWorkLogNavigation(page,data){
-	var options = {
-			bootstrapMajorVersion: 3,
-            currentPage: page+1,
-            totalPages: data.totalPages,
-            itemContainerClass: function (type, page, current) {
-                return (page === current) ? "active" : "pointer-cursor";
-            },
-            numberOfPages:10,
-            onPageChanged: function(e,oldPage,newPage){
-            	fetchWorkLogData(newPage-1);
-            }
-   	}
-	$("#eventsTable_pagination_top").bootstrapPaginator(options);
-	$("#eventsTable_pagination_bot").bootstrapPaginator(options);
-}
-
-function getEventTypeMsg(type){
-	switch(type){
-		<c:forEach items="${types}" var="enum_type">
-		case "${enum_type}":
-			return '<s:message code="${enum_type.code}"/> ';
-		</c:forEach>
-		default:
-			return 'not yet added ';
-	};
-};
 </script>

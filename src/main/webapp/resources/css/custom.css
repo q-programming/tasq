@@ -562,7 +562,9 @@ li.wider {
 .progress {
 	border-radius: 0px;
 }
-
+.progress-bar-closed{
+	background-color: #488A48;;
+}
 .btn, .btn-sm, .btn-xs, .btn-xxs {
 	border-radius: 0px;
 }
