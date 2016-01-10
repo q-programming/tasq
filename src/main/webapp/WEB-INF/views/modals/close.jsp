@@ -17,7 +17,7 @@
 				</div>
 				
 				<div class="checkbox">
-					<div style="font-weight: bold; margin-left: -22px;"><s:message code="task.estimate"/></div>
+					<div style="font-weight: bold;"><s:message code="task.estimate"/></div>
 					<label class="checkbox"> <input type="checkbox"
 						name="zero_checkbox" id="modal_zero_checkbox"> <s:message
 							code="task.setToZero" />

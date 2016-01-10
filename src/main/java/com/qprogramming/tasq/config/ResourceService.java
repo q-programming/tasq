@@ -11,24 +11,30 @@ import javax.imageio.ImageIO;
 import org.imgscalr.Scalr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 
+import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.support.Utils;
 
 @Service
 public class ResourceService implements ResourceLoaderAware {
 
-	@Value("${home.directory}")
-	private String tasqRootDir;
 	private static final String AVATAR_DIR = "avatar";
 	private static final String SMALL = "small_";
 	private static final String LOGO = "logo";
 	private static final String PNG = ".png";
 	private ResourceLoader resourceLoader;
+	private AppService appSrv;
+
+	@Autowired
+	public ResourceService(AppService appSrv) {
+		this.appSrv = appSrv;
+	}
 
 	private static final Logger LOG = LoggerFactory.getLogger(ResourceService.class);
 
@@ -74,7 +80,7 @@ public class ResourceService implements ResourceLoaderAware {
 	}
 
 	private String getAvatarDir() {
-		return tasqRootDir + File.separator + AVATAR_DIR + File.separator;
+		return appSrv.getProperty(AppService.TASQROOTDIR) + File.separator + AVATAR_DIR + File.separator;
 	}
 
 	private void resizeAvatar() throws IOException {

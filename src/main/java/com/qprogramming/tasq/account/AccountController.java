@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +41,11 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.error.TasqAuthException;
+import com.qprogramming.tasq.error.TasqException;
+import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.manage.Theme;
 import com.qprogramming.tasq.manage.ThemeService;
+import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.ResultData;
 import com.qprogramming.tasq.support.Utils;
@@ -50,25 +55,25 @@ import com.qprogramming.tasq.support.web.MessageHelper;
 @Secured("ROLE_USER")
 public class AccountController {
 
-	@Value("${home.directory}")
-	private String tasqRootDir;
-
 	private AccountService accountSrv;
 	private ProjectService projSrv;
 	private SessionLocaleResolver localeResolver;
 	private MessageSource msg;
 	private SessionRegistry sessionRegistry;
 	private ThemeService themeSrv;
+	private AppService appSrv;
 
 	@Autowired
 	public AccountController(AccountService accountSrv, ProjectService projSrv, MessageSource msg,
-			SessionLocaleResolver localeResolver, SessionRegistry sessionRegistry, ThemeService themeSrv) {
+			SessionLocaleResolver localeResolver, SessionRegistry sessionRegistry, ThemeService themeSrv,
+			AppService appSrv) {
 		this.accountSrv = accountSrv;
 		this.projSrv = projSrv;
 		this.msg = msg;
 		this.localeResolver = localeResolver;
 		this.sessionRegistry = sessionRegistry;
 		this.themeSrv = themeSrv;
+		this.appSrv = appSrv;
 	}
 
 	private static final Logger LOG = LoggerFactory.getLogger(AccountController.class);
@@ -82,7 +87,7 @@ public class AccountController {
 		return "user/settings";
 	}
 
-	@Transactional
+	@Transactional(rollbackFor = { TasqException.class })
 	@RequestMapping(value = "settings", method = RequestMethod.POST)
 	public String saveSettings(@RequestParam(value = "avatar", required = false) MultipartFile avatarFile,
 			@RequestParam(value = "email", required = false) String email,
@@ -108,8 +113,9 @@ public class AccountController {
 		if (email != null && email != "" && !account.getEmail().equals(email)) {
 			account.setEmail(email);
 			account.setConfirmed(false);
-			accountSrv.sendConfirmationLink(account);
-			message = msg.getMessage("panel.email.confirm", null, Utils.getCurrentLocale());
+			if (!accountSrv.sendConfirmationLink(account)) {
+				throw new TasqException(msg.getMessage("error.email.sending", null, Utils.getCurrentLocale()));
+			}
 		}
 		accountSrv.update(account);
 		MessageHelper.addSuccessAttribute(ra,
@@ -125,11 +131,7 @@ public class AccountController {
 			return "redirect:/users";
 		}
 		List<Object> principals = sessionRegistry.getAllPrincipals();
-		DisplayAccount dispAccount = new DisplayAccount(account);
-		List<SessionInformation> sessions = sessionRegistry.getAllSessions(account, false);
-		if (!sessions.isEmpty() && principals.contains(account)) {
-			dispAccount.setOnline(true);
-		}
+		DisplayAccount dispAccount = accountWithSession(principals, account);
 		model.addAttribute("projects", projSrv.findAllByUser(account.getId()));
 		model.addAttribute("account", dispAccount);
 		return "user/details";
@@ -164,15 +166,54 @@ public class AccountController {
 		List<DisplayAccount> list = new LinkedList<DisplayAccount>();
 		List<Object> principals = sessionRegistry.getAllPrincipals();
 		for (Account account : page) {
-			DisplayAccount dispAccount = new DisplayAccount(account);
-			List<SessionInformation> sessions = sessionRegistry.getAllSessions(account, false);
-			if (!sessions.isEmpty() && principals.contains(account)) {
-				dispAccount.setOnline(true);
-			}
+			DisplayAccount dispAccount = accountWithSession(principals, account);
 			list.add(dispAccount);
 		}
 		Page<DisplayAccount> result = new PageImpl<DisplayAccount>(list, p, page.getTotalElements());
 		return result;
+	}
+
+	@RequestMapping(value = "/project/participants", method = RequestMethod.GET)
+	public @ResponseBody Page<DisplayAccount> listParticipants(@RequestParam(required = false) String term,
+			@RequestParam String projId,
+			@PageableDefault(size = 25, page = 0, sort = "surname", direction = Direction.ASC) Pageable p) {
+
+		Project project = projSrv.findByProjectId(projId);
+		if (project == null) {
+			try {
+				Long projectID = Long.valueOf(projId);
+				project = projSrv.findById(projectID);
+			} catch (NumberFormatException e) {
+				LOG.error(e.getMessage());
+			}
+		}
+		Set<Account> allParticipants = project.getParticipants();
+		List<Object> principals = sessionRegistry.getAllPrincipals();
+		List<DisplayAccount> participants = new ArrayList<DisplayAccount>();
+		for (Account account : allParticipants) {
+			if (term == null) {
+				participants.add(accountWithSession(principals, account));
+			} else {
+				if (StringUtils.containsIgnoreCase(account.toString(), term)) {
+					participants.add(accountWithSession(principals, account));
+				}
+			}
+		}
+		int totalParticipants = participants.size();
+		if (participants.size() > p.getPageSize()) {
+			participants = participants.subList(p.getOffset(), p.getOffset() + p.getPageSize());
+		}
+		Page<DisplayAccount> result = new PageImpl<DisplayAccount>(participants, p, totalParticipants);
+		return result;
+	}
+
+	private DisplayAccount accountWithSession(List<Object> principals, Account account) {
+		DisplayAccount sAccount = new DisplayAccount(account);
+		List<SessionInformation> sessions = sessionRegistry.getAllSessions(account, false);
+		if (!sessions.isEmpty() && principals.contains(account)) {
+			sAccount.setOnline(true);
+		}
+		return sAccount;
 	}
 
 	@RequestMapping(value = "/user/{username}/reset-avatar", method = RequestMethod.GET)
@@ -197,11 +238,12 @@ public class AccountController {
 	@RequestMapping(value = "/emailResend", method = RequestMethod.GET)
 	public String resendEmail(RedirectAttributes ra) {
 		Account account = Utils.getCurrentAccount();
-		accountSrv.sendConfirmationLink(account);
+		if (!accountSrv.sendConfirmationLink(account)) {
+			throw new TasqException(msg.getMessage("error.email.sending", null, Utils.getCurrentLocale()));
+		}
 		MessageHelper.addSuccessAttribute(ra, msg.getMessage("panel.emails.resend.sent",
 				new Object[] { account.getEmail() }, Utils.getCurrentLocale()));
 		return "redirect:/settings";
-
 	}
 
 	@RequestMapping(value = "role", method = RequestMethod.POST)
@@ -226,8 +268,27 @@ public class AccountController {
 		return null;
 	}
 
+	/**
+	 * Sends email with invite to indicated email
+	 * 
+	 * @param email
+	 * @param request
+	 * @param ra
+	 * @return
+	 */
+	@RequestMapping(value = "/inviteUsers", method = RequestMethod.GET)
+	public String sendInvite(@RequestParam(value = "email") String email, HttpServletRequest request,
+			RedirectAttributes ra) {
+		if (!accountSrv.sendInvite(email, themeSrv.getDefault())) {
+			throw new TasqException(msg.getMessage("error.email.sending", null, Utils.getCurrentLocale()));
+		}
+		MessageHelper.addSuccessAttribute(ra,
+				msg.getMessage("panel.invite.sent", new Object[] { email }, Utils.getCurrentLocale()));
+		return "redirect:" + request.getHeader("Referer");
+	}
+
 	private String getAvatarDir() {
-		return tasqRootDir + File.separator + AVATAR_DIR + File.separator;
+		return appSrv.getProperty(AppService.TASQROOTDIR) + File.separator + AVATAR_DIR + File.separator;
 	}
 
 	private String getAvatar(Long id) {

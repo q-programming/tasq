@@ -66,8 +66,7 @@ public class ImportExportController {
 	private WorkLogService wlSrv;
 	private MessageSource msg;
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(ImportExportController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ImportExportController.class);
 	private static final String COLS = "ABCDEFGHIJKLMNOPRSTUVWXYZ";
 	private static final int NAME_CELL = 0;
 	private static final int DESCRIPTION_CELL = 1;
@@ -85,8 +84,8 @@ public class ImportExportController {
 	private static final String DIVIDER = "<br>---------------------------------------------------<br>";
 
 	@Autowired
-	public ImportExportController(ProjectService projectSrv,
-			TaskService taskSrv, WorkLogService wlSrv, MessageSource msg) {
+	public ImportExportController(ProjectService projectSrv, TaskService taskSrv, WorkLogService wlSrv,
+			MessageSource msg) {
 		this.projectSrv = projectSrv;
 		this.taskSrv = taskSrv;
 		this.wlSrv = wlSrv;
@@ -94,11 +93,10 @@ public class ImportExportController {
 	}
 
 	@RequestMapping(value = "/task/getTemplateFile", method = RequestMethod.GET)
-	public @ResponseBody String downloadTemplate(HttpServletRequest request,
-			HttpServletResponse response) throws IOException {
+	public @ResponseBody String downloadTemplate(HttpServletRequest request, HttpServletResponse response)
+			throws IOException {
 		FileInputStream is = getExcelTemplate();
-		response.setHeader("content-Disposition", "attachment; filename="
-				+ TEMPLATE_XLS);
+		response.setHeader("content-Disposition", "attachment; filename=" + TEMPLATE_XLS);
 		IOUtils.copyLarge(is, response.getOutputStream());
 		return "redirect:" + request.getHeader("Referer");
 	}
@@ -115,23 +113,18 @@ public class ImportExportController {
 
 	@Transactional
 	@RequestMapping(value = "/task/import", method = RequestMethod.POST)
-	public String importTasks(
-			@RequestParam(value = "file") MultipartFile importFile,
-			@RequestParam(value = "project") String projectName, Model model)
-			throws IOException {
+	public String importTasks(@RequestParam(value = "file") MultipartFile importFile,
+			@RequestParam(value = "project") String projectName, Model model) throws IOException {
 
 		if (importFile.getSize() != 0) {
-			String extension = FilenameUtils.getExtension(importFile
-					.getOriginalFilename());
+			String extension = FilenameUtils.getExtension(importFile.getOriginalFilename());
 			Project project = projectSrv.findByProjectId(projectName);
-			int taskCount = project.getTasks().size();
+			Long taskCount = project.getLastTaskNo();
 			StringBuilder logger = new StringBuilder();
 			if (extension.equals(XLS_TYPE)) {
-				HSSFWorkbook workbook = new HSSFWorkbook(
-						importFile.getInputStream());
+				HSSFWorkbook workbook = new HSSFWorkbook(importFile.getInputStream());
 				HSSFSheet sheet = workbook.getSheetAt(0);
-				for (Iterator<Row> rowIterator = sheet.iterator(); rowIterator
-						.hasNext();) {
+				for (Iterator<Row> rowIterator = sheet.iterator(); rowIterator.hasNext();) {
 					Row row = rowIterator.next();
 					if (row.getRowNum() == 0) {
 						continue;
@@ -145,29 +138,21 @@ public class ImportExportController {
 					}
 					// validation finished
 					TaskForm taskForm = new TaskForm();
-					taskForm.setName(row.getCell(NAME_CELL)
-							.getStringCellValue());
-					taskForm.setDescription(row.getCell(DESCRIPTION_CELL)
-							.getStringCellValue());
-					taskForm.setType(row.getCell(TYPE_CELL)
-							.getStringCellValue());
-					taskForm.setPriority(row.getCell(PRIORITY_CELL)
-							.getStringCellValue());
+					taskForm.setName(row.getCell(NAME_CELL).getStringCellValue());
+					taskForm.setDescription(row.getCell(DESCRIPTION_CELL).getStringCellValue());
+					taskForm.setType(row.getCell(TYPE_CELL).getStringCellValue());
+					taskForm.setPriority(row.getCell(PRIORITY_CELL).getStringCellValue());
 					if (row.getCell(ESTIMATE_CELL) != null) {
-						taskForm.setEstimate(row.getCell(ESTIMATE_CELL)
-								.getStringCellValue());
+						taskForm.setEstimate(row.getCell(ESTIMATE_CELL).getStringCellValue());
 					}
 					Task task = taskForm.createTask();
 					// optional fields
 					if (row.getCell(SP_CELL) != null) {
-						task.setStory_points(((Double) row.getCell(SP_CELL)
-								.getNumericCellValue()).intValue());
+						task.setStory_points(((Double) row.getCell(SP_CELL).getNumericCellValue()).intValue());
 					}
 					if (row.getCell(DUE_DATE_CELL) != null
-							&& !"".equals(row.getCell(DUE_DATE_CELL)
-									.getStringCellValue())) {
-						Date date = row.getCell(DUE_DATE_CELL)
-								.getDateCellValue();
+							&& !"".equals(row.getCell(DUE_DATE_CELL).getStringCellValue())) {
+						Date date = row.getCell(DUE_DATE_CELL).getDateCellValue();
 						task.setDue_date(date);
 					}
 					taskCount++;
@@ -182,14 +167,11 @@ public class ImportExportController {
 				model.addAttribute("logger", logger.toString().trim());
 			} else if (extension.equals(XML_TYPE)) {
 				try {
-					JAXBContext jaxbcontext = JAXBContext
-							.newInstance(ProjectXML.class);
-					Unmarshaller unmarshaller = jaxbcontext
-							.createUnmarshaller();
+					JAXBContext jaxbcontext = JAXBContext.newInstance(ProjectXML.class);
+					Unmarshaller unmarshaller = jaxbcontext.createUnmarshaller();
 					File convFile = new File(importFile.getOriginalFilename());
 					importFile.transferTo(convFile);
-					ProjectXML projectXML = (ProjectXML) unmarshaller
-							.unmarshal(convFile);
+					ProjectXML projectXML = (ProjectXML) unmarshaller.unmarshal(convFile);
 					// validate all tasks
 					for (TaskXML taskxml : projectXML.getTaskList()) {
 						StringBuilder logRow = verifyTaskXml(taskxml);
@@ -207,13 +189,11 @@ public class ImportExportController {
 						task.setDue_date(taskxml.getDue_date());
 						// optional fields
 						if (taskxml.getStory_points() != null) {
-							task.setStory_points(Integer.parseInt(taskxml
-									.getStory_points()));
+							task.setStory_points(Integer.parseInt(taskxml.getStory_points()));
 						}
 						taskCount++;
 						task = finalizeTaskCretion(task, taskCount, project);
-						String logHeader = "[Task number="
-								+ taskxml.getNumber() + "]";
+						String logHeader = "[Task number=" + taskxml.getNumber() + "]";
 						logger.append(logHeader);
 						logger.append("Task ");
 						logger.append(task);
@@ -231,12 +211,13 @@ public class ImportExportController {
 		return "/task/importResults";
 	}
 
-	private Task finalizeTaskCretion(Task task, int taskCount, Project project) {
+	private Task finalizeTaskCretion(Task task, long taskCount, Project project) {
 		String taskID = project.getProjectId() + "-" + taskCount;
 		task.setId(taskID);
 		task.setProject(project);
-		task.setTaskOrder((long) taskCount);
+		task.setTaskOrder(taskCount);
 		project.getTasks().add(task);
+		project.setLastTaskNo(taskCount);
 		task = taskSrv.save(task);
 		projectSrv.save(project);
 		wlSrv.addActivityLog(task, "", LogType.CREATE);
@@ -244,16 +225,14 @@ public class ImportExportController {
 	}
 
 	@RequestMapping(value = "/task/export", method = RequestMethod.POST)
-	public void exportTasks(@RequestParam(value = "tasks") String[] idList,
-			@RequestParam(value = "type") String type,
-			HttpServletResponse response, HttpServletRequest request)
-			throws FileNotFoundException, IOException {
+	public void exportTasks(@RequestParam(value = "tasks") String[] idList, @RequestParam(value = "type") String type,
+			HttpServletResponse response, HttpServletRequest request) throws FileNotFoundException, IOException {
 		// Prepare task list
 		List<Task> taskList = taskSrv.finAllById(Arrays.asList(idList));
 		Project project = taskList.get(0).getProject();
 		FileInputStream is = getExcelTemplate();
-		String filename = project.getProjectId() + UNDERSCORE
-				+ Utils.convertDateToString(new Date()) + UNDERSCORE + "export";
+		String filename = project.getProjectId() + UNDERSCORE + Utils.convertDateToString(new Date()) + UNDERSCORE
+				+ "export";
 		ServletOutputStream out = response.getOutputStream();
 		if (type.equals(XML_TYPE)) {
 			// pack into xml
@@ -269,20 +248,17 @@ public class ImportExportController {
 			}
 			projectXML.setTaskList(xmltasklist);
 			try {
-				JAXBContext jaxbContext = JAXBContext
-						.newInstance(ProjectXML.class);
+				JAXBContext jaxbContext = JAXBContext.newInstance(ProjectXML.class);
 				Marshaller marshaller = jaxbContext.createMarshaller();
 				Utils.setHttpRequest(request);
-				String templateURL = Utils.getBaseURL()
-						+ "/export_template.xsl";
+				// String templateURL = Utils.getBaseURL()
+				// + "/export_template.xsl";
 				// marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION,
 				// templateURL);
-				marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT,
-						Boolean.TRUE);
+				marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 				// // OutputStream output = new BufferedOutputStream(out);
 				response.setContentType("application/xml");
-				response.setHeader("Content-Disposition",
-						"attachment; filename=" + filename + ".xml");
+				response.setHeader("Content-Disposition", "attachment; filename=" + filename + ".xml");
 				marshaller.marshal(projectXML, out);
 			} catch (JAXBException e) {
 				// TODO Auto-generated catch block
@@ -296,19 +272,15 @@ public class ImportExportController {
 			for (Task task : taskList) {
 				HSSFRow row = sheet.createRow(rowNo++);
 				row.createCell(NAME_CELL).setCellValue(task.getName());
-				row.createCell(DESCRIPTION_CELL).setCellValue(
-						task.getDescription());
-				row.createCell(TYPE_CELL).setCellValue(
-						((TaskType) task.getType()).getEnum());
-				row.createCell(PRIORITY_CELL).setCellValue(
-						((TaskPriority) task.getPriority()).toString());
+				row.createCell(DESCRIPTION_CELL).setCellValue(task.getDescription());
+				row.createCell(TYPE_CELL).setCellValue(((TaskType) task.getType()).getEnum());
+				row.createCell(PRIORITY_CELL).setCellValue(((TaskPriority) task.getPriority()).toString());
 				row.createCell(ESTIMATE_CELL).setCellValue(task.getEstimate());
 				row.createCell(SP_CELL).setCellValue(task.getStory_points());
 				row.createCell(DUE_DATE_CELL).setCellValue(task.getDue_date());
 			}
 			response.setContentType("application/vnd.ms-excel");
-			response.setHeader("Content-Disposition", "attachment; filename="
-					+ filename + ".xls");
+			response.setHeader("Content-Disposition", "attachment; filename=" + filename + ".xls");
 			workbook.write(out);
 		}
 		out.flush();
@@ -322,8 +294,7 @@ public class ImportExportController {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	private FileInputStream getExcelTemplate() throws FileNotFoundException,
-			IOException {
+	private FileInputStream getExcelTemplate() throws FileNotFoundException, IOException {
 		URL fileURL = getClass().getResource("/" + TEMPLATE_XLS);
 		File file;
 		try {
@@ -417,14 +388,12 @@ public class ImportExportController {
 			logger.append("Empty or wrong task type");
 			logger.append(BR);
 		}
-		if (task.getPriority() == null
-				|| !isTaskPriorityValid(task.getPriority())) {
+		if (task.getPriority() == null || !isTaskPriorityValid(task.getPriority())) {
 			logger.append(logHeader);
 			logger.append("Empty or wrong task priority");
 			logger.append(BR);
 		}
-		if (task.getStory_points() != null
-				&& !isNumerical(task.getStory_points())) {
+		if (task.getStory_points() != null && !isNumerical(task.getStory_points())) {
 			logger.append(logHeader);
 			logger.append("Story points must be empty or a number");
 			logger.append(BR);
@@ -455,8 +424,8 @@ public class ImportExportController {
 	 * @return
 	 */
 	private boolean isNumericCellValid(Row row, int cell) {
-		return row.getCell(cell) != null
-				&& row.getCell(cell).getCellType() == Cell.CELL_TYPE_NUMERIC;
+		return !(row.getCell(cell) != null)
+				|| (row.getCell(cell) != null && row.getCell(cell).getCellType() == Cell.CELL_TYPE_NUMERIC);
 	}
 
 	/**
@@ -468,8 +437,7 @@ public class ImportExportController {
 	 */
 	private boolean isDATECellValid(Row row, int cell) {
 		try {
-			if (row.getCell(cell) != null
-					&& !"".equals(row.getCell(cell).getStringCellValue())
+			if (row.getCell(cell) != null && !"".equals(row.getCell(cell).getStringCellValue())
 					&& (!HSSFDateUtil.isCellDateFormatted(row.getCell(cell)))) {
 				return false;
 			}

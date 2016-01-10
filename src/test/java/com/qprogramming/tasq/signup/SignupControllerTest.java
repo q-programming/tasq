@@ -2,6 +2,9 @@ package com.qprogramming.tasq.signup;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyMapOf;
+
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,6 +23,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.springframework.core.io.Resource;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.junit.Assert;
@@ -48,6 +52,7 @@ import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.config.ResourceService;
 import com.qprogramming.tasq.mail.MailMail;
+import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.manage.ThemeService;
 import com.qprogramming.tasq.support.web.Message;
 import com.qprogramming.tasq.test.MockSecurityContext;
@@ -100,6 +105,8 @@ public class SignupControllerTest {
 	private ThemeService themeSrvMock;
 	@Mock
 	private PasswordEncoder encoderMock;
+	@Mock
+	private AppService appSrvMock;
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -122,8 +129,9 @@ public class SignupControllerTest {
 
 	@Before
 	public void setUp() {
-		accountSrv = new AccountService(accRepoMock, msgMock, velocityMock, resourceMock, mailerMock, encoderMock);
-		signupCtr = new SignupController(accountSrv, msgMock, themeSrvMock);
+		accountSrv = new AccountService(accRepoMock, msgMock, velocityMock, resourceMock, mailerMock, encoderMock,
+				appSrvMock);
+		signupCtr = new SignupController(accountSrv, msgMock, themeSrvMock, appSrvMock);
 		testAccount = new Account(EMAIL, "", USERNAME, Roles.ROLE_ADMIN);
 		testAccount.setLanguage("en");
 		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");
@@ -144,6 +152,9 @@ public class SignupControllerTest {
 			when(accRepoMock.findAll()).thenReturn(accountsList);
 			when(accRepoMock.findByEmail(NEW_EMAIL)).thenReturn(null);
 			when(encoderMock.encode(any(CharSequence.class))).thenReturn("encodedPassword");
+			when(appSrvMock.getProperty(AppService.URL)).thenReturn("http://dummy.com");
+			when(mailerMock.sendMail(anyInt(), anyString(), anyString(), anyString(),
+					anyMapOf(String.class, Resource.class))).thenReturn(true);
 			SignupForm form = fillForm();
 			Errors errors = new BeanPropertyBindingResult(form, "form");
 			signupCtr.signup(form, errors, raMock, requestMock);
@@ -242,6 +253,9 @@ public class SignupControllerTest {
 		when(requestMock.getScheme()).thenReturn("http");
 		when(requestMock.getServerName()).thenReturn("testServer");
 		when(requestMock.getServerPort()).thenReturn(8080);
+		when(appSrvMock.getProperty(AppService.URL)).thenReturn("http://dummy.com");
+		when(mailerMock.sendMail(anyInt(), anyString(), anyString(), anyString(),
+				anyMapOf(String.class, Resource.class))).thenReturn(true);
 		signupCtr.resetPassword(EMAIL, raMock, requestMock);
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.WARNING, new Object[] {}));

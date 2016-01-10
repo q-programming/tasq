@@ -44,6 +44,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.manage.Theme;
 import com.qprogramming.tasq.manage.ThemeService;
 import com.qprogramming.tasq.projects.ProjectService;
@@ -85,6 +86,8 @@ public class AccountControllerTest {
 	private SessionRegistry sessionRegistry;
 	@Mock
 	private ThemeService themeSrvMock;
+	@Mock
+	private AppService appSrvMock;
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -107,7 +110,7 @@ public class AccountControllerTest {
 	@Before
 	public void setUp() {
 		accountCtr = new AccountController(accSrvMock, projSrvMock, msgMock, localeResolverMock, sessionRegistry,
-				themeSrvMock);
+				themeSrvMock, appSrvMock);
 		testAccount = new Account(EMAIL, "", USERNAME, Roles.ROLE_ADMIN);
 		testAccount.setLanguage("en");
 		when(securityMock.getAuthentication()).thenReturn(authMock);

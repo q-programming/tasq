@@ -123,6 +123,7 @@ public class ProjectController {
 		}
 		model.addAttribute("TO_DO", stateCount.get(TaskState.TO_DO));
 		model.addAttribute("ONGOING", stateCount.get(TaskState.ONGOING));
+		model.addAttribute("COMPLETE", stateCount.get(TaskState.COMPLETE));
 		model.addAttribute("CLOSED", stateCount.get(TaskState.CLOSED));
 		model.addAttribute("BLOCKED", stateCount.get(TaskState.BLOCKED));
 		List<Task> taskList = new LinkedList<Task>();
@@ -134,7 +135,7 @@ public class ProjectController {
 		Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID, false));
 		// Initilize getRawWorkLog for all task in this project . Otherwise lazy
 		// init exception is thrown
-		Utils.initializeWorkLogs(taskList);
+		// Utils.initializeWorkLogs(taskList);
 		model.addAttribute("tasks", taskList);
 		model.addAttribute("project", project);
 		return "project/details";
@@ -153,6 +154,25 @@ public class ProjectController {
 		}
 		// Fetch events
 		Page<WorkLog> page = wrkLogSrv.findByProjectId(project.getId(), p);
+		List<DisplayWorkLog> list = new LinkedList<DisplayWorkLog>();
+		for (WorkLog workLog : page) {
+			list.add(new DisplayWorkLog(workLog));
+		}
+		Page<DisplayWorkLog> result = new PageImpl<DisplayWorkLog>(list, p, page.getTotalElements());
+		return result;
+	}
+
+	@RequestMapping(value = "/usersProjectsEvents", method = RequestMethod.GET)
+	@ResponseBody
+	Page<DisplayWorkLog> getProjectsLogs(
+			@PageableDefault(size = 25, page = 0, sort = "time", direction = Direction.DESC) Pageable p) {
+		Account account = Utils.getCurrentAccount();
+		List<Project> usersProjects = projSrv.findAllByUser(account.getId());
+		List<Long> ids = new LinkedList<Long>();
+		for (Project project : usersProjects) {
+			ids.add(project.getId());
+		}
+		Page<WorkLog> page = wrkLogSrv.findByProjectIdIn(ids, p);
 		List<DisplayWorkLog> list = new LinkedList<DisplayWorkLog>();
 		for (WorkLog workLog : page) {
 			list.add(new DisplayWorkLog(workLog));
@@ -231,7 +251,7 @@ public class ProjectController {
 		// TODO Create first release if Kanban ?
 		MessageHelper.addSuccessAttribute(ra,
 				msg.getMessage("project.created", new Object[] { name }, Utils.getCurrentLocale()));
-		return "redirect:/project/" + newProject.getId();
+		return "redirect:/project/" + newProject.getProjectId();
 	}
 
 	@RequestMapping(value = "project/{id}/manage", method = RequestMethod.GET)
@@ -397,55 +417,57 @@ public class ProjectController {
 		ProjectChart result = new ProjectChart();
 		List<WorkLog> events = wrkLogSrv.findProjectCreateCloseEvents(project, all);
 		// Fill maps
-		for (WorkLog workLog : events) {
-			// Don't calculate for subtask ( not important )
-			if (workLog.getTask() != null && !workLog.getTask().isSubtask()) {
-				LocalDate date = new LocalDate(workLog.getRawTime());
-				if (LogType.CREATE.equals(workLog.getType())) {
-					Integer value = created.get(date.toString());
-					if (value == null) {
-						value = 0;
+		if (events.size() > 0) {
+			for (WorkLog workLog : events) {
+				// Don't calculate for subtask ( not important )
+				if (workLog.getTask() != null && !workLog.getTask().isSubtask()) {
+					LocalDate date = new LocalDate(workLog.getRawTime());
+					if (LogType.CREATE.equals(workLog.getType())) {
+						Integer value = created.get(date.toString());
+						if (value == null) {
+							value = 0;
+						}
+						value++;
+						created.put(date.toString(), value);
+					} else if (LogType.REOPEN.equals(workLog.getType())) {
+						Integer value = closed.get(date.toString());
+						if (value == null) {
+							value = 0;
+						}
+						value--;
+						closed.put(date.toString(), value);
+					} else {
+						Integer value = closed.get(date.toString());
+						if (value == null) {
+							value = 0;
+						}
+						value++;
+						closed.put(date.toString(), value);
 					}
-					value++;
-					created.put(date.toString(), value);
-				} else if (LogType.REOPEN.equals(workLog.getType())) {
-					Integer value = closed.get(date.toString());
-					if (value == null) {
-						value = 0;
-					}
-					value--;
-					closed.put(date.toString(), value);
-				} else {
-					Integer value = closed.get(date.toString());
-					if (value == null) {
-						value = 0;
-					}
-					value++;
-					closed.put(date.toString(), value);
 				}
 			}
-		}
-		// Look for the first event ever (they are sorted)
-		LocalDate start = new LocalDate(events.get(0).getRawTime());
-		LocalDate end = new LocalDate().plusDays(1);
-		LocalDate counter = start;
-		Integer taskCreated = 0;
-		Integer taskClosed = 0;
-		while (counter.isBefore(end)) {
-			Integer createValue = created.get(counter.toString());
-			if (createValue == null) {
-				createValue = 0;
-			}
-			taskCreated += createValue;
-			result.getCreated().put(counter.toString(), taskCreated);
+			// Look for the first event ever (they are sorted)
+			LocalDate start = new LocalDate(events.get(0).getRawTime());
+			LocalDate end = new LocalDate().plusDays(1);
+			LocalDate counter = start;
+			Integer taskCreated = 0;
+			Integer taskClosed = 0;
+			while (counter.isBefore(end)) {
+				Integer createValue = created.get(counter.toString());
+				if (createValue == null) {
+					createValue = 0;
+				}
+				taskCreated += createValue;
+				result.getCreated().put(counter.toString(), taskCreated);
 
-			Integer closeValue = closed.get(counter.toString());
-			if (closeValue == null) {
-				closeValue = 0;
+				Integer closeValue = closed.get(counter.toString());
+				if (closeValue == null) {
+					closeValue = 0;
+				}
+				taskClosed += closeValue;
+				result.getClosed().put(counter.toString(), taskClosed);
+				counter = counter.plusDays(1);
 			}
-			taskClosed += closeValue;
-			result.getClosed().put(counter.toString(), taskClosed);
-			counter = counter.plusDays(1);
 		}
 		return result;
 	}
@@ -464,7 +486,10 @@ public class ProjectController {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(id);
 		DisplayProject result = new DisplayProject(project);
-		result.setDefaultAssignee(accSrv.findById(project.getDefaultAssigneeID()));
+		Account account = accSrv.findById(project.getDefaultAssigneeID());
+		if (account != null) {
+			result.setDefaultAssignee(new DisplayAccount(account));
+		}
 		return result;
 	}
 

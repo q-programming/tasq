@@ -59,13 +59,18 @@
 				data-placement="bottom"> <i class="fa fa-refresh"></i>
 			</a>
 		</c:if>
+			<a class="show_participants_btn btn btn-default a-tooltip pull-right" 
+				title="" data-placement="bottom" data-original-title="<s:message code="project.members"/>">
+					<i class="fa fa-users"></i>
+			</a>
 	</div>
 	<h3>[${project.projectId}] ${project.name}</h3>
 	${project.description}
 	<hr>
-	<c:set var="tasks_total">${TO_DO + ONGOING+ CLOSED+ BLOCKED}</c:set>
+	<c:set var="tasks_total">${TO_DO + ONGOING + COMPLETE + CLOSED + BLOCKED}</c:set>
 	<c:set var="tasks_todo">${TO_DO * 100 / tasks_total }</c:set>
 	<c:set var="tasks_ongoing">${ONGOING * 100 / tasks_total}</c:set>
+	<c:set var="tasks_complete">${COMPLETE *100 / tasks_total}</c:set>
 	<c:set var="tasks_closed">${CLOSED *100 / tasks_total}</c:set>
 	<c:set var="tasks_blocked">${BLOCKED*100 / tasks_total}</c:set>
 	<div class="progress">
@@ -82,7 +87,14 @@
 				<span>${ONGOING}&nbsp;<s:message code="task.state.ongoing" /></span>
 			</c:if>
 		</div>
-		<div class="progress-bar progress-bar-success a-tooltip"
+		<div class="progress-bar progress-bar-success a-tooltip" style="width: ${tasks_complete}%"
+			title="${COMPLETE}&nbsp;<s:message code="task.state.complete"/>">
+			<c:if test="${tasks_complete gt 10.0}">
+				<span>${COMPLETE}&nbsp;<s:message code="task.state.complete" /></span>
+			</c:if>
+		</div>
+		
+		<div class="progress-bar progress-bar-closed  a-tooltip"
 			style="width: ${tasks_closed}%"
 			title="${CLOSED}&nbsp;<s:message code="task.state.closed"/>">
 			<c:if test="${tasks_closed gt 10.0}">
@@ -98,8 +110,11 @@
 		</div>
 	</div>
 	<%----------CHART -----------%>
-	<div class="row" style="height: 300px; width: 90%; margin: 20px auto">
+	<div id="chart_divarea" class="row" style="height: 300px; width: 90%; margin: 20px auto">
 		<div id="chartdiv"></div>
+	</div>
+	<div id="no_events" style="text-align: center;padding: 20px;display:none">
+		No events
 	</div>
 		<div style="display: inherit; font-size: small; float: right">
 		<span id="moreEvents" class="clickable" data-all="false"><span id="moreEventsCheck"><i 
@@ -199,20 +214,14 @@
 		</div>
 	</div>
 </div>
-<%
-	pageContext.setAttribute("types", LogType.values());
-	pageContext.setAttribute("taskTypes", TaskType.values());
-%>
 <jsp:include page="../task/subtasks.jsp" />
+<jsp:include page="../other/events.jsp" />
 <script>
 var	plot;
 $(document).ready(function($) {
 	var currentPage = 0
-	taskURL = '<c:url value="/task/"/>';
-	apiurl = '<c:url value="/task/getSubTasks"/>';
-	small_loading_indicator = '<div id="small_loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br></div>';
-	loading_indicator = '<div id="loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></div>';
-	fetchWorkLogData(currentPage);
+	var projectID = '${project.projectId}';
+	fetchWorkLogData(currentPage, projectID);
 	printChart(false);
 	
 	$("#moreEvents").click(function() {
@@ -232,6 +241,8 @@ function printChart(all){
 	if(plot){
 		plot.destroy();
 	}
+	$("#chart_divarea").show('slow');
+	$("#no_events").hide('slow');
 	$("#chartdiv").append(loading_indicator);
 	projectId = '${project.projectId}';
 	$.get('<c:url value="/project/getChart"/>',{id:projectId,all:all},function(result){
@@ -248,6 +259,8 @@ function printChart(all){
 	    	$.each(result.closed, function(key,val){
 	    		closedData.push([key, val]);
 	    	});
+	    	if(createdData.length > 0 && closedData.length > 0)
+	    	{
 	    	plot = $.jqplot('chartdiv', [ createdData , closedData ], {
 	    		title : '<s:message code="task.created"/>/<s:message code="task.state.closed"/>',
 	            seriesDefaults: {
@@ -304,69 +317,10 @@ function printChart(all){
 			        show: false,
 			    }
 	    	});
-	});
-}
-
-function fetchWorkLogData(page) {
-	var projectID = '${project.projectId}';
-	var url = '<c:url value="/projectEvents"/>';
-	var avatarURL = '<c:url value="/../avatar/"/>';
-	var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
-	$("#eventsTable .projEvent").remove();
-	$("#eventsTable").append(loading_indicator);
-	$.get(url, {id : projectID,	page: page}, function(data) {
-		//console.log(data)
-		$("#eventsTable tr").remove();
-		printWorkLogNavigation(page, data);
-		var rows = "";
-		for ( var j = 0; j < data.content.length; j++) {
-			var row = '<tr class="projEvent"><td colspan="3">';
-			var content = data.content[j];
-			var timeLogged = '<div class="time-div">'+ content.time +'</div>';
-			var avatar = '<img data-src="holder.js/30x30" style="height: 30px; float: left; padding-right: 10px;" src="' + avatarURL + content.account.id +'.png"/>';
-			var account = content.account.name + " " + content.account.surname + " ";
-			var event = getEventTypeMsg(content.type);
-			var task = '';
-			if(content.task!=null){
-				task = '<a href="'+taskURL+content.task.id + '">[' + content.task.id +'] '+ content.task.name + '</a>';
-			}
-			var message = '';
-			if(content.message!=null && content.message!=''){
-				message ='<div class="quote">' + content.message + '</div>';
-			}
-			row+=timeLogged + avatar + account + event + task + message;
-			row+='</td></tr>';
-			rows+=row;
+		}else{
+			$("#chart_divarea").hide('slow');
+			$("#no_events").show('slow');
 		}
-		$("#eventsTable").append(rows);
 	});
-
 }
-function printWorkLogNavigation(page,data){
-	var options = {
-			bootstrapMajorVersion: 3,
-            currentPage: page+1,
-            totalPages: data.totalPages,
-            itemContainerClass: function (type, page, current) {
-                return (page === current) ? "active" : "pointer-cursor";
-            },
-            numberOfPages:10,
-            onPageChanged: function(e,oldPage,newPage){
-            	fetchWorkLogData(newPage-1);
-            }
-   	}
-	$("#eventsTable_pagination_top").bootstrapPaginator(options);
-	$("#eventsTable_pagination_bot").bootstrapPaginator(options);
-}
-
-function getEventTypeMsg(type){
-	switch(type){
-		<c:forEach items="${types}" var="enum_type">
-		case "${enum_type}":
-			return '<s:message code="${enum_type.code}"/> ';
-		</c:forEach>
-		default:
-			return 'not yet added ';
-	};
-};
 </script>

@@ -55,10 +55,10 @@ title="<s:message code="task.assignme"/>">
 </c:if> </i>
 </c:if>
 <c:if test="${not empty task.assignee}">
-<a ${link} class="a-tooltip"
+<a ${link} class="a-tooltip pull-right"
 href="<c:url value="/user/${task.assignee.username}"/>"
 title="${task.assignee}"><img data-src="holder.js/30x30"
-style="height: 30px; padding-right: 5px;"
+class="avatar small"
 src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />
 </a><c:if test="${task.state ne 'CLOSED'}}"><button class="btn btn-default assignToTask btn-xxs a-tooltip assign_me"
 title="<s:message code="task.assign"/>" data-toggle="modal" data-target="#assign_modal" 

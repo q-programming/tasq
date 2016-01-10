@@ -8,7 +8,7 @@
 	<div style="display: table">
 		<div id="avatar" style="border: 1px dashed; min-width: 110px; text-align: center;">
 			<img src="<c:url value="/../avatar/${account.id}.png"/>"
-				style="padding: 10px;"></img>
+				style="padding: 10px;border-radius:50%;"></img>
 		</div>
 		<div
 			style="display: table-cell; margin-left: 10px; padding-left: 20px">

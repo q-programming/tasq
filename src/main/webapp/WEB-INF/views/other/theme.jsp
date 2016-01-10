@@ -13,11 +13,14 @@ body {
 	${user.theme.font.cssFamily}	
 }
 .theme-text{
-	color: ${invcolor};
+	color: ${invcolor} !important;
+}
+.theme-inv-text{
+	color: ${color} !important;
 }
 
 a.theme {
-	color: ${invcolor};
+	color: ${invcolor} !important;
 }
 
 .caret.theme {
@@ -32,6 +35,9 @@ a.theme {
 	color: ${invcolor};
 	background-color: ${color};
 }
+.bg.theme{
+	background-color: ${color};
+}
 .bg-preview.theme {
     border: 1px dashed;
     display: table-cell;
@@ -43,7 +49,7 @@ a.theme {
 	border-color: ${invcolor};
 }
 
-div.navbar.navbar-fixed-top.theme {
+nav.navbar.navbar-fixed-top.theme {
 	background-color: ${color};
 }
 
@@ -109,9 +115,38 @@ span.badge.theme.zero {
 	color: ${invcolor};
 	background-color: ${color};
 }
+.nav-sidebar>.active>a, .nav-sidebar>.active>a:hover, .nav-sidebar>.active>a:focus
+	{
+	color: ${invcolor};
+	background-color: ${color};
+}
+.nav>li>a:focus, .nav>li>a:hover {
+    text-decoration: none;
+	color: ${invcolor} !important;
+	background-color: ${color} !important;
+}
+.nav>li.active>a:focus, .nav>li.active>a:hover {
+    text-decoration: none;
+    color: #555 !important;
+	background-color: white !important;
+    
+}
+.navbar-toggle {
+	border-color:  ${invcolor};
+}
+.navbar-toggle .icon-bar {
+	background:  ${invcolor};
+}
+.pagination>li.active>a{
+	color: ${invcolor} !important;
+	background-color: ${color} !important;
+}
 
 .table-hover>tbody>tr:hover>td, .table-hover>tbody>tr:hover>th {
 	background-color: rgba(${rgbcolor}, 0.1);
+}
+.table-hover>tbody>tr.bg-color:hover>td, .table-hover>tbody>tr.bg-color:hover>th {
+	background-color: rgb(${rgbcolor10});
 }
 
 span.tag.label.label-info.theme {
@@ -151,7 +186,7 @@ span.tag.label.label-info.theme {
 .back-to-top {
 	display: none;
 	position: fixed;
-	bottom: 20px;
+	bottom: 55px;
 	right: 20px;
 	color: ${invcolor};
 	text-decoration: none;
@@ -163,5 +198,34 @@ span.tag.label.label-info.theme {
 	text-decoration: none;
 	color: ${invcolor};
 	background-color: rgba(${rgbcolor}, 0.7);
+}
+.nav .open>a, .nav .open>a:focus, .nav .open>a:hover {
+    background-color: transparent;
+    
+}
+.header-time{
+	color: ${invcolor};
+	font-size: xx-large;
+}
+
+.form-control::-webkit-input-placeholder { color: ${invcolor}; }
+.form-control:-moz-placeholder { color: ${invcolor}; }
+.form-control::-moz-placeholder { color: ${invcolor}; }
+.form-control:-ms-input-placeholder { color: ${invcolor}; }
+
+.nav-search{
+	height: 52px;
+	background: ${color};
+	color: ${invcolor};
+	border-color: transparent;
+}
+.nav-search:FOCUS{
+	border-color: transparent;
+}
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+    border: 1px solid rgb(${rgbcolor10});
+    background: ${color} url("images/ui-bg_flat_75_428bca_40x100.png") 50% 50% repeat-x;
+    font-weight: normal;
+    color: ${invcolor};
 }
 </style>

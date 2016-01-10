@@ -26,16 +26,16 @@
 	<c:set var="ActiveSprint">${param.sprint}</c:set>
 </c:if>
 	
-<h3>[${project.projectId}] ${project}</h3>
+<h3>${project}</h3>
 <div class="white-frame" style="display: table; width: 100%;">
 	<div style="display: table-caption; margin-left: 10px;">
 		<ul class="nav nav-tabs" style="border-bottom: 0">
-			<li><a style="color: black"
+			<li><a 
 				href="<c:url value="/${project.projectId}/scrum/backlog"/>"><i class="fa fa-book"></i> Backlog</a></li>
-			<li><a style="color: black"
+			<li><a 
 				href="<c:url value="/${project.projectId}/scrum/board"/>"><i class="fa fa-list-alt"></i> <s:message
 						code="agile.board" /></a></li>
-			<li class="active"><a style="color: black" href="#"><i class="fa fa-line-chart"></i> <s:message
+			<li class="active"><a ><i class="fa fa-line-chart"></i> <s:message
 						code="agile.reports" /></a></li>
 		</ul>
 	</div>

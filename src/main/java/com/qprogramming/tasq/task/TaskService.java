@@ -13,19 +13,19 @@ import org.springframework.stereotype.Service;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.agile.Release;
 import com.qprogramming.tasq.agile.Sprint;
+import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.projects.Project;
 
 @Service
 public class TaskService {
 
-	@Value("${home.directory}")
-	private String tasqRootDir;
-
 	private TaskRepository taskRepo;
+	private AppService appSrv;
 
 	@Autowired
-	public TaskService(TaskRepository taskRepo) {
+	public TaskService(TaskRepository taskRepo, AppService appSrv) {
 		this.taskRepo = taskRepo;
+		this.appSrv = appSrv;
 	}
 
 	public Task save(Task task) {
@@ -121,7 +121,8 @@ public class TaskService {
 	}
 
 	public String getTaskDir(Task task) {
-		return tasqRootDir + File.separator + task.getProject().getProjectId() + File.separator + task.getId();
+		return appSrv.getProperty(AppService.TASQROOTDIR) + File.separator + task.getProject().getProjectId()
+				+ File.separator + task.getId();
 	}
 
 	public List<Task> finAllById(List<String> taskIDs) {

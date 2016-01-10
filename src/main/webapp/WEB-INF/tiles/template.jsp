@@ -26,9 +26,16 @@
 	$.widget.bridge('uitooltip', $.ui.tooltip);
 </script>
 <%-- BOOTSTRAP --%>
-<script src="<c:url value="/resources/js/bootstrap.min.js" />"></script>
-<link href="<c:url value="/resources/css/bootstrap.min.css" />"
-	rel="stylesheet" media="screen" />
+<%-- <link href="<c:url value="/resources/css/bootstrap.min.css" />" --%>
+<!-- 	rel="stylesheet" media="screen" /> -->
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+	integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+	crossorigin="anonymous"></script>
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+	integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"
+	crossorigin="anonymous">
 <link href="<c:url value="/resources/css/core.css" />" rel="stylesheet"
 	media="screen" />
 <%-- FONT AWSOME --%>
@@ -58,6 +65,7 @@
     <![endif]-->
 <%-------THEME ------%>
 <security:authorize access="!isAuthenticated()">
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
 	<link href="<c:url value="/resources/css/theme.css" />"
 		rel="stylesheet" media="screen" />
 </security:authorize>
@@ -73,56 +81,74 @@
 </security:authorize>
 </head>
 <body>
+	<!-- 	Header -->
 	<tiles:insertAttribute name="header" defaultValue="" />
 	<!-- Page content -->
-	<div class="container">
-		<tiles:insertAttribute name="body" defaultValue="" />
-	</div>
-	<!-- End of page content -->
-	<tiles:insertAttribute name="footer" defaultValue="" />
-	<a href="#" class="back-to-top a-tooltip" title="<s:message code="main.backToTop"/>"><i class="fa fa-2x fa-angle-up"></i></a>
-	<%
-		/* Show a message. See support.web package */
-	%>
-	<div id="messages_div">
-		<c:if test="${not empty message}">
-			<c:choose>
-				<c:when test="${message.type == 'WARNING'}">
-					<c:set value="" var="alertClass" />
-				</c:when>
-				<c:otherwise>
-					<c:set value="alert-${fn:toLowerCase(message.type)}"
-						var="alertClass" />
-				</c:otherwise>
-			</c:choose>
-			<div class="alert ${alertClass} fade in"
-				style="position: fixed; bottom: 0px; width: 100%;">
-				<button type="button" class="close" data-dismiss="alert">&times;</button>
-				<%
-					/* Display a message by its code. If the code was not found, it will be displayed as default text */
-				%>
-				<s:message code="${message.message}" arguments="${message.args}"
-					text="${message.message}" />
+	<div class="container-fluid">
+		<div class="row">
+			<security:authorize access="isAuthenticated()">
+				<!-- 	Sidebar -->
+				<div class="col-sm-3 col-md-2 sidebar">
+					<tiles:insertAttribute name="sidebar" defaultValue="" />
+				</div>
+				<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+					<tiles:insertAttribute name="body" defaultValue="" />
+				</div>
+
+			</security:authorize>
+			<security:authorize access="!isAuthenticated()">
+				<tiles:insertAttribute name="body" defaultValue="" />
+			</security:authorize>
+			<!-- End of page content -->
+			<tiles:insertAttribute name="footer" defaultValue="" />
+			<a href="#" class="back-to-top a-tooltip"
+				title="<s:message code="main.backToTop"/>"><i
+				class="fa fa-2x fa-angle-up"></i></a>
+			<%
+				/* Show a message. See support.web package */
+			%>
+			<div id="messages_div">
+				<c:if test="${not empty message}">
+					<c:choose>
+						<c:when test="${message.type == 'WARNING'}">
+							<c:set value="" var="alertClass" />
+						</c:when>
+						<c:otherwise>
+							<c:set value="alert-${fn:toLowerCase(message.type)}"
+								var="alertClass" />
+						</c:otherwise>
+					</c:choose>
+					<div class="alert ${alertClass} fade in alert-overlay">
+						<button type="button" class="close" data-dismiss="alert">&times;</button>
+						<%
+							/* Display a message by its code. If the code was not found, it will be displayed as default text */
+						%>
+						<s:message code="${message.message}" arguments="${message.args}"
+							text="${message.message}" />
+					</div>
+				</c:if>
 			</div>
-		</c:if>
+		</div>
 	</div>
 </body>
 <script>
-$(document).ready(function () {
-	  $('.back-to-top').hide();
-	  $(window).scroll(function () {
-	  if ($(this).scrollTop() > 200) {
-	    $('.back-to-top').fadeIn();
-	  } else {
-	    $('.back-to-top').fadeOut();
-	  }
+	$(document).ready(function() {
+		$('.back-to-top').hide();
+		$(window).scroll(function() {
+			if ($(this).scrollTop() > 200) {
+				$('.back-to-top').fadeIn();
+			} else {
+				$('.back-to-top').fadeOut();
+			}
+		});
+
+		$('.back-to-top').click(function() {
+			$('html, body').animate({
+				scrollTop : 0
+			}, 800);
+			return false;
+		});
 	});
-	 
-	$('.back-to-top').click(function () {
-	  $('html, body').animate({ scrollTop: 0 }, 800);
-	  return false;
-	  });
-});
 	$(".alert").alert();
 	window.setTimeout(function() {
 		$(".alert-success").alert('close');
@@ -140,6 +166,5 @@ $(document).ready(function () {
 		var url = '<a href="<c:url value="/settings" />">' + settings + '</a>'
 		showWarning(msg + url);
 	}
-	
 </script>
 </html>

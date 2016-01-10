@@ -3,7 +3,7 @@
 <head>
 <meta name="viewport" content="width=device-width">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Password reset</title>
+<title>Zaproszenie do aplikacji Tasker</title>
 <style>
 * {
 	margin: 0;
@@ -79,8 +79,8 @@ table.footer-wrap a {
 }
 
 .header {
-	background-color: ${account.theme.color};
-	color: ${account.theme.invColor};
+	background-color: ${theme.color};
+	color: ${theme.invColor};
 	padding: 5px;
 	font-weight: bold;
 	vertical-align: middle;
@@ -172,27 +172,28 @@ table.worklog_table td {
 	padding: 10px;
 }
 </style>
+<style type="text/css"></style>
 </head>
 <body bgcolor="#f6f6f6">
 	<div class="content">
-		<div class="header ${account.theme}">
-			<img src='cid:logo' style="height:50px; padding:2px">&nbsp;Password reset
+		<div class="header">
+			<img src='cid:logo' style="height:50px; padding:2px" >&nbsp;
+			Zaproszenie do aplikacji Tasker
 		</div>
 		<table class="main">
 			<tbody>
 				<tr>
-					<td>
-						<p>Hello ${account} ,</p>
+					<td valign="top" style="vertical-align: top; width:70px">
+						<img src='cid:avatar' style="height:50px; padding:2px">
+					</td> 
+					<td class="text">
 						<p>
-							This email (${account.email}) has been used to reset password in TasQ application
-							</br>In order to set new password please click link below. 
+							<a href="mailto:${curAccount.email}">${curAccount}</a> zaprosił Cię do aplikacji Tasker
 						</p>
-						<p>Reset token will be valid for 12h</p>
-						<p></p>
 						<p>
-							<a href="${link}" target="_blank">${link}</a>
+							Tasker to aplikacja do śledzenia postępu prac w projekcie używajajac estymat czasowych lub w metodologi Agile.<br>
+							Możesz zarejestrowac się klikając <a href="${application}/signup">tutaj</a>, lub zignorowac tą wiadomość jeżeli nie jesteś zainteresowany
 						</p>
-						<p>If you have not tried to reset password, please ignore this e-mail.</p>
 					</td>
 				</tr>
 			</tbody>
@@ -211,8 +212,8 @@ table.worklog_table td {
 								<tr>
 									<td align="center">
 										<p>
-											This is automated e-mail sent from <a href="${application}" target="_blank">${application}</a>.
-											Please do not reply.
+											To jest automatyczna wiadomość wysłana z <a href="${application}" target="_blank">${application}</a>.
+											Proszę nie odpowiadać
 										</p>
 									</td>
 								</tr>

@@ -627,9 +627,9 @@
 							:
 						</div>
 						<div style="display: table-cell">
-							<img data-src="holder.js/20x20"
-								style="height: 20px; padding-right: 5px;"
-								src="<c:url value="/../avatar/${task.owner.id}.png"/>" /><a
+							<img data-src="holder.js/30x30"
+								class="avatar small"
+								src="<c:url value="/../avatar/${task.owner.id}.png"/>" />&nbsp;<a
 								href="<c:url value="/user/${task.owner.username}"/>">${task.owner}</a>
 						</div>
 					</div>
@@ -643,9 +643,8 @@
 								<i><s:message code="task.unassigned" /></i>
 							</c:if>
 							<c:if test="${not empty task.assignee}">
-								<img data-src="holder.js/20x20" style="height: 20px;"
-									src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />
-								<a href="<c:url value="/user/${task.assignee.username}"/>">${task.assignee}</a>
+								<img data-src="holder.js/30x30" class="avatar small"
+									src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />&nbsp;<a href="<c:url value="/user/${task.assignee.username}"/>">${task.assignee}</a>
 							</c:if>
 							<c:if test="${project_participant}">
 								<span class="btn btn-default btn-sm a-tooltip assignToTask"
@@ -732,14 +731,17 @@
 			<%--------------------------------- Comments -----------------------------%>
 			<div id="comments" class="tab-pane fade in active">
 				<table class="table table-hover button-table">
-					<thead><th id="sorter" class="time-header clickable"><span id="indicator"><i class="fa fa-caret-down"></i></span>&nbsp;Date</th></thead>
+					<thead><th style="width:30px"></th><th></th><th id="sorter" class="time-header clickable"><span id="indicator"><i class="fa fa-caret-down"></i></span>&nbsp;Date</th></thead>
 					<c:forEach items="${comments}" var="comment">
 						<tr id="c${comment.id}" data-date="${comment.date}">
 							<td>
-								<div>
-									<img data-src="holder.js/30x30"
-										style="height: 30px; float: left; padding-right: 10px;"
+							<img data-src="holder.js/30x30"
+										class="avatar small"
 										src="<c:url value="/../avatar/${comment.author.id}.png"/>" />
+							</td>
+							<td colspan="2">
+								<div>
+									
 									<a href="<c:url value="/user/${comment.author.username}"/>">${comment.author}</a>
 									<div class="time-div">${comment.date}</div>
 								</div> <%-- Comment buttons --%>
@@ -1078,12 +1080,17 @@ $(document).ready(function($) {
 			
 			function getWorklogs(){
 				var loading_indicator = '<tr id="loading" class="centerPadded"><td colspan="3"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td></tr>';
-				var url ='<c:url value="/task/getWorklogs"/>'
+				var url ='<c:url value="/task/getWorklogs"/>';
+				var accountURL = '<c:url value="/user/"/>';
+				var avatarURL = '<c:url value="/../avatar/"/>';
+
 				$("#taskworklogs").append(loading_indicator);
 				$.get(url ,{taskID:taskID},function(result){
 					$.each(result, function(key,worklog){
 						$("#loading").remove();
-						var account = worklog.account.name + ' ' +worklog.account.surname;
+						
+						var account = '<a href="' + accountURL + worklog.account.username + '">'+ worklog.account.name + ' ' +worklog.account.surname + '</a>';
+						var avatar = '<img data-src="holder.js/30x30" class="avatar small" src="' + avatarURL + worklog.account.id +'.png"/>';
 						var type = getEventTypeMsg(worklog.type);
 						var message = "";
 						if (worklog.message != ""){
@@ -1093,13 +1100,13 @@ $(document).ready(function($) {
 						<security:authorize access="hasRole('ROLE_ADMIN')">
 							var delurl ='<c:url value="/task/delWorklog?id="/>';
 							delbtn = '<div class="buttons_panel" style="float: right;">'
-									+'<a class="a-tooltip delete_btn" style="color:gray" href="' +delurl + worklog.id + '"'
+									+'<a class="delete_btn a-tooltip" style="color: #555;" href="' +delurl + worklog.id + '"'
 									+' title = "<s:message code="task.worklog.delete"/>"'
 									+' data-lang="${pageContext.response.locale}"'
-									+' data-msg="<s:message code="task.delete.confirm"/>" >' 
+									+' data-msg="<s:message code="task.worklog.delete.confirm"/>" >' 
 									+'<i class="fa fa-trash-o"></i></a></div>';
 						</security:authorize>
-						var row = '<tr><td><div style="font-size: smaller; color: dimgray;">' + account + ' ' + type + '<div class="time-div">' + worklog.timeLogged + '</div> ' + delbtn + message 
+						var row = '<tr><td>'+ avatar +'</td><td style="font-size: smaller; color: dimgray;width: 100%;">' + account + '&nbsp;'+ type + '<div class="time-div">' + worklog.timeLogged + '</div> ' + delbtn + message 
 								  + '</td></tr>';
 						$("#taskworklogs").append(row);	  
 						$(".a-tooltip").tooltip();
@@ -1125,8 +1132,7 @@ $(document).ready(function($) {
 					$("#watch").attr('data-original-title',msg + current + watchers);
 				});
 			}
-			
-$(document).on("click",".delete_btn",function(e) {
+$('body').on('click', 'a.delete_btn', function(e) {			
 		var msg = '<p style="text-align:center"><i class="fa fa-lg fa-exclamation-triangle" style="display: initial;"></i>&nbsp'
 					+ $(this).data('msg') + '</p>';
 		var lang = $(this).data('lang');

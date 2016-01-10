@@ -5,72 +5,7 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <div class="row white-frame">
-	<div id="menu" class="col-md-2 col-sm-2 col-lg-2" role="complementary">
-		<nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix">
-			<ul class="nav bs-docs-sidenav">
-				<li><a href="#about">About Tasker</a></li>
-				<li><a href="#main">Main menu</a>
-					<ul class="nav">
-						<li><a href="#personal">Personal menu</a></li>
-						<li><a href="#settings">User Settings menu</a></li>
-						<li><a href="#events">Events</a></li>
-						<li><a href="#watch">Watching</a></li>
-					</ul></li>
-				<li><a href="#users">Users</a></li>
-				<li><a href="#proj"><s:message code="project.projects"
-							text="Projects" /></a>
-					<ul class="nav">
-						<li><a href="#proj-view">Browsing all projects</a></li>
-						<li><a href="#proj-details">View projects details</a></li>
-						<li><a href="#proj-create">Creating projects</a></li>
-						<li><a href="#proj-edit">Managing projects</a></li>
-					</ul></li>
-				<li><a href="#task"><s:message code="task.tasks"
-							text="Tasks" /></a>
-					<ul class="nav">
-						<li><a href="#task-view">Browsing all tasks</a></li>
-						<li><a href="#task-details">View task details</a></li>
-						<li><a href="#task-create">Creating tasks</a></li>
-						<li><a href="#task-edit">Editing tasks</a></li>
-						<li><a href="#task-remove">Removing Tasks</a>
-						<li><a href="#task-import">Importing tasks</a></li>
-						<li><a href="#task-export">Exporting tasks</a></li>
-						<li><a href="#task-work">Working with tasks</a></li>
-						<li><a href="#task-subtask">Subtasks</a></li>
-					</ul></li>
-				<li><a href="#agile"><s:message code="agile.agile"
-							text="Agile" /></a>
-					<ul class="nav">
-						<li><a href="#scrum">SCRUM</a>
-							<ul class="nav">
-								<li><a href="#scrum-backlog">Backlog</a></li>
-								<li><a href="#scrum-board">Board</a></li>
-								<li><a href="#scrum-reports">Reports</a></li>
-							</ul></li>
-						<li><a href="#kanban">Kanban</a>
-							<ul class="nav">
-								<li><a href="#kanban-board">Board</a></li>
-								<li><a href="#kanban-reports">Reports</a></li>
-							</ul></li>
-					</ul></li>
-
-				<security:authorize access="hasRole('ROLE_ADMIN')">
-					<li><a href="#admin">Administration</a>
-						<ul class="nav">
-							<li><a href="#a_users">Users</a></li>
-							<li><a href="#a_projects">Projects</a>
-							<li><a href="#a_roles">Roles</a></li>
-							<li><a href="#a_manage">Manage application</a>
-								<ul class="nav">
-									<li><a href="#a_logo">Changing logo</a></li>
-									<li><a href="#a_theme">Themes</a></li>
-								</ul></li>
-							<li><a href="#a_manage_task">Manage tasks</a></li>
-						</ul></li>
-				</security:authorize>
-			</ul>
-		</nav>
-	</div>
+	
 	<div class="col-md-10 col-sm-10 col-lg-10" role="main">
 		<a class="anchor" id="top"></a>
 		<div>
@@ -79,8 +14,8 @@
 				<img src="<c:url value="/resources/img/logo.png"/>"
 					style="height: 50px; padding: 5px;"></img>Tasker
 			</h2>
-			<p style="text-align:center">v.${version}</p>
-			
+			<p style="text-align: center">v.${version}</p>
+
 			<h3>About Tasker</h3>
 			<p>
 				"Tasker" is application to track progress within project using
@@ -635,7 +570,8 @@
 						ID ] Task name</b></li>
 				<li><a class="anchor" id="task-2"></a><b>Current task
 						status</b> - in order to change this status click <span class="caret"></span>
-					and choose new one</li>
+					and choose new one</li> More about
+				<b><a href="#taskstatus">task statuses</a></b>
 				<li><a class="anchor" id="task-3"></a><b>Task priority</b> - to
 					change click <span class="caret"></span> and choose new</li>
 				<li><a class="anchor" id="task-4"></a><b>Tags</b> - to add new
@@ -1043,6 +979,22 @@
 				applies).<br>The remaining time can never be less than 0.<br>If
 				more work was logged in task, it will be marked on task detials
 				screen accordingly.
+			</p>
+			<a class="anchor" id="taskstatus"></a>
+			<h4>Task status</h4>
+			<p>Tasks can be in following statuses:
+			<ul>
+				<li><t:state state="TO_DO" /> - new task, which can be taken
+					by developer</li>
+				<li><t:state state="ONGOING" /> - some work has been started
+					on this task.</li>
+				<li><t:state state="BLOCKED" /> - task on hold, because one
+					some issues are preventing from continuing work on it</li>
+				<li><t:state state="COMPLETE" /> - task has been completed,
+					only some review or testing left to be done</li>
+				<li><t:state state="CLOSED" /> - finished task, all work done</li>
+			</ul>
+
 			</p>
 			<h4>Timer</h4>
 			<p>
@@ -1461,8 +1413,10 @@
 				<a class="anchor" id="a_manage"></a>
 				<h3>Manage application</h3>
 				<p>
-					There are some modification that can be set when application is
-					deployed. Application logo and themes can be changed anytime by any
+					Tasker comes with some predefines settings that are included in
+					<code>tasq.war</code>
+					which should be overrides while setting application. Application
+					logo and themes and e-mail settings can be changed anytime by any
 					administrator.<br> To enter application management use admin
 					<button class="btn btn-default btn-xs" type="button">
 						<i class="fa fa-wrench"></i>
@@ -1505,6 +1459,34 @@
 					change logo too often
 
 				</p>
+				<a class="anchor" id="a_url"></a>
+				<h4>Application URL</h4>
+				<p>
+					URL of application is used in all e-mails sent by application (
+					like events or account approving ). It must be valid url, otherwise
+					e-mails will be sent with wrong url's to task, account confirmation
+					etc. In order to obtain current url from browser click <a
+						class="btn btn-default btn-sm clickable"><i
+						class="fa fa-arrow-down"></i>&nbsp;Get url</a> button
+				</p>
+				<a class="anchor" id="a_dir"></a>
+				<h4>Application Directory</h4>
+				<p>Default directory where all files are stored can be changed
+					in this section. When changing to new path, application will try to
+					move all currently existing files to new location Please ensure
+					that application has correct privileges to access new directory</p>
+				<p>
+					<i class="fa fa-exclamation-circle"></i>&nbsp; Do not change
+					application directory wheb application is live and used by users,
+					as it might produce some errors for users currently using it
+				</p>
+
+				<a class="anchor" id="a_email"></a>
+				<h4>Email settings</h4>
+				<p>In this section , you can set all Email related settings.
+					SMTP host name, port username and password. Default value points to
+					localhost server on port 25 without user and password.</p>
+
 				<a class="anchor" id="a_theme"></a>
 				<h4>Themes</h4>
 				<p>
@@ -1590,6 +1572,73 @@
 				href="http://q-programming.pl/">http://q-programming.pl/</a> and is
 			under GNU GPL License.
 		</div>
+	</div>
+	<div id="menu" class="col-md-2 col-sm-2 col-lg-2" role="complementary">
+		<nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix">
+			<ul class="nav bs-docs-sidenav">
+				<li><a href="#about">About Tasker</a></li>
+				<li><a href="#main">Main menu</a>
+					<ul class="nav">
+						<li><a href="#personal">Personal menu</a></li>
+						<li><a href="#settings">User Settings menu</a></li>
+						<li><a href="#events">Events</a></li>
+						<li><a href="#watch">Watching</a></li>
+					</ul></li>
+				<li><a href="#users">Users</a></li>
+				<li><a href="#proj"><s:message code="project.projects"
+							text="Projects" /></a>
+					<ul class="nav">
+						<li><a href="#proj-view">Browsing all projects</a></li>
+						<li><a href="#proj-details">View projects details</a></li>
+						<li><a href="#proj-create">Creating projects</a></li>
+						<li><a href="#proj-edit">Managing projects</a></li>
+					</ul></li>
+				<li><a href="#task"><s:message code="task.tasks"
+							text="Tasks" /></a>
+					<ul class="nav">
+						<li><a href="#task-view">Browsing all tasks</a></li>
+						<li><a href="#task-details">View task details</a></li>
+						<li><a href="#task-create">Creating tasks</a></li>
+						<li><a href="#task-edit">Editing tasks</a></li>
+						<li><a href="#task-remove">Removing Tasks</a>
+						<li><a href="#task-import">Importing tasks</a></li>
+						<li><a href="#task-export">Exporting tasks</a></li>
+						<li><a href="#task-work">Working with tasks</a></li>
+						<li><a href="#task-subtask">Subtasks</a></li>
+					</ul></li>
+				<li><a href="#agile"><s:message code="agile.agile"
+							text="Agile" /></a>
+					<ul class="nav">
+						<li><a href="#scrum">SCRUM</a>
+							<ul class="nav">
+								<li><a href="#scrum-backlog">Backlog</a></li>
+								<li><a href="#scrum-board">Board</a></li>
+								<li><a href="#scrum-reports">Reports</a></li>
+							</ul></li>
+						<li><a href="#kanban">Kanban</a>
+							<ul class="nav">
+								<li><a href="#kanban-board">Board</a></li>
+								<li><a href="#kanban-reports">Reports</a></li>
+							</ul></li>
+					</ul></li>
+
+				<security:authorize access="hasRole('ROLE_ADMIN')">
+					<li><a href="#admin">Administration</a>
+						<ul class="nav">
+							<li><a href="#a_users">Users</a></li>
+							<li><a href="#a_projects">Projects</a>
+							<li><a href="#a_roles">Roles</a></li>
+							<li><a href="#a_manage">Manage application</a>
+								<ul class="nav">
+									<li><a href="#a_logo">Changing logo</a></li>
+									<li><a href="#a_dir">Changing main directory</a></li>
+									<li><a href="#a_theme">Themes</a></li>
+								</ul></li>
+							<li><a href="#a_manage_task">Manage tasks</a></li>
+						</ul></li>
+				</security:authorize>
+			</ul>
+		</nav>
 	</div>
 </div>
 <script src="<c:url value="/resources/js/imageMapResizer.min.js" />"></script>

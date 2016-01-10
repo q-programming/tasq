@@ -20,6 +20,8 @@ import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
+import com.qprogramming.tasq.manage.AppService;
+
 @Configuration
 public class MailMail {
 
@@ -57,19 +59,21 @@ public class MailMail {
 	public static final int REGISTER = 3;
 	public static final int OTHER = -1;
 
-	private static final String TASQ = "tasq@tasq.qprogramming.pl";
+	private static final String TASQ = "tasq@";
 	private static final String TASQ_PERSONAL = "Tasker";
-	private static final String TASQ_REGISTER = "registration@tasq.qprogramming.pl";
+	private static final String TASQ_REGISTER = "registration@";
 	private static final String TASQ__REGISTER_PERSONAL = "Registration at Tasker";
-	private static final String NOTIFICATION_TASQ = "notification@tasq.qprogramming.pl";
+	private static final String NOTIFICATION_TASQ = "notification@";
 	private static final String NOTIFICATION_TASQ_PERSONAL = "Tasker notifier";
-	private static final String MESSAGE_TASQ = "messages@tasq.com";
+	private static final String MESSAGE_TASQ = "messages@";
 	private static final String MESSAGE_TASQ_PERSONAL = "Tasker messenger";
-	private static final String PROJECT_TASQ = "projects@tasq.qprogramming.pl";
+	private static final String PROJECT_TASQ = "projects@";
 	private static final String PROJECT_TASQ_PERSONAL = "Tasker projects";
 
 	@Autowired
 	private MailSender mailSender;
+	@Autowired
+	private AppService appSrv;
 
 	@Bean
 	public MailMail mailMail() {
@@ -79,20 +83,28 @@ public class MailMail {
 	}
 
 	@Bean
-	public MailSender mailSender() {
-		jmsi = new JavaMailSenderImpl();
-		jmsi.setHost(host);
-		jmsi.setPort(Integer.parseInt(port));
-		jmsi.setUsername(username);
-		jmsi.setPassword(pass);
-
-		Properties javaMailProperties = new Properties();
-		javaMailProperties.setProperty("mail.smtp.auth", smtpAuth);
-		javaMailProperties.setProperty("mail.smtp.starttls.enable", smtpStarttls);
-		jmsi.setJavaMailProperties(javaMailProperties);
-		mailSender = jmsi;
+	@Autowired
+	public MailSender mailSender(AppService appSrv) {
+		this.appSrv = appSrv;
+		initMailSender();
 		return mailSender;
 
+	}
+
+	/**
+	 * Initialize mail sender with properties form DB/properties file
+	 */
+	public void initMailSender() {
+		jmsi = new JavaMailSenderImpl();
+		jmsi.setHost(appSrv.getProperty(AppService.EMAIL_HOST));
+		jmsi.setPort(Integer.parseInt(appSrv.getProperty(AppService.EMAIL_PORT)));
+		jmsi.setUsername(appSrv.getProperty(AppService.EMAIL_USERNAME));
+		jmsi.setPassword(appSrv.getProperty(AppService.EMAIL_PASS));
+		Properties javaMailProperties = new Properties();
+		javaMailProperties.setProperty("mail.smtp.auth", appSrv.getProperty(AppService.EMAIL_SMTPAUTH));
+		javaMailProperties.setProperty("mail.smtp.starttls.enable", appSrv.getProperty(AppService.EMAIL_SMTPSTARTTLS));
+		jmsi.setJavaMailProperties(javaMailProperties);
+		mailSender = jmsi;
 	}
 
 	public void setMailSender(MailSender mailSender) {
@@ -111,22 +123,23 @@ public class MailMail {
 	public boolean sendMail(int type, String to, String subject, String msg, Map<String, Resource> resources) {
 		try {
 			MimeMessage message = ((JavaMailSenderImpl) mailSender).createMimeMessage();
-			MimeMessageHelper helper = new MimeMessageHelper(message, true, encoding);
+			MimeMessageHelper helper = new MimeMessageHelper(message, true,
+					appSrv.getProperty(AppService.EMAIL_ENCODING));
 			switch (type) {
 			case NOTIFICATION:
-				helper.setFrom(NOTIFICATION_TASQ, NOTIFICATION_TASQ_PERSONAL);
+				helper.setFrom(domain(NOTIFICATION_TASQ), NOTIFICATION_TASQ_PERSONAL);
 				break;
 			case MESSAGE:
-				helper.setFrom(MESSAGE_TASQ, MESSAGE_TASQ_PERSONAL);
+				helper.setFrom(domain(MESSAGE_TASQ), MESSAGE_TASQ_PERSONAL);
 				break;
 			case PROJECT:
-				helper.setFrom(PROJECT_TASQ, PROJECT_TASQ_PERSONAL);
+				helper.setFrom(domain(PROJECT_TASQ), PROJECT_TASQ_PERSONAL);
 				break;
 			case REGISTER:
-				helper.setFrom(TASQ_REGISTER, TASQ__REGISTER_PERSONAL);
+				helper.setFrom(domain(TASQ_REGISTER), TASQ__REGISTER_PERSONAL);
 				break;
 			default:
-				helper.setFrom(TASQ, TASQ_PERSONAL);
+				helper.setFrom(domain(TASQ), TASQ_PERSONAL);
 				break;
 			}
 			helper.setTo(to);
@@ -157,5 +170,9 @@ public class MailMail {
 
 	public void setDefaultLang(String defaultLang) {
 		this.defaultLang = defaultLang;
+	}
+
+	private String domain(String var) {
+		return var + appSrv.getProperty(AppService.EMAIL_DOMAIN);
 	}
 }

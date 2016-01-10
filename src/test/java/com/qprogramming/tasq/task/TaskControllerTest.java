@@ -40,6 +40,7 @@ import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.events.EventsService;
+import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.ResultData;
@@ -82,6 +83,8 @@ public class TaskControllerTest {
 	@Mock
 	private WorkLogService wrkLogSrv;
 	@Mock
+	private AppService appSrv;
+	@Mock
 	private CommentsRepository commRepoMock;
 	@Mock
 	private EventsService eventsSrvMock;
@@ -121,7 +124,7 @@ public class TaskControllerTest {
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
-		taskSrv = new TaskService(taskRepoMock);
+		taskSrv = new TaskService(taskRepoMock, appSrv);
 		taskCtr = new TaskController(taskSrv, projSrvMock, accountServiceMock, wrkLogSrv, msgMock, sprintSrvMock,
 				taskLinkSrvMock, commRepoMock, tagsRepoMock, watchSrvMock, eventSrvMock);
 	}
@@ -596,16 +599,11 @@ public class TaskControllerTest {
 		Project project = createProject(1L);
 		Task task = createTask(TASK_NAME, 1, project);
 		when(taskRepoMock.findById(TASK_ID)).thenReturn(task);
-		when(projSrvMock.canEdit(project)).thenReturn(true);
+		when(projSrvMock.canEdit(project)).thenReturn(false);
 		testAccount.setRole(Roles.ROLE_VIEWER);
+		ResultData data = taskCtr.changeState(TASK_ID, TaskState.COMPLETE, null, null, null);
+		Assert.assertEquals(ResultData.ERROR, data.code);
 		boolean catched = false;
-		try {
-			taskCtr.changeState(TASK_ID, null, null, null, null);
-		} catch (TasqAuthException e) {
-			catched = true;
-		}
-		Assert.assertTrue(TASQ_AUTH_MSG, catched);
-		catched = false;
 		try {
 			taskCtr.changeStoryPoints(TASK_ID, 2);
 		} catch (TasqAuthException e) {

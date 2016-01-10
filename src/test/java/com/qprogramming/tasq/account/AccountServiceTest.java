@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.qprogramming.tasq.config.ResourceService;
 import com.qprogramming.tasq.mail.MailMail;
+import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.test.MockSecurityContext;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -51,6 +52,8 @@ public class AccountServiceTest {
 	private MailMail mailerMock;
 	@Mock
 	private PasswordEncoder encoderMock;
+	@Mock
+	private AppService appSrvMock;
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -59,7 +62,8 @@ public class AccountServiceTest {
 
 	@Before
 	public void setUp() {
-		accountSrv = new AccountService(accRepoMomck, msgMock, velocityMock, resourceMock, mailerMock, encoderMock);
+		accountSrv = new AccountService(accRepoMomck, msgMock, velocityMock, resourceMock, mailerMock, encoderMock,
+				appSrvMock);
 		testAccount = new Account(EMAIL, "", USERNAME, Roles.ROLE_ADMIN);
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);

@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -20,6 +21,7 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.events.Event;
 import com.qprogramming.tasq.events.EventsService;
+import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.Utils;
@@ -27,6 +29,7 @@ import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
+import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
 
 @Controller
 public class HomeController {
@@ -34,23 +37,20 @@ public class HomeController {
 	private TaskService taskSrv;
 	private ProjectService projSrv;
 	private EventsService eventSrv;
-
-	@Value("${home.directory}")
-	private String appHomeDir;
+	private AppService appSrv;
 
 	@Value("${skip.landing.page}")
 	private String skipLandingPage;
 
-	@Value("1.0.1")
+	@Value("1.1.0")
 	private String version;
 
 	@Autowired
-	public HomeController(TaskService taskSrv, ProjectService projSrv) {
+	public HomeController(TaskService taskSrv, ProjectService projSrv, AppService appSrv) {
 		this.taskSrv = taskSrv;
 		this.projSrv = projSrv;
+		this.appSrv = appSrv;
 	}
-
-	int week = 7 * 24 * 60 * 60 * 1000;
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String index(Account account, Model model) {
@@ -70,16 +70,10 @@ public class HomeController {
 			for (Project project : usersProjects) {
 				allTasks.addAll(taskSrv.findAllByProject(project));
 			}
-			List<Task> dueTasks = new LinkedList<Task>();
 			List<Task> currentAccTasks = new LinkedList<Task>();
 			List<Task> unassignedTasks = new LinkedList<Task>();
 			for (Task task : allTasks) {
 				TaskState state = (TaskState) task.getState();
-				if (task.getRawDue_date() != null
-						&& (task.getRawDue_date().getTime() - System.currentTimeMillis() < week)
-								& !TaskState.CLOSED.equals(state)) {
-					dueTasks.add(task);
-				}
 				if (task.getAssignee() == null & !TaskState.CLOSED.equals(state)) {
 					unassignedTasks.add(task);
 				}
@@ -87,13 +81,10 @@ public class HomeController {
 					currentAccTasks.add(task);
 				}
 			}
-			Collections.sort(dueTasks, new TaskSorter(TaskSorter.SORTBY.DUE_DATE, false));
 			Collections.sort(currentAccTasks, new TaskSorter(TaskSorter.SORTBY.PRIORITY, true));
 			Collections.sort(unassignedTasks, new TaskSorter(TaskSorter.SORTBY.PRIORITY, true));
-
 			model.addAttribute("myTasks", currentAccTasks);
 			model.addAttribute("unassignedTasks", unassignedTasks);
-			model.addAttribute("dueTasks", dueTasks);
 			return "homeSignedIn";
 		}
 	}
@@ -116,7 +107,7 @@ public class HomeController {
 		// }
 		// }
 		model.addAttribute("version", version);
-		model.addAttribute("projHome", appHomeDir);
+		model.addAttribute("projHome", appSrv.getProperty(AppService.TASQROOTDIR));
 		return "help/" + lang;
 	}
 

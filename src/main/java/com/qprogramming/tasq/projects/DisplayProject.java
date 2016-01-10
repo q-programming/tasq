@@ -5,6 +5,7 @@ import java.util.Date;
 import org.springframework.beans.BeanUtils;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.projects.Project.AgileType;
 import com.qprogramming.tasq.task.TaskPriority;
 import com.qprogramming.tasq.task.TaskType;
@@ -21,7 +22,7 @@ public class DisplayProject {
 	private AgileType agile;
 	private Boolean timeTracked = false;
 	private Long defaultAssigneeID;
-	private Account defaultAssignee;
+	private DisplayAccount defaultAssignee;
 	private Long lastTaskNo;
 
 	public DisplayProject(Project project) {
@@ -116,11 +117,11 @@ public class DisplayProject {
 		this.lastTaskNo = lastTaskNo;
 	}
 
-	public Account getDefaultAssignee() {
+	public DisplayAccount getDefaultAssignee() {
 		return defaultAssignee;
 	}
 
-	public void setDefaultAssignee(Account defaultAssignee) {
+	public void setDefaultAssignee(DisplayAccount defaultAssignee) {
 		this.defaultAssignee = defaultAssignee;
 	}
 

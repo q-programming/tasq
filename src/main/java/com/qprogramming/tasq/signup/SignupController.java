@@ -30,6 +30,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.error.TasqException;
+import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.manage.ThemeService;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.web.MessageHelper;
@@ -38,8 +40,6 @@ import com.qprogramming.tasq.support.web.MessageHelper;
 public class SignupController {
 	private static final Logger LOG = LoggerFactory.getLogger(SignupController.class);
 
-	@Value("${home.directory}")
-	private String tasqRootDir;
 	private static final String AVATAR_DIR = "avatar";
 	private static final String PNG = ".png";
 	private static final String LOGO = "logo";
@@ -47,12 +47,14 @@ public class SignupController {
 	private AccountService accountSrv;
 	private MessageSource msg;
 	private ThemeService themeSrv;
+	private AppService appSrv;
 
 	@Autowired
-	public SignupController(AccountService accountSrv, MessageSource msg, ThemeService themeSrv) {
+	public SignupController(AccountService accountSrv, MessageSource msg, ThemeService themeSrv, AppService appSrv) {
 		this.accountSrv = accountSrv;
 		this.msg = msg;
 		this.themeSrv = themeSrv;
+		this.appSrv = appSrv;
 	}
 
 	@RequestMapping(value = "signup")
@@ -90,15 +92,20 @@ public class SignupController {
 			// Copy logo
 			File appLogo = new File(getAvatarDir() + LOGO + PNG);
 			Utils.copyFile(sc, "/resources/img/logo.png", appLogo);
+			// set base url
+			Utils.setHttpRequest(request);
+			String url = Utils.getBaseURL();
+			appSrv.setProperty(AppService.URL, url);
 		}
 		account.setTheme(themeSrv.getDefault());
 		account = accountSrv.save(account, true);
 		// copy default avatar
 		File userAvatar = new File(getAvatar(account.getId()));
 		Utils.copyFile(sc, "/resources/img/avatar.png", userAvatar);
-		accountSrv.sendConfirmationLink(account);
+		if (!accountSrv.sendConfirmationLink(account)) {
+			throw new TasqException(msg.getMessage("error.email.sending", null, Utils.getCurrentLocale()));
+		}
 		MessageHelper.addSuccessAttribute(ra, msg.getMessage("signup.success", null, Utils.getDefaultLocale()));
-
 		return "redirect:/";
 	}
 
@@ -160,7 +167,7 @@ public class SignupController {
 		return "signin/resetPassword";
 	}
 
-	@Transactional
+	@Transactional(rollbackFor = TasqException.class)
 	@RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
 	public String resetPassword(@RequestParam(value = "email", required = true) String email, RedirectAttributes ra,
 			HttpServletRequest request) {
@@ -172,7 +179,9 @@ public class SignupController {
 		} else {
 			accountSrv.save(account, false);
 			Utils.setHttpRequest(request);
-			accountSrv.sendResetLink(account);
+			if (!accountSrv.sendResetLink(account)) {
+				throw new TasqException(msg.getMessage("error.email.sending", null, Utils.getCurrentLocale()));
+			}
 			MessageHelper.addSuccessAttribute(ra,
 					msg.getMessage("singin.password.token.sent", new Object[] { email }, Utils.getDefaultLocale()));
 		}
@@ -180,7 +189,7 @@ public class SignupController {
 	}
 
 	private String getAvatarDir() {
-		return tasqRootDir + File.separator + AVATAR_DIR + File.separator;
+		return appSrv.getProperty(AppService.TASQROOTDIR) + File.separator + AVATAR_DIR + File.separator;
 	}
 
 	private String getAvatar(Long id) {
