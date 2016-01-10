@@ -67,9 +67,10 @@
 	<h3>[${project.projectId}] ${project.name}</h3>
 	${project.description}
 	<hr>
-	<c:set var="tasks_total">${TO_DO + ONGOING+ CLOSED+ BLOCKED}</c:set>
+	<c:set var="tasks_total">${TO_DO + ONGOING + COMPLETE + CLOSED + BLOCKED}</c:set>
 	<c:set var="tasks_todo">${TO_DO * 100 / tasks_total }</c:set>
 	<c:set var="tasks_ongoing">${ONGOING * 100 / tasks_total}</c:set>
+	<c:set var="tasks_complete">${COMPLETE *100 / tasks_total}</c:set>
 	<c:set var="tasks_closed">${CLOSED *100 / tasks_total}</c:set>
 	<c:set var="tasks_blocked">${BLOCKED*100 / tasks_total}</c:set>
 	<div class="progress">
@@ -86,7 +87,14 @@
 				<span>${ONGOING}&nbsp;<s:message code="task.state.ongoing" /></span>
 			</c:if>
 		</div>
-		<div class="progress-bar progress-bar-success a-tooltip"
+		<div class="progress-bar progress-bar-success a-tooltip" style="width: ${tasks_complete}%"
+			title="${COMPLETE}&nbsp;<s:message code="task.state.complete"/>">
+			<c:if test="${tasks_complete gt 10.0}">
+				<span>${COMPLETE}&nbsp;<s:message code="task.state.complete" /></span>
+			</c:if>
+		</div>
+		
+		<div class="progress-bar progress-bar-closed  a-tooltip"
 			style="width: ${tasks_closed}%"
 			title="${CLOSED}&nbsp;<s:message code="task.state.closed"/>">
 			<c:if test="${tasks_closed gt 10.0}">

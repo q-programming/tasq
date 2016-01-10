@@ -123,6 +123,7 @@ public class ProjectController {
 		}
 		model.addAttribute("TO_DO", stateCount.get(TaskState.TO_DO));
 		model.addAttribute("ONGOING", stateCount.get(TaskState.ONGOING));
+		model.addAttribute("COMPLETE", stateCount.get(TaskState.COMPLETE));
 		model.addAttribute("CLOSED", stateCount.get(TaskState.CLOSED));
 		model.addAttribute("BLOCKED", stateCount.get(TaskState.BLOCKED));
 		List<Task> taskList = new LinkedList<Task>();
