@@ -48,7 +48,6 @@ import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.config.ResourceService;
 import com.qprogramming.tasq.mail.MailMail;
-import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.manage.ThemeService;
 import com.qprogramming.tasq.support.web.Message;
 import com.qprogramming.tasq.test.MockSecurityContext;
@@ -101,8 +100,6 @@ public class SignupControllerTest {
 	private ThemeService themeSrvMock;
 	@Mock
 	private PasswordEncoder encoderMock;
-	@Mock
-	private AppService appSrvMock;
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -125,9 +122,8 @@ public class SignupControllerTest {
 
 	@Before
 	public void setUp() {
-		accountSrv = new AccountService(accRepoMock, msgMock, velocityMock, resourceMock, mailerMock, encoderMock,
-				appSrvMock);
-		signupCtr = new SignupController(accountSrv, msgMock, themeSrvMock, appSrvMock);
+		accountSrv = new AccountService(accRepoMock, msgMock, velocityMock, resourceMock, mailerMock, encoderMock);
+		signupCtr = new SignupController(accountSrv, msgMock, themeSrvMock);
 		testAccount = new Account(EMAIL, "", USERNAME, Roles.ROLE_ADMIN);
 		testAccount.setLanguage("en");
 		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");
@@ -246,7 +242,6 @@ public class SignupControllerTest {
 		when(requestMock.getScheme()).thenReturn("http");
 		when(requestMock.getServerName()).thenReturn("testServer");
 		when(requestMock.getServerPort()).thenReturn(8080);
-		when(appSrvMock.getProperty(AppService.URL)).thenReturn("http://dummy.com");
 		signupCtr.resetPassword(EMAIL, raMock, requestMock);
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.WARNING, new Object[] {}));

@@ -41,7 +41,6 @@ import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.config.ResourceService;
 import com.qprogramming.tasq.mail.MailMail;
-import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.ResultData;
@@ -106,8 +105,6 @@ public class EventsTest {
 	private VelocityEngine velMock;
 	@Mock
 	private ResourceService resourceMock;
-	@Mock
-	private AppService appSrvMock;
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -122,7 +119,7 @@ public class EventsTest {
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
 		eventsService = new EventsService(eventsRepoMock, watchedTaskSrvMock, mailerMock, msgMock, velMock,
-				resourceMock, appSrvMock);
+				resourceMock);
 		eventsController = new EventsController(eventsService, msgMock);
 	}
 
