@@ -43,7 +43,7 @@
 				<a class="btn btn-default btn-sm a-tooltip" href="#"
 					data-toggle="dropdown"> <i class="fa fa-lg fa-pencil"></i>
 				</a>
-				<ul class="dropdown-menu" style="top: inherit; right: inherit;">
+				<ul class="dropdown-menu" style="top: inherit;">
 					<c:if test="${can_edit}">
 						<li><a href="<c:url value="/task/${task.id}/edit"/>"> <i
 								class="fa fw fa-pencil"></i> <s:message code="task.edit" />
