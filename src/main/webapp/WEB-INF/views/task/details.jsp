@@ -753,7 +753,6 @@
 										<c:if test="${not empty comment.message}">
 											<a href="#" class="comments_edit" data-toggle="modal"
 												data-target="#commentModal"
-												data-message="${comment.message}"
 												data-comment_id="${comment.id}"><i class="fa fa-pencil"
 												style="color: gray"></i></a>
 											<a
@@ -762,14 +761,14 @@
 										</c:if>
 									</c:if>
 								</div>
-								<div>
+								<div class="comment-div">
 									<c:choose>
 										<c:when test="${empty comment.message}">
 											<span style="color: gray; font-size: smaller"><s:message
 													code="comment.deleted" text="Comment deleted" /></span>
 										</c:when>
 										<c:otherwise>
-						${comment.message}
+						<span class="comment-message">${comment.message}</span>
 					</c:otherwise>
 									</c:choose>
 								</div> <c:if test="${not empty comment.date_edited}">
@@ -840,7 +839,7 @@
 							<input type="hidden" name="task_id" name="task_id"
 								value="${task.id}"> <input type="hidden"
 								name="comment_id" id="comment_id">
-							<textarea type="text" class="form-control" rows="3"
+							<textarea type="text" class="form-control" rows="5"
 								name="message" id="message" autofocus></textarea>
 						</div>
 					</div>
@@ -895,7 +894,9 @@ $(document).ready(function($) {
 	});
 
 	$('.comments_edit').click(function() {
-		var message = $(this).data('message');
+		var commentDiv = $(this).parent().parent().children("div.comment-div");
+		var message = commentDiv.children(".comment-message").text();
+//		var message = $(this).data('message');
 		var comment_id = $(this).data('comment_id');
 		$(".modal-body #message").val(message);
 		$(".modal-body #comment_id").val(comment_id);

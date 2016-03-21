@@ -35,6 +35,16 @@
 				<br> <br> Application creation process was started on May
 				18 2014 and over a year to have it in stable version
 			</p>
+			<hr>
+			<p>
+				If you found a bug, or want to propose an improvement , please go to
+				<a href="http://q-programming.pl/tasq/project/TASQ">http://q-programming.pl/tasq/project/TASQ</a> and
+				login using following credentials and create new task.<br>
+				<ul class="list-unstyled"><li><strong>login</strong>: <i>public</i></li>
+				<li><strong>password</strong>: <i>iFoundAbugOrImprovement</i></li>
+				</ul>
+			</p>
+			<hr>
 			<p>
 				Application created by <b>Jakub Romaniszyn</b> <a
 					href="http://q-programming.pl/">http://q-programming.pl/</a> and is
@@ -220,16 +230,16 @@
 				notification" in My settings, he will receive email notification
 				about watched event<br> In order to sign up for project
 				notification press watch button
-				<button id="watch" class="btn btn-default btn-sm">
-					<i id="watch_icon" class="fa fa-lg fa-eye"></i>
+				<button id="" class="btn btn-default btn-sm">
+					<i id="" class="fa fa-lg fa-eye"></i>
 				</button>
 				while being in task details screen.<br> All currently watched
 				tasks are displayed in <b><i class="fa fa-eye"></i>&nbsp;<s:message
 						code="events.watching" /></b> view which can be accessed through <a
 					href="#personal">Personal Menu</a><br>To stop receiving
 				notification about project, press stop watching
-				<button id="watch" class="btn btn-default btn-sm">
-					<i id="watch_icon" class="fa fa-lg fa-eye-slash"></i>
+				<button id="" class="btn btn-default btn-sm">
+					<i id="" class="fa fa-lg fa-eye-slash"></i>
 				</button>
 				button located inside task details or in Watched screen inside
 				Personal menu

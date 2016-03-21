@@ -35,6 +35,9 @@ a.theme {
 	color: ${invcolor};
 	background-color: ${color};
 }
+.bg-color-light.theme {
+	background-color: rgb(${rgbcolor10});
+}
 .bg.theme{
 	background-color: ${color};
 }

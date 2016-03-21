@@ -184,7 +184,7 @@ table.worklog_table td {
 					<td>
 						<p>Witaj ${account} ,</p>
 						<p>
-							To jest e-mail potwierdzjący użycia tego adresu do konta w aplikacji TasQ
+							To jest e-mail potwierdzjący użycia tego adresu do konta w aplikacji Tasker
 							</br>Aby zatwierdzić twoje ten adres e-mail, kliknij w link poniżej.
 						</p>
 						<p></p>
