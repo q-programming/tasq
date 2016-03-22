@@ -207,6 +207,10 @@ public class DisplayTask implements Comparable<DisplayTask> {
 		getTags().add(tag);
 	}
 
+	public String getTagsList(){
+		return String.join(",",tags);
+	}
+
 	@Override
 	public String toString() {
 		return getId() + " " + getName();

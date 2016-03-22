@@ -100,13 +100,12 @@ public class SprintController {
 			List<Task> taskList = taskSrv.findAllBySprint(sprint);
 			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ORDER,
 					true));
-			Set<Tag> tags = new HashSet<Tag>();
-			for (Task task : taskList) {
-				Hibernate.initialize(task.getTags());
-				tags.addAll(task.getTags());
-			}
+			Set<String> tags = new HashSet<>();
 			List<DisplayTask> resultList = taskSrv.convertToDisplay(taskList,
 					true);
+			for (DisplayTask displayTask : resultList) {
+				tags.addAll(displayTask.getTags());
+			}
 			model.addAttribute("tags", tags);
 			model.addAttribute("sprint", sprint);
 			model.addAttribute("tasks", resultList);
@@ -115,7 +114,7 @@ public class SprintController {
 		return "";
 	}
 
-	@Transactional
+	@Transactional(readOnly = true)
 	@RequestMapping(value = "/{id}/scrum/backlog", method = RequestMethod.GET)
 	public String showBacklog(@PathVariable String id, Model model,
 			HttpServletRequest request) {
@@ -129,23 +128,31 @@ public class SprintController {
 			List<Task> taskList = taskSrv.findAllByProject(project);
 			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ORDER,
 					true));
-			List<DisplayTask> resultList = DisplayTask
-					.convertToDisplayTasks(taskList);
+			Set<String> tags = new HashSet<>();
+			List<DisplayTask> resultList = taskSrv.convertToDisplay(taskList,true);
+			for (DisplayTask displayTask : resultList) {
+				tags.addAll(displayTask.getTags());
+			}
 			Map<Sprint, List<DisplayTask>> sprint_result = new LinkedHashMap<Sprint, List<DisplayTask>>();
 			List<Sprint> sprintList = agileSrv.findByProjectIdAndFinished(
 					project.getId(), false);
 			Collections.sort(sprintList, new SprintSorter());
 			// Assign tasks to sprints in order to display them
+			//TODO Try to refactor double for
 			for (Sprint sprint : sprintList) {
 				List<DisplayTask> sprint_tasks = new LinkedList<DisplayTask>();
 				for (Task task : taskList) {
 					Hibernate.initialize(task.getSprints());
+					Hibernate.initialize(task.getTags());
 					if (task.getSprints().contains(sprint)) {
-						sprint_tasks.add(new DisplayTask(task));
+						DisplayTask displayTask = new DisplayTask(task);
+						displayTask.setTagsFromTask(task.getTags());
+						sprint_tasks.add(displayTask);
 					}
 				}
 				sprint_result.put(sprint, sprint_tasks);
 			}
+			model.addAttribute("tags", tags);
 			model.addAttribute("sprint_result", sprint_result);
 			model.addAttribute("tasks", resultList);
 			model.addAttribute("sprints", sprintList);
@@ -733,7 +740,7 @@ public class SprintController {
 	 * Checks if currently logged in user have privileges to change anything in
 	 * project
 	 * 
-	 * @param task
+	 * @param project
 	 * @return
 	 */
 	private boolean canEdit(Project project) {

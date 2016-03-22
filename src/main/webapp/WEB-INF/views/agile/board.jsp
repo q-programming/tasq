@@ -92,34 +92,6 @@
 	
 	$(document).ready(function($) {
 		resizeDivs();
-		$(".tag_filter").click(function(){
-			//first show all 
-			$(".agile-card").each(function() {
-				$(this).show();
-			});
-			$(".tag_filter").each(function() {
-				$(this).removeClass("not_selected");
-			});
-			var tag = $(this).data("name");
-			if(tag != currentTag){
-				$( ".agile-card" ).each(function() {
-						var ids =  $(this).data("id");
-				  		var tags = $(this).data("tags").split(",");
-				  		if (!($.inArray(tag,tags)>=0)){
-				  			$(this).hide();
-				  		}
-// 				  		if (!(tags.toLowerCase().indexOf(tag) >= 0)){
-// 					  		$(this).hide();
-// 				  		}
-				});
-				$('.tag_filter').not(this).each(function(){
-		         	$(this).addClass("not_selected");
-		     	});
-				currentTag = tag;				
-			}else{
-				currentTag = "";
-			}
-		});
 		<c:if test="${can_edit}">
 		
 		$(".notsortable_tasks").sortable({
