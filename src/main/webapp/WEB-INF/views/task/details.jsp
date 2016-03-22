@@ -748,16 +748,16 @@
 								<div class="buttons_panel" style="float: right">
 									<a href="<c:url value="/task/${task.id}#c${comment.id}"/>"
 										title="<s:message code="comment.link" text="Link to this comment" />"
-										style="color: gray"><i class="fa fa-link"></i></a>
+										style="color: #676767"><i class="fa fa-link"></i></a>
 									<c:if test="${user == comment.author }">
 										<c:if test="${not empty comment.message}">
 											<a href="#" class="comments_edit" data-toggle="modal"
 												data-target="#commentModal"
 												data-comment_id="${comment.id}"><i class="fa fa-pencil"
-												style="color: gray"></i></a>
+												style="color: #676767"></i></a>
 											<a
 												href='<c:url value="/task/${task.id}/comment/delete?id=${comment.id}"/>'><i
-												class="fa fa-trash-o" style="color: gray"></i></a>
+												class="fa fa-trash-o" style="color: #676767"></i></a>
 										</c:if>
 									</c:if>
 								</div>
@@ -773,7 +773,7 @@
 									</c:choose>
 								</div> <c:if test="${not empty comment.date_edited}">
 									<span style="color: gray; font-size: smaller;"><s:message
-											code="comment.lastedited" text="Comment last edited" />
+											code="comment.lastedited" text="Comment last edited" />&nbsp;
 										${comment.date_edited}</span>
 								</c:if>
 								<div></div>
@@ -828,7 +828,7 @@
 				<button type="button" class="close" data-dismiss="modal"
 					aria-hidden="true">&times;</button>
 				<h4>
-					<s:message code="comment.edit" text="Edit comment"></s:message>
+					<i class="fa fa-pencil"></i>&nbsp;<s:message code="comment.edit" text="Edit comment"></s:message>
 				</h4>
 			</div>
 			<div class="modal-body">
@@ -843,12 +843,14 @@
 								name="message" id="message" autofocus></textarea>
 						</div>
 					</div>
+					<div class="modal-footer">
 					<div class="form-group">
 						<button class="btn btn-default pull-right" type="submit">
 							<i class="fa fa-pencil"></i>
 							<s:message code="main.edit" text="Edit"></s:message>
 						</button>
 					</div>
+						</div>
 				</form>
 			</div>
 		</div>

@@ -101,8 +101,8 @@ function fetchEvents(page,term){
 			var eventtask = '<s:message code="event.task"/>';
 			var deleteevent= '<s:message code="event.delete"/>';
 			var content = '<blockquote class="eventMore quote">'+event.message+'<div class="pull-right buttons_panel">'
-							+'<a style="color: gray" href="'+taskurl+'"><i class="fa fa-lg fa-link fa-flip-horizontal a-tooltip" title="'+eventtask+'"></i></a>'
-							+'<a style="color: gray" href="#" data-event="'+event.id+'" class="delete-event a-tooltip"	title="'+deleteevent+'"> <i class="fa fa-lg fa-trash"></i></a>'
+							+'<a style="color: #676767" href="'+taskurl+'"><i class="fa fa-lg fa-link fa-flip-horizontal a-tooltip" title="'+eventtask+'"></i></a>'
+							+'<a style="color: #676767" href="#" data-event="'+event.id+'" class="delete-event a-tooltip"	title="'+deleteevent+'"> <i class="fa fa-lg fa-trash"></i></a>'
 							+'</div></blockquote>';							
 			row+=content;			
 			//date
