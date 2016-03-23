@@ -36,12 +36,14 @@
                         code="agile.reports"/></a></li>
         </ul>
     </div>
-    <div class="row" style="margin-left: 30px">
-        <i class="fa fa-tags"></i>&nbsp;<s:message code="task.tags"/>: <c:forEach items="${tags}" var="tag">
-        <span class="tag label label-info theme tag_filter a-tooltip" title="<s:message code="task.tags.click.filter"/>"
-              data-name="${tag}">${tag}</span>
-    </c:forEach>
-    </div>
+    <c:if test="${not empty tags}">
+        <div class="row" style="margin-left: 30px">
+            <i class="fa fa-tags"></i>&nbsp;<s:message code="task.tags"/>:
+            <c:forEach items="${tags}" var="tag"><span class="tag label label-info theme tag_filter a-tooltip"
+                                                       title="<s:message code="task.tags.click.filter"/>"
+                                                       data-name="${tag}">${tag}</span></c:forEach>
+        </div>
+    </c:if>
     <div class="row">
         <div class="col-sm-12 col-md-7">
             <h4>
@@ -153,7 +155,7 @@
             </c:forEach>
         </div>
         <!-- 	FREE TASK LIST -->
-        <div class="col-sm-12 col-md-3">
+        <div class="col-sm-12 col-md-5">
             <h4>
                 <s:message code="task.tasks"/>
                 <span class="btn btn-default pull-right" id="save_order" style="display:none"><i
