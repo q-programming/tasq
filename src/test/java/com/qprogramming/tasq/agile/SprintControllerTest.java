@@ -186,7 +186,7 @@ public class SprintControllerTest {
 		when(taskSrvMock.findByProjectAndOpen(project)).thenReturn(taskList);
 		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("TEST");
 		Assert.assertEquals("/scrum/backlog", sprintCtrl.showBacklog(TEST, modelMock, requestMock));
-		verify(modelMock, times(4)).addAttribute(anyString(), anyObject());
+		verify(modelMock, times(5)).addAttribute(anyString(), anyObject());
 	}
 
 	@Test
