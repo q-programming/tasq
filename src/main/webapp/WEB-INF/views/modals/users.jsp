@@ -169,9 +169,9 @@ $('#search_users').click(function() {
 });
 
 $('.sorter').click(function() {
-		var table = $(this).parents('table').eq(0)
-		var rows = table.find("tr:not(:has('th'))").toArray().sort(comparer($(this).index()))
-		this.asc = !this.asc
+		var table = $(this).parents('table').eq(0);
+		var rows = table.find("tr:not(:has('th'))").toArray().sort(comparer($(this).index()));
+		this.asc = !this.asc;
 		if (!this.asc) {
 			rows = rows.reverse();
 			//TODO Add some indicator about sorting ?
@@ -185,11 +185,11 @@ $('.sorter').click(function() {
 });
 function comparer(index) {
 	return function(a, b) {
-		var valA = getCellValue(a, index), valB = getCellValue(b, index)
+		var valA = getCellValue(a, index), valB = getCellValue(b, index);
 		return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA
 				.localeCompare(valB)
 	};
-};
+}
 function getCellValue(row, index) {
 	return $(row).children('td').eq(index).html()
 }
@@ -202,9 +202,8 @@ function getRoleTypeMsg(role){
 		</c:forEach>
 		default:
 			return 'not yet added ';
-	};
-};
-
+	}
+}
 function printNavigation(page,data){
 	var options = {
 			bootstrapMajorVersion: 3,
@@ -217,7 +216,7 @@ function printNavigation(page,data){
             onPageChanged: function(e,oldPage,newPage){
             	fetchUsers(newPage-1,$("#search_field").val());
             }
-   	}
+   	};
 	$("#user_nav").bootstrapPaginator(options);
 }
 

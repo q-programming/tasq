@@ -2,11 +2,8 @@ package com.qprogramming.tasq.signin;
 
 import java.util.Date;
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.authentication.rememberme.PersistentRememberMeToken;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
-import org.springframework.stereotype.Service;
 
 public class PersistentTokenRepositoryImpl implements PersistentTokenRepository {
 

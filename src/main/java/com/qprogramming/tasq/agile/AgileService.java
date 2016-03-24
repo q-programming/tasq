@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -58,11 +59,7 @@ public class AgileService {
 	}
 
 	public List<DisplaySprint> convertToDisplay(List<Sprint> projectSprints) {
-		List<DisplaySprint> result = new LinkedList<DisplaySprint>();
-		for (Sprint sprint : projectSprints) {
-			result.add(new DisplaySprint(sprint));
-		}
-		return result;
+		return projectSprints.stream().map(DisplaySprint::new).collect(Collectors.toCollection(LinkedList::new));
 	}
 
 	public Map<String, Float> fillTimeBurndownMap(List<WorkLog> wrkList, DateTime startTime, DateTime endTime) {
@@ -73,13 +70,13 @@ public class AgileService {
 			LocalDate date = new LocalDate(startTime.plusDays(i));
 			Period value = timeBurndownMap.get(new LocalDate(date));
 			if (date.isAfter(LocalDate.now())) {
-				resultsBurned.put(date.toString(), new Float(0));
+				resultsBurned.put(date.toString(), 0f);
 			} else {
 				if (value != null) {
 					Float result = Utils.getFloatValue(value);
 					resultsBurned.put(date.toString(), result);
 				} else {
-					resultsBurned.put(date.toString(), new Float(0));
+					resultsBurned.put(date.toString(), 0f);
 				}
 			}
 		}

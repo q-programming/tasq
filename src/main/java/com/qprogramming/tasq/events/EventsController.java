@@ -59,8 +59,7 @@ public class EventsController {
 		for (Event event : events) {
 			eventList.add(new DisplayEvent(event));
 		}
-		Page<DisplayEvent> result = new PageImpl<DisplayEvent>(eventList, p, events.getTotalElements());
-		return result;
+		return  new PageImpl<DisplayEvent>(eventList, p, events.getTotalElements());
 	}
 
 	/**
@@ -85,12 +84,10 @@ public class EventsController {
 	public ResultData readAllEvents() {
 		ResultData result = new ResultData();
 		List<Event> events = eventSrv.getEvents();
-		for (Event event : events) {
-			if (event.isUnread()) {
-				event.setUnread(false);
-				eventSrv.save(event);
-			}
-		}
+		events.stream().filter(Event::isUnread).forEach(event -> {
+			event.setUnread(false);
+			eventSrv.save(event);
+		});
 		result.code = ResultData.OK;
 		result.message = msg.getMessage("events.markAll.success", null, Utils.getCurrentLocale());
 		return result;

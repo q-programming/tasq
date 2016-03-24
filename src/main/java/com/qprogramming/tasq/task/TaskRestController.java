@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -70,10 +71,7 @@ public class TaskRestController {
 	public List<DisplayTask> showSubTasks(@RequestParam String taskID, HttpServletResponse response) {
 		response.setContentType("application/json");
 		List<Task> allSubTasks = taskSrv.findSubtasks(taskID);
-		List<DisplayTask> result = new ArrayList<DisplayTask>();
-		for (Task task : allSubTasks) {
-			result.add(new DisplayTask(task));
-		}
+		List<DisplayTask> result = allSubTasks.stream().map(DisplayTask::new).collect(Collectors.toList());
 		Collections.sort(result, new DisplayTaskSorter(DisplayTaskSorter.SORTBY.ID, true));
 		return result;
 	}

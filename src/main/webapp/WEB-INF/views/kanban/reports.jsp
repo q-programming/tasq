@@ -134,7 +134,7 @@ function renderReleaseData(releaseNo){
     $("#chartdiv").append(loading_indicator);
     $('#eventsTable tbody').html('');
     $('#summaryTable tbody').html('');
-    $('#totalSummary tr').remove()
+    $('#totalSummary tr').remove();
     if(releaseNo){
     	releaseName = releaseNo;
     	$("#releaseNoMenu").html('<h4><b>'+ relaseTxt + releaseNo + '</b> <span class="caret"></span></h4>')
@@ -193,7 +193,7 @@ function renderReleaseData(releaseNo){
 				row = '<tr>' + taskCell + metter + '</tr>';
 				$("#summaryTable").append(row);
 			}
-		})
+		});
 		//remove loading
 		$("#loading").remove();
     	//render chart
@@ -203,7 +203,7 @@ function renderReleaseData(releaseNo){
 			title : '<i class="fa fa-line-chart"></i> <s:message code="agile.release.chart"/><p style="font-size: x-small;">'+startStop+'</p>',
 			animate: true,
 			grid: {
-                background: '#ffffff',
+                background: '#ffffff'
             },
 			highlighter : {
 				show : true,
@@ -252,12 +252,9 @@ function renderReleaseData(releaseNo){
 				    			var highDate = str.split(',')[0];
 				    			var label = result.openLabels[highDate];
 		                        return "[" + highDate +"] " + label + " " + plot.series[seriesIndex]["label"];
-		                        },
-				    	
+		                        }
 				    	}
-				    
 			    },
-			    
 			    {
 			    	color:'#428bca',
 				    label: '<s:message code="task.state.ongoing"/>',
@@ -373,7 +370,7 @@ function renderReleaseData(releaseNo){
 				return '<s:message code="task.state.estimatechange"/>';
 			default:
 				return 'not yet added ';
-		};
+		}
 	}
 });
 </script>

@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -29,7 +28,6 @@ import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
-import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
 
 @Controller
 public class HomeController {

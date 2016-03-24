@@ -3,8 +3,7 @@ package com.qprogramming.tasq.home;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
@@ -48,11 +47,7 @@ public class HomeControllerAdvice {
 			List<Project> projects = currentAccount.getLast_visited_p();
 			Collections.sort(projects, new ProjectSorter(ProjectSorter.SORTBY.LAST_VISIT,
 					Utils.getCurrentAccount().getActive_project(), true));
-			List<DisplayProject> result = new LinkedList<DisplayProject>();
-			for (Project project : projects) {
-				result.add(new DisplayProject(project));
-			}
-			return result;
+			return projects.stream().map(DisplayProject::new).collect(Collectors.toCollection(LinkedList::new));
 		}
 		return null;
 	}
@@ -65,11 +60,7 @@ public class HomeControllerAdvice {
 			Account current_account = Utils.getCurrentAccount();
 			current_account = accSrv.findByUsername(current_account.getUsername());
 			List<Task> tasks = current_account.getLast_visited_t();
-			List<DisplayTask> result = new LinkedList<DisplayTask>();
-			for (Task task : tasks) {
-				result.add(new DisplayTask(task));
-			}
-			return result;
+			return tasks.stream().map(DisplayTask::new).collect(Collectors.toList());
 		}
 		return null;
 	}

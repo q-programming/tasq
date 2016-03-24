@@ -56,8 +56,6 @@ public class MailMail {
     @Value("${default.locale}")
     private String defaultLang;
 
-    private JavaMailSenderImpl jmsi;
-
     private MailSender mailSender;
     private AppService appSrv;
 
@@ -88,7 +86,7 @@ public class MailMail {
      * Initialize mail sender with properties form DB/properties file
      */
     public void initMailSender() {
-        jmsi = new JavaMailSenderImpl();
+        JavaMailSenderImpl jmsi = new JavaMailSenderImpl();
         jmsi.setHost(appSrv.getProperty(AppService.EMAIL_HOST));
         jmsi.setPort(Integer.parseInt(appSrv.getProperty(AppService.EMAIL_PORT)));
         jmsi.setUsername(appSrv.getProperty(AppService.EMAIL_USERNAME));

@@ -7,7 +7,7 @@ public enum TaskLinkType {
 
 	private String localCode;
 
-	private TaskLinkType(String code) {
+	TaskLinkType(String code) {
 		this.localCode = code;
 	}
 

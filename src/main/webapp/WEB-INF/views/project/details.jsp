@@ -219,7 +219,7 @@
 <script>
 var	plot;
 $(document).ready(function($) {
-	var currentPage = 0
+	var currentPage = 0;
 	var projectID = '${project.projectId}';
 	fetchWorkLogData(currentPage, projectID);
 	printChart(false);

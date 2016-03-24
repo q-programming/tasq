@@ -56,12 +56,12 @@ public class AgileController {
 		int order = 0;
 		List<Task> allTasks = taskSrv.findAllByProjectId(project);
 		// build map of all tasks
-		Map<String, Task> map = new HashMap<String, Task>();
+		Map<String, Task> map = new HashMap<>();
 		for (Task i : allTasks) {
 			map.put(i.getId(), i);
 		}
-		List<Task> taskList = new LinkedList<Task>();
-		List<Long> newTaskOrder = new LinkedList<Long>();
+		List<Task> taskList = new LinkedList<>();
+		List<Long> newTaskOrder = new LinkedList<>();
 		for (String taskID : Arrays.asList(ids)) {
 			Task task = map.get(taskID);
 			newTaskOrder.add(task.getTaskOrder());

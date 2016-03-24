@@ -77,12 +77,12 @@ public class Account implements java.io.Serializable, UserDetails {
 	@ManyToMany(fetch = FetchType.EAGER)
 	@IndexColumn(name = "INDEX_COL")
 	@JoinTable(name = "last_visited_t")
-	private List<Task> last_visited_t = new LinkedList<Task>();
+	private List<Task> last_visited_t = new LinkedList<>();
 
 	@ManyToMany(fetch = FetchType.EAGER)
 	@IndexColumn(name = "INDEX_COL")
 	@JoinTable(name = "last_visited_p")
-	private List<Project> last_visited_p = new LinkedList<Project>();
+	private List<Project> last_visited_p = new LinkedList<>();
 
 	@ManyToOne
 	@JoinColumn(name = "theme")
@@ -102,7 +102,7 @@ public class Account implements java.io.Serializable, UserDetails {
 
 	public enum Role {
 		ROLE_USER, ROLE_ADMIN, ROLE_REPORTER, ROLE_VIEWER
-	};
+	}
 
 	protected Account() {
 
@@ -200,7 +200,7 @@ public class Account implements java.io.Serializable, UserDetails {
 
 	public void setAuthority(Roles role) {
 		if (this.authorities == null) {
-			this.authorities = new ArrayList<GrantedAuthority>();
+			this.authorities = new ArrayList<>();
 		}
 		this.authorities.add(createAuthority(role));
 	}

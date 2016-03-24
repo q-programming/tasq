@@ -55,8 +55,8 @@
 <security:authentication property="principal" var="user" />
 <security:authorize access="hasRole('ROLE_ADMIN')" var="role"/>
 <script>
-roles = new Array();;
-userID = '${user.id}';
+	roles = [];
+	userID = '${user.id}';
 <c:forEach items="${roles}" var="enum_role">
 	roles.push('${enum_role}');
 </c:forEach>
@@ -110,9 +110,9 @@ $('a[rel=popover]').popover({
 	});
 
 $('.manage_sorter').click(function() {
-		var table = $(this).parents('table').eq(0)
-		var rows = table.find("tr:not(:has('th'))").toArray().sort(comparer($(this).index()))
-		this.asc = !this.asc
+		var table = $(this).parents('table').eq(0);
+		var rows = table.find("tr:not(:has('th'))").toArray().sort(comparer($(this).index()));
+		this.asc = !this.asc;
 		if (!this.asc) {
 			rows = rows.reverse();
 		} else {
@@ -124,11 +124,11 @@ $('.manage_sorter').click(function() {
 });
 function comparer(index) {
 	return function(a, b) {
-		var valA = getCellValue(a, index), valB = getCellValue(b, index)
+		var valA = getCellValue(a, index), valB = getCellValue(b, index);
 		return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA
 				.localeCompare(valB)
 	}
-};
+}
 function getCellValue(row, index) {
 	return $(row).children('td').eq(index).html()
 }
@@ -191,7 +191,7 @@ function fetchManagedUsers(page,term){
 			var username = content.name + " " + content.surname;
 			var user = userURL + content.username; 
 			var avatar = '<img data-src="holder.js/30x30" class="avatar small" src="' + avatarURL + +data.content[j].id +'.png"/>&nbsp;';
-			var avatarResetUrl = userURL + content.username + "/reset-avatar"
+			var avatarResetUrl = userURL + content.username + "/reset-avatar";
 			var action = '<a href="'+ avatarResetUrl + '" class="a-tooltip" style="color: black;" title="<s:message code="user.reset.avatar"/>"><i class="fa fa-times"></i><i class="fa fa-picture-o"></i></span></a>&nbsp;';
 			if(content.id != userID){
 				action= action + '<a href="mailto:'+content.email+'" ><i title="'+email_txt+' ('+content.email+')" class="a-tooltip fa fa-envelope" style="color: black;"></i>'+ confirmed +'</a>';

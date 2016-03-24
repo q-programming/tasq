@@ -102,7 +102,7 @@
 				return type;
 			default:
 				return 'not yet added ';
-		};
+		}
 	}
 	function getDefaultTaskType(project){
 		var url='<c:url value="/project/getDefaultTaskType"/>';

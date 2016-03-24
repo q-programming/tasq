@@ -5,9 +5,9 @@ import com.qprogramming.tasq.account.Account;
 
 
 public class AccountSorter implements Comparator<Account> {
-	public static enum SORTBY {
+	public enum SORTBY {
 		NAME, SURNAME, EMAIL
-	};
+	}
 
 	private SORTBY sortBy;
 	private boolean descending;
@@ -18,7 +18,7 @@ public class AccountSorter implements Comparator<Account> {
 	}
 
 	public int compare(Account a, Account b) {
-		int result = 0;
+		int result;
 		switch (sortBy) {
 		case NAME:
 			result = a.getName().compareTo(b.getName());

@@ -69,7 +69,7 @@
 	});
 	$(".datepicker").change(function() {
 		var date = new Date;
-		var minutes = (date.getMinutes()<10?'0':'') + date.getMinutes()
+		var minutes = (date.getMinutes()<10?'0':'') + date.getMinutes();
 		var hour = date.getHours();
 		$(this).nextAll(".sprint_time").val(hour + ":" + minutes);
 	});
@@ -103,7 +103,7 @@
 		var end_date = $.datepicker.parseDate("dd-mm-yy",end);
 		if(start_date==null || end_date==null|| start_date > end_date || startTime=="" || endTime==""){
 			var error_msg = "<s:message code="agile.sprint.startstop.error"/>";
-			$("#errors").html(error_msg)
+			$("#errors").html(error_msg);
 			event.preventDefault();
 		}
 		else{

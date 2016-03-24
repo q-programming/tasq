@@ -7,7 +7,7 @@ public enum TaskState {
 
 	private String localCode;
 
-	private TaskState(String code) {
+	TaskState(String code) {
 		this.localCode = code;
 	}
 

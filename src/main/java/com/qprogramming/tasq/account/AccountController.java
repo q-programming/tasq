@@ -54,6 +54,7 @@ public class AccountController {
     private SessionRegistry sessionRegistry;
     private ThemeService themeSrv;
     private AppService appSrv;
+
     @Autowired
     public AccountController(AccountService accountSrv, ProjectService projSrv, MessageSource msg,
                              SessionLocaleResolver localeResolver, SessionRegistry sessionRegistry, ThemeService themeSrv,
@@ -96,7 +97,7 @@ public class AccountController {
         Theme theme = themeSrv.findById(themeID);
         account.setTheme(theme);
         String message = "";
-        if (email != null && email != "" && !account.getEmail().equals(email)) {
+        if (StringUtils.isNotEmpty(email) && !account.getEmail().equals(email)) {
             account.setEmail(email);
             account.setConfirmed(false);
             if (!accountSrv.sendConfirmationLink(account)) {
@@ -128,13 +129,13 @@ public class AccountController {
     @ResponseBody
     List<DisplayAccount> listAccounts(@RequestParam String term, HttpServletResponse response) {
         response.setContentType("application/json");
-        List<Account> accounts = new LinkedList<Account>();
+        List<Account> accounts;
         if (term == null) {
             accounts = accountSrv.findAll();
         } else {
             accounts = accountSrv.findByNameSurnameContaining(term);
         }
-        List<DisplayAccount> result = new ArrayList<DisplayAccount>();
+        List<DisplayAccount> result = new ArrayList<>();
         for (Account account : accounts) {
             DisplayAccount d_account = new DisplayAccount(account);
             result.add(d_account);
@@ -145,24 +146,21 @@ public class AccountController {
     @RequestMapping(value = "/users", method = RequestMethod.GET)
     public
     @ResponseBody
-    Page<DisplayAccount> listUsers(@RequestParam(required = false) String term) {
-//    Page<DisplayAccount> listUsers(@RequestParam(required = false) String term,
-//                                   @PageableDefault(size = 25, page = 0, sort = "surname", direction = Direction.ASC) Pageable p) {
-        Page p = new PageImpl(null);
+    Page<DisplayAccount> listUsers(@RequestParam(required = false) String term,
+                                   @PageableDefault(size = 25, page = 0, sort = "surname", direction = Direction.ASC) Pageable p) {
         Page<Account> page;
         if (term != null) {
             page = accountSrv.findByNameSurnameContaining(term, p);
         } else {
             page = accountSrv.findAll(p);
         }
-        List<DisplayAccount> list = new LinkedList<DisplayAccount>();
+        List<DisplayAccount> list = new LinkedList<>();
         List<Object> principals = sessionRegistry.getAllPrincipals();
         for (Account account : page) {
             DisplayAccount dispAccount = accountWithSession(principals, account);
             list.add(dispAccount);
         }
-        Page<DisplayAccount> result = new PageImpl<DisplayAccount>(list, p, page.getTotalElements());
-        return result;
+        return  new PageImpl<>(list, p, page.getTotalElements());
     }
 
     @RequestMapping(value = "/project/participants", method = RequestMethod.GET)
@@ -183,7 +181,7 @@ public class AccountController {
         }
         Set<Account> allParticipants = project.getParticipants();
         List<Object> principals = sessionRegistry.getAllPrincipals();
-        List<DisplayAccount> participants = new ArrayList<DisplayAccount>();
+        List<DisplayAccount> participants = new ArrayList<>();
         for (Account account : allParticipants) {
             if (term == null) {
                 participants.add(accountWithSession(principals, account));
@@ -197,8 +195,7 @@ public class AccountController {
         if (participants.size() > p.getPageSize()) {
             participants = participants.subList(p.getOffset(), p.getOffset() + p.getPageSize());
         }
-        Page<DisplayAccount> result = new PageImpl<DisplayAccount>(participants, p, totalParticipants);
-        return result;
+        return new PageImpl<>(participants, p, totalParticipants);
     }
 
     private DisplayAccount accountWithSession(List<Object> principals, Account account) {

@@ -3,10 +3,9 @@ package com.qprogramming.tasq.task;
 public enum TaskType {
 	TASK(false), USER_STORY(false), ISSUE(false), BUG(false), IDLE(false), SUBTASK(
 			true), SUBBUG(true);
-	;
 	private boolean subtask;
 
-	private TaskType(boolean subtask) {
+	TaskType(boolean subtask) {
 		this.subtask = subtask;
 	}
 

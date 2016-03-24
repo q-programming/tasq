@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -153,7 +154,7 @@ public class TaskController {
 						msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
 				return "redirect:" + request.getHeader("Referer");
 			}
-			Task task = null;
+			Task task;
 			try {
 				task = taskForm.createTask();
 
@@ -409,7 +410,7 @@ public class TaskController {
 			@RequestParam(value = "state", required = false) String state,
 			@RequestParam(value = "query", required = false) String query,
 			@RequestParam(value = "priority", required = false) String priority, Model model) {
-		if (state == null || state == "") {
+		if (StringUtils.isEmpty(state)) {
 			if (query != null) {
 				state = ALL;
 			} else {
@@ -422,14 +423,14 @@ public class TaskController {
 		model.addAttribute("projects", projects);
 
 		// Get active or choosen project
-		Project active = null;
+		Project active;
 		if (projId == null) {
 			active = projectSrv.findUserActiveProject();
 		} else {
 			active = projectSrv.findByProjectId(projId);
 		}
 		if (active != null) {
-			List<Task> taskList = new LinkedList<Task>();
+			List<Task> taskList;
 			if (OPEN.equals(state)) {
 				taskList = taskSrv.findByProjectAndOpen(active);
 			} else if (ALL.equals(state)) {
@@ -437,26 +438,16 @@ public class TaskController {
 			} else {
 				taskList = taskSrv.findByProjectAndState(active, TaskState.valueOf(state));
 			}
-			if (query != null && query != "") {
+			if (StringUtils.isNotEmpty(query)) {
 				Tag tag = tagsRepo.findByName(query);
-				List<Task> searchResult = new LinkedList<Task>();
-				for (Task task : taskList) {
-					if (StringUtils.containsIgnoreCase(task.getId(), query)
-							|| StringUtils.containsIgnoreCase(task.getName(), query)
-							|| StringUtils.containsIgnoreCase(task.getDescription(), query)
-							|| task.getTags().contains(tag)) {
-						searchResult.add(task);
-					}
-				}
+				List<Task> searchResult = taskList.stream().filter(task -> StringUtils.containsIgnoreCase(task.getId(), query)
+						|| StringUtils.containsIgnoreCase(task.getName(), query)
+						|| StringUtils.containsIgnoreCase(task.getDescription(), query)
+						|| task.getTags().contains(tag)).collect(Collectors.toCollection(LinkedList::new));
 				taskList = searchResult;
 			}
-			if (priority != null && priority != "") {
-				List<Task> searchResult = new LinkedList<Task>();
-				for (Task task : taskList) {
-					if (task.getPriority() != null && task.getPriority().equals(TaskPriority.valueOf(priority))) {
-						searchResult.add(task);
-					}
-				}
+			if (StringUtils.isNotEmpty(priority)) {
+				List<Task> searchResult = taskList.stream().filter(task -> task.getPriority() != null && task.getPriority().equals(TaskPriority.valueOf(priority))).collect(Collectors.toCollection(LinkedList::new));
 				taskList = searchResult;
 			}
 			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID, false));
@@ -552,14 +543,17 @@ public class TaskController {
 					Period logged = PeriodHelper.inFormat(loggedWork);
 					StringBuilder message = new StringBuilder(loggedWork);
 					Date when = new Date();
-					if (dateLogged != "" && timeLogged != "") {
+					if (StringUtils.isNotEmpty(dateLogged)&& StringUtils.isNotEmpty(timeLogged)) {
 						when = Utils.convertStringToDateAndTime(dateLogged + " " + timeLogged);
 						message.append(BR);
 						message.append("Date: ");
-						message.append(dateLogged + " " + timeLogged);
+						message.append(dateLogged);
+						message.append(" ");
+						message.append(timeLogged);
+
 					}
 					Period remaining = null;
-					if (remainingTxt != null && remainingTxt != "") {
+					if (StringUtils.isNotEmpty(remainingTxt)) {
 						if (remainingTxt.matches("[0-9]+")) {
 							remainingTxt += "h";
 						}
@@ -629,7 +623,7 @@ public class TaskController {
 
 				TaskState oldState = (TaskState) task.getState();
 				task.setState(state);
-				if (commentMessage != null && commentMessage != "") {
+				if (StringUtils.isNotEmpty(commentMessage)) {
 					if (Utils.containsHTMLTags(commentMessage)) {
 						return new ResultData(ResultData.ERROR,
 								msg.getMessage("comment.htmlTag", null, Utils.getCurrentLocale()));
@@ -703,26 +697,31 @@ public class TaskController {
 						msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
 				return "redirect:" + request.getHeader("Referer");
 			}
-			if (action.equals(START)) {
-				Account account = Utils.getCurrentAccount();
-				if (account.getActive_task() != null && account.getActive_task().length > 0
-						&& !("").equals(account.getActive_task()[0])) {
-					MessageHelper.addWarningAttribute(ra, msg.getMessage("task.stopTime.warning",
-							new Object[] { account.getActive_task()[0] }, Utils.getCurrentLocale()));
-					return "redirect:" + request.getHeader("Referer");
+			switch (action) {
+				case START: {
+					Account account = Utils.getCurrentAccount();
+					if (account.getActive_task() != null && account.getActive_task().length > 0
+							&& !("").equals(account.getActive_task()[0])) {
+						MessageHelper.addWarningAttribute(ra, msg.getMessage("task.stopTime.warning",
+								new Object[]{account.getActive_task()[0]}, Utils.getCurrentLocale()));
+						return "redirect:" + request.getHeader("Referer");
+					}
+					account.startTimerOnTask(task);
+					accSrv.update(account);
+					wlSrv.checkStateAndSave(task);
+					break;
 				}
-				account.startTimerOnTask(task);
-				accSrv.update(account);
-				wlSrv.checkStateAndSave(task);
-			} else if (action.equals(STOP)) {
-				Period logWork = stopTimer(task);
-				MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.logWork.logged",
-						new Object[] { PeriodHelper.outFormat(logWork), task.getId() }, Utils.getCurrentLocale()));
-			} else if (action.equals(CANCEL)) {
-				Account account = Utils.getCurrentAccount();
-				account.clearActive_task();
-				accSrv.update(account);
-				return "redirect:/task/" + taskID;
+				case STOP:
+					Period logWork = stopTimer(task);
+					MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.logWork.logged",
+							new Object[]{PeriodHelper.outFormat(logWork), task.getId()}, Utils.getCurrentLocale()));
+					break;
+				case CANCEL: {
+					Account account = Utils.getCurrentAccount();
+					account.clearActive_task();
+					accSrv.update(account);
+					return "redirect:/task/" + taskID;
+				}
 			}
 		} else {
 			return "redirect:" + request.getHeader("Referer");

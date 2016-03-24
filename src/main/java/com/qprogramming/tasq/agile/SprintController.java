@@ -31,6 +31,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -426,7 +427,7 @@ public class SprintController {
                 int counter = 1;
                 Collections.sort(sprints, new SprintSorter());
                 lastSprint = sprints.get(sprints.size() - counter);
-                while (lastSprint.getStart_date() == "") {
+                while (StringUtils.isEmpty(lastSprint.getStart_date())) {
                     counter++;
                     if (counter > sprints.size()) {
                         MessageHelper.addWarningAttribute(ra, msg.getMessage(
@@ -578,10 +579,10 @@ public class SprintController {
         LocalDate startTime = new LocalDate(sprint.getRawStart_date());
         LocalDate endTime = new LocalDate(sprint.getRawEnd_date());
         int sprintDays = Days.daysBetween(startTime, endTime).getDays() + 1;
-        Integer totalPoints = new Integer(0);
+        Integer totalPoints = 0;
         SprintData data = result;
-        Float remaining_estimate = new Float(0);
-        Float burned = new Float(0);
+        Float remaining_estimate;
+        Float burned = 0f;
         if (timeTracked) {
             remaining_estimate = Utils.getFloatValue(sprint.getTotalEstimate());
         } else {

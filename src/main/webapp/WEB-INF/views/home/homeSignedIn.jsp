@@ -99,7 +99,7 @@
 <jsp:include page="../other/events.jsp" />
 <script>
 	$(document).ready(function($) {
-		var currentPage = 0
+		var currentPage = 0;
 		fetchWorkLogData(currentPage);
 	});
 

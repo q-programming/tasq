@@ -29,7 +29,7 @@ public class MessageHelperTest {
 
 	@Test
 	public void addSuccessMessageTest() {
-		MessageHelper.addSuccessAttribute(ra, MESSAGE, new Object[] {});
+		MessageHelper.addSuccessAttribute(ra, MESSAGE);
 		verify(ra, times(1))
 				.addFlashAttribute(
 						anyString(),
@@ -39,14 +39,14 @@ public class MessageHelperTest {
 
 	@Test
 	public void addErrorMessageTest() {
-		MessageHelper.addErrorAttribute(ra, MESSAGE, new Object[] {});
+		MessageHelper.addErrorAttribute(ra, MESSAGE);
 		verify(ra, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.DANGER, new Object[] {}));
 	}
 
 	@Test
 	public void addWarrningMessageTest() {
-		MessageHelper.addWarningAttribute(ra, MESSAGE, new Object[] {});
+		MessageHelper.addWarningAttribute(ra, MESSAGE);
 		verify(ra, times(1))
 				.addFlashAttribute(
 						anyString(),
@@ -56,17 +56,17 @@ public class MessageHelperTest {
 
 	@Test
 	public void addInfoMessageTest() {
-		MessageHelper.addInfoAttribute(ra, MESSAGE, new Object[] {});
+		MessageHelper.addInfoAttribute(ra, MESSAGE);
 		verify(ra, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.INFO, new Object[] {}));
 	}
 
 	@Test
 	public void addMessagesWithModelTest() {
-		MessageHelper.addSuccessAttribute(model, MESSAGE, new Object[] {});
-		MessageHelper.addErrorAttribute(model, MESSAGE, new Object[] {});
-		MessageHelper.addWarningAttribute(model, MESSAGE, new Object[] {});
-		MessageHelper.addInfoAttribute(model, MESSAGE, new Object[] {});
+		MessageHelper.addSuccessAttribute(model, MESSAGE);
+		MessageHelper.addErrorAttribute(model, MESSAGE);
+		MessageHelper.addWarningAttribute(model, MESSAGE);
+		MessageHelper.addInfoAttribute(model, MESSAGE);
 		verify(model, times(4)).addAttribute(anyString(), any(Message.class));
 	}
 

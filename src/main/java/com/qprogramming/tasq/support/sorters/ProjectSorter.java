@@ -6,8 +6,8 @@ import com.qprogramming.tasq.projects.Project;
 
 public class ProjectSorter implements Comparator<Project> {
 
-	public static enum SORTBY {
-		NAME, START_DATE, LAST_VISIT;
+	public enum SORTBY {
+		NAME, START_DATE, LAST_VISIT
 	}
 
 	private SORTBY sortBy;
@@ -20,9 +20,11 @@ public class ProjectSorter implements Comparator<Project> {
 	}
 
 	/**
+	 *
+	 * @param sortBy
 	 * @param active_project
-	 * @param isDescending2
-	 */
+	 * @param isDescending
+     */
 	public ProjectSorter(SORTBY sortBy, Long active_project,
 			boolean isDescending) {
 		this.active_project = active_project;
@@ -31,7 +33,7 @@ public class ProjectSorter implements Comparator<Project> {
 	}
 
 	public int compare(Project a, Project b) {
-		int result = 0;
+		int result ;
 		switch (sortBy) {
 		// sort by active , then just by name
 		case LAST_VISIT:

@@ -11,10 +11,10 @@ import com.qprogramming.tasq.account.Account;
 
 public interface CommentsRepository extends JpaRepository<Comment, Integer> {
 
-	public Comment findById(Long id);
+	Comment findById(Long id);
 
-	public Set<Comment> findByAuthor(Account author);
+	Set<Comment> findByAuthor(Account author);
 
-	public Set<Comment> findByTaskIdOrderByDateDesc(String id);
+	Set<Comment> findByTaskIdOrderByDateDesc(String id);
 
 }

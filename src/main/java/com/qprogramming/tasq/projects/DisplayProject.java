@@ -3,8 +3,6 @@ package com.qprogramming.tasq.projects;
 import java.util.Date;
 
 import org.springframework.beans.BeanUtils;
-
-import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.projects.Project.AgileType;
 import com.qprogramming.tasq.task.TaskPriority;

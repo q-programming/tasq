@@ -66,7 +66,7 @@ function printWorkLogNavigation(page,data){
             onPageChanged: function(e,oldPage,newPage){
             	fetchWorkLogData(newPage-1);
             }
-   	}
+   	};
 	$("#eventsTable_pagination_top").bootstrapPaginator(options);
 	$("#eventsTable_pagination_bot").bootstrapPaginator(options);
 }
@@ -79,7 +79,7 @@ function getEventTypeMsg(type){
 		</c:forEach>
 		default:
 			return 'not yet added ';
-	};
-};
+	}
+}
 
 </script>

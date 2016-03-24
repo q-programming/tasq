@@ -11,9 +11,9 @@ public class CommentsSorter implements Comparator<Comment> {
 	}
 
 	public int compare(Comment a, Comment b) {
-		int result = 0;
+		int result;
 
-		if (a.getDate() == b.getDate()) {
+		if (a.getDate().equals(b.getDate())) {
 			result = 0;
 		} else if (a.getRawDate().before(b.getRawDate())) {
 			result = -1;
