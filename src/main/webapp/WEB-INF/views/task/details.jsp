@@ -14,10 +14,16 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <script src="<c:url value="/resources/js/bootstrap-tagsinput.js" />"></script>
 <link href="<c:url value="/resources/css/bootstrap-tagsinput.css" />" rel="stylesheet" media="screen" />
+<script src="<c:url value="/resources/js/trumbowyg.min.js" />"></script>
+<link href="<c:url value="/resources/css/trumbowyg.min.css" />" rel="stylesheet" media="screen" />
 <security:authorize access="hasRole('ROLE_ADMIN')">
 	<c:set var="is_admin" value="true" />
 </security:authorize>
 <security:authentication property="principal" var="user" />
+<c:if test="${user.language ne 'en' }">
+	<script src="<c:url value="/resources/js/trumbowyg.${user.language}.min.js" />"></script>
+</c:if>
+
 <c:set var="is_user" value="<%=Roles.isUser()%>" />
 <c:if test="${(myfn:contains(task.project.administrators,user) || is_admin || task.owner.id == user.id)}">
 	<c:set var="can_edit" value="true" />
@@ -786,8 +792,8 @@
 					<form id="commentForm" name="commentForm" method="post"
 						action="<c:url value="/task/comment"/>">
 						<input type="hidden" name="task_id" value="${task.id}">
-						<textarea class="form-control" rows="3" name="message"
-							id="message" autofocus></textarea>
+						<textarea id="comment-message" class="form-control comment-message-text" rows="3" name="message"
+							 autofocus></textarea>
 						<div style="margin-top: 5px">
 							<button class="btn btn-default btn-sm" type="submit">
 								<s:message code="main.add" text="Add" />
@@ -839,8 +845,8 @@
 							<input type="hidden" name="task_id" name="task_id"
 								value="${task.id}"> <input type="hidden"
 								name="comment_id" id="comment_id">
-							<textarea type="text" class="form-control" rows="5"
-								name="message" id="message" autofocus></textarea>
+							<textarea id="modal-comment-message" type="text" class="form-control comment-message-text" rows="5"
+								name="message" autofocus></textarea>
 						</div>
 					</div>
 					<div class="modal-footer">
@@ -878,7 +884,20 @@ $(document).ready(function($) {
 			'scrollTop' : $('#comments_div').offset().top
 		}, 2000);
 	}
-			
+	var btnsGrps = jQuery.trumbowyg.btnsGrps;
+	$('.comment-message-text').trumbowyg({
+		lang: '${user.language}',
+		fullscreenable: false,
+		removeformatPasted: true,
+		autogrow: true,
+		btns: ['formatting',
+			'|', btnsGrps.design,
+			'|', 'link',
+			'|', btnsGrps.justify,
+			'|', btnsGrps.lists]
+	});
+
+
 	$('#comments_scroll').click(function() {
 		$(document.body).animate({
 			'scrollTop' : $('#comments').offset().top
@@ -897,10 +916,10 @@ $(document).ready(function($) {
 
 	$('.comments_edit').click(function() {
 		var commentDiv = $(this).parent().parent().children("div.comment-div");
-		var message = commentDiv.children(".comment-message").text();
+		var message = commentDiv.children(".comment-message").html();
 //		var message = $(this).data('message');
 		var comment_id = $(this).data('comment_id');
-		$(".modal-body #message").val(message);
+		$(".trumbowyg-editor").html(message);
 		$(".modal-body #comment_id").val(comment_id);
 	});
 

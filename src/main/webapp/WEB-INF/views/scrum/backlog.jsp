@@ -114,16 +114,13 @@
                             <%--Sprint task --%>
                         <c:forEach items="${entry.value}" var="task">
                             <c:set var="count" value="${count + task.story_points}"/>
-                            <div class="agile-list" data-id="${task.id}" id="${task.id}"
-                                 data-tags="${task.getTagsList()}"
-                                 sprint-id="${sprint.id}"
+                            <div class="agile-list"
+                                 data-id="${task.id}" id="${task.id}" data-tags="${task.getTagsList()}" sprint-id="${sprint.id}"
                                     <c:if test="${task.state eq 'CLOSED' }">
                                         style="text-decoration: line-through;"
                                     </c:if>>
-                                <div style="display: table-cell; width: 100%;">
-                                    <t:type type="${task.type}" list="true"/>
-                                    <a href="<c:url value="/task/${task.id}"/>"
-                                       style="color: inherit;">[${task.id}] ${task.name}</a>
+                                <div style="display: table-cell; width: 100%;"><t:type type="${task.type}" list="true"/><a
+                                        href="<c:url value="/task/${task.id}"/>" style="color: inherit;">[${task.id}] ${task.name}</a>
                                     <form id="sprint_remove_${task.id}"
                                           action="<c:url value="/${project.projectId}/scrum/sprintRemove"/>"
                                           method="post">

@@ -205,6 +205,8 @@
 		$('#description').trumbowyg({
 			lang: '${user.language}',
 			fullscreenable: false,
+			removeformatPasted: true,
+			autogrow: true,
 			btns: ['formatting',
 		           '|', btnsGrps.design,
 		           '|', 'link',

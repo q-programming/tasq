@@ -298,7 +298,6 @@ $(document).ready(function($) {
 		btns: ['formatting',
 	           '|', btnsGrps.design,
 	           '|', 'link',
-	           '|', 'insertImage',
 	           '|', btnsGrps.justify,
 	           '|', btnsGrps.lists]
 	});
