@@ -132,7 +132,7 @@ form.form-search:before {
 }
 
 .mod-header {
-	background: url(/tasq/resources/img/mod_header_bg.png) repeat-x center;
+	background: url(/resources/img/mod_header_bg.png) repeat-x center;
 	margin-top: 15px;
 	padding-bottom: 5px;
 }
@@ -369,6 +369,7 @@ span.points:hover .point-edit {
 .point-input {
 	width: 20px;
 	display: none;
+	color: black;
 }
 
 ul.auto-complete-list {
