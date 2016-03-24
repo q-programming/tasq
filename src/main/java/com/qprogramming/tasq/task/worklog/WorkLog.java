@@ -4,7 +4,6 @@
 package com.qprogramming.tasq.task.worklog;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -222,9 +221,6 @@ public class WorkLog implements Serializable {
 		} else if (!time.equals(other.time)) {
 			return false;
 		}
-		if (type != other.type) {
-			return false;
-		}
-		return true;
+		return type == other.type;
 	}
 }

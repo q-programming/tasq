@@ -220,7 +220,7 @@ $(document).ready(function($) {
 	$("#due_date").val(currentDue);
 
 	//INIT ALL
-	getDefaults()
+	getDefaults();
 	
 	$("#assignee_auto").click(function(){
 		 $(this).select();

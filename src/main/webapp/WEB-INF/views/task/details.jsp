@@ -1089,7 +1089,7 @@ $(document).ready(function($) {
 			}
 			function getSprints(){
 				projectId = '${project.id}';
-				var url ='<c:url value="/task/getSprints"/>' 
+				var url ='<c:url value="/task/getSprints"/>';
 				$.get(url ,{taskID:taskID},function(result){
 					$.each(result, function(key,sprint){
 						var url = '<c:url value="/${task.project.projectId}/${fn:toLowerCase(task.project.agile)}/reports?sprint="/>' + sprint.sprintNo;
@@ -1267,7 +1267,7 @@ $('body').on('click', 'a.delete_btn', function(e) {
 				if('${can_edit}'){
 					$('#taskTags').tagsinput('add', item.name);
 				}else{
-					var tag = '<span class="tag label label-info theme"><span class="tagSearch" data-name="'+item.name+'">'+item.name+'</span></span>'
+					var tag = '<span class="tag label label-info theme"><span class="tagSearch" data-name="'+item.name+'">'+item.name+'</span></span>';
 					$('#taskTagslist').append(tag);
 					$('#taskTagslist').attr('tags','true');
 				}
@@ -1294,13 +1294,13 @@ $('body').on('click', 'a.delete_btn', function(e) {
 	</c:if>
 });
 $('#sorter').click(function() {
-	var table = $(this).parents('table').eq(0)
+	var table = $(this).parents('table').eq(0);
 	var rows = table.find("tr:not(:has('th'))").toArray().sort(function (a,b){
 		var dateA = convertToDate($(a).attr("data-date"));
 		var dateB = convertToDate($(b).attr("data-date"));
 		return dateA - dateB;
 	});
-	this.asc = !this.asc
+	this.asc = !this.asc;
 	if (!this.asc) {
 		rows = rows.reverse();
 		$("#indicator").html('<i class="fa fa-caret-down">');
@@ -1332,6 +1332,6 @@ function getEventTypeMsg(type){
 		</c:forEach>
 		default:
 			return 'not yet added ';
-	};
-};
+	}
+}
 </script>

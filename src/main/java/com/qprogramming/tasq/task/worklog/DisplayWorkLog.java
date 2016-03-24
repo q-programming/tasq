@@ -2,6 +2,7 @@ package com.qprogramming.tasq.task.worklog;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.joda.time.Period;
 import org.springframework.beans.BeanUtils;
@@ -113,11 +114,7 @@ public class DisplayWorkLog {
 	 */
 	public static List<DisplayWorkLog> convertToDisplayWorkLogs(
 			List<WorkLog> list) {
-		List<DisplayWorkLog> result = new LinkedList<DisplayWorkLog>();
-		for (WorkLog workLog : list) {
-			result.add(new DisplayWorkLog(workLog));
-		}
-		return result;
+		return list.stream().map(DisplayWorkLog::new).collect(Collectors.toCollection(LinkedList::new));
 	}
 
 }

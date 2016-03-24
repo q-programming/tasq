@@ -156,7 +156,7 @@
     var menu_toggle = menu_item.parent().parent();
     if (menu_toggle.children("a")) {
         var type = menu_toggle.children("a").data("type");
-        var targetClass = "." + type
+        var targetClass = "." + type;
         $(targetClass).show();
     }
     //find toggler

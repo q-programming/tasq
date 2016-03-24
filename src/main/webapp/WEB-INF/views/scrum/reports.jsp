@@ -142,13 +142,13 @@ $(document).ready(function() {
 	    $("#chartdiv").append(loading_indicator);
 	    $('#eventsTable tbody').html('');
 	    $('#summaryTable tbody').html('');
-	    $('#totalSummary tr').remove()
+	    $('#totalSummary tr').remove();
 	    if(timeTracked){
 	    	$('th:nth-child(4)').hide();
 	    }else{
 	    	$('th:nth-child(4)').show();
 	    }
-	    $("#sprintNoMenu").html('<h4><b>Sprint '+ sprintNo + '</b> <span class="caret"></span></h4>')
+	    $("#sprintNoMenu").html('<h4><b>Sprint '+ sprintNo + '</b> <span class="caret"></span></h4>');
 	    $.get('<c:url value="/${project.projectId}/sprint-data"/>',{sprint:sprintNo},function(result){
  	    	//Fill arrays of data
 	    	//console.log(result);
@@ -249,7 +249,7 @@ $(document).ready(function() {
 					row = '<tr>' + taskCell + metter + '</tr>';
 					$("#summaryTable").append(row);
 				}
-			})
+			});
 			row = '<tr><th colspan=3>Not Completed</th></tr>';
 			$("#summaryTable").append(row);
 			$.each(result.tasks.ALL, function(key,task){
@@ -265,7 +265,7 @@ $(document).ready(function() {
 					row = '<tr>' + taskCell + metter + '</tr>';
 					$("#summaryTable").append(row);
 				}
-			})
+			});
 			//remove loading
 			$("#loading").remove();
 	    	//render chart
@@ -391,7 +391,7 @@ $(document).ready(function() {
 					return html;
 				}});
 	    });
-	};
+	}
 	function getEventTypeMsg(type){
 		switch(type){
 			case "CLOSED":
@@ -408,7 +408,7 @@ $(document).ready(function() {
 				return '<s:message code="task.state.estimatechange"/>';
 			default:
 				return 'not yet added ';
-		};
+		}
 	}
 });
 </script>

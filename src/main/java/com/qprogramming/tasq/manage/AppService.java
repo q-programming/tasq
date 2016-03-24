@@ -71,13 +71,7 @@ public class AppService {
 				Field f = AppService.class.getDeclaredField(key);
 				f.setAccessible(true);
 				return (String) f.get(this);
-			} catch (IllegalArgumentException e) {
-				LOG.error(e.getMessage());
-			} catch (IllegalAccessException e) {
-				LOG.error(e.getMessage());
-			} catch (NoSuchFieldException e) {
-				LOG.error(e.getMessage());
-			} catch (SecurityException e) {
+			} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
 				LOG.error(e.getMessage());
 			}
 		}

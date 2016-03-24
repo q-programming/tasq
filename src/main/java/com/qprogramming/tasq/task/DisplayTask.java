@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class DisplayTask implements Comparable<DisplayTask> {
     private String id;
@@ -206,15 +207,9 @@ public class DisplayTask implements Comparable<DisplayTask> {
         return tags;
     }
 
-    public void setTags(Set<String> tags) {
-        this.tags = tags;
-    }
-
-    public void setTagsFromTask(Set<Tag> tags) {
-        for (Tag tag : tags) {
-            this.tags.add(tag.getName());
-        }
-    }
+	public void setTagsFromTask(Set<Tag> tags) {
+		this.tags.addAll(tags.stream().map(Tag::getName).collect(Collectors.toList()));
+	}
 
     public void addTag(String tag) {
         getTags().add(tag);

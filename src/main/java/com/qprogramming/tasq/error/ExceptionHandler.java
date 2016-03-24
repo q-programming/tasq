@@ -18,6 +18,7 @@ class ExceptionHandler {
 	@org.springframework.web.bind.annotation.ExceptionHandler(value = TasqAuthException.class)
 	public ModelAndView authException(Exception exception,
 			HttpServletRequest request, HttpServletResponse response) {
+		exception.printStackTrace();
 		ModelAndView modelAndView = new ModelAndView("error/authError");
 		modelAndView.addObject("errorMessage",
 				Throwables.getRootCause(exception));
@@ -30,6 +31,7 @@ class ExceptionHandler {
 	@org.springframework.web.bind.annotation.ExceptionHandler(value = Exception.class)
 	public ModelAndView exception(Exception exception, WebRequest request) {
 		ModelAndView modelAndView = new ModelAndView("generalError");
+		exception.printStackTrace();
 		modelAndView.addObject("errorMessage",
 				Throwables.getRootCause(exception));
 		return modelAndView;

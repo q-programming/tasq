@@ -20,10 +20,10 @@ public class AgileData {
 	protected Map<String, Float> timeBurned;
 
 	public AgileData() {
-		timeBurned = new LinkedHashMap<String, Float>();
-		tasks = new HashMap<String, List<DisplayTask>>();
-		tasks.put(CLOSED, new LinkedList<DisplayTask>());
-		tasks.put(ALL, new LinkedList<DisplayTask>());
+		timeBurned = new LinkedHashMap<>();
+		tasks = new HashMap<>();
+		tasks.put(CLOSED, new LinkedList<>());
+		tasks.put(ALL, new LinkedList<>());
 	}
 
 	public String getMessage() {

@@ -17,7 +17,7 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 import com.qprogramming.tasq.support.Utils;
 
-@Component
+@Component("localeSettingAuthenticationSuccessHandler")
 public class LocaleSettingAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 	@Autowired
 	private SessionLocaleResolver localeResolver;

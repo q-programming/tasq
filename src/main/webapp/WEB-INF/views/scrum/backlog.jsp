@@ -276,7 +276,7 @@
                         action: function (event) {
                             var taskID = event.currentTarget.id;
                             var sprintID = "${sprint.id}";
-                            var task = event.currentTarget
+                            var task = event.currentTarget;
                             checkIfActiveAndSend(taskID, sprintID, task);
                         }
                     },
@@ -317,8 +317,8 @@
                         var sprintID = event.currentTarget.getAttribute('sprint-id');
                         var url = '<c:url value="/scrum/isActive"/>';
                         var message = '<s:message code="agile.sprint.remove.confirm"/>';
-                        var task = event.currentTarget
-                        console.log(task)
+                        var task = event.currentTarget;
+                        console.log(task);
                         $.get(url, {id: sprintID}, function (active) {
                             if (active) {
                                 bootbox.confirm(message, function (result) {
@@ -343,7 +343,7 @@
                     var message = '<s:message code="agile.sprint.add.confirm"/>';
                     bootbox.confirm(message, function (result) {
                         if (result) {
-                            addToSprint(taskID, sprintID, task)
+                            addToSprint(taskID, sprintID, task);
                             console.log("Added to sprint" + sprintID);
                         }
                         else {

@@ -124,8 +124,7 @@ public class ImportExportController {
 			if (extension.equals(XLS_TYPE)) {
 				HSSFWorkbook workbook = new HSSFWorkbook(importFile.getInputStream());
 				HSSFSheet sheet = workbook.getSheetAt(0);
-				for (Iterator<Row> rowIterator = sheet.iterator(); rowIterator.hasNext();) {
-					Row row = rowIterator.next();
+				for (Row row : sheet) {
 					if (row.getRowNum() == 0) {
 						continue;
 					}
@@ -226,7 +225,7 @@ public class ImportExportController {
 
 	@RequestMapping(value = "/task/export", method = RequestMethod.POST)
 	public void exportTasks(@RequestParam(value = "tasks") String[] idList, @RequestParam(value = "type") String type,
-			HttpServletResponse response, HttpServletRequest request) throws FileNotFoundException, IOException {
+			HttpServletResponse response, HttpServletRequest request) throws IOException {
 		// Prepare task list
 		List<Task> taskList = taskSrv.finAllById(Arrays.asList(idList));
 		Project project = taskList.get(0).getProject();
@@ -274,7 +273,7 @@ public class ImportExportController {
 				row.createCell(NAME_CELL).setCellValue(task.getName());
 				row.createCell(DESCRIPTION_CELL).setCellValue(task.getDescription());
 				row.createCell(TYPE_CELL).setCellValue(((TaskType) task.getType()).getEnum());
-				row.createCell(PRIORITY_CELL).setCellValue(((TaskPriority) task.getPriority()).toString());
+				row.createCell(PRIORITY_CELL).setCellValue(task.getPriority().toString());
 				row.createCell(ESTIMATE_CELL).setCellValue(task.getEstimate());
 				row.createCell(SP_CELL).setCellValue(task.getStory_points());
 				row.createCell(DUE_DATE_CELL).setCellValue(task.getDue_date());
@@ -294,7 +293,7 @@ public class ImportExportController {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	private FileInputStream getExcelTemplate() throws FileNotFoundException, IOException {
+	private FileInputStream getExcelTemplate() throws IOException {
 		URL fileURL = getClass().getResource("/" + TEMPLATE_XLS);
 		File file;
 		try {
@@ -452,15 +451,11 @@ public class ImportExportController {
 	 * Check if cell in row is has correct TaskType value
 	 * 
 	 * @param row
-	 * @param cell
 	 * @return
 	 */
 	private boolean isTaskTypeValid(Row row) {
 		Cell cell = row.getCell(TYPE_CELL);
-		if (cell != null && cell.getCellType() != Cell.CELL_TYPE_BLANK) {
-			return isTaskTypeValid(row.getCell(TYPE_CELL).getStringCellValue());
-		}
-		return true;
+		return !(cell != null && cell.getCellType() != Cell.CELL_TYPE_BLANK) || isTaskTypeValid(row.getCell(TYPE_CELL).getStringCellValue());
 	}
 
 	private boolean isTaskTypeValid(String type) {
@@ -477,15 +472,11 @@ public class ImportExportController {
 	 * Check if cell in row is has correct TaskPriority value
 	 * 
 	 * @param row
-	 * @param cell
 	 * @return
 	 */
 	private boolean isTaskPriorityValid(Row row) {
 		Cell cell = row.getCell(PRIORITY_CELL);
-		if (cell != null && cell.getCellType() != Cell.CELL_TYPE_BLANK) {
-			return isTaskPriorityValid(cell.getStringCellValue());
-		}
-		return true;
+		return !(cell != null && cell.getCellType() != Cell.CELL_TYPE_BLANK) || isTaskPriorityValid(cell.getStringCellValue());
 	}
 
 	private boolean isTaskPriorityValid(String priority) {

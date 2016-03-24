@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -267,12 +266,9 @@ public class Task implements java.io.Serializable {
 	public void updateLoggedWork() {
 		this.loggedWork = new Period();
 		Set<WorkLog> worklg = getRawWorkLog();
-		for (WorkLog activity : worklg) {
-			if (!LogType.ESTIMATE.equals(activity.getType())) {
-				this.loggedWork = PeriodHelper.plusPeriods(this.loggedWork,
-						activity.getActivity());
-			}
-		}
+		worklg.stream().filter(
+				activity -> !LogType.ESTIMATE.equals(activity.getType())).forEach(
+				activity -> this.loggedWork = PeriodHelper.plusPeriods(this.loggedWork,activity.getActivity()));
 	}
 
 	public Period getRawLoggedWork() {

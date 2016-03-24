@@ -176,7 +176,7 @@ public class PeriodHelper {
 		millis += (((long) period.getSeconds()) * ((long) DateTimeConstants.MILLIS_PER_SECOND));
 		millis += (((long) period.getMinutes()) * ((long) DateTimeConstants.MILLIS_PER_MINUTE));
 		millis += (((long) period.getHours()) * ((long) DateTimeConstants.MILLIS_PER_HOUR));
-		millis += (((long) period.getDays()) * ((long) MILLIS_PER_DAY));
+		millis += (((long) period.getDays()) * MILLIS_PER_DAY);
 		millis += (((long) period.getWeeks()) * ((long) DateTimeConstants.MILLIS_PER_WEEK));
 		return millis;
 	}

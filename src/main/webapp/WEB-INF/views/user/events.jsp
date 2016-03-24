@@ -78,7 +78,7 @@ function fetchEvents(page,term){
 			}else{
 				row += 'read">';
 			}
-			row+='<td>'
+			row+='<td>';
 			//Type
 			if(event.type == 'COMMENT'){
 				row+='<i class="fa fa-comment"></i>';
@@ -131,7 +131,7 @@ function printEventsNavigation(page,data){
             onPageChanged: function(e,oldPage,newPage){
             	fetchEvents(newPage-1,'');
             }
-   	}
+   	};
 	$("#eventsNavigation").bootstrapPaginator(options);
 }
 
@@ -219,8 +219,8 @@ function printEventsNavigation(page,data){
 		</c:forEach>
 		default:
 			return 'not yet added ';
-	};
-};
+	}
+	}
 
-	
+
 </script>

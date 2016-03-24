@@ -49,7 +49,7 @@ class SprintData extends AgileData {
 
 	public void createIdeal(String startTime, Float value, String endTime) {
 		ideal.put(startTime, value);
-		ideal.put(endTime, new Float(0));
+		ideal.put(endTime, 0f);
 	}
 
 	public void putToLeft(String time, Float value) {

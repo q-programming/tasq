@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.TransactionManagementConfigure
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(basePackages={"com.qprogramming.tasq.*"})
+@EnableSpringDataWebSupport
 public class PersistenceConfig implements TransactionManagementConfigurer {
 	
 	@Value("${dataSource.driverClassName}")

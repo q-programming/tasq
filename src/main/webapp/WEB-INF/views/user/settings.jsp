@@ -172,7 +172,7 @@
 						var reader = new FileReader();
 						reader.onload = function(e) {
 							$('#avatar_src').attr('src', e.target.result);
-						}
+						};
 						reader.readAsDataURL(file);
 					}
 				};

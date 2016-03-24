@@ -170,15 +170,11 @@ public class Utils {
      * @return
      */
     public static String convertDateTimeToString(Date date) {
-        String result = null;
-        result = new SimpleDateFormat(DATE_FORMAT_TIME).format(date);
-        return result;
+        return new SimpleDateFormat(DATE_FORMAT_TIME).format(date);
     }
 
     public static String convertDateToString(Date date) {
-        String result = null;
-        result = new SimpleDateFormat(DATE_FORMAT).format(date);
-        return result;
+        return new SimpleDateFormat(DATE_FORMAT).format(date);
     }
 
     /**
@@ -191,9 +187,7 @@ public class Utils {
         if (value == null) {
             value = new Period();
         }
-        Float result = Float.valueOf(
-                (float) (PeriodHelper.toStandardDuration(value).getMillis() / MILLIS_PER_SECOND) / SECONDS_PER_HOUR);
-        return result;
+        return (float) (PeriodHelper.toStandardDuration(value).getMillis() / MILLIS_PER_SECOND) / SECONDS_PER_HOUR;
     }
 
     /**
@@ -216,8 +210,7 @@ public class Utils {
      * @return
      */
     public static Period getPeriodValue(Float timelogged) {
-        Period value = new Period(0, 0, (int) (timelogged * Utils.SECONDS_PER_HOUR), 0);
-        return value;
+        return new Period(0, 0, (int) (timelogged * Utils.SECONDS_PER_HOUR), 0);
     }
 
     public static StringBuilder changedFromTo(String what, String from, String to) {

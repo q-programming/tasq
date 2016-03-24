@@ -7,8 +7,8 @@ import com.qprogramming.tasq.task.TaskPriority;
 
 public class DisplayTaskSorter implements Comparator<DisplayTask> {
 
-	public static enum SORTBY {
-		NAME, START_DATE, ID, DUE_DATE, PRIORITY;
+	public enum SORTBY {
+		NAME, START_DATE, ID, DUE_DATE, PRIORITY
 	}
 
 	private SORTBY sortBy;
@@ -21,7 +21,7 @@ public class DisplayTaskSorter implements Comparator<DisplayTask> {
 
 	@Override
 	public int compare(DisplayTask a, DisplayTask b) {
-		int result = 0;
+		int result;
 		switch (sortBy) {
 		case NAME:
 			result = a.getName().compareTo(b.getName());
@@ -48,8 +48,8 @@ public class DisplayTaskSorter implements Comparator<DisplayTask> {
 
 	private int compareByID(DisplayTask a, DisplayTask b) {
 		int result;
-		String aId = "";
-		String bId = "";
+		String aId;
+		String bId;
 		if (a.isSubtask() && b.isSubtask()) {
 			aId = a.getId().split("-")[1].split("/")[1];
 			bId = b.getId().split("-")[1].split("/")[1];

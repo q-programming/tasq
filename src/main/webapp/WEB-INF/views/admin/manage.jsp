@@ -336,7 +336,7 @@
 						var msg = '<s:message code="theme.font.choose"/>&nbsp;<span class="caret">';
 						var label = '<i class="fa fa-plus"></i><i class="fa fa-paint-brush"></i><s:message code="theme.create" />';
 						$("#theme-font").html(msg);
-						$("#theme-label").html(label)
+						$("#theme-label").html(label);
 						$("#name").val("");
 						$("#font").val("");
 						$("#color").val("#000000");
@@ -360,7 +360,7 @@
 
 						var label = '<i class="fa fa-paint-brush"></i><s:message code="theme.edit" /> '
 								+ name;
-						$("#theme-label").html(label)
+						$("#theme-label").html(label);
 						$("#theme-font").html(
 								$('#' + font).html() + " <span class='caret'>");
 						$("#font").val(font);
@@ -440,7 +440,7 @@
 						var reader = new FileReader();
 						reader.onload = function(e) {
 							$('#avatar_src').attr('src', e.target.result);
-						}
+						};
 						reader.readAsDataURL(file);
 					}
 				};
