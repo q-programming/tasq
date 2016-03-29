@@ -4,6 +4,7 @@
 	uri="http://www.springframework.org/security/tags"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <script src="<c:url value="/resources/js/trumbowyg.min.js" />"></script>
+<script src="<c:url value="/resources/js/trumbowyg.editlink.js" />"></script>
 <link href="<c:url value="/resources/css/trumbowyg.min.css" />" rel="stylesheet" media="screen" />
 <security:authentication property="principal" var="user" />
 <c:if test="${user.language ne 'en' }">

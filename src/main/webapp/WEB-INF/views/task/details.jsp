@@ -15,6 +15,7 @@
 <script src="<c:url value="/resources/js/bootstrap-tagsinput.js" />"></script>
 <link href="<c:url value="/resources/css/bootstrap-tagsinput.css" />" rel="stylesheet" media="screen"/>
 <script src="<c:url value="/resources/js/trumbowyg.min.js" />"></script>
+<script src="<c:url value="/resources/js/trumbowyg.editlink.js" />"></script>
 <link href="<c:url value="/resources/css/trumbowyg.min.css" />" rel="stylesheet" media="screen"/>
 <security:authorize access="hasRole('ROLE_ADMIN')">
     <c:set var="is_admin" value="true"/>
