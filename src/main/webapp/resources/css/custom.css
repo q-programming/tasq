@@ -160,6 +160,9 @@ table.togglerContent {
 .left-margin {
 	padding-left: 20px;
 }
+.marginleft_0{
+	margin-left: 0px;
+}
 
 .table_state {
 	margin: 10px;
