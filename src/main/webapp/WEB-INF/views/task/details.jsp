@@ -818,8 +818,10 @@
                     <form id="commentForm" name="commentForm" method="post"
                           action="<c:url value="/task/comment"/>">
                         <input type="hidden" name="task_id" value="${task.id}">
-                        <textarea id="comment-message" class="form-control comment-message-text" rows="3" name="message"
+                        <textarea id="comment-message" class="form-control comment-message-text max4kchars" rows="3"
+                                  name="message"
                                   autofocus></textarea>
+                        <span class="remain-span"><span class="remain"></span> <s:message code="comment.charsLeft"/></span>
                         <div style="margin-top: 5px">
                             <button class="btn btn-default btn-sm" type="submit">
                                 <s:message code="main.add" text="Add"/>
@@ -871,9 +873,11 @@
                             <input type="hidden" name="task_id" name="task_id"
                                    value="${task.id}"> <input type="hidden"
                                                               name="comment_id" id="comment_id">
-                            <textarea id="modal-comment-message" type="text" class="form-control comment-message-text"
+                            <textarea id="modal-comment-message" type="text"
+                                      class="form-control comment-message-text max4kchars"
                                       rows="5"
                                       name="message" autofocus></textarea>
+                            <span class="remain-span"><span class="remain"></span> <s:message code="comment.charsLeft"/></span>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -902,6 +906,7 @@
         <c:if test="${not task.subtask}">
         getSprints();
         </c:if>
+        var maxchars = 4000;
 
         //--------------------------------------Coments----------------------------
         function toggle_comment() {
@@ -923,6 +928,21 @@
                 '|', 'link',
                 '|', btnsGrps.justify,
                 '|', btnsGrps.lists]
+        }).on('tbwchange ', function () {
+            var tlength = $(this).val().length;
+            remain = maxchars - parseInt(tlength);
+            if (tlength > 3500) {
+                $(".remain-span").show();
+                $('.remain').text(remain);
+                if(remain <0){
+                    $('.remain-span').addClass("invalid");
+                }else{
+                    $('.remain-span').removeClass("invalid");
+                }
+            }else
+            {
+                $(".remain-span").hide();
+            }
         });
 
 
@@ -947,7 +967,8 @@
             var message = commentDiv.children(".comment-message").html();
 //		var message = $(this).data('message');
             var comment_id = $(this).data('comment_id');
-            $(".trumbowyg-editor").html(message);
+            $("#modal-comment-message").trumbowyg('html', message);
+            //$(".trumbowyg-editor").html(message);
             $(".modal-body #comment_id").val(comment_id);
         });
 

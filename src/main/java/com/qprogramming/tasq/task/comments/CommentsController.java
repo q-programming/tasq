@@ -151,6 +151,11 @@ public class CommentsController {
 //                    msg.getMessage("comment.htmlTag", null, locale));
 //            return false;
 //        }
+        else if (message.length() > 4000){
+            MessageHelper.addErrorAttribute(ra,
+                    msg.getMessage("comment.tooLong", new Object[]{message.length()}, locale));
+            return false;
+        }
         return true;
     }
 

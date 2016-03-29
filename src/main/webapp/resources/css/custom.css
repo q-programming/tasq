@@ -577,6 +577,12 @@ li.wider {
 .inputcheck.invalid {
 	color: red;
 }
+.remain-span{
+	display: none;
+}
+.invalid{
+	color: red;
+}
 
 .inputcheck.valid {
 	color: green;
