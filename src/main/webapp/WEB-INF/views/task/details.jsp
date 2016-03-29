@@ -587,19 +587,19 @@
                             <c:forEach items="${files}" var="file">
                                 <c:choose>
                                     <c:when
-                                            test="${fn:endsWith(file,'pptx') || fn:endsWith(file,'ppt') || fn:endsWith(file,'pps')}">
+                                            test="${myfn:endsWithIgnoreCase(file,'pptx') || myfn:endsWithIgnoreCase(file,'ppt') || myfn:endsWithIgnoreCase(file,'pps')}">
                                         <c:set var="file_type">fa-file-powerpoint-o</c:set>
                                     </c:when>
                                     <c:when
-                                            test="${fn:endsWith(file,'doc') || fn:endsWith(file,'docx') || fn:endsWith(file,'rtf') || fn:endsWith(file,'txt') || fn:endsWith(file,'odt')}">
+                                            test="${myfn:endsWithIgnoreCase(file,'doc') || myfn:endsWithIgnoreCase(file,'docx') || myfn:endsWithIgnoreCase(file,'rtf') || myfn:endsWithIgnoreCase(file,'txt') || myfn:endsWithIgnoreCase(file,'odt')}">
                                         <c:set var="file_type">fa-file-word-o</c:set>
                                     </c:when>
                                     <c:when
-                                            test="${fn:endsWith(file,'xls') || fn:endsWith(file,'xlsx') || fn:endsWith(file,'ods') || fn:endsWith(file,'csv')}">
+                                            test="${myfn:endsWithIgnoreCase(file,'xls') || myfn:endsWithIgnoreCase(file,'xlsx') || myfn:endsWithIgnoreCase(file,'ods') || myfn:endsWithIgnoreCase(file,'csv')}">
                                         <c:set var="file_type">fa-file-excel-o</c:set>
                                     </c:when>
                                     <c:when
-                                            test="${fn:endsWith(file,'jpg') || fn:endsWith(file,'png') || fn:endsWith(file,'gif')}">
+                                            test="${myfn:endsWithIgnoreCase(file,'jpg') || myfn:endsWithIgnoreCase(file,'png') || myfn:endsWithIgnoreCase(file,'gif')}">
                                         <c:set var="file_type">fa-file-image-o</c:set>
                                     </c:when>
 

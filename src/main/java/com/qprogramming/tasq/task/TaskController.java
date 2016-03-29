@@ -922,6 +922,7 @@ public class TaskController {
                 InputStream is = new FileInputStream(file);
                 response.setContentType("image/jpeg, image/jpg, image/png, image/gif");
                 IOUtils.copyLarge(is, response.getOutputStream());
+                response.flushBuffer();
                 response.getOutputStream().close();
             }
         } else {
@@ -1351,7 +1352,7 @@ public class TaskController {
     /**
      * Get's tasks all files
      *
-     * @param project
+     * @param task
      * @return
      */
     private List<String> getTaskFiles(Task task) {

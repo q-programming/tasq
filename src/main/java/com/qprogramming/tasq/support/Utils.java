@@ -2,6 +2,7 @@ package com.qprogramming.tasq.support;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.task.Task;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.Hibernate;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.Period;
@@ -145,6 +146,11 @@ public class Utils {
             LOG.error(e.getMessage());
         }
         return result;
+    }
+
+    public static boolean endsWithIgnoreCase(String input, String substring) {
+        return StringUtils.endsWithIgnoreCase(input, substring);
+
     }
 
     /**
