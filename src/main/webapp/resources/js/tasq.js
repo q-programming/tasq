@@ -113,21 +113,35 @@ function getTaskType(type) {
     ;
 }
 var currentTag;
-$(document).on("click",".tag_filter" ,function () {
+$(document).on("click", ".tag_filter", function () {
     //first show all
     $(".agile-card,.agile-list").each(function () {
         $(this).show();
     });
+    //reset SP to original value
+    $(".total-points").each(function () {
+        $(this).text($(this).attr("data-count"));
+    })
     $(".tag_filter").each(function () {
         $(this).removeClass("not_selected");
     });
     var tag = $(this).data("name");
     if (tag != currentTag) {
+        $(".total-points").text("0");
         $(".agile-card,.agile-list").each(function () {
-            var ids = $(this).data("id");
+            var sprintId = $(this).attr('sprint-id');
             var tags = $(this).data("tags").split(",");
             if (!($.inArray(tag, tags) >= 0)) {
                 $(this).hide();
+            } else {
+                var points_span = $(this).find(".points-div > .point-value")
+                if (points_span) {
+                    if (sprintId) {
+                        var points = parseInt(points_span.attr('data-points'));
+                        var curr_value = parseInt($("#sprint_points_" + sprintId).text());
+                        $("#sprint_points_" + sprintId).text(curr_value + points)
+                    }
+                }
             }
         });
         $('.tag_filter').not(this).each(function () {
