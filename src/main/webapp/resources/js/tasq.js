@@ -138,8 +138,10 @@ $(document).on("click", ".tag_filter", function () {
                 if (points_span) {
                     if (sprintId) {
                         var points = parseInt(points_span.attr('data-points'));
-                        var curr_value = parseInt($("#sprint_points_" + sprintId).text());
-                        $("#sprint_points_" + sprintId).text(curr_value + points)
+                        if (!isNaN(points)) {
+                            var curr_value = parseInt($("#sprint_points_" + sprintId).text());
+                            $("#sprint_points_" + sprintId).text(curr_value + points)
+                        }
                     }
                 }
             }
