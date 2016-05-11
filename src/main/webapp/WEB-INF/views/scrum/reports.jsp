@@ -10,8 +10,6 @@
         src="<c:url value="/resources/js/jqplot.enhancedLegendRenderer.min.js"/>"></script>
 <script language="javascript" type="text/javascript"
         src="<c:url value="/resources/js/jqplot.dateAxisRenderer.min.js"/>"></script>
-<%-- <link href="<c:url value="/resources/css/docs.min.css" />" --%>
-<!-- rel="stylesheet" media="screen" /> -->
 <link rel="stylesheet" type="text/css"
       href="<c:url value="/resources/css/jquery.jqplot.min.css"/>"/>
 <script language="javascript" type="text/javascript"
@@ -156,7 +154,6 @@
             $.get('<c:url value="/${project.projectId}/sprint-data"/>', {sprint: sprintNo}, function (result) {
                 //Fill arrays of data
                 //console.log(result);
-                timePresent = false;
                 $.each(result.timeBurned, function (key, val) {
                     if (val != 0) {
                         timePresent = true;
@@ -293,8 +290,9 @@
                     axes: {
                         xaxis: {
                             renderer: $.jqplot.DateAxisRenderer,
-                            tickOptions: {formatString: '%#d-%m'},
-                            pad: 0
+//				        tickOptions:{formatString:'%#d-%m'},
+                            pad: 0,
+                            min: left[0][0]
                         },
                         yaxis: {
                             pad: 0,
@@ -312,9 +310,15 @@
                     series: [
                         {
                             label: '<s:message code="agile.remaining"/>',
+                            rendererOptions: {
+//							smooth: true
+                            }
                         },
                         {
                             label: '<s:message code="agile.burned"/>',
+                            rendererOptions: {
+//							smooth: true
+                            }
                         },
                         {
                             color: '#B34202',

@@ -127,7 +127,7 @@
                                         <input type="hidden" name="taskID" value="${task.id}">
                                     </form>
                                 </div>
-                                <div style="display: table-cell">
+                                <div class="points-div" style="display: table-cell">
                                     <c:if test="${task.story_points ne 0 && task.estimated}">
 								<span
                                         class="badge theme point-value" data-points="${task.story_points}">
@@ -144,8 +144,8 @@
                     </div>
                     <div style="text-align: right;margin-top:5px">
                         <s:message code="agile.storypoints.total"/>
-                        <span id="sprint_points_${sprint.id}" class="badge theme"
-                              style="margin: 0px 5px;">${count}</span>
+                        <span id="sprint_points_${sprint.id}" class="badge theme total-points" sprint-id="${sprint.id}"
+                              style="margin: 0px 5px;" data-count="${count}">${count}</span>
                     </div>
                 </div>
                 <hr>

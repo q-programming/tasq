@@ -22,8 +22,9 @@ import com.qprogramming.tasq.task.worklog.WorkLogService;
 import org.hibernate.Hibernate;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
-import org.joda.time.LocalDate;
 import org.joda.time.Period;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +54,7 @@ public class SprintController {
     private AgileService agileSrv;
     private WorkLogService wrkLogSrv;
     private MessageSource msg;
+    private DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
 
     @Autowired
     public SprintController(ProjectService prjSrv, TaskService taskSrv,
@@ -110,7 +112,6 @@ public class SprintController {
                 throw new TasqAuthException(msg);
             }
             model.addAttribute("project", project);
-            // Don't show closed tasks in backlog view
             List<Task> taskList = taskSrv.findAllByProject(project);
             //init sprints data
             taskList.stream().parallel().forEach(task -> Hibernate.initialize(task.getSprints()));
@@ -118,23 +119,25 @@ public class SprintController {
                     true));
             Set<String> tags = new HashSet<>();
             List<DisplayTask> resultList = taskSrv.convertToDisplay(taskList, true);
-            for (DisplayTask displayTask : resultList) {
-                tags.addAll(displayTask.getTags());
-            }
-            Map<Sprint, List<DisplayTask>> sprint_result = new LinkedHashMap<Sprint, List<DisplayTask>>();
+
+            Map<Sprint, List<DisplayTask>> sprint_result = new LinkedHashMap<>();
             List<Sprint> sprintList = agileSrv.findByProjectIdAndFinished(
                     project.getId(), false);
             Collections.sort(sprintList, new SprintSorter());
             // Assign tasks to sprints in order to display them
             for (Sprint sprint : sprintList) {
-                List<DisplayTask> sprint_tasks = new LinkedList<DisplayTask>();
+                List<DisplayTask> sprint_tasks = new LinkedList<>();
                 taskList.stream().parallel().filter(task -> task.getSprints().contains(sprint)).forEach(task -> {
                     DisplayTask displayTask = new DisplayTask(task);
                     displayTask.setTagsFromTask(task.getTags());
+                    tags.addAll(displayTask.getTags());
                     sprint_tasks.add(displayTask);
                 });
                 sprint_result.put(sprint, sprint_tasks);
             }
+            resultList.stream()
+                    .filter(displayTask -> !TaskState.CLOSED.equals(displayTask.getState()))
+                    .forEach(displayTask -> tags.addAll(displayTask.getTags()));
             model.addAttribute("tags", tags);
             model.addAttribute("sprint_result", sprint_result);
             model.addAttribute("tasks", resultList);
@@ -574,12 +577,10 @@ public class SprintController {
      */
     private SprintData fillLeftAndBurned(SprintData result, Sprint sprint,
                                          List<WorkLog> wrkList, boolean timeTracked) {
-        Map<LocalDate, Float> leftMap = fillLeftMap(wrkList, timeTracked);
-        Map<LocalDate, Float> burnedMap = fillBurnednMap(wrkList, timeTracked);
-        LocalDate startTime = new LocalDate(sprint.getRawStart_date());
-        LocalDate endTime = new LocalDate(sprint.getRawEnd_date());
-        int sprintDays = Days.daysBetween(startTime, endTime).getDays() + 1;
-        Integer totalPoints = 0;
+        Map<DateTime, Float> leftMap = fillLeftMap(wrkList, timeTracked);
+        Map<DateTime, Float> burnedMap = fillBurnedMap(wrkList, timeTracked);
+        DateTime startTime = new DateTime(sprint.getRawStart_date());
+        DateTime endTime = new DateTime(sprint.getRawEnd_date());
         SprintData data = result;
         Float remaining_estimate;
         Float burned = 0f;
@@ -589,30 +590,45 @@ public class SprintController {
             remaining_estimate = new Float(sprint.getTotalStoryPoints());
         }
         // Fill ideal burndown
-        data.createIdeal(startTime.toString(), remaining_estimate,
-                endTime.toString());
+        data.createIdeal(fmt.print(startTime), remaining_estimate,
+                fmt.print(endTime));
         // Iterate over sprint days
-        for (int i = 0; i < sprintDays; i++) {
-            LocalDate date = startTime.plusDays(i);
+        Integer totalPoints;
+        if (burnedMap.size() > leftMap.size()) {
+            totalPoints = iterateOverLongerMap(burnedMap, leftMap, burnedMap, data, remaining_estimate, burned);
+        } else {
+            totalPoints = iterateOverLongerMap(leftMap, leftMap, burnedMap, data, remaining_estimate, burned);
+        }
+        //ensure left and burned final values are filled
+        if (endTime.isBefore(DateTime.now())) {
+            data.fillEnds(fmt.print(endTime));
+        }
+        if (!timeTracked) {
+            data.setTotalPoints(totalPoints);
+        }
+        return data;
+    }
+
+    private Integer iterateOverLongerMap(Map<DateTime, Float> longerMap, Map<DateTime, Float> leftMap, Map<DateTime, Float> burnedMap, SprintData data, Float remaining_estimate, Float burned) {
+        Integer totalPoints = new Integer(0);
+        for (Entry<DateTime, Float> entry : longerMap.entrySet()) {
+            DateTime date = entry.getKey();
             Float value = leftMap.get(date);
             Float valueBurned = burnedMap.get(date);
             value = value == null ? 0 : value;
             valueBurned = valueBurned == null ? 0 : valueBurned;
             remaining_estimate -= value;
             burned += valueBurned;
-            if (date.isAfter(LocalDate.now())) {
-                data.putToLeft(date.toString(), null);
-                data.getBurned().put(date.toString(), null);
+            if (date.isAfter(DateTime.now())) {
+                data.putToLeft(fmt.print(date), null);
+                data.getBurned().put(fmt.print(date), null);
             } else {
-                data.putToLeft(date.toString(), remaining_estimate);
-                data.getBurned().put(date.toString(), burned);
+                data.putToLeft(fmt.print(date), remaining_estimate);
+                data.getBurned().put(fmt.print(date), burned);
                 totalPoints = burned.intValue();
             }
         }
-        if (!timeTracked) {
-            data.setTotalPoints(totalPoints);
-        }
-        return data;
+        return totalPoints;
     }
 
     /**
@@ -621,24 +637,14 @@ public class SprintController {
      * @param worklogList list of events with task closed event
      * @return
      */
-    private Map<LocalDate, Float> fillLeftMap(List<WorkLog> worklogList,
-                                              boolean time) {
-        Map<LocalDate, Float> burndownMap = new LinkedHashMap<LocalDate, Float>();
+    private Map<DateTime, Float> fillLeftMap(List<WorkLog> worklogList,
+                                             boolean time) {
+        Map<DateTime, Float> leftMap = new LinkedHashMap<>();
         for (WorkLog workLog : worklogList) {
-            LocalDate dateLogged = new LocalDate(workLog.getRawTime());
-            if (time) {
-                Float value = burndownMap.get(dateLogged);
-                value = addOrSubstractTime(workLog, value);
-                burndownMap.put(dateLogged, value);
-            } else {
-                if (workLog.getActivity() == null) {
-                    Float value = burndownMap.get(dateLogged);
-                    value = addOrSubstractPoints(workLog, value);
-                    burndownMap.put(dateLogged, value);
-                }
-            }
+            DateTime dateLogged = new DateTime(workLog.getRawTime());
+            timeOrPointsUpdate(time, leftMap, workLog, dateLogged);
         }
-        return burndownMap;
+        return leftMap;
     }
 
     /**
@@ -648,30 +654,32 @@ public class SprintController {
      * @param time
      * @return
      */
-    private Map<LocalDate, Float> fillBurnednMap(List<WorkLog> worklogList,
-                                                 boolean time) {
-        Map<LocalDate, Float> burndedMap = new LinkedHashMap<LocalDate, Float>();
+    private Map<DateTime, Float> fillBurnedMap(List<WorkLog> worklogList, boolean time) {
+        Map<DateTime, Float> burnedMap = new LinkedHashMap<>();
         for (WorkLog workLog : worklogList) {
             if (!LogType.ESTIMATE.equals(workLog.getType())
                     && !LogType.TASKSPRINTADD.equals(workLog.getType())
                     && !LogType.TASKSPRINTREMOVE.equals(workLog.getType())) {
-                LocalDate dateLogged = new LocalDate(workLog.getRawTime());
-                if (time) {
-                    Float value = burndedMap.get(dateLogged);
-                    // If task reopened then re-add SP
-                    value = addOrSubstractTime(workLog, value);
-                    burndedMap.put(dateLogged, value);
-                } else {
-                    if (workLog.getActivity() == null) {
-                        Float value = burndedMap.get(dateLogged);
-                        // If task reopened then re-add SP
-                        value = addOrSubstractPoints(workLog, value);
-                        burndedMap.put(dateLogged, value);
-                    }
-                }
+                DateTime dateLogged = new DateTime(workLog.getRawTime());
+                timeOrPointsUpdate(time, burnedMap, workLog, dateLogged);
             }
         }
-        return burndedMap;
+        return burnedMap;
+    }
+
+
+    private void timeOrPointsUpdate(boolean time, Map<DateTime, Float> map, WorkLog workLog, DateTime dateLogged) {
+        if (time) {
+            Float value = map.get(dateLogged);
+            value = addOrSubstractTime(workLog, value);
+            map.put(dateLogged, value);
+        } else {
+            if (workLog.getActivity() == null) {
+                Float value = map.get(dateLogged);
+                value = addOrSubstractPoints(workLog, value);
+                map.put(dateLogged, value);
+            }
+        }
     }
 
     /**
