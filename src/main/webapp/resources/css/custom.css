@@ -709,6 +709,9 @@ body {
 /*     margin-left: -8px; */
 /*     border-radius: 0px; */
 }
+a.black-link{
+	color:black;
+}
 
 .nav-sidebar>li>a {
 	padding-right: 20px;

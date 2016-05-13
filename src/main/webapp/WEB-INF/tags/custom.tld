@@ -23,4 +23,10 @@
         <function-signature>boolean endsWithIgnoreCase(java.lang.String, java.lang.String)
         </function-signature>
     </function>
+    <function>
+        <name>stripHtml</name>
+        <function-class>com.qprogramming.tasq.support.Utils</function-class>
+        <function-signature>java.lang.String stripHtml(java.lang.String)
+        </function-signature>
+    </function>
 </taglib>

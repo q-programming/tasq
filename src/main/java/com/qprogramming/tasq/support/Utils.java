@@ -6,6 +6,7 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.Hibernate;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.Period;
+import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -242,6 +243,10 @@ public class Utils {
         message.append(" &#10151; ");
         message.append(current);
         return message.toString();
+    }
+
+    public static String stripHtml(String string){
+        return Jsoup.parse(string).text();
     }
 
     /**

@@ -151,6 +151,9 @@ span.badge.theme.zero {
 .table-hover>tbody>tr.bg-color:hover>td, .table-hover>tbody>tr.bg-color:hover>th {
 	background-color: rgb(${rgbcolor10});
 }
+.active-project{
+	background-color: rgba(${rgbcolor}, 0.1);
+}
 
 span.tag.label.label-info.theme {
 	background-color: rgba(${rgbcolor}, 0.8);
