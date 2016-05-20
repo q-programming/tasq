@@ -54,10 +54,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -85,6 +82,9 @@ public class TaskController {
     private static final String START = "start";
     private static final String STOP = "stop";
     private static final String CANCEL = "cancel";
+    private static final String REDIRECT_TASK = "redirect:/task/";
+    private static final String REDIRECT = "redirect:";
+    private static final String ERROR_ACCES_RIGHTS = "error.accesRights";
 
     private TaskService taskSrv;
     private ProjectService projectSrv;
@@ -137,8 +137,8 @@ public class TaskController {
             // check if can edit
             if (!projectSrv.canEdit(project)) {
                 MessageHelper.addErrorAttribute(ra,
-                        msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
-                return "redirect:" + request.getHeader("Referer");
+                        msg.getMessage(ERROR_ACCES_RIGHTS, null, Utils.getCurrentLocale()));
+                return REDIRECT + request.getHeader("Referer");
             }
             Task task;
             try {
@@ -199,7 +199,7 @@ public class TaskController {
                     wlSrv.addWorkLogNoTask(linked + " - " + taskID, project, LogType.TASK_LINK);
                 }
             }
-            return "redirect:/task/" + taskID;
+            return REDIRECT_TASK + taskID;
         }
         return null;
     }
@@ -248,13 +248,13 @@ public class TaskController {
         // check if can edit
         if (!projectSrv.canEdit(task.getProject())
                 && (!Roles.isUser() | !task.getOwner().equals(Utils.getCurrentAccount()))) {
-            MessageHelper.addErrorAttribute(ra, msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
-            return "redirect:" + request.getHeader("Referer");
+            MessageHelper.addErrorAttribute(ra, msg.getMessage(ERROR_ACCES_RIGHTS, null, Utils.getCurrentLocale()));
+            return REDIRECT + request.getHeader("Referer");
         }
         if (task.getState().equals(TaskState.CLOSED)) {
             ResultData result = taskIsClosed(ra, request, task);
             MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
-            return "redirect:" + request.getHeader("Referer");
+            return REDIRECT + request.getHeader("Referer");
         }
         StringBuilder message = new StringBuilder(Utils.TABLE);
         if (!task.getName().equalsIgnoreCase(taskForm.getName())) {
@@ -280,8 +280,6 @@ public class TaskController {
         }
         if ((taskForm.getRemaining() != null) && (!task.getRemaining().equalsIgnoreCase(taskForm.getRemaining()))) {
             Period remaining = PeriodHelper.inFormat(taskForm.getRemaining());
-            Period difference = PeriodHelper.minusPeriods(remaining, task.getRawEstimate());
-            // only add estimate change event if task is in sprint
             message.append(Utils.changedFromTo(REMAINING_TXT, task.getRemaining(), taskForm.getRemaining()));
             task.setRemaining(remaining);
         }
@@ -328,7 +326,7 @@ public class TaskController {
         if (message.length() > 37) {
             wlSrv.addActivityLog(task, message.toString(), LogType.EDITED);
         }
-        return "redirect:/task/" + taskID;
+        return REDIRECT_TASK + taskID;
     }
 
     private void updateWatched(Task task) {
@@ -469,8 +467,8 @@ public class TaskController {
             return null;
         }
         if (!projectSrv.canEdit(project)) {
-            MessageHelper.addErrorAttribute(ra, msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
-            return "redirect:" + request.getHeader("Referer");
+            MessageHelper.addErrorAttribute(ra, msg.getMessage(ERROR_ACCES_RIGHTS, null, Utils.getCurrentLocale()));
+            return REDIRECT + request.getHeader("Referer");
         }
         Task subTask = taskForm.createSubTask();
         // build ID
@@ -496,7 +494,7 @@ public class TaskController {
         // TODO save in subdir?
         // saveTaskFiles(taskForm.getFiles(), subTask);
         wlSrv.addActivityLog(subTask, "", LogType.SUBTASK);
-        return "redirect:/task/" + id;
+        return REDIRECT_TASK + id;
     }
 
     /**
@@ -550,15 +548,15 @@ public class TaskController {
                 } catch (IllegalArgumentException e) {
                     MessageHelper.addErrorAttribute(ra,
                             msg.getMessage("error.estimateFormat", null, Utils.getCurrentLocale()));
-                    return "redirect:" + request.getHeader("Referer");
+                    return REDIRECT + request.getHeader("Referer");
                 }
             } else {
                 MessageHelper.addErrorAttribute(ra,
-                        msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
-                return "redirect:" + request.getHeader("Referer");
+                        msg.getMessage(ERROR_ACCES_RIGHTS, null, Utils.getCurrentLocale()));
+                return REDIRECT + request.getHeader("Referer");
             }
         }
-        return "redirect:" + request.getHeader("Referer");
+        return REDIRECT + request.getHeader("Referer");
     }
 
     @Transactional
@@ -595,14 +593,12 @@ public class TaskController {
                     }
                 }
                 if (closeSubtasks != null && closeSubtasks) {
-                    if (task.getSubtasks() > 0) {
-                        List<Task> subtasks = taskSrv.findSubtasks(task);
-                        for (Task subtask : subtasks) {
-                            wlSrv.addActivityLog(subtask, "", LogType.CLOSED);
-                            subtask.setState(TaskState.CLOSED);
-                        }
-                        taskSrv.save(subtasks);
-                    }
+                    List<Task> subtasks = taskSrv.findSubtasks(task);
+                    subtasks.stream().filter(subtask -> !TaskState.CLOSED.equals(subtask.getState())).forEach(subtask -> {
+                        wlSrv.addActivityLog(subtask, "", LogType.CLOSED);
+                        subtask.setState(TaskState.CLOSED);
+                    });
+                    taskSrv.save(subtasks);
                 }
 
                 TaskState oldState = (TaskState) task.getState();
@@ -678,8 +674,8 @@ public class TaskController {
             // check if can edit
             if (!projectSrv.canEdit(task.getProject()) || !Roles.isPowerUser()) {
                 MessageHelper.addErrorAttribute(ra,
-                        msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
-                return "redirect:" + request.getHeader("Referer");
+                        msg.getMessage(ERROR_ACCES_RIGHTS, null, Utils.getCurrentLocale()));
+                return REDIRECT + request.getHeader("Referer");
             }
             switch (action) {
                 case START: {
@@ -688,7 +684,7 @@ public class TaskController {
                             && !("").equals(account.getActive_task()[0])) {
                         MessageHelper.addWarningAttribute(ra, msg.getMessage("task.stopTime.warning",
                                 new Object[]{account.getActive_task()[0]}, Utils.getCurrentLocale()));
-                        return "redirect:" + request.getHeader("Referer");
+                        return REDIRECT + request.getHeader("Referer");
                     }
                     account.startTimerOnTask(task);
                     accSrv.update(account);
@@ -704,13 +700,13 @@ public class TaskController {
                     Account account = Utils.getCurrentAccount();
                     account.clearActive_task();
                     accSrv.update(account);
-                    return "redirect:/task/" + taskID;
+                    return REDIRECT_TASK + taskID;
                 }
             }
         } else {
-            return "redirect:" + request.getHeader("Referer");
+            return REDIRECT + request.getHeader("Referer");
         }
-        return "redirect:" + request.getHeader("Referer");
+        return REDIRECT + request.getHeader("Referer");
     }
 
     @RequestMapping(value = "/task/assign", method = RequestMethod.POST)
@@ -723,7 +719,7 @@ public class TaskController {
                 if (task.getState().equals(TaskState.CLOSED)) {
                     ResultData result = taskIsClosed(ra, request, task);
                     MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
-                    return "redirect:" + request.getHeader("Referer");
+                    return REDIRECT + request.getHeader("Referer");
 
                 }
                 if (("").equals(email) && task.getAssignee() != null) {
@@ -738,8 +734,8 @@ public class TaskController {
                         // check if can edit
                         if (!projectSrv.canEdit(task.getProject())) {
                             MessageHelper.addErrorAttribute(ra,
-                                    msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
-                            return "redirect:" + request.getHeader("Referer");
+                                    msg.getMessage(ERROR_ACCES_RIGHTS, null, Utils.getCurrentLocale()));
+                            return REDIRECT + request.getHeader("Referer");
                         }
                         task.setAssignee(assignee);
                         task.setLastUpdate(new Date());
@@ -755,7 +751,7 @@ public class TaskController {
                 throw new TasqAuthException(msg);
             }
         }
-        return "redirect:" + request.getHeader("Referer");
+        return REDIRECT + request.getHeader("Referer");
 
     }
 
@@ -767,7 +763,7 @@ public class TaskController {
     public String assignMe(@RequestParam(value = "id") String taskID, RedirectAttributes ra,
                            HttpServletRequest request) {
         assignMeToTask(taskID);
-        return "redirect:" + request.getHeader("Referer");
+        return REDIRECT + request.getHeader("Referer");
     }
 
     @RequestMapping(value = "/task/assignMe", method = RequestMethod.POST)
@@ -795,7 +791,7 @@ public class TaskController {
             if (task.getState().equals(TaskState.CLOSED)) {
                 ResultData result = taskIsClosed(ra, request, task);
                 MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
-                return "redirect:" + request.getHeader("Referer");
+                return REDIRECT + request.getHeader("Referer");
             }
             TaskPriority newPriority = TaskPriority.valueOf(priority);
             if (!task.getPriority().equals(newPriority) && projectSrv.canEdit(task.getProject())
@@ -814,7 +810,7 @@ public class TaskController {
                 wlSrv.addActivityLog(task, message.toString(), LogType.PRIORITY);
             }
         }
-        return "redirect:" + request.getHeader("Referer");
+        return REDIRECT + request.getHeader("Referer");
     }
 
     @RequestMapping(value = "/task/delete", method = RequestMethod.GET)
@@ -832,7 +828,7 @@ public class TaskController {
                     result = removeTaskRelations(subtask);
                     if (ResultData.ERROR.equals(result.code)) {
                         MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
-                        return "redirect:" + request.getHeader("Referer");
+                        return REDIRECT + request.getHeader("Referer");
                     }
                 }
                 taskSrv.deleteAll(subtasks);
@@ -840,7 +836,7 @@ public class TaskController {
                 result = removeTaskRelations(task);
                 if (result.code.equals(ResultData.ERROR)) {
                     MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
-                    return "redirect:" + request.getHeader("Referer");
+                    return REDIRECT + request.getHeader("Referer");
                 }
                 // delete files
                 // leave message and clear all
@@ -863,12 +859,12 @@ public class TaskController {
             // TODO add message about removed task
             return "redirect:/";
         }
-        return "redirect:" + request.getHeader("Referer");
+        return REDIRECT + request.getHeader("Referer");
     }
 
     @RequestMapping(value = "/task/attachFiles", method = RequestMethod.POST)
     public String attacheFiles(@RequestParam String taskID, @RequestParam List<MultipartFile> files,
-                               RedirectAttributes ra, HttpServletRequest request, Model model) {
+                               HttpServletRequest request) {
         Task task = taskSrv.findById(taskID);
         if (task != null) {
             // check if can edit
@@ -877,7 +873,7 @@ public class TaskController {
             }
             saveTaskFiles(files, task);
         }
-        return "redirect:" + request.getHeader("Referer");
+        return REDIRECT + request.getHeader("Referer");
     }
 
     @RequestMapping(value = "/task/{id}/file", method = RequestMethod.GET)
@@ -885,22 +881,19 @@ public class TaskController {
                              HttpServletRequest request, HttpServletResponse response, RedirectAttributes ra) throws IOException {
         Task task = taskSrv.findById(id);
         if (task.getProject().getParticipants().contains(Utils.getCurrentAccount())) {
-            InputStream is = null;
-            try {
-                File file = new File(taskSrv.getTaskDirectory(task) + File.separator + filename);
-                if (file != null) {
-                    response.setHeader("content-Disposition", "attachment; filename=" + filename);
-                    is = new FileInputStream(file);
-                    IOUtils.copyLarge(is, response.getOutputStream());
-                }
+            File file = new File(taskSrv.getTaskDirectory(task) + File.separator + filename);
+            response.setHeader("content-Disposition", "attachment; filename=" + filename);
+            try (InputStream is = new FileInputStream(file)) {
+                IOUtils.copyLarge(is, response.getOutputStream());
+            } catch (FileNotFoundException e) {
+                LOG.error("Error while writing to output stream , filename '{}'", filename, e);
             } catch (IOException e) {
                 LOG.error("Error while writing to output stream , filename '{}'", filename, e);
             } finally {
-                is.close();
                 response.flushBuffer();
             }
         } else {
-            MessageHelper.addErrorAttribute(ra, msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
+            MessageHelper.addErrorAttribute(ra, msg.getMessage(ERROR_ACCES_RIGHTS, null, Utils.getCurrentLocale()));
         }
     }
 
@@ -912,21 +905,26 @@ public class TaskController {
     }
 
     @RequestMapping(value = "/task/{id}/imgfile", method = RequestMethod.GET)
-    public void showImageFile(@PathVariable String id, @RequestParam("get") String filename, HttpServletRequest request,
+    public void showImageFile(@PathVariable String id, @RequestParam("get") String filename,
                               HttpServletResponse response, RedirectAttributes ra) throws IOException {
         Task task = taskSrv.findById(id);
         if (task.getProject().getParticipants().contains(Utils.getCurrentAccount())) {
             File file = new File(taskSrv.getTaskDirectory(task) + File.separator + filename);
-            if (file != null) {
-                response.setHeader("content-Disposition", "attachment; filename=" + filename);
-                InputStream is = new FileInputStream(file);
+            response.setHeader("content-Disposition", "attachment; filename=" + filename);
+            try (InputStream is = new FileInputStream(file)) {
                 response.setContentType("image/jpeg, image/jpg, image/png, image/gif");
                 IOUtils.copyLarge(is, response.getOutputStream());
+            } catch (FileNotFoundException e) {
+                LOG.error("File not found filename '{}'", filename, e);
+            } catch (IOException e) {
+                LOG.error("Error while writing to output stream , filename '{}'", filename, e);
+            } finally {
                 response.flushBuffer();
                 response.getOutputStream().close();
             }
+
         } else {
-            MessageHelper.addErrorAttribute(ra, msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
+            MessageHelper.addErrorAttribute(ra, msg.getMessage(ERROR_ACCES_RIGHTS, null, Utils.getCurrentLocale()));
         }
     }
 
@@ -934,7 +932,7 @@ public class TaskController {
     public void showSubTaskImageFile(@PathVariable String id, @PathVariable String subid,
                                      @RequestParam("get") String filename, HttpServletRequest request, HttpServletResponse response,
                                      RedirectAttributes ra) throws IOException {
-        showImageFile(id + "/" + subid, filename, request, response, ra);
+        showImageFile(id + "/" + subid, filename, response, ra);
     }
 
     @RequestMapping(value = "/task/removeFile", method = RequestMethod.GET)
@@ -943,7 +941,7 @@ public class TaskController {
         Task task = taskSrv.findById(id);
         if (!projectSrv.canEdit(task.getProject())
                 && (!Roles.isUser() || !task.getOwner().equals(Utils.getCurrentAccount()))) {
-            MessageHelper.addErrorAttribute(ra, msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
+            MessageHelper.addErrorAttribute(ra, msg.getMessage(ERROR_ACCES_RIGHTS, null, Utils.getCurrentLocale()));
         } else {
             File file = new File(taskSrv.getTaskDirectory(task) + File.separator + filename);
             if (file != null) {
@@ -952,7 +950,7 @@ public class TaskController {
                         msg.getMessage("task.file.deleted", new Object[]{filename}, Utils.getCurrentLocale()));
             }
         }
-        return "redirect:" + request.getHeader("Referer");
+        return REDIRECT + request.getHeader("Referer");
     }
 
     /**
@@ -973,8 +971,8 @@ public class TaskController {
         Project project = projectSrv.findById(subtask.getProject().getId());
         if (!projectSrv.canEdit(project)
                 && (!Roles.isUser() || !subtask.getOwner().equals(Utils.getCurrentAccount()))) {
-            MessageHelper.addErrorAttribute(ra, msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
-            return "redirect:" + request.getHeader("Referer");
+            MessageHelper.addErrorAttribute(ra, msg.getMessage(ERROR_ACCES_RIGHTS, null, Utils.getCurrentLocale()));
+            return REDIRECT + request.getHeader("Referer");
         } else {
             Task parent = taskSrv.findById(subtask.getParent());
             parent.removeSubTask();
@@ -1041,7 +1039,7 @@ public class TaskController {
                     new Object[]{id, taskID}, Utils.getCurrentLocale()));
             TaskLink link = new TaskLink(parent.getId(), taskID, TaskLinkType.RELATES_TO);
             linkService.save(link);
-            return "redirect:/task/" + taskID;
+            return REDIRECT_TASK + taskID;
         }
     }
 
@@ -1077,7 +1075,7 @@ public class TaskController {
                         msg.getMessage("task.worklog.deleted", null, Utils.getCurrentLocale()));
                 return "redirect:/manage/tasks?project=" + projectID;
             } else {
-                return "redirect:" + request.getHeader("Referer");
+                return REDIRECT + request.getHeader("Referer");
             }
         } else {
             throw new TasqAuthException();
@@ -1238,7 +1236,7 @@ public class TaskController {
                     account.setLast_visited_t(lastVisited);
                     update = true;
                 }
-                if (Utils.getCurrentAccount().equals(account)) {
+                if (account.equals(Utils.getCurrentAccount())) {
                     Utils.getCurrentAccount().setLast_visited_t(lastVisited);
                 }
             }
@@ -1332,16 +1330,16 @@ public class TaskController {
                 || Roles.isAdmin();
     }
 
-    private boolean saveTaskFiles(List<MultipartFile> files_array, Task task) {
+    private boolean saveTaskFiles(List<MultipartFile> filesArray, Task task) {
         // Save
-        for (MultipartFile multipartFile : files_array) {
+        for (MultipartFile multipartFile : filesArray) {
             if (!multipartFile.isEmpty()) {
                 File file = new File(
                         taskSrv.getTaskDirectory(task) + File.separator + multipartFile.getOriginalFilename());
                 try {
                     FileUtils.writeByteArrayToFile(file, multipartFile.getBytes());
                 } catch (IOException e) {
-                    LOG.error(e.getMessage());
+                    LOG.error("IOException while saving task files", e);
                     return false;
                 }
             }

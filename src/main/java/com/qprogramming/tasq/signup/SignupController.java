@@ -83,6 +83,7 @@ public class SignupController {
         ServletContext sc = session.getServletContext();
 
         Account account = signupForm.createAccount();
+        account.setRole(Roles.valueOf(appSrv.getProperty(AppService.DEFAULTROLE)));
         if (accountSrv.findAll().isEmpty()) {
             // FIRST ACCOUNT EVER, LAUNCH SETUP TASKS
             account.setRole(Roles.ROLE_ADMIN);

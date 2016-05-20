@@ -101,9 +101,12 @@
                 }
                 row += link;
                 //more
-                var taskurl = '<c:url value="/task/"/>' + event.task;
                 var eventtask = '<s:message code="event.task"/>';
                 var deleteevent = '<s:message code="event.delete"/>';
+                var taskurl = "#";
+                if(event.task){
+                    taskurl = '<c:url value="/task/"/>' + event.task;
+                }
                 var buttons = '<div class="pull-right buttons_panel">'
                         + '<a href="' + taskurl + '"><i class="fa fa-lg fa-link fa-flip-horizontal a-tooltip" title="' + eventtask + '" style="color: #545454 !important"></i></a>'
                         + '<a href="#" data-event="' + event.id + '" class="delete-event a-tooltip"	title="' + deleteevent + '"> <i class="fa fa-lg fa-trash" style="color: #545454 !important"></i></a></div>';
