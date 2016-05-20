@@ -76,6 +76,9 @@ table.button-table tr:hover td .buttons_panel {
 .agile-card {
 	max-width: 600px
 }
+.max-width{
+	max-width: 100%;
+}
 
 .sprint_div:hover .buttons_panel {
 	display: block;
