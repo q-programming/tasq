@@ -2,33 +2,34 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
 <%@ attribute name="state" required="true"%>
+<%@ attribute name="list" required="false"%>
 <c:choose>
 <c:when test="${state eq 'TO_DO'}">
-<span class="state_span"><i class="fa fa-lg fa-pencil-square-o"></i> 
-<s:message code="task.state.todo"></s:message></span>
+<c:set var="message"><s:message code="task.state.todo"/></c:set>
+<span class="state_span a-tooltip" <c:if test="${list}">title="${message}"</c:if>><i class="fa fa-lg fa-pencil-square-o"></i><c:if test="${not list}">&nbsp;${message}</c:if></span>
 </c:when>
 <c:when test="${state eq 'ONGOING'}">
-<span class="state_span"><i class="fa fa-lg fa-spin fa-repeat"></i> <s:message
-code="task.state.ongoing"></s:message></span>
+<c:set var="message"><s:message code="task.state.ongoing"/></c:set>
+<span class="state_span a-tooltip" <c:if test="${list}">title="${message}"</c:if>><i class="fa fa-lg fa-spin fa-repeat"></i><c:if test="${not list}">&nbsp;${message}</c:if></span>
 </c:when>
 <c:when test="${state eq 'BLOCKED'}">
-<span class="state_span"><i class="fa fa-lg fa-ban"></i> <s:message
-code="task.state.blocked"></s:message></span>
+<c:set var="message"><s:message code="task.state.blocked"/></c:set>
+<span class="state_span a-tooltip" <c:if test="${list}">title="${message}"</c:if>><i class="fa fa-lg fa-ban"></i><c:if test="${not list}">&nbsp;${message}</c:if></span>
 </c:when>
 <c:when test="${state eq 'CLOSED'}">
-<span class="state_span"><i class="fa fa-lg fa-archive"></i> 
-<s:message code="task.state.closed"></s:message></span>
+<c:set var="message"><s:message code="task.state.closed"/></c:set>
+<span class="state_span a-tooltip" <c:if test="${list}">title="${message}"</c:if>><i class="fa fa-lg fa-archive"></i><c:if test="${not list}">&nbsp;${message}</c:if></span>
 </c:when>
 <c:when test="${state eq 'OPEN'}">
-<span class="state_span"><i class="fa fa-lg fa-refresh"></i> 
-<s:message code="task.state.open"></s:message></span>
+<c:set var="message"><s:message code="task.state.open"/></c:set>
+<span class="state_span a-tooltip" <c:if test="${list}">title="${message}"</c:if>><i class="fa fa-lg fa-refresh"></i><c:if test="${not list}">&nbsp;;${message}</c:if></span>
 </c:when>
 <c:when test="${state eq 'COMPLETE'}">
-<span class="state_span"><i class="fa fa-lg fa-check"></i> 
-<s:message code="task.state.complete"></s:message></span>
+<c:set var="message"><s:message code="task.state.complete"/></c:set>
+<span class="state_span a-tooltip" <c:if test="${list}">title="${message}"</c:if>><i class="fa fa-lg fa-check"></i><c:if test="${not list}">&nbsp;${message}</c:if></span>
 </c:when>
 <c:otherwise>
-<span class="state_span"><i class="fa fa-lg fa-list"></i> 
-<s:message code="task.showAll"></s:message></span>
+<c:set var="message"><s:message code="task.showAll"/></c:set>
+<span class="state_span a-tooltip" <c:if test="${list}">title="${message}"</c:if>><i class="fa fa-lg fa-list"></i><c:if test="${not list}">&nbsp;${message}</c:if></span>
 </c:otherwise>
 </c:choose>

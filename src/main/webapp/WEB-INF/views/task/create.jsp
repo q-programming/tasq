@@ -49,7 +49,7 @@
 			<c:set var="name_class" value="has-error" />
 		</c:if>
 		<c:if test="${not empty desc_error}">
-			<c:set var="desc_class" value="has-error" />
+			<c:set var="desc_class" value="trumbowyg-error" />
 		</c:if>
 		<c:if test="${not empty sprint_error}">
 			<c:set var="sprint_class" value="has-error" />

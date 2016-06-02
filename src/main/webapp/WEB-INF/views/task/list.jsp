@@ -23,7 +23,7 @@
 <c:if test="${not empty param.projectID}">
 	<c:set var="active_project" value="${param.projectID}" />
 </c:if>
-<div>
+<div class="padding-top5">
 	<div style="display: table-cell;">
 		<h4>${tasks_text}</h4>
 	</div>
@@ -278,9 +278,9 @@
 					</span>
 				</c:if> <c:if test="${not empty task.assignee}">
 					<img data-src="holder.js/20x20"
-						style="height: 20px; padding-right: 5px;"
+						class="avatar xsmall"
 						src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />
-					<a ${link} href="<c:url value="/user/${task.assignee.username}"/>">${task.assignee}</a>
+					&nbsp;<a ${link} href="<c:url value="/user/${task.assignee.username}"/>">${task.assignee}</a>
 				</c:if></td>
 			</tr>
 		</c:forEach>
