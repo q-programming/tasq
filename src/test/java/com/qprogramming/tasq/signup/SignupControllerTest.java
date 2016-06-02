@@ -153,6 +153,7 @@ public class SignupControllerTest {
 			when(accRepoMock.findByEmail(NEW_EMAIL)).thenReturn(null);
 			when(encoderMock.encode(any(CharSequence.class))).thenReturn("encodedPassword");
 			when(appSrvMock.getProperty(AppService.URL)).thenReturn("http://dummy.com");
+			when(appSrvMock.getProperty(AppService.DEFAULTROLE)).thenReturn("ROLE_USER");
 			when(mailerMock.sendMail(anyInt(), anyString(), anyString(), anyString(),
 					anyMapOf(String.class, Resource.class))).thenReturn(true);
 			SignupForm form = fillForm();

@@ -1044,6 +1044,7 @@
                     });
                 }
                 else {
+                    showWait(true);
                     $.post('<c:url value="/task/changeState"/>', {id: taskID, state: state}, function (result) {
                         if (result.code == 'ERROR') {
                             showError(result.message);
@@ -1053,6 +1054,7 @@
                             $("#current_state").html(newState);
                             showSuccess(result.message);
                         }
+                        showWait(false);
                     });
                 }
             }

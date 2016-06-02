@@ -844,6 +844,9 @@ a.secondaryPanelButton {
 .padding-right10{
 	padding-right: 10px;
 }
+.padding-top5{
+	padding-top: 5px;
+}
 
 .avatar {
 	height: 50px;
@@ -852,8 +855,16 @@ a.secondaryPanelButton {
 
 .avatar.small {
 	height: 30px;
-	border-radius: 50%;
 	float: left;
+}
+.avatar.xsmall {
+	height: 20px;
+	float: left;
+}
+.trumbowyg-error{
+	border-color: #a94442;
+	border-style: solid;
+	border-width: 1px;
 }
 /* .search { position: relative; } */
 /* .search input { text-indent: 30px;} */
