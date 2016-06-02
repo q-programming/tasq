@@ -95,10 +95,7 @@ public class ProjectService {
 	 */
 	public boolean canEdit(Long projectID) {
 		Project repoProject = projRepo.findById(projectID);
-		if (repoProject == null) {
-			return false;
-		}
-		return canEdit(repoProject);
+		return repoProject != null && canEdit(repoProject);
 	}
 
 	public boolean canEdit(Project project) {

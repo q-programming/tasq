@@ -7,8 +7,8 @@ import com.qprogramming.tasq.task.TaskPriority;
 
 public class TaskSorter implements Comparator<Task> {
 
-	public static enum SORTBY {
-		NAME, START_DATE, ID, DUE_DATE, PRIORITY, ORDER;
+	public enum SORTBY {
+		NAME, START_DATE, ID, DUE_DATE, PRIORITY, ORDER
 	}
 
 	private SORTBY sortBy;
@@ -20,7 +20,7 @@ public class TaskSorter implements Comparator<Task> {
 	}
 
 	public int compare(Task a, Task b) {
-		int result = 0;
+		int result;
 		switch (sortBy) {
 		case NAME:
 			result = a.getName().compareTo(b.getName());
@@ -72,8 +72,8 @@ public class TaskSorter implements Comparator<Task> {
 
 	private int compareByID(Task a, Task b) {
 		int result;
-		String aId="";
-		String bId="";
+		String aId;
+		String bId;
 		if(a.isSubtask()&& b.isSubtask()){
 			aId = a.getId().split("-")[1].split("/")[1];
 			bId = b.getId().split("-")[1].split("/")[1];

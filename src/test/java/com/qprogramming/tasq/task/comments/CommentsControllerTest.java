@@ -111,7 +111,7 @@ public class CommentsControllerTest {
 	public void taskCommentMessageNotValidTest() {
 		Task task = createTask(TASK_NAME, 1, createProject());
 		when(taskSrvMock.findById(TEST_1)).thenReturn(task);
-		commentsController.addComment(TEST_1, "<script>Comment</script>", requestMock, raMock);
+		commentsController.addComment(TEST_1, "", requestMock, raMock);
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.DANGER, new Object[] {}));
 	}
@@ -207,7 +207,7 @@ public class CommentsControllerTest {
 	public void taskCommentEditInvalidTest() {
 		Task task = createTask(TASK_NAME, 1, createProject());
 		when(taskSrvMock.findById(TEST_1)).thenReturn(task);
-		commentsController.editComment(TEST_1, 1L, "<script>comment</script>", requestMock, raMock);
+		commentsController.editComment(TEST_1, 1L, "", requestMock, raMock);
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.DANGER, new Object[] {}));
 	}

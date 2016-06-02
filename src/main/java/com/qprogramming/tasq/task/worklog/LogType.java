@@ -17,7 +17,7 @@ public enum LogType {
 
 	private String code;
 
-	private LogType(String code) {
+	LogType(String code) {
 		this.code = code;
 	}
 

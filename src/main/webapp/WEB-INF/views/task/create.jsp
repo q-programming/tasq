@@ -49,7 +49,7 @@
 			<c:set var="name_class" value="has-error" />
 		</c:if>
 		<c:if test="${not empty desc_error}">
-			<c:set var="desc_class" value="has-error" />
+			<c:set var="desc_class" value="trumbowyg-error" />
 		</c:if>
 		<c:if test="${not empty sprint_error}">
 			<c:set var="sprint_class" value="has-error" />
@@ -225,7 +225,7 @@
 				</div>
 			</div>
 		</div>
-		<label class="checkbox clickable" style="display: inherit; font-weight: normal;    margin-left: 22px;">
+		<label class="checkbox clickable" style="display: inherit; font-weight: normal; margin-left: 22px;">
 			<input type="checkbox" name="estimated" id="estimated"
 			value="true" style=""> <s:message code="task.withoutEstimation"  />&nbsp;<i class="fa fa-question-circle a-tooltip"
 			data-html="true" title="<s:message  code ="task.withoutEstimation.help" />"
@@ -294,11 +294,12 @@ $(document).ready(function($) {
 	
 	$('#description').trumbowyg({
 		lang: '${user.language}',
+		autogrow: true,
 		fullscreenable: false,
 		btns: ['formatting',
 	           '|', btnsGrps.design,
 	           '|', 'link',
-	           '|', 'insertImage',
+			   '|', 'insertImage',
 	           '|', btnsGrps.justify,
 	           '|', btnsGrps.lists]
 	});
@@ -328,7 +329,7 @@ $(document).ready(function($) {
 		var title = "<i class='fa fa-file'></i>"+choose;
 		var inputField = '<input class="file_upload" name="files" type="file" accept="'+fileTypes+'" title="'+title+'" data-filename-placement="inside">';
 		$("#fileTable").append('<tr><td style="width:300px">'+inputField+'</td></tr>');
-		$("#fileTable tr:last").find(".file_upload").bootstrapFileInput();;
+		$("#fileTable tr:last").find(".file_upload").bootstrapFileInput();
 	}
 	
 	$(".taskType").click(function(){
@@ -406,7 +407,7 @@ $(document).ready(function($) {
 	
 	//INIT ALL
 	fillSprints();
-	getDefaults()
+	getDefaults();
 	addFileInput();
 	$('body').scrollspy({
 		target : '#menu'
@@ -468,7 +469,7 @@ $(document).ready(function($) {
 				var type = thisType.data('type');
 		   	 	$("#task_type").html(thisType.html());
 		   		$("#type").val(type);
-		   		checkTaskTypeEstimate(type,project)
+		   		checkTaskTypeEstimate(type,project);
 				//ASSIGNEE
    				$("#assignee").val(null);
 				$("#assignee_auto").val(null);

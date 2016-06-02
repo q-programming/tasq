@@ -5,7 +5,7 @@
 <%---------------------CONVERT TO TASK MODAL --%>
 <div class="modal fade" id="convert2task" tabindex="-1" role="dialog"
 	aria-labelledby="" aria-hidden="true">
-	<div class="modal-dialog modal-sm">
+	<div class="modal-dialog ">
 		<div class="modal-content">
 			<div class="modal-header theme">
 				<button type="button" class="close" data-dismiss="modal"
@@ -102,12 +102,13 @@
 				return type;
 			default:
 				return 'not yet added ';
-		};
+		}
 	}
 	function getDefaultTaskType(project){
-		var url='<c:url value="/project/getDefaultTaskType"/>';
+		var url='<c:url value="/project/getDefaults"/>';
 		$.get(url,{id:project},function(result,status){
-				var thisType = $("#"+result);
+				project = result;
+				var thisType = $("#"+project.default_type);
 				var type = thisType.data('type');
 		   	 	$("#task_type").html(thisType.html());
 		   		$("#type").val(type);

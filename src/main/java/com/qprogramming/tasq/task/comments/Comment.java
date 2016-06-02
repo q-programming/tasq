@@ -4,7 +4,6 @@
 package com.qprogramming.tasq.task.comments;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.persistence.Column;

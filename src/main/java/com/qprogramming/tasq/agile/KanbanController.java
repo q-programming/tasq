@@ -83,8 +83,7 @@ public class KanbanController {
 				throw new TasqAuthException(msg);
 			}
 			model.addAttribute("project", project);
-			List<Task> taskList = new LinkedList<Task>();
-			taskList = taskSrv.findAllWithoutRelease(project);
+			List<Task> taskList = taskSrv.findAllWithoutRelease(project);
 			Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ORDER,
 					true));
 			Set<Tag> tags = new HashSet<Tag>();
@@ -177,9 +176,8 @@ public class KanbanController {
 			HttpServletResponse response) {
 		response.setContentType("application/json");
 		Project project = projSrv.findById(projectID);
-		List<Release> releases = agileSrv
+		return agileSrv
 				.findReleaseByProjectIdOrderByDateDesc(project.getId());
-		return releases;
 	}
 
 	@RequestMapping(value = "/{id}/release-data", method = RequestMethod.GET, produces = "application/json")
@@ -193,7 +191,7 @@ public class KanbanController {
 			DateTime startTime;
 			DateTime endTime;
 			List<Task> releaseTasks;
-			if (releaseNo == null || releaseNo == "") {
+			if (releaseNo == null || "".equals(releaseNo)) {
 				release = agileSrv.findLastReleaseByProjectId(project.getId());
 				if (release == null) {
 					startTime = new DateTime(project.getRawStartDate());
@@ -285,9 +283,9 @@ public class KanbanController {
 			Map<LocalDate, Integer> openMap, Map<LocalDate, Integer> closedMap,
 			Map<LocalDate, Integer> progressMap, LocalDate startTime,
 			LocalDate endTime) {
-		Integer open = new Integer(0);
-		Integer closed = new Integer(0);
-		Integer progress = new Integer(0);
+		Integer open = 0;
+		Integer closed = 0;
+		Integer progress = 0;
 		int releaseDays = Days.daysBetween(startTime, endTime).getDays() + 1;
 		for (int i = 0; i < releaseDays; i++) {
 			LocalDate date = startTime.plusDays(i);

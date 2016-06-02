@@ -111,8 +111,8 @@ public class WatchedTaskService {
 	 */
 	public boolean isWatching(String taskID) {
 		WatchedTask watched = getByTask(taskID);
-		return watched != null ? watched.getWatchers().contains(
-				Utils.getCurrentAccount()) : false;
+		return watched != null && watched.getWatchers().contains(
+				Utils.getCurrentAccount());
 	}
 
 	/**

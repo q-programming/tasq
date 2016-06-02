@@ -11,7 +11,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 
 import com.qprogramming.tasq.account.Account;
-import com.qprogramming.tasq.task.TaskState;
 import com.qprogramming.tasq.task.TaskType;
 
 @Entity

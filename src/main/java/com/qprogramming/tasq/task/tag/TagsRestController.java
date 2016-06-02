@@ -38,7 +38,7 @@ public class TagsRestController {
 	public List<Tag> getTags(@RequestParam String term,
 			HttpServletResponse response) {
 		response.setContentType("application/json");
-		List<Tag> result = new LinkedList<Tag>();
+		List<Tag> result;
 		if (term == null) {
 			result = tagsRepo.findAll();
 		} else {
@@ -54,8 +54,7 @@ public class TagsRestController {
 		response.setContentType("application/json");
 		Task task = taskSrv.findById(taskID);
 		Hibernate.initialize(task.getTags());
-		Set<Tag> result = task.getTags();
-		return result;
+		return task.getTags();
 	}
 
 	@Transactional

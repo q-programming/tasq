@@ -69,7 +69,7 @@ $(".assignToTask").click(function() {
 		showAssignee = '<i><s:message code="task.unassigned" /></i>';
 		$("#unassign_btn").attr("disabled", "disabled");
 	}else{
-		showAssignee= '<img data-src="holder.js/30x30" style="height: 30px;padding-right: 10px;" src="' + avatarURL + assigneeid +'.png"/>'+ assignee;
+		showAssignee= '<img data-src="holder.js/30x30" class="avatar small" src="' + avatarURL + assigneeid +'.png"/>'+ assignee;
 	}
 	$("#displayAssignee").html(showAssignee);
 	$("#assign_btn").attr("disabled", "disabled");
@@ -132,7 +132,7 @@ $("#assignee_input").autocomplete({
 			event.preventDefault();
 				$("#assignEmail").remove();
 				$("#assignee_input").val("");
-				var avatar = '<img data-src="holder.js/30x30" style="height: 30px;padding-right: 10px;" src="' + avatarURL + ui.item.id +'.png"/>';
+				var avatar = '<img data-src="holder.js/30x30" class="avatar small" src="' + avatarURL + ui.item.id +'.png"/>';
 				var show = avatar + '&nbsp;'+ui.item.label;
 				$("#displayAssignee").html(show);
 				$("#assignModalForm").append('<input id="assignEmail" type="hidden" name="email" value=' + ui.item.value + '>');

@@ -9,7 +9,7 @@ type="com.qprogramming.tasq.task.DisplayTask"%>
 <%@ attribute name="can_edit" required="true"%>
 <security:authentication property="principal" var="user" />
 <div class="agile-card theme" data-id="${task.id}" state="${task.state}" data-subtasks="${task.subtasks}"
-id="${task.id}" data-tags="<c:forEach items="${task.tags}" var="tag">${tag},</c:forEach>">
+id="${task.id}" data-tags="${task.getTagsList()}">
 <div style="padding-left: 5px; min-height: 50px;">
 <c:if test="${task.story_points ne 0}">
 <span class="badge theme pull-right">${task.story_points}</span>

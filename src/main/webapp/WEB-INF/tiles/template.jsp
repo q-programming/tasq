@@ -163,7 +163,7 @@
 	if (emailConfirmed === 'false' && !settings) {
 		var msg = '<s:message code="signup.notconfirmed" /> ';
 		var settings = '<s:message code="menu.settings" /> ';
-		var url = '<a href="<c:url value="/settings" />">' + settings + '</a>'
+		var url = '<a href="<c:url value="/settings" />">' + settings + '</a>';
 		showWarning(msg + url);
 	}
 </script>

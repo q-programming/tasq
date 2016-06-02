@@ -36,7 +36,7 @@
 			</div>
 		</div>
 	</div>
-	<div style="height:300px;overflow: auto;">
+	<div style="overflow: auto;">
 		<h4><s:message code="project.projects" /></h4>
 		<table class="table table-condensed table-hover">
 			<c:forEach items="${projects}" var="project">

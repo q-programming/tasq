@@ -66,11 +66,11 @@ function fetchWatches(page){
 				var taskUrl = '<c:url value="/task/"/>' + task.id;
 				var taskStr = '<td>' + getTaskType(task.type) + '&nbsp;<a href="'+taskUrl + '">[' + task.id +'] ' 
 							+ task.name + '</a></td>';
-				var watches = '<td style="text-align:center">'+ task.watchCount + '&nbsp;<i class="fa fa-eye"></i></td>'
-				row+=button + taskStr + watches + '</tr>'
+				var watches = '<td style="text-align:center">'+ task.watchCount + '&nbsp;<i class="fa fa-eye"></i></td>';
+				row+=button + taskStr + watches + '</tr>';
 				$("#watchesTable").append(row);
 			}
-			printWatchesNavigation(page,data)
+			printWatchesNavigation(page,data);
 			$('.a-tooltip').tooltip();
 		});
 		
@@ -88,7 +88,7 @@ function printWatchesNavigation(page,data){
             onPageChanged: function(e,oldPage,newPage){
             	fetchWatches(newPage-1,'');
             }
-   	}
+   	};
 	$("#watchesNavigation").bootstrapPaginator(options);
 }
 

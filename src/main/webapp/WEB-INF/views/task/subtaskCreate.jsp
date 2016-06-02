@@ -8,6 +8,7 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <script src="<c:url value="/resources/js/trumbowyg.min.js" />"></script>
+<script src="<c:url value="/resources/js/trumbowyg.editlink.js" />"></script>
 <link href="<c:url value="/resources/css/trumbowyg.min.css" />" rel="stylesheet" media="screen" />
 <security:authentication property="principal" var="user" />
 <c:if test="${user.language ne 'en' }">
@@ -220,7 +221,7 @@ $(document).ready(function($) {
 	$("#due_date").val(currentDue);
 
 	//INIT ALL
-	getDefaults()
+	getDefaults();
 	
 	$("#assignee_auto").click(function(){
 		 $(this).select();

@@ -30,17 +30,15 @@ public class SecurityConfig {
 
 	@Bean
 	public RememberMeServices rememberMeServices() {
-		PersistentTokenBasedRememberMeServices rememberMeServices = new PersistentTokenBasedRememberMeServices(
+		return new PersistentTokenBasedRememberMeServices(
 				"tasq-aWreDWE4343asrwerewraWeFFTgxcv9u1X", userService(),
 				persistentTokenRepository());
-		return rememberMeServices;
 	}
 
 	@Bean
 	public RememberMeAuthenticationProvider rememberMeAuthenticationProvider() {
-		RememberMeAuthenticationProvider rememberMeAuthenticationProvider = new RememberMeAuthenticationProvider(
+		return new RememberMeAuthenticationProvider(
 				"test");
-		return rememberMeAuthenticationProvider;
 	}
 
 	@Bean

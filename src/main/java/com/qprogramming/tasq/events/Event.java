@@ -188,5 +188,5 @@ public class Event {
 			return false;
 		}
 		return true;
-	};
+	}
 }

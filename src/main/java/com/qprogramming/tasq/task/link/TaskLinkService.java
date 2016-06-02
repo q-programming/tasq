@@ -81,11 +81,7 @@ public class TaskLinkService {
 			result.put(switchType(taskLink.getLinkType()), tasks);
 		}
 		// clean all potential empty results
-		for (Entry<TaskLinkType, List<DisplayTask>> entry : result.entrySet()) {
-			if (!entry.getValue().isEmpty()) {
-				finalResult.put(entry.getKey(), entry.getValue());
-			}
-		}
+		result.entrySet().stream().filter(entry -> !entry.getValue().isEmpty()).forEachOrdered(entry -> finalResult.put(entry.getKey(), entry.getValue()));
 		return finalResult;
 	}
 

@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -126,7 +127,7 @@ public class ProjectController {
 		model.addAttribute("COMPLETE", stateCount.get(TaskState.COMPLETE));
 		model.addAttribute("CLOSED", stateCount.get(TaskState.CLOSED));
 		model.addAttribute("BLOCKED", stateCount.get(TaskState.BLOCKED));
-		List<Task> taskList = new LinkedList<Task>();
+		List<Task> taskList ;
 		if (closed == null) {
 			taskList = taskSrv.findByProjectAndOpen(project);
 		} else {
@@ -158,8 +159,7 @@ public class ProjectController {
 		for (WorkLog workLog : page) {
 			list.add(new DisplayWorkLog(workLog));
 		}
-		Page<DisplayWorkLog> result = new PageImpl<DisplayWorkLog>(list, p, page.getTotalElements());
-		return result;
+		return new PageImpl<DisplayWorkLog>(list, p, page.getTotalElements());
 	}
 
 	@RequestMapping(value = "/usersProjectsEvents", method = RequestMethod.GET)
@@ -168,17 +168,13 @@ public class ProjectController {
 			@PageableDefault(size = 25, page = 0, sort = "time", direction = Direction.DESC) Pageable p) {
 		Account account = Utils.getCurrentAccount();
 		List<Project> usersProjects = projSrv.findAllByUser(account.getId());
-		List<Long> ids = new LinkedList<Long>();
-		for (Project project : usersProjects) {
-			ids.add(project.getId());
-		}
+		List<Long> ids = usersProjects.stream().map(Project::getId).collect(Collectors.toCollection(LinkedList::new));
 		Page<WorkLog> page = wrkLogSrv.findByProjectIdIn(ids, p);
 		List<DisplayWorkLog> list = new LinkedList<DisplayWorkLog>();
 		for (WorkLog workLog : page) {
 			list.add(new DisplayWorkLog(workLog));
 		}
-		Page<DisplayWorkLog> result = new PageImpl<DisplayWorkLog>(list, p, page.getTotalElements());
-		return result;
+		return new PageImpl<DisplayWorkLog>(list, p, page.getTotalElements());
 	}
 
 	@RequestMapping(value = "projects", method = RequestMethod.GET)

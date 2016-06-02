@@ -35,6 +35,9 @@ a.theme {
 	color: ${invcolor};
 	background-color: ${color};
 }
+.bg-color-light.theme {
+	background-color: rgb(${rgbcolor10});
+}
 .bg.theme{
 	background-color: ${color};
 }
@@ -147,6 +150,9 @@ span.badge.theme.zero {
 }
 .table-hover>tbody>tr.bg-color:hover>td, .table-hover>tbody>tr.bg-color:hover>th {
 	background-color: rgb(${rgbcolor10});
+}
+.active-project{
+	background-color: rgba(${rgbcolor}, 0.1);
 }
 
 span.tag.label.label-info.theme {

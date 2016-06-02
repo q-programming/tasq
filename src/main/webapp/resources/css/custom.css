@@ -57,26 +57,6 @@
 	padding-left: 30px;
 }
 
-/* Blink */
-@
--webkit-keyframes blinker {
-	from {opacity: 1.0;
-}
-
-to {
-	opacity: 0.0;
-}
-
-}
-.blink {
-	text-decoration: blink;
-	-webkit-animation-name: blinker;
-	-webkit-animation-duration: 1s;
-	-webkit-animation-iteration-count: infinite;
-	-webkit-animation-timing-function: ease-in-out;
-	-webkit-animation-direction: alternate;
-}
-
 table.button-table tr td .buttons_panel {
 	display: none;
 }
@@ -94,7 +74,10 @@ table.button-table tr:hover td .buttons_panel {
 }
 
 .agile-card {
-	max-width: 500px
+	max-width: 600px
+}
+.max-width{
+	max-width: 100%;
 }
 
 .sprint_div:hover .buttons_panel {
@@ -132,7 +115,7 @@ form.form-search:before {
 }
 
 .mod-header {
-	background: url(/tasq/resources/img/mod_header_bg.png) repeat-x center;
+	background: url(/resources/img/mod_header_bg.png) repeat-x center;
 	margin-top: 15px;
 	padding-bottom: 5px;
 }
@@ -179,6 +162,12 @@ table.togglerContent {
 
 .left-margin {
 	padding-left: 20px;
+}
+.marginleft_0{
+	margin-left: 0px;
+}
+.marginbottom_1{
+	margin-bottom: 1px;
 }
 
 .table_state {
@@ -340,9 +329,15 @@ tr.unread .eventSummary {
 	font-weight: bold;
 }
 
-a.showMore {
+a.showMorelink {
 	color: black;
 }
+
+a.showMorelink:hover {
+	color: black;
+	text-decoration: none;
+}
+
 
 blockquote.eventMore {
 	display: none;
@@ -369,6 +364,7 @@ span.points:hover .point-edit {
 .point-input {
 	width: 20px;
 	display: none;
+	color: black;
 }
 
 ul.auto-complete-list {
@@ -593,6 +589,12 @@ li.wider {
 .inputcheck.invalid {
 	color: red;
 }
+.remain-span{
+	display: none;
+}
+.invalid{
+	color: red;
+}
 
 .inputcheck.valid {
 	color: green;
@@ -709,6 +711,9 @@ body {
 /* 	background: white; */
 /*     margin-left: -8px; */
 /*     border-radius: 0px; */
+}
+a.black-link{
+	color:black;
 }
 
 .nav-sidebar>li>a {
@@ -839,6 +844,9 @@ a.secondaryPanelButton {
 .padding-right10{
 	padding-right: 10px;
 }
+.padding-top5{
+	padding-top: 5px;
+}
 
 .avatar {
 	height: 50px;
@@ -847,8 +855,16 @@ a.secondaryPanelButton {
 
 .avatar.small {
 	height: 30px;
-	border-radius: 50%;
 	float: left;
+}
+.avatar.xsmall {
+	height: 20px;
+	float: left;
+}
+.trumbowyg-error{
+	border-color: #a94442;
+	border-style: solid;
+	border-width: 1px;
 }
 /* .search { position: relative; } */
 /* .search input { text-indent: 30px;} */

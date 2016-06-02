@@ -35,6 +35,16 @@
 				<br> <br> Application creation process was started on May
 				18 2014 and over a year to have it in stable version
 			</p>
+			<hr>
+			<p>
+				If you found a bug, or want to propose an improvement , please go to
+				<a href="http://q-programming.pl/tasq/project/TASQ">http://q-programming.pl/tasq/project/TASQ</a> and
+				login using following credentials and create new task.<br>
+				<ul class="list-unstyled"><li><strong>login</strong>: <i>public</i></li>
+				<li><strong>password</strong>: <i>iFoundAbugOrImprovement</i></li>
+				</ul>
+			</p>
+			<hr>
 			<p>
 				Application created by <b>Jakub Romaniszyn</b> <a
 					href="http://q-programming.pl/">http://q-programming.pl/</a> and is
@@ -220,16 +230,16 @@
 				notification" in My settings, he will receive email notification
 				about watched event<br> In order to sign up for project
 				notification press watch button
-				<button id="watch" class="btn btn-default btn-sm">
-					<i id="watch_icon" class="fa fa-lg fa-eye"></i>
+				<button id="" class="btn btn-default btn-sm">
+					<i id="" class="fa fa-lg fa-eye"></i>
 				</button>
 				while being in task details screen.<br> All currently watched
 				tasks are displayed in <b><i class="fa fa-eye"></i>&nbsp;<s:message
 						code="events.watching" /></b> view which can be accessed through <a
 					href="#personal">Personal Menu</a><br>To stop receiving
 				notification about project, press stop watching
-				<button id="watch" class="btn btn-default btn-sm">
-					<i id="watch_icon" class="fa fa-lg fa-eye-slash"></i>
+				<button id="" class="btn btn-default btn-sm">
+					<i id="" class="fa fa-lg fa-eye-slash"></i>
 				</button>
 				button located inside task details or in Watched screen inside
 				Personal menu
@@ -934,7 +944,7 @@
 							button</a></b>)
 				</li>
 				<li>Add <b><a href="#task-4">tags</a></b> to help categorize
-					project tasks better
+					project tasks better ( only project administrators, Administrator or task owner)
 				</li>
 				<li>If project is time tracked, work should be logged. It can
 					be inputed manually by using <b><a href="#worklogging">Log
@@ -1297,6 +1307,70 @@
 			Total time spent on all tasks in this sprint is added and shown here
 			as well
 			<hr>
+			<a class="anchor" id="roles"></a>
+			<h3>Roles</h3>
+			<p>
+				In order to not mess up application each user has application role
+				assigned to keep things in order. <br> Following roles are
+				available
+			<table class="table">
+				<tr>
+					<td class="col-md-2"><b><s:message code="role.admin" /></b></td>
+					<td>All below and
+						<ul>
+							<li>Edit any project</li>
+							<li>Assign users to any project</li>
+							<li>Add to project administrators</li>
+							<li>Edit any tasks</li>
+							<li>Change state and priority of any task in any project</li>
+							<li>Delete task</li>
+						</ul>
+					</td>
+				</tr>
+				<tr>
+					<td class="col-md-2"><b><s:message code="role.poweruser" /></b></td>
+					<td>Power user <br>Can do all below and
+						<ul>
+							<li>Edit project to which he is assigned</li>
+							<li>Assign users to project (if is project admin)</li>
+							<li>Add to project administrators (if is project admin)</li>
+							<li>Edit tasks in his projects</li>
+							<li>Link tasks in his project</li>
+							<li>Start/stop sprint if is project admin</li>
+							<li>Perform release if is project admin</li>
+						</ul>
+					</td>
+				</tr>
+				<tr>
+					<td class="col-md-2"><b><s:message code="role.user" /></b></td>
+					<td>Regular user <br>Can do all below and
+						<ul>
+							<li>Create tasks in project in which he is assigned</li>
+							<li>Edit tasks he created</li>
+							<li>Change state or priority of task he is assigned or
+								created</li>
+							<li>Comment on task which is not in Closed state</li>
+						</ul>
+					</td>
+				</tr>
+				<tr>
+					<td class="col-md-2"><b><s:message code="role.viewer" /></b></td>
+					<td>Demo user <br>
+						<ul>
+							<li>Login into application</li>
+							<li>Change user settings, add avatar</li>
+							<li>Watch tasks</li>
+							<li>View all users in Tasker</li>
+							<li>View tasks in project he is assigned to</li>
+							<li>View Task activity log</li>
+							<li>View agile boards, reports and backlog</li>
+							<li>Invite new users to application</li>
+						</ul>
+					</td>
+				</tr>
+			</table>
+			<p>Additionally in order to edit task ( change name, description, add tags ) , user have to be either task owner, <s:message code="role.admin" /> or project administrator</p>
+			<p>To work with task (change state, log hours ) , user have to be <s:message code="role.admin" /> or task assignee</p>
 			<security:authorize access="hasRole('ROLE_ADMIN')">
 				<%------------------------------ADMIN ---------------------------------------%>
 				<a class="anchor" id="admin"></a>
@@ -1348,68 +1422,6 @@
 					</li>
 				</ul>
 				<hr>
-				<a class="anchor" id="a_roles"></a>
-				<h3>Roles</h3>
-				<p>
-					In order to not mess up application each user has application role
-					assigned to keep things in order. <br> Following roles are
-					available
-				<table class="table">
-					<tr>
-						<td class="col-md-2"><b><s:message code="role.admin" /></b></td>
-						<td>All below and
-							<ul>
-								<li>Edit any project</li>
-								<li>Assign users to any project</li>
-								<li>Add to project administrators</li>
-								<li>Edit any tasks</li>
-								<li>Change state and priority of any task in any project</li>
-								<li>Delete task</li>
-							</ul>
-						</td>
-					</tr>
-					<tr>
-						<td class="col-md-2"><b><s:message code="role.user" /></b></td>
-						<td>Power user <br>Can do all below and
-							<ul>
-								<li>Edit project to which he is assigned</li>
-								<li>Assign users to project (if is project admin)</li>
-								<li>Add to project administrators (if is project admin)</li>
-								<li>Edit tasks in his projects</li>
-								<li>Link tasks in his project</li>
-								<li>Start/stop sprint if is project admin</li>
-								<li>Perform release if is project admin</li>
-							</ul>
-						</td>
-					</tr>
-					<tr>
-						<td class="col-md-2"><b><s:message code="role.reporter" /></b></td>
-						<td>Regular user <br>Can do all below and
-							<ul>
-								<li>Create tasks in project in which he is assigned</li>
-								<li>Edit tasks he created</li>
-								<li>Change state or priority of task he is assigned or
-									created</li>
-								<li>Comment on task which is not in Closed state</li>
-							</ul>
-						</td>
-					</tr>
-					<tr>
-						<td class="col-md-2"><b><s:message code="role.viewer" /></b></td>
-						<td>Demo user <br>
-							<ul>
-								<li>Login into application</li>
-								<li>Change user settings, add avatar</li>
-								<li>Watch tasks</li>
-								<li>View all users in Tasker</li>
-								<li>View tasks in project he is assigned to</li>
-								<li>View Task activity log</li>
-								<li>View agile boards, reports and backlog</li>
-								<li>Invite new users to application</li>
-							</ul>
-						</td>
-					</tr>
-				</table>
 				<a class="anchor" id="a_manage"></a>
 				<h3>Manage application</h3>
 				<p>
@@ -1621,13 +1633,12 @@
 								<li><a href="#kanban-reports">Reports</a></li>
 							</ul></li>
 					</ul></li>
-
+				<li><a href="#roles">Roles</a></li>
 				<security:authorize access="hasRole('ROLE_ADMIN')">
 					<li><a href="#admin">Administration</a>
 						<ul class="nav">
 							<li><a href="#a_users">Users</a></li>
 							<li><a href="#a_projects">Projects</a>
-							<li><a href="#a_roles">Roles</a></li>
 							<li><a href="#a_manage">Manage application</a>
 								<ul class="nav">
 									<li><a href="#a_logo">Changing logo</a></li>

@@ -16,8 +16,7 @@ public class RequestedLinkAdvice {
 	 */
 	@ModelAttribute("requestedLink")
 	public String link(HttpServletRequest request) {
-		String requested = request.getRequestURI();
-		return requested;
+		return request.getRequestURI();
 	}
 
 }

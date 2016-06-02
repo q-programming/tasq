@@ -65,7 +65,7 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
 	@Bean
 	public TilesConfigurer configureTilesConfigurer() {
 		TilesConfigurer configurer = new TilesConfigurer();
-		configurer.setDefinitions(new String[] { TILES, VIEWS });
+		configurer.setDefinitions(TILES, VIEWS);
 		return configurer;
 	}
 

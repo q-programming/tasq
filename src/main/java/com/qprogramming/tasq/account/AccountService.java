@@ -137,7 +137,7 @@ public class AccountService {
 		String baseUrl = appSrv.getProperty(AppService.URL);
 		String confirmlink = baseUrl + "/confirm?id=" + account.getUuid();
 		String subject = msg.getMessage("signup.register", null, Utils.getDefaultLocale());
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		model.put(ACCOUNT, account);
 		model.put(LINK, confirmlink);
 		model.put(APPLICATION, baseUrl);
@@ -154,7 +154,7 @@ public class AccountService {
 		url.append("password?id=");
 		url.append(account.getUuid());
 		String subject = msg.getMessage("singin.password.reset", null, new Locale(account.getLanguage()));
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		model.put(ACCOUNT, account);
 		model.put(LINK, url);
 		model.put(APPLICATION, baseUrl);
@@ -167,7 +167,7 @@ public class AccountService {
 	public boolean sendInvite(String email, Theme theme) {
 		String baseUrl = appSrv.getProperty(AppService.URL);
 		String subject = msg.getMessage("panel.invite.subject", null, Utils.getDefaultLocale());
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		model.put(APPLICATION, baseUrl);
 		model.put("curAccount", Utils.getCurrentAccount());
 		model.put("theme", theme);

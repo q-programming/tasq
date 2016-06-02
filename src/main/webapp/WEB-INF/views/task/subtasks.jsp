@@ -31,7 +31,7 @@ $("#hidesubtask").click(function(){
 
 function showSubTasks(target,parentTask)
 {
-	var taskTD = target.closest('td');;
+	var taskTD = target.closest('td');
 	var task = parentTask;
 	if(target.hasClass( "fa-minus-square" )){
 		var divid = "#"+ task + 'subtask';
@@ -72,8 +72,8 @@ function getTaskTypeMsg(type){
 			return type;
 		default:
 			return 'not yet added ';
-	};
-};
+	}
+}
 
 
 </script>

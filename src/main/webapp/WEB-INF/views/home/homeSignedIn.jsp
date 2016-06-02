@@ -5,7 +5,7 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 
-<div class="white-frame" style="overflow: auto">
+<div class="white-frame">
 <!-- 	<div class="pull-left"> -->
 <%-- 		<s:message code="home.hello" /> --%>
 <!-- 		&nbsp; -->
@@ -17,7 +17,7 @@
 				<table class="table table-hover table-condensed">
 					<thead class="theme">
 						<tr>
-							<th colspan="3"><i class="fa fa-user"></i> <s:message
+							<th colspan="4"><i class="fa fa-user"></i> <s:message
 									code="home.mineAssigned" /></th>
 						</tr>
 					</thead>
@@ -27,6 +27,7 @@
 									list="true" /></td>
 							<td style="width: 10px;"><t:priority
 									priority="${task.priority}" list="true" /></td>
+							<td style="width: 10px;"><t:state state="${task.state}" list="true"/></td>
 							<td><a href="<c:url value="/task/${task.id}"/>"
 								style="color: inherit;">[${task.id}] ${task.name}</a></td>
 						</tr>
@@ -99,7 +100,7 @@
 <jsp:include page="../other/events.jsp" />
 <script>
 	$(document).ready(function($) {
-		var currentPage = 0
+		var currentPage = 0;
 		fetchWorkLogData(currentPage);
 	});
 
