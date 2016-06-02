@@ -30,6 +30,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -171,18 +172,18 @@ public class TaskControllerTest {
 		list.add(project2);
 		Task task = createTask(TASK_NAME, 1, project);
 		TaskForm form = new TaskForm(task);
-		Errors errors = new BeanPropertyBindingResult(form, "form");
+		BindingResult errors = new BeanPropertyBindingResult(form, "form");
 		when(projSrvMock.findUserActiveProject()).thenReturn(project);
 		when(projSrvMock.findAllByUser()).thenReturn(list);
 		try {
-			taskCtr.createTask(form, null, errors, raMock, requestMock, modelMock);
+			taskCtr.createTask(form,errors, null, raMock, requestMock, modelMock);
 		} catch (TasqAuthException e) {
 			catched = true;
 		}
 		Assert.assertTrue("AuthException not thrown on user roles", catched);
 		testAccount.setRole(Roles.ROLE_POWERUSER);
 		errors.rejectValue("name", "Error name");
-		String result = taskCtr.createTask(form, null, errors, raMock, requestMock, modelMock);
+		String result = taskCtr.createTask(form, errors,null, raMock, requestMock, modelMock);
 		Assert.assertNull("No errors", result);
 	}
 
@@ -195,12 +196,12 @@ public class TaskControllerTest {
 		list.add(project2);
 		Task task = createTask(TASK_NAME, 1, project);
 		TaskForm form = new TaskForm(task);
-		Errors errors = new BeanPropertyBindingResult(form, "form");
+		BindingResult errors = new BeanPropertyBindingResult(form, "form");
 		when(projSrvMock.findUserActiveProject()).thenReturn(project);
 		when(projSrvMock.findAllByUser()).thenReturn(list);
 		when(projSrvMock.findById(1L)).thenReturn(project);
 		when(projSrvMock.canEdit(project)).thenReturn(false);
-		String result = taskCtr.createTask(form, null, errors, raMock, requestMock, modelMock);
+		String result = taskCtr.createTask(form, errors,null, raMock, requestMock, modelMock);
 		verify(raMock, times(1)).addFlashAttribute(anyString(),
 				new Message(anyString(), Message.Type.DANGER, new Object[] {}));
 	}
@@ -215,12 +216,12 @@ public class TaskControllerTest {
 		Task task = createTask(TASK_NAME, 1, project);
 		TaskForm form = new TaskForm(task);
 		form.setStory_points("TEST");
-		Errors errors = new BeanPropertyBindingResult(form, "form");
+		BindingResult errors = new BeanPropertyBindingResult(form, "form");
 		when(projSrvMock.findUserActiveProject()).thenReturn(project);
 		when(projSrvMock.findAllByUser()).thenReturn(list);
 		when(projSrvMock.findById(1L)).thenReturn(project);
 		when(projSrvMock.canEdit(project)).thenReturn(true);
-		taskCtr.createTask(form, null, errors, raMock, requestMock, modelMock);
+		taskCtr.createTask(form, errors,null,  raMock, requestMock, modelMock);
 		Assert.assertTrue(errors.hasErrors());
 	}
 
@@ -240,14 +241,14 @@ public class TaskControllerTest {
 		form.setAssignee(1L);
 		form.setAddToSprint(1L);
 		form.setStory_points("");
-		Errors errors = new BeanPropertyBindingResult(form, "form");
+		BindingResult errors = new BeanPropertyBindingResult(form, "form");
 		when(projSrvMock.findUserActiveProject()).thenReturn(project);
 		when(projSrvMock.findAllByUser()).thenReturn(list);
 		when(projSrvMock.findById(1L)).thenReturn(project);
 		when(projSrvMock.canEdit(project)).thenReturn(true);
 		when(accountServiceMock.findById(1L)).thenReturn(testAccount);
 		when(sprintSrvMock.findByProjectIdAndSprintNo(1L, 1L)).thenReturn(sprint);
-		taskCtr.createTask(form, null, errors, raMock, requestMock, modelMock);
+		taskCtr.createTask(form,errors, null,  raMock, requestMock, modelMock);
 		Assert.assertTrue(errors.hasErrors());
 	}
 
@@ -266,14 +267,14 @@ public class TaskControllerTest {
 		TaskForm form = new TaskForm(task);
 		form.setAssignee(1L);
 		form.setAddToSprint(1L);
-		Errors errors = new BeanPropertyBindingResult(form, "form");
+		BindingResult errors = new BeanPropertyBindingResult(form, "form");
 		when(projSrvMock.findUserActiveProject()).thenReturn(project);
 		when(projSrvMock.findAllByUser()).thenReturn(list);
 		when(projSrvMock.findById(1L)).thenReturn(project);
 		when(projSrvMock.canEdit(project)).thenReturn(true);
 		when(accountServiceMock.findById(1L)).thenReturn(testAccount);
 		when(sprintSrvMock.findByProjectIdAndSprintNo(1L, 1L)).thenReturn(sprint);
-		taskCtr.createTask(form, null, errors, raMock, requestMock, modelMock);
+		taskCtr.createTask(form, errors,null, raMock, requestMock, modelMock);
 	}
 
 	@Test

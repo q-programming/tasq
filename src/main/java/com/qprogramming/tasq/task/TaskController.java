@@ -46,6 +46,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -122,13 +123,13 @@ public class TaskController {
     }
 
     @RequestMapping(value = "task/create", method = RequestMethod.POST)
-    public String createTask(@Valid @ModelAttribute("taskForm") TaskForm taskForm,
-                             @RequestParam(value = "linked", required = false) String linked, Errors errors, RedirectAttributes ra,
+    public String createTask(@Valid @ModelAttribute("taskForm") TaskForm taskForm, BindingResult result,
+                             @RequestParam(value = "linked", required = false) String linked, RedirectAttributes ra,
                              HttpServletRequest request, Model model) {
         if (!Roles.isUser()) {
             throw new TasqAuthException(msg);
         }
-        if (errors.hasErrors()) {
+        if (result.hasErrors()) {
             fillCreateTaskModel(model);
             return null;
         }
@@ -143,9 +144,8 @@ public class TaskController {
             Task task;
             try {
                 task = taskForm.createTask();
-
             } catch (IllegalArgumentException e) {
-                errors.rejectValue("estimate", "error.estimateFormat");
+                result.rejectValue("estimate", "error.estimateFormat");
                 fillCreateTaskModel(model);
                 return null;
             }
@@ -173,7 +173,7 @@ public class TaskController {
                 // increase scope
                 if (sprint.isActive()) {
                     if (checkIfNotEstimated(task, project)) {
-                        errors.rejectValue("addToSprint", "agile.task2Sprint.Notestimated",
+                        result.rejectValue("addToSprint", "agile.task2Sprint.Notestimated",
                                 new Object[]{"", sprint.getSprintNo()},
                                 "Unable to add not estimated task to active sprint");
                         fillCreateTaskModel(model);

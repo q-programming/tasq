@@ -294,6 +294,7 @@ $(document).ready(function($) {
 	
 	$('#description').trumbowyg({
 		lang: '${user.language}',
+		autogrow: true,
 		fullscreenable: false,
 		btns: ['formatting',
 	           '|', btnsGrps.design,
