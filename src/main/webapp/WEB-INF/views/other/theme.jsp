@@ -15,6 +15,10 @@ body {
 .theme-text{
 	color: ${invcolor} !important;
 }
+.theme-close{
+	color: rgba(${rgbinvcolor}, 0.5) !important;
+	opacity: 1;
+}
 .theme-inv-text{
 	color: ${color} !important;
 }

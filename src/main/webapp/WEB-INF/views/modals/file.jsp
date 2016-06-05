@@ -36,7 +36,7 @@
 var fileTypes='.doc,.docx,.rtf,.txt,.odt,.xls,.xlsx,.ods,.csv,.pps,.ppt,.pptx,.jpg,.png,.gif';
 $(".addFileButton").click(function() {
 	var taskID = $(this).data('taskid');
-	var title = '<i class="fa fa-file"></i>' + taskID+' - <s:message code="task.addFile" /> ';
+	var title = '<i class="fa fa-file"></i>&nbsp;' + taskID+' - <s:message code="task.addFile" /> ';
 	$("#fileModalLabel").html(title);
 	$("#file_taskID").val(taskID);
 	addFileInput();

@@ -190,8 +190,8 @@
 							<i id="participantsLoader" class="fa fa-lg fa-cog fa-spin" style="display:none"></i>
 							</span>
 							 <span class="input-group-btn">
-								<button type="button" id="dismiss_add" class="close"
-									style="padding-left: 5px">×</button>
+								<button type="button" id="dismiss_add" class="close theme-close"
+									style="padding-left: 5px">&times;</button>
 							</span>
 					</div>
 					<form id="added" action="<c:url value="/project/useradd"/>"

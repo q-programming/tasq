@@ -119,7 +119,7 @@
 						</c:otherwise>
 					</c:choose>
 					<div class="alert ${alertClass} fade in alert-overlay">
-						<button type="button" class="close" data-dismiss="alert">&times;</button>
+						<button type="button" class="close theme-close" data-dismiss="alert">&times;</button>
 						<%
 							/* Display a message by its code. If the code was not found, it will be displayed as default text */
 						%>

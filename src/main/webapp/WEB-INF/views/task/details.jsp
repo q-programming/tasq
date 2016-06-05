@@ -611,11 +611,18 @@
                                 <tr>
                                     <td><i class="fa ${file_type}"></i>&nbsp;
                                         <c:if test="${file_type eq 'fa-file-image-o'}">
-                                            <img data-src="holder.js/50x50"
-                                                 style="height: 50px;"
-                                                 src="<c:url value="/task/${task.id}/imgfile?get=${file}"/>"/>
+                                            <a class="image-modal clickable" data-toggle="modal" data-target="#image-modal-dialog"
+                                               data-url="<c:url value="/task/${task.id}/file?get=${file}"></c:url>"
+                                               data-filename="${file}"
+                                               data-src="<c:url value="/task/${task.id}/imgfile?get=${file}"/>">
+                                                <img data-src="holder.js/50x50"
+                                                     style="height: 50px;"
+                                                     src="<c:url value="/task/${task.id}/imgfile?get=${file}"/>"/> ${file}
+                                            </a>
                                         </c:if>
-                                        <a href="<c:url value="/task/${task.id}/file?get=${file}"></c:url>">${file}</a>
+                                        <c:if test="${file_type ne 'fa-file-image-o'}">
+                                            <a href="<c:url value="/task/${task.id}/file?get=${file}"></c:url>"> ${file}</a>
+                                        </c:if>
                                     </td>
                                     <c:if test="${(can_edit && user.isPowerUser) || is_assignee}">
                                         <td style="width: 30px">
@@ -822,7 +829,8 @@
                         <textarea id="comment-message" class="form-control comment-message-text max4kchars" rows="3"
                                   name="message"
                                   autofocus></textarea>
-                        <span class="remain-span"><span class="remain"></span> <s:message code="comment.charsLeft"/></span>
+                        <span class="remain-span"><span class="remain"></span> <s:message
+                                code="comment.charsLeft"/></span>
                         <div style="margin-top: 5px">
                             <button class="btn btn-default btn-sm" type="submit">
                                 <s:message code="main.add" text="Add"/>
@@ -851,6 +859,7 @@
 <jsp:include page="../modals/close.jsp"/>
 <jsp:include page="../modals/file.jsp"/>
 <jsp:include page="../modals/assign.jsp"/>
+<jsp:include page="../modals/image.jsp"/>
 <c:if test="${task.subtask}">
     <jsp:include page="../modals/convert2task.jsp"/>
 </c:if>
@@ -860,10 +869,11 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header theme">
-                <button type="button" class="close" data-dismiss="modal"
+                <button type="button" class="close theme-close" data-dismiss="modal"
                         aria-hidden="true">&times;</button>
                 <h4>
-                    <i class="fa fa-pencil"></i>&nbsp;<s:message code="comment.edit" text="Edit comment"></s:message>
+                    <i class="fa fa-pencil"></i>&nbsp;<s:message code="comment.edit"
+                                                                 text="Edit comment"></s:message>
                 </h4>
             </div>
             <div class="modal-body">
@@ -878,7 +888,8 @@
                                       class="form-control comment-message-text max4kchars"
                                       rows="5"
                                       name="message" autofocus></textarea>
-                            <span class="remain-span"><span class="remain"></span> <s:message code="comment.charsLeft"/></span>
+                                <span class="remain-span"><span class="remain"></span> <s:message
+                                        code="comment.charsLeft"/></span>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -935,13 +946,12 @@
             if (tlength > 3500) {
                 $(".remain-span").show();
                 $('.remain').text(remain);
-                if(remain <0){
+                if (remain < 0) {
                     $('.remain-span').addClass("invalid");
-                }else{
+                } else {
                     $('.remain-span').removeClass("invalid");
                 }
-            }else
-            {
+            } else {
                 $(".remain-span").hide();
             }
         });
