@@ -570,6 +570,10 @@ public class TaskController {
         // check if not admin or user
         Task task = taskSrv.findById(taskID);
         if (task != null) {
+            if (state.equals(task.getState())) {
+                String stateText = msg.getMessage(state.getCode(), null, Utils.getCurrentLocale());
+                return new ResultData(ResultData.WARNING, msg.getMessage("task.already.inState", new Object[]{stateText}, Utils.getCurrentLocale()));
+            }
             // check if can edit
             if ((Utils.getCurrentAccount().equals(task.getOwner())
                     || Utils.getCurrentAccount().equals(task.getAssignee()))
