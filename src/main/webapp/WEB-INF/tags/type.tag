@@ -40,6 +40,10 @@ title="<s:message code="task.type.idle" />"></i>
 <i class="fa fa-lg fa-check-circle-o a-tooltip ${list_view}"
 title="<s:message code="task.type.subtask" />"></i>
 </c:when>
+<c:when test="${type eq 'CHANGE_REQUEST'}">
+<i class="fa fa-lg fa fa-magic a-tooltip ${list_view}"
+title="<s:message code="task.type.change_request" />"></i>
+</c:when>
 </c:choose>
 </c:if>
 <c:if test="${not empty show_text}">
@@ -64,6 +68,9 @@ title="<s:message code="task.type.subtask" />"></i>
 </c:when>
 <c:when test="${type eq 'SUBTASK'}">
 <s:message code="task.type.subtask" />
+</c:when>
+<c:when test="${type eq 'CHANGE_REQUEST'}">
+<s:message code="task.type.change_request" />
 </c:when>
 </c:choose>
 </c:if>
