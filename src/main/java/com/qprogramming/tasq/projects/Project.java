@@ -1,11 +1,7 @@
 package com.qprogramming.tasq.projects;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -21,6 +17,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.annotations.IndexColumn;
 
 import com.qprogramming.tasq.account.Account;
@@ -112,6 +109,9 @@ public class Project implements Serializable {
 	}
 
 	public Set<Account> getParticipants() {
+		if(CollectionUtils.isEmpty(participants)){
+			participants = new HashSet<>();
+		}
 		return participants;
 	}
 

@@ -39,6 +39,7 @@ import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @Secured("ROLE_USER")
@@ -169,28 +170,9 @@ public class AccountController {
     Page<DisplayAccount> listParticipants(@RequestParam(required = false) String term,
                                           @RequestParam String projId,
                                           @PageableDefault(size = 25, page = 0, sort = "surname", direction = Direction.ASC) Pageable p) {
-
-        Project project = projSrv.findByProjectId(projId);
-        if (project == null) {
-            try {
-                Long projectID = Long.valueOf(projId);
-                project = projSrv.findById(projectID);
-            } catch (NumberFormatException e) {
-                LOG.error(e.getMessage());
-            }
-        }
-        Set<Account> allParticipants = project.getParticipants();
         List<Object> principals = sessionRegistry.getAllPrincipals();
-        List<DisplayAccount> participants = new ArrayList<>();
-        for (Account account : allParticipants) {
-            if (term == null) {
-                participants.add(accountWithSession(principals, account));
-            } else {
-                if (StringUtils.containsIgnoreCase(account.toString(), term)) {
-                    participants.add(accountWithSession(principals, account));
-                }
-            }
-        }
+        List<Account> projectAccounts = projSrv.getProjectAccounts(projId, term);
+        List<DisplayAccount> participants = projectAccounts.stream().map( account -> accountWithSession(principals, account)).collect(Collectors.toList());
         int totalParticipants = participants.size();
         if (participants.size() > p.getPageSize()) {
             participants = participants.subList(p.getOffset(), p.getOffset() + p.getPageSize());
@@ -199,12 +181,12 @@ public class AccountController {
     }
 
     private DisplayAccount accountWithSession(List<Object> principals, Account account) {
-        DisplayAccount sAccount = new DisplayAccount(account);
+        DisplayAccount dAccount = new DisplayAccount(account);
         List<SessionInformation> sessions = sessionRegistry.getAllSessions(account, false);
         if (!sessions.isEmpty() && principals.contains(account)) {
-            sAccount.setOnline(true);
+            dAccount.setOnline(true);
         }
-        return sAccount;
+        return dAccount;
     }
 
     @RequestMapping(value = "/user/{username}/reset-avatar", method = RequestMethod.GET)
