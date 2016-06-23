@@ -112,17 +112,53 @@ function getTaskType(type) {
     }
     ;
 }
+var currentAccount=-1;
+$(document).on("click", ".avatar.small.member", function () {
+    var account = $(this).data('account');
+    //first show all
+    $(".agile-card,.agile-list").each(function () {
+        $(this).show();
+    });
+    currentTag = "";
+    $(".avatar.small.member").each(function () {
+        $(this).removeClass("not_selected");
+    });
+    $(".tag_filter").each(function () {
+        $(this).removeClass("not_selected");
+    });
+
+    if (account !== currentAccount) {
+        $(".agile-card,.agile-list").each(function () {
+            var assignee = $(this).data('assignee');
+            if (assignee !== account) {
+                $(this).hide();
+            }
+        });
+        $('.avatar.small.member').not(this).each(function () {
+            $(this).addClass("not_selected");
+        });
+        currentAccount = account;
+    } else {
+        currentAccount = "";
+    }
+})
+
+
 var currentTag;
 $(document).on("click", ".tag_filter", function () {
     //first show all
     $(".agile-card,.agile-list").each(function () {
         $(this).show();
     });
+    currentAccount = "";
     //reset SP to original value
     $(".total-points").each(function () {
         $(this).text($(this).attr("data-count"));
     })
     $(".tag_filter").each(function () {
+        $(this).removeClass("not_selected");
+    });
+    $(".avatar.small.member").each(function () {
         $(this).removeClass("not_selected");
     });
     var tag = $(this).data("name");

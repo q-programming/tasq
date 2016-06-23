@@ -170,9 +170,18 @@ table.togglerContent {
 .marginleft_0 {
     margin-left: 0px;
 }
+.marginright_0 {
+    margin-right: 0px;
+}
 
 .marginbottom_1 {
     margin-bottom: 1px;
+}
+.marginbottom_20{
+    margin-bottom: 20px;
+}
+.margintop_20{
+    margin-top: 20px;
 }
 
 .table_state {
@@ -873,6 +882,21 @@ a.secondaryPanelButton {
     height: 30px;
     float: left;
 }
+.avatar.small.member {
+    float: none;
+    height: 25px;
+ }
+.unassigned.button{
+    background: whitesmoke;
+    padding: 7px;
+    border-radius: 50%;
+}
+.v-middle{
+    vertical-align: middle;
+}
+.avatar.small.not_selected {
+    opacity: 0.4;
+}
 
 .avatar.xsmall {
     height: 20px;
@@ -887,6 +911,9 @@ a.secondaryPanelButton {
 
 .text-centered {
     text-align: center;
+}
+.text-right{
+    text-align: right;
 }
 .auto-margin{
     margin: 0 auto;

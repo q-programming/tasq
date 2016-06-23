@@ -1,5 +1,3 @@
-<%@page import="com.qprogramming.tasq.task.TaskType"%>
-<%@page import="com.qprogramming.tasq.task.worklog.LogType"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
 <%@ taglib prefix="security"
@@ -37,32 +35,38 @@
 	<c:if test="${can_edit}">
 		<div class="pull-right">
 			<a class="btn btn-default a-tooltip pull-right"
-				style="padding: 6px 11px;"
-				href='<s:url value="/project/${project.projectId}/manage"></s:url>'
-				title="<s:message code="project.manage" text="Set as avtive" />"
-				data-placement="bottom"><i class="fa fa-wrench"></i></a>
+			   style="padding: 6px 11px;"
+			   href='<s:url value="/project/${project.projectId}/manage"></s:url>'
+			   title="<s:message code="project.manage" text="Set as avtive" />"
+			   data-placement="bottom"><i class="fa fa-wrench"></i></a>
+			<c:if test="${project.agile eq 'KANBAN'}">
+			<span class="btn btn-default pull-left" id="new release" data-toggle="modal" data-target="#releaseModal">
+				<i class="fa fa-clipboard"></i>&nbsp;<s:message code="agile.newRelease"/>
+			</span>
+			</c:if>
+
 		</div>
 	</c:if>
 	<div class="pull-right">
 		<c:if test="${project.id eq user.active_project}">
 			<a class="btn btn-default a-tooltip pull-right"
-				style="padding: 6px 11px;" href='#'
-				title="<s:message
+			   style="padding: 6px 11px;" href='#'
+			   title="<s:message
 									code="project.active" text="Active project" />"
-				data-placement="bottom"> <i class="fa fa-refresh fa-spin"></i></a>
+			   data-placement="bottom"> <i class="fa fa-refresh fa-spin"></i></a>
 		</c:if>
 		<c:if test="${project.id ne user.active_project}">
 			<a class="btn btn-default a-tooltip pull-right"
-				href='<s:url value="/project/activate/${project.projectId}"></s:url>'
-				title="<s:message
+			   href='<s:url value="/project/activate/${project.projectId}"></s:url>'
+			   title="<s:message
 									code="project.activate" text="Set as avtive" />"
-				data-placement="bottom"> <i class="fa fa-refresh"></i>
+			   data-placement="bottom"> <i class="fa fa-refresh"></i>
 			</a>
 		</c:if>
-			<a class="show_participants_btn btn btn-default a-tooltip pull-right" 
-				title="" data-placement="bottom" data-original-title="<s:message code="project.members"/>">
-					<i class="fa fa-users"></i>
-			</a>
+		<a class="show_participants_btn btn btn-default a-tooltip pull-right"
+		   title="" data-placement="bottom" data-original-title="<s:message code="project.members"/>">
+			<i class="fa fa-users"></i>
+		</a>
 	</div>
 	<h3>[${project.projectId}] ${project.name}</h3>
 	${project.description}
@@ -216,6 +220,7 @@
 </div>
 <jsp:include page="../task/subtasks.jsp" />
 <jsp:include page="../other/events.jsp" />
+<jsp:include page="../modals/release.jsp" />
 <script>
 var	plot;
 $(document).ready(function($) {

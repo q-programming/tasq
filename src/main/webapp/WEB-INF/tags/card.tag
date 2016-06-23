@@ -9,7 +9,7 @@ type="com.qprogramming.tasq.task.DisplayTask"%>
 <%@ attribute name="can_edit" required="true"%>
 <security:authentication property="principal" var="user" />
 <div class="agile-card theme" data-id="${task.id}" state="${task.state}" data-subtasks="${task.subtasks}"
-id="${task.id}" data-tags="${task.getTagsList()}">
+id="${task.id}" data-tags="${task.getTagsList()}" data-assignee="${task.assignee.id}">
 <div style="padding-left: 5px; min-height: 50px;">
 <c:if test="${task.story_points ne 0}">
 <span class="badge theme pull-right">${task.story_points}</span>
@@ -19,7 +19,7 @@ id="${task.id}" data-tags="${task.getTagsList()}">
 class="<c:if test="${task.state eq 'CLOSED' }">
 closed
 </c:if>">[${task.id}]
-${task.name}</a> 
+${task.name}</a>
 </div>
 <div
 style="display: table; width: 100%; margin-top: 5px; min-height: 30px;">
@@ -44,8 +44,8 @@ style="margin-top: 10px; text-align: right; display: table-cell; vertical-align:
 <i><s:message code="task.unassigned" /> <c:if
 test="${can_edit}">
 &nbsp;<button class="btn btn-default assignToTask btn-xxs a-tooltip assign_me"
-title="<s:message code="task.assign"/>" data-toggle="modal" data-target="#assign_modal" 
-data-taskID="${task.id}" data-assignee="${task.assignee}" 
+title="<s:message code="task.assign"/>" data-toggle="modal" data-target="#assign_modal"
+data-taskID="${task.id}" data-assignee="${task.assignee}"
 data-assigneeID="${task.assignee.id}"
 data-projectID="${task.projectID}"
 type="button" data-taskID="${task.id}"
@@ -61,8 +61,8 @@ title="${task.assignee}"><img data-src="holder.js/30x30"
 class="avatar small"
 src="<c:url value="/../avatar/${task.assignee.id}.png"/>" />
 </a><c:if test="${task.state ne 'CLOSED'}}"><button class="btn btn-default assignToTask btn-xxs a-tooltip assign_me"
-title="<s:message code="task.assign"/>" data-toggle="modal" data-target="#assign_modal" 
-data-taskID="${task.id}" data-assignee="${task.assignee}" 
+title="<s:message code="task.assign"/>" data-toggle="modal" data-target="#assign_modal"
+data-taskID="${task.id}" data-assignee="${task.assignee}"
 data-assigneeID="${task.assignee.id}"
 data-projectID="${task.projectID}"
 type="button" data-taskID="${task.id}"

@@ -1272,7 +1272,7 @@
 			<p>
 				To create new release, click <span class="btn btn-default"> <i
 					class="fa fa-clipboard"></i>&nbsp;New Release
-				</span> button which is available for project administrators.<br>Clicking
+				</span> button which is available for project administrators on <a href="#proj-details">Project details</a> page.<br>Clicking
 				it will show modal window, where name of release and optional
 				comment can be inputed. After it , all closed tasks will be moved to
 				this release , and new release will be started.<br>From now on,
