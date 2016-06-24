@@ -3,6 +3,7 @@ package com.qprogramming.tasq.task;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import com.qprogramming.tasq.account.Account;
@@ -10,7 +11,7 @@ import com.qprogramming.tasq.agile.Release;
 import com.qprogramming.tasq.projects.Project;
 
 @Repository
-public interface TaskRepository extends JpaRepository<Task, Integer> {
+public interface TaskRepository extends JpaRepository<Task, Integer> , JpaSpecificationExecutor {
 
 	Task findByName(String name);
 
