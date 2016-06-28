@@ -419,30 +419,21 @@ public class TaskController {
             Project project = projectObj.get();
             TaskFilter filter = new TaskFilter(project, state, query, priority, type, assignee);
             List<Task> tasks = taskSrv.findBySpecification(filter);
-            //TODO filter by project is faulty
-            List<Task> taskList = tasks.stream().filter(task -> project.equals(task.getProject())).collect(Collectors.toList());
-//            if (OPEN.equals(state)) {
-//                taskList = taskSrv.findByProjectAndOpen(project.get());
-//            } else if (ALL.equals(state)) {
-//                taskList = taskSrv.findAllByProject(project.get());
-//            } else {
-//                taskList = taskSrv.findByProjectAndState(project.get(), TaskState.valueOf(state));
-//            }
             //TODO filter by query as well ?
             if (StringUtils.isNotEmpty(query)) {
                 Tag tag = tagsRepo.findByName(query);
-                List<Task> searchResult = taskList.stream().filter(task -> StringUtils.containsIgnoreCase(task.getId(), query)
+                List<Task> searchResult = tasks.stream().filter(task -> StringUtils.containsIgnoreCase(task.getId(), query)
                         || StringUtils.containsIgnoreCase(task.getName(), query)
                         || StringUtils.containsIgnoreCase(task.getDescription(), query)
                         || task.getTags().contains(tag)).collect(Collectors.toCollection(LinkedList::new));
-                taskList = searchResult;
+                tasks = searchResult;
             }
             if (StringUtils.isNotEmpty(priority)) {
-                List<Task> searchResult = taskList.stream().filter(task -> task.getPriority() != null && task.getPriority().equals(TaskPriority.valueOf(priority))).collect(Collectors.toCollection(LinkedList::new));
-                taskList = searchResult;
+                List<Task> searchResult = tasks.stream().filter(task -> task.getPriority() != null && task.getPriority().equals(TaskPriority.valueOf(priority))).collect(Collectors.toCollection(LinkedList::new));
+                tasks = searchResult;
             }
-            Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID, false));
-            model.addAttribute("tasks", taskList);
+            Collections.sort(tasks, new TaskSorter(TaskSorter.SORTBY.ID, false));
+            model.addAttribute("tasks", tasks);
             model.addAttribute("active_project", project);
         }
         return "task/list";

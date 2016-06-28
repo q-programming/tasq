@@ -1,5 +1,6 @@
 package com.qprogramming.tasq.task;
 
+import com.qprogramming.tasq.projects.Project_;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -23,10 +24,10 @@ public class TaskSpecification implements Specification<Task> {
     public Predicate toPredicate(Root<Task> task, CriteriaQuery<?> cq, CriteriaBuilder cb) {
         Predicate predicate = cb.conjunction();
         //project
-        cb.and(predicate, cb.equal(task.get(Task_.project), taskFilter.getProject().getId()));
-        //no subtasks
-        cb.and(predicate, task.get(Task_.parent).isNull());
-        //state
+        predicate = cb.and(predicate, cb.equal(task.get(Task_.project).get(Project_.id), taskFilter.getProject().getId()));
+//      no subtasks
+        predicate = cb.and(predicate, task.get(Task_.parent).isNull());
+//      state
         if (StringUtils.isNotBlank(taskFilter.getByState())) {
             if (TaskFilter.OPEN.equals(taskFilter.getByState())) {
                 predicate = cb.and(predicate, task.get(Task_.state).in(TaskState.TO_DO, TaskState.ONGOING, TaskState.COMPLETE, TaskState.BLOCKED));
@@ -42,7 +43,7 @@ public class TaskSpecification implements Specification<Task> {
         if (taskFilter.getPriority() != null) {
             predicate = cb.and(predicate, task.get(Task_.priority).in(taskFilter.getPriority()));
         }
-        //query
+//        query
 //        if (StringUtils.isNotBlank(taskFilter.getQuery())) {
 //            cb.function("CONTAINS",Boolean.class,task.get(Task_.id), taskFilter.getQuery().toLowerCase())
 //            Predicate query_predicate = cb.or(cb.like( + "%"),

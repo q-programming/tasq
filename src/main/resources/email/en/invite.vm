@@ -183,10 +183,11 @@ table.worklog_table td {
 		<table class="main">
 			<tbody>
 				<tr>
-					<td valign="top" style="vertical-align: top; width:70px">
-						<img src='cid:avatar' style="height:50px; padding:2px">
-					</td> 
-					<td class="text">
+                    <td valign="top" style="vertical-align: top; width:70px; padding: 2px">
+                        <img src='cid:avatar' style="height:50px; border-radius: 50%">
+                    </td>
+
+                    <td class="text">
 						<p>
 							<a href="mailto:${curAccount.email}">${curAccount}</a> invited you to Tasker application.
 						</p>

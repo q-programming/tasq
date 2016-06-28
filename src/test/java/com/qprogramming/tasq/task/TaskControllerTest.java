@@ -489,7 +489,7 @@ public class TaskControllerTest {
 		taskCtr.listTasks(PROJ_ID, "TO_DO", null, null, null,null,modelMock);
 		when(taskRepoMock.findByProjectAndStateAndParentIsNull(project, TaskState.TO_DO)).thenReturn(toDoList);
 		taskCtr.listTasks(PROJ_ID, null, "tas", "MAJOR", null,null,modelMock);
-		verify(modelMock, times(9)).addAttribute(anyString(), anyObject());
+		verify(modelMock, times(3)).addAttribute(anyString(), anyObject());
 	}
 
 	@Test
@@ -623,7 +623,7 @@ public class TaskControllerTest {
 		when(taskRepoMock.findById(TASK_ID)).thenReturn(task);
 		when(projSrvMock.canEdit(project)).thenReturn(true);
 		ResultData data = taskCtr.changeState(TASK_ID, TaskState.TO_DO, true, null, "Done");
-		Assert.assertEquals(ResultData.ERROR, data.code);
+		Assert.assertEquals(ResultData.WARNING, data.code);
 	}
 
 	@Test
@@ -643,7 +643,7 @@ public class TaskControllerTest {
 		when(taskRepoMock.findById(TASK_ID)).thenReturn(task);
 		when(projSrvMock.canEdit(project)).thenReturn(true);
 		ResultData data = taskCtr.changeState(TASK_ID, TaskState.CLOSED, true, null, "Done");
-		Assert.assertEquals(ResultData.ERROR, data.code);
+		Assert.assertEquals(ResultData.WARNING, data.code);
 	}
 
 	@Test
