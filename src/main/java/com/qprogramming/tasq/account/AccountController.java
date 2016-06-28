@@ -5,7 +5,6 @@ import com.qprogramming.tasq.error.TasqException;
 import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.manage.Theme;
 import com.qprogramming.tasq.manage.ThemeService;
-import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.ResultData;
 import com.qprogramming.tasq.support.Utils;
@@ -38,7 +37,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Controller
@@ -136,12 +137,7 @@ public class AccountController {
         } else {
             accounts = accountSrv.findByNameSurnameContaining(term);
         }
-        List<DisplayAccount> result = new ArrayList<>();
-        for (Account account : accounts) {
-            DisplayAccount d_account = new DisplayAccount(account);
-            result.add(d_account);
-        }
-        return result;
+        return accounts.stream().map(DisplayAccount::new).collect(Collectors.toList());
     }
 
     @RequestMapping(value = "/users", method = RequestMethod.GET)
@@ -161,7 +157,7 @@ public class AccountController {
             DisplayAccount dispAccount = accountWithSession(principals, account);
             list.add(dispAccount);
         }
-        return  new PageImpl<>(list, p, page.getTotalElements());
+        return new PageImpl<>(list, p, page.getTotalElements());
     }
 
     @RequestMapping(value = "/project/participants", method = RequestMethod.GET)
@@ -172,7 +168,7 @@ public class AccountController {
                                           @PageableDefault(size = 25, page = 0, sort = "surname", direction = Direction.ASC) Pageable p) {
         List<Object> principals = sessionRegistry.getAllPrincipals();
         List<Account> projectAccounts = projSrv.getProjectAccounts(projId, term);
-        List<DisplayAccount> participants = projectAccounts.stream().map( account -> accountWithSession(principals, account)).collect(Collectors.toList());
+        List<DisplayAccount> participants = projectAccounts.stream().map(account -> accountWithSession(principals, account)).collect(Collectors.toList());
         int totalParticipants = participants.size();
         if (participants.size() > p.getPageSize()) {
             participants = participants.subList(p.getOffset(), p.getOffset() + p.getPageSize());

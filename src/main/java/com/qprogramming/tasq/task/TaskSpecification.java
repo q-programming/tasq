@@ -1,5 +1,6 @@
 package com.qprogramming.tasq.task;
 
+import com.qprogramming.tasq.account.Account_;
 import com.qprogramming.tasq.projects.Project_;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
@@ -27,7 +28,6 @@ public class TaskSpecification implements Specification<Task> {
         predicate = cb.and(predicate, cb.equal(task.get(Task_.project).get(Project_.id), taskFilter.getProject().getId()));
 //      no subtasks
         predicate = cb.and(predicate, task.get(Task_.parent).isNull());
-//      state
         if (StringUtils.isNotBlank(taskFilter.getByState())) {
             if (TaskFilter.OPEN.equals(taskFilter.getByState())) {
                 predicate = cb.and(predicate, task.get(Task_.state).in(TaskState.TO_DO, TaskState.ONGOING, TaskState.COMPLETE, TaskState.BLOCKED));
@@ -35,22 +35,15 @@ public class TaskSpecification implements Specification<Task> {
                 predicate = cb.and(predicate, task.get(Task_.state).in(TaskState.valueOf(taskFilter.getByState())));
             }
         }
-        //type
         if (taskFilter.getType() != null) {
             predicate = cb.and(predicate, task.get(Task_.type).in(taskFilter.getType()));
         }
-        //priority
         if (taskFilter.getPriority() != null) {
             predicate = cb.and(predicate, task.get(Task_.priority).in(taskFilter.getPriority()));
         }
-//        query
-//        if (StringUtils.isNotBlank(taskFilter.getQuery())) {
-//            cb.function("CONTAINS",Boolean.class,task.get(Task_.id), taskFilter.getQuery().toLowerCase())
-//            Predicate query_predicate = cb.or(cb.like( + "%"),
-//                    cb.like(cb.lower(task.get(Task_.name)), taskFilter.getQuery().toLowerCase() + "%"),
-//                    cb.like(cb.lower(task.get(Task_.description)), taskFilter.getQuery().toLowerCase() + "%"));
-//            predicate = cb.and(predicate, query_predicate);
-//        }
+        if (taskFilter.getAssignee() != null) {
+            predicate = cb.and(predicate, task.get(Task_.assignee).get(Account_.id).in(taskFilter.getAssignee().getId()));
+        }
         return predicate;
     }
 }

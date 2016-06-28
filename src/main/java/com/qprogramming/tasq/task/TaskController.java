@@ -407,6 +407,13 @@ public class TaskController {
         List<Project> projects = projectSrv.findAllByUser();
         Collections.sort(projects, new ProjectSorter(ProjectSorter.SORTBY.LAST_VISIT,
                 currentAccount.getActive_project(), true));
+        Account assigneeAccount = null;
+        if (StringUtils.isNotEmpty(assignee)) {
+            assigneeAccount = accSrv.findByUsername(assignee);
+            if (assigneeAccount != null) {
+                model.addAttribute("assignee", assigneeAccount);
+            }
+        }
         model.addAttribute("projects", projects);
         // Get active or choosen project
         Optional<Project> projectObj;
@@ -417,19 +424,14 @@ public class TaskController {
         }
         if (projectObj.isPresent()) {
             Project project = projectObj.get();
-            TaskFilter filter = new TaskFilter(project, state, query, priority, type, assignee);
+            TaskFilter filter = new TaskFilter(project, state, query, priority, type, assigneeAccount);
             List<Task> tasks = taskSrv.findBySpecification(filter);
-            //TODO filter by query as well ?
             if (StringUtils.isNotEmpty(query)) {
                 Tag tag = tagsRepo.findByName(query);
                 List<Task> searchResult = tasks.stream().filter(task -> StringUtils.containsIgnoreCase(task.getId(), query)
                         || StringUtils.containsIgnoreCase(task.getName(), query)
                         || StringUtils.containsIgnoreCase(task.getDescription(), query)
                         || task.getTags().contains(tag)).collect(Collectors.toCollection(LinkedList::new));
-                tasks = searchResult;
-            }
-            if (StringUtils.isNotEmpty(priority)) {
-                List<Task> searchResult = tasks.stream().filter(task -> task.getPriority() != null && task.getPriority().equals(TaskPriority.valueOf(priority))).collect(Collectors.toCollection(LinkedList::new));
                 tasks = searchResult;
             }
             Collections.sort(tasks, new TaskSorter(TaskSorter.SORTBY.ID, false));

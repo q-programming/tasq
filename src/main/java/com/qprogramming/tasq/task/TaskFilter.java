@@ -1,5 +1,6 @@
 package com.qprogramming.tasq.task;
 
+import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.projects.Project;
 import org.apache.commons.lang.StringUtils;
 
@@ -12,7 +13,7 @@ public class TaskFilter extends Task {
     private String byState;
     private String query;
 
-    public TaskFilter(Project project, String state, String query, String priority, String type, String assignee) {
+    public TaskFilter(Project project, String state, String query, String priority, String type, Account assignee) {
         this.query = query;
         setProject(project);
         if (StringUtils.isNotEmpty(priority)) {
@@ -24,7 +25,7 @@ public class TaskFilter extends Task {
         if (StringUtils.isNotEmpty(type)) {
             setType(TaskType.toType(type));
         }
-
+        setAssignee(assignee);
     }
 
     public String getByState() {
