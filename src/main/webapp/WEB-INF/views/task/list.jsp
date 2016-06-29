@@ -336,15 +336,17 @@
                 </td>
                 <%-- 			</c:if> --%>
                 <td class="${blinker}"><t:state state="${task.state}"></t:state></td>
-                <td><c:if test="${empty task.assignee}">
+                <td><c:if test="${empty task.assignee }">
                     <i><s:message code="task.unassigned"/></i>
-					<span class="btn btn-default btn-xxs a-tooltip assignToTask pull-right"
-                          title="<s:message code="task.assign"/>" data-toggle="modal" data-target="#assign_modal"
-                          data-taskID="${task.id}" data-assignee="${task.assignee}"
-                          data-assigneeID="${task.assignee.id}"
-                          data-projectID="${task.project.projectId}">
-									<i class="fa fa-lg fa-user-plus"></i>
-					</span>
+                    <c:if test="${user.getIsUser()}">
+                        <span class="btn btn-default btn-xxs a-tooltip assignToTask pull-right"
+                              title="<s:message code="task.assign"/>" data-toggle="modal" data-target="#assign_modal"
+                              data-taskID="${task.id}" data-assignee="${task.assignee}"
+                              data-assigneeID="${task.assignee.id}"
+                              data-projectID="${task.project.projectId}">
+                                        <i class="fa fa-lg fa-user-plus"></i>
+                        </span>
+                    </c:if>
                 </c:if> <c:if test="${not empty task.assignee}">
                     <img data-src="holder.js/20x20"
                          class="avatar xsmall"

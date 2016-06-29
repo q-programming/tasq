@@ -17,7 +17,6 @@ import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
-import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,8 +43,8 @@ import java.util.stream.Collectors;
 @Controller
 public class ProjectController {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ProjectController.class);
     public static final String APPLICATION_JSON = "application/json";
+    private static final Logger LOG = LoggerFactory.getLogger(ProjectController.class);
     private ProjectService projSrv;
     private AccountService accSrv;
     private TaskService taskSrv;
@@ -363,9 +362,13 @@ public class ProjectController {
     public
     @ResponseBody
     List<DisplayAccount> listParticipants(@RequestParam String id, @RequestParam String term,
-                                          HttpServletResponse response) {
+                                          @RequestParam(required = false) Boolean userOnly, HttpServletResponse response) {
         response.setContentType(APPLICATION_JSON);
-        return  projSrv.getProjectAccounts(id, term).stream().map(DisplayAccount::new).collect(Collectors.toList());
+        List<Account> accounts = projSrv.getProjectAccounts(id, term);
+        if (userOnly) {
+            return accounts.stream().filter(Account::getIsUser).map(DisplayAccount::new).collect(Collectors.toList());
+        }
+        return accounts.stream().map(DisplayAccount::new).collect(Collectors.toList());
     }
 
 

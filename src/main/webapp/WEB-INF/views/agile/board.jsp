@@ -207,7 +207,7 @@
         var url = '<c:url value="/project/getParticipants"/>';
         var term = '';
         var projId = "${project.id}"
-        $.get(url, {id: projId, term: term}, function (data) {
+        $.get(url, {id: projId, term: term,userOnly:true}, function (data) {
             console.log(data);
             var avatarURL = '<c:url value="/../avatar/"/>';
             for (var j = 0; j < data.length; j++) {
