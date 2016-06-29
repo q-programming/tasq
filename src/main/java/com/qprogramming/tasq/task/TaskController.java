@@ -166,7 +166,7 @@ public class TaskController {
             }
             // lookup for sprint
             // Create log work
-            taskSrv.save(task);
+            task = taskSrv.save(task);
             if (taskForm.getAddToSprint() != null) {
                 Sprint sprint = sprintSrv.findByProjectIdAndSprintNo(project.getId(), taskForm.getAddToSprint());
                 task.addSprint(sprint);
@@ -817,6 +817,7 @@ public class TaskController {
         return REDIRECT + request.getHeader("Referer");
     }
 
+    @Transactional
     @RequestMapping(value = "/task/delete", method = RequestMethod.GET)
     public String deleteTask(@RequestParam(value = "id") String taskID, RedirectAttributes ra,
                              HttpServletRequest request) {
@@ -825,7 +826,7 @@ public class TaskController {
             Project project = projectSrv.findById(task.getProject().getId());
             // Only allow delete for administrators, owner or app admin
             if (isAdmin(task, project)) {
-                ResultData result = new ResultData();
+                ResultData result;
                 // check for links and subtasks
                 List<Task> subtasks = taskSrv.findSubtasks(taskID);
                 for (Task subtask : subtasks) {
@@ -855,9 +856,9 @@ public class TaskController {
                     int count = parentTask.getSubtasks();
                     parentTask.setSubtasks(--count);
                     taskSrv.save(parentTask);
-                    taskSrv.save(purgeTask(task));
                 }
-                taskSrv.delete(task);
+                Task purged = taskSrv.save(purgeTask(task));
+                taskSrv.delete(purged);
                 wlSrv.addWorkLogNoTask(message.toString(), project, LogType.DELETED);
             }
             // TODO add message about removed task
@@ -1038,7 +1039,8 @@ public class TaskController {
             if (result.code.equals(ResultData.ERROR)) {
                 throw new TasqException(result.message);
             }
-            taskSrv.save(purgeTask(subtask));
+            subtask = taskSrv.save(purgeTask(subtask));
+            taskSrv.delete(subtask);
             MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.subtasks.2task.success",
                     new Object[]{id, taskID}, Utils.getCurrentLocale()));
             TaskLink link = new TaskLink(parent.getId(), taskID, TaskLinkType.RELATES_TO);
@@ -1186,6 +1188,10 @@ public class TaskController {
             task.setOwner(null);
             task.setAssignee(null);
             task.setProject(null);
+            task.setTags(null);
+            wlSrv.deleteTaskWorklogs(task);
+            Set<Comment> comments = commRepo.findByTaskIdOrderByDateDesc(task.getId());
+            commRepo.delete(comments);
         }
         return result;
     }
