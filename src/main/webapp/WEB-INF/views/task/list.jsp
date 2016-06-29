@@ -1,5 +1,6 @@
 <%@page import="com.qprogramming.tasq.task.TaskPriority" %>
 <%@page import="com.qprogramming.tasq.task.TaskState" %>
+<%@ page import="com.qprogramming.tasq.task.TaskType" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
 <%@ taglib prefix="security"
@@ -41,8 +42,12 @@
     </div>
     <%--------------FILTERS ----------------------------%>
     <div style="display: table-cell; padding-left: 20px; width: 100%;line-height: 30px;">
-        <c:if
-                test="${not empty param.projectID || not empty param.state || not empty param.query || not empty param.priority}">
+        <c:if test="${not empty param.projectID
+            || not empty param.state
+            || not empty param.query
+            || not empty param.priority
+            || not empty param.type
+            || not empty param.assignee}">
             <c:if test="${not empty param.projectID}">
                 <c:set var="projID_url">
                     projectID=${param.projectID}&
@@ -74,40 +79,41 @@
                 </c:set>
             </c:if>
             <c:if test="${not empty param.projectID}">
-				<span><s:message code="project.project"/>: <span
+				<span class="filter"><s:message code="project.project"/>: <span
                         class="filter_span"> ${param.projectID}<a
                         href="<c:url value="/tasks?${state_url}${query_url}${priority_url}${assignee_url}${type_url}"/>">
 						<i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
 						</a></span></span>
             </c:if>
-            <c:if test="${not empty param.state}">
-				<span><s:message code="task.state"/>: <span
-                        class="filter_span"><t:state state="${param.state}"/> <a
-                        href="<c:url value="/tasks?${projID_url}${query_url}${priority_url}${assignee_url}${type_url}"/>">
-						<i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i></a>
-						</span></span>
+            <c:if test="${not empty param.type}">
+				<span class="filter"><s:message code="task.type"/>: <span
+                        class="filter_span">  <t:type type="${param.type}" list="true" show_text="true"/>
+						<a
+                                href="<c:url value="/tasks?${projID_url}${query_url}${priority_url}${state_url}${assignee_url}"/>">
+						<i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
+						</a></span></span>
             </c:if>
             <c:if test="${not empty param.priority}">
-				<span><s:message code="task.priority"/>: <span
+				<span class="filter"><s:message code="task.priority"/>: <span
                         class="filter_span"><t:priority priority="${param.priority}"/>
 						<a
                                 href="<c:url value="/tasks?${projID_url}${query_url}${state_url}${assignee_url}${type_url}"/>">
 						<i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
 						</a></span></span>
             </c:if>
-            <c:if test="${not empty param.type}">
-				<span><s:message code="task.type"/>: <span
-                        class="filter_span"> ${param.type}
-						<a
-                                href="<c:url value="/tasks?${projID_url}${query_url}${priority_url}${state_url}${assignee_url}"/>">
-						<i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
-						</a></span></span>
+            <c:if test="${not empty param.state}">
+				<span class="filter"><s:message code="task.state"/>: <span
+                        class="filter_span"><t:state state="${param.state}"/> <a
+                        href="<c:url value="/tasks?${projID_url}${query_url}${priority_url}${assignee_url}${type_url}"/>">
+						<i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i></a>
+						</span></span>
             </c:if>
-            <c:if test="${not empty param.assignee}">
-				<span><s:message code="task.assignee"/>: <span
-                        class="filter_span"><t:priority priority="${param.assignee}"/>
-						<a
-                                href="<c:url value="/tasks?${projID_url}${query_url}${priority_url}${state_url}${type_url}"/>">
+            <c:if test="${not empty assignee}">
+				<span class="filter"><s:message code="task.assignee"/>: <span
+                        class="filter_span">
+                            <c:if test="${user eq assignee}"><s:message code="task.assignee.me"/></c:if>
+                            <c:if test="${user ne assignee}">${assignee}</c:if>
+						<a href="<c:url value="/tasks?${projID_url}${query_url}${priority_url}${state_url}${type_url}"/>">
 						<i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
 						</a></span></span>
             </c:if>
@@ -184,7 +190,22 @@
             <th class="export_cell export-hidden" style="width: 30px"><input
                     id="select_all" type="checkbox" class="a-tooltip"
                     title="<s:message code="task.export.clickAll"/>"></th>
-            <th style="width: 30px;text-align: center;"><s:message code="task.type"/></th>
+            <th style="width: 60px;text-align: center;">
+                <span class="dropdown a-tooltip clickable" title="<s:message code="task.type" />">
+                    <a class="filter dropdown-toggle theme" type="button" id="dropdownMenuType"
+                       data-toggle="dropdown">
+                        <s:message code="task.type"/> <span class="caret theme"></span></a>
+                        <ul class="dropdown-menu">
+                            <%
+                                pageContext.setAttribute("types", TaskType.getTypes(false));
+                            %>
+                            <c:forEach items="${types}" var="type">
+                                <li><a href="<c:url value="/tasks?${projID_url}${query_url}${state_url}${priority_url}${assignee_url}type=${type}"/>">
+                                        <t:type type="${type}" list="true" show_text="true"/></a></li>
+                            </c:forEach>
+                        </ul>
+                    <span>
+            </th>
             <th style="width: 30px;"><span class="dropdown a-tooltip"
                                            title="<s:message code="task.priority" />"
                                            style="padding-top: 5px; cursor: pointer;"> <a
@@ -197,8 +218,8 @@
 						<ul class="dropdown-menu">
 							<c:forEach items="${priorities}" var="priority">
 								<li><a
-                                        href="<c:url value="/tasks?${projID_url}${query_url}${state_url}priority=${priority}"/>"><t:priority
-                                        priority="${priority}"></t:priority></a></li>
+                                        href="<c:url value="/tasks?${projID_url}${query_url}${state_url}${type_url}${assignee_url}priority=${priority}"/>">
+                                    <t:priority priority="${priority}"></t:priority></a></li>
                             </c:forEach>
 						</ul>
 				</span></th>
@@ -206,7 +227,7 @@
             <th><s:message code="task.progress"/></th>
             <th>
                 <div class="dropdown" style="padding-top: 5px; cursor: pointer;">
-                    <a class="dropdown-toggle theme" type="button" id="dropdownMenu1"
+                    <a class="filter dropdown-toggle theme" type="button" id="dropdownMenu1"
                        data-toggle="dropdown"><s:message code="task.state"/><span
                             class="caret theme"></span></a>
                     <%
@@ -215,20 +236,37 @@
                     <ul class="dropdown-menu">
                         <c:forEach items="${states}" var="state">
                             <li><a
-                                    href="<c:url value="/tasks?${projID_url}${query_url}${priority_url}state=${state}"/>"><t:state
-                                    state="${state}"></t:state></a></li>
+                                    href="<c:url value="/tasks?${projID_url}${query_url}${priority_url}${assignee_url}${type_url}state=${state}"/>">
+                                <t:state state="${state}"></t:state></a></li>
                         </c:forEach>
                         <li class="divider"></li>
                         <li><a
-                                href="<c:url value="/tasks?${projID_url}${query_url}${priority_url}state=ALL"/>">
+                                href="<c:url value="/tasks?${projID_url}${query_url}${priority_url}${assignee_url}${type_url}state=ALL"/>">
                             <t:state state="ALL"></t:state>
                         </a>
                         </li>
                     </ul>
                 </div>
-
             </th>
-            <th style="width: 200px"><s:message code="task.assignee"/></th>
+            <th style="width: 200px">
+                <div class="dropdown" style="padding-top: 5px; cursor: pointer;">
+                    <a class="filter dropdown-toggle theme" type="button" id="dropdownMenuAssignee"
+                       data-toggle="dropdown"><s:message code="task.assignee"/><span
+                            class="caret theme"></span></a>
+                    <ul class="dropdown-menu" style="padding: 5px;width: 200px;z-index: 1;">
+                        <li>
+                            <input type="text" class="form-control input-sm"
+                                   placeholder="<s:message code="project.participant.hint"/>"
+                                   id="assignee_auto">
+                            <div id="assignee_autoLoader" style="display: none; color:black">
+                                <i class="fa fa-cog fa-spin"></i>
+                                <s:message code="main.loading"/>
+                                <br>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </th>
         </tr>
         </thead>
         <%----------------TASKS -----------------------------%>
@@ -298,15 +336,17 @@
                 </td>
                 <%-- 			</c:if> --%>
                 <td class="${blinker}"><t:state state="${task.state}"></t:state></td>
-                <td><c:if test="${empty task.assignee}">
+                <td><c:if test="${empty task.assignee }">
                     <i><s:message code="task.unassigned"/></i>
-					<span class="btn btn-default btn-xxs a-tooltip assignToTask pull-right"
-                          title="<s:message code="task.assign"/>" data-toggle="modal" data-target="#assign_modal"
-                          data-taskID="${task.id}" data-assignee="${task.assignee}"
-                          data-assigneeID="${task.assignee.id}"
-                          data-projectID="${task.project.projectId}">
-									<i class="fa fa-lg fa-user-plus"></i>
-					</span>
+                    <c:if test="${user.getIsUser()}">
+                        <span class="btn btn-default btn-xxs a-tooltip assignToTask pull-right"
+                              title="<s:message code="task.assign"/>" data-toggle="modal" data-target="#assign_modal"
+                              data-taskID="${task.id}" data-assignee="${task.assignee}"
+                              data-assigneeID="${task.assignee.id}"
+                              data-projectID="${task.project.projectId}">
+                                        <i class="fa fa-lg fa-user-plus"></i>
+                        </span>
+                    </c:if>
                 </c:if> <c:if test="${not empty task.assignee}">
                     <img data-src="holder.js/20x20"
                          class="avatar xsmall"
@@ -342,9 +382,8 @@
         small_loading_indicator = '<div id="small_loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br></div>';
 
         $("#project").change(function () {
-            var query = "${query_url}";
-            var state = "${state_url}";
-            var link = '<c:url value="/tasks?projectID="/>' + $(this).val() + "&" + query + state;
+            var query = "${state_url}${query_url}${priority_url}${assignee_url}${type_url}";
+            var link = '<c:url value="/tasks?projectID="/>' + $(this).val() + "&" + query;
             window.location = link + $(this).val();
         });
         $(".export_startstop").click(function () {
@@ -383,5 +422,55 @@
                 });
             }
         });
+    });
+    $("#assignee_auto").autocomplete({
+        minLength: 1,
+        delay: 500,
+        //define callback to format results
+        source: function (request, response) {
+            $("#assignee_autoLoader").show();
+            $(this).closest(".ui-menu").hide();
+            var term = request.term;
+            if (term in cache) {
+                response(cache[term]);
+                return;
+            }
+            var url = '<c:url value="/getAccounts"/>';
+            $.get(url, {id: projectID, term: term}, function (data) {
+                $("#assignee_autoLoader").hide();
+                var results = [];
+                $.each(data, function (i, item) {
+                    var itemToAdd = {
+                        value: item.username,
+                        label: item.name + " " + item.surname,
+                        id: item.id
+                    };
+                    results.push(itemToAdd);
+                });
+                cache[term] = results;
+                $(this).closest(".ui-menu").show();
+                return response(results);
+            });
+        },
+        open: function (e, ui) {
+            var termTemplate = "<span class='ui-autocomplete-term'>%s</span>";
+            var acData = $(this).data('uiAutocomplete');
+            var styledTerm = termTemplate.replace('%s', acData.term);
+            acData.menu.element.find('a').each(function () {
+                var me = $(this);
+                var keywords = acData.term.split(' ').join('|');
+                me.html(me.text().replace(new RegExp("(" + keywords + ")", "gi"), '<b>$1</b>'));
+            });
+        },
+        //define select handler
+        select: function (event, ui) {
+            if (ui.item) {
+                event.preventDefault();
+                var query = "${projID_url}${state_url}${query_url}${priority_url}${type_url}&assignee=" + ui.item.value;
+                var link = '<c:url value="/tasks?"/>' + query;
+                window.location = link;
+                return false;
+            }
+        }
     });
 </script>

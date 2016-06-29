@@ -115,6 +115,13 @@ form.form-search:before {
     padding: 5px;
     /* 	border-radius: 3px; */
     background-color: white;
+    margin-left: 1px;
+}
+.filter{
+    margin-left: 5px;
+}
+a.filter{
+    text-decoration: none;
 }
 
 .mod-header {

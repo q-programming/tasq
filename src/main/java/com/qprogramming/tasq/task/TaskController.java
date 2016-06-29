@@ -393,7 +393,9 @@ public class TaskController {
     public String listTasks(@RequestParam(value = "projectID", required = false) String projId,
                             @RequestParam(value = "state", required = false) String state,
                             @RequestParam(value = "query", required = false) String query,
-                            @RequestParam(value = "priority", required = false) String priority, Model model) {
+                            @RequestParam(value = "priority", required = false) String priority,
+                            @RequestParam(value = "type", required = false) String type,
+                            @RequestParam(value = "assignee", required = false) String assignee, Model model) {
         if (StringUtils.isEmpty(state)) {
             if (query != null) {
                 state = ALL;
@@ -401,42 +403,40 @@ public class TaskController {
                 state = OPEN;
             }
         }
+        Account currentAccount = Utils.getCurrentAccount();
         List<Project> projects = projectSrv.findAllByUser();
         Collections.sort(projects, new ProjectSorter(ProjectSorter.SORTBY.LAST_VISIT,
-                Utils.getCurrentAccount().getActive_project(), true));
-        model.addAttribute("projects", projects);
-
-        // Get active or choosen project
-        Project active;
-        if (projId == null) {
-            active = projectSrv.findUserActiveProject();
-        } else {
-            active = projectSrv.findByProjectId(projId);
-        }
-        if (active != null) {
-            List<Task> taskList;
-            if (OPEN.equals(state)) {
-                taskList = taskSrv.findByProjectAndOpen(active);
-            } else if (ALL.equals(state)) {
-                taskList = taskSrv.findAllByProject(active);
-            } else {
-                taskList = taskSrv.findByProjectAndState(active, TaskState.valueOf(state));
+                currentAccount.getActive_project(), true));
+        Account assigneeAccount = null;
+        if (StringUtils.isNotEmpty(assignee)) {
+            assigneeAccount = accSrv.findByUsername(assignee);
+            if (assigneeAccount != null) {
+                model.addAttribute("assignee", assigneeAccount);
             }
+        }
+        model.addAttribute("projects", projects);
+        // Get active or choosen project
+        Optional<Project> projectObj;
+        if (projId == null) {
+            projectObj = projects.stream().filter(p -> p.getId().equals(currentAccount.getActive_project())).findFirst();
+        } else {
+            projectObj = projects.stream().filter(p -> p.getProjectId().equals(projId)).findFirst();
+        }
+        if (projectObj.isPresent()) {
+            Project project = projectObj.get();
+            TaskFilter filter = new TaskFilter(project, state, query, priority, type, assigneeAccount);
+            List<Task> tasks = taskSrv.findBySpecification(filter);
             if (StringUtils.isNotEmpty(query)) {
                 Tag tag = tagsRepo.findByName(query);
-                List<Task> searchResult = taskList.stream().filter(task -> StringUtils.containsIgnoreCase(task.getId(), query)
+                List<Task> searchResult = tasks.stream().filter(task -> StringUtils.containsIgnoreCase(task.getId(), query)
                         || StringUtils.containsIgnoreCase(task.getName(), query)
                         || StringUtils.containsIgnoreCase(task.getDescription(), query)
                         || task.getTags().contains(tag)).collect(Collectors.toCollection(LinkedList::new));
-                taskList = searchResult;
+                tasks = searchResult;
             }
-            if (StringUtils.isNotEmpty(priority)) {
-                List<Task> searchResult = taskList.stream().filter(task -> task.getPriority() != null && task.getPriority().equals(TaskPriority.valueOf(priority))).collect(Collectors.toCollection(LinkedList::new));
-                taskList = searchResult;
-            }
-            Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID, false));
-            model.addAttribute("tasks", taskList);
-            model.addAttribute("active_project", active);
+            Collections.sort(tasks, new TaskSorter(TaskSorter.SORTBY.ID, false));
+            model.addAttribute("tasks", tasks);
+            model.addAttribute("active_project", project);
         }
         return "task/list";
     }

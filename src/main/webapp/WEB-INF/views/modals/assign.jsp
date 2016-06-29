@@ -100,7 +100,7 @@ $("#assignee_input").autocomplete({
           return;
 	    }
 		var url='<c:url value="/project/getParticipants"/>';
-		$.get(url,{id:projectID,term:term},function(data) {
+		$.get(url,{id:projectID,term:term,userOnly:true},function(data) {
 			$("#assignUsersLoader").hide();
 			var results = [];
             $.each(data, function(i, item) {

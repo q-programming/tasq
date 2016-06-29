@@ -31,6 +31,9 @@
         </c:choose>
     </li>
     <li role="presentation" class="divider"></li>
+    <li><a href='<c:url value="/tasks?assignee="/>${user.username}'><i class="fa fa-lg fa-user"></i>&nbsp;<strong><s:message code="task.list.my" text="Create"/></strong></a></li>
+
+    <li role="presentation" class="divider"></li>
     <!-- 		PROJECTS -->
     <li><a href="#" class="menu-toggle" data-type="project-menu"><i
             class="menu-indicator fa fw fa-toggle-right"></i><i

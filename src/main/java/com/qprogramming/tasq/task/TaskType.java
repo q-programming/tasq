@@ -1,44 +1,57 @@
 package com.qprogramming.tasq.task;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public enum TaskType {
-	TASK(false), USER_STORY(false), ISSUE(false), BUG(false), CHANGE_REQUEST(false),IDLE(false) ,SUBTASK(
-			true), SUBBUG(true);
-	private boolean subtask;
+    TASK(false), USER_STORY(false), ISSUE(false), BUG(false), CHANGE_REQUEST(false), IDLE(false), SUBTASK(
+            true), SUBBUG(true);
+    private boolean subtask;
 
-	TaskType(boolean subtask) {
-		this.subtask = subtask;
-	}
+    TaskType(boolean subtask) {
+        this.subtask = subtask;
+    }
 
-	@Override
-	public String toString() {
-		// only capitalize the first letter
-		String s = super.toString();
-		s = s.replaceAll("_", " ");
-		return s.substring(0, 1) + s.substring(1).toLowerCase();
-	}
+    public static TaskType toType(String string) {
+        return valueOf(string.toUpperCase());
+    }
 
-	public String getEnum() {
-		return super.toString();
-	}
+    public static List<TaskType> getTypes(boolean subtask) {
+        List<TaskType> types = new LinkedList<>();
+        for (TaskType type : TaskType.values()) {
+            if (type.isSubtask() == subtask) {
+                types.add(type);
+            }
+        }
+        return types;
+    }
 
-	public String getDescription() {
-		return toString();
-	}
+    @Override
+    public String toString() {
+        // only capitalize the first letter
+        String s = super.toString();
+        s = s.replaceAll("_", " ");
+        return s.substring(0, 1) + s.substring(1).toLowerCase();
+    }
 
-	public String getCode() {
-		return super.toString().toLowerCase();
-	}
+    public String getEnum() {
+        return super.toString();
+    }
 
-	public boolean isSubtask() {
-		return subtask;
-	}
+    public String getDescription() {
+        return toString();
+    }
 
-	public void setSubtask(boolean subtask) {
-		this.subtask = subtask;
-	}
+    public String getCode() {
+        return super.toString().toLowerCase();
+    }
 
-	public static TaskType toType(String string) {
-		return valueOf(string.toUpperCase());
-	}
+    public boolean isSubtask() {
+        return subtask;
+    }
+
+    public void setSubtask(boolean subtask) {
+        this.subtask = subtask;
+    }
 
 }

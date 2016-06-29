@@ -484,12 +484,12 @@ public class TaskControllerTest {
 		when(projSrvMock.findUserActiveProject()).thenReturn(project);
 		when(taskRepoMock.findByParent(TASK_ID)).thenReturn(subtasks);
 		when(taskRepoMock.findAllByProjectAndParentIsNull(project)).thenReturn(allList);
-		taskCtr.listTasks(null, null, null, null, modelMock);
+		taskCtr.listTasks(null, null, null, null, null,null,modelMock);
 		when(projSrvMock.findByProjectId(PROJ_ID)).thenReturn(project);
-		taskCtr.listTasks(PROJ_ID, "TO_DO", null, null, modelMock);
+		taskCtr.listTasks(PROJ_ID, "TO_DO", null, null, null,null,modelMock);
 		when(taskRepoMock.findByProjectAndStateAndParentIsNull(project, TaskState.TO_DO)).thenReturn(toDoList);
-		taskCtr.listTasks(PROJ_ID, null, "tas", "MAJOR", modelMock);
-		verify(modelMock, times(9)).addAttribute(anyString(), anyObject());
+		taskCtr.listTasks(PROJ_ID, null, "tas", "MAJOR", null,null,modelMock);
+		verify(modelMock, times(3)).addAttribute(anyString(), anyObject());
 	}
 
 	@Test
@@ -623,7 +623,7 @@ public class TaskControllerTest {
 		when(taskRepoMock.findById(TASK_ID)).thenReturn(task);
 		when(projSrvMock.canEdit(project)).thenReturn(true);
 		ResultData data = taskCtr.changeState(TASK_ID, TaskState.TO_DO, true, null, "Done");
-		Assert.assertEquals(ResultData.ERROR, data.code);
+		Assert.assertEquals(ResultData.WARNING, data.code);
 	}
 
 	@Test
@@ -643,7 +643,7 @@ public class TaskControllerTest {
 		when(taskRepoMock.findById(TASK_ID)).thenReturn(task);
 		when(projSrvMock.canEdit(project)).thenReturn(true);
 		ResultData data = taskCtr.changeState(TASK_ID, TaskState.CLOSED, true, null, "Done");
-		Assert.assertEquals(ResultData.ERROR, data.code);
+		Assert.assertEquals(ResultData.WARNING, data.code);
 	}
 
 	@Test
