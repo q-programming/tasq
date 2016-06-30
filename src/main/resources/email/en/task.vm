@@ -194,7 +194,7 @@ table.worklog_table td {
 						#set ($create = "create")
 						#if ($log.type.string == $create)
 							<p>
-								<a href="${application}/user/${curAccount.username}">${curAccount}</a> created new task <img src='cid:${task.type.code}'><a href="${application}/task/${task.id}" target="_blank">${task.id}</a>and assigned you to it.
+								<a href="${application}/user/${curAccount.username}">${curAccount}</a> created new task <img src='cid:${task.type.code}'><a href="${application}/task/${task.id}" target="_blank">${task.id}</a> and assigned you to it.
 							</p>
 						#else
 							<p>

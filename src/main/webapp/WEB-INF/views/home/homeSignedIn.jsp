@@ -75,25 +75,6 @@
 			<div class="text-center">
 				<ul id="eventsTable_pagination_bot"></ul>
 			</div>
-
-
-			<%-- 			<table class="table table-condensed table table-hover"> --%>
-			<%-- 				<thead class="theme"> --%>
-			<%-- 					<tr> --%>
-			<%-- 						<th colspan="3"><i class="fa fa-calendar"></i>  --%>
-			<%-- 							<s:message code="home.due"/></th> --%>
-			<%-- 					</tr> --%>
-			<%-- 				</thead> --%>
-			<%-- 				<c:forEach items="${dueTasks}" var="due_task"> --%>
-			<%-- 					<tr style="<c:if test="${due_task.rawDue_date lt now}"> --%>
-			<%-- 									background: rgba(205, 50, 50, 0.12); --%>
-			<%-- 								</c:if>"> --%>
-			<%-- 						<td style="width: 100px;">${due_task.due_date}</td> --%>
-			<%-- 						<td><a href="<c:url value="/task/${due_task.id}"/>" --%>
-			<%-- 							style="color: inherit;">[${due_task.id}] ${due_task.name}</a></td> --%>
-			<%-- 					</tr> --%>
-			<%-- 				</c:forEach> --%>
-			<%-- 			</table> --%>
 		</div>
 	</div>
 </div>

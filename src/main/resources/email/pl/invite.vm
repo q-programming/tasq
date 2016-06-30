@@ -3,7 +3,7 @@
 <head>
 <meta name="viewport" content="width=device-width">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Zaproszenie do aplikacji Tasker</title>
+<title>Zaproszenie do aplikacji ${applicationName}</title>
 <style>
 * {
 	margin: 0;
@@ -188,10 +188,10 @@ table.worklog_table td {
 					</td> 
 					<td class="text">
 						<p>
-							<a href="mailto:${curAccount.email}">${curAccount}</a> zaprosił Cię do aplikacji Tasker
+							<a href="mailto:${curAccount.email}">${curAccount}</a> zaprosił Cię do aplikacji ${applicationName}
 						</p>
 						<p>
-							Tasker to aplikacja do śledzenia postępu prac w projekcie używajajac estymat czasowych lub w metodologi Agile.<br>
+							${applicationName} to aplikacja do śledzenia postępu prac w projekcie używajajac estymat czasowych lub w metodologi Agile.<br>
 							Możesz zarejestrowac się klikając <a href="${application}/signup">tutaj</a>, lub zignorowac tą wiadomość jeżeli nie jesteś zainteresowany
 						</p>
 					</td>

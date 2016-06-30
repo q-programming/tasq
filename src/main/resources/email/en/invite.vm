@@ -3,7 +3,7 @@
 <head>
 <meta name="viewport" content="width=device-width">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Invitation to Tasker</title>
+<title>Invitation to ${applicationName}</title>
 <style>
 * {
 	margin: 0;
@@ -178,7 +178,7 @@ table.worklog_table td {
 	<div class="content">
 		<div class="header">
 			<img src='cid:logo' style="height:50px; padding:2px" >&nbsp;
-			Invitation to Tasker
+			Invitation to ${applicationName}
 		</div>
 		<table class="main">
 			<tbody>
@@ -189,10 +189,10 @@ table.worklog_table td {
 
                     <td class="text">
 						<p>
-							<a href="mailto:${curAccount.email}">${curAccount}</a> invited you to Tasker application.
+							<a href="mailto:${curAccount.email}">${curAccount}</a> invited you to ${applicationName} application.
 						</p>
 						<p>
-							Tasker is an application to track progress within project using either time	estimation based or Agile style.<br/>
+							${applicationName} is an application to track progress within project using either time	estimation based or Agile style.<br/>
 							You can register by clicking <a href="${application}/signup">here</a> or ignore this e-mail, if you are not interested.
 						</p>
 					</td>

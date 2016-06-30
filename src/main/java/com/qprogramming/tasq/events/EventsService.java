@@ -33,6 +33,14 @@ import com.qprogramming.tasq.task.worklog.WorkLog;
 @Service
 public class EventsService {
 
+	public static final String APPLICATION_NAME = "applicationName";
+	public static final String TASK = "task";
+	public static final String WL_MESSAGE = "wlMessage";
+	public static final String LOG_KEY = "log";
+	public static final String CUR_ACCOUNT = "curAccount";
+	public static final String EVENT_STR = "eventStr";
+	public static final String APPLICATION = "application";
+	public static final String ACCOUNT = "account";
 	private EventsRepository eventsRepo;
 	private WatchedTaskService watchSrv;
 	private MailMail mailer;
@@ -40,6 +48,7 @@ public class EventsService {
 	private VelocityEngine velocityEngine;
 	private ResourceService resourceSrv;
 	private AppService appSrv;
+	private String applicationName;
 
 	private static final Logger LOG = LoggerFactory.getLogger(EventsService.class);
 
@@ -53,6 +62,7 @@ public class EventsService {
 		this.velocityEngine = velocityEngine;
 		this.resourceSrv = resourceSrv;
 		this.appSrv = appSrv;
+		applicationName = appSrv.getProperty(AppService.APPLICATION_NAME);
 	}
 
 	public Event getById(Long id) {
@@ -61,7 +71,7 @@ public class EventsService {
 
 	/**
 	 * Returns list of all events for currently logged account
-	 * 
+	 *
 	 * @return
 	 */
 	public List<Event> getEvents() {
@@ -71,7 +81,7 @@ public class EventsService {
 
 	/**
 	 * Returns list of all events for task
-	 * 
+	 *
 	 * @return
 	 */
 	public List<Event> getTaskEvents(String task) {
@@ -81,7 +91,7 @@ public class EventsService {
 
 	/**
 	 * Returns list of all events for currently logged account with Pageable
-	 * 
+	 *
 	 * @param page
 	 * @return
 	 */
@@ -91,7 +101,7 @@ public class EventsService {
 
 	/**
 	 * Returns list of all unread events for currently logged account
-	 * 
+	 *
 	 * @return
 	 */
 	public List<Event> getUnread() {
@@ -101,7 +111,7 @@ public class EventsService {
 
 	/**
 	 * Add event for each account that is watching task
-	 * 
+	 *
 	 * @param taskID
 	 * @param type
 	 * @param wlMessage
@@ -133,13 +143,14 @@ public class EventsService {
 						subject.append(task.getName());
 						String type = task.getType().getCode();
 						Map<String, Object> model = new HashMap<String, Object>();
-						model.put("account", account);
-						model.put("application", baseUrl);
-						model.put("task", task);
-						model.put("wlMessage", wlMessage);
-						model.put("log", log);
-						model.put("curAccount", Utils.getCurrentAccount());
-						model.put("eventStr", eventStr);
+						model.put(ACCOUNT, account);
+						model.put(APPLICATION, baseUrl);
+						model.put(APPLICATION_NAME, applicationName);
+						model.put(TASK, task);
+						model.put(WL_MESSAGE, wlMessage);
+						model.put(LOG_KEY, log);
+						model.put(CUR_ACCOUNT, Utils.getCurrentAccount());
+						model.put(EVENT_STR, eventStr);
 						String message;
 						message = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
 								"email/" + account.getLanguage() + "/task.vm", "UTF-8", model);
@@ -176,11 +187,12 @@ public class EventsService {
 					new Object[] { Utils.getCurrentAccount(), eventStr }, locale);
 
 			Map<String, Object> model = new HashMap<String, Object>();
-			model.put("account", account);
+			model.put(ACCOUNT, account);
 			model.put("type", type);
-			model.put("application", baseUrl);
+			model.put(APPLICATION, baseUrl);
+			model.put(APPLICATION_NAME, applicationName);
 			model.put("project", project);
-			model.put("curAccount", Utils.getCurrentAccount());
+			model.put(CUR_ACCOUNT, Utils.getCurrentAccount());
 			String message;
 			message = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
 					"email/" + account.getLanguage() + "/project.vm", "UTF-8", model);

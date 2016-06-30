@@ -1,5 +1,6 @@
 package com.qprogramming.tasq.manage;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ public class AppService {
     public static final String TASQROOTDIR = "tasqRootDir";
     public static final String URL = "url";
     public static final String DEFAULTROLE = "defaultRole";
+    public static final String APPLICATION_NAME = "applicationName";
 
     private static final Logger LOG = LoggerFactory.getLogger(AppService.class);
 
@@ -58,6 +60,8 @@ public class AppService {
     @Value("${default.role}")
     private String defaultRole;
 
+    @Value("${application.name}")
+    private String applicationName;
 
     @Value("${home.directory}")
     private String tasqRootDir;
@@ -80,7 +84,7 @@ public class AppService {
                 LOG.error("Error while getting property ", e);
             }
         }
-        return prop.getValue();
+        return prop != null ? prop.getValue() : StringUtils.EMPTY;
     }
 
     public void setProperty(String key, String value) {

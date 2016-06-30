@@ -354,8 +354,8 @@ public class TaskController {
         Account account = Utils.getCurrentAccount();
         List<Task> lastVisited = account.getLast_visited_t();
         lastVisited.add(0, task);
-        List<Task> clean = new ArrayList<Task>();
-        Set<Task> lookup = new HashSet<Task>();
+        List<Task> clean = new ArrayList<>();
+        Set<Task> lookup = new HashSet<>();
         for (Task item : lastVisited) {
             if (lookup.add(item)) {
                 clean.add(item);
@@ -890,8 +890,6 @@ public class TaskController {
             response.setHeader("content-Disposition", "attachment; filename=" + filename);
             try (InputStream is = new FileInputStream(file)) {
                 IOUtils.copyLarge(is, response.getOutputStream());
-            } catch (FileNotFoundException e) {
-                LOG.error("Error while writing to output stream , filename '{}'", filename, e);
             } catch (IOException e) {
                 LOG.error("Error while writing to output stream , filename '{}'", filename, e);
             } finally {
@@ -949,7 +947,7 @@ public class TaskController {
             MessageHelper.addErrorAttribute(ra, msg.getMessage(ERROR_ACCES_RIGHTS, null, Utils.getCurrentLocale()));
         } else {
             File file = new File(taskSrv.getTaskDirectory(task) + File.separator + filename);
-            if (file != null) {
+            if (file.exists()) {
                 file.delete();
                 MessageHelper.addSuccessAttribute(ra,
                         msg.getMessage("task.file.deleted", new Object[]{filename}, Utils.getCurrentLocale()));

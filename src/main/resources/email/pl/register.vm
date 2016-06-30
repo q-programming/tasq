@@ -176,7 +176,7 @@ table.worklog_table td {
 <body bgcolor="#f6f6f6">
 	<div class="content">
 		<div class="header">
-			<img src='cid:logo' style="height:50px; padding:2px">&nbsp Potwierdzenie konta
+			<img src='cid:logo' style="height:50px; padding:2px">&nbsp; Potwierdzenie konta
 		</div>
 		<table class="main">
 			<tbody>
@@ -184,14 +184,14 @@ table.worklog_table td {
 					<td>
 						<p>Witaj ${account} ,</p>
 						<p>
-							To jest e-mail potwierdzjący użycia tego adresu do konta w aplikacji Tasker
+							To jest e-mail potwierdzjący użycia tego adresu do konta w aplikacji ${applicationName}
 							</br>Aby zatwierdzić twoje ten adres e-mail, kliknij w link poniżej.
 						</p>
 						<p></p>
 						<p>
 							<a href="${link}" target="_blank">${link}</a>
 						</p>
-						<p>Jeżeli nie tworzyłeś żadnego konta TasQ z użyciem tego adresu e-mail,
+						<p>Jeżeli nie tworzyłeś żadnego konta ${applicationName} z użyciem tego adresu e-mail,
 							proszę zignorują tą wiadomość</p>
 						</p>
 					</td>

@@ -11,7 +11,7 @@
 		<p>
 			<security:authentication property="principal" var="user" />
 			<s:message code="view.index.new" htmlEscape="false"
-				arguments="${user}" />
+				arguments="${applicationName},${user}" />
 			<br>
 			<s:message code="view.index.new.help" />
 			<a class="show_users_btn btn btn-default btn-xxs a-tooltip" 
