@@ -39,7 +39,7 @@ function showWarning(message) {
     window.setTimeout(function () {
         $(".alert-warning").alert('close');
     }, 15000);
-};
+}
 
 $(".alert").alert();
 window.setTimeout(function () {
@@ -67,7 +67,7 @@ function isNumber(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
-$(document).on("click", ".toggler", function (e) {
+$(document).on("click", ".toggler", function () {
     var target = $(this).data('tab');
     $(this).nextAll(".mod-header-title-txt").toggleClass('closed');
     $('#' + target).toggle("blind", 500);
@@ -76,7 +76,7 @@ $(document).on("click", ".toggler", function (e) {
     $(this).toggleClass('fa-caret-right');
 });
 
-$(document).on("click", ".menu-toggle", function (e) {
+$(document).on("click", ".menu-toggle", function () {
     var targetClass = "." + $(this).data('type');
     $(targetClass).toggle("blind");
     var indicator = $(this).find(".menu-indicator");
@@ -87,25 +87,28 @@ $(document).on("click", ".menu-toggle", function (e) {
 function getTaskType(type) {
     switch (type) {
         case "TASK":
-            var type = '<i class="fa fa-lg fa-fw fa-check-square"></i> ';
+            type = '<i class="fa fa-lg fa-fw fa-check-square"></i> ';
             return type;
         case "USER_STORY":
-            var type = '<i class="fa fa-lg fa-fw fa-lightbulb-o"></i> ';
+            type = '<i class="fa fa-lg fa-fw fa-lightbulb-o"></i> ';
             return type;
         case "ISSUE":
-            var type = '<i class="fa fa-lg fa-fw fa-exclamation-triangle"></i> ';
+            type = '<i class="fa fa-lg fa-fw fa-exclamation-triangle"></i> ';
             return type;
         case "BUG":
-            var type = '<i class="fa fa-lg fa-fw fa-bug"></i> ';
+            type = '<i class="fa fa-lg fa-fw fa-bug"></i> ';
             return type;
         case "IDLE":
-            var type = '<i class="fa fa-lg fa-fw fa-coffee"></i> ';
+            type = '<i class="fa fa-lg fa-fw fa-coffee"></i> ';
             return type;
         case "SUBTASK":
-            var type = '<i class="fa fa-lg fa-fw fa-check-circle-o"></i> ';
+            type = '<i class="fa fa-lg fa-fw fa-check-circle-o"></i> ';
             return type;
         case "SUBBUG":
-            var type = '<i class="fa fa-lg fa-fw fa-bug"></i> ';
+            type = '<i class="fa fa-lg fa-fw fa-bug"></i> ';
+            return type;
+        case "CHANGE_REQUEST":
+            type = '<i class="fa fa-lg fa-fw fa-magic"></i> ';
             return type;
         default:
             return 'not yet added ';
