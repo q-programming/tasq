@@ -148,17 +148,17 @@ public class ProjectController {
 
     @RequestMapping(value = "/usersProjectsEvents", method = RequestMethod.GET)
     @ResponseBody
-    Page<DisplayWorkLog> getProjectsLogs(
+    public Page<DisplayWorkLog> getProjectsLogs(
             @PageableDefault(size = 25, page = 0, sort = "time", direction = Direction.DESC) Pageable p) {
         Account account = Utils.getCurrentAccount();
         List<Project> usersProjects = projSrv.findAllByUser(account.getId());
-        List<Long> ids = usersProjects.stream().map(Project::getId).collect(Collectors.toCollection(LinkedList::new));
-        Page<WorkLog> page = wrkLogSrv.findByProjectIdIn(ids, p);
-        List<DisplayWorkLog> list = new LinkedList<DisplayWorkLog>();
-        for (WorkLog workLog : page) {
-            list.add(new DisplayWorkLog(workLog));
+        if (!usersProjects.isEmpty()) {
+            List<Long> ids = usersProjects.stream().map(Project::getId).collect(Collectors.toCollection(LinkedList::new));
+            Page<WorkLog> page = wrkLogSrv.findByProjectIdIn(ids, p);
+            List<DisplayWorkLog> list = page.getContent().stream().map(DisplayWorkLog::new).collect(Collectors.toList());
+            return new PageImpl<>(list, p, page.getTotalElements());
         }
-        return new PageImpl<DisplayWorkLog>(list, p, page.getTotalElements());
+        return null;
     }
 
     @RequestMapping(value = "projects", method = RequestMethod.GET)
