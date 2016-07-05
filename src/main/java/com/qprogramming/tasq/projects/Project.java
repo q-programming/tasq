@@ -68,6 +68,12 @@ public class Project implements Serializable {
     @Column
     private Long lastTaskNo;
 
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<Holiday> holidays;
+
+    @Column
+    private Boolean workingWeekends = false;
+
     public Project() {
     }
 
@@ -223,11 +229,30 @@ public class Project implements Serializable {
         this.lastTaskNo = lastTaskNo;
     }
 
+    public List<Holiday> getHolidays() {
+        if(holidays==null){
+            holidays = new LinkedList<>();
+        }
+        return holidays;
+    }
+
+    public void setHolidays(List<Holiday> holidays) {
+        this.holidays = holidays;
+    }
+
+    public Boolean getWorkingWeekends() {
+        return workingWeekends;
+    }
+
+    public void setWorkingWeekends(Boolean workingWeekends) {
+        this.workingWeekends = workingWeekends;
+    }
+
     /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
+         * (non-Javadoc)
+         *
+         * @see java.lang.Object#toString()
+         */
     @Override
     public String toString() {
         return "[" + getProjectId() + "] " + getName();

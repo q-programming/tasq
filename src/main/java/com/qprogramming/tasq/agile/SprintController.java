@@ -21,6 +21,7 @@ import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 import org.hibernate.Hibernate;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.Days;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
@@ -167,9 +168,8 @@ public class SprintController {
 
     @Transactional
     @RequestMapping(value = "/task/sprintAssign", method = RequestMethod.POST)
-    public
     @ResponseBody
-    ResultData assignSprint(
+    public ResultData assignSprint(
             @RequestParam(value = "taskID") String taskID,
             @RequestParam(value = "sprintID") Long sprintID,
             HttpServletRequest request, RedirectAttributes ra) {
@@ -211,9 +211,8 @@ public class SprintController {
 
     @Transactional
     @RequestMapping(value = "/task/sprintRemove", method = RequestMethod.POST)
-    public
     @ResponseBody
-    ResultData removeFromSprint(
+    public ResultData removeFromSprint(
             @RequestParam(value = "taskID") String taskID,
             @RequestParam(value = "sprintID") Long sprintID, Model model,
             HttpServletRequest request, RedirectAttributes ra) {
@@ -457,10 +456,10 @@ public class SprintController {
      * @return
      */
     @RequestMapping(value = "/{id}/sprint-data", method = RequestMethod.GET, produces = "application/json")
-    public
     @ResponseBody
-    SprintData showBurndownChart(@PathVariable String id,
-                                 @RequestParam(value = "sprint") Long sprintNo) {
+    @Transactional
+    public SprintData showBurndownChart(@PathVariable String id,
+                                        @RequestParam(value = "sprint") Long sprintNo) {
         SprintData result = new SprintData();
         Project project = projSrv.findByProjectId(id);
         if (project != null) {
@@ -506,16 +505,77 @@ public class SprintController {
 
             result.setTotalTime(String.valueOf(Utils.round(
                     Utils.getFloatValue(totalTime), 2)));
+            //fill ideal
+
+            Float remainingEstimate = getRemainingEstimate(sprint, timeTracked);
+            if (!sprint.getFinished() && new DateTime().isAfter(endTime)) {
+                endTime = new DateTime();
+            }
+            fillIdeal(result, project, startTime, endTime, remainingEstimate);
             return fillLeftAndBurned(result, sprint, wrkList, timeTracked);
         } else {
             return result;
         }
     }
 
+    private void fillIdeal(SprintData result, Project project, DateTime startTime, DateTime endTime, Float remainingEstimate) {
+        Hibernate.initialize(project.getHolidays());
+        int sprintWorkDays = Days.daysBetween(startTime, endTime).getDays();
+        Map<String, Float> left = new LinkedHashMap<>();
+        Map<String, Float> burned = new LinkedHashMap<>();
+        Map<String, Float> ideal = new LinkedHashMap<>();
+
+        left.put(fmt.print(startTime), remainingEstimate);
+        burned.put(fmt.print(startTime), 0f);
+        if (!project.getWorkingWeekends() || !project.getHolidays().isEmpty()) {
+            int counter = 0;
+            int weekdays = 0;
+            List<DateTime> freeDays = getFreeDays(project, startTime, endTime);
+            DateTime dateCounter;
+            //reset counter and go
+            dateCounter = startTime;
+            sprintWorkDays -= freeDays.size();
+            while (dateCounter.isBefore(endTime)) {
+                if (!project.getWorkingWeekends()) {
+                    if (freeDays.contains(dateCounter)) {
+                        //TODO on free days fill margin values
+                        weekdays++;
+                        ideal.put(fmt.print(dateCounter), ideal.get(fmt.print(dateCounter.minusDays(1))));
+                    } else {
+                        //f = - (remainingEstimate / sprintWorkDays ) * day + remainingEstimate + weekdays
+                        ideal.put(fmt.print(dateCounter), (-((remainingEstimate + weekdays) / (sprintWorkDays + weekdays)) * counter + (remainingEstimate + weekdays)));
+                    }
+                }
+                dateCounter = dateCounter.plusDays(1);
+                counter++;
+            }
+        } else {
+            ideal.put(fmt.print(startTime), remainingEstimate);
+            ideal.put(fmt.print(endTime), 0f);
+        }
+        result.setIdeal(ideal);
+        result.setBurned(burned);
+        result.setLeft(left);
+    }
+
+    private List<DateTime> getFreeDays(Project project, DateTime startTime, DateTime endTime) {
+        List<DateTime> freeDays = new LinkedList<>();
+        DateTime dateCounter = startTime;
+        while (dateCounter.isBefore(endTime)) {
+            if (!project.getWorkingWeekends()) {
+                if (dateCounter.getDayOfWeek() == DateTimeConstants.SUNDAY || dateCounter.getDayOfWeek() == DateTimeConstants.SATURDAY) {
+                    freeDays.add(dateCounter);
+                }
+            }
+            //TODO check for project holiday
+            dateCounter = dateCounter.plusDays(1);
+        }
+        return freeDays;
+    }
+
     @RequestMapping(value = "/getSprints", method = RequestMethod.GET)
-    public
     @ResponseBody
-    List<DisplaySprint> showProjectSprints(
+    public List<DisplaySprint> showProjectSprints(
             @RequestParam Long projectID, HttpServletResponse response) {
         response.setContentType("application/json");
         List<Sprint> projectSprints = agileSrv.findByProjectIdAndFinished(
@@ -533,9 +593,8 @@ public class SprintController {
      * @return
      */
     @RequestMapping(value = "/scrum/isActive", method = RequestMethod.GET)
-    public
     @ResponseBody
-    boolean checkIfActive(
+    public boolean checkIfActive(
             @RequestParam(value = "id") Long sprintID,
             HttpServletResponse response) {
         Sprint sprint = agileSrv.findById(sprintID);
@@ -582,16 +641,8 @@ public class SprintController {
         DateTime startTime = new DateTime(sprint.getRawStart_date());
         DateTime endTime = new DateTime(sprint.getRawEnd_date());
         SprintData data = result;
-        Float remaining_estimate;
         Float burned = 0f;
-        if (timeTracked) {
-            remaining_estimate = Utils.getFloatValue(sprint.getTotalEstimate());
-        } else {
-            remaining_estimate = new Float(sprint.getTotalStoryPoints());
-        }
-        // Fill ideal burndown
-        data.createIdeal(fmt.print(startTime), remaining_estimate,
-                fmt.print(endTime));
+        Float remaining_estimate = getRemainingEstimate(sprint, timeTracked);
         // Iterate over sprint days
         Integer totalPoints;
         if (burnedMap.size() > leftMap.size()) {
@@ -607,6 +658,16 @@ public class SprintController {
             data.setTotalPoints(totalPoints);
         }
         return data;
+    }
+
+    private Float getRemainingEstimate(Sprint sprint, boolean timeTracked) {
+        Float remaining_estimate;
+        if (timeTracked) {
+            remaining_estimate = Utils.getFloatValue(sprint.getTotalEstimate());
+        } else {
+            remaining_estimate = new Float(sprint.getTotalStoryPoints());
+        }
+        return remaining_estimate;
     }
 
     private Integer iterateOverLongerMap(Map<DateTime, Float> longerMap, Map<DateTime, Float> leftMap, Map<DateTime, Float> burnedMap, SprintData data, Float remaining_estimate, Float burned) {
