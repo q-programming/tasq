@@ -1,6 +1,7 @@
 package com.qprogramming.tasq.projects;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.projects.holiday.Holiday;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskPriority;
@@ -69,7 +70,7 @@ public class Project implements Serializable {
     private Long lastTaskNo;
 
     @OneToMany(fetch = FetchType.LAZY)
-    private List<Holiday> holidays;
+    private Set<Holiday> holidays;
 
     @Column
     private Boolean workingWeekends = false;
@@ -229,14 +230,14 @@ public class Project implements Serializable {
         this.lastTaskNo = lastTaskNo;
     }
 
-    public List<Holiday> getHolidays() {
+    public Set<Holiday> getHolidays() {
         if(holidays==null){
-            holidays = new LinkedList<>();
+            holidays = new HashSet<>();
         }
         return holidays;
     }
 
-    public void setHolidays(List<Holiday> holidays) {
+    public void setHolidays(Set<Holiday> holidays) {
         this.holidays = holidays;
     }
 

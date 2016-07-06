@@ -20,10 +20,7 @@ import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 import org.hibernate.Hibernate;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeConstants;
-import org.joda.time.Days;
-import org.joda.time.Period;
+import org.joda.time.*;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -41,6 +38,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 @Controller
 public class SprintController {
@@ -463,6 +461,7 @@ public class SprintController {
         SprintData result = new SprintData();
         Project project = projSrv.findByProjectId(id);
         if (project != null) {
+            Hibernate.initialize(project.getHolidays());
             Sprint sprint = agileSrv.findByProjectIdAndSprintNo(
                     project.getId(), sprintNo);
             if (sprint == null
@@ -524,27 +523,25 @@ public class SprintController {
         Map<String, Float> left = new LinkedHashMap<>();
         Map<String, Float> burned = new LinkedHashMap<>();
         Map<String, Float> ideal = new LinkedHashMap<>();
-
         left.put(fmt.print(startTime), remainingEstimate);
         burned.put(fmt.print(startTime), 0f);
-        if (!project.getWorkingWeekends() || !project.getHolidays().isEmpty()) {
+        List<DateTime> freeDays = getFreeDays(project, startTime, endTime);
+        ideal.put(fmt.print(startTime.withHourOfDay(0).withMinuteOfHour(0)), remainingEstimate);
+        if (!freeDays.isEmpty()) {
             int counter = 0;
             int weekdays = 0;
-            List<DateTime> freeDays = getFreeDays(project, startTime, endTime);
             DateTime dateCounter;
             //reset counter and go
             dateCounter = startTime;
             sprintWorkDays -= freeDays.size();
             while (dateCounter.isBefore(endTime)) {
-                if (!project.getWorkingWeekends()) {
-                    if (freeDays.contains(dateCounter)) {
-                        //TODO on free days fill margin values
-                        weekdays++;
-                        ideal.put(fmt.print(dateCounter), ideal.get(fmt.print(dateCounter.minusDays(1))));
-                    } else {
-                        //f = - (remainingEstimate / sprintWorkDays ) * day + remainingEstimate + weekdays
-                        ideal.put(fmt.print(dateCounter), (-((remainingEstimate + weekdays) / (sprintWorkDays + weekdays)) * counter + (remainingEstimate + weekdays)));
-                    }
+                if (freeDays.contains(dateCounter)) {
+                    //TODO on free days fill margin values
+                    weekdays++;
+                    ideal.put(fmt.print(dateCounter), ideal.get(fmt.print(dateCounter.minusDays(1))));
+                } else {
+                    //f = - (remainingEstimate / sprintWorkDays ) * day + remainingEstimate + weekdays
+                    ideal.put(fmt.print(dateCounter), (-((remainingEstimate + weekdays) / (sprintWorkDays + weekdays)) * counter + (remainingEstimate + weekdays)));
                 }
                 dateCounter = dateCounter.plusDays(1);
                 counter++;
@@ -560,14 +557,23 @@ public class SprintController {
 
     private List<DateTime> getFreeDays(Project project, DateTime startTime, DateTime endTime) {
         List<DateTime> freeDays = new LinkedList<>();
+        List<LocalDate> projectHolidays = new LinkedList<>();
         DateTime dateCounter = startTime;
+        if (!project.getHolidays().isEmpty()) {
+            projectHolidays = project.getHolidays().stream().map(holiday -> new LocalDate(holiday.getDate())).collect(Collectors.toList());
+        }
+
         while (dateCounter.isBefore(endTime)) {
             if (!project.getWorkingWeekends()) {
                 if (dateCounter.getDayOfWeek() == DateTimeConstants.SUNDAY || dateCounter.getDayOfWeek() == DateTimeConstants.SATURDAY) {
                     freeDays.add(dateCounter);
                 }
             }
-            //TODO check for project holiday
+            if (!projectHolidays.isEmpty()) {
+                if (projectHolidays.contains(new LocalDate(dateCounter))) {
+                    freeDays.add(dateCounter);
+                }
+            }
             dateCounter = dateCounter.plusDays(1);
         }
         return freeDays;

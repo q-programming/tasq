@@ -1,4 +1,6 @@
-package com.qprogramming.tasq.projects;
+package com.qprogramming.tasq.projects.holiday;
+
+import com.qprogramming.tasq.support.Utils;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -18,6 +20,13 @@ public class Holiday implements Serializable {
     @Column
     private Date date;
 
+    public Holiday() {
+    }
+
+    public Holiday(Date date) {
+        this.date = date;
+    }
+
     public Long getId() {
         return id;
     }
@@ -36,7 +45,9 @@ public class Holiday implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {return true;}
+        if (this == o) {
+            return true;
+        }
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
@@ -48,6 +59,10 @@ public class Holiday implements Serializable {
         }
         return getDate() != null ? getDate().equals(holiday.getDate()) : holiday.getDate() == null;
 
+    }
+
+    public String getStringDate() {
+        return Utils.convertDateToString(date);
     }
 
     @Override
