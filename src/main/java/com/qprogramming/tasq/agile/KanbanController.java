@@ -22,6 +22,8 @@ import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 @Controller
 public class KanbanController {
@@ -51,6 +54,7 @@ public class KanbanController {
     private WorkLogService wrkLogSrv;
     private MessageSource msg;
     private AgileService agileSrv;
+    private DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
 
     // private ReleaseRepository releaseRepo;
 
@@ -162,21 +166,20 @@ public class KanbanController {
     }
 
     @RequestMapping(value = "/getReleases", method = RequestMethod.GET)
-    public
     @ResponseBody
-    List<Release> showProjectReleases(@RequestParam Long projectID,
-                                      HttpServletResponse response) {
+    public List<Release> showProjectReleases(@RequestParam Long projectID,
+                                             HttpServletResponse response) {
         response.setContentType("application/json");
         Project project = projSrv.findById(projectID);
         return agileSrv
                 .findReleaseByProjectIdOrderByDateDesc(project.getId());
     }
 
+    @Transactional
     @RequestMapping(value = "/{id}/release-data", method = RequestMethod.GET, produces = "application/json")
-    public
     @ResponseBody
-    KanbanData showBurndownChart(@PathVariable String id,
-                                 @RequestParam(value = "release", required = false) String releaseNo) {
+    public KanbanData showBurndownChart(@PathVariable String id,
+                                        @RequestParam(value = "release", required = false) String releaseNo) {
         KanbanData result = new KanbanData();
         Project project = projSrv.findByProjectId(id);
         if (project != null) {
@@ -205,7 +208,10 @@ public class KanbanController {
                 endTime = release.getEndDate();
                 releaseTasks = taskSrv.findAllByRelease(release);
             }
-
+            List<DateTime> freeDays = projSrv.getFreeDays(project, startTime, endTime);
+            result.setFreeDays(freeDays.stream()
+                    .map(dateTime -> new StartStop(fmt.print(dateTime.minusDays(2).withHourOfDay(23).withMinuteOfHour(59)), fmt.print(dateTime.minusDays(1).withHourOfDay(23).withMinuteOfHour(59))))
+                    .collect(Collectors.toList()));
             List<WorkLog> wrkList = wrkLogSrv.getAllReleaseEvents(release);
             for (Task task : releaseTasks) {
                 DateTime finishDate = null;
@@ -334,5 +340,6 @@ public class KanbanController {
     private String getToDoOngoing() {
         return TODO_ONGOING_DEPR;
     }
+
 
 }

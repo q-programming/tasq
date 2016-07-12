@@ -6,6 +6,7 @@ import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.agile.Sprint;
+import com.qprogramming.tasq.agile.StartStop;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.events.EventsService;
 import com.qprogramming.tasq.projects.holiday.HolidayService;
@@ -19,7 +20,11 @@ import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 import org.hibernate.Hibernate;
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +61,7 @@ public class ProjectController {
     private MessageSource msg;
     private EventsService eventsSrv;
     private HolidayService holidayService;
+    private DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
 
     @Autowired
     public ProjectController(ProjectService projSrv, AccountService accSrv, TaskService taskSrv, AgileService sprintSrv,
@@ -401,11 +407,11 @@ public class ProjectController {
     }
 
 
+    @Transactional
     @RequestMapping(value = "/project/getChart", method = RequestMethod.GET)
-    public
     @ResponseBody
-    ProjectChart getProjectChart(@RequestParam String id,
-                                 @RequestParam(required = false) boolean all, HttpServletResponse response) {
+    public ProjectChart getProjectChart(@RequestParam String id,
+                                        @RequestParam(required = false) boolean all, HttpServletResponse response) {
         response.setContentType(APPLICATION_JSON);
         Project project = projSrv.findByProjectId(id);
         Map<String, Integer> created = new HashMap<String, Integer>();
@@ -448,6 +454,12 @@ public class ProjectController {
             LocalDate counter = start;
             Integer taskCreated = 0;
             Integer taskClosed = 0;
+            DateTime startTime = start.toDateTime(new LocalTime(0, 0));
+            DateTime endTime = end.toDateTime(new LocalTime(23, 59));
+            List<DateTime> freeDays = projSrv.getFreeDays(project, startTime, endTime);
+            result.setFreeDays(freeDays.stream()
+                    .map(dateTime -> new StartStop(fmt.print(dateTime.minusDays(2).withHourOfDay(23).withMinuteOfHour(59)), fmt.print(dateTime.minusDays(1).withHourOfDay(23).withMinuteOfHour(59))))
+                    .collect(Collectors.toList()));
             while (counter.isBefore(end)) {
                 Integer createValue = created.get(counter.toString());
                 if (createValue == null) {

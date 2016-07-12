@@ -1,8 +1,15 @@
 package com.qprogramming.tasq.projects;
 
-import com.qprogramming.tasq.account.*;
+import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.account.AccountService;
+import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.account.UserService;
 import com.qprogramming.tasq.support.Utils;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.Hibernate;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,5 +142,39 @@ public class ProjectService {
         Account currentAccount = Utils.getCurrentAccount();
         return project.getAdministrators().contains(currentAccount) || Roles.isAdmin();
 
+    }
+
+    /**
+     * Returns free days for project in startTime-endTime period
+     * Must be executed within transaction to initalize project.getHollidays
+     *
+     * @param project
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+
+    public List<DateTime> getFreeDays(Project project, DateTime startTime, DateTime endTime) {
+        List<DateTime> freeDays = new LinkedList<>();
+        List<LocalDate> projectHolidays = new LinkedList<>();
+        DateTime dateCounter = startTime;
+        Hibernate.initialize(project.getHolidays());
+        if (!project.getHolidays().isEmpty()) {
+            projectHolidays = project.getHolidays().stream().map(holiday -> new LocalDate(holiday.getDate())).collect(Collectors.toList());
+        }
+        while (dateCounter.isBefore(endTime)) {
+            if (!project.getWorkingWeekends()) {
+                if (dateCounter.getDayOfWeek() == DateTimeConstants.SUNDAY || dateCounter.getDayOfWeek() == DateTimeConstants.SATURDAY) {
+                    freeDays.add(dateCounter);
+                }
+            }
+            if (!projectHolidays.isEmpty()) {
+                if (projectHolidays.contains(new LocalDate(dateCounter))) {
+                    freeDays.add(dateCounter);
+                }
+            }
+            dateCounter = dateCounter.plusDays(1);
+        }
+        return freeDays;
     }
 }

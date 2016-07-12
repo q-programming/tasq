@@ -12,6 +12,8 @@
 <script language="javascript" type="text/javascript"
 	src="<c:url value="/resources/js/jqplot.dateAxisRenderer.min.js"/>"></script>
 <script language="javascript" type="text/javascript"
+		src="<c:url value="/resources/js/jqplot.canvasOverlay.js"/>"></script>
+<script language="javascript" type="text/javascript"
 	src="<c:url value="/resources/js/jqplot.cursor.min.js"/>"></script>
 <security:authorize access="hasRole('ROLE_ADMIN')">
 	<c:set var="is_admin" value="true" />
@@ -243,6 +245,13 @@ $(document).ready(function($) {
 
 
 function printChart(all){
+	$.jqplot.postDrawHooks.push(function() {
+		$(".jqplot-overlayCanvas-canvas").css('z-index', '0'); //send overlay canvas to back
+		$(".jqplot-series-canvas").css('z-index', '1'); //send series canvas to front
+		$(".jqplot-highlighter-tooltip").css('z-index', '2'); //make sure the tooltip is over the series
+		$(".jqplot-event-canvas").css('z-index', '5'); //must be on the very top since it is responsible for event catchin
+	});
+	freeDays = new Array();
 	if(plot){
 		plot.destroy();
 	}
@@ -264,7 +273,20 @@ function printChart(all){
 	    	$.each(result.closed, function(key,val){
 	    		closedData.push([key, val]);
 	    	});
-	    	if(createdData.length > 0 && closedData.length > 0)
+			$.each(result.freeDays, function (key, val) {
+				freeDays.push({
+					line: {
+						start: [new Date(val.start).getTime(), 0],
+						stop: [new Date(val.stop).getTime(), 0],
+						lineWidth: 1000,
+						color: 'rgba(200, 200, 200,0.25)',
+						shadow: false,
+						lineCap: 'butt'
+					}
+				});
+			});
+
+		if(createdData.length > 0 && closedData.length > 0)
 	    	{
 	    	plot = $.jqplot('chartdiv', [ createdData , closedData ], {
 	    		title : '<s:message code="task.created"/>/<s:message code="task.state.closed"/>',
@@ -273,7 +295,11 @@ function printChart(all){
 	                    smooth: true
 	                }
 	            },
-	            cursor:{ 
+				canvasOverlay: {
+					show: true,
+					objects: freeDays
+				},
+				cursor:{
 	                show: true,
 	                zoom:true, 
 	                showTooltip:false

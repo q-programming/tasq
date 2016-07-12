@@ -525,7 +525,7 @@ public class SprintController {
         Map<String, Float> ideal = new LinkedHashMap<>();
         left.put(fmt.print(startTime), remainingEstimate);
         burned.put(fmt.print(startTime), 0f);
-        List<DateTime> freeDays = getFreeDays(project, startTime, endTime);
+        List<DateTime> freeDays = projSrv.getFreeDays(project, startTime, endTime);
         ideal.put(fmt.print(startTime.withHourOfDay(0).withMinuteOfHour(0)), remainingEstimate);
         if (!freeDays.isEmpty()) {
             int counter = 0;
@@ -553,30 +553,6 @@ public class SprintController {
         result.setIdeal(ideal);
         result.setBurned(burned);
         result.setLeft(left);
-    }
-
-    private List<DateTime> getFreeDays(Project project, DateTime startTime, DateTime endTime) {
-        List<DateTime> freeDays = new LinkedList<>();
-        List<LocalDate> projectHolidays = new LinkedList<>();
-        DateTime dateCounter = startTime;
-        if (!project.getHolidays().isEmpty()) {
-            projectHolidays = project.getHolidays().stream().map(holiday -> new LocalDate(holiday.getDate())).collect(Collectors.toList());
-        }
-
-        while (dateCounter.isBefore(endTime)) {
-            if (!project.getWorkingWeekends()) {
-                if (dateCounter.getDayOfWeek() == DateTimeConstants.SUNDAY || dateCounter.getDayOfWeek() == DateTimeConstants.SATURDAY) {
-                    freeDays.add(dateCounter);
-                }
-            }
-            if (!projectHolidays.isEmpty()) {
-                if (projectHolidays.contains(new LocalDate(dateCounter))) {
-                    freeDays.add(dateCounter);
-                }
-            }
-            dateCounter = dateCounter.plusDays(1);
-        }
-        return freeDays;
     }
 
     @RequestMapping(value = "/getSprints", method = RequestMethod.GET)

@@ -11,6 +11,9 @@
         src="<c:url value="/resources/js/jqplot.dateAxisRenderer.min.js"/>"></script>
 <script language="javascript" type="text/javascript"
         src="<c:url value="/resources/js/jqplot.cursor.min.js"/>"></script>
+<script language="javascript" type="text/javascript"
+        src="<c:url value="/resources/js/jqplot.canvasOverlay.js"/>"></script>
+
 <%-- <link href="<c:url value="/resources/css/docs.min.css" />" --%>
 <!-- rel="stylesheet" media="screen" /> -->
 <link rel="stylesheet" type="text/css"
@@ -120,11 +123,18 @@
 
 
         function renderReleaseData(releaseNo) {
+            $.jqplot.postDrawHooks.push(function() {
+                $(".jqplot-overlayCanvas-canvas").css('z-index', '0'); //send overlay canvas to back
+                $(".jqplot-series-canvas").css('z-index', '1'); //send series canvas to front
+                $(".jqplot-highlighter-tooltip").css('z-index', '2'); //make sure the tooltip is over the series
+                $(".jqplot-event-canvas").css('z-index', '5'); //must be on the very top since it is responsible for event catchin
+            });
             //init arrays and remove first element via pop()
             time = new Array([]);
             openData = new Array([]);
             closedData = new Array([]);
             progressData = new Array([]);
+            freeDays = new Array();
             var timePresent = false;
             time.pop();
             openData.pop();
@@ -165,6 +175,19 @@
                 $.each(result.inProgress, function (key, val) {
                     progressData.push([key, val, result.progressLabels[key]]);
                 });
+                $.each(result.freeDays, function (key, val) {
+                    freeDays.push({
+                        line: {
+                            start: [new Date(val.start).getTime(), 0],
+                            stop: [new Date(val.stop).getTime(), 0],
+                            lineWidth: 1000,
+                            color: 'rgba(200, 200, 200,0.25)',
+                            shadow: false,
+                            lineCap: 'butt'
+                        }
+                    });
+                });
+
                 var startStop = '';
                 //Render worklog events
                 $.each(result.worklogs, function (key, val) {
@@ -213,6 +236,10 @@
                     animate: true,
                     grid: {
                         background: '#ffffff'
+                    },
+                    canvasOverlay: {
+                        show: true,
+                        objects: freeDays
                     },
                     highlighter: {
                         show: true,
@@ -291,7 +318,13 @@
                         location: 's',
                         placement: 'outsideGrid'
                     }
+
+//                    canvasOverlay: {
+//                        show: true,
+//                        objects: [ freeDays ]
+//                    }
                 });
+
                 //	render time chart
                 labelFormat = '%#.1f h';
                 if (timePresent) {
