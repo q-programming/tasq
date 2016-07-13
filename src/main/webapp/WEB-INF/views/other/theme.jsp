@@ -234,8 +234,13 @@ span.tag.label.label-info.theme {
 }
 .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
     border: 1px solid rgb(${rgbcolor10});
-    background: ${color} url("images/ui-bg_flat_75_428bca_40x100.png") 50% 50% repeat-x;
+    background: ${color};
     font-weight: normal;
     color: ${invcolor};
+}
+
+.ui-state-default.ui-state-highlight {
+	background: rgba(${rgbcolor10}, 0.9);
+	color: ${invcolor};
 }
 </style>

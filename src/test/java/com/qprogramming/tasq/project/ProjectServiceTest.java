@@ -5,7 +5,9 @@ import com.qprogramming.tasq.projects.NewProjectForm;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectRepository;
 import com.qprogramming.tasq.projects.ProjectService;
+import com.qprogramming.tasq.projects.holiday.Holiday;
 import com.qprogramming.tasq.test.MockSecurityContext;
+import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -19,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import static org.mockito.Mockito.*;
 
@@ -97,8 +100,6 @@ public class ProjectServiceTest {
 
     @Test
     public void findUserActiveProjectTest() {
-        List<Project> list = new LinkedList<Project>();
-        list.add(testProject);
         testAccount.setActive_project(1L);
         when(projRepoMock.findById(1L)).thenReturn(testProject);
         Assert.assertNotNull(projSrv.findUserActiveProject());
@@ -124,8 +125,20 @@ public class ProjectServiceTest {
         Assert.assertTrue(projSrv.canEdit(1L));
         testAccount.setRole(Roles.ROLE_POWERUSER);
         Assert.assertTrue(projSrv.canEdit(1L));
+    }
+
+    @Test
+    public void getFreeDaysTest() {
+        Holiday holiday = new Holiday(new DateTime(2016, 7, 1, 11, 00).toDate());
+        testProject.setWorkingWeekends(false);
+        Set<Holiday> holidays = testProject.getHolidays();
+        holidays.add(holiday);
+        testProject.setHolidays(holidays);
+        List<DateTime> freeDays = projSrv.getFreeDays(testProject, new DateTime(2016, 6, 11, 11, 00), new DateTime(2016, 7, 10, 11, 00));
+        Assert.assertEquals(10, freeDays.size());
 
     }
+
 
     @Test
     public void getParticipantTest() {

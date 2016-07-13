@@ -245,7 +245,7 @@ public class CommentsControllerTest {
 		comment2.setMessage("Comment2");
 		comment2.setDate(new Date());
 		Assert.assertFalse(comment.equals(comment2));
-		Assert.assertFalse(comment.getId() == comment2.getId());
+		Assert.assertFalse(comment.getId().equals(comment2.getId()));
 		Assert.assertNotNull(comment.getDate_edited());
 	}
 

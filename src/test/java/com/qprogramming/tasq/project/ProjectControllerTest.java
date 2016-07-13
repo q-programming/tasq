@@ -8,6 +8,7 @@ import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.events.EventsService;
 import com.qprogramming.tasq.projects.*;
+import com.qprogramming.tasq.projects.holiday.HolidayService;
 import com.qprogramming.tasq.support.web.Message;
 import com.qprogramming.tasq.task.*;
 import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
@@ -80,6 +81,8 @@ public class ProjectControllerTest {
     @Mock
     private MessageSource msgMock;
     @Mock
+    private HolidayService holidayServiceMock;
+    @Mock
     private RedirectAttributes raMock;
     @Mock
     private HttpServletResponse responseMock;
@@ -97,7 +100,7 @@ public class ProjectControllerTest {
         when(authMock.getPrincipal()).thenReturn(testAccount);
         SecurityContextHolder.setContext(securityMock);
         projectCtr = new ProjectController(projSrv, accountServiceMock, taskSrv, sprintSrvMock, wrkLogSrv, msg,
-                eventsSrvMock);
+                eventsSrvMock, holidayServiceMock);
     }
 
     @Test

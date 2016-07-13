@@ -12,9 +12,9 @@ class SprintData extends AgileData {
     private Integer totalPoints = 0;
 
     public SprintData() {
-        left = new LinkedHashMap<String, Float>();
-        burned = new LinkedHashMap<String, Float>();
-        ideal = new LinkedHashMap<String, Float>();
+        left = new LinkedHashMap<>();
+        burned = new LinkedHashMap<>();
+        ideal = new LinkedHashMap<>();
     }
 
     public Map<String, Float> getLeft() {

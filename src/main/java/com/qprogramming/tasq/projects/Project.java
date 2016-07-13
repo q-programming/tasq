@@ -1,6 +1,7 @@
 package com.qprogramming.tasq.projects;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.projects.holiday.Holiday;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskPriority;
@@ -67,6 +68,12 @@ public class Project implements Serializable {
 
     @Column
     private Long lastTaskNo;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    private Set<Holiday> holidays;
+
+    @Column
+    private Boolean workingWeekends = false;
 
     public Project() {
     }
@@ -223,11 +230,30 @@ public class Project implements Serializable {
         this.lastTaskNo = lastTaskNo;
     }
 
+    public Set<Holiday> getHolidays() {
+        if (holidays == null) {
+            holidays = new HashSet<>();
+        }
+        return holidays;
+    }
+
+    public void setHolidays(Set<Holiday> holidays) {
+        this.holidays = holidays;
+    }
+
+    public Boolean getWorkingWeekends() {
+        return workingWeekends == null ? false : workingWeekends;
+    }
+
+    public void setWorkingWeekends(Boolean workingWeekends) {
+        this.workingWeekends = workingWeekends;
+    }
+
     /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
+         * (non-Javadoc)
+         *
+         * @see java.lang.Object#toString()
+         */
     @Override
     public String toString() {
         return "[" + getProjectId() + "] " + getName();

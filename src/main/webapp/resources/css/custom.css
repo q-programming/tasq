@@ -925,6 +925,9 @@ a.secondaryPanelButton {
 .auto-margin{
     margin: 0 auto;
 }
+td.width200{
+    width: 200px;
+}
 
 /* .search { position: relative; } */
 /* .search input { text-indent: 30px;} */

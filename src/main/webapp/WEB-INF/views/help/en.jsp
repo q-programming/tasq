@@ -230,16 +230,16 @@
 				notification" in My settings, he will receive email notification
 				about watched event<br> In order to sign up for project
 				notification press watch button
-				<button id="" class="btn btn-default btn-sm">
-					<i id="" class="fa fa-lg fa-eye"></i>
+				<button i class="btn btn-default btn-sm">
+					<i  class="fa fa-lg fa-eye"></i>
 				</button>
 				while being in task details screen.<br> All currently watched
 				tasks are displayed in <b><i class="fa fa-eye"></i>&nbsp;<s:message
 						code="events.watching" /></b> view which can be accessed through <a
 					href="#personal">Personal Menu</a><br>To stop receiving
 				notification about project, press stop watching
-				<button id="" class="btn btn-default btn-sm">
-					<i id="" class="fa fa-lg fa-eye-slash"></i>
+				<button class="btn btn-default btn-sm">
+					<i class="fa fa-lg fa-eye-slash"></i>
 				</button>
 				button located inside task details or in Watched screen inside
 				Personal menu

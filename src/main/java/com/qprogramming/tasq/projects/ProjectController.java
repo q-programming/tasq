@@ -6,8 +6,10 @@ import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.agile.Sprint;
+import com.qprogramming.tasq.agile.StartStop;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.events.EventsService;
+import com.qprogramming.tasq.projects.holiday.HolidayService;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.ProjectSorter;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
@@ -17,7 +19,12 @@ import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
+import org.hibernate.Hibernate;
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +51,7 @@ import java.util.stream.Collectors;
 public class ProjectController {
 
     public static final String APPLICATION_JSON = "application/json";
+    public static final String REFERER = "Referer";
     private static final Logger LOG = LoggerFactory.getLogger(ProjectController.class);
     private ProjectService projSrv;
     private AccountService accSrv;
@@ -52,10 +60,12 @@ public class ProjectController {
     private WorkLogService wrkLogSrv;
     private MessageSource msg;
     private EventsService eventsSrv;
+    private HolidayService holidayService;
+    private DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
 
     @Autowired
     public ProjectController(ProjectService projSrv, AccountService accSrv, TaskService taskSrv, AgileService sprintSrv,
-                             WorkLogService wrklSrv, MessageSource msg, EventsService eventsSrv) {
+                             WorkLogService wrklSrv, MessageSource msg, EventsService eventsSrv, HolidayService holidayService) {
         this.projSrv = projSrv;
         this.accSrv = accSrv;
         this.taskSrv = taskSrv;
@@ -63,6 +73,7 @@ public class ProjectController {
         this.wrkLogSrv = wrklSrv;
         this.msg = msg;
         this.eventsSrv = eventsSrv;
+        this.holidayService = holidayService;
     }
 
     @Transactional
@@ -95,7 +106,7 @@ public class ProjectController {
         accSrv.update(current);
         // Check status of all projects
         List<Task> tasks = project.getTasks();
-        Map<TaskState, Integer> stateCount = new HashMap<TaskState, Integer>();
+        Map<TaskState, Integer> stateCount = new HashMap<>();
         for (TaskState state : TaskState.values()) {
             stateCount.put(state, 0);
         }
@@ -182,7 +193,7 @@ public class ProjectController {
             MessageHelper.addSuccessAttribute(ra, msg.getMessage("project.activated",
                     new Object[]{activatedProj.getName()}, Utils.getCurrentLocale()));
         }
-        return "redirect:" + request.getHeader("Referer");
+        return "redirect:" + request.getHeader(REFERER);
     }
 
     @RequestMapping(value = "project/create", method = RequestMethod.GET)
@@ -234,6 +245,7 @@ public class ProjectController {
         return "redirect:/project/" + newProject.getProjectId();
     }
 
+    @Transactional
     @RequestMapping(value = "project/{id}/manage", method = RequestMethod.GET)
     public String manageProject(@PathVariable(value = "id") String id, Model model, RedirectAttributes ra) {
         if (!Roles.isPowerUser()) {
@@ -248,7 +260,7 @@ public class ProjectController {
             DisplayAccount assignee = new DisplayAccount(accSrv.findById(project.getDefaultAssigneeID()));
             model.addAttribute("defaultAssignee", assignee);
         }
-
+        Hibernate.initialize(project.getHolidays());
         model.addAttribute("project", project);
         return "project/manage";
     }
@@ -275,7 +287,30 @@ public class ProjectController {
             eventsSrv.addProjectEvent(account, LogType.ASSIGN_PROJ, project);
             projSrv.save(project);
         }
-        return "redirect:" + request.getHeader("Referer");
+        return "redirect:" + request.getHeader(REFERER);
+    }
+
+    @Transactional
+    @RequestMapping(value = "project/{id}/workdays ", method = RequestMethod.POST)
+    public String saveWorkdays(@PathVariable(value = "id") String id,
+                               @RequestParam(value = "workingWeekends", required = false, defaultValue = "false") boolean workingWeekends,
+                               @RequestParam(value = "holiday", required = false) Set<String> holidays,
+                               RedirectAttributes ra, HttpServletRequest request) {
+        Set<String> holidaysSet = holidays == null ? new HashSet<>() : holidays;
+        if (!Roles.isPowerUser()) {
+            throw new TasqAuthException(msg);
+        }
+        Project project = projSrv.findByProjectId(id);
+        if (project == null) {
+            MessageHelper.addErrorAttribute(ra,
+                    msg.getMessage("project.notexists", null, Utils.getCurrentLocale()));
+            return "redirect:/projects";
+        }
+        project.setWorkingWeekends(workingWeekends);
+        Hibernate.initialize(project.getHolidays());
+        project = holidayService.processProjectHolidays(holidaysSet, project);
+        projSrv.save(project);
+        return "redirect:" + request.getHeader(REFERER);
     }
 
     @Transactional
@@ -291,14 +326,14 @@ public class ProjectController {
             if (project == null) {
                 MessageHelper.addErrorAttribute(ra,
                         msg.getMessage("project.notexists", null, Utils.getCurrentLocale()));
-                return "redirect:" + request.getHeader("Referer");
+                return "redirect:" + request.getHeader(REFERER);
             }
             Set<Account> admins = project.getAdministrators();
             if (admins.contains(account)) {
                 if (admins.size() == 1) {
                     MessageHelper.addErrorAttribute(ra,
                             msg.getMessage("project.lastAdmin", null, Utils.getCurrentLocale()));
-                    return "redirect:" + request.getHeader("Referer");
+                    return "redirect:" + request.getHeader(REFERER);
                 } else {
                     project.removeAdministrator(account);
                 }
@@ -308,7 +343,7 @@ public class ProjectController {
             eventsSrv.addProjectEvent(account, LogType.REMOVE_PROJ, project);
             projSrv.save(project);
         }
-        return "redirect:" + request.getHeader("Referer");
+        return "redirect:" + request.getHeader(REFERER);
     }
 
     @Transactional
@@ -329,7 +364,7 @@ public class ProjectController {
             project.addAdministrator(account);
             projSrv.save(project);
         }
-        return "redirect:" + request.getHeader("Referer");
+        return "redirect:" + request.getHeader(REFERER);
     }
 
     @Transactional
@@ -350,12 +385,12 @@ public class ProjectController {
             if (project.getAdministrators().size() == 1) {
                 MessageHelper.addErrorAttribute(ra,
                         msg.getMessage("project.lastAdmin", null, Utils.getCurrentLocale()));
-                return "redirect:" + request.getHeader("Referer");
+                return "redirect:" + request.getHeader(REFERER);
             }
             project.removeAdministrator(account);
             projSrv.save(project);
         }
-        return "redirect:" + request.getHeader("Referer");
+        return "redirect:" + request.getHeader(REFERER);
     }
 
     @RequestMapping(value = "/project/getParticipants", method = RequestMethod.GET)
@@ -372,11 +407,11 @@ public class ProjectController {
     }
 
 
+    @Transactional
     @RequestMapping(value = "/project/getChart", method = RequestMethod.GET)
-    public
     @ResponseBody
-    ProjectChart getProjectChart(@RequestParam String id,
-                                 @RequestParam(required = false) boolean all, HttpServletResponse response) {
+    public ProjectChart getProjectChart(@RequestParam String id,
+                                        @RequestParam(required = false) boolean all, HttpServletResponse response) {
         response.setContentType(APPLICATION_JSON);
         Project project = projSrv.findByProjectId(id);
         Map<String, Integer> created = new HashMap<String, Integer>();
@@ -419,6 +454,12 @@ public class ProjectController {
             LocalDate counter = start;
             Integer taskCreated = 0;
             Integer taskClosed = 0;
+            DateTime startTime = start.toDateTime(new LocalTime(0, 0));
+            DateTime endTime = end.toDateTime(new LocalTime(23, 59));
+            List<DateTime> freeDays = projSrv.getFreeDays(project, startTime, endTime);
+            result.setFreeDays(freeDays.stream()
+                    .map(dateTime -> new StartStop(fmt.print(dateTime.minusDays(2).withHourOfDay(23).withMinuteOfHour(59)), fmt.print(dateTime.minusDays(1).withHourOfDay(23).withMinuteOfHour(59))))
+                    .collect(Collectors.toList()));
             while (counter.isBefore(end)) {
                 Integer createValue = created.get(counter.toString());
                 if (createValue == null) {
@@ -488,11 +529,11 @@ public class ProjectController {
         if (activeSprint != null && !project.getTimeTracked().equals(timeTracked)) {
             MessageHelper.addWarningAttribute(ra,
                     msg.getMessage("project.sprintActive", null, Utils.getCurrentLocale()));
-            return "redirect:" + request.getHeader("Referer");
+            return "redirect:" + request.getHeader(REFERER);
         } else {
             project.setTimeTracked(timeTracked);
         }
-        return "redirect:" + request.getHeader("Referer");
+        return "redirect:" + request.getHeader(REFERER);
     }
 
     @RequestMapping(value = "project/{id}/editDescriptions", method = RequestMethod.POST)
@@ -509,7 +550,7 @@ public class ProjectController {
         }
         if (!projSrv.canEdit(project.getId())) {
             MessageHelper.addErrorAttribute(ra, msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
-            return "redirect:" + request.getHeader("Referer");
+            return "redirect:" + request.getHeader(REFERER);
         }
         if (description != null) {
             project.setDescription(description);
@@ -519,7 +560,7 @@ public class ProjectController {
         }
 
         projSrv.save(project);
-        return "redirect:" + request.getHeader("Referer");
+        return "redirect:" + request.getHeader(REFERER);
     }
 
 }

@@ -16,6 +16,8 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.qprogramming.tasq.projects.holiday.Holiday;
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.junit.Assert;
@@ -141,6 +143,7 @@ public class KanbanControllerTest {
 		} catch (TasqAuthException e) {
 			catched = true;
 		}
+		Assert.assertTrue(catched);
 	}
 
 	@Test
@@ -261,6 +264,9 @@ public class KanbanControllerTest {
 		List<Task> taskList = new LinkedList<Task>();
 		taskList.add(task);
 		taskList.add(task2);
+		List<DateTime> freeDays = new LinkedList<>();
+		freeDays.add(new DateTime().minusDays(2));
+		when(projSrvMock.getFreeDays(any(Project.class),any(DateTime.class),any(DateTime.class))).thenReturn(freeDays);
 		when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
 		when(agileSrvMock.findByProjectIdAndRelease(1L, RELEASE)).thenReturn(release);
 		when(wrkLogSrvMock.getAllReleaseEvents(release)).thenReturn(workLogs);
