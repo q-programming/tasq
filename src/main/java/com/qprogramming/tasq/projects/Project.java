@@ -231,7 +231,7 @@ public class Project implements Serializable {
     }
 
     public Set<Holiday> getHolidays() {
-        if(holidays==null){
+        if (holidays == null) {
             holidays = new HashSet<>();
         }
         return holidays;
@@ -242,7 +242,7 @@ public class Project implements Serializable {
     }
 
     public Boolean getWorkingWeekends() {
-        return workingWeekends;
+        return workingWeekends == null ? false : workingWeekends;
     }
 
     public void setWorkingWeekends(Boolean workingWeekends) {

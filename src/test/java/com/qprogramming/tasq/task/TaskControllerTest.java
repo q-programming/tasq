@@ -190,7 +190,7 @@ public class TaskControllerTest {
         when(projSrvMock.findAllByUser()).thenReturn(list);
         when(projSrvMock.findById(1L)).thenReturn(project);
         when(projSrvMock.canEdit(project)).thenReturn(false);
-        String result = taskCtr.createTask(form, errors, null, raMock, requestMock, modelMock);
+        taskCtr.createTask(form, errors, null, raMock, requestMock, modelMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
     }

@@ -89,8 +89,6 @@ public class TaskService {
     public List<Task> findSubtasksForProject(Project project) {
         if (project == null) {
             return taskRepo.findByParentIsNotNull();
-        } else {
-
         }
         return taskRepo.findByProjectAndParentIsNotNull(project);
     }

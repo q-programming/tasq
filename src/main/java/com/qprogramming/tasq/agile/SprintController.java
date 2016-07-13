@@ -20,7 +20,9 @@ import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 import org.hibernate.Hibernate;
-import org.joda.time.*;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -38,7 +40,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 @Controller
 public class SprintController {
@@ -474,22 +475,8 @@ public class SprintController {
             DateTime startTime = new DateTime(sprint.getRawStart_date());
             DateTime endTime = new DateTime(sprint.getRawEnd_date());
             List<Task> sprintTasks = taskSrv.findAllBySprint(sprint);
-            for (Task task : sprintTasks) {
-                DateTime finishDate = null;
-                if (task.getFinishDate() != null) {
-                    finishDate = new DateTime(task.getFinishDate());
-                }
-                if (task.getState().equals(TaskState.CLOSED)
-                        && (finishDate != null && endTime.isAfter(finishDate))) {
-                    result.getTasks().get(SprintData.CLOSED)
-                            .add(new DisplayTask(task));
-                } else {
-                    result.getTasks().get(SprintData.ALL)
-                            .add(new DisplayTask(task));
-                }
-            }
+            result.setTasksByStatus(endTime, sprintTasks);
             // Fill maps based on time or story point driven board
-
             boolean timeTracked = project.getTimeTracked();
             List<WorkLog> wrkList = wrkLogSrv.getAllSprintEvents(sprint);
             result.setWorklogs(DisplayWorkLog.convertToDisplayWorkLogs(wrkList));
@@ -620,7 +607,6 @@ public class SprintController {
                                          List<WorkLog> wrkList, boolean timeTracked) {
         Map<DateTime, Float> leftMap = fillLeftMap(wrkList, timeTracked);
         Map<DateTime, Float> burnedMap = fillBurnedMap(wrkList, timeTracked);
-        DateTime startTime = new DateTime(sprint.getRawStart_date());
         DateTime endTime = new DateTime(sprint.getRawEnd_date());
         SprintData data = result;
         Float burned = 0f;

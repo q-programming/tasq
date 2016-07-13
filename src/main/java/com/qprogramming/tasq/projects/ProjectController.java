@@ -106,7 +106,7 @@ public class ProjectController {
         accSrv.update(current);
         // Check status of all projects
         List<Task> tasks = project.getTasks();
-        Map<TaskState, Integer> stateCount = new HashMap<TaskState, Integer>();
+        Map<TaskState, Integer> stateCount = new HashMap<>();
         for (TaskState state : TaskState.values()) {
             stateCount.put(state, 0);
         }

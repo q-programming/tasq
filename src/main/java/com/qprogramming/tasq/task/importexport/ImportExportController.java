@@ -400,9 +400,9 @@ public class ImportExportController {
         return logger;
     }
 
-    private boolean isNumerical(String story_points) {
+    private boolean isNumerical(String storyPoints) {
         try {
-            Integer.parseInt(story_points);
+            Integer.parseInt(storyPoints);
             return true;
         } catch (NumberFormatException e) {
             LOG.error(e.getLocalizedMessage());

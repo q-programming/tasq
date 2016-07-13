@@ -10,7 +10,6 @@ import com.qprogramming.tasq.support.web.MessageHelper;
 import com.qprogramming.tasq.task.DisplayTask;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
-import com.qprogramming.tasq.task.TaskState;
 import com.qprogramming.tasq.task.tag.Tag;
 import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
 import com.qprogramming.tasq.task.worklog.LogType;
@@ -213,20 +212,7 @@ public class KanbanController {
                     .map(dateTime -> new StartStop(fmt.print(dateTime.minusDays(2).withHourOfDay(23).withMinuteOfHour(59)), fmt.print(dateTime.minusDays(1).withHourOfDay(23).withMinuteOfHour(59))))
                     .collect(Collectors.toList()));
             List<WorkLog> wrkList = wrkLogSrv.getAllReleaseEvents(release);
-            for (Task task : releaseTasks) {
-                DateTime finishDate = null;
-                if (task.getFinishDate() != null) {
-                    finishDate = new DateTime(task.getFinishDate());
-                }
-                if (task.getState().equals(TaskState.CLOSED)
-                        && (finishDate != null && endTime.isAfter(finishDate))) {
-                    result.getTasks().get(SprintData.CLOSED)
-                            .add(new DisplayTask(task));
-                } else {
-                    result.getTasks().get(SprintData.ALL)
-                            .add(new DisplayTask(task));
-                }
-            }
+            result.setTasksByStatus(endTime, releaseTasks);
             result.setWorklogs(DisplayWorkLog.convertToDisplayWorkLogs(wrkList));
             result.setTimeBurned(agileSrv.fillTimeBurndownMap(wrkList,
                     startTime, endTime));
