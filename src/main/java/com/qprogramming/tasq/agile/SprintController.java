@@ -41,6 +41,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 @Controller
 public class SprintController {
@@ -289,6 +290,22 @@ public class SprintController {
         sprintEnd += " " + sprintEndTime;
         Date startDate = Utils.convertStringToDateAndTime(sprintStart);
         Date endDate = Utils.convertStringToDateAndTime(sprintEnd);
+        DateTime startTime = new DateTime(startDate);
+        DateTime endTime = new DateTime(endDate);
+        List<LocalDate> freeDays = projSrv.getFreeDays(project, startTime, endTime);
+        String freeDaysString = String.join(", ", freeDays.stream().map(LocalDate::toString).collect(Collectors.toList()));
+        if (freeDays.contains(new LocalDate(startTime))) {
+            return new ResultData(ResultData.WARNING, msg.getMessage(
+                    "agile.sprint.start.freeday",
+                    new Object[]{sprintStart,freeDaysString},
+                    Utils.getCurrentLocale()));
+        }
+        if (freeDays.contains(new LocalDate(endTime))) {
+            return new ResultData(ResultData.WARNING, msg.getMessage(
+                    "agile.sprint.end.freeday",
+                    new Object[]{sprintEnd, freeDaysString},
+                    Utils.getCurrentLocale()));
+        }
         for (Sprint sprint : allSprints) {
             if (sprint.getRawEnd_date() != null) {
                 DateTime sprintEndDate = new DateTime(sprint.getRawEnd_date());
@@ -349,6 +366,13 @@ public class SprintController {
         }
         return new ResultData(ResultData.ERROR, msg.getMessage("error.unknown",
                 null, Utils.getCurrentLocale()));
+    }
+
+    private boolean overlappingFreeDay(Project project, Date startDate, Date endDate) {
+        DateTime startTime = new DateTime(startDate);
+        DateTime endTime = new DateTime(endDate);
+        List<LocalDate> freeDays = projSrv.getFreeDays(project, startTime, endTime);
+        return freeDays.contains(startTime) || freeDays.contains(endTime);
     }
 
     @Transactional
