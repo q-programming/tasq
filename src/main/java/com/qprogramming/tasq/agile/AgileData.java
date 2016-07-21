@@ -17,6 +17,8 @@ public class AgileData {
     private String message;
     private List<DisplayWorkLog> worklogs;
     private String totalTime;
+    private String start;
+    private String stop;
 
     public AgileData() {
         timeBurned = new LinkedHashMap<>();
@@ -67,6 +69,22 @@ public class AgileData {
 
     public void addTime(Integer time) {
         totalTime += time;
+    }
+
+    public String getStart() {
+        return start;
+    }
+
+    public void setStart(String start) {
+        this.start = start;
+    }
+
+    public String getStop() {
+        return stop;
+    }
+
+    public void setStop(String stop) {
+        this.stop = stop;
     }
 
     /**

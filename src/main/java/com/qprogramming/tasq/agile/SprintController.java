@@ -22,6 +22,7 @@ import com.qprogramming.tasq.task.worklog.WorkLogService;
 import org.hibernate.Hibernate;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
+import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -474,6 +475,8 @@ public class SprintController {
             }
             DateTime startTime = new DateTime(sprint.getRawStart_date());
             DateTime endTime = new DateTime(sprint.getRawEnd_date());
+            result.setStart(fmt.print(startTime));
+            result.setStop(fmt.print(endTime));
             List<Task> sprintTasks = taskSrv.findAllBySprint(sprint);
             result.setTasksByStatus(endTime, sprintTasks);
             // Fill maps based on time or story point driven board
@@ -488,11 +491,8 @@ public class SprintController {
                 totalTime = PeriodHelper.plusPeriods(totalTime,
                         Utils.getPeriodValue(entry.getValue()));
             }
-
             result.setTotalTime(String.valueOf(Utils.round(
                     Utils.getFloatValue(totalTime), 2)));
-            //fill ideal
-
             Float remainingEstimate = getRemainingEstimate(sprint, timeTracked);
             if (!sprint.getFinished() && new DateTime().isAfter(endTime)) {
                 endTime = new DateTime();
@@ -506,40 +506,62 @@ public class SprintController {
 
     private void fillIdeal(SprintData result, Project project, DateTime startTime, DateTime endTime, Float remainingEstimate) {
         Hibernate.initialize(project.getHolidays());
-        int sprintWorkDays = Days.daysBetween(startTime, endTime).getDays();
         Map<String, Float> left = new LinkedHashMap<>();
         Map<String, Float> burned = new LinkedHashMap<>();
         Map<String, Float> ideal = new LinkedHashMap<>();
         left.put(fmt.print(startTime), remainingEstimate);
         burned.put(fmt.print(startTime), 0f);
-        List<DateTime> freeDays = projSrv.getFreeDays(project, startTime, endTime);
-        ideal.put(fmt.print(startTime.withHourOfDay(0).withMinuteOfHour(0)), remainingEstimate);
+        List<LocalDate> freeDays = projSrv.getFreeDays(project, startTime, endTime);
         if (!freeDays.isEmpty()) {
-            int counter = 0;
-            int weekdays = 0;
-            DateTime dateCounter;
-            //reset counter and go
-            dateCounter = startTime;
-            sprintWorkDays -= freeDays.size();
-            while (dateCounter.isBefore(endTime)) {
-                if (freeDays.contains(dateCounter)) {
-                    //TODO on free days fill margin values
-                    weekdays++;
-                    ideal.put(fmt.print(dateCounter), ideal.get(fmt.print(dateCounter.minusDays(1))));
-                } else {
-                    //f = - (remainingEstimate / sprintWorkDays ) * day + remainingEstimate + weekdays
-                    ideal.put(fmt.print(dateCounter), (-((remainingEstimate + weekdays) / (sprintWorkDays + weekdays)) * counter + (remainingEstimate + weekdays)));
-                }
-                dateCounter = dateCounter.plusDays(1);
-                counter++;
-            }
+            populateIdealWithFreeDays(startTime, endTime, remainingEstimate, ideal, freeDays);
         } else {
             ideal.put(fmt.print(startTime), remainingEstimate);
-            ideal.put(fmt.print(endTime), 0f);
         }
+        ideal.put(fmt.print(endTime), 0f);
         result.setIdeal(ideal);
         result.setBurned(burned);
         result.setLeft(left);
+    }
+
+    /**
+     * Populates ideal data based on project FreeDays.Starting point is set to midnight of first day. For each free day, chart values are calculated based on formula:
+     * (-remainingEstimate/sprintWorkDays) * counter + (remainingEstimate + freeDaysSoFar)
+     * After it freeDaysSoFar is increased.. If there are consequentive freedays , value from previous day is taken instaedn of formula value
+     *
+     * @param startTime
+     * @param endTime
+     * @param remainingEstimate
+     * @param ideal
+     * @param freeDays
+     */
+    private void populateIdealWithFreeDays(DateTime startTime, DateTime endTime, Float remainingEstimate, Map<String, Float> ideal, List<LocalDate> freeDays) {
+        int sprintWorkDays = Days.daysBetween(startTime, endTime).getDays();
+        DateTime dateCounter = startTime.withHourOfDay(0).withMinuteOfHour(0);
+        ideal.put(fmt.print(dateCounter), remainingEstimate);
+        ideal.put(fmt.print(startTime), remainingEstimate);
+        dateCounter = dateCounter.plusDays(1);
+        int counter = 1;
+        int freeDaysSoFar = 0;
+        sprintWorkDays -= freeDays.size();
+        boolean wasFree = false;
+        while (dateCounter.isBefore(endTime)) {
+            if (freeDays.contains(new LocalDate(dateCounter))) {
+                DateTime nearMidnight = dateCounter.withHourOfDay(23).withMinuteOfHour(59);
+                if (wasFree) {
+                    ideal.put(fmt.print(dateCounter), ideal.get(fmt.print(dateCounter.minusDays(1))));
+                    ideal.put(fmt.print(nearMidnight), ideal.get(fmt.print(dateCounter.minusDays(1))));
+                } else {
+                    ideal.put(fmt.print(dateCounter), (-remainingEstimate / sprintWorkDays) * counter + (remainingEstimate + freeDaysSoFar));
+                    ideal.put(fmt.print(dateCounter.withHourOfDay(23).withMinuteOfHour(59)), (-(remainingEstimate) / (sprintWorkDays)) * counter + (remainingEstimate + freeDaysSoFar));
+                }
+                freeDaysSoFar++;
+                wasFree = true;
+            } else {
+                wasFree = false;
+            }
+            dateCounter = dateCounter.plusDays(1);
+            counter++;
+        }
     }
 
     @RequestMapping(value = "/getSprints", method = RequestMethod.GET)

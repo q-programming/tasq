@@ -454,11 +454,12 @@ public class ProjectController {
             LocalDate counter = start;
             Integer taskCreated = 0;
             Integer taskClosed = 0;
+            LocalTime nearMidnight = new LocalTime(23, 59);
             DateTime startTime = start.toDateTime(new LocalTime(0, 0));
-            DateTime endTime = end.toDateTime(new LocalTime(23, 59));
-            List<DateTime> freeDays = projSrv.getFreeDays(project, startTime, endTime);
+            DateTime endTime = end.toDateTime(nearMidnight);
+            List<LocalDate> freeDays = projSrv.getFreeDays(project, startTime, endTime);
             result.setFreeDays(freeDays.stream()
-                    .map(dateTime -> new StartStop(fmt.print(dateTime.minusDays(2).withHourOfDay(23).withMinuteOfHour(59)), fmt.print(dateTime.minusDays(1).withHourOfDay(23).withMinuteOfHour(59))))
+                    .map(dateTime -> new StartStop(fmt.print(dateTime.minusDays(1).toDateTime(nearMidnight)), fmt.print(dateTime.toDateTime(nearMidnight))))
                     .collect(Collectors.toList()));
             while (counter.isBefore(end)) {
                 Integer createValue = created.get(counter.toString());

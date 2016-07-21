@@ -154,8 +154,8 @@ public class ProjectService {
      * @return
      */
 
-    public List<DateTime> getFreeDays(Project project, DateTime startTime, DateTime endTime) {
-        List<DateTime> freeDays = new LinkedList<>();
+    public List<LocalDate> getFreeDays(Project project, DateTime startTime, DateTime endTime) {
+        List<LocalDate> freeDays = new LinkedList<>();
         List<LocalDate> projectHolidays = new LinkedList<>();
         DateTime dateCounter = startTime;
         Hibernate.initialize(project.getHolidays());
@@ -165,12 +165,12 @@ public class ProjectService {
         while (dateCounter.isBefore(endTime)) {
             if (!project.getWorkingWeekends()) {
                 if (dateCounter.getDayOfWeek() == DateTimeConstants.SUNDAY || dateCounter.getDayOfWeek() == DateTimeConstants.SATURDAY) {
-                    freeDays.add(dateCounter);
+                    freeDays.add(new LocalDate(dateCounter));
                 }
             }
             if (!projectHolidays.isEmpty()) {
                 if (projectHolidays.contains(new LocalDate(dateCounter))) {
-                    freeDays.add(dateCounter);
+                    freeDays.add(new LocalDate(dateCounter));
                 }
             }
             dateCounter = dateCounter.plusDays(1);

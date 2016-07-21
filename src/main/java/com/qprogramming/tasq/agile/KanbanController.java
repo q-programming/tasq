@@ -17,10 +17,7 @@ import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Hibernate;
-import org.joda.time.DateTime;
-import org.joda.time.Days;
-import org.joda.time.LocalDate;
-import org.joda.time.Period;
+import org.joda.time.*;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -207,9 +204,10 @@ public class KanbanController {
                 endTime = release.getEndDate();
                 releaseTasks = taskSrv.findAllByRelease(release);
             }
-            List<DateTime> freeDays = projSrv.getFreeDays(project, startTime, endTime);
+            List<LocalDate> freeDays = projSrv.getFreeDays(project, startTime, endTime);
+            LocalTime nearMidnight = new LocalTime(23, 59);
             result.setFreeDays(freeDays.stream()
-                    .map(dateTime -> new StartStop(fmt.print(dateTime.minusDays(2).withHourOfDay(23).withMinuteOfHour(59)), fmt.print(dateTime.minusDays(1).withHourOfDay(23).withMinuteOfHour(59))))
+                    .map(localDate -> new StartStop(fmt.print(localDate.minusDays(1).toDateTime(nearMidnight)), fmt.print(localDate.toDateTime(nearMidnight))))
                     .collect(Collectors.toList()));
             List<WorkLog> wrkList = wrkLogSrv.getAllReleaseEvents(release);
             result.setTasksByStatus(endTime, releaseTasks);
@@ -254,7 +252,8 @@ public class KanbanController {
         }
         LocalDate startTime = new LocalDate(release.getStartDate());
         LocalDate endTime = new LocalDate(release.getEndDate());
-        data.setStartStop(startTime.toString() + " - " + endTime.toString());
+        data.setStart(startTime.toString());
+        data.setStop(endTime.toString());
         fillChartData(data, openMap, closedMap, progressMap, startTime, endTime);
         normalizeProgressLabels(data, progressMap);
         return data;

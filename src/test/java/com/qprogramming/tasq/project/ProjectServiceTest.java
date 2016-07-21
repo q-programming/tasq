@@ -8,6 +8,7 @@ import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.projects.holiday.Holiday;
 import com.qprogramming.tasq.test.MockSecurityContext;
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -134,7 +135,7 @@ public class ProjectServiceTest {
         Set<Holiday> holidays = testProject.getHolidays();
         holidays.add(holiday);
         testProject.setHolidays(holidays);
-        List<DateTime> freeDays = projSrv.getFreeDays(testProject, new DateTime(2016, 6, 11, 11, 00), new DateTime(2016, 7, 10, 11, 00));
+        List<LocalDate> freeDays = projSrv.getFreeDays(testProject, new DateTime(2016, 6, 11, 11, 00), new DateTime(2016, 7, 10, 11, 00));
         Assert.assertEquals(10, freeDays.size());
 
     }

@@ -11,7 +11,6 @@ public class KanbanData extends AgileData {
     private Map<String, Integer> progressLabels;
     private Map<String, Integer> openLabels;
     private List<StartStop> freeDays;
-    private String startStop;
 
     public KanbanData() {
         open = new LinkedHashMap<>();
@@ -46,11 +45,7 @@ public class KanbanData extends AgileData {
     }
 
     public String getStartStop() {
-        return startStop;
-    }
-
-    public void setStartStop(String startStop) {
-        this.startStop = startStop;
+        return getStart() + " - " + getStop();
     }
 
     public Map<String, Integer> getProgressLabels() {
