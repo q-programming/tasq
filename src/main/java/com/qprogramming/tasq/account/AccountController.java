@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
@@ -131,9 +132,8 @@ public class AccountController {
     }
 
     @RequestMapping(value = "/getAccounts", method = RequestMethod.GET)
-    public
     @ResponseBody
-    List<DisplayAccount> listAccounts(@RequestParam String term, HttpServletResponse response) {
+    public ResponseEntity<List<DisplayAccount>> listAccounts(@RequestParam String term, HttpServletResponse response) {
         response.setContentType("application/json");
         List<Account> accounts;
         if (term == null) {
@@ -141,7 +141,7 @@ public class AccountController {
         } else {
             accounts = accountSrv.findByNameSurnameContaining(term);
         }
-        return accounts.stream().map(DisplayAccount::new).collect(Collectors.toList());
+        return ResponseEntity.ok(accounts.stream().map(DisplayAccount::new).collect(Collectors.toList()));
     }
 
     @RequestMapping(value = "/users", method = RequestMethod.GET)
@@ -165,9 +165,9 @@ public class AccountController {
     }
 
     @RequestMapping(value = "/project/participants", method = RequestMethod.GET)
-    public
     @ResponseBody
-    Page<DisplayAccount> listParticipants(@RequestParam(required = false) String term,
+    public
+    ResponseEntity<Page<DisplayAccount>> listParticipants(@RequestParam(required = false) String term,
                                           @RequestParam String projId,
                                           @PageableDefault(size = 25, page = 0, sort = "surname", direction = Direction.ASC) Pageable p) {
         List<Object> principals = sessionRegistry.getAllPrincipals();
@@ -177,7 +177,7 @@ public class AccountController {
         if (participants.size() > p.getPageSize()) {
             participants = participants.subList(p.getOffset(), p.getOffset() + p.getPageSize());
         }
-        return new PageImpl<>(participants, p, totalParticipants);
+        return ResponseEntity.ok(new PageImpl<>(participants, p, totalParticipants));
     }
 
     private DisplayAccount accountWithSession(List<Object> principals, Account account) {
@@ -221,21 +221,21 @@ public class AccountController {
 
     @RequestMapping(value = "role", method = RequestMethod.POST)
     @ResponseBody
-    public ResultData setRole(@RequestParam(value = "id") Long id, @RequestParam(value = "role") Roles role) {
+    public ResponseEntity<ResultData> setRole(@RequestParam(value = "id") Long id, @RequestParam(value = "role") Roles role) {
         Account account = accountSrv.findById(id);
         if (account != null) {
             // check if not admin or user
             List<Account> admins = accountSrv.findAdmins();
             if (account.getRole().equals(Roles.ROLE_ADMIN) && admins.size() == 1) {
-                return new ResultData(ResultData.ERROR,
-                        msg.getMessage("role.last.admin", null, Utils.getCurrentLocale()));
+                return ResponseEntity.ok(new ResultData(ResultData.ERROR,
+                        msg.getMessage("role.last.admin", null, Utils.getCurrentLocale())));
             } else {
                 String rolemsg = msg.getMessage(role.getCode(), null, Utils.getCurrentLocale());
                 account.setRole(role);
                 accountSrv.update(account);
                 String resultMsg = msg.getMessage("role.change.succes", new Object[]{account.toString(), rolemsg},
                         Utils.getCurrentLocale());
-                return new ResultData(ResultData.OK, resultMsg);
+                return ResponseEntity.ok(new ResultData(ResultData.OK, resultMsg));
             }
         }
         return null;

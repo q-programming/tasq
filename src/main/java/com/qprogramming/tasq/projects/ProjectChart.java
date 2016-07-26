@@ -3,6 +3,7 @@ package com.qprogramming.tasq.projects;
 import com.qprogramming.tasq.agile.StartStop;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,8 +13,9 @@ public class ProjectChart {
     private List<StartStop> freeDays;
 
     public ProjectChart() {
-        created = new LinkedHashMap<String, Integer>();
-        closed = new LinkedHashMap<String, Integer>();
+        created = new LinkedHashMap<>();
+        closed = new LinkedHashMap<>();
+        freeDays = new LinkedList<>();
     }
 
     public Map<String, Integer> getCreated() {

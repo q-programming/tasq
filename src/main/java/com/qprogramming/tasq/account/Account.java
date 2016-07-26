@@ -1,9 +1,9 @@
 package com.qprogramming.tasq.account;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.qprogramming.tasq.manage.Theme;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.task.Task;
-import org.codehaus.jackson.annotate.JsonIgnore;
 import org.hibernate.annotations.IndexColumn;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;

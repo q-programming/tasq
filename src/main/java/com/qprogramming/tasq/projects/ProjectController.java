@@ -34,6 +34,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -136,10 +137,9 @@ public class ProjectController {
     }
 
     @RequestMapping(value = "projectEvents", method = RequestMethod.GET)
-    public
     @ResponseBody
-    Page<DisplayWorkLog> getProjectEvents(@RequestParam(value = "id") String id,
-                                          @PageableDefault(size = 25, page = 0, sort = "time", direction = Direction.DESC) Pageable p) {
+    public ResponseEntity<Page<DisplayWorkLog>> getProjectEvents(@RequestParam(value = "id") String id,
+                                                                 @PageableDefault(size = 25, page = 0, sort = "time", direction = Direction.DESC) Pageable p) {
         Project project = projSrv.findByProjectId(id);
         if (project == null) {
             // NULL
@@ -154,12 +154,12 @@ public class ProjectController {
         for (WorkLog workLog : page) {
             list.add(new DisplayWorkLog(workLog));
         }
-        return new PageImpl<DisplayWorkLog>(list, p, page.getTotalElements());
+        return ResponseEntity.ok(new PageImpl<>(list, p, page.getTotalElements()));
     }
 
     @RequestMapping(value = "/usersProjectsEvents", method = RequestMethod.GET)
     @ResponseBody
-    public Page<DisplayWorkLog> getProjectsLogs(
+    public ResponseEntity<Page<DisplayWorkLog>> getProjectsLogs(
             @PageableDefault(size = 25, page = 0, sort = "time", direction = Direction.DESC) Pageable p) {
         Account account = Utils.getCurrentAccount();
         List<Project> usersProjects = projSrv.findAllByUser(account.getId());
@@ -167,7 +167,7 @@ public class ProjectController {
             List<Long> ids = usersProjects.stream().map(Project::getId).collect(Collectors.toCollection(LinkedList::new));
             Page<WorkLog> page = wrkLogSrv.findByProjectIdIn(ids, p);
             List<DisplayWorkLog> list = page.getContent().stream().map(DisplayWorkLog::new).collect(Collectors.toList());
-            return new PageImpl<>(list, p, page.getTotalElements());
+            return ResponseEntity.ok(new PageImpl<>(list, p, page.getTotalElements()));
         }
         return null;
     }
@@ -396,26 +396,26 @@ public class ProjectController {
     @RequestMapping(value = "/project/getParticipants", method = RequestMethod.GET)
     public
     @ResponseBody
-    List<DisplayAccount> listParticipants(@RequestParam String id, @RequestParam String term,
-                                          @RequestParam(required = false) Boolean userOnly, HttpServletResponse response) {
+    ResponseEntity<List<DisplayAccount>> listParticipants(@RequestParam String id, @RequestParam String term,
+                                                          @RequestParam(required = false) Boolean userOnly, HttpServletResponse response) {
         response.setContentType(APPLICATION_JSON);
         List<Account> accounts = projSrv.getProjectAccounts(id, term);
         if (userOnly) {
-            return accounts.stream().filter(Account::getIsUser).map(DisplayAccount::new).collect(Collectors.toList());
+            return ResponseEntity.ok(accounts.stream().filter(Account::getIsUser).map(DisplayAccount::new).collect(Collectors.toList()));
         }
-        return accounts.stream().map(DisplayAccount::new).collect(Collectors.toList());
+        return ResponseEntity.ok(accounts.stream().map(DisplayAccount::new).collect(Collectors.toList()));
     }
 
 
     @Transactional
     @RequestMapping(value = "/project/getChart", method = RequestMethod.GET)
     @ResponseBody
-    public ProjectChart getProjectChart(@RequestParam String id,
-                                        @RequestParam(required = false) boolean all, HttpServletResponse response) {
+    public ResponseEntity<ProjectChart> getProjectChart(@RequestParam String id,
+                                                        @RequestParam(required = false) boolean all, HttpServletResponse response) {
         response.setContentType(APPLICATION_JSON);
         Project project = projSrv.findByProjectId(id);
-        Map<String, Integer> created = new HashMap<String, Integer>();
-        Map<String, Integer> closed = new HashMap<String, Integer>();
+        Map<String, Integer> created = new HashMap<>();
+        Map<String, Integer> closed = new HashMap<>();
         ProjectChart result = new ProjectChart();
         List<WorkLog> events = wrkLogSrv.findProjectCreateCloseEvents(project, all);
         // Fill maps
@@ -478,7 +478,7 @@ public class ProjectController {
                 counter = counter.plusDays(1);
             }
         }
-        return result;
+        return ResponseEntity.ok(result);
     }
 
     /**
@@ -492,7 +492,7 @@ public class ProjectController {
     @RequestMapping(value = "/project/getDefaults", method = RequestMethod.GET)
     public
     @ResponseBody
-    DisplayProject getDefaults(@RequestParam Long id, HttpServletResponse response) {
+    ResponseEntity<DisplayProject> getDefaults(@RequestParam Long id, HttpServletResponse response) {
         response.setContentType(APPLICATION_JSON);
         Project project = projSrv.findById(id);
         DisplayProject result = new DisplayProject(project);
@@ -500,7 +500,7 @@ public class ProjectController {
         if (account != null) {
             result.setDefaultAssignee(new DisplayAccount(account));
         }
-        return result;
+        return ResponseEntity.ok(result);
     }
 
     @Transactional

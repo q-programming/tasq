@@ -150,7 +150,7 @@ public class AccountControllerTest {
     @Test
     public void getAccountsTest() {
         when(accSrvMock.findAll()).thenReturn(accountsList);
-        List<DisplayAccount> list = accountCtr.listAccounts(null, responseMock);
+        List<DisplayAccount> list = accountCtr.listAccounts(null, responseMock).getBody();
         Assert.assertEquals(5, list.size());
     }
 

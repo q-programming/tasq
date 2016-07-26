@@ -27,6 +27,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
@@ -188,8 +189,8 @@ public class KanbanControllerTest {
         List<Release> list = new LinkedList<Release>();
         list.add(release);
         when(agileSrvMock.findReleaseByProjectIdOrderByDateDesc(project.getId())).thenReturn(list);
-        List<Release> result = kanbanCtrl.showProjectReleases(project.getId(), responseMock);
-        Assert.assertFalse(result.isEmpty());
+        ResponseEntity<List<Release>> result = kanbanCtrl.showProjectReleases(project.getId(), responseMock);
+        Assert.assertFalse(result.getBody().isEmpty());
     }
 
     @Test
@@ -254,11 +255,11 @@ public class KanbanControllerTest {
         when(wrkLogSrvMock.getAllReleaseEvents(release)).thenReturn(workLogs);
         when(taskSrvMock.findAllByRelease(release)).thenReturn(taskList);
         when(taskSrvMock.findAllByRelease(null)).thenReturn(taskList);
-        KanbanData data = kanbanCtrl.showBurndownChart(TEST, RELEASE);
+        KanbanData data = kanbanCtrl.showBurndownChart(TEST, RELEASE).getBody();
         Assert.assertNotNull(data.getClosed());
         Assert.assertNotNull(data.getOpen());
         Assert.assertNotNull(data.getTimeBurned());
-        data = kanbanCtrl.showBurndownChart(TEST, null);
+        data = kanbanCtrl.showBurndownChart(TEST, null).getBody();
         Assert.assertNotNull(data.getClosed());
         Assert.assertNotNull(data.getOpen());
         Assert.assertNotNull(data.getTimeBurned());

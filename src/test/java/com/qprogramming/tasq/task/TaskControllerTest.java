@@ -30,6 +30,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.context.MessageSource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
@@ -595,8 +596,8 @@ public class TaskControllerTest {
         when(taskRepoMock.findById(TASK_ID)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(false);
         testAccount.setRole(Roles.ROLE_VIEWER);
-        ResultData data = taskCtr.changeState(TASK_ID, TaskState.COMPLETE, null, null, null);
-        Assert.assertEquals(ResultData.ERROR, data.code);
+        ResponseEntity<ResultData> data = taskCtr.changeState(TASK_ID, TaskState.COMPLETE, null, null, null);
+        Assert.assertEquals(ResultData.ERROR, data.getBody().code);
         boolean catched = false;
         try {
             taskCtr.changeStoryPoints(TASK_ID, 2);
@@ -615,8 +616,8 @@ public class TaskControllerTest {
         task.setComments(new HashSet<Comment>());
         when(taskRepoMock.findById(TASK_ID)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(true);
-        ResultData data = taskCtr.changeState(TASK_ID, TaskState.TO_DO, true, null, "Done");
-        Assert.assertEquals(ResultData.WARNING, data.code);
+        ResponseEntity<ResultData> data = taskCtr.changeState(TASK_ID, TaskState.TO_DO, true, null, "Done");
+        Assert.assertEquals(ResultData.WARNING, data.getBody().code);
     }
 
     @Test
@@ -635,8 +636,8 @@ public class TaskControllerTest {
         when(accountServiceMock.findAll()).thenReturn(accounts);
         when(taskRepoMock.findById(TASK_ID)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(true);
-        ResultData data = taskCtr.changeState(TASK_ID, TaskState.CLOSED, true, null, "Done");
-        Assert.assertEquals(ResultData.WARNING, data.code);
+        ResponseEntity<ResultData> data = taskCtr.changeState(TASK_ID, TaskState.CLOSED, true, null, "Done");
+        Assert.assertEquals(ResultData.WARNING, data.getBody().code);
     }
 
     @Test
@@ -654,10 +655,10 @@ public class TaskControllerTest {
         when(taskRepoMock.findByParent(TASK_ID)).thenReturn(subtasks);
         when(taskRepoMock.findById(TASK_ID)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(true);
-        ResultData result = taskCtr.changeState(TASK_ID, TaskState.CLOSED, true, true, "Done");
+        ResponseEntity<ResultData> result = taskCtr.changeState(TASK_ID, TaskState.CLOSED, true, true, "Done");
         verify(wrkLogSrv, times(1)).addActivityLog(subtask, "", LogType.CLOSED);
         verify(taskRepoMock, times(1)).save(any(Task.class));
-        Assert.assertEquals(ResultData.OK, result.code);
+        Assert.assertEquals(ResultData.OK, result.getBody().code);
     }
 
     @Test

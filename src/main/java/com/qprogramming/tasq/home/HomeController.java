@@ -14,6 +14,8 @@ import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -42,10 +44,11 @@ public class HomeController {
     private String version;
 
     @Autowired
-    public HomeController(TaskService taskSrv, ProjectService projSrv, AppService appSrv) {
+    public HomeController(TaskService taskSrv, ProjectService projSrv, AppService appSrv, EventsService eventSrv) {
         this.taskSrv = taskSrv;
         this.projSrv = projSrv;
         this.appSrv = appSrv;
+        this.eventSrv = eventSrv;
     }
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
@@ -87,9 +90,13 @@ public class HomeController {
 
     @RequestMapping(value = "/eventCount", method = RequestMethod.GET)
     @ResponseBody
-    int getEventCount() {
-        List<Event> events = eventSrv.getUnread();
-        return events.size();
+    public ResponseEntity<Integer> getEventCount() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            List<Event> events = eventSrv.getUnread();
+            return ResponseEntity.ok(events.size());
+        }
+        return ResponseEntity.ok(0);
     }
 
     @RequestMapping(value = "/help", method = RequestMethod.GET)

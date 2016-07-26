@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -163,19 +164,19 @@ public class KanbanController {
 
     @RequestMapping(value = "/getReleases", method = RequestMethod.GET)
     @ResponseBody
-    public List<Release> showProjectReleases(@RequestParam Long projectID,
-                                             HttpServletResponse response) {
+    public ResponseEntity<List<Release>> showProjectReleases(@RequestParam Long projectID,
+                                                             HttpServletResponse response) {
         response.setContentType("application/json");
         Project project = projSrv.findById(projectID);
-        return agileSrv
-                .findReleaseByProjectIdOrderByDateDesc(project.getId());
+        return ResponseEntity.ok(agileSrv
+                .findReleaseByProjectIdOrderByDateDesc(project.getId()));
     }
 
     @Transactional
     @RequestMapping(value = "/{id}/release-data", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    public KanbanData showBurndownChart(@PathVariable String id,
-                                        @RequestParam(value = "release", required = false) String releaseNo) {
+    public ResponseEntity<KanbanData> showBurndownChart(@PathVariable String id,
+                                                        @RequestParam(value = "release", required = false) String releaseNo) {
         KanbanData result = new KanbanData();
         Project project = projSrv.findByProjectId(id);
         if (project != null) {
@@ -222,9 +223,9 @@ public class KanbanController {
             }
             result.setTotalTime(String.valueOf(Utils.round(
                     Utils.getFloatValue(totalTime), 2)));
-            return fillOpenAndClosed(result, release, wrkList);
+            return ResponseEntity.ok(fillOpenAndClosed(result, release, wrkList));
         } else {
-            return result;
+            return ResponseEntity.ok(result);
         }
     }
 

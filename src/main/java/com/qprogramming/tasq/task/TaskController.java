@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -562,17 +563,17 @@ public class TaskController {
     @Transactional
     @RequestMapping(value = "/task/changeState", method = RequestMethod.POST)
     @ResponseBody
-    public ResultData changeState(@RequestParam(value = "id") String taskID,
-                                  @RequestParam(value = "state") TaskState state,
-                                  @RequestParam(value = "zero_checkbox", required = false) Boolean remainingZero,
-                                  @RequestParam(value = "closesubtasks", required = false) Boolean closeSubtasks,
-                                  @RequestParam(value = "message", required = false) String commentMessage) {
+    public ResponseEntity<ResultData> changeState(@RequestParam(value = "id") String taskID,
+                                                  @RequestParam(value = "state") TaskState state,
+                                                  @RequestParam(value = "zero_checkbox", required = false) Boolean remainingZero,
+                                                  @RequestParam(value = "closesubtasks", required = false) Boolean closeSubtasks,
+                                                  @RequestParam(value = "message", required = false) String commentMessage) {
         // check if not admin or user
         Task task = taskSrv.findById(taskID);
         if (task != null) {
             if (state.equals(task.getState())) {
                 String stateText = msg.getMessage(state.getCode(), null, Utils.getCurrentLocale());
-                return new ResultData(ResultData.WARNING, msg.getMessage("task.already.inState", new Object[]{stateText}, Utils.getCurrentLocale()));
+                return ResponseEntity.ok(new ResultData(ResultData.WARNING, msg.getMessage("task.already.inState", new Object[]{stateText}, Utils.getCurrentLocale())));
             }
             // check if can edit
             if ((Utils.getCurrentAccount().equals(task.getOwner())
@@ -581,19 +582,19 @@ public class TaskController {
                 // check if reopening kanban
                 if (task.getState().equals(TaskState.CLOSED)
                         && Project.AgileType.KANBAN.equals(task.getProject().getAgile()) && task.getRelease() != null) {
-                    return new ResultData(ResultData.ERROR, msg.getMessage("task.changeState.change.kanbanRelease",
-                            new Object[]{task.getRelease().getRelease()}, Utils.getCurrentLocale()));
+                    return ResponseEntity.ok(new ResultData(ResultData.ERROR, msg.getMessage("task.changeState.change.kanbanRelease",
+                            new Object[]{task.getRelease().getRelease()}, Utils.getCurrentLocale())));
                 }
                 if (TaskState.TO_DO.equals(state)) {
                     Hibernate.initialize(task.getLoggedWork());
                     if (!("0m").equals(task.getLoggedWork())) {
-                        return new ResultData(ResultData.ERROR,
-                                msg.getMessage("task.alreadyStarted", null, Utils.getCurrentLocale()));
+                        return ResponseEntity.ok(new ResultData(ResultData.ERROR,
+                                msg.getMessage("task.alreadyStarted", null, Utils.getCurrentLocale())));
                     }
                 } else if (TaskState.CLOSED.equals(state)) {
                     ResultData result = checkTaskCanOperated(task, false);
                     if (result.code.equals(ResultData.ERROR)) {
-                        return result;
+                        return ResponseEntity.ok(result);
                     }
                 }
                 if (closeSubtasks != null && closeSubtasks) {
@@ -609,8 +610,8 @@ public class TaskController {
                 task.setState(state);
                 if (StringUtils.isNotEmpty(commentMessage)) {
                     if (Utils.containsHTMLTags(commentMessage)) {
-                        return new ResultData(ResultData.ERROR,
-                                msg.getMessage("comment.htmlTag", null, Utils.getCurrentLocale()));
+                        return ResponseEntity.ok(new ResultData(ResultData.ERROR,
+                                msg.getMessage("comment.htmlTag", null, Utils.getCurrentLocale())));
                     } else {
                         Comment comment = new Comment();
                         comment.setTask(task);
@@ -629,12 +630,12 @@ public class TaskController {
                 }
                 String message = worklogStateChange(state, oldState, task);
                 taskSrv.save(task);
-                return new ResultData(ResultData.OK, message);
+                return ResponseEntity.ok(new ResultData(ResultData.OK, message));
             }
-            return new ResultData(ResultData.ERROR, msg.getMessage("error.unknown", null, Utils.getCurrentLocale()));
+            return ResponseEntity.ok(new ResultData(ResultData.ERROR, msg.getMessage("error.unknown", null, Utils.getCurrentLocale())));
         } else {
-            return new ResultData(ResultData.ERROR,
-                    msg.getMessage("role.error.task.permission", null, Utils.getCurrentLocale()));
+            return ResponseEntity.ok(new ResultData(ResultData.ERROR,
+                    msg.getMessage("role.error.task.permission", null, Utils.getCurrentLocale())));
         }
 
     }
@@ -642,7 +643,7 @@ public class TaskController {
     @Transactional
     @RequestMapping(value = "/task/changePoints", method = RequestMethod.POST)
     @ResponseBody
-    public ResultData changeStoryPoints(@RequestParam(value = "id") String taskID,
+    public ResponseEntity<ResultData> changeStoryPoints(@RequestParam(value = "id") String taskID,
                                         @RequestParam(value = "points") Integer points) {
         // check if not admin or user
         Task task = taskSrv.findById(taskID);
@@ -662,10 +663,10 @@ public class TaskController {
             }
             task.setStory_points(points);
             taskSrv.save(task);
-            return new ResultData(ResultData.OK, msg.getMessage("task.storypoints.edited",
-                    new Object[]{task.getId(), points}, Utils.getCurrentLocale()));
+            return ResponseEntity.ok(new ResultData(ResultData.OK, msg.getMessage("task.storypoints.edited",
+                    new Object[]{task.getId(), points}, Utils.getCurrentLocale())));
         }
-        return new ResultData(ResultData.ERROR, msg.getMessage("error.unknown", null, Utils.getCurrentLocale()));
+        return ResponseEntity.ok(new ResultData(ResultData.ERROR, msg.getMessage("error.unknown", null, Utils.getCurrentLocale())));
     }
 
     @Transactional
@@ -772,17 +773,17 @@ public class TaskController {
 
     @RequestMapping(value = "/task/assignMe", method = RequestMethod.POST)
     @ResponseBody
-    public ResultData assignMePOST(@RequestParam(value = "id") String id) {
+    public ResponseEntity<ResultData> assignMePOST(@RequestParam(value = "id") String id) {
         // check if not admin or user
         if (!Roles.isPowerUser()) {
             throw new TasqAuthException(msg);
         }
         if (assignMeToTask(id)) {
-            return new ResultData(ResultData.OK,
-                    msg.getMessage("task.assinged.me", null, Utils.getCurrentLocale()) + " " + id);
+            return ResponseEntity.ok(new ResultData(ResultData.OK,
+                    msg.getMessage("task.assinged.me", null, Utils.getCurrentLocale()) + " " + id));
         } else {
-            return new ResultData(ResultData.ERROR,
-                    msg.getMessage("role.error.task.permission", null, Utils.getCurrentLocale()));
+            return ResponseEntity.ok(new ResultData(ResultData.ERROR,
+                    msg.getMessage("role.error.task.permission", null, Utils.getCurrentLocale())));
         }
     }
 

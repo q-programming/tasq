@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -170,7 +171,7 @@ public class SprintController {
     @Transactional
     @RequestMapping(value = "/task/sprintAssign", method = RequestMethod.POST)
     @ResponseBody
-    public ResultData assignSprint(
+    public ResponseEntity<ResultData> assignSprint(
             @RequestParam(value = "taskID") String taskID,
             @RequestParam(value = "sprintID") Long sprintID,
             HttpServletRequest request, RedirectAttributes ra) {
@@ -189,7 +190,7 @@ public class SprintController {
                         "agile.task2Sprint.Notestimated",
                         new Object[]{task.getId(), sprint.getSprintNo()},
                         Utils.getCurrentLocale());
-                return result;
+                return ResponseEntity.ok(result);
             }
             String message = "";
             if (task.isEstimated() && project.getTimeTracked()) {
@@ -207,13 +208,13 @@ public class SprintController {
         result.code = ResultData.OK;
         result.message = msg.getMessage("agile.task2Sprint", new Object[]{
                 task.getId(), sprint.getSprintNo()}, Utils.getCurrentLocale());
-        return result;
+        return ResponseEntity.ok(result);
     }
 
     @Transactional
     @RequestMapping(value = "/task/sprintRemove", method = RequestMethod.POST)
     @ResponseBody
-    public ResultData removeFromSprint(
+    public ResponseEntity<ResultData> removeFromSprint(
             @RequestParam(value = "taskID") String taskID,
             @RequestParam(value = "sprintID") Long sprintID, Model model,
             HttpServletRequest request, RedirectAttributes ra) {
@@ -238,7 +239,7 @@ public class SprintController {
         result.code = ResultData.OK;
         result.message = msg.getMessage("agile.taskRemoved",
                 new Object[]{task.getId()}, Utils.getCurrentLocale());
-        return result;
+        return ResponseEntity.ok(result);
     }
 
     @Transactional
