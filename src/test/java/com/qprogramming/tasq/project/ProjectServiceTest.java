@@ -136,7 +136,7 @@ public class ProjectServiceTest {
         holidays.add(holiday);
         testProject.setHolidays(holidays);
         List<LocalDate> freeDays = projSrv.getFreeDays(testProject, new DateTime(2016, 6, 11, 11, 00), new DateTime(2016, 7, 10, 11, 00));
-        Assert.assertEquals(10, freeDays.size());
+        Assert.assertEquals(11, freeDays.size());
 
     }
 

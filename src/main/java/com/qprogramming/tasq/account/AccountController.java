@@ -80,7 +80,9 @@ public class AccountController {
     @RequestMapping(value = "settings", method = RequestMethod.POST)
     public String saveSettings(@RequestParam(value = "avatar", required = false) MultipartFile avatarFile,
                                @RequestParam(value = "email", required = false) String email,
-                               @RequestParam(value = "emails", required = false) String emails,
+                               @RequestParam(value = "watched", required = false) String watched,
+                               @RequestParam(value = "system", required = false) String system,
+                               @RequestParam(value = "comments", required = false) String comments,
                                @RequestParam(value = "language", required = false) String language,
                                @RequestParam(value = "theme", required = false) Long themeID, RedirectAttributes ra,
                                HttpServletRequest request, HttpServletResponse response) {
@@ -95,7 +97,9 @@ public class AccountController {
         }
         account.setLanguage(language);
         localeResolver.setLocale(request, response, new Locale(language));
-        account.setEmail_notifications(Boolean.parseBoolean(emails));
+        account.setSystemnotification(Boolean.parseBoolean(system));
+        account.setWatchnotification(Boolean.parseBoolean(watched));
+        account.setCommentnotification(Boolean.parseBoolean(comments));
         Theme theme = themeSrv.findById(themeID);
         account.setTheme(theme);
         String message = "";
