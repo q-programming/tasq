@@ -96,8 +96,27 @@ public class MailMail {
         mailSender = jmsi;
     }
 
-    public void setMailSender(MailSender mailSender) {
-        this.mailSender = mailSender;
+    /**
+     * Test if connection is correct. If there are some errors MessagingException will be thrown which should be catched
+     * @param host
+     * @param port
+     * @param username
+     * @param password
+     * @param auth
+     * @param tls
+     * @throws MessagingException
+     */
+    public void testConnection(String host, Integer port, String username, String password, String auth, String tls) throws MessagingException {
+        JavaMailSenderImpl jmsi = new JavaMailSenderImpl();
+        jmsi.setHost(host);
+        jmsi.setPort(port);
+        jmsi.setUsername(username);
+        jmsi.setPassword(password);
+        Properties javaMailProperties = new Properties();
+        javaMailProperties.setProperty("mail.smtp.auth", auth);
+        javaMailProperties.setProperty("mail.smtp.starttls.enable", tls);
+        jmsi.setJavaMailProperties(javaMailProperties);
+        jmsi.testConnection();
     }
 
     /**
