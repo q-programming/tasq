@@ -128,46 +128,59 @@
     </div>
 </nav>
 <script>
+    eventsTxt = '<s:message code="events.events"/>&nbsp;';
+    appName = '${applicationName} '
+    appUrl = '<c:url value="/eventCount"/>';
     $(document).ready(function ($) {
         $("#header-date").datepicker();
         $(".header-time").click(function () {
             $('#header-date').toggle("blind");
         });
-
-        // 			$("#header_date_span").text(
-        // 					$.datepicker.formatDate('d m yy', new Date()));
         <security:authorize access="isAuthenticated()">
-        setEvents();
+        //Set worker which will run in background and periodically check if there are new events
+        if (window.Worker) {
+            var eventsWorker = new Worker("<c:url value="/resources/js/eventTimer.js" />");
+            eventsWorker.postMessage([appUrl]);
+            eventsWorker.onmessage = function (e) {
+                setEventsCount(e.data, appName, eventsTxt);
+            };
+        } else {
+            setInterval(getEventCount,60*1000);
+        }
+        // Clock
+        setInterval(display_time, 1000);
         </security:authorize>
-        setTimeout(display_time, 1000);
     });
 
     function display_time() {
         var currentTime = new Date();
         var hours = currentTime.getHours();
         var minutes = currentTime.getMinutes();
-        // 		var seconds = currentTime.getSeconds();
         var time = ('0' + hours).slice(-2) + ':' + ('0' + minutes).slice(-2);
         $("#header_time_span").text(time);
-        setTimeout(display_time, 1000);
     }
-    function setEvents() {
-        var eventsTxt = '<s:message code="events.events"/>&nbsp;';
-        $.get('<c:url value="/eventCount"/>', function (count) {
-            if (count > 0) {
-                var bell = '<i class="fa fa-bell"></i>&nbsp;';
-                var text = bell + eventsTxt + '(' + count + ')';
-                $(".event-menu-li").html(text);
-                $("#event-menu-icon").html(bell + count)
-            } else {
-                var bell = '<i class="fa fa-bell-o"></i>&nbsp;';
-                var text = bell + eventsTxt;
-                $(".event-menu-li").html(text);
-                $("#event-menu-icon").html(bell)
-            }
-            setTimeout(setEvents, 60 * 1000);
+
+    function getEventCount(){
+        $.get(appUrl, function (count) {
+            setEventsCount(count, appName, eventsTxt);
         });
     }
 
-
+    function setEventsCount(count, appName, eventsTxt) {
+        var bell, text, countPar;
+        if (count > 0) {
+            bell = '<i class="fa fa-bell"></i>&nbsp;';
+            countPar = '(' + count + ') ';
+            text = bell + eventsTxt + countPar;
+            $(".event-menu-li").html(text);
+            $("#event-menu-icon").html(bell + count)
+            document.title = countPar + appName;
+        } else {
+            bell = '<i class="fa fa-bell-o"></i>&nbsp;';
+            text = bell + eventsTxt;
+            $(".event-menu-li").html(text);
+            $("#event-menu-icon").html(bell)
+            document.title = appName;
+        }
+    }
 </script>

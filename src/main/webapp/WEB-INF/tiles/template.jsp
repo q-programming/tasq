@@ -51,6 +51,7 @@
 
 <%--CUSTOM SCRIPTS --%>
 <script src="<c:url value="/resources/js/tasq.js" />"></script>
+<script src="<c:url value="/resources/js/eventTimer.js" />"></script>
 <script src="<c:url value="/resources/js/jquery.mask.min.js" />"></script>
 <script src="<c:url value="/resources/js/bootbox.min.js" />"></script>
 <%-- <tilesx:useAttribute id="styles" name="styles" --%>
