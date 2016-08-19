@@ -13,10 +13,9 @@ public class RootConfig {
 	@Bean
 	public static PropertyPlaceholderConfigurer propertyPlaceholderConfigurer() {
 		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
-		ppc.setLocations(new Resource[] {
-				new ClassPathResource("/persistence.properties"),
+		ppc.setLocations(new ClassPathResource("/persistence.properties"),
 				new ClassPathResource("/project.properties"),
-				new ClassPathResource("/email.properties"), });
+				new ClassPathResource("/email.properties"));
 		ppc.setIgnoreUnresolvablePlaceholders(true);
 		return ppc;
 	}

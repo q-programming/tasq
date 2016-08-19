@@ -119,7 +119,8 @@
         <h3>
             <t:type type="${task.type}"/>
             <c:if test="${task.subtask}">
-                <a href='<c:url value="/task/${task.parent}"/>'>[${task.parent}]</a>
+                <a href='<c:url value="/project/${task.project.projectId}"/>'>${task.project.projectId}</a> /
+                <a href='<c:url value="/task/${task.parent}"/>'>${task.parent}</a>
                 / [${task.id}] ${task.name}
             </c:if>
             <c:if test="${not task.subtask}">

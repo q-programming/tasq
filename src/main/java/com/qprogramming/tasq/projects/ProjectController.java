@@ -397,7 +397,7 @@ public class ProjectController {
     public
     @ResponseBody
     ResponseEntity<List<DisplayAccount>> listParticipants(@RequestParam String id, @RequestParam String term,
-                                                          @RequestParam(required = false) Boolean userOnly, HttpServletResponse response) {
+                                                          @RequestParam(required = false) boolean userOnly, HttpServletResponse response) {
         response.setContentType(APPLICATION_JSON);
         List<Account> accounts = projSrv.getProjectAccounts(id, term);
         if (userOnly) {
