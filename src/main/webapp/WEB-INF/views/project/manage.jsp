@@ -429,15 +429,23 @@
             minLength: 1,
             delay: 500,
             source: function (request, response) {
-                $("#assignUsersLoader").show();
                 $(this).closest(".ui-menu").hide();
                 var term = request.term;
                 var projectID = "${project.projectId}";
                 if (term in cache) {
-                    response(cache[term]);
-                    $(".ui-menu").hide();
+                    var results = [];
+                    var data =cache[term];
+                    $.each(data, function (i, item) {
+                        var itemToAdd = {
+                            value: item.email,
+                            label: item.name + " " + item.surname,
+                            id: item.id
+                        };
+                        results.push(itemToAdd);
+                    });
                     return;
                 }
+                $("#assignUsersLoader").show();
                 var url = '<c:url value="/project/getParticipants"/>';
                 $.get(url, {id: projectID, term: term}, function (data) {
                     $("#assignUsersLoader").hide();

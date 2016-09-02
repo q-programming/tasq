@@ -433,6 +433,7 @@
         $("#assignee_auto").click(function () {
             $(this).select();
         });
+
         $("#assignee_auto").change(function () {
             if (!$("#assignee_auto").val()) {
                 $("#assignee").val(null);
@@ -444,14 +445,21 @@
         $("#assignee_auto").autocomplete({
             minLength: 1,
             delay: 500,
+            autoFocus: true,
             //define callback to format results
             source: function (request, response) {
-                $("#createUsersLoader").show();
                 var term = request.term;
                 if (term in cache) {
-                    response(cache[term]);
+                    var result = cache[term];
+                    response($.map(result, function (item) {
+                        return {
+                            label: item.name + " " + item.surname,
+                            value: item.id
+                        }
+                    }));
                     return;
                 }
+                $("#createUsersLoader").show();
                 var url = '<c:url value="/project/getParticipants"/>';
                 var projectID = $("#projects_list").val();
                 $.get(url, {id: projectID, term: term, userOnly: true}, function (result) {
@@ -459,7 +467,6 @@
                     cache[term] = result;
                     response($.map(result, function (item) {
                         return {
-                            // following property gets displayed in drop down
                             label: item.name + " " + item.surname,
                             value: item.id,
                         }

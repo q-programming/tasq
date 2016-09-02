@@ -273,12 +273,18 @@
             delay: 500,
             //define callback to format results
             source: function (request, response) {
-                $("#createUsersLoader").show();
                 var term = request.term;
                 if (term in cache) {
-                    response(cache[term]);
+                    var result = cache[term];
+                    response($.map(result, function (item) {
+                        return {
+                            label: item.name + " " + item.surname,
+                            value: item.id
+                        }
+                    }));
                     return;
                 }
+                $("#createUsersLoader").show();
                 var url = '<c:url value="/project/getParticipants"/>';
                 var projectID = $("#projects_list").val();
                 $.get(url, {id: projectID, term: term,userOnly: true}, function (result) {
