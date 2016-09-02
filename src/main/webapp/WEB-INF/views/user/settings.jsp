@@ -67,14 +67,31 @@
 							</span>
 						</div>
 					</div>
-					<div class="checkbox">
+					<span class="help-block"><s:message
+							code="panel.emails.help" /></span>
+					<div class="checkbox padding-left5">
 						<label class="checkbox" style="display: inherit;"> <input
-							type="checkbox" name="emails" id="emails" value="true"
-							<c:if test="${user.email_notifications}">checked</c:if>>
-							<i class="fa fa-envelope"></i> <s:message
-								code="panel.recieveEmails"></s:message>
-						</label> <span class="help-block"><s:message
-								code="panel.emails.help" /></span>
+								type="checkbox" name="watched" id="watched" value="true"
+								<c:if test="${user.watchnotification}">checked</c:if>>
+							<i class="fa fa-eye"></i> <s:message
+									code="panel.emails.watched"/>
+						</label>
+					</div>
+					<div class="checkbox padding-left5">
+						<label class="checkbox" style="display: inherit;"> <input
+							type="checkbox" name="comments" id="comments" value="true"
+							<c:if test="${user.commentnotification}">checked</c:if>>
+							<i class="fa fa-comment"></i> <s:message
+								code="panel.emails.comments"/>
+						</label>
+					</div>
+					<div class="checkbox padding-left5">
+						<label class="checkbox" style="display: inherit;"> <input
+								type="checkbox" name="system" id="system" value="true"
+								<c:if test="${user.systemnotification}">checked</c:if>>
+							<i class="fa fa-exclamation-triangle"></i> <s:message
+									code="panel.emails.system"/>
+						</label>
 					</div>
 				</div>
 				<div>

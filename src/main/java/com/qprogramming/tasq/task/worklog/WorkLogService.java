@@ -314,6 +314,10 @@ public class WorkLogService {
         addActivityLog(task, Utils.changedFromTo(oldState.getDescription(), newState.getDescription()), LogType.STATUS);
 
     }
+    public void deleteTaskWorklogs(Task task){
+        List<WorkLog> workLogList = wlRepo.findByWorklogtaskId(task.getId());
+        wlRepo.delete(workLogList);
+    }
 
     public void delete(WorkLog log) {
         wlRepo.delete(log);

@@ -171,26 +171,30 @@ table.worklog_table td {
 	font-size: smaller;
 	padding: 10px;
 }
+.avatar {
+    height: 50px;
+    border-radius: 50%
+}
 </style>
 <style type="text/css"></style>
 </head>
 <body bgcolor="#f6f6f6">
 	<div class="content">
-		<div class="header">
-			<img src='cid:logo' style="height:50px; padding:2px" >&nbsp;
+		<div class="header"><img src='cid:logo' style="height:50px; padding:2px" >&nbsp;
+
 			<a href="${application}/task/${task.id}" target="_blank" style="color:${account.theme.invColor};margin-left: 5px;    text-decoration: none;">[${task.id}] ${task.name}</a>
 		</div>
 		<table class="main">
 			<tbody>
 				<tr>
-					<td valign="top" style="vertical-align: top; width:70px">
-						<img src='cid:avatar' style="height:50px; padding:2px">
+					<td valign="top" style="vertical-align: top; width:70px; padding: 2px">
+						<img src='cid:avatar' style="height:50px; border-radius: 50%">
 					</td> 
 					<td class="text">
 						#set ($create = "create")
 						#if ($log.type.string == $create)
 							<p>
-								<a href="${application}/user/${curAccount.username}">${curAccount}</a> created new task <img src='cid:${task.type.code}'><a href="${application}/task/${task.id}" target="_blank">${task.id}</a>and assigned you to it.
+								<a href="${application}/user/${curAccount.username}">${curAccount}</a> created new task <img src='cid:${task.type.code}'><a href="${application}/task/${task.id}" target="_blank">${task.id}</a> and assigned you to it.
 							</p>
 						#else
 							<p>

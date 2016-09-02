@@ -37,7 +37,7 @@ import com.qprogramming.tasq.task.worklog.WorkLog;
 public class Task implements java.io.Serializable {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 6612220415004910977L;
 
@@ -55,7 +55,7 @@ public class Task implements java.io.Serializable {
 
 	@Column
 	private Date lastUpdate;
-	
+
 	@Column
 	private Date finishDate;
 
@@ -108,10 +108,10 @@ public class Task implements java.io.Serializable {
 	private Enum<TaskType> type;
 
 	@ManyToMany(fetch = FetchType.LAZY)
-	private Set<Sprint> sprints = new HashSet<Sprint>();
+	private Set<Sprint> sprints = new HashSet<>();
 
 	@ManyToMany(fetch = FetchType.LAZY)
-	private Set<Tag> tags = new HashSet<Tag>();
+	private Set<Tag> tags = new HashSet<>();
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	private Release release;
@@ -176,7 +176,7 @@ public class Task implements java.io.Serializable {
 	public Date getRawCreate_date() {
 		return create_date;
 	}
-	
+
 
 	public Date getFinishDate() {
 		return finishDate;
@@ -430,7 +430,7 @@ public class Task implements java.io.Serializable {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
@@ -588,7 +588,7 @@ public class Task implements java.io.Serializable {
 
 	/**
 	 * Reqieres session and initialize
-	 * 
+	 *
 	 * @param sprint
 	 * @return
 	 */

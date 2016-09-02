@@ -5,7 +5,6 @@ import com.qprogramming.tasq.error.TasqException;
 import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.manage.Theme;
 import com.qprogramming.tasq.manage.ThemeService;
-import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.ResultData;
 import com.qprogramming.tasq.support.Utils;
@@ -21,6 +20,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
@@ -38,7 +38,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 @Controller
 @Secured("ROLE_USER")
@@ -78,7 +81,9 @@ public class AccountController {
     @RequestMapping(value = "settings", method = RequestMethod.POST)
     public String saveSettings(@RequestParam(value = "avatar", required = false) MultipartFile avatarFile,
                                @RequestParam(value = "email", required = false) String email,
-                               @RequestParam(value = "emails", required = false) String emails,
+                               @RequestParam(value = "watched", required = false) String watched,
+                               @RequestParam(value = "system", required = false) String system,
+                               @RequestParam(value = "comments", required = false) String comments,
                                @RequestParam(value = "language", required = false) String language,
                                @RequestParam(value = "theme", required = false) Long themeID, RedirectAttributes ra,
                                HttpServletRequest request, HttpServletResponse response) {
@@ -93,7 +98,9 @@ public class AccountController {
         }
         account.setLanguage(language);
         localeResolver.setLocale(request, response, new Locale(language));
-        account.setEmail_notifications(Boolean.parseBoolean(emails));
+        account.setSystemnotification(Boolean.parseBoolean(system));
+        account.setWatchnotification(Boolean.parseBoolean(watched));
+        account.setCommentnotification(Boolean.parseBoolean(comments));
         Theme theme = themeSrv.findById(themeID);
         account.setTheme(theme);
         String message = "";
@@ -125,9 +132,8 @@ public class AccountController {
     }
 
     @RequestMapping(value = "/getAccounts", method = RequestMethod.GET)
-    public
     @ResponseBody
-    List<DisplayAccount> listAccounts(@RequestParam String term, HttpServletResponse response) {
+    public ResponseEntity<List<DisplayAccount>> listAccounts(@RequestParam String term, HttpServletResponse response) {
         response.setContentType("application/json");
         List<Account> accounts;
         if (term == null) {
@@ -135,12 +141,7 @@ public class AccountController {
         } else {
             accounts = accountSrv.findByNameSurnameContaining(term);
         }
-        List<DisplayAccount> result = new ArrayList<>();
-        for (Account account : accounts) {
-            DisplayAccount d_account = new DisplayAccount(account);
-            result.add(d_account);
-        }
-        return result;
+        return ResponseEntity.ok(accounts.stream().map(DisplayAccount::new).collect(Collectors.toList()));
     }
 
     @RequestMapping(value = "/users", method = RequestMethod.GET)
@@ -160,51 +161,32 @@ public class AccountController {
             DisplayAccount dispAccount = accountWithSession(principals, account);
             list.add(dispAccount);
         }
-        return  new PageImpl<>(list, p, page.getTotalElements());
+        return new PageImpl<>(list, p, page.getTotalElements());
     }
 
     @RequestMapping(value = "/project/participants", method = RequestMethod.GET)
-    public
     @ResponseBody
-    Page<DisplayAccount> listParticipants(@RequestParam(required = false) String term,
+    public
+    ResponseEntity<Page<DisplayAccount>> listParticipants(@RequestParam(required = false) String term,
                                           @RequestParam String projId,
                                           @PageableDefault(size = 25, page = 0, sort = "surname", direction = Direction.ASC) Pageable p) {
-
-        Project project = projSrv.findByProjectId(projId);
-        if (project == null) {
-            try {
-                Long projectID = Long.valueOf(projId);
-                project = projSrv.findById(projectID);
-            } catch (NumberFormatException e) {
-                LOG.error(e.getMessage());
-            }
-        }
-        Set<Account> allParticipants = project.getParticipants();
         List<Object> principals = sessionRegistry.getAllPrincipals();
-        List<DisplayAccount> participants = new ArrayList<>();
-        for (Account account : allParticipants) {
-            if (term == null) {
-                participants.add(accountWithSession(principals, account));
-            } else {
-                if (StringUtils.containsIgnoreCase(account.toString(), term)) {
-                    participants.add(accountWithSession(principals, account));
-                }
-            }
-        }
+        List<Account> projectAccounts = projSrv.getProjectAccounts(projId, term);
+        List<DisplayAccount> participants = projectAccounts.stream().map(account -> accountWithSession(principals, account)).collect(Collectors.toList());
         int totalParticipants = participants.size();
         if (participants.size() > p.getPageSize()) {
             participants = participants.subList(p.getOffset(), p.getOffset() + p.getPageSize());
         }
-        return new PageImpl<>(participants, p, totalParticipants);
+        return ResponseEntity.ok(new PageImpl<>(participants, p, totalParticipants));
     }
 
     private DisplayAccount accountWithSession(List<Object> principals, Account account) {
-        DisplayAccount sAccount = new DisplayAccount(account);
+        DisplayAccount dAccount = new DisplayAccount(account);
         List<SessionInformation> sessions = sessionRegistry.getAllSessions(account, false);
         if (!sessions.isEmpty() && principals.contains(account)) {
-            sAccount.setOnline(true);
+            dAccount.setOnline(true);
         }
-        return sAccount;
+        return dAccount;
     }
 
     @RequestMapping(value = "/user/{username}/reset-avatar", method = RequestMethod.GET)
@@ -239,21 +221,21 @@ public class AccountController {
 
     @RequestMapping(value = "role", method = RequestMethod.POST)
     @ResponseBody
-    public ResultData setRole(@RequestParam(value = "id") Long id, @RequestParam(value = "role") Roles role) {
+    public ResponseEntity<ResultData> setRole(@RequestParam(value = "id") Long id, @RequestParam(value = "role") Roles role) {
         Account account = accountSrv.findById(id);
         if (account != null) {
             // check if not admin or user
             List<Account> admins = accountSrv.findAdmins();
             if (account.getRole().equals(Roles.ROLE_ADMIN) && admins.size() == 1) {
-                return new ResultData(ResultData.ERROR,
-                        msg.getMessage("role.last.admin", null, Utils.getCurrentLocale()));
+                return ResponseEntity.ok(new ResultData(ResultData.ERROR,
+                        msg.getMessage("role.last.admin", null, Utils.getCurrentLocale())));
             } else {
                 String rolemsg = msg.getMessage(role.getCode(), null, Utils.getCurrentLocale());
                 account.setRole(role);
                 accountSrv.update(account);
                 String resultMsg = msg.getMessage("role.change.succes", new Object[]{account.toString(), rolemsg},
                         Utils.getCurrentLocale());
-                return new ResultData(ResultData.OK, resultMsg);
+                return ResponseEntity.ok(new ResultData(ResultData.OK, resultMsg));
             }
         }
         return null;

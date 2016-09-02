@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -166,7 +167,7 @@ public class TaskController {
             }
             // lookup for sprint
             // Create log work
-            taskSrv.save(task);
+            task = taskSrv.save(task);
             if (taskForm.getAddToSprint() != null) {
                 Sprint sprint = sprintSrv.findByProjectIdAndSprintNo(project.getId(), taskForm.getAddToSprint());
                 task.addSprint(sprint);
@@ -354,8 +355,8 @@ public class TaskController {
         Account account = Utils.getCurrentAccount();
         List<Task> lastVisited = account.getLast_visited_t();
         lastVisited.add(0, task);
-        List<Task> clean = new ArrayList<Task>();
-        Set<Task> lookup = new HashSet<Task>();
+        List<Task> clean = new ArrayList<>();
+        Set<Task> lookup = new HashSet<>();
         for (Task item : lastVisited) {
             if (lookup.add(item)) {
                 clean.add(item);
@@ -393,7 +394,9 @@ public class TaskController {
     public String listTasks(@RequestParam(value = "projectID", required = false) String projId,
                             @RequestParam(value = "state", required = false) String state,
                             @RequestParam(value = "query", required = false) String query,
-                            @RequestParam(value = "priority", required = false) String priority, Model model) {
+                            @RequestParam(value = "priority", required = false) String priority,
+                            @RequestParam(value = "type", required = false) String type,
+                            @RequestParam(value = "assignee", required = false) String assignee, Model model) {
         if (StringUtils.isEmpty(state)) {
             if (query != null) {
                 state = ALL;
@@ -401,42 +404,40 @@ public class TaskController {
                 state = OPEN;
             }
         }
+        Account currentAccount = Utils.getCurrentAccount();
         List<Project> projects = projectSrv.findAllByUser();
         Collections.sort(projects, new ProjectSorter(ProjectSorter.SORTBY.LAST_VISIT,
-                Utils.getCurrentAccount().getActive_project(), true));
-        model.addAttribute("projects", projects);
-
-        // Get active or choosen project
-        Project active;
-        if (projId == null) {
-            active = projectSrv.findUserActiveProject();
-        } else {
-            active = projectSrv.findByProjectId(projId);
-        }
-        if (active != null) {
-            List<Task> taskList;
-            if (OPEN.equals(state)) {
-                taskList = taskSrv.findByProjectAndOpen(active);
-            } else if (ALL.equals(state)) {
-                taskList = taskSrv.findAllByProject(active);
-            } else {
-                taskList = taskSrv.findByProjectAndState(active, TaskState.valueOf(state));
+                currentAccount.getActive_project(), true));
+        Account assigneeAccount = null;
+        if (StringUtils.isNotEmpty(assignee)) {
+            assigneeAccount = accSrv.findByUsername(assignee);
+            if (assigneeAccount != null) {
+                model.addAttribute("assignee", assigneeAccount);
             }
+        }
+        model.addAttribute("projects", projects);
+        // Get active or choosen project
+        Optional<Project> projectObj;
+        if (projId == null) {
+            projectObj = projects.stream().filter(p -> p.getId().equals(currentAccount.getActive_project())).findFirst();
+        } else {
+            projectObj = projects.stream().filter(p -> p.getProjectId().equals(projId)).findFirst();
+        }
+        if (projectObj.isPresent()) {
+            Project project = projectObj.get();
+            TaskFilter filter = new TaskFilter(project, state, query, priority, type, assigneeAccount);
+            List<Task> tasks = taskSrv.findBySpecification(filter);
             if (StringUtils.isNotEmpty(query)) {
                 Tag tag = tagsRepo.findByName(query);
-                List<Task> searchResult = taskList.stream().filter(task -> StringUtils.containsIgnoreCase(task.getId(), query)
+                List<Task> searchResult = tasks.stream().filter(task -> StringUtils.containsIgnoreCase(task.getId(), query)
                         || StringUtils.containsIgnoreCase(task.getName(), query)
                         || StringUtils.containsIgnoreCase(task.getDescription(), query)
                         || task.getTags().contains(tag)).collect(Collectors.toCollection(LinkedList::new));
-                taskList = searchResult;
+                tasks = searchResult;
             }
-            if (StringUtils.isNotEmpty(priority)) {
-                List<Task> searchResult = taskList.stream().filter(task -> task.getPriority() != null && task.getPriority().equals(TaskPriority.valueOf(priority))).collect(Collectors.toCollection(LinkedList::new));
-                taskList = searchResult;
-            }
-            Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID, false));
-            model.addAttribute("tasks", taskList);
-            model.addAttribute("active_project", active);
+            Collections.sort(tasks, new TaskSorter(TaskSorter.SORTBY.ID, false));
+            model.addAttribute("tasks", tasks);
+            model.addAttribute("active_project", project);
         }
         return "task/list";
     }
@@ -562,14 +563,18 @@ public class TaskController {
     @Transactional
     @RequestMapping(value = "/task/changeState", method = RequestMethod.POST)
     @ResponseBody
-    public ResultData changeState(@RequestParam(value = "id") String taskID,
-                                  @RequestParam(value = "state") TaskState state,
-                                  @RequestParam(value = "zero_checkbox", required = false) Boolean remainingZero,
-                                  @RequestParam(value = "closesubtasks", required = false) Boolean closeSubtasks,
-                                  @RequestParam(value = "message", required = false) String commentMessage) {
+    public ResponseEntity<ResultData> changeState(@RequestParam(value = "id") String taskID,
+                                                  @RequestParam(value = "state") TaskState state,
+                                                  @RequestParam(value = "zero_checkbox", required = false) Boolean remainingZero,
+                                                  @RequestParam(value = "closesubtasks", required = false) Boolean closeSubtasks,
+                                                  @RequestParam(value = "message", required = false) String commentMessage) {
         // check if not admin or user
         Task task = taskSrv.findById(taskID);
         if (task != null) {
+            if (state.equals(task.getState())) {
+                String stateText = msg.getMessage(state.getCode(), null, Utils.getCurrentLocale());
+                return ResponseEntity.ok(new ResultData(ResultData.WARNING, msg.getMessage("task.already.inState", new Object[]{stateText}, Utils.getCurrentLocale())));
+            }
             // check if can edit
             if ((Utils.getCurrentAccount().equals(task.getOwner())
                     || Utils.getCurrentAccount().equals(task.getAssignee()))
@@ -577,19 +582,19 @@ public class TaskController {
                 // check if reopening kanban
                 if (task.getState().equals(TaskState.CLOSED)
                         && Project.AgileType.KANBAN.equals(task.getProject().getAgile()) && task.getRelease() != null) {
-                    return new ResultData(ResultData.ERROR, msg.getMessage("task.changeState.change.kanbanRelease",
-                            new Object[]{task.getRelease().getRelease()}, Utils.getCurrentLocale()));
+                    return ResponseEntity.ok(new ResultData(ResultData.ERROR, msg.getMessage("task.changeState.change.kanbanRelease",
+                            new Object[]{task.getRelease().getRelease()}, Utils.getCurrentLocale())));
                 }
                 if (TaskState.TO_DO.equals(state)) {
                     Hibernate.initialize(task.getLoggedWork());
                     if (!("0m").equals(task.getLoggedWork())) {
-                        return new ResultData(ResultData.ERROR,
-                                msg.getMessage("task.alreadyStarted", null, Utils.getCurrentLocale()));
+                        return ResponseEntity.ok(new ResultData(ResultData.ERROR,
+                                msg.getMessage("task.alreadyStarted", null, Utils.getCurrentLocale())));
                     }
                 } else if (TaskState.CLOSED.equals(state)) {
                     ResultData result = checkTaskCanOperated(task, false);
                     if (result.code.equals(ResultData.ERROR)) {
-                        return result;
+                        return ResponseEntity.ok(result);
                     }
                 }
                 if (closeSubtasks != null && closeSubtasks) {
@@ -605,8 +610,8 @@ public class TaskController {
                 task.setState(state);
                 if (StringUtils.isNotEmpty(commentMessage)) {
                     if (Utils.containsHTMLTags(commentMessage)) {
-                        return new ResultData(ResultData.ERROR,
-                                msg.getMessage("comment.htmlTag", null, Utils.getCurrentLocale()));
+                        return ResponseEntity.ok(new ResultData(ResultData.ERROR,
+                                msg.getMessage("comment.htmlTag", null, Utils.getCurrentLocale())));
                     } else {
                         Comment comment = new Comment();
                         comment.setTask(task);
@@ -625,12 +630,12 @@ public class TaskController {
                 }
                 String message = worklogStateChange(state, oldState, task);
                 taskSrv.save(task);
-                return new ResultData(ResultData.OK, message);
+                return ResponseEntity.ok(new ResultData(ResultData.OK, message));
             }
-            return new ResultData(ResultData.ERROR, msg.getMessage("error.unknown", null, Utils.getCurrentLocale()));
+            return ResponseEntity.ok(new ResultData(ResultData.ERROR, msg.getMessage("error.unknown", null, Utils.getCurrentLocale())));
         } else {
-            return new ResultData(ResultData.ERROR,
-                    msg.getMessage("role.error.task.permission", null, Utils.getCurrentLocale()));
+            return ResponseEntity.ok(new ResultData(ResultData.ERROR,
+                    msg.getMessage("role.error.task.permission", null, Utils.getCurrentLocale())));
         }
 
     }
@@ -638,7 +643,7 @@ public class TaskController {
     @Transactional
     @RequestMapping(value = "/task/changePoints", method = RequestMethod.POST)
     @ResponseBody
-    public ResultData changeStoryPoints(@RequestParam(value = "id") String taskID,
+    public ResponseEntity<ResultData> changeStoryPoints(@RequestParam(value = "id") String taskID,
                                         @RequestParam(value = "points") Integer points) {
         // check if not admin or user
         Task task = taskSrv.findById(taskID);
@@ -658,10 +663,10 @@ public class TaskController {
             }
             task.setStory_points(points);
             taskSrv.save(task);
-            return new ResultData(ResultData.OK, msg.getMessage("task.storypoints.edited",
-                    new Object[]{task.getId(), points}, Utils.getCurrentLocale()));
+            return ResponseEntity.ok(new ResultData(ResultData.OK, msg.getMessage("task.storypoints.edited",
+                    new Object[]{task.getId(), points}, Utils.getCurrentLocale())));
         }
-        return new ResultData(ResultData.ERROR, msg.getMessage("error.unknown", null, Utils.getCurrentLocale()));
+        return ResponseEntity.ok(new ResultData(ResultData.ERROR, msg.getMessage("error.unknown", null, Utils.getCurrentLocale())));
     }
 
     @Transactional
@@ -768,17 +773,17 @@ public class TaskController {
 
     @RequestMapping(value = "/task/assignMe", method = RequestMethod.POST)
     @ResponseBody
-    public ResultData assignMePOST(@RequestParam(value = "id") String id) {
+    public ResponseEntity<ResultData> assignMePOST(@RequestParam(value = "id") String id) {
         // check if not admin or user
         if (!Roles.isPowerUser()) {
             throw new TasqAuthException(msg);
         }
         if (assignMeToTask(id)) {
-            return new ResultData(ResultData.OK,
-                    msg.getMessage("task.assinged.me", null, Utils.getCurrentLocale()) + " " + id);
+            return ResponseEntity.ok(new ResultData(ResultData.OK,
+                    msg.getMessage("task.assinged.me", null, Utils.getCurrentLocale()) + " " + id));
         } else {
-            return new ResultData(ResultData.ERROR,
-                    msg.getMessage("role.error.task.permission", null, Utils.getCurrentLocale()));
+            return ResponseEntity.ok(new ResultData(ResultData.ERROR,
+                    msg.getMessage("role.error.task.permission", null, Utils.getCurrentLocale())));
         }
     }
 
@@ -813,6 +818,7 @@ public class TaskController {
         return REDIRECT + request.getHeader("Referer");
     }
 
+    @Transactional
     @RequestMapping(value = "/task/delete", method = RequestMethod.GET)
     public String deleteTask(@RequestParam(value = "id") String taskID, RedirectAttributes ra,
                              HttpServletRequest request) {
@@ -821,7 +827,7 @@ public class TaskController {
             Project project = projectSrv.findById(task.getProject().getId());
             // Only allow delete for administrators, owner or app admin
             if (isAdmin(task, project)) {
-                ResultData result = new ResultData();
+                ResultData result;
                 // check for links and subtasks
                 List<Task> subtasks = taskSrv.findSubtasks(taskID);
                 for (Task subtask : subtasks) {
@@ -851,9 +857,9 @@ public class TaskController {
                     int count = parentTask.getSubtasks();
                     parentTask.setSubtasks(--count);
                     taskSrv.save(parentTask);
-                    taskSrv.save(purgeTask(task));
                 }
-                taskSrv.delete(task);
+                Task purged = taskSrv.save(purgeTask(task));
+                taskSrv.delete(purged);
                 wlSrv.addWorkLogNoTask(message.toString(), project, LogType.DELETED);
             }
             // TODO add message about removed task
@@ -885,8 +891,6 @@ public class TaskController {
             response.setHeader("content-Disposition", "attachment; filename=" + filename);
             try (InputStream is = new FileInputStream(file)) {
                 IOUtils.copyLarge(is, response.getOutputStream());
-            } catch (FileNotFoundException e) {
-                LOG.error("Error while writing to output stream , filename '{}'", filename, e);
             } catch (IOException e) {
                 LOG.error("Error while writing to output stream , filename '{}'", filename, e);
             } finally {
@@ -944,7 +948,7 @@ public class TaskController {
             MessageHelper.addErrorAttribute(ra, msg.getMessage(ERROR_ACCES_RIGHTS, null, Utils.getCurrentLocale()));
         } else {
             File file = new File(taskSrv.getTaskDirectory(task) + File.separator + filename);
-            if (file != null) {
+            if (file.exists()) {
                 file.delete();
                 MessageHelper.addSuccessAttribute(ra,
                         msg.getMessage("task.file.deleted", new Object[]{filename}, Utils.getCurrentLocale()));
@@ -1034,7 +1038,8 @@ public class TaskController {
             if (result.code.equals(ResultData.ERROR)) {
                 throw new TasqException(result.message);
             }
-            taskSrv.save(purgeTask(subtask));
+            subtask = taskSrv.save(purgeTask(subtask));
+            taskSrv.delete(subtask);
             MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.subtasks.2task.success",
                     new Object[]{id, taskID}, Utils.getCurrentLocale()));
             TaskLink link = new TaskLink(parent.getId(), taskID, TaskLinkType.RELATES_TO);
@@ -1182,6 +1187,10 @@ public class TaskController {
             task.setOwner(null);
             task.setAssignee(null);
             task.setProject(null);
+            task.setTags(null);
+            wlSrv.deleteTaskWorklogs(task);
+            Set<Comment> comments = commRepo.findByTaskIdOrderByDateDesc(task.getId());
+            commRepo.delete(comments);
         }
         return result;
     }

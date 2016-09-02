@@ -51,6 +51,8 @@
 		}
 	});
 	$("#close_task_btn").click(function() {
+		$(this).attr("disabled", true);
+		showWait(true);
 		var comment = $("#modal_comment").val();
 		var zero = $("#modal_zero_checkbox").prop('checked');
 		var closeSubtasks = $("#modal_subtasks").prop('checked');
@@ -61,6 +63,7 @@
 			zero_checkbox: zero,
 			closesubtasks: closeSubtasks
 		}, function(result) {
+			showWait(false);
 			$('#close_task').modal('toggle');
 			if (result.code != 'OK') {
 				showError(result.message);

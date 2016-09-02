@@ -184,7 +184,7 @@ table.worklog_table td {
 					<td>
 						<p>Hello ${account} ,</p>
 						<p>
-							This is confirmation message about linking this email to account created in Tasker
+							This is confirmation message about linking this email to account created in ${applicationName}
 							application. </br>In order to confirm your email
 							please click link below
 						</p>
@@ -192,7 +192,7 @@ table.worklog_table td {
 						<p>
 							<a href="${link}" target="_blank">${link}</a>
 						</p>
-						<p>If you have not created account in TasQ application,
+						<p>If you have not created account in ${applicationName} application,
 							please ignore this e-mail.</p>
 						</p>
 					</td>

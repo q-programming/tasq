@@ -92,7 +92,7 @@ public class HomeControllersTest {
 		when(authMock.getPrincipal()).thenReturn(testAccount);
 		SecurityContextHolder.setContext(securityMock);
 		projSrv = new ProjectService(projRepoMock, accSrvMock, usrSrvMock);
-		homeCtrl = new HomeController(taskSrvMock, projSrv, appSrvMock);
+		homeCtrl = new HomeController(taskSrvMock, projSrv, appSrvMock,eventSrvMock);
 		homeAdvCtrl = new HomeControllerAdvice(accSrvMock, eventSrvMock);
 	}
 

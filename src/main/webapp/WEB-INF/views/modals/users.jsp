@@ -31,7 +31,7 @@
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header theme">
-				<button type="button" class="close" data-dismiss="modal"
+				<button type="button" class="close theme-close" data-dismiss="modal"
 					aria-hidden="true">&times;</button>
 				<i id="search_users" class="fa fa-search search-btn a-tooltip" data-html="true" data-placement="left" title="<s:message code="user.search"/>"></i>
 				<h4 class="modal-title" id="myModalLabel">

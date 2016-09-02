@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.imageio.ImageIO;
+import javax.mail.MessagingException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -33,13 +34,12 @@ import java.io.IOException;
 @Controller
 public class ManageController {
 
+    public static final String REFERER = "Referer";
     private static final String AVATAR_DIR = "avatar";
     private static final String PNG = ".png";
     private static final String LOGO = "logo";
     private static final String SMALL = "small_";
-
     private static final Logger LOG = LoggerFactory.getLogger(ManageController.class);
-
     private ThemeService themeSrv;
     private MessageSource msg;
     private ProjectService projSrv;
@@ -85,7 +85,7 @@ public class ManageController {
             if (!newDir.mkdirs()) {
                 MessageHelper.addErrorAttribute(ra, msg.getMessage("manage.prop.dir.error.create",
                         new Object[]{newPath}, Utils.getCurrentLocale()));
-                return "redirect:" + request.getHeader("Referer");
+                return "redirect:" + request.getHeader(REFERER);
             } else {
                 File oldDir = new File(oldPath);
                 try {
@@ -94,14 +94,14 @@ public class ManageController {
                     MessageHelper.addErrorAttribute(ra, msg.getMessage("manage.prop.dir.error.move",
                             new Object[]{newPath}, Utils.getCurrentLocale()));
                     LOG.error(e.getMessage());
-                    return "redirect:" + request.getHeader("Referer");
+                    return "redirect:" + request.getHeader(REFERER);
                 }
                 appSrv.setProperty(AppService.TASQROOTDIR, newPath);
             }
         }
         MessageHelper.addSuccessAttribute(ra,
                 msg.getMessage("manage.prop.dir.success", new Object[]{newPath}, Utils.getCurrentLocale()));
-        return "redirect:" + request.getHeader("Referer");
+        return "redirect:" + request.getHeader(REFERER);
     }
 
     @RequestMapping(value = "/manage/seturl", method = RequestMethod.POST)
@@ -112,7 +112,7 @@ public class ManageController {
         appSrv.setProperty(AppService.URL, url);
         MessageHelper.addSuccessAttribute(ra,
                 msg.getMessage("manage.prop.url.success", new Object[]{url}, Utils.getCurrentLocale()));
-        return "redirect:" + request.getHeader("Referer");
+        return "redirect:" + request.getHeader(REFERER);
     }
 
     @RequestMapping(value = "/manage/setlang", method = RequestMethod.POST)
@@ -124,7 +124,7 @@ public class ManageController {
         appSrv.setProperty(AppService.DEFAULTLANG, language);
         MessageHelper.addSuccessAttribute(ra,
                 msg.getMessage("manage.prop.defaultLang.success", null, Utils.getCurrentLocale()));
-        return "redirect:" + request.getHeader("Referer");
+        return "redirect:" + request.getHeader(REFERER);
     }
 
     @RequestMapping(value = "/manage/setrole", method = RequestMethod.POST)
@@ -136,7 +136,19 @@ public class ManageController {
         appSrv.setProperty(AppService.DEFAULTROLE, role.toString());
         MessageHelper.addSuccessAttribute(ra,
                 msg.getMessage("manage.prop.defaultRole.success", null, Utils.getCurrentLocale()));
-        return "redirect:" + request.getHeader("Referer");
+        return "redirect:" + request.getHeader(REFERER);
+    }
+
+    @RequestMapping(value = "/manage/setname", method = RequestMethod.POST)
+    public String setName(@RequestParam(value = "name") String name, HttpServletRequest request,
+                          RedirectAttributes ra) {
+        if (!Roles.isAdmin()) {
+            throw new TasqAuthException();
+        }
+        appSrv.setProperty(AppService.APPLICATION_NAME, name.toString());
+        MessageHelper.addSuccessAttribute(ra,
+                msg.getMessage("manage.prop.name.success", null, Utils.getCurrentLocale()));
+        return "redirect:" + request.getHeader(REFERER);
     }
 
 
@@ -153,18 +165,32 @@ public class ManageController {
         if (!Roles.isAdmin()) {
             throw new TasqAuthException();
         }
-        appSrv.setProperty(AppService.EMAIL_HOST, emailHost);
-        appSrv.setProperty(AppService.EMAIL_PORT, emailPort);
-        appSrv.setProperty(AppService.EMAIL_USERNAME, emailUsername);
-        appSrv.setProperty(AppService.EMAIL_PASS, emailPass);
-        appSrv.setProperty(AppService.EMAIL_SMTPAUTH, Boolean.toString(emailSmtpAuth));
-        appSrv.setProperty(AppService.EMAIL_SMTPSTARTTLS, Boolean.toString(emailSmtpStarttls));
-        appSrv.setProperty(AppService.EMAIL_DOMAIN, emailDomain);
-        appSrv.setProperty(AppService.EMAIL_ENCODING, emailEncoding);
-        mailer.initMailSender();
-        MessageHelper.addSuccessAttribute(ra,
-                msg.getMessage("manage.prop.email.success", null, Utils.getCurrentLocale()));
-        return "redirect:" + request.getHeader("Referer");
+        try {
+            String smtpAuth = Boolean.toString(emailSmtpAuth);
+            String smtpTLS = Boolean.toString(emailSmtpStarttls);
+            mailer.testConnection(emailHost,
+                    Integer.parseInt(emailPort),
+                    emailUsername,
+                    emailPass,
+                    smtpAuth,
+                    smtpTLS);
+            appSrv.setProperty(AppService.EMAIL_HOST, emailHost);
+            appSrv.setProperty(AppService.EMAIL_PORT, emailPort);
+            appSrv.setProperty(AppService.EMAIL_USERNAME, emailUsername);
+            appSrv.setProperty(AppService.EMAIL_PASS, emailPass);
+            appSrv.setProperty(AppService.EMAIL_SMTPAUTH, smtpAuth);
+            appSrv.setProperty(AppService.EMAIL_SMTPSTARTTLS, smtpTLS);
+            appSrv.setProperty(AppService.EMAIL_DOMAIN, emailDomain);
+            appSrv.setProperty(AppService.EMAIL_ENCODING, emailEncoding);
+            mailer.initMailSender();
+            MessageHelper.addSuccessAttribute(ra,
+                    msg.getMessage("manage.prop.email.success", null, Utils.getCurrentLocale()));
+        } catch (MessagingException e) {
+            LOG.debug("There were errors while testing connection: ", e);
+            MessageHelper.addErrorAttribute(ra,
+                    msg.getMessage("manage.prop.email.error", null, Utils.getCurrentLocale()));
+        }
+        return "redirect:" + request.getHeader(REFERER);
     }
 
     @RequestMapping(value = "manage/app", method = RequestMethod.GET)

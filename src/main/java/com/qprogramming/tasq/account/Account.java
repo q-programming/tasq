@@ -1,9 +1,9 @@
 package com.qprogramming.tasq.account;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.qprogramming.tasq.manage.Theme;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.task.Task;
-import org.codehaus.jackson.annotate.JsonIgnore;
 import org.hibernate.annotations.IndexColumn;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
@@ -54,6 +54,13 @@ public class Account implements java.io.Serializable, UserDetails {
 
     @Column
     private String uuid;
+
+    @Column
+    private Boolean systemnotification = false;
+    @Column
+    private Boolean commentnotification = false;
+    @Column
+    private Boolean watchnotification = false;
 
     @Column
     private boolean email_notifications;
@@ -233,6 +240,30 @@ public class Account implements java.io.Serializable, UserDetails {
 
     public void setEmail_notifications(boolean email_notifications) {
         this.email_notifications = email_notifications;
+    }
+
+    public boolean getSystemnotification() {
+        return systemnotification == null ? false : systemnotification;
+    }
+
+    public void setSystemnotification(boolean systemnotification) {
+        this.systemnotification = systemnotification;
+    }
+
+    public boolean getCommentnotification() {
+        return commentnotification == null ? false : commentnotification;
+    }
+
+    public void setCommentnotification(boolean commentnotification) {
+        this.commentnotification = commentnotification;
+    }
+
+    public boolean getWatchnotification() {
+        return watchnotification == null ? false : watchnotification;
+    }
+
+    public void setWatchnotification(boolean watchnotification) {
+        this.watchnotification = watchnotification;
     }
 
     public Object[] getActive_task() {

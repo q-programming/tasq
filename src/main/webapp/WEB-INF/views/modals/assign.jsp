@@ -6,7 +6,7 @@
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header theme">
-			<button type="button" class="close" data-dismiss="modal"
+			<button type="button" class="close theme-close" data-dismiss="modal"
 					aria-hidden="true">&times;</button>
 				<h4 class="modal-title" id="assignToModalLabel">
 					<s:message code="task.assign" />
@@ -92,15 +92,21 @@ $("#assignee_input").autocomplete({
 	delay : 500,
 	//define callback to format results
 	source : function(request, response) {
-		$("#assignUsersLoader").show();
 		$(this).closest(".ui-menu").hide();
 		var term = request.term;
 		if ( term in cache ) {
-          response( cache[ term ] );
-          return;
+			var result = cache[term];
+			response($.map(result, function (item) {
+				return {
+					label: item.name + " " + item.surname,
+					value: item.id
+				}
+			}));
+			return;
 	    }
+		$("#assignUsersLoader").show();
 		var url='<c:url value="/project/getParticipants"/>';
-		$.get(url,{id:projectID,term:term},function(data) {
+		$.get(url,{id:projectID,term:term,userOnly:true},function(data) {
 			$("#assignUsersLoader").hide();
 			var results = [];
             $.each(data, function(i, item) {

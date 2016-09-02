@@ -33,4 +33,5 @@ public interface WorkLogRepository extends JpaRepository<WorkLog, Integer> {
 
 	List<WorkLog> findByWorklogtaskIdOrderByTimeLoggedDesc(String id);
 
+	List<WorkLog> findByWorklogtaskId(String id);
 }

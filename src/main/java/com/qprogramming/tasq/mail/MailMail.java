@@ -27,18 +27,15 @@ public class MailMail {
     public static final int PROJECT = 2;
     public static final int REGISTER = 3;
     public static final int OTHER = -1;
+    public static final String NOTIFICATION_ADDRES = "notification@";
 
     private static final String TASQ = "tasq@";
-    private static final String TASQ_PERSONAL = "Tasker";
-    private static final String TASQ_REGISTER = "registration@";
-    private static final String TASQ__REGISTER_PERSONAL = "Registration at Tasker";
-    private static final String NOTIFICATION_TASQ = "notification@";
-    private static final String NOTIFICATION_TASQ_PERSONAL = "Tasker notifier";
-    private static final String MESSAGE_TASQ = "messages@";
-    private static final String MESSAGE_TASQ_PERSONAL = "Tasker messenger";
-    private static final String PROJECT_TASQ = "projects@";
-    private static final String PROJECT_TASQ_PERSONAL = "Tasker projects";
+    private static final String MESSAGES_ADDRESS = "messages@";
+    private static final String PROJECTS_ADDRES = "projects@";
+    private static final String REGISTRATION_ADDRESS = "registration@";
     private static final Logger LOG = LoggerFactory.getLogger(MailMail.class);
+
+    private String applicationName = "Tasker";
     @Value("${email.host}")
     private String host;
     @Value("${email.port}")
@@ -63,6 +60,7 @@ public class MailMail {
     public MailMail(AppService appSrv) {
         this.appSrv = appSrv;
         initMailSender();
+        applicationName = appSrv.getProperty(AppService.APPLICATION_NAME);
     }
 
     //	@Bean
@@ -98,8 +96,27 @@ public class MailMail {
         mailSender = jmsi;
     }
 
-    public void setMailSender(MailSender mailSender) {
-        this.mailSender = mailSender;
+    /**
+     * Test if connection is correct. If there are some errors MessagingException will be thrown which should be catched
+     * @param host
+     * @param port
+     * @param username
+     * @param password
+     * @param auth
+     * @param tls
+     * @throws MessagingException
+     */
+    public void testConnection(String host, Integer port, String username, String password, String auth, String tls) throws MessagingException {
+        JavaMailSenderImpl jmsi = new JavaMailSenderImpl();
+        jmsi.setHost(host);
+        jmsi.setPort(port);
+        jmsi.setUsername(username);
+        jmsi.setPassword(password);
+        Properties javaMailProperties = new Properties();
+        javaMailProperties.setProperty("mail.smtp.auth", auth);
+        javaMailProperties.setProperty("mail.smtp.starttls.enable", tls);
+        jmsi.setJavaMailProperties(javaMailProperties);
+        jmsi.testConnection();
     }
 
     /**
@@ -116,21 +133,26 @@ public class MailMail {
             MimeMessage message = ((JavaMailSenderImpl) mailSender).createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true,
                     appSrv.getProperty(AppService.EMAIL_ENCODING));
+            String notificationName = applicationName + " notifier";
+            String messageName = applicationName + " messenger";
+            String projectName = applicationName + "projects";
+            String registerName = "Register at " + applicationName;
+
             switch (type) {
                 case NOTIFICATION:
-                    helper.setFrom(domain(NOTIFICATION_TASQ), NOTIFICATION_TASQ_PERSONAL);
+                    helper.setFrom(domain(NOTIFICATION_ADDRES), notificationName);
                     break;
                 case MESSAGE:
-                    helper.setFrom(domain(MESSAGE_TASQ), MESSAGE_TASQ_PERSONAL);
+                    helper.setFrom(domain(MESSAGES_ADDRESS), messageName);
                     break;
                 case PROJECT:
-                    helper.setFrom(domain(PROJECT_TASQ), PROJECT_TASQ_PERSONAL);
+                    helper.setFrom(domain(PROJECTS_ADDRES), projectName);
                     break;
                 case REGISTER:
-                    helper.setFrom(domain(TASQ_REGISTER), TASQ__REGISTER_PERSONAL);
+                    helper.setFrom(domain(REGISTRATION_ADDRESS), registerName);
                     break;
                 default:
-                    helper.setFrom(domain(TASQ), TASQ_PERSONAL);
+                    helper.setFrom(domain(TASQ), applicationName);
                     break;
             }
             helper.setTo(to);
@@ -142,13 +164,7 @@ public class MailMail {
             }
             LOG.debug("Sending e-mail to:" + to);
             ((JavaMailSenderImpl) mailSender).send(message);
-        } catch (MailSendException e) {
-            LOG.error(e.getLocalizedMessage());
-            return false;
-        } catch (MessagingException e) {
-            LOG.error(e.getLocalizedMessage());
-            return false;
-        } catch (UnsupportedEncodingException e) {
+        } catch (MailSendException | MessagingException | UnsupportedEncodingException e) {
             LOG.error(e.getLocalizedMessage());
             return false;
         }

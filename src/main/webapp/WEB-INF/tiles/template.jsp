@@ -12,7 +12,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<title>Tasqr</title>
+<title>${applicationName}</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <script src="<c:url value="/resources/js/jquery-1.11.1.min.js" />"></script>
 <%-- jQuery UI --%>
@@ -40,7 +40,7 @@
 	media="screen" />
 <%-- FONT AWSOME --%>
 <link rel="stylesheet"
-	href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+	href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
 <%-- <link href="<c:url value="/resources/css/font-awesome.min.css" />" rel="stylesheet" --%>
 <!-- 	media="screen" /> -->
 <%-- CUSTOMS --%>
@@ -51,6 +51,7 @@
 
 <%--CUSTOM SCRIPTS --%>
 <script src="<c:url value="/resources/js/tasq.js" />"></script>
+<script src="<c:url value="/resources/js/eventTimer.js" />"></script>
 <script src="<c:url value="/resources/js/jquery.mask.min.js" />"></script>
 <script src="<c:url value="/resources/js/bootbox.min.js" />"></script>
 <%-- <tilesx:useAttribute id="styles" name="styles" --%>
@@ -119,7 +120,7 @@
 						</c:otherwise>
 					</c:choose>
 					<div class="alert ${alertClass} fade in alert-overlay">
-						<button type="button" class="close" data-dismiss="alert">&times;</button>
+						<button type="button" class="close theme-close" data-dismiss="alert">&times;</button>
 						<%
 							/* Display a message by its code. If the code was not found, it will be displayed as default text */
 						%>

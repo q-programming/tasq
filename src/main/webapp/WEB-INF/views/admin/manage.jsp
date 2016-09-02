@@ -26,6 +26,30 @@
                     code="menu.manage.tasks"/></a></li>
         </ul>
     </div>
+    <!-- 	APPLICATION NAME -->
+    <div>
+        <div class="mod-header">
+            <h5 class="mod-header-title">
+                <i class="fa fa-fw fa-caret-down toggler" data-tab="appnameToggle"></i>
+				<span class="mod-header-title-txt">
+					<i class="fa fa-users"></i>&nbsp;<s:message code="manage.prop.name" text="Application name"/>
+				</span>
+            </h5>
+        </div>
+        <div id="appnameToggle">
+            <div style="padding-top: 10px; padding-left: 20px;">
+                <form action="<c:url value="/manage/setname"/>" method="POST">
+                    <input class="form-control" id="applicationName" name="name" value="${applicationName}" style="width: 350px;float:left">
+                    <button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i>&nbsp;<s:message
+                            code="main.save"/></button>
+                </form>
+            </div>
+			<span class="help-block">
+				<s:message code="manage.prop.name.hint" htmlEscape="false"/>
+			</span>
+        </div>
+    </div>
+
     <!-- 	AVATAR -->
     <div>
         <form id="avatarUpload" name="avatarUpload" enctype="multipart/form-data"
@@ -305,7 +329,7 @@
                         <td>${theme.name}</td>
                         <td style="${theme.font.cssFamily}">
 							<span style="display:block;width:200px;padding: 5px; background-color:${theme.color};color:${theme.invColor}">
-								<img id="avatar_src" src="<c:url value="/../avatar/logo.png"/>"
+								<img src="<c:url value="/../avatar/logo.png"/>"
                                      style="height: 25px;"></img>
 								${theme.font.fontFamily}
 							</span>

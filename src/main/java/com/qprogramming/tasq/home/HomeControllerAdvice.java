@@ -64,13 +64,13 @@ public class HomeControllerAdvice {
         return null;
     }
 
-    @ModelAttribute("eventCount")
-    public int getEvents() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            List<Event> events = eventSrv.getUnread();
-            return events.size();
-        }
-        return 0;
-    }
+//    @ModelAttribute("eventCount")
+//    public int getEvents() {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+//            List<Event> events = eventSrv.getUnread();
+//            return events.size();
+//        }
+//        return 0;
+//    }
 }

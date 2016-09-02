@@ -166,13 +166,10 @@
                 $.each(result.burned, function (key, val) {
                     burned.push([key, val]);
                 });
-                var startStop = '';
                 $.each(result.ideal, function (key, val) {
                     ideal.push([key, val]);
-                    startStop += key;
-                    startStop += " - ";
                 });
-                startStop = startStop.slice(0, -3);
+                var startStop = result.start + " - " + result.stop;
 
                 //Render worklog events
                 $.each(result.worklogs, function (key, val) {

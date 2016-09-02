@@ -246,7 +246,7 @@ public class SprintControllerTest {
 
 		resultTask.addSprint(sprint);
 		when(taskSrvMock.findById(TEST)).thenReturn(task);
-		ResultData result = sprintCtrl.assignSprint(TEST, 1L, requestMock, raMock);
+		ResultData result = sprintCtrl.assignSprint(TEST, 1L, requestMock, raMock).getBody();
 		Assert.assertEquals(ResultData.OK, result.code);
 		verify(taskSrvMock, times(1)).save(resultTask);
 		// Add to active sprint
@@ -256,7 +256,7 @@ public class SprintControllerTest {
 		// Task not esstimated when adding to active
 		task.setEstimated(true);
 		task.setStory_points(0);
-		result = sprintCtrl.assignSprint(TEST, 1L, requestMock, raMock);
+		result = sprintCtrl.assignSprint(TEST, 1L, requestMock, raMock).getBody();
 		Assert.assertEquals(ResultData.WARNING, result.code);
 	}
 
@@ -325,7 +325,7 @@ public class SprintControllerTest {
 		task.addSprint(sprint);
 		when(taskSrvMock.findById(TEST)).thenReturn(task);
 		when(projSrvMock.canAdminister(project)).thenReturn(true);
-		ResultData result = sprintCtrl.removeFromSprint(TEST, 1L, modelMock, requestMock, raMock);
+		ResultData result = sprintCtrl.removeFromSprint(TEST, 1L, modelMock, requestMock, raMock).getBody();
 		Assert.assertEquals(ResultData.OK, result.code);
 		verify(taskSrvMock, times(1)).save(resultTask);
 		// remove from active sprint

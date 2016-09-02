@@ -3,7 +3,7 @@
 
 <div class="hero-unit" style="text-align: center">
 	<h3>
-		<s:message code="view.index.title" />
+		<s:message code="view.index.title" arguments="${applicationName}"/>
 	</h3>
 	<div id="carousel" class="carousel slide" data-ride="carousel"
 		data-interval="5000">

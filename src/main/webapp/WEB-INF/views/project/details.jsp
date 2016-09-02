@@ -1,5 +1,3 @@
-<%@page import="com.qprogramming.tasq.task.TaskType"%>
-<%@page import="com.qprogramming.tasq.task.worklog.LogType"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
 <%@ taglib prefix="security"
@@ -13,6 +11,8 @@
 	src="<c:url value="/resources/js/jqplot.highlighter.min.js"/>"></script>
 <script language="javascript" type="text/javascript"
 	src="<c:url value="/resources/js/jqplot.dateAxisRenderer.min.js"/>"></script>
+<script language="javascript" type="text/javascript"
+		src="<c:url value="/resources/js/jqplot.canvasOverlay.js"/>"></script>
 <script language="javascript" type="text/javascript"
 	src="<c:url value="/resources/js/jqplot.cursor.min.js"/>"></script>
 <security:authorize access="hasRole('ROLE_ADMIN')">
@@ -37,32 +37,38 @@
 	<c:if test="${can_edit}">
 		<div class="pull-right">
 			<a class="btn btn-default a-tooltip pull-right"
-				style="padding: 6px 11px;"
-				href='<s:url value="/project/${project.projectId}/manage"></s:url>'
-				title="<s:message code="project.manage" text="Set as avtive" />"
-				data-placement="bottom"><i class="fa fa-wrench"></i></a>
+			   style="padding: 6px 11px;"
+			   href='<s:url value="/project/${project.projectId}/manage"></s:url>'
+			   title="<s:message code="project.manage" text="Set as avtive" />"
+			   data-placement="bottom"><i class="fa fa-wrench"></i></a>
+			<c:if test="${project.agile eq 'KANBAN'}">
+			<span class="btn btn-default pull-left" id="new release" data-toggle="modal" data-target="#releaseModal">
+				<i class="fa fa-clipboard"></i>&nbsp;<s:message code="agile.newRelease"/>
+			</span>
+			</c:if>
+
 		</div>
 	</c:if>
 	<div class="pull-right">
 		<c:if test="${project.id eq user.active_project}">
 			<a class="btn btn-default a-tooltip pull-right"
-				style="padding: 6px 11px;" href='#'
-				title="<s:message
+			   style="padding: 6px 11px;" href='#'
+			   title="<s:message
 									code="project.active" text="Active project" />"
-				data-placement="bottom"> <i class="fa fa-refresh fa-spin"></i></a>
+			   data-placement="bottom"> <i class="fa fa-refresh fa-spin"></i></a>
 		</c:if>
 		<c:if test="${project.id ne user.active_project}">
 			<a class="btn btn-default a-tooltip pull-right"
-				href='<s:url value="/project/activate/${project.projectId}"></s:url>'
-				title="<s:message
+			   href='<s:url value="/project/activate/${project.projectId}"></s:url>'
+			   title="<s:message
 									code="project.activate" text="Set as avtive" />"
-				data-placement="bottom"> <i class="fa fa-refresh"></i>
+			   data-placement="bottom"> <i class="fa fa-refresh"></i>
 			</a>
 		</c:if>
-			<a class="show_participants_btn btn btn-default a-tooltip pull-right" 
-				title="" data-placement="bottom" data-original-title="<s:message code="project.members"/>">
-					<i class="fa fa-users"></i>
-			</a>
+		<a class="show_participants_btn btn btn-default a-tooltip pull-right"
+		   title="" data-placement="bottom" data-original-title="<s:message code="project.members"/>">
+			<i class="fa fa-users"></i>
+		</a>
 	</div>
 	<h3>[${project.projectId}] ${project.name}</h3>
 	${project.description}
@@ -216,6 +222,7 @@
 </div>
 <jsp:include page="../task/subtasks.jsp" />
 <jsp:include page="../other/events.jsp" />
+<jsp:include page="../modals/release.jsp" />
 <script>
 var	plot;
 $(document).ready(function($) {
@@ -238,6 +245,13 @@ $(document).ready(function($) {
 
 
 function printChart(all){
+	$.jqplot.postDrawHooks.push(function() {
+		$(".jqplot-overlayCanvas-canvas").css('z-index', '0'); //send overlay canvas to back
+		$(".jqplot-series-canvas").css('z-index', '1'); //send series canvas to front
+		$(".jqplot-highlighter-tooltip").css('z-index', '2'); //make sure the tooltip is over the series
+		$(".jqplot-event-canvas").css('z-index', '5'); //must be on the very top since it is responsible for event catchin
+	});
+	freeDays = new Array();
 	if(plot){
 		plot.destroy();
 	}
@@ -259,7 +273,20 @@ function printChart(all){
 	    	$.each(result.closed, function(key,val){
 	    		closedData.push([key, val]);
 	    	});
-	    	if(createdData.length > 0 && closedData.length > 0)
+			$.each(result.freeDays, function (key, val) {
+				freeDays.push({
+					line: {
+						start: [new Date(val.start).getTime(), 0],
+						stop: [new Date(val.stop).getTime(), 0],
+						lineWidth: 1000,
+						color: 'rgba(200, 200, 200,0.25)',
+						shadow: false,
+						lineCap: 'butt'
+					}
+				});
+			});
+
+		if(createdData.length > 0 && closedData.length > 0)
 	    	{
 	    	plot = $.jqplot('chartdiv', [ createdData , closedData ], {
 	    		title : '<s:message code="task.created"/>/<s:message code="task.state.closed"/>',
@@ -268,7 +295,11 @@ function printChart(all){
 	                    smooth: true
 	                }
 	            },
-	            cursor:{ 
+				canvasOverlay: {
+					show: true,
+					objects: freeDays
+				},
+				cursor:{
 	                show: true,
 	                zoom:true, 
 	                showTooltip:false

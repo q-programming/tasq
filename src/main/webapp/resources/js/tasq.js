@@ -39,7 +39,7 @@ function showWarning(message) {
     window.setTimeout(function () {
         $(".alert-warning").alert('close');
     }, 15000);
-};
+}
 
 $(".alert").alert();
 window.setTimeout(function () {
@@ -58,6 +58,9 @@ function showWait(show) {
         $("body").css("cursor", "auto");
     }
 }
+/**
+ * @return {boolean}
+ */
 function IsEmail(email) {
     var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
     return regex.test(email);
@@ -67,7 +70,7 @@ function isNumber(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
-$(document).on("click", ".toggler", function (e) {
+$(document).on("click", ".toggler", function () {
     var target = $(this).data('tab');
     $(this).nextAll(".mod-header-title-txt").toggleClass('closed');
     $('#' + target).toggle("blind", 500);
@@ -76,7 +79,7 @@ $(document).on("click", ".toggler", function (e) {
     $(this).toggleClass('fa-caret-right');
 });
 
-$(document).on("click", ".menu-toggle", function (e) {
+$(document).on("click", ".menu-toggle", function () {
     var targetClass = "." + $(this).data('type');
     $(targetClass).toggle("blind");
     var indicator = $(this).find(".menu-indicator");
@@ -87,42 +90,81 @@ $(document).on("click", ".menu-toggle", function (e) {
 function getTaskType(type) {
     switch (type) {
         case "TASK":
-            var type = '<i class="fa fa-lg fa-fw fa-check-square"></i> ';
+            type = '<i class="fa fa-lg fa-fw fa-check-square"></i> ';
             return type;
         case "USER_STORY":
-            var type = '<i class="fa fa-lg fa-fw fa-lightbulb-o"></i> ';
+            type = '<i class="fa fa-lg fa-fw fa-lightbulb-o"></i> ';
             return type;
         case "ISSUE":
-            var type = '<i class="fa fa-lg fa-fw fa-exclamation-triangle"></i> ';
+            type = '<i class="fa fa-lg fa-fw fa-exclamation-triangle"></i> ';
             return type;
         case "BUG":
-            var type = '<i class="fa fa-lg fa-fw fa-bug"></i> ';
+            type = '<i class="fa fa-lg fa-fw fa-bug"></i> ';
             return type;
         case "IDLE":
-            var type = '<i class="fa fa-lg fa-fw fa-coffee"></i> ';
+            type = '<i class="fa fa-lg fa-fw fa-coffee"></i> ';
             return type;
         case "SUBTASK":
-            var type = '<i class="fa fa-lg fa-fw fa-check-circle-o"></i> ';
+            type = '<i class="fa fa-lg fa-fw fa-check-circle-o"></i> ';
             return type;
         case "SUBBUG":
-            var type = '<i class="fa fa-lg fa-fw fa-bug"></i> ';
+            type = '<i class="fa fa-lg fa-fw fa-bug"></i> ';
+            return type;
+        case "CHANGE_REQUEST":
+            type = '<i class="fa fa-lg fa-fw fa-magic"></i> ';
             return type;
         default:
             return 'not yet added ';
     }
     ;
 }
+var currentAccount=-1;
+$(document).on("click", ".avatar.small.member", function () {
+    var account = $(this).data('account');
+    //first show all
+    $(".agile-card,.agile-list").each(function () {
+        $(this).show();
+    });
+    currentTag = "";
+    $(".avatar.small.member").each(function () {
+        $(this).removeClass("not_selected");
+    });
+    $(".tag_filter").each(function () {
+        $(this).removeClass("not_selected");
+    });
+
+    if (account !== currentAccount) {
+        $(".agile-card,.agile-list").each(function () {
+            var assignee = $(this).data('assignee');
+            if (assignee !== account) {
+                $(this).hide();
+            }
+        });
+        $('.avatar.small.member').not(this).each(function () {
+            $(this).addClass("not_selected");
+        });
+        currentAccount = account;
+    } else {
+        currentAccount = "";
+    }
+})
+
+
 var currentTag;
 $(document).on("click", ".tag_filter", function () {
     //first show all
     $(".agile-card,.agile-list").each(function () {
         $(this).show();
     });
+    currentAccount = "";
     //reset SP to original value
     $(".total-points").each(function () {
         $(this).text($(this).attr("data-count"));
     })
     $(".tag_filter").each(function () {
+        $(this).removeClass("not_selected");
+    });
+    $(".avatar.small.member").each(function () {
         $(this).removeClass("not_selected");
     });
     var tag = $(this).data("name");
