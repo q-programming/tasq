@@ -138,6 +138,13 @@ public class ProjectService {
 
     }
 
+    public boolean canView(Project project) {
+        Account currentAccount = Utils.getCurrentAccount();
+        return project.getParticipants().contains(currentAccount) || Roles.isAdmin();
+
+    }
+
+
     public boolean canAdminister(Project project) {
         Account currentAccount = Utils.getCurrentAccount();
         return project.getAdministrators().contains(currentAccount) || Roles.isAdmin();

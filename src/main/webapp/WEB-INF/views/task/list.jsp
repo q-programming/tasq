@@ -366,10 +366,6 @@
                 <img src="<c:url value="/resources/img/loading.gif"/>"></img>
                 <br><s:message code="task.export.prepareFile"/>
             </div>
-            <div class="centerPadded">
-                <a href="<c:url value="/tasks"/>"><i class="fa fa-lg fa-check-circle-o"></i></span> <s:message
-                        code="task.export.goBack"/></a>
-            </div>
         </div>
     </div>
 </div>
@@ -400,14 +396,20 @@
                 }
             });
             if (atLeastOnechecked) {
-                var type = $(this).data('type');
-                $("#exportType").val(type);
-                $("#exportTaskForm").submit();
                 $('#loading').modal({
                     show: true,
                     keyboard: false,
                     backdrop: 'static'
                 });
+                var type = $(this).data('type');
+                $("#exportType").val(type);
+                var params = "?type=" + type
+                $(".export:checked").each(function(){
+                    params+="&tasks="+this.value;
+                })
+                var url = '<c:url value="/task/export"/>' + params;
+                window.open(url);
+                location.reload();
             }
         });
 

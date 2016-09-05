@@ -43,10 +43,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 public class ImportExportController {
@@ -198,7 +196,7 @@ public class ImportExportController {
 
                     }
                 } catch (JAXBException e) {
-                    LOG.error("JAXB excetpion while importing file '{}'",importFile.getOriginalFilename(),e);
+                    LOG.error("JAXB excetpion while importing file '{}'", importFile.getOriginalFilename(), e);
                 }
                 model.addAttribute("logger", logger.toString().trim());
             }
@@ -219,12 +217,17 @@ public class ImportExportController {
         return task;
     }
 
-    @RequestMapping(value = "/task/export", method = RequestMethod.POST)
-    public void exportTasks(@RequestParam(value = "tasks") String[] idList, @RequestParam(value = "type") String type,
+    @RequestMapping(value = "/task/export", method = RequestMethod.GET)
+    public void exportTasks(@RequestParam(value = "tasks") String[] tasks, @RequestParam(value = "type") String type,
                             HttpServletResponse response, HttpServletRequest request) throws IOException {
         // Prepare task list
-        List<Task> taskList = taskSrv.finAllById(Arrays.asList(idList));
-        Project project = taskList.get(0).getProject();
+        List<Task> taskList = taskSrv.finAllById(Arrays.asList(tasks));
+        //we should have only one project, and exporting account should be able to view it.
+        Set<Project> projects = taskList.stream().map(Task::getProject).collect(Collectors.toSet());
+        Project project = projects.iterator().next();
+        if (projects.size() > 1 || !projectSrv.canView(project)) {
+            throw new TasqAuthException(msg, "task.export.tampering");
+        }
         FileInputStream is = getExcelTemplate();
         String filename = project.getProjectId() + UNDERSCORE + Utils.convertDateToString(new Date()) + UNDERSCORE
                 + "export";
@@ -256,7 +259,7 @@ public class ImportExportController {
                 response.setHeader("Content-Disposition", "attachment; filename=" + filename + ".xml");
                 marshaller.marshal(projectXML, out);
             } catch (JAXBException e) {
-                LOG.error("JAXB excetpion while exporting '{}'" ,e);
+                LOG.error("JAXB excetpion while exporting '{}'", e);
             }
         } else if (type.equals(XLS_TYPE)) {
             // pack into excel

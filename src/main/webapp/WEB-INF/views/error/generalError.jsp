@@ -11,9 +11,8 @@
     <div
             style="display: none; padding: 5px; border: 1px solid; border-radius: 5px; margin-top: 10px; background-color: white; word-wrap: break-word; ">
         <div>
-            <!-- it's a String! -->
             <c:forEach items="${errorMessage.stackTrace}" var="element">
-                <c:out value="${element}"/>
+                <c:out value="${element}"/></br>
             </c:forEach>
         </div>
     </div>
