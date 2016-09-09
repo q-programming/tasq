@@ -40,6 +40,7 @@ public class SignupController {
     private static final String AVATAR_DIR = "avatar";
     private static final String PNG = ".png";
     private static final String LOGO = "logo";
+    private static final String SMALL = "small_";
 
     private AccountService accountSrv;
     private MessageSource msg;
@@ -89,7 +90,9 @@ public class SignupController {
             account.setRole(Roles.ROLE_ADMIN);
             // Copy logo
             File appLogo = new File(getAvatarDir() + LOGO + PNG);
+            File smallAppLogo = new File(getAvatarDir() + SMALL + LOGO + PNG);
             Utils.copyFile(sc, "/resources/img/logo.png", appLogo);
+            Utils.copyFile(sc, "/resources/img/small_logo.png", smallAppLogo);
             // set base url
             Utils.setHttpRequest(request);
             String url = Utils.getBaseURL();
