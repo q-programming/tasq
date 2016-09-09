@@ -61,7 +61,7 @@ public class ResourceService implements ResourceLoaderAware {
 		return map;
 	}
 
-	public Resource getLogo() throws IOException {
+		public Resource getLogo() throws IOException {
 		return getResource("file:" + getAvatarDir() + SMALL + LOGO + PNG);
 	}
 
