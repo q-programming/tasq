@@ -928,6 +928,12 @@ a.secondaryPanelButton {
 td.width200{
     width: 200px;
 }
+@media print {
+    .badge {
+        padding: 2px 6px;
+        border: 1px solid #000;
+    }
+}
 
 /* .search { position: relative; } */
 /* .search input { text-indent: 30px;} */

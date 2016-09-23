@@ -43,6 +43,9 @@
                                                        title="<s:message code="task.tags.click.filter"/>"
                                                        data-name="${tag}">${tag}</span></c:forEach>
         </div>
+        <span class="btn btn-default pull-right" style="width: 120px" id="print_cards">
+            <i class="fa fa-print"></i>&nbsp;Print Cards</span>
+
     </c:if>
     <div class="row">
         <div class="col-sm-12 col-md-7">
@@ -115,12 +118,14 @@
                         <c:forEach items="${entry.value}" var="task">
                             <c:set var="count" value="${count + task.story_points}"/>
                             <div class="agile-list"
-                                 data-id="${task.id}" id="${task.id}" data-tags="${task.getTagsList()}" sprint-id="${sprint.id}"
+                                 data-id="${task.id}" id="${task.id}" data-tags="${task.getTagsList()}"
+                                 sprint-id="${sprint.id}"
                                     <c:if test="${task.state eq 'CLOSED' }">
                                         style="text-decoration: line-through;"
                                     </c:if>>
                                 <div style="display: table-cell; width: 100%;"><t:type type="${task.type}" list="true"/><a
-                                        href="<c:url value="/task/${task.id}"/>" style="color: inherit;">[${task.id}] ${task.name}</a>
+                                        href="<c:url value="/task/${task.id}"/>"
+                                        style="color: inherit;">[${task.id}] ${task.name}</a>
                                     <form id="sprint_remove_${task.id}"
                                           action="<c:url value="/${project.projectId}/scrum/sprintRemove"/>"
                                           method="post">
@@ -155,7 +160,7 @@
         <div class="col-sm-12 col-md-5">
             <h4>
                 <s:message code="task.tasks"/>
-                <span class="btn btn-default pull-right" id="save_order" style="display:none"><i
+                <span class="btn btn-default pull-right" id="save_order" style="display:none;width: 120px"><i
                         class="fa fa-floppy-o"></i>&nbsp;Save order</span>
             </h4>
             <ul id="sortable" style="margin-top: 20px;margin-left: -40px;">
@@ -249,6 +254,10 @@
                 showWait(false);
                 $("#save_order").hide("highlight", {color: '#5cb85c'}, 1000);
             });
+        });
+        $("#print_cards").click(function () {
+            var url = '<c:url value="/${project.projectId}/agile/cardsprint"/>';
+            window.open(url, "Cards Print");
         });
 
         $(".table_sprint").droppable({

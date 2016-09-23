@@ -10,7 +10,7 @@
 	<s:message code="signup.password" />
 </c:set>
 <security:authentication property="principal" var="user" />
-<div class="navbar navbar-fixed-top theme">
+<div class="navbar navbar-fixed-top theme hidden-print">
 	<div class="container-fluid">
 		<div class="navbar-header">
 			<button type="button" class="navbar-toggle" data-toggle="collapse"

@@ -4,7 +4,7 @@
            prefix="security" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <security:authentication property="principal" var="user"/>
-<nav class="navbar navbar-fixed-top theme">
+<nav class="navbar navbar-fixed-top theme hidden-print">
     <div class="container-fluid">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed"

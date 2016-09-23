@@ -5,7 +5,7 @@
 <%@ taglib uri="http://www.springframework.org/security/tags"
            prefix="security" %>
 <security:authentication property="principal" var="user"/>
-<ul class="nav nav-sidebar">
+<ul class="nav nav-sidebar hidden-print">
     <!-- CREATE -->
     <li>
         <c:choose>
