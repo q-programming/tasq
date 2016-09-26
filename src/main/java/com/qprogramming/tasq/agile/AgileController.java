@@ -69,10 +69,15 @@ public class AgileController {
 
     @Transactional(readOnly = true)
     @RequestMapping(value = "{id}/agile/cardsprint", method = RequestMethod.GET)
-    public String showBoard(@PathVariable String id, Model model) {
+    public String showBoard(@PathVariable String id, @RequestParam(name = "sprint", required = false) Long sprintID, Model model) {
         Project project = projSrv.findByProjectId(id);
         if (project != null) {
-            List<Task> taskList = taskSrv.findByProjectAndOpen(project);
+            List<Task> taskList;
+            if (sprintID != null) {
+                taskList = taskSrv.findAllBySprintId(project, sprintID);
+            } else {
+                taskList = taskSrv.findByProjectAndOpen(project);
+            }
             taskList.stream().forEach(task -> task.setDescription(eliminateHTML(task)));
             model.addAttribute("tasks", taskSrv.convertToDisplay(taskList, true));
             model.addAttribute("project", project);

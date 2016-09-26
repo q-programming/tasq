@@ -13,8 +13,11 @@
     </c:forEach>
 </div>
 <script>
-    window.print();
-    setTimeout(function () {
-        window.open('', '_self', ''); window.close();
-    }, 1000);
+    $(document).ready(function () {
+        window.print();
+        setTimeout(function () {
+            window.open('', '_self', '');
+            window.close();
+        }, 2000);
+    });
 </script>

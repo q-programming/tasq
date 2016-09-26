@@ -78,6 +78,10 @@ public class TaskService {
         return taskRepo.findByProjectAndSprintsId(sprint.getProject(), sprint.getId());
     }
 
+    public List<Task> findAllBySprintId(Project project, Long sprintId) {
+        return taskRepo.findByProjectAndSprintsId(project, sprintId);
+    }
+
     public List<Task> findAllByRelease(Release release) {
         return taskRepo.findByProjectAndRelease(release.getProject(), release);
     }

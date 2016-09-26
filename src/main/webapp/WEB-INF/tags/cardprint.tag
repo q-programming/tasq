@@ -12,8 +12,13 @@
 <div class="agile-card theme col-xs-6 col-sm-6 col-md-6"
      style="display: table; page-break-inside: avoid;margin-bottom: 0px;">
     <div style="padding: 10px; min-height: 30px; border-bottom: 1px solid;">
-        <c:if test="${task.story_points ne 0}">
-            <span class="badge theme pull-right" style="border: 1px solid #000;">${task.story_points}</span>
+        <c:if test="${task.estimated}">
+            <c:if test="${task.story_points eq 0}">
+                <span class="badge theme pull-right" style="border: 1px solid #000;">&nbsp;</span>
+            </c:if>
+            <c:if test="${task.story_points ne 0}">
+                <span class="badge theme pull-right" style="border: 1px solid #000;">${task.story_points}</span>
+            </c:if>
         </c:if>
         <t:type type="${task.type}" list="true"/>
         [${task.id}] ${task.name}
