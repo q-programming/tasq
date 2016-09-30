@@ -16,8 +16,8 @@ import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +44,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Controller
@@ -52,6 +54,7 @@ public class ImportExportController {
     private static final String TEMPLATE_XLS = "template.xls";
     private static final Logger LOG = LoggerFactory.getLogger(ImportExportController.class);
     private static final String COLS = "ABCDEFGHIJKLMNOPRSTUVWXYZ";
+    private static final String ID_REGEXP_PATERN = "[a-zA-Z]{1,5}-\\d+";
     private static final int NAME_CELL = 0;
     private static final int DESCRIPTION_CELL = 1;
     private static final int TYPE_CELL = 2;
@@ -59,6 +62,7 @@ public class ImportExportController {
     private static final int ESTIMATE_CELL = 4;
     private static final int SP_CELL = 5;
     private static final int DUE_DATE_CELL = 6;
+    private static final int PARENT_CELL = 7;
     private static final String BR = "<br>";
     private static final String ROW_SKIPPED = "Row was skipped";
     private static final String NODE_SKIPPED = "Node was skipped";
@@ -66,6 +70,7 @@ public class ImportExportController {
     private static final String XML_TYPE = "xml";
     private static final String XLS_TYPE = "xls";
     private static final String DIVIDER = "<br>---------------------------------------------------<br>";
+    private static final String XLSX_TYPE = "xlsx";
     private ProjectService projectSrv;
     private TaskService taskSrv;
     private WorkLogService wlSrv;
@@ -77,86 +82,51 @@ public class ImportExportController {
         this.projectSrv = projectSrv;
         this.taskSrv = taskSrv;
         this.wlSrv = wlSrv;
-        this.msg = msg;
-    }
+                this.msg = msg;
+            }
 
-    @RequestMapping(value = "/task/getTemplateFile", method = RequestMethod.GET)
-    public void downloadTemplate(HttpServletRequest request, HttpServletResponse response)
+            @RequestMapping(value = "/task/getTemplateFile", method = RequestMethod.GET)
+            public void downloadTemplate(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        FileInputStream is = null;
-        try {
-            is = getExcelTemplate();
-            response.setHeader("content-Disposition", "attachment; filename=" + TEMPLATE_XLS);
-            IOUtils.copyLarge(is, response.getOutputStream());
-        } catch (IOException e) {
-            LOG.error("Error while trying to save file , filename '{}'", TEMPLATE_XLS, e);
-        } finally {
-            is.close();
-            response.flushBuffer();
-        }
-    }
+                try (FileInputStream is = getExcelTemplate()) {
+                    response.setHeader("content-Disposition", "attachment; filename=" + TEMPLATE_XLS);
+                    IOUtils.copyLarge(is, response.getOutputStream());
+                } catch (IOException e) {
+                    LOG.error("Error while trying to save file , filename '{}'", TEMPLATE_XLS, e);
+                } finally {
+                    response.flushBuffer();
+                }
+            }
 
-    @RequestMapping(value = "/task/import", method = RequestMethod.GET)
-    public String startImportTasks(Model model) {
-        // check if can import/create!
-        if (!Roles.isUser()) {
-            throw new TasqAuthException(msg);
-        }
-        model.addAttribute("projects", projectSrv.findAllByUser());
-        return "/task/import";
-    }
+            @RequestMapping(value = "/task/import", method = RequestMethod.GET)
+            public String startImportTasks(Model model) {
+                // check if can import/create!
+                if (!Roles.isUser()) {
+                    throw new TasqAuthException(msg);
+                }
+                model.addAttribute("projects", projectSrv.findAllByUser());
+                return "/task/import";
+            }
 
-    @Transactional
-    @RequestMapping(value = "/task/import", method = RequestMethod.POST)
-    public String importTasks(@RequestParam(value = "file") MultipartFile importFile,
-                              @RequestParam(value = "project") String projectName, Model model) throws IOException {
+            @Transactional
+            @RequestMapping(value = "/task/import", method = RequestMethod.POST)
+            public String importTasks(@RequestParam(value = "file") MultipartFile importFile,
+                    @RequestParam(value = "project") String projectName, Model model) throws IOException {
 
-        if (importFile.getSize() != 0) {
-            String extension = FilenameUtils.getExtension(importFile.getOriginalFilename());
-            Project project = projectSrv.findByProjectId(projectName);
-            Long taskCount = project.getLastTaskNo();
-            StringBuilder logger = new StringBuilder();
-            if (extension.equals(XLS_TYPE)) {
-                HSSFWorkbook workbook = new HSSFWorkbook(importFile.getInputStream());
-                HSSFSheet sheet = workbook.getSheetAt(0);
-                for (Row row : sheet) {
-                    if (row.getRowNum() == 0) {
-                        continue;
-                    }
-                    StringBuilder logRow = verifyRow(row);
-                    // If there was at least one error with row , add it to
-                    // logger and move to next row
-                    if (logRow.length() > 0) {
-                        logger.append(logRow);
-                        continue;
-                    }
-                    // validation finished
-                    TaskForm taskForm = new TaskForm();
-                    taskForm.setName(row.getCell(NAME_CELL).getStringCellValue());
-                    taskForm.setDescription(row.getCell(DESCRIPTION_CELL).getStringCellValue());
-                    taskForm.setType(row.getCell(TYPE_CELL).getStringCellValue());
-                    taskForm.setPriority(row.getCell(PRIORITY_CELL).getStringCellValue());
-                    if (row.getCell(ESTIMATE_CELL) != null) {
-                        taskForm.setEstimate(row.getCell(ESTIMATE_CELL).getStringCellValue());
-                    }
-                    Task task = taskForm.createTask();
-                    // optional fields
-                    if (row.getCell(SP_CELL) != null) {
-                        task.setStory_points(((Double) row.getCell(SP_CELL).getNumericCellValue()).intValue());
-                    }
-                    if (row.getCell(DUE_DATE_CELL) != null
-                            && !"".equals(row.getCell(DUE_DATE_CELL).getStringCellValue())) {
-                        Date date = row.getCell(DUE_DATE_CELL).getDateCellValue();
-                        task.setDue_date(date);
-                    }
-                    taskCount++;
-                    task = finalizeTaskCretion(task, taskCount, project);
-                    String logHeader = "[Row " + row.getRowNum() + "]";
-                    logger.append(logHeader);
-                    logger.append("Task ");
-                    logger.append(task);
-                    logger.append(" succesfully created");
-                    logger.append(DIVIDER);
+                if (importFile.getSize() != 0) {
+                    String extension = FilenameUtils.getExtension(importFile.getOriginalFilename());
+                    Project project = projectSrv.findByProjectId(projectName);
+                    Long taskCount = project.getLastTaskNo();
+                    StringBuilder logger = new StringBuilder();
+                    if (extension.equals(XLS_TYPE) || extension.equals(XLSX_TYPE)) {
+                        Workbook workbook;
+                try {
+                    workbook = WorkbookFactory.create(importFile.getInputStream());
+                    Sheet sheet = workbook.getSheetAt(0);
+                    processSheet(project, taskCount, logger, sheet);
+                } catch (InvalidFormatException e) {
+                    LOG.error("Failed to determine excel type");
+                    logger.append(e.getMessage());
                 }
                 model.addAttribute("logger", logger.toString().trim());
             } else if (extension.equals(XML_TYPE)) {
@@ -204,13 +174,94 @@ public class ImportExportController {
         return "/task/importResults";
     }
 
-    private Task finalizeTaskCretion(Task task, long taskCount, Project project) {
+    private void processSheet(Project project, Long taskCount, StringBuilder logger, Sheet sheet) {
+        Map<Integer, Task> createdTasks = new HashMap<>();
+        for (Row row : sheet) {
+            if (row.getRowNum() == 0) {
+                continue;
+            }
+            StringBuilder logRow = verifyRow(row);
+            // If there was at least one error with row , add it to
+            // logger and move to next row
+            if (logRow.length() > 0) {
+                logger.append(logRow);
+                continue;
+            }
+            String logHeader = "[Row " + (row.getRowNum() + 1) + "]";
+            // validation finished
+            TaskForm taskForm = new TaskForm();
+            taskForm.setName(row.getCell(NAME_CELL).getStringCellValue());
+            taskForm.setDescription(row.getCell(DESCRIPTION_CELL).getStringCellValue());
+            taskForm.setType(row.getCell(TYPE_CELL).getStringCellValue());
+            taskForm.setPriority(row.getCell(PRIORITY_CELL).getStringCellValue());
+            if (row.getCell(ESTIMATE_CELL) != null) {
+                taskForm.setEstimate(row.getCell(ESTIMATE_CELL).getStringCellValue());
+            }
+            Task task = taskForm.createTask();
+            // optional fields
+            if (row.getCell(SP_CELL) != null) {
+                task.setStory_points(((Double) row.getCell(SP_CELL).getNumericCellValue()).intValue());
+            }
+            if (row.getCell(DUE_DATE_CELL) != null
+                    && !"".equals(row.getCell(DUE_DATE_CELL).getStringCellValue())) {
+                Date date = row.getCell(DUE_DATE_CELL).getDateCellValue();
+                task.setDue_date(date);
+            }
+            Cell parentCell = row.getCell(PARENT_CELL);
+            //subtask
+            if (parentCell != null) {
+                String parentTaskId = null;
+                Task parentTask;
+                if (parentCell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                    int parentRow = (int) parentCell.getNumericCellValue();
+                    parentTask = createdTasks.get(parentRow);
+                    if (parentTask != null) {
+                        parentTaskId = parentTask.getId();
+                    } else {
+                        parentTaskId = "" + parentRow;
+                    }
+                } else {
+                    parentTaskId = parentCell.getStringCellValue();
+                }
+                //get real task ( should be created by now)
+                parentTask = taskSrv.findById(parentTaskId);
+                if (parentTask != null) {
+                    task = taskSrv.createSubTask(project, parentTask, task);
+                    logger.append(logHeader);
+                    logger.append("Subtask ");
+                    logger.append(task);
+                    logger.append(" successfully created");
+                    logger.append(DIVIDER);
+                } else {
+                    logger.append(logHeader);
+                    logger.append(String.format("Parent '%s' was not found either in excel nor in database.", parentTaskId));
+                    logger.append(BR);
+                    logger.append(logHeader);
+                    logger.append(ROW_SKIPPED);
+                    logger.append(DIVIDER);
+                }
+            } else {
+                taskCount++;
+                task = finalizeTaskCretion(task, taskCount, project);
+                createdTasks.put(row.getRowNum() + 1, task);
+                logger.append(logHeader);
+                logger.append("Task ");
+                logger.append(task);
+                logger.append(" succesfully created");
+                logger.append(DIVIDER);
+            }
+        }
+    }
+
+    private Task finalizeTaskCretion(Task task, Long taskCount, Project project) {
         String taskID = project.getProjectId() + "-" + taskCount;
         task.setId(taskID);
         task.setProject(project);
         task.setTaskOrder(taskCount);
-        project.getTasks().add(task);
-        project.setLastTaskNo(taskCount);
+        if (taskCount != null) {
+            project.getTasks().add(task);
+            project.setLastTaskNo(taskCount);
+        }
         task = taskSrv.save(task);
         projectSrv.save(project);
         wlSrv.addActivityLog(task, "", LogType.CREATE);
@@ -236,7 +287,7 @@ public class ImportExportController {
             // pack into xml
             ProjectXML projectXML = new ProjectXML();
             projectXML.setName(project.getName());
-            ArrayList<TaskXML> xmltasklist = new ArrayList<TaskXML>();
+            ArrayList<TaskXML> xmltasklist = new ArrayList<>();
             int count = 0;
             for (Task task : taskList) {
                 TaskXML taskXML = new TaskXML(task);
@@ -313,7 +364,7 @@ public class ImportExportController {
      */
     private StringBuilder verifyRow(Row row) {
         StringBuilder logger = new StringBuilder();
-        String logHeader = "[Row " + row.getRowNum() + "]";
+        String logHeader = "[Row " + (row.getRowNum() + 1) + "]";
         for (int i = 0; i < 7; i++) {
             Cell cell = row.getCell(i);
             if ((cell == null || cell.getCellType() == Cell.CELL_TYPE_BLANK)
@@ -321,7 +372,7 @@ public class ImportExportController {
                 logger.append(logHeader);
                 logger.append("Cell ");
                 logger.append(COLS.charAt(i));
-                logger.append(row.getRowNum());
+                logger.append(row.getRowNum() + 1);
                 logger.append(" can't be empty");
                 logger.append(BR);
             }
@@ -330,28 +381,35 @@ public class ImportExportController {
             logger.append(logHeader);
             logger.append("Story points must be blank or numeric in cell ");
             logger.append(COLS.charAt(SP_CELL));
-            logger.append(row.getRowNum());
+            logger.append(row.getRowNum() + 1);
             logger.append(BR);
         }
         if (!isTaskTypeValid(row)) {
             logger.append(logHeader);
             logger.append("Wrong Task Type in cell ");
             logger.append(COLS.charAt(TYPE_CELL));
-            logger.append(row.getRowNum());
+            logger.append(row.getRowNum() + 1);
             logger.append(BR);
         }
         if (!isTaskPriorityValid(row)) {
             logger.append(logHeader);
             logger.append("Wrong Task Priority in cell ");
             logger.append(COLS.charAt(PRIORITY_CELL));
-            logger.append(row.getRowNum());
+            logger.append(row.getRowNum() + 1);
             logger.append(BR);
         }
         if (!isDATECellValid(row, DUE_DATE_CELL)) {
             logger.append(logHeader);
             logger.append("Due date must be blank or date formated in cell ");
             logger.append(COLS.charAt(DUE_DATE_CELL));
-            logger.append(row.getRowNum());
+            logger.append(row.getRowNum() + 1);
+            logger.append(BR);
+        }
+        if (!isParentTaskValid(row)) {
+            logger.append(logHeader);
+            logger.append("Parent cell have wrong value in cell ");
+            logger.append(COLS.charAt(PARENT_CELL));
+            logger.append(row.getRowNum() + 1);
             logger.append(BR);
         }
         if (logger.length() > 0) {
@@ -453,7 +511,33 @@ public class ImportExportController {
      */
     private boolean isTaskTypeValid(Row row) {
         Cell cell = row.getCell(TYPE_CELL);
-        return !(cell != null && cell.getCellType() != Cell.CELL_TYPE_BLANK) || isTaskTypeValid(row.getCell(TYPE_CELL).getStringCellValue());
+        return !(cell != null && cell.getCellType() != Cell.CELL_TYPE_BLANK) || isTaskTypeCellValid(row);
+    }
+
+    private boolean isTaskTypeCellValid(Row row) {
+        String type = row.getCell(TYPE_CELL).getStringCellValue();
+        try {
+            return taskTypeValid(row, type);
+        } catch (IllegalArgumentException e) {
+            LOG.error(e.getLocalizedMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Check if row have valid task type with parent as well
+     *
+     * @param row
+     * @param type
+     * @return
+     */
+    private boolean taskTypeValid(Row row, String type) {
+        TaskType taskType = TaskType.toType(type);
+        if (taskType.isSubtask()) {
+            return !parentCellEmpty(row);
+        } else {
+            return parentCellEmpty(row);
+        }
     }
 
     private boolean isTaskTypeValid(String type) {
@@ -466,6 +550,7 @@ public class ImportExportController {
         }
     }
 
+
     /**
      * Check if cell in row is has correct TaskPriority value
      *
@@ -475,6 +560,33 @@ public class ImportExportController {
     private boolean isTaskPriorityValid(Row row) {
         Cell cell = row.getCell(PRIORITY_CELL);
         return !(cell != null && cell.getCellType() != Cell.CELL_TYPE_BLANK) || isTaskPriorityValid(cell.getStringCellValue());
+    }
+
+    /**
+     * Check basic validation if parent cell has correct numerical value or ID is correct format
+     *
+     * @param row
+     * @return
+     */
+    private boolean isParentTaskValid(Row row) {
+        if (parentCellEmpty(row)) {
+            return true;
+        }
+        Cell parentcell = row.getCell(PARENT_CELL);
+        if (parentcell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+            double parentRow = parentcell.getNumericCellValue();
+            return parentRow < row.getRowNum()+1;
+        } else if (parentcell.getCellType() == Cell.CELL_TYPE_STRING) {
+            Pattern r = Pattern.compile(ID_REGEXP_PATERN);
+            Matcher m = r.matcher(parentcell.getStringCellValue());
+            return m.matches();
+        }
+        return false;
+    }
+
+    private boolean parentCellEmpty(Row row) {
+        Cell cell = row.getCell(PARENT_CELL);
+        return cell == null || cell.getCellType() == Cell.CELL_TYPE_BLANK;
     }
 
     private boolean isTaskPriorityValid(String priority) {

@@ -19,6 +19,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 import org.springframework.context.MessageSource;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
@@ -101,6 +102,15 @@ public class ImportExportControllerTest {
         task2 = createTask(TASK_NAME, 2, project);
         when(taskSrvMock.findById(TEST_1)).thenReturn(task1);
         when(taskSrvMock.findById(TEST_2)).thenReturn(task2);
+        when(taskSrvMock.save(any(Task.class))).thenAnswer((Answer<Task>) invocationOnMock -> (Task) invocationOnMock.getArguments()[0]);
+        when(taskSrvMock.createSubTask(any(Project.class), any(Task.class), any(Task.class))).thenAnswer((Answer<Task>) invocationOnMock -> {
+            Task parentTask = (Task) invocationOnMock.getArguments()[1];
+            Task subTask = (Task) invocationOnMock.getArguments()[2];
+            String subId = taskSrvMock.createSubId(parentTask.getId(), "1");
+            subTask.setId(subId);
+            return subTask;
+        });
+        when(taskSrvMock.createSubId(anyString(), anyString())).thenCallRealMethod();
         SecurityContextHolder.setContext(securityMock);
         importExportCtrl = new ImportExportController(projSrvMock, taskSrvMock, wlSrvMock, msgMock);
     }
@@ -144,6 +154,7 @@ public class ImportExportControllerTest {
             mockMultipartFile = new MockMultipartFile("content", fileURL.getFile(), "text/plain",
                     getClass().getResourceAsStream("/sampleImport.xls"));
             importExportCtrl.importTasks(mockMultipartFile, PROJECT_ID, modelMock);
+            //TODO add verify
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

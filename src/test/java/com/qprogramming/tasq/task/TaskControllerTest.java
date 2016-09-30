@@ -29,6 +29,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -115,7 +116,7 @@ public class TaskControllerTest {
         when(securityMock.getAuthentication()).thenReturn(authMock);
         when(authMock.getPrincipal()).thenReturn(testAccount);
         SecurityContextHolder.setContext(securityMock);
-        taskSrv = new TaskService(taskRepoMock, appSrv);
+        taskSrv = new TaskService(taskRepoMock, appSrv, sprintSrvMock);
         taskCtr = new TaskController(taskSrv, projSrvMock, accountServiceMock, wrkLogSrv, msgMock, sprintSrvMock,
                 taskLinkSrvMock, commRepoMock, tagsRepoMock, watchSrvMock, eventSrvMock);
     }

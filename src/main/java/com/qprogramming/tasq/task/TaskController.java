@@ -223,7 +223,7 @@ public class TaskController {
     @Transactional
     @RequestMapping(value = "/task/{id}/{subid}/edit", method = RequestMethod.GET)
     public TaskForm startEditSubTask(@PathVariable("id") String id, @PathVariable("subid") String subid, Model model) {
-        return startEditTask(createSubId(id, subid), model);
+        return startEditTask(taskSrv.createSubId(id, subid), model);
     }
 
     @Transactional
@@ -342,7 +342,7 @@ public class TaskController {
     @RequestMapping(value = "task/{id}/{subId}", method = RequestMethod.GET)
     public String showSubTaskDetails(@PathVariable(value = "id") String id, @PathVariable(value = "subId") String subId,
                                      Model model, RedirectAttributes ra) {
-        return showTaskDetails(createSubId(id, subId), model, ra);
+        return showTaskDetails(taskSrv.createSubId(id, subId), model, ra);
     }
 
     @RequestMapping(value = "task/{id}", method = RequestMethod.GET)
@@ -472,28 +472,12 @@ public class TaskController {
             return REDIRECT + request.getHeader("Referer");
         }
         Task subTask = taskForm.createSubTask();
-        // build ID
-        int taskCount = task.getSubtasks();
-        taskCount++;
-        String taskID = createSubId(task.getId(), String.valueOf(taskCount));
-        subTask.setId(taskID);
-        subTask.setParent(task.getId());
-        subTask.setProject(project);
-        task.addSubTask();
         // assigne
         if (taskForm.getAssignee() != null) {
             Account assignee = accSrv.findById(taskForm.getAssignee());
             subTask.setAssignee(assignee);
         }
-        if (sprintSrv.taskInActiveSprint(task)) {
-            Sprint active = sprintSrv.findByProjectIdAndActiveTrue(task.getProject().getId());
-            subTask.addSprint(active);
-        }
-        Hibernate.initialize(task.getSubtasks());
-        taskSrv.save(subTask);
-        taskSrv.save(task);
-        // TODO save in subdir?
-        // saveTaskFiles(taskForm.getFiles(), subTask);
+        taskSrv.createSubTask(project, task, subTask);
         wlSrv.addActivityLog(subTask, "", LogType.SUBTASK);
         return REDIRECT_TASK + id;
     }
@@ -644,7 +628,7 @@ public class TaskController {
     @RequestMapping(value = "/task/changePoints", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<ResultData> changeStoryPoints(@RequestParam(value = "id") String taskID,
-                                        @RequestParam(value = "points") Integer points) {
+                                                        @RequestParam(value = "points") Integer points) {
         // check if not admin or user
         Task task = taskSrv.findById(taskID);
         if (task != null) {
@@ -1162,10 +1146,6 @@ public class TaskController {
         } else {
             throw new TasqAuthException();
         }
-    }
-
-    private String createSubId(String id, String subId) {
-        return id + "/" + subId;
     }
 
     private ResultData taskIsClosed(RedirectAttributes ra, HttpServletRequest request, Task task) {
