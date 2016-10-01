@@ -13,9 +13,6 @@ import com.qprogramming.tasq.task.worklog.WorkLogService;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
 import org.slf4j.Logger;
@@ -271,7 +268,7 @@ public class ImportExportController {
 
     @RequestMapping(value = "/task/export", method = RequestMethod.GET)
     public void exportTasks(@RequestParam(value = "tasks") String[] tasks, @RequestParam(value = "type") String type,
-                            HttpServletResponse response, HttpServletRequest request) throws IOException {
+                            HttpServletResponse response, HttpServletRequest request) throws IOException, InvalidFormatException {
         // Prepare task list
         List<Task> taskList = taskSrv.finAllById(Arrays.asList(tasks));
         //we should have only one project, and exporting account should be able to view it.
@@ -288,15 +285,24 @@ public class ImportExportController {
             // pack into xml
             ProjectXML projectXML = new ProjectXML();
             projectXML.setName(project.getName());
-            ArrayList<TaskXML> xmltasklist = new ArrayList<>();
-            int count = 0;
+            ArrayList<TaskXML> xmlTaskList = new ArrayList<>();
+            int count = 1;
             for (Task task : taskList) {
-                TaskXML taskXML = new TaskXML(task);
-                taskXML.setNumber(count);
-                xmltasklist.add(taskXML);
+                TaskXML taskXML = toTaskXML(String.valueOf(count), task);
+                if (task.getSubtasks() > 0) {
+                    ArrayList<TaskXML> xmlSubTaskList = new ArrayList<>();
+                    List<Task> subTasks = taskSrv.findSubtasks(task);
+                    int subCount = 1;
+                    for (Task subTask : subTasks) {
+                        xmlSubTaskList.add(toTaskXML(String.valueOf(count) + "/" + String.valueOf(subCount), subTask));
+                        subCount++;
+                    }
+                    taskXML.setSubTasksList(xmlSubTaskList);
+                }
+                xmlTaskList.add(taskXML);
                 count++;
             }
-            projectXML.setTaskList(xmltasklist);
+            projectXML.setTaskList(xmlTaskList);
             try {
                 JAXBContext jaxbContext = JAXBContext.newInstance(ProjectXML.class);
                 Marshaller marshaller = jaxbContext.createMarshaller();
@@ -315,11 +321,11 @@ public class ImportExportController {
             }
         } else if (type.equals(XLS_TYPE)) {
             // pack into excel
-            HSSFWorkbook workbook = new HSSFWorkbook(is);
-            HSSFSheet sheet = workbook.getSheetAt(0);
+            Workbook workbook = WorkbookFactory.create(is);
+            Sheet sheet = workbook.getSheetAt(0);
             int rowNo = 1;
             for (Task task : taskList) {
-                HSSFRow row = sheet.createRow(rowNo++);
+                Row row = sheet.createRow(rowNo++);
                 row.createCell(NAME_CELL).setCellValue(task.getName());
                 row.createCell(DESCRIPTION_CELL).setCellValue(task.getDescription());
                 row.createCell(TYPE_CELL).setCellValue(((TaskType) task.getType()).getEnum());
@@ -334,6 +340,12 @@ public class ImportExportController {
         }
         out.flush();
         out.close();
+    }
+
+    private TaskXML toTaskXML(String count, Task task) {
+        TaskXML taskXML = new TaskXML(task);
+        taskXML.setNumber(count);
+        return taskXML;
     }
 
     /**

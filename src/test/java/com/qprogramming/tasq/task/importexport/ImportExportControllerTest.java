@@ -6,10 +6,12 @@ import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
-import com.qprogramming.tasq.task.*;
+import com.qprogramming.tasq.task.Task;
+import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 import com.qprogramming.tasq.test.MockSecurityContext;
 import com.qprogramming.tasq.test.TestUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.joda.time.Period;
 import org.junit.Assert;
 import org.junit.Before;
@@ -38,9 +40,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
-import static com.qprogramming.tasq.test.TestUtils.PROJECT_ID;
-import static com.qprogramming.tasq.test.TestUtils.TASK_NAME;
-import static com.qprogramming.tasq.test.TestUtils.createTask;
+import static com.qprogramming.tasq.test.TestUtils.*;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -174,7 +174,7 @@ public class ImportExportControllerTest {
             when(taskSrvMock.findById(TEST_2)).thenReturn(task2);
             when(projSrvMock.canView(task1.getProject())).thenReturn(true);
             importExportCtrl.exportTasks(idList, "XLS", responseMock, requestMock);
-        } catch (IOException e) {
+        } catch (IOException | InvalidFormatException e) {
             fail(e.getMessage());
         }
     }
@@ -196,7 +196,7 @@ public class ImportExportControllerTest {
             when(projSrvMock.canView(task1.getProject())).thenReturn(true);
             try {
                 importExportCtrl.exportTasks(idList, "XLS", responseMock, requestMock);
-            } catch (TasqAuthException e) {
+            } catch (TasqAuthException | InvalidFormatException e) {
                 catched = true;
             }
         } catch (IOException e) {
