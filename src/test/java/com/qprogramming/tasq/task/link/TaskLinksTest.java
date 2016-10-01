@@ -1,5 +1,7 @@
 package com.qprogramming.tasq.task.link;
 
+import static com.qprogramming.tasq.test.TestUtils.TEST_1;
+import static com.qprogramming.tasq.test.TestUtils.TEST_2;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
@@ -14,6 +16,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.qprogramming.tasq.test.TestUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -30,28 +33,18 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
-import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.support.web.Message;
 import com.qprogramming.tasq.task.DisplayTask;
 import com.qprogramming.tasq.task.Task;
-import com.qprogramming.tasq.task.TaskPriority;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
-import com.qprogramming.tasq.task.TaskType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 import com.qprogramming.tasq.test.MockSecurityContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TaskLinksTest {
 
-	private static final String TEST_1 = "TEST-1";
-	private static final String TEST_2 = "TEST-2";
-	private static final String EMAIL = "user@test.com";
-	private static final String TASK_NAME = "taskName";
-	private static final String PROJECT_NAME = "TestProject";
-	private static final String PROJECT_ID = "TEST";
-	private static final String PROJECT_DESCRIPTION = "Description";
 
 	private Account testAccount;
 	private Task task1;
@@ -88,14 +81,13 @@ public class TaskLinksTest {
 
 	@Before
 	public void setUp() {
-		testAccount = new Account(EMAIL, "", "user", Roles.ROLE_ADMIN);
-		testAccount.setLanguage("en");
+		testAccount = TestUtils.createAccount();
 		when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");
 		when(securityMock.getAuthentication()).thenReturn(authMock);
 		when(authMock.getPrincipal()).thenReturn(testAccount);
-		Project project = createProject();
-		task1 = createTask(TASK_NAME, 1, project);
-		task2 = createTask(TASK_NAME, 2, project);
+		Project project = TestUtils.createProject();
+		task1 = TestUtils.createTask(TestUtils.TASK_NAME, 1, project);
+		task2 = TestUtils.createTask(TestUtils.TASK_NAME, 2, project);
 		when(taskSrvMock.findById(TEST_1)).thenReturn(task1);
 		when(taskSrvMock.findById(TEST_2)).thenReturn(task2);
 		SecurityContextHolder.setContext(securityMock);
@@ -196,25 +188,4 @@ public class TaskLinksTest {
 		Map<TaskLinkType, List<DisplayTask>> map = taskLinkSrv.findTaskLinks(TEST_1);
 		Assert.assertTrue(map.size() == 4);
 	}
-
-	private Task createTask(String name, int no, Project project) {
-		Task task = new Task();
-		task.setName(name);
-		task.setProject(project);
-		task.setId(project.getProjectId() + "-" + no);
-		task.setPriority(TaskPriority.MAJOR);
-		task.setType(TaskType.USER_STORY);
-		task.setStory_points(2);
-		task.setState(TaskState.TO_DO);
-		return task;
-	}
-
-	private Project createProject() {
-		Project project = new Project(PROJECT_NAME, testAccount);
-		project.setDescription(PROJECT_DESCRIPTION);
-		project.setProjectId(PROJECT_ID);
-		project.setId(1L);
-		return project;
-	}
-
 }

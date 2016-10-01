@@ -2,17 +2,19 @@ package com.qprogramming.tasq.agile;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
-import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.support.web.Message;
-import com.qprogramming.tasq.task.*;
+import com.qprogramming.tasq.task.Task;
+import com.qprogramming.tasq.task.TaskService;
+import com.qprogramming.tasq.task.TaskState;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 import com.qprogramming.tasq.test.MockSecurityContext;
+import com.qprogramming.tasq.test.TestUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
@@ -37,6 +39,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
+import static com.qprogramming.tasq.test.TestUtils.PROJECT_ID;
+import static com.qprogramming.tasq.test.TestUtils.createAccountList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
@@ -46,10 +50,6 @@ import static org.mockito.Mockito.*;
 @PropertySource("classpath:/project.properties")
 public class KanbanControllerTest {
 
-    private static final String TEST = "TEST";
-    private static final String TEST_PROJ = "Test project";
-    private static final String EMAIL = "user@user.com";
-    private static final String USERNAME = "user";
     private static final String LAMB = "Lamb";
     private static final String ZOE = "Zoe";
     private static final String ART = "Art";
@@ -96,12 +96,9 @@ public class KanbanControllerTest {
     @Before
     public void setUp() {
         // ReflectionTestUtils.setField(PeriodHelper.class, "hours", 8);
-        testAccount = new Account(EMAIL, "", USERNAME, Roles.ROLE_POWERUSER);
-        project = new Project();
-        project.setName(TEST_PROJ);
-        project.setId(1L);
-        project.setProjectId(TEST);
-        Set<Account> participants = new HashSet<Account>(createList());
+        testAccount = TestUtils.createAccount();
+        project = TestUtils.createProject();
+        Set<Account> participants = new HashSet<>(createAccountList());
         project.setParticipants(participants);
         kanbanCtrl = new KanbanController(taskSrvMock, projSrvMock, wrkLogSrvMock, msgMock, agileSrvMock);
         when(securityMock.getAuthentication()).thenReturn(authMock);
@@ -113,16 +110,16 @@ public class KanbanControllerTest {
     @Test
     public void notParticipantTest() {
         boolean catched = false;
-        when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
+        when(projSrvMock.findByProjectId(PROJECT_ID)).thenReturn(project);
         try {
-            kanbanCtrl.showBoard(TEST, modelMock, requestMock, raMock);
+            kanbanCtrl.showBoard(PROJECT_ID, modelMock, requestMock, raMock);
         } catch (TasqAuthException e) {
             catched = true;
         }
         Assert.assertTrue("TasqAuthException not thrown", catched);
         catched = false;
         try {
-            kanbanCtrl.newRelease(TEST, "1.0.0", null, requestMock, raMock);
+            kanbanCtrl.newRelease(PROJECT_ID, "1.0.0", null, requestMock, raMock);
         } catch (TasqAuthException e) {
             catched = true;
         }
@@ -132,21 +129,21 @@ public class KanbanControllerTest {
     @Test
     public void showBoardTest() {
         project.addParticipant(testAccount);
-        when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
+        when(projSrvMock.findByProjectId(PROJECT_ID)).thenReturn(project);
         when(projSrvMock.canEdit(project)).thenReturn(true);
         when(taskSrvMock.findAllWithoutRelease(project)).thenReturn(createTaskList(project));
         when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("TEST");
-        Assert.assertEquals("/kanban/board", kanbanCtrl.showBoard(TEST, modelMock, requestMock, raMock));
+        Assert.assertEquals("/kanban/board", kanbanCtrl.showBoard(PROJECT_ID, modelMock, requestMock, raMock));
         verify(modelMock, times(3)).addAttribute(anyString(), anyObject());
     }
 
     @Test
     public void newReleaseNoClosedTest() {
         project.addParticipant(testAccount);
-        when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
+        when(projSrvMock.findByProjectId(PROJECT_ID)).thenReturn(project);
         when(projSrvMock.canAdminister(project)).thenReturn(true);
         when(taskSrvMock.findAllToRelease(project)).thenReturn(new LinkedList<Task>());
-        kanbanCtrl.newRelease(TEST, RELEASE, null, requestMock, raMock);
+        kanbanCtrl.newRelease(PROJECT_ID, RELEASE, null, requestMock, raMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.WARNING, new Object[]{}));
     }
@@ -154,10 +151,10 @@ public class KanbanControllerTest {
     @Test
     public void newReleaseNotUniqueTest() {
         project.addParticipant(testAccount);
-        when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
+        when(projSrvMock.findByProjectId(PROJECT_ID)).thenReturn(project);
         when(projSrvMock.canAdminister(project)).thenReturn(true);
         when(agileSrvMock.findByProjectIdAndRelease(1L, RELEASE)).thenReturn(new Release(project, RELEASE, null));
-        kanbanCtrl.newRelease(TEST, RELEASE, null, requestMock, raMock);
+        kanbanCtrl.newRelease(PROJECT_ID, RELEASE, null, requestMock, raMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.WARNING, new Object[]{}));
     }
@@ -165,7 +162,7 @@ public class KanbanControllerTest {
     @Test
     public void newReleaseTest() {
         project.addParticipant(testAccount);
-        when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
+        when(projSrvMock.findByProjectId(PROJECT_ID)).thenReturn(project);
         when(projSrvMock.canAdminister(project)).thenReturn(true);
         Release release = new Release(project, RELEASE, null);
         when(agileSrvMock.save(release)).thenReturn(release);
@@ -174,7 +171,7 @@ public class KanbanControllerTest {
         taskList.get(1).setState(TaskState.CLOSED);
         taskList.get(4).setState(TaskState.CLOSED);
         when(taskSrvMock.findAllToRelease(project)).thenReturn(taskList);
-        kanbanCtrl.newRelease(TEST, RELEASE, null, requestMock, raMock);
+        kanbanCtrl.newRelease(PROJECT_ID, RELEASE, null, requestMock, raMock);
         Assert.assertTrue(taskList.get(0).getRelease() != null);
         Assert.assertTrue(taskList.get(1).getRelease() != null);
         Assert.assertTrue(taskList.get(4).getRelease() != null);
@@ -196,12 +193,12 @@ public class KanbanControllerTest {
     @Test
     public void getReportTest() {
         project.addParticipant(testAccount);
-        when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
+        when(projSrvMock.findByProjectId(PROJECT_ID)).thenReturn(project);
         Release release = new Release(project, RELEASE, null);
         List<Release> releaseList = new LinkedList<Release>();
         releaseList.add(release);
         when(agileSrvMock.findReleaseByProjectIdOrderByDateDesc(project.getId())).thenReturn(releaseList);
-        kanbanCtrl.showReport(TEST, null, modelMock, requestMock, raMock);
+        kanbanCtrl.showReport(PROJECT_ID, null, modelMock, requestMock, raMock);
         verify(modelMock, times(2)).addAttribute(anyString(), anyObject());
     }
 
@@ -209,7 +206,7 @@ public class KanbanControllerTest {
     public void showChartTest() {
         project.setStartDate(new LocalDate().minusDays(4).toDate());
         Release release = new Release(project, RELEASE, null);
-        Task task = createTask(TEST, 1, project);
+        Task task = TestUtils.createTask(PROJECT_ID, 1, project);
         task.setRelease(release);
         WorkLog wl0 = new WorkLog();
         wl0.setTask(task);
@@ -231,7 +228,7 @@ public class KanbanControllerTest {
         wl2.setType(LogType.CLOSED);
         task.setState(TaskState.CLOSED);
         task.setFinishDate(new LocalDate().minusDays(1).toDate());
-        Task task2 = createTask(TEST, 2, project);
+        Task task2 = TestUtils.createTask(PROJECT_ID, 2, project);
         task2.setRelease(release);
         WorkLog wl3 = new WorkLog();
         wl3.setTask(task2);
@@ -250,16 +247,16 @@ public class KanbanControllerTest {
         List<LocalDate> freeDays = new LinkedList<>();
         freeDays.add(new LocalDate().minusDays(2));
         when(projSrvMock.getFreeDays(any(Project.class), any(DateTime.class), any(DateTime.class))).thenReturn(freeDays);
-        when(projSrvMock.findByProjectId(TEST)).thenReturn(project);
+        when(projSrvMock.findByProjectId(PROJECT_ID)).thenReturn(project);
         when(agileSrvMock.findByProjectIdAndRelease(1L, RELEASE)).thenReturn(release);
         when(wrkLogSrvMock.getAllReleaseEvents(release)).thenReturn(workLogs);
         when(taskSrvMock.findAllByRelease(release)).thenReturn(taskList);
         when(taskSrvMock.findAllByRelease(null)).thenReturn(taskList);
-        KanbanData data = kanbanCtrl.showBurndownChart(TEST, RELEASE).getBody();
+        KanbanData data = kanbanCtrl.showBurndownChart(PROJECT_ID, RELEASE).getBody();
         Assert.assertNotNull(data.getClosed());
         Assert.assertNotNull(data.getOpen());
         Assert.assertNotNull(data.getTimeBurned());
-        data = kanbanCtrl.showBurndownChart(TEST, null).getBody();
+        data = kanbanCtrl.showBurndownChart(PROJECT_ID, null).getBody();
         Assert.assertNotNull(data.getClosed());
         Assert.assertNotNull(data.getOpen());
         Assert.assertNotNull(data.getTimeBurned());
@@ -275,40 +272,11 @@ public class KanbanControllerTest {
         Assert.assertNotEquals(release.hashCode(), release2.hashCode());
     }
 
-    private List<Account> createList() {
-        List<Account> accountsList = new LinkedList<Account>();
-        accountsList.add(createAccount(JOHN, DOE));
-        accountsList.add(createAccount(ADAM, ART));
-        accountsList.add(createAccount(ADAM, ZOE));
-        accountsList.add(createAccount(MARRY, LAMB));
-        accountsList.add(createAccount(KATE, DOE));
-        return accountsList;
-    }
-
-    private Account createAccount(String name, String surname) {
-        Account account = new Account(name + "@test.com", "", name, Roles.ROLE_POWERUSER);
-        account.setName(name);
-        account.setSurname(surname);
-        return account;
-    }
-
     private List<Task> createTaskList(Project project) {
         List<Task> taskList = new LinkedList<Task>();
         for (int i = 0; i < 5; i++) {
-            taskList.add(createTask("TASK" + i, i, project));
+            taskList.add(TestUtils.createTask("TASK" + i, i, project));
         }
         return taskList;
-    }
-
-    private Task createTask(String name, int no, Project project) {
-        Task task = new Task();
-        task.setName(name);
-        task.setProject(project);
-        task.setId(project.getProjectId() + "-" + no);
-        task.setPriority(TaskPriority.MAJOR);
-        task.setType(TaskType.USER_STORY);
-        task.setStory_points(2);
-        task.setState(TaskState.TO_DO);
-        return task;
     }
 }

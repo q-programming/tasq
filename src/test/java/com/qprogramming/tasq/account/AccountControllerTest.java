@@ -37,6 +37,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
+import static com.qprogramming.tasq.test.TestUtils.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
@@ -46,17 +47,6 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class AccountControllerTest {
 
-    private static final String LAMB = "Lamb";
-    private static final String ZOE = "Zoe";
-    private static final String ART = "Art";
-    private static final String DOE = "Doe";
-    private static final String KATE = "Kate";
-    private static final String JOHN = "John";
-    private static final String ADAM = "Adam";
-    private static final String MARRY = "Marry";
-    private static final String USER = "user";
-    private static final String EMAIL = "user@test.com";
-    private static final String USERNAME = USER;
     @Rule
     public ExpectedException thrown = ExpectedException.none();
     private AccountController accountCtr;
@@ -99,12 +89,11 @@ public class AccountControllerTest {
     public void setUp() {
         accountCtr = new AccountController(accSrvMock, projSrvMock, msgMock, localeResolverMock, sessionRegistry,
                 themeSrvMock, appSrvMock);
-        testAccount = new Account(EMAIL, "", USERNAME, Roles.ROLE_ADMIN);
-        testAccount.setLanguage("en");
+        testAccount = createAccount();
         when(securityMock.getAuthentication()).thenReturn(authMock);
         when(authMock.getPrincipal()).thenReturn(testAccount);
         SecurityContextHolder.setContext(securityMock);
-        accountsList = createList();
+        accountsList = createAccountList();
     }
 
     @Test
@@ -198,23 +187,4 @@ public class AccountControllerTest {
             Assert.fail(e.getMessage());
         }
     }
-
-    private List<Account> createList() {
-        List<Account> accountsList = new LinkedList<Account>();
-        accountsList.add(createAccount(JOHN, DOE));
-        accountsList.add(createAccount(ADAM, ART));
-        accountsList.add(createAccount(ADAM, ZOE));
-        accountsList.add(createAccount(MARRY, LAMB));
-        accountsList.add(createAccount(KATE, DOE));
-        return accountsList;
-    }
-
-    private Account createAccount(String name, String surname) {
-        Account account = new Account(name + "@test.com", "", name, Roles.ROLE_POWERUSER);
-        account.setName(name);
-        account.setSurname(surname);
-        return account;
-
-    }
-
 }

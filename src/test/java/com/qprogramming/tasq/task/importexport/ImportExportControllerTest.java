@@ -9,6 +9,7 @@ import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.task.*;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 import com.qprogramming.tasq.test.MockSecurityContext;
+import com.qprogramming.tasq.test.TestUtils;
 import org.joda.time.Period;
 import org.junit.Assert;
 import org.junit.Before;
@@ -37,6 +38,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
+import static com.qprogramming.tasq.test.TestUtils.PROJECT_ID;
+import static com.qprogramming.tasq.test.TestUtils.TASK_NAME;
+import static com.qprogramming.tasq.test.TestUtils.createTask;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -48,11 +53,6 @@ public class ImportExportControllerTest {
     private static final String TEST_1 = "TEST-1";
     private static final String TEST_2 = "TEST-2";
     private static final String TEST_3 = "TEST-3";
-    private static final String EMAIL = "user@test.com";
-    private static final String TASK_NAME = "taskName";
-    private static final String PROJECT_NAME = "TestProject";
-    private static final String PROJECT_ID = "TEST";
-    private static final String PROJECT_DESCRIPTION = "Description";
     private static final String TEMPLATE_XLS = "template.xls";
     private static final String TASQ_AUTH_MSG = "TasqAuthException was not thrown";
     @Rule
@@ -92,12 +92,12 @@ public class ImportExportControllerTest {
 
     @Before
     public void setUp() {
-        testAccount = new Account(EMAIL, "", "user", Roles.ROLE_ADMIN);
+        testAccount = TestUtils.createAccount();
         testAccount.setLanguage("en");
         when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");
         when(securityMock.getAuthentication()).thenReturn(authMock);
         when(authMock.getPrincipal()).thenReturn(testAccount);
-        Project project = createProject(1L);
+        Project project = TestUtils.createProject();
         task1 = createTask(TASK_NAME, 1, project);
         task2 = createTask(TASK_NAME, 2, project);
         when(taskSrvMock.findById(TEST_1)).thenReturn(task1);
@@ -123,7 +123,7 @@ public class ImportExportControllerTest {
             verify(responseMock, times(1)).setHeader("content-Disposition", "attachment; filename=" + TEMPLATE_XLS);
             verify(outputStreamMock, times(7)).write(any(byte[].class), anyInt(), anyInt());
         } catch (IOException e) {
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 
@@ -148,16 +148,16 @@ public class ImportExportControllerTest {
     @Test
     public void importTasksTest() {
         URL fileURL = getClass().getResource("/sampleImport.xls");
-        Project project = createProject(1L);
+        Project project = TestUtils.createProject();
         when(projSrvMock.findByProjectId(PROJECT_ID)).thenReturn(project);
         try {
             mockMultipartFile = new MockMultipartFile("content", fileURL.getFile(), "text/plain",
                     getClass().getResourceAsStream("/sampleImport.xls"));
             importExportCtrl.importTasks(mockMultipartFile, PROJECT_ID, modelMock);
-            //TODO add verify
+            verify(taskSrvMock, times(1)).save(any(Task.class));
+            verify(taskSrvMock, times(2)).createSubTask(any(Project.class), any(Task.class), any(Task.class));
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            fail(e.getMessage());
         }
     }
 
@@ -175,7 +175,7 @@ public class ImportExportControllerTest {
             when(projSrvMock.canView(task1.getProject())).thenReturn(true);
             importExportCtrl.exportTasks(idList, "XLS", responseMock, requestMock);
         } catch (IOException e) {
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 
@@ -184,7 +184,7 @@ public class ImportExportControllerTest {
         boolean catched = false;
         try {
             List<Task> list = new LinkedList<Task>();
-            Task task3 = createTask(TASK_NAME, 3, createProject(2L));
+            Task task3 = createTask(TASK_NAME, 3, TestUtils.createProject(2L));
             task1.setEstimate(new Period());
             list.add(task1);
             list.add(task2);
@@ -200,30 +200,8 @@ public class ImportExportControllerTest {
                 catched = true;
             }
         } catch (IOException e) {
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
         Assert.assertTrue(TASQ_AUTH_MSG, catched);
     }
-
-
-    private Task createTask(String name, int no, Project project) {
-        Task task = new Task();
-        task.setName(name);
-        task.setProject(project);
-        task.setId(project.getProjectId() + "-" + no);
-        task.setPriority(TaskPriority.MAJOR);
-        task.setType(TaskType.USER_STORY);
-        task.setStory_points(2);
-        task.setState(TaskState.TO_DO);
-        return task;
-    }
-
-    private Project createProject(Long id) {
-        Project project = new Project(PROJECT_NAME, testAccount);
-        project.setDescription(PROJECT_DESCRIPTION);
-        project.setProjectId(PROJECT_ID);
-        project.setId(id);
-        return project;
-    }
-
 }

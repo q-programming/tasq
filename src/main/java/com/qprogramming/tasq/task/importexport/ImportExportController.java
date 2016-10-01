@@ -82,44 +82,44 @@ public class ImportExportController {
         this.projectSrv = projectSrv;
         this.taskSrv = taskSrv;
         this.wlSrv = wlSrv;
-                this.msg = msg;
-            }
+        this.msg = msg;
+    }
 
-            @RequestMapping(value = "/task/getTemplateFile", method = RequestMethod.GET)
-            public void downloadTemplate(HttpServletRequest request, HttpServletResponse response)
+    @RequestMapping(value = "/task/getTemplateFile", method = RequestMethod.GET)
+    public void downloadTemplate(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-                try (FileInputStream is = getExcelTemplate()) {
-                    response.setHeader("content-Disposition", "attachment; filename=" + TEMPLATE_XLS);
-                    IOUtils.copyLarge(is, response.getOutputStream());
-                } catch (IOException e) {
-                    LOG.error("Error while trying to save file , filename '{}'", TEMPLATE_XLS, e);
-                } finally {
-                    response.flushBuffer();
-                }
-            }
+        try (FileInputStream is = getExcelTemplate()) {
+            response.setHeader("content-Disposition", "attachment; filename=" + TEMPLATE_XLS);
+            IOUtils.copyLarge(is, response.getOutputStream());
+        } catch (IOException e) {
+            LOG.error("Error while trying to save file , filename '{}'", TEMPLATE_XLS, e);
+        } finally {
+            response.flushBuffer();
+        }
+    }
 
-            @RequestMapping(value = "/task/import", method = RequestMethod.GET)
-            public String startImportTasks(Model model) {
-                // check if can import/create!
-                if (!Roles.isUser()) {
-                    throw new TasqAuthException(msg);
-                }
-                model.addAttribute("projects", projectSrv.findAllByUser());
-                return "/task/import";
-            }
+    @RequestMapping(value = "/task/import", method = RequestMethod.GET)
+    public String startImportTasks(Model model) {
+        // check if can import/create!
+        if (!Roles.isUser()) {
+            throw new TasqAuthException(msg);
+        }
+        model.addAttribute("projects", projectSrv.findAllByUser());
+        return "/task/import";
+    }
 
-            @Transactional
-            @RequestMapping(value = "/task/import", method = RequestMethod.POST)
-            public String importTasks(@RequestParam(value = "file") MultipartFile importFile,
-                    @RequestParam(value = "project") String projectName, Model model) throws IOException {
+    @Transactional
+    @RequestMapping(value = "/task/import", method = RequestMethod.POST)
+    public String importTasks(@RequestParam(value = "file") MultipartFile importFile,
+                              @RequestParam(value = "project") String projectName, Model model) throws IOException {
 
-                if (importFile.getSize() != 0) {
-                    String extension = FilenameUtils.getExtension(importFile.getOriginalFilename());
-                    Project project = projectSrv.findByProjectId(projectName);
-                    Long taskCount = project.getLastTaskNo();
-                    StringBuilder logger = new StringBuilder();
-                    if (extension.equals(XLS_TYPE) || extension.equals(XLSX_TYPE)) {
-                        Workbook workbook;
+        if (importFile.getSize() != 0) {
+            String extension = FilenameUtils.getExtension(importFile.getOriginalFilename());
+            Project project = projectSrv.findByProjectId(projectName);
+            Long taskCount = project.getLastTaskNo();
+            StringBuilder logger = new StringBuilder();
+            if (extension.equals(XLS_TYPE) || extension.equals(XLSX_TYPE)) {
+                Workbook workbook;
                 try {
                     workbook = WorkbookFactory.create(importFile.getInputStream());
                     Sheet sheet = workbook.getSheetAt(0);
@@ -232,6 +232,7 @@ public class ImportExportController {
                     logger.append(task);
                     logger.append(" successfully created");
                     logger.append(DIVIDER);
+                    wlSrv.addActivityLog(task, "", LogType.SUBTASK);
                 } else {
                     logger.append(logHeader);
                     logger.append(String.format("Parent '%s' was not found either in excel nor in database.", parentTaskId));
@@ -575,7 +576,7 @@ public class ImportExportController {
         Cell parentcell = row.getCell(PARENT_CELL);
         if (parentcell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
             double parentRow = parentcell.getNumericCellValue();
-            return parentRow < row.getRowNum()+1;
+            return parentRow < row.getRowNum() + 1;
         } else if (parentcell.getCellType() == Cell.CELL_TYPE_STRING) {
             Pattern r = Pattern.compile(ID_REGEXP_PATERN);
             Matcher m = r.matcher(parentcell.getStringCellValue());
