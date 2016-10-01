@@ -22,6 +22,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -48,6 +49,9 @@ import java.util.stream.Collectors;
 @Controller
 public class ImportExportController {
 
+    public static final String SUCCESS_TASK = "Task <strong>";
+    public static final String SUCCESFULLY_END = "</strong> succesfully created";
+    public static final String SUCCESS_SUBTASK = "Subtask <strong>";
     private static final String TEMPLATE_XLS = "template.xls";
     private static final Logger LOG = LoggerFactory.getLogger(ImportExportController.class);
     private static final String COLS = "ABCDEFGHIJKLMNOPRSTUVWXYZ";
@@ -130,38 +134,8 @@ public class ImportExportController {
                 try {
                     JAXBContext jaxbcontext = JAXBContext.newInstance(ProjectXML.class);
                     Unmarshaller unmarshaller = jaxbcontext.createUnmarshaller();
-                    File convFile = new File(importFile.getOriginalFilename());
-                    importFile.transferTo(convFile);
-                    ProjectXML projectXML = (ProjectXML) unmarshaller.unmarshal(convFile);
-                    // validate all tasks
-                    for (TaskXML taskxml : projectXML.getTaskList()) {
-                        StringBuilder logRow = verifyTaskXml(taskxml);
-                        if (logRow.length() > 0) {
-                            logger.append(logRow);
-                            continue;
-                        }
-                        TaskForm taskForm = new TaskForm();
-                        taskForm.setName(taskxml.getName());
-                        taskForm.setDescription(taskxml.getDescription());
-                        taskForm.setType(taskxml.getType());
-                        taskForm.setPriority(taskxml.getPriority());
-                        taskForm.setEstimate(taskxml.getEstimate());
-                        Task task = taskForm.createTask();
-                        task.setDue_date(taskxml.getDue_date());
-                        // optional fields
-                        if (taskxml.getStory_points() != null) {
-                            task.setStory_points(Integer.parseInt(taskxml.getStory_points()));
-                        }
-                        taskCount++;
-                        task = finalizeTaskCretion(task, taskCount, project);
-                        String logHeader = "[Task number=" + taskxml.getNumber() + "]";
-                        logger.append(logHeader);
-                        logger.append("Task ");
-                        logger.append(task);
-                        logger.append(" succesfully created");
-                        logger.append(DIVIDER);
-
-                    }
+                    ProjectXML projectXML = (ProjectXML) unmarshaller.unmarshal(importFile.getInputStream());
+                    processXML(project, taskCount, logger, projectXML);
                 } catch (JAXBException e) {
                     LOG.error("JAXB excetpion while importing file '{}'", importFile.getOriginalFilename(), e);
                 }
@@ -169,6 +143,59 @@ public class ImportExportController {
             }
         }
         return "/task/importResults";
+    }
+
+    private void processXML(Project project, Long taskCount, StringBuilder logger, ProjectXML projectXML) {
+        for (TaskXML taskxml : projectXML.getTaskList()) {
+            StringBuilder logRow = verifyTaskXml(taskxml, false);
+            if (logRow.length() > 0) {
+                logger.append(logRow);
+                logger.append(DIVIDER);
+                continue;
+            }
+            Task task = createTaskFromXMLTask(taskxml);
+            taskCount++;
+            task = finalizeTaskCretion(task, taskCount, project);
+            String logHeader = "[Task number=" + taskxml.getNumber() + "]";
+            logger.append(logHeader);
+            logger.append(SUCCESS_TASK);
+            logger.append(task);
+            logger.append(SUCCESFULLY_END);
+            if (!CollectionUtils.isEmpty(taskxml.getSubTasksList())) {
+                taskxml.getSubTasksList();
+                for (TaskXML subTaskXML : taskxml.getSubTasksList()) {
+                    logRow = verifyTaskXml(subTaskXML, true);
+                    if (logRow.length() > 0) {
+                        logger.append(BR);
+                        logger.append(logRow);
+                        continue;
+                    }
+                    Task subTask = taskSrv.createSubTask(project, task, createTaskFromXMLTask(subTaskXML));
+                    logHeader = "<br>[Task number=" + subTaskXML.getNumber() + "]";
+                    logger.append(logHeader);
+                    logger.append(SUCCESS_SUBTASK);
+                    logger.append(subTask);
+                    logger.append(SUCCESFULLY_END);
+                }
+            }
+            logger.append(DIVIDER);
+        }
+    }
+
+    private Task createTaskFromXMLTask(TaskXML taskxml) {
+        TaskForm taskForm = new TaskForm();
+        taskForm.setName(taskxml.getName());
+        taskForm.setDescription(taskxml.getDescription());
+        taskForm.setType(taskxml.getType());
+        taskForm.setPriority(taskxml.getPriority());
+        taskForm.setEstimate(taskxml.getEstimate());
+        Task task = taskForm.createTask();
+        task.setDue_date(taskxml.getDue_date());
+        // optional fields
+        if (taskxml.getStory_points() != null) {
+            task.setStory_points(Integer.parseInt(taskxml.getStory_points()));
+        }
+        return task;
     }
 
     private void processSheet(Project project, Long taskCount, StringBuilder logger, Sheet sheet) {
@@ -225,9 +252,9 @@ public class ImportExportController {
                 if (parentTask != null) {
                     task = taskSrv.createSubTask(project, parentTask, task);
                     logger.append(logHeader);
-                    logger.append("Subtask ");
+                    logger.append(SUCCESS_SUBTASK);
                     logger.append(task);
-                    logger.append(" successfully created");
+                    logger.append(SUCCESFULLY_END);
                     logger.append(DIVIDER);
                     wlSrv.addActivityLog(task, "", LogType.SUBTASK);
                 } else {
@@ -243,9 +270,9 @@ public class ImportExportController {
                 task = finalizeTaskCretion(task, taskCount, project);
                 createdTasks.put(row.getRowNum() + 1, task);
                 logger.append(logHeader);
-                logger.append("Task ");
+                logger.append(SUCCESS_TASK);
                 logger.append(task);
-                logger.append(" succesfully created");
+                logger.append(SUCCESFULLY_END);
                 logger.append(DIVIDER);
             }
         }
@@ -294,7 +321,8 @@ public class ImportExportController {
                     List<Task> subTasks = taskSrv.findSubtasks(task);
                     int subCount = 1;
                     for (Task subTask : subTasks) {
-                        xmlSubTaskList.add(toTaskXML(String.valueOf(count) + "/" + String.valueOf(subCount), subTask));
+                        TaskXML subTaskXML = toTaskXML(String.valueOf(count) + "/" + String.valueOf(subCount), subTask);
+                        xmlSubTaskList.add(subTaskXML);
                         subCount++;
                     }
                     taskXML.setSubTasksList(xmlSubTaskList);
@@ -307,12 +335,7 @@ public class ImportExportController {
                 JAXBContext jaxbContext = JAXBContext.newInstance(ProjectXML.class);
                 Marshaller marshaller = jaxbContext.createMarshaller();
                 Utils.setHttpRequest(request);
-                // String templateURL = Utils.getBaseURL()
-                // + "/export_template.xsl";
-                // marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION,
-                // templateURL);
                 marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-                // // OutputStream output = new BufferedOutputStream(out);
                 response.setContentType("application/xml");
                 response.setHeader("Content-Disposition", "attachment; filename=" + filename + ".xml");
                 marshaller.marshal(projectXML, out);
@@ -433,35 +456,35 @@ public class ImportExportController {
         return logger;
     }
 
-    private StringBuilder verifyTaskXml(TaskXML task) {
+    private StringBuilder verifyTaskXml(TaskXML taskXML, boolean subtasks) {
         StringBuilder logger = new StringBuilder();
-        String logHeader = "[Task number=" + task.getNumber() + "]";
-        if (task.getName() == null) {
+        String logHeader = "[Task number=" + taskXML.getNumber() + "]";
+        if (taskXML.getName() == null) {
             logger.append(logHeader);
             logger.append("Name can't be empty");
             logger.append(BR);
         }
-        if (task.getDescription() == null) {
+        if (taskXML.getDescription() == null) {
             logger.append(logHeader);
             logger.append("Description can't be empty");
             logger.append(BR);
         }
-        if (task.getDescription() == null) {
+        if (taskXML.getDescription() == null) {
             logger.append(logHeader);
             logger.append("Description can't be empty");
             logger.append(BR);
         }
-        if (task.getType() == null || !isTaskTypeValid(task.getType())) {
+        if (taskXML.getType() == null || !isTaskTypeValid(taskXML.getType(), subtasks)) {
             logger.append(logHeader);
             logger.append("Empty or wrong task type");
             logger.append(BR);
         }
-        if (task.getPriority() == null || !isTaskPriorityValid(task.getPriority())) {
+        if (taskXML.getPriority() == null || !isTaskPriorityValid(taskXML.getPriority())) {
             logger.append(logHeader);
             logger.append("Empty or wrong task priority");
             logger.append(BR);
         }
-        if (task.getStory_points() != null && !isNumerical(task.getStory_points())) {
+        if (taskXML.getStory_points() != null && !isNumerical(taskXML.getStory_points())) {
             logger.append(logHeader);
             logger.append("Story points must be empty or a number");
             logger.append(BR);
@@ -469,7 +492,6 @@ public class ImportExportController {
         if (logger.length() > 0) {
             logger.append(logHeader);
             logger.append(NODE_SKIPPED);
-            logger.append(DIVIDER);
         }
         return logger;
     }
@@ -553,10 +575,13 @@ public class ImportExportController {
         }
     }
 
-    private boolean isTaskTypeValid(String type) {
+    private boolean isTaskTypeValid(String type, boolean subtask) {
         try {
-            TaskType.toType(type);
-            return true;
+            TaskType taskType = TaskType.toType(type);
+            if (taskType.isSubtask()) {
+                return subtask;
+            }
+            return !subtask;
         } catch (IllegalArgumentException e) {
             LOG.error(e.getLocalizedMessage());
             return false;

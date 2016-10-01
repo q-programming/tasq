@@ -202,8 +202,9 @@ public class TaskService {
             subTask.addSprint(active);
         }
         Hibernate.initialize(parentTask.getSubtasks());
-        save(subTask);
-        return save(parentTask);
+        Task subtask = save(subTask);
+        save(parentTask);
+        return subtask;
     }
 
     public String createSubId(String id, String subId) {

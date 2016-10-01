@@ -122,7 +122,7 @@ public class SignupControllerTest {
     public void signUpAndConfirmTest() {
         try {
             when(requestMock.getSession()).thenReturn(httpSesssionMock);
-            URL fileURL = getClass().getResource("/avatar.png");
+            URL fileURL = getClass().getResource("/com/qprogramming/tasq/avatar.png");
             when(httpSesssionMock.getServletContext()).thenReturn(scMock);
             when(scMock.getRealPath(anyString())).thenReturn(fileURL.getFile());
             when(responseMock.getOutputStream()).thenReturn(outStreamMock);

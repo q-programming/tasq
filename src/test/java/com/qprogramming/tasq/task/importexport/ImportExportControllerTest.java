@@ -147,12 +147,12 @@ public class ImportExportControllerTest {
 
     @Test
     public void importTasksTest() {
-        URL fileURL = getClass().getResource("/sampleImport.xls");
+        URL fileURL = getClass().getResource("sampleImport.xls");
         Project project = TestUtils.createProject();
         when(projSrvMock.findByProjectId(PROJECT_ID)).thenReturn(project);
         try {
             mockMultipartFile = new MockMultipartFile("content", fileURL.getFile(), "text/plain",
-                    getClass().getResourceAsStream("/sampleImport.xls"));
+                    getClass().getResourceAsStream("sampleImport.xls"));
             importExportCtrl.importTasks(mockMultipartFile, PROJECT_ID, modelMock);
             verify(taskSrvMock, times(1)).save(any(Task.class));
             verify(taskSrvMock, times(2)).createSubTask(any(Project.class), any(Task.class), any(Task.class));
@@ -160,6 +160,23 @@ public class ImportExportControllerTest {
             fail(e.getMessage());
         }
     }
+
+    @Test
+    public void importXMLTasksTest() {
+        URL fileURL = getClass().getResource("sampleImport.xml");
+        Project project = TestUtils.createProject();
+        when(projSrvMock.findByProjectId(PROJECT_ID)).thenReturn(project);
+        try {
+            mockMultipartFile = new MockMultipartFile("content", fileURL.getFile(), "text/plain",
+                    getClass().getResourceAsStream("sampleImport.xml"));
+            importExportCtrl.importTasks(mockMultipartFile, PROJECT_ID, modelMock);
+            verify(taskSrvMock, times(2)).save(any(Task.class));
+            verify(taskSrvMock, times(3)).createSubTask(any(Project.class), any(Task.class), any(Task.class));
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
+    }
+
 
     @Test
     public void exportTasksTest() {
@@ -173,7 +190,25 @@ public class ImportExportControllerTest {
             when(taskSrvMock.finAllById(Arrays.asList(idList))).thenReturn(list);
             when(taskSrvMock.findById(TEST_2)).thenReturn(task2);
             when(projSrvMock.canView(task1.getProject())).thenReturn(true);
-            importExportCtrl.exportTasks(idList, "XLS", responseMock, requestMock);
+            importExportCtrl.exportTasks(idList, "xls", responseMock, requestMock);
+        } catch (IOException | InvalidFormatException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void exportTasksXMLTest() {
+        try {
+            List<Task> list = new LinkedList<Task>();
+            task1.setEstimate(new Period());
+            list.add(task1);
+            list.add(task2);
+            String[] idList = {TEST_1, TEST_2};
+            when(responseMock.getOutputStream()).thenReturn(outputStreamMock);
+            when(taskSrvMock.finAllById(Arrays.asList(idList))).thenReturn(list);
+            when(taskSrvMock.findById(TEST_2)).thenReturn(task2);
+            when(projSrvMock.canView(task1.getProject())).thenReturn(true);
+            importExportCtrl.exportTasks(idList, "xml", responseMock, requestMock);
         } catch (IOException | InvalidFormatException e) {
             fail(e.getMessage());
         }

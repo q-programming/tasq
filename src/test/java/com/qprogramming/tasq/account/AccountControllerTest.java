@@ -155,11 +155,11 @@ public class AccountControllerTest {
 
     @Test
     public void saveSettingsTest() {
-        URL fileURL = getClass().getResource("/avatar.png");
+        URL fileURL = getClass().getResource("/com/qprogramming/tasq/avatar.png");
         MockMultipartFile mockMultipartFile;
         try {
             mockMultipartFile = new MockMultipartFile("content", fileURL.getFile(), "text/plain",
-                    getClass().getResourceAsStream("/avatar.png"));
+                    getClass().getResourceAsStream("/com/qprogramming/tasq/avatar.png"));
             when(themeSrvMock.findById(1L)).thenReturn(new Theme());
             accountCtr.saveSettings(mockMultipartFile, EMAIL, "true", "true", "true", "en", 1L, raMock, requestMock, responseMock);
             verify(accSrvMock, times(1)).update(any(Account.class));
@@ -173,11 +173,11 @@ public class AccountControllerTest {
     @Test
     public void saveSettingsAvatarTooBigTest() {
         when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("TEST");
-        URL fileURL = getClass().getResource("/avatar_tooBig.png");
+        URL fileURL = getClass().getResource("/com/qprogramming/tasq/avatar_tooBig.png");
         MockMultipartFile mockMultipartFile;
         try {
             mockMultipartFile = new MockMultipartFile("content", fileURL.getFile(), "text/plain",
-                    getClass().getResourceAsStream("/avatar_tooBig.png"));
+                    getClass().getResourceAsStream("/com/qprogramming/tasq/avatar_tooBig.png"));
             when(themeSrvMock.findById(1L)).thenReturn(new Theme());
             accountCtr.saveSettings(mockMultipartFile, EMAIL, "true", "true", "true", "en", 1L, raMock, requestMock, responseMock);
             verify(raMock, times(1)).addFlashAttribute(anyString(),
