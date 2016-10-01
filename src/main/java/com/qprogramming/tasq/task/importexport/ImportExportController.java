@@ -124,7 +124,7 @@ public class ImportExportController {
                 try {
                     workbook = WorkbookFactory.create(importFile.getInputStream());
                     Sheet sheet = workbook.getSheetAt(0);
-                    processSheet(project, taskCount, logger, sheet);
+                    processImportSheet(project, taskCount, logger, sheet);
                 } catch (InvalidFormatException e) {
                     LOG.error("Failed to determine excel type");
                     logger.append(e.getMessage());
@@ -135,7 +135,7 @@ public class ImportExportController {
                     JAXBContext jaxbcontext = JAXBContext.newInstance(ProjectXML.class);
                     Unmarshaller unmarshaller = jaxbcontext.createUnmarshaller();
                     ProjectXML projectXML = (ProjectXML) unmarshaller.unmarshal(importFile.getInputStream());
-                    processXML(project, taskCount, logger, projectXML);
+                    processImportXML(project, taskCount, logger, projectXML);
                 } catch (JAXBException e) {
                     LOG.error("JAXB excetpion while importing file '{}'", importFile.getOriginalFilename(), e);
                 }
@@ -145,7 +145,7 @@ public class ImportExportController {
         return "/task/importResults";
     }
 
-    private void processXML(Project project, Long taskCount, StringBuilder logger, ProjectXML projectXML) {
+    private void processImportXML(Project project, Long taskCount, StringBuilder logger, ProjectXML projectXML) {
         for (TaskXML taskxml : projectXML.getTaskList()) {
             StringBuilder logRow = verifyTaskXml(taskxml, false);
             if (logRow.length() > 0) {
@@ -198,7 +198,7 @@ public class ImportExportController {
         return task;
     }
 
-    private void processSheet(Project project, Long taskCount, StringBuilder logger, Sheet sheet) {
+    private void processImportSheet(Project project, Long taskCount, StringBuilder logger, Sheet sheet) {
         Map<Integer, Task> createdTasks = new HashMap<>();
         for (Row row : sheet) {
             if (row.getRowNum() == 0) {
@@ -304,65 +304,83 @@ public class ImportExportController {
         if (projects.size() > 1 || !projectSrv.canView(project)) {
             throw new TasqAuthException(msg, "task.export.tampering");
         }
-        FileInputStream is = getExcelTemplate();
         String filename = project.getProjectId() + UNDERSCORE + Utils.convertDateToString(new Date()) + UNDERSCORE
                 + "export";
         ServletOutputStream out = response.getOutputStream();
         if (type.equals(XML_TYPE)) {
-            // pack into xml
-            ProjectXML projectXML = new ProjectXML();
-            projectXML.setName(project.getName());
-            ArrayList<TaskXML> xmlTaskList = new ArrayList<>();
-            int count = 1;
-            for (Task task : taskList) {
-                TaskXML taskXML = toTaskXML(String.valueOf(count), task);
-                if (task.getSubtasks() > 0) {
-                    ArrayList<TaskXML> xmlSubTaskList = new ArrayList<>();
-                    List<Task> subTasks = taskSrv.findSubtasks(task);
-                    int subCount = 1;
-                    for (Task subTask : subTasks) {
-                        TaskXML subTaskXML = toTaskXML(String.valueOf(count) + "/" + String.valueOf(subCount), subTask);
-                        xmlSubTaskList.add(subTaskXML);
-                        subCount++;
-                    }
-                    taskXML.setSubTasksList(xmlSubTaskList);
-                }
-                xmlTaskList.add(taskXML);
-                count++;
-            }
-            projectXML.setTaskList(xmlTaskList);
-            try {
-                JAXBContext jaxbContext = JAXBContext.newInstance(ProjectXML.class);
-                Marshaller marshaller = jaxbContext.createMarshaller();
-                Utils.setHttpRequest(request);
-                marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-                response.setContentType("application/xml");
-                response.setHeader("Content-Disposition", "attachment; filename=" + filename + ".xml");
-                marshaller.marshal(projectXML, out);
-            } catch (JAXBException e) {
-                LOG.error("JAXB excetpion while exporting '{}'", e);
-            }
+            packIntoXml(response, request, taskList, project, filename, out);
         } else if (type.equals(XLS_TYPE)) {
-            // pack into excel
-            Workbook workbook = WorkbookFactory.create(is);
-            Sheet sheet = workbook.getSheetAt(0);
-            int rowNo = 1;
-            for (Task task : taskList) {
-                Row row = sheet.createRow(rowNo++);
-                row.createCell(NAME_CELL).setCellValue(task.getName());
-                row.createCell(DESCRIPTION_CELL).setCellValue(task.getDescription());
-                row.createCell(TYPE_CELL).setCellValue(((TaskType) task.getType()).getEnum());
-                row.createCell(PRIORITY_CELL).setCellValue(task.getPriority().toString());
-                row.createCell(ESTIMATE_CELL).setCellValue(task.getEstimate());
-                row.createCell(SP_CELL).setCellValue(task.getStory_points());
-                row.createCell(DUE_DATE_CELL).setCellValue(task.getDue_date());
-            }
-            response.setContentType("application/vnd.ms-excel");
-            response.setHeader("Content-Disposition", "attachment; filename=" + filename + ".xls");
-            workbook.write(out);
+            packIntoExcel(response, taskList, getExcelTemplate(), filename, out);
         }
         out.flush();
         out.close();
+    }
+
+    private void packIntoExcel(HttpServletResponse response, List<Task> taskList, FileInputStream excelTemplate, String filename, ServletOutputStream out) throws IOException, InvalidFormatException {
+        Workbook workbook = WorkbookFactory.create(excelTemplate);
+        Sheet sheet = workbook.getSheetAt(0);
+        int rowNo = 1;
+        for (Task task : taskList) {
+            Row row = sheet.createRow(rowNo++);
+            fillRowWithTask(task, row);
+            if (task.getSubtasks() > 0) {
+                int parentRow = rowNo;
+                List<Task> subTasks = taskSrv.findSubtasks(task);
+                for (Task subTask : subTasks) {
+                    Row subTaskRow = sheet.createRow(rowNo++);
+                    fillRowWithTask(subTask, subTaskRow);
+                    subTaskRow.createCell(PARENT_CELL).setCellValue(parentRow);
+                }
+            }
+        }
+        response.setContentType("application/vnd.ms-excel");
+        response.setHeader("Content-Disposition", "attachment; filename=" + filename + ".xls");
+        workbook.write(out);
+    }
+
+    private void packIntoXml(HttpServletResponse response, HttpServletRequest request, List<Task> taskList, Project project, String filename, ServletOutputStream out) {
+        ProjectXML projectXML = new ProjectXML();
+        projectXML.setName(project.getName());
+        ArrayList<TaskXML> xmlTaskList = new ArrayList<>();
+        int count = 1;
+        for (Task task : taskList) {
+            TaskXML taskXML = toTaskXML(String.valueOf(count), task);
+            if (task.getSubtasks() > 0) {
+                ArrayList<TaskXML> xmlSubTaskList = new ArrayList<>();
+                List<Task> subTasks = taskSrv.findSubtasks(task);
+                int subCount = 1;
+                for (Task subTask : subTasks) {
+                    TaskXML subTaskXML = toTaskXML(String.valueOf(count) + "/" + String.valueOf(subCount), subTask);
+                    xmlSubTaskList.add(subTaskXML);
+                    subCount++;
+                }
+                taskXML.setSubTasksList(xmlSubTaskList);
+            }
+            xmlTaskList.add(taskXML);
+            count++;
+        }
+        projectXML.setTaskList(xmlTaskList);
+        try {
+            JAXBContext jaxbContext = JAXBContext.newInstance(ProjectXML.class);
+            Marshaller marshaller = jaxbContext.createMarshaller();
+            Utils.setHttpRequest(request);
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            response.setContentType("application/xml");
+            response.setHeader("Content-Disposition", "attachment; filename=" + filename + ".xml");
+            marshaller.marshal(projectXML, out);
+        } catch (JAXBException e) {
+            LOG.error("JAXB excetpion while exporting '{}'", e);
+        }
+    }
+
+    private void fillRowWithTask(Task task, Row row) {
+        row.createCell(NAME_CELL).setCellValue(task.getName());
+        row.createCell(DESCRIPTION_CELL).setCellValue(task.getDescription());
+        row.createCell(TYPE_CELL).setCellValue(((TaskType) task.getType()).getEnum());
+        row.createCell(PRIORITY_CELL).setCellValue(task.getPriority().toString());
+        row.createCell(ESTIMATE_CELL).setCellValue(task.getEstimate());
+        row.createCell(SP_CELL).setCellValue(task.getStory_points());
+        row.createCell(DUE_DATE_CELL).setCellValue(task.getDue_date());
     }
 
     private TaskXML toTaskXML(String count, Task task) {

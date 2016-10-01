@@ -60,6 +60,7 @@ public class ImportExportControllerTest {
     private Account testAccount;
     private Task task1;
     private Task task2;
+    private Project project;
     private ImportExportController importExportCtrl;
     @Mock
     private ProjectService projSrvMock;
@@ -97,7 +98,7 @@ public class ImportExportControllerTest {
         when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");
         when(securityMock.getAuthentication()).thenReturn(authMock);
         when(authMock.getPrincipal()).thenReturn(testAccount);
-        Project project = TestUtils.createProject();
+        project = TestUtils.createProject();
         task1 = createTask(TASK_NAME, 1, project);
         task2 = createTask(TASK_NAME, 2, project);
         when(taskSrvMock.findById(TEST_1)).thenReturn(task1);
@@ -181,14 +182,23 @@ public class ImportExportControllerTest {
     @Test
     public void exportTasksTest() {
         try {
-            List<Task> list = new LinkedList<Task>();
+            List<Task> list = new LinkedList<>();
             task1.setEstimate(new Period());
+            task1.setSubtasks(2);
+            List<Task> subtasklist = new LinkedList<>();
+            Task subTask1 = createTask(TASK_NAME, 3, project);
+            Task subTask2 = createTask(TASK_NAME, 3, project);
+            subTask1.setParent(TestUtils.TEST_1);
+            subTask2.setParent(TestUtils.TEST_2);
+            subtasklist.add(subTask1);
+            subtasklist.add(subTask2);
             list.add(task1);
             list.add(task2);
             String[] idList = {TEST_1, TEST_2};
             when(responseMock.getOutputStream()).thenReturn(outputStreamMock);
             when(taskSrvMock.finAllById(Arrays.asList(idList))).thenReturn(list);
             when(taskSrvMock.findById(TEST_2)).thenReturn(task2);
+            when(taskSrvMock.findSubtasks(task1)).thenReturn(subtasklist);
             when(projSrvMock.canView(task1.getProject())).thenReturn(true);
             importExportCtrl.exportTasks(idList, "xls", responseMock, requestMock);
         } catch (IOException | InvalidFormatException e) {
@@ -201,12 +211,21 @@ public class ImportExportControllerTest {
         try {
             List<Task> list = new LinkedList<Task>();
             task1.setEstimate(new Period());
+            task1.setSubtasks(2);
+            List<Task> subtasklist = new LinkedList<>();
+            Task subTask1 = createTask(TASK_NAME, 3, project);
+            Task subTask2 = createTask(TASK_NAME, 3, project);
+            subTask1.setParent(TestUtils.TEST_1);
+            subTask2.setParent(TestUtils.TEST_2);
+            subtasklist.add(subTask1);
+            subtasklist.add(subTask2);
             list.add(task1);
             list.add(task2);
             String[] idList = {TEST_1, TEST_2};
             when(responseMock.getOutputStream()).thenReturn(outputStreamMock);
             when(taskSrvMock.finAllById(Arrays.asList(idList))).thenReturn(list);
             when(taskSrvMock.findById(TEST_2)).thenReturn(task2);
+            when(taskSrvMock.findSubtasks(task1)).thenReturn(subtasklist);
             when(projSrvMock.canView(task1.getProject())).thenReturn(true);
             importExportCtrl.exportTasks(idList, "xml", responseMock, requestMock);
         } catch (IOException | InvalidFormatException e) {
