@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<projectXML>
+    <name>Tasker</name>
+    <taskList>
+        <task number="1">
+            <name>Project manage screen improvements</name>
+            <description>On project manage screen there are couple improvements that can be made</description>
+            <type>USER_STORY</type>
+            <priority>MAJOR</priority>
+            <estimate>0m</estimate>
+            <story_points>3</story_points>
+            <subTasksList>
+                <task number="1/1">
+                    <name>Autocomplete of all project members instead of combobox</name>
+                    <description>Instead of combobox , add autocomplete on project default assignee&amp;nbsp;
+                    </description>
+                    <type>SUBTASK</type>
+                    <priority>MAJOR</priority>
+                    <estimate>0m</estimate>
+                    <story_points>0</story_points>
+                </task>
+                <task number="1/2">
+                    <name>Allow changing of project name after it has been created</name>
+                    <description>On project manage screen allow changing project name as it should not cause any errors&amp;nbsp;</description>
+                    <type>SUBTASK</type>
+                    <priority>MAJOR</priority>
+                    <estimate>0m</estimate>
+                    <story_points>0</story_points>
+                </task>
+                <task number="1/3">
+                    <name>Improve adding/removing project admins</name>
+                    <description>Improve adding/removing project admins</description>
+                    <type>SUBTASK</type>
+                    <priority>MAJOR</priority>
+                    <estimate>0m</estimate>
+                    <story_points>0</story_points>
+                </task>
+                <task number="1/4">
+                    <name>Improve adding/removing project admins</name>
+                    <description>Improve adding/removing project admins</description>
+                    <type>BUG</type>
+                    <priority>MAJOR</priority>
+                    <estimate>0m</estimate>
+                    <story_points>0</story_points>
+                </task>
+            </subTasksList>
+        </task>
+        <task number="2">
+            <name>Fix remmeber me cookie</name>
+            <description>By default user's session is closed after 15 min . Add longer lasting cookie&amp;nbsp;
+            </description>
+            <type>BUG</type>
+            <priority>CRITICAL</priority>
+            <estimate>1h</estimate>
+            <story_points>0</story_points>
+        </task>
+        <task number="3">
+            <name>Fix remmeber me cookie</name>
+            <description>By default user's session is closed after 15 min . Add longer lasting cookie&amp;nbsp;
+            </description>
+            <type>SUBBUG</type>
+            <priority>CRITICAL</priority>
+            <estimate>1h</estimate>
+            <story_points>0</story_points>
+        </task>
+        <task number="4">
+            <description>By default user's session is closed after 15 min . Add longer lasting cookie&amp;nbsp;
+            </description>
+            <type>SUBBUG</type>
+            <priority>CRITICAL</priority>
+            <estimate>1h</estimate>
+            <story_points>0</story_points>
+        </task>
+
+    </taskList>
+</projectXML>

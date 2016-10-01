@@ -1,6 +1,7 @@
 package com.qprogramming.tasq.task;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.agile.Release;
 import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.manage.AppService;
@@ -19,11 +20,13 @@ public class TaskService {
 
     private TaskRepository taskRepo;
     private AppService appSrv;
+    private AgileService sprintSrv;
 
     @Autowired
-    public TaskService(TaskRepository taskRepo, AppService appSrv) {
+    public TaskService(TaskRepository taskRepo, AppService appSrv, AgileService sprintSrv) {
         this.taskRepo = taskRepo;
         this.appSrv = appSrv;
+        this.sprintSrv = sprintSrv;
     }
 
     public Task save(Task task) {
@@ -177,4 +180,36 @@ public class TaskService {
     public List<Task> findBySpecification(TaskFilter filter) {
         return taskRepo.findAll(new TaskSpecification(filter));
     }
+
+    /**
+     * Creates subtask for which task is parent
+     * Must be run within transactional block
+     *
+     * @param project    task project
+     * @param parentTask parent task
+     * @param subTask    new subtask
+     */
+    public Task createSubTask(Project project, Task parentTask, Task subTask) {
+        int taskCount = parentTask.getSubtasks();
+        taskCount++;
+        String taskID = createSubId(parentTask.getId(), String.valueOf(taskCount));
+        subTask.setId(taskID);
+        subTask.setParent(parentTask.getId());
+        subTask.setProject(project);
+        parentTask.addSubTask();
+        if (sprintSrv.taskInActiveSprint(parentTask)) {
+            Sprint active = sprintSrv.findByProjectIdAndActiveTrue(parentTask.getProject().getId());
+            subTask.addSprint(active);
+        }
+        Hibernate.initialize(parentTask.getSubtasks());
+        Task subtask = save(subTask);
+        save(parentTask);
+        return subtask;
+    }
+
+    public String createSubId(String id, String subId) {
+        return id + "/" + subId;
+    }
+
+
 }

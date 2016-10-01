@@ -16,6 +16,7 @@ import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 import com.qprogramming.tasq.test.MockSecurityContext;
+import com.qprogramming.tasq.test.TestUtils;
 import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Before;
@@ -39,6 +40,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
+import static com.qprogramming.tasq.test.TestUtils.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
@@ -49,13 +51,10 @@ public class ProjectControllerTest {
 
     private static final String NEW_DESCRIPTION = "newDescription";
     private static final String TASQ_AUTH_MSG = "TasqAuthException was not thrown";
-    private static final String PROJ_ID = "TEST";
-    private static final String PROJ_NAME = "Test project";
     private static final String PASSWORD = "password";
     private static final String EMAIL = "user@test.com";
     private static final String NEW_EMAIL = "newuser@test.com";
     private static final String NEW_NAME = "newName";
-    private static final String USERNAME = "user";
     private static final String NEWUSERNAME = "newUser";
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -94,7 +93,7 @@ public class ProjectControllerTest {
 
     @Before
     public void setUp() {
-        testAccount = new Account(EMAIL, "", USERNAME, Roles.ROLE_ADMIN);
+        testAccount = TestUtils.createAccount();
         testAccount.setLanguage("en");
         when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");
         when(securityMock.getAuthentication()).thenReturn(authMock);
@@ -106,7 +105,7 @@ public class ProjectControllerTest {
 
     @Test
     public void showDetailsTest() {
-        Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
+        Project project = createForm(PROJECT_NAME, PROJECT_ID).createProject();
         List<Task> taskList = new LinkedList<Task>();
         List<Task> openTaskList = new LinkedList<Task>();
         Task task = new Task();
@@ -125,9 +124,9 @@ public class ProjectControllerTest {
         openTaskList.add(task2);
 
         project.setTasks(taskList);
-        when(projSrv.findByProjectId(PROJ_ID)).thenReturn(project);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
         when(taskSrv.findByProjectAndOpen(project)).thenReturn(openTaskList);
-        projectCtr.showDetails(PROJ_ID, null, modelMock, raMock);
+        projectCtr.showDetails(PROJECT_ID, null, modelMock, raMock);
         verify(modelMock, times(1)).addAttribute("TO_DO", 1);
         verify(modelMock, times(1)).addAttribute("ONGOING", 1);
         verify(modelMock, times(1)).addAttribute("CLOSED", 1);
@@ -138,8 +137,8 @@ public class ProjectControllerTest {
 
     @Test
     public void showDetailsNoProjectsTest() {
-        when(projSrv.findByProjectId(PROJ_ID)).thenReturn(null);
-        projectCtr.showDetails(PROJ_ID, null, modelMock, raMock);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(null);
+        projectCtr.showDetails(PROJECT_ID, null, modelMock, raMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.WARNING, new Object[]{}));
 
@@ -147,13 +146,13 @@ public class ProjectControllerTest {
 
     @Test
     public void showDetailsBadAuthTest() {
-        Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
+        Project project = createForm(PROJECT_NAME, PROJECT_ID).createProject();
         testAccount.setRole(Roles.ROLE_POWERUSER);
         project.removeParticipant(testAccount);
-        when(projSrv.findByProjectId(PROJ_ID)).thenReturn(project);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
         boolean catched = false;
         try {
-            projectCtr.showDetails(PROJ_ID, null, modelMock, raMock);
+            projectCtr.showDetails(PROJECT_ID, null, modelMock, raMock);
         } catch (TasqAuthException e) {
             catched = true;
         }
@@ -163,10 +162,10 @@ public class ProjectControllerTest {
 
     @Test
     public void getProjectEventsAndChartTest() {
-        Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
-        Task task = createTask(PROJ_NAME, 1, project);
+        Project project = createForm(PROJECT_NAME, PROJECT_ID).createProject();
+        Task task = TestUtils.createTask(PROJECT_NAME, 1, project);
         project.addParticipant(testAccount);
-        when(projSrv.findByProjectId(PROJ_ID)).thenReturn(project);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
         List<WorkLog> list = new LinkedList<WorkLog>();
         WorkLog wl = new WorkLog();
         wl.setAccount(testAccount);
@@ -208,8 +207,8 @@ public class ProjectControllerTest {
         when(wrkLogSrv.findByProjectId(anyLong(), any(Pageable.class))).thenReturn(page);
         when(wrkLogSrv.findProjectCreateCloseEvents(project, false)).thenReturn(list);
         Pageable p = new PageRequest(0, 5, new Sort(Sort.Direction.ASC, "time"));
-        ResponseEntity <Page<DisplayWorkLog>> result = projectCtr.getProjectEvents(PROJ_ID, p);
-        ResponseEntity<ProjectChart> chart = projectCtr.getProjectChart(PROJ_ID, false, responseMock);
+        ResponseEntity<Page<DisplayWorkLog>> result = projectCtr.getProjectEvents(PROJECT_ID, p);
+        ResponseEntity<ProjectChart> chart = projectCtr.getProjectChart(PROJECT_ID, false, responseMock);
         String today = new LocalDate().toString();
         Assert.assertEquals(Integer.valueOf(1), chart.getBody().getClosed().get(today));
         Assert.assertEquals(Integer.valueOf(5), chart.getBody().getCreated().get(today));
@@ -221,11 +220,11 @@ public class ProjectControllerTest {
     public void getProjectEventsUnahtorizedTest() {
         boolean catched = false;
         testAccount.setRole(Roles.ROLE_POWERUSER);
-        Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
+        Project project = createForm(PROJECT_NAME, PROJECT_ID).createProject();
         project.setParticipants(new HashSet<Account>());
-        when(projSrv.findByProjectId(PROJ_ID)).thenReturn(project);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
         try {
-            projectCtr.getProjectEvents(PROJ_ID, null);
+            projectCtr.getProjectEvents(PROJECT_ID, null);
         } catch (TasqAuthException e) {
             catched = true;
         }
@@ -235,8 +234,8 @@ public class ProjectControllerTest {
 
     @Test
     public void getProjectEventsNoProjectTest() {
-        when(projSrv.findByProjectId(PROJ_ID)).thenReturn(null);
-        Assert.assertNull(projectCtr.getProjectEvents(PROJ_ID, null));
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(null);
+        Assert.assertNull(projectCtr.getProjectEvents(PROJECT_ID, null));
     }
 
     @Test
@@ -256,7 +255,7 @@ public class ProjectControllerTest {
 
     @Test
     public void createProjectSuccessTest() {
-        NewProjectForm form = createForm(PROJ_NAME, PROJ_ID);
+        NewProjectForm form = createForm(PROJECT_NAME, PROJECT_ID);
         List<Project> list = createList(1);
         Project project = form.createProject();
         Assert.assertEquals(form.getProject_id(), new NewProjectForm(project).getProject_id());
@@ -271,7 +270,7 @@ public class ProjectControllerTest {
     @Test
     public void createProjectBadAuthTest() {
         boolean catched = false;
-        NewProjectForm form = createForm(PROJ_NAME, PROJ_ID);
+        NewProjectForm form = createForm(PROJECT_NAME, PROJECT_ID);
         Errors errors = new BeanPropertyBindingResult(form, "form");
         testAccount.setRole(Roles.ROLE_VIEWER);
         try {
@@ -282,7 +281,7 @@ public class ProjectControllerTest {
         Assert.assertTrue(TASQ_AUTH_MSG, catched);
         catched = false;
         try {
-            projectCtr.manageProject(PROJ_ID, modelMock, raMock);
+            projectCtr.manageProject(PROJECT_ID, modelMock, raMock);
         } catch (TasqAuthException e) {
             catched = true;
         }
@@ -291,7 +290,7 @@ public class ProjectControllerTest {
 
     @Test
     public void createProjectIDLongErrorsTest() {
-        NewProjectForm form = createForm(PROJ_NAME, "TESTTEST");
+        NewProjectForm form = createForm(PROJECT_NAME, "TESTTEST");
         Errors errors = new BeanPropertyBindingResult(form, "form");
         projectCtr.createProject(form, errors, raMock, requestMock);
         Assert.assertTrue(errors.hasErrors());
@@ -299,7 +298,7 @@ public class ProjectControllerTest {
 
     @Test
     public void createProjectIDDigitsErrorsTest() {
-        NewProjectForm form = createForm(PROJ_NAME, "TEST2");
+        NewProjectForm form = createForm(PROJECT_NAME, "TEST2");
         Errors errors = new BeanPropertyBindingResult(form, "form");
         projectCtr.createProject(form, errors, raMock, requestMock);
         Assert.assertTrue(errors.hasErrors());
@@ -307,7 +306,7 @@ public class ProjectControllerTest {
 
     @Test
     public void createProjectErrorsTest() {
-        NewProjectForm form = createForm(PROJ_NAME, PROJ_ID);
+        NewProjectForm form = createForm(PROJECT_NAME, PROJECT_ID);
         Errors errors = new BeanPropertyBindingResult(form, "form");
         errors.rejectValue("name", "Error name");
         projectCtr.createProject(form, errors, raMock, requestMock);
@@ -316,9 +315,9 @@ public class ProjectControllerTest {
 
     @Test
     public void createProjectNameExistsTest() {
-        NewProjectForm form = createForm(PROJ_NAME, PROJ_ID);
+        NewProjectForm form = createForm(PROJECT_NAME, PROJECT_ID);
         Project project = form.createProject();
-        when(projSrv.findByName(PROJ_NAME)).thenReturn(project);
+        when(projSrv.findByName(PROJECT_NAME)).thenReturn(project);
         Errors errors = new BeanPropertyBindingResult(form, "form");
         projectCtr.createProject(form, errors, raMock, requestMock);
         Assert.assertTrue(errors.hasFieldErrors("name"));
@@ -326,9 +325,9 @@ public class ProjectControllerTest {
 
     @Test
     public void createProjectIDExistsTest() {
-        NewProjectForm form = createForm(PROJ_NAME, PROJ_ID);
+        NewProjectForm form = createForm(PROJECT_NAME, PROJECT_ID);
         Project project = form.createProject();
-        when(projSrv.findByProjectId(PROJ_ID)).thenReturn(project);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
         Errors errors = new BeanPropertyBindingResult(form, "form");
         projectCtr.createProject(form, errors, raMock, requestMock);
         Assert.assertTrue(errors.hasFieldErrors("project_id"));
@@ -336,18 +335,18 @@ public class ProjectControllerTest {
 
     @Test
     public void projectManageNoProjectTest() {
-        when(projSrv.findByProjectId(PROJ_ID)).thenReturn(null);
-        projectCtr.manageProject(PROJ_ID, modelMock, raMock);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(null);
+        projectCtr.manageProject(PROJECT_ID, modelMock, raMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
     }
 
     @Test
     public void projectManageTest() {
-        NewProjectForm form = createForm(PROJ_NAME, PROJ_ID);
+        NewProjectForm form = createForm(PROJECT_NAME, PROJECT_ID);
         Project project = form.createProject();
-        when(projSrv.findByProjectId(PROJ_ID)).thenReturn(project);
-        projectCtr.manageProject(PROJ_ID, modelMock, raMock);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
+        projectCtr.manageProject(PROJECT_ID, modelMock, raMock);
         verify(modelMock, times(1)).addAttribute("project", project);
     }
 
@@ -356,7 +355,7 @@ public class ProjectControllerTest {
         boolean catched = false;
         testAccount.setRole(Roles.ROLE_VIEWER);
         try {
-            projectCtr.updateProperties(PROJ_ID, true, TaskPriority.BLOCKER, TaskType.BUG, 1L, raMock, requestMock);
+            projectCtr.updateProperties(PROJECT_ID, true, TaskPriority.BLOCKER, TaskType.BUG, 1L, raMock, requestMock);
         } catch (TasqAuthException e) {
             catched = true;
         }
@@ -365,64 +364,64 @@ public class ProjectControllerTest {
 
     @Test
     public void updatePropertiesNoProjectTest() {
-        when(projSrv.findByProjectId(PROJ_ID)).thenReturn(null);
-        projectCtr.updateProperties(PROJ_ID, true, TaskPriority.BLOCKER, TaskType.BUG, 1L, raMock, requestMock);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(null);
+        projectCtr.updateProperties(PROJECT_ID, true, TaskPriority.BLOCKER, TaskType.BUG, 1L, raMock, requestMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
     }
 
     @Test
     public void updatePropertiesActiveSprintTest() {
-        Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
+        Project project = createForm(PROJECT_NAME, PROJECT_ID).createProject();
         project.setId(1L);
-        when(projSrv.findByProjectId(PROJ_ID)).thenReturn(project);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
         when(sprintSrvMock.findByProjectIdAndActiveTrue(1L)).thenReturn(new Sprint());
         when(accountServiceMock.findById(1L)).thenReturn(testAccount);
-        projectCtr.updateProperties(PROJ_ID, true, TaskPriority.BLOCKER, TaskType.BUG, 1L, raMock, requestMock);
+        projectCtr.updateProperties(PROJECT_ID, true, TaskPriority.BLOCKER, TaskType.BUG, 1L, raMock, requestMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.WARNING, new Object[]{}));
     }
 
     @Test
     public void updatePropertiesTest() {
-        Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
+        Project project = createForm(PROJECT_NAME, PROJECT_ID).createProject();
         project.setId(1L);
-        when(projSrv.findByProjectId(PROJ_ID)).thenReturn(project);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
         when(sprintSrvMock.findByProjectIdAndActiveTrue(1L)).thenReturn(null);
         when(accountServiceMock.findById(1L)).thenReturn(testAccount);
-        projectCtr.updateProperties(PROJ_ID, true, TaskPriority.BLOCKER, TaskType.BUG, 1L, raMock, requestMock);
+        projectCtr.updateProperties(PROJECT_ID, true, TaskPriority.BLOCKER, TaskType.BUG, 1L, raMock, requestMock);
         verify(projSrv, times(1)).save(project);
     }
 
     @Test
     public void activateProjectFailTest() {
-        when(projSrv.activateForCurrentUser(PROJ_ID)).thenReturn(null);
-        projectCtr.activate(PROJ_ID, requestMock, raMock);
+        when(projSrv.activateForCurrentUser(PROJECT_ID)).thenReturn(null);
+        projectCtr.activate(PROJECT_ID, requestMock, raMock);
         verify(raMock, never()).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.SUCCESS, new Object[]{}));
     }
 
     @Test
     public void activateProjectSuccesTest() {
-        NewProjectForm form = createForm(PROJ_NAME, PROJ_ID);
+        NewProjectForm form = createForm(PROJECT_NAME, PROJECT_ID);
         Project project = form.createProject();
-        when(projSrv.activateForCurrentUser(PROJ_ID)).thenReturn(project);
-        projectCtr.activate(PROJ_ID, requestMock, raMock);
+        when(projSrv.activateForCurrentUser(PROJECT_ID)).thenReturn(project);
+        projectCtr.activate(PROJECT_ID, requestMock, raMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.SUCCESS, new Object[]{}));
     }
 
     @Test
     public void addParticipantTest() {
-        Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
+        Project project = createForm(PROJECT_NAME, PROJECT_ID).createProject();
         testAccount.setName("John");
         testAccount.setSurname("Doe");
         project.setId(1L);
         project.addParticipant(testAccount);
         when(accountServiceMock.findByEmail(NEW_EMAIL))
                 .thenReturn(new Account(NEW_EMAIL, PASSWORD, NEWUSERNAME, Roles.ROLE_POWERUSER));
-        when(projSrv.findByProjectId(PROJ_ID)).thenReturn(project);
-        projectCtr.addParticipant(PROJ_ID, NEW_EMAIL, raMock, requestMock);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
+        projectCtr.addParticipant(PROJECT_ID, NEW_EMAIL, raMock, requestMock);
         verify(accountServiceMock, times(1)).findByEmail(anyString());
         verify(accountServiceMock, times(1)).update(any(Account.class));
         verify(projSrv, times(1)).save(project);
@@ -434,7 +433,7 @@ public class ProjectControllerTest {
         boolean catched = false;
         testAccount.setRole(Roles.ROLE_VIEWER);
         try {
-            projectCtr.addParticipant(PROJ_ID, "", raMock, requestMock);
+            projectCtr.addParticipant(PROJECT_ID, "", raMock, requestMock);
         } catch (TasqAuthException e) {
             catched = true;
         }
@@ -445,8 +444,8 @@ public class ProjectControllerTest {
     public void addParticipantNoProjectTest() {
         when(accountServiceMock.findByEmail(NEW_EMAIL))
                 .thenReturn(new Account(NEW_EMAIL, PASSWORD, USERNAME, Roles.ROLE_POWERUSER));
-        when(projSrv.findByProjectId(PROJ_ID)).thenReturn(null);
-        projectCtr.addParticipant(PROJ_ID, NEW_EMAIL, raMock, requestMock);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(null);
+        projectCtr.addParticipant(PROJECT_ID, NEW_EMAIL, raMock, requestMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
     }
@@ -455,8 +454,8 @@ public class ProjectControllerTest {
     public void removeParticipantNoProjectTest() {
         when(accountServiceMock.findById(1L))
                 .thenReturn(new Account(NEW_EMAIL, PASSWORD, NEWUSERNAME, Roles.ROLE_POWERUSER));
-        when(projSrv.findByProjectId(PROJ_ID)).thenReturn(null);
-        projectCtr.removeParticipant(PROJ_ID, 1L, raMock, requestMock);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(null);
+        projectCtr.removeParticipant(PROJECT_ID, 1L, raMock, requestMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
     }
@@ -466,7 +465,7 @@ public class ProjectControllerTest {
         boolean catched = false;
         testAccount.setRole(Roles.ROLE_VIEWER);
         try {
-            projectCtr.removeParticipant(PROJ_ID, 1L, raMock, requestMock);
+            projectCtr.removeParticipant(PROJECT_ID, 1L, raMock, requestMock);
         } catch (TasqAuthException e) {
             catched = true;
         }
@@ -475,27 +474,27 @@ public class ProjectControllerTest {
 
     @Test
     public void removeParticipantLastAdminTest() {
-        Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
+        Project project = createForm(PROJECT_NAME, PROJECT_ID).createProject();
         project.setId(1L);
         project.addAdministrator(testAccount);
         when(accountServiceMock.findById(1L)).thenReturn(testAccount);
-        when(projSrv.findByProjectId(PROJ_ID)).thenReturn(project);
-        projectCtr.removeParticipant(PROJ_ID, 1L, raMock, requestMock);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
+        projectCtr.removeParticipant(PROJECT_ID, 1L, raMock, requestMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
     }
 
     @Test
     public void removeParticipantTest() {
-        Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
+        Project project = createForm(PROJECT_NAME, PROJECT_ID).createProject();
         project.setId(1L);
         Account newUser = new Account(NEW_EMAIL, PASSWORD, NEWUSERNAME, Roles.ROLE_ADMIN);
         project.addAdministrator(newUser);
         project.addParticipant(newUser);
         project.addParticipant(testAccount);
         when(accountServiceMock.findById(1L)).thenReturn(testAccount);
-        when(projSrv.findByProjectId(PROJ_ID)).thenReturn(project);
-        projectCtr.removeParticipant(PROJ_ID, 1L, raMock, requestMock);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
+        projectCtr.removeParticipant(PROJECT_ID, 1L, raMock, requestMock);
         verify(projSrv, times(1)).save(project);
     }
 
@@ -504,14 +503,14 @@ public class ProjectControllerTest {
         boolean catched = false;
         testAccount.setRole(Roles.ROLE_VIEWER);
         try {
-            projectCtr.grantAdmin(PROJ_ID, 1L, raMock, requestMock);
+            projectCtr.grantAdmin(PROJECT_ID, 1L, raMock, requestMock);
         } catch (TasqAuthException e) {
             catched = true;
         }
         Assert.assertTrue(TASQ_AUTH_MSG, catched);
         catched = false;
         try {
-            projectCtr.removeAdmin(PROJ_ID, 1L, raMock, requestMock);
+            projectCtr.removeAdmin(PROJECT_ID, 1L, raMock, requestMock);
         } catch (TasqAuthException e) {
             catched = true;
         }
@@ -523,41 +522,41 @@ public class ProjectControllerTest {
     public void grantAndRemoveAdminNoProjectTest() {
         when(accountServiceMock.findById(1L))
                 .thenReturn(new Account(NEW_EMAIL, PASSWORD, NEWUSERNAME, Roles.ROLE_POWERUSER));
-        when(projSrv.findByProjectId(PROJ_ID)).thenReturn(null);
-        projectCtr.grantAdmin(PROJ_ID, 1L, raMock, requestMock);
-        projectCtr.removeAdmin(PROJ_ID, 1L, raMock, requestMock);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(null);
+        projectCtr.grantAdmin(PROJECT_ID, 1L, raMock, requestMock);
+        projectCtr.removeAdmin(PROJECT_ID, 1L, raMock, requestMock);
         verify(raMock, times(2)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
     }
 
     @Test
     public void grantAndRemoveAdminTest() {
-        Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
+        Project project = createForm(PROJECT_NAME, PROJECT_ID).createProject();
         project.setId(1L);
         project.addParticipant(testAccount);
         when(accountServiceMock.findById(1L))
                 .thenReturn(new Account(NEW_EMAIL, PASSWORD, NEWUSERNAME, Roles.ROLE_POWERUSER));
-        when(projSrv.findByProjectId(PROJ_ID)).thenReturn(project);
-        projectCtr.grantAdmin(PROJ_ID, 1L, raMock, requestMock);
-        projectCtr.removeAdmin(PROJ_ID, 1L, raMock, requestMock);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
+        projectCtr.grantAdmin(PROJECT_ID, 1L, raMock, requestMock);
+        projectCtr.removeAdmin(PROJECT_ID, 1L, raMock, requestMock);
         verify(projSrv, times(2)).save(project);
     }
 
     @Test
     public void grantAndRemoveLastAdminTest() {
-        Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
+        Project project = createForm(PROJECT_NAME, PROJECT_ID).createProject();
         project.setId(1L);
         project.addParticipant(testAccount);
         when(accountServiceMock.findById(1L)).thenReturn(testAccount);
-        when(projSrv.findByProjectId(PROJ_ID)).thenReturn(project);
-        projectCtr.removeAdmin(PROJ_ID, 1L, raMock, requestMock);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
+        projectCtr.removeAdmin(PROJECT_ID, 1L, raMock, requestMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
     }
 
     @Test
     public void getDefaultAssigneeTest() {
-        Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
+        Project project = createForm(PROJECT_NAME, PROJECT_ID).createProject();
         project.setId(1L);
         project.setDefaultAssigneeID(1L);
         when(accountServiceMock.findById(1L)).thenReturn(testAccount);
@@ -569,52 +568,52 @@ public class ProjectControllerTest {
 
     @Test
     public void changeDescriptionNoProjectsTest() {
-        when(projSrv.findByProjectId(PROJ_ID)).thenReturn(null);
-        projectCtr.editDescriptions(PROJ_ID, NEW_NAME, NEW_DESCRIPTION, raMock, requestMock);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(null);
+        projectCtr.editDescriptions(PROJECT_ID, NEW_NAME, NEW_DESCRIPTION, raMock, requestMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.WARNING, new Object[]{}));
     }
 
     @Test
     public void changeDescriptionBadAuthTest() {
-        Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
+        Project project = createForm(PROJECT_NAME, PROJECT_ID).createProject();
         project.setId(1L);
         project.addParticipant(testAccount);
         testAccount.setRole(Roles.ROLE_VIEWER);
         when(accountServiceMock.findById(1L)).thenReturn(testAccount);
-        when(projSrv.findByProjectId(PROJ_ID)).thenReturn(project);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
         boolean catched = false;
         try {
-            projectCtr.editDescriptions(PROJ_ID, NEW_NAME, NEW_DESCRIPTION, raMock, requestMock);
+            projectCtr.editDescriptions(PROJECT_ID, NEW_NAME, NEW_DESCRIPTION, raMock, requestMock);
         } catch (TasqAuthException e) {
             catched = true;
         }
         Assert.assertTrue(TASQ_AUTH_MSG, catched);
         testAccount.setRole(Roles.ROLE_POWERUSER);
-        projectCtr.editDescriptions(PROJ_ID, NEW_NAME, NEW_DESCRIPTION, raMock, requestMock);
+        projectCtr.editDescriptions(PROJECT_ID, NEW_NAME, NEW_DESCRIPTION, raMock, requestMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
     }
 
     @Test
     public void changeDescriptionTest() {
-        Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
+        Project project = createForm(PROJECT_NAME, PROJECT_ID).createProject();
         project.setId(1L);
         project.addParticipant(testAccount);
         when(accountServiceMock.findById(1L)).thenReturn(testAccount);
-        when(projSrv.findByProjectId(PROJ_ID)).thenReturn(project);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
         when(projSrv.canEdit(1L)).thenReturn(true);
-        projectCtr.editDescriptions(PROJ_ID, NEW_NAME, NEW_DESCRIPTION, raMock, requestMock);
+        projectCtr.editDescriptions(PROJECT_ID, NEW_NAME, NEW_DESCRIPTION, raMock, requestMock);
         Project newProject = project;
         newProject.setDescription(NEW_DESCRIPTION);
-        verify(projSrv, times(1)).findByProjectId(PROJ_ID);
+        verify(projSrv, times(1)).findByProjectId(PROJECT_ID);
         verify(projSrv, times(1)).save(newProject);
     }
 
     private List<Project> createList(int count) {
         List<Project> list = new LinkedList<Project>();
         for (int i = 0; i < count; i++) {
-            Project project = createForm(PROJ_NAME + i, PROJ_ID + 1).createProject();
+            Project project = createForm(PROJECT_NAME + i, PROJECT_ID + 1).createProject();
             project.setId(new Long(i + 1));
             list.add(project);
         }
@@ -630,17 +629,4 @@ public class ProjectControllerTest {
         form.setId(1L);
         return form;
     }
-
-    private Task createTask(String name, int no, Project project) {
-        Task task = new Task();
-        task.setName(name);
-        task.setProject(project);
-        task.setId(project.getProjectId() + "-" + no);
-        task.setPriority(TaskPriority.MAJOR);
-        task.setType(TaskType.USER_STORY);
-        task.setStory_points(2);
-        task.setState(TaskState.TO_DO);
-        return task;
-    }
-
 }
