@@ -1,9 +1,6 @@
 package com.qprogramming.tasq.projects;
 
-import com.qprogramming.tasq.account.Account;
-import com.qprogramming.tasq.account.AccountService;
-import com.qprogramming.tasq.account.DisplayAccount;
-import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.account.*;
 import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.agile.StartStop;
@@ -38,6 +35,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -62,11 +60,13 @@ public class ProjectController {
     private MessageSource msg;
     private EventsService eventsSrv;
     private HolidayService holidayService;
+    private LastVisitedService visitedSrv;
+
     private DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
 
     @Autowired
     public ProjectController(ProjectService projSrv, AccountService accSrv, TaskService taskSrv, AgileService sprintSrv,
-                             WorkLogService wrklSrv, MessageSource msg, EventsService eventsSrv, HolidayService holidayService) {
+                             WorkLogService wrklSrv, MessageSource msg, EventsService eventsSrv, HolidayService holidayService,LastVisitedService visitedSrv) {
         this.projSrv = projSrv;
         this.accSrv = accSrv;
         this.taskSrv = taskSrv;
@@ -75,6 +75,7 @@ public class ProjectController {
         this.msg = msg;
         this.eventsSrv = eventsSrv;
         this.holidayService = holidayService;
+        this.visitedSrv = visitedSrv;
     }
 
     @Transactional
@@ -89,22 +90,8 @@ public class ProjectController {
         if (!project.getParticipants().contains(Utils.getCurrentAccount()) && !Roles.isAdmin()) {
             throw new TasqAuthException(msg, "role.error.project.permission");
         }
-        // set last visited
-        Account current = Utils.getCurrentAccount();
-        List<Project> lastVisited = current.getLast_visited_p();
-        lastVisited.add(0, project);
-        List<Project> clean = new ArrayList<Project>();
-        Set<Project> lookup = new HashSet<Project>();
-        for (Project item : lastVisited) {
-            if (lookup.add(item)) {
-                clean.add(item);
-            }
-        }
-        if (clean.size() > 4) {
-            clean = clean.subList(0, 4);
-        }
-        current.setLast_visited_p(clean);
-        accSrv.update(current);
+        Account account = Utils.getCurrentAccount();
+        visitedSrv.addLastVisited(account.getId(), project);
         // Check status of all projects
         List<Task> tasks = project.getTasks();
         Map<TaskState, Integer> stateCount = new HashMap<>();
@@ -181,7 +168,7 @@ public class ProjectController {
             projects = projSrv.findAllByUser();
         }
         Collections.sort(projects, new ProjectSorter(ProjectSorter.SORTBY.LAST_VISIT,
-                Utils.getCurrentAccount().getActive_project(), true));
+                Utils.getCurrentAccount().getActiveProject(), true));
         model.addAttribute("projects", projects);
         return "project/list";
     }
@@ -236,7 +223,7 @@ public class ProjectController {
         newProject = projSrv.save(newProject);
         if (projSrv.findAllByUser().size() == 1) {
             Account account = Utils.getCurrentAccount();
-            account.setActive_project(newProject.getId());
+            account.setActiveProject(newProject.getProjectId());
             accSrv.update(account);
         }
         // TODO Create first release if Kanban ?
@@ -280,8 +267,8 @@ public class ProjectController {
                 return "redirect:/projects";
             }
             project.addParticipant(account);
-            if (account.getActive_project() == null) {
-                account.setActive_project(project.getId());
+            if (StringUtils.isEmpty(account.getActiveProject())) {
+                account.setActiveProject(project.getProjectId());
                 accSrv.update(account);
             }
             eventsSrv.addProjectEvent(account, LogType.ASSIGN_PROJ, project);

@@ -86,7 +86,6 @@
                     <th id="timeColumn" style="width: 60px; text-align: center"><s:message code="agile.time"/></th>
                     <th style="width: 90px"><s:message code="task.activeLog"/></th>
                     <th style="width: 100px"><s:message code="agile.user"/></th>
-                    <!-- 						TODO -->
                 </tr>
                 </thead>
             </table>

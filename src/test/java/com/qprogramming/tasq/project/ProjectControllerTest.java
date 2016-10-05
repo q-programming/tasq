@@ -2,6 +2,7 @@ package com.qprogramming.tasq.project;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
+import com.qprogramming.tasq.account.LastVisitedService;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.agile.Sprint;
@@ -83,6 +84,9 @@ public class ProjectControllerTest {
     @Mock
     private HolidayService holidayServiceMock;
     @Mock
+    private LastVisitedService visitedSrvMock;
+
+    @Mock
     private RedirectAttributes raMock;
     @Mock
     private HttpServletResponse responseMock;
@@ -100,7 +104,7 @@ public class ProjectControllerTest {
         when(authMock.getPrincipal()).thenReturn(testAccount);
         SecurityContextHolder.setContext(securityMock);
         projectCtr = new ProjectController(projSrv, accountServiceMock, taskSrv, sprintSrvMock, wrkLogSrv, msg,
-                eventsSrvMock, holidayServiceMock);
+                eventsSrvMock, holidayServiceMock, visitedSrvMock);
     }
 
     @Test
@@ -241,7 +245,7 @@ public class ProjectControllerTest {
     @Test
     public void listProjectsTest() {
         List<Project> list = createList(5);
-        testAccount.setActive_project(3L);
+        testAccount.setActiveProject(PROJECT_ID + 3);
         testAccount.setRole(Roles.ROLE_POWERUSER);
         when(projSrv.findAllByUser()).thenReturn(list);
         when(projSrv.findAll()).thenReturn(list);
@@ -250,7 +254,7 @@ public class ProjectControllerTest {
         testAccount.setRole(Roles.ROLE_ADMIN);
         projectCtr.listProjects(modelMock);
         verify(modelMock, times(2)).addAttribute("projects", list);
-        Assert.assertEquals(new Long(3), list.get(0).getId());
+        Assert.assertEquals(new Long(4), list.get(0).getId());
     }
 
     @Test
@@ -613,7 +617,7 @@ public class ProjectControllerTest {
     private List<Project> createList(int count) {
         List<Project> list = new LinkedList<Project>();
         for (int i = 0; i < count; i++) {
-            Project project = createForm(PROJECT_NAME + i, PROJECT_ID + 1).createProject();
+            Project project = createForm(PROJECT_NAME + i, PROJECT_ID + i).createProject();
             project.setId(new Long(i + 1));
             list.add(project);
         }

@@ -1,6 +1,7 @@
 package com.qprogramming.tasq.test;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.account.LastVisited;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.support.Utils;
@@ -58,6 +59,7 @@ public class TestUtils {
     public static Account createAccount() {
         Account testAccount = new Account(EMAIL, "", "user", Roles.ROLE_ADMIN);
         testAccount.setLanguage("en");
+        testAccount.setId(1L);
         return testAccount;
     }
 
@@ -108,5 +110,15 @@ public class TestUtils {
         wl.setMessage(msg);
         return wl;
     }
+
+    public static List<LastVisited> createLastVisitedTasks(int count) {
+        Project project = TestUtils.createProject();
+        List<LastVisited> visited = new LinkedList<>();
+        for (int i = 0; i < count; i++) {
+            visited.add(new LastVisited(TestUtils.createTask(TestUtils.TASK_NAME, i, project), createAccount().getId()));
+        }
+        return visited;
+    }
+
 
 }

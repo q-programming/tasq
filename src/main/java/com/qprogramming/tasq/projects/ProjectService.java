@@ -71,7 +71,7 @@ public class ProjectService {
         Project project = projRepo.findByProjectId(id);
         if (project != null) {
             Account account = Utils.getCurrentAccount();
-            account.setActive_project(project.getId());
+            account.setActiveProject(project.getProjectId());
             accSrv.update(account);
             return projRepo.save(project);
         }
@@ -87,14 +87,14 @@ public class ProjectService {
      */
     public Project findUserActiveProject() {
         Account account = Utils.getCurrentAccount();
-        if (account.getActive_project() == null) {
+        if (StringUtils.isBlank(account.getActiveProject())) {
             // if there is not active project, force reload current logged user
             account = accSrv.findById(Utils.getCurrentAccount().getId());
-            if (account.getActive_project() != null) {
+            if (StringUtils.isNotBlank(account.getActiveProject())) {
                 userSrv.signin(account);
             }
         }
-        return projRepo.findById(account.getActive_project());
+        return projRepo.findByProjectId(account.getActiveProject());
     }
 
     public List<Account> getProjectAccounts(String id, String term) {

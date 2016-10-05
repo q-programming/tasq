@@ -5,6 +5,7 @@ package com.qprogramming.tasq.task;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
+import com.qprogramming.tasq.account.LastVisitedService;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.agile.Sprint;
@@ -99,11 +100,12 @@ public class TaskController {
     private CommentsRepository commRepo;
     private TagsRepository tagsRepo;
     private EventsService eventSrv;
+    private LastVisitedService visitedSrv;
 
     @Autowired
     public TaskController(TaskService taskSrv, ProjectService projectSrv, AccountService accSrv, WorkLogService wlSrv,
                           MessageSource msg, AgileService sprintSrv, TaskLinkService linkService, CommentsRepository commRepo,
-                          TagsRepository tagsRepo, WatchedTaskService watchSrv, EventsService eventSrv) {
+                          TagsRepository tagsRepo, WatchedTaskService watchSrv, EventsService eventSrv, LastVisitedService visitedSrv) {
         this.taskSrv = taskSrv;
         this.projectSrv = projectSrv;
         this.accSrv = accSrv;
@@ -115,6 +117,7 @@ public class TaskController {
         this.tagsRepo = tagsRepo;
         this.watchSrv = watchSrv;
         this.eventSrv = eventSrv;
+        this.visitedSrv = visitedSrv;
     }
 
     @RequestMapping(value = "task/create", method = RequestMethod.GET)
@@ -345,6 +348,7 @@ public class TaskController {
         return showTaskDetails(taskSrv.createSubId(id, subId), model, ra);
     }
 
+    @Transactional
     @RequestMapping(value = "task/{id}", method = RequestMethod.GET)
     public String showTaskDetails(@PathVariable String id, Model model, RedirectAttributes ra) {
         Task task = taskSrv.findById(id);
@@ -353,20 +357,7 @@ public class TaskController {
             return "redirect:/tasks";
         }
         Account account = Utils.getCurrentAccount();
-        List<Task> lastVisited = account.getLast_visited_t();
-        lastVisited.add(0, task);
-        List<Task> clean = new ArrayList<>();
-        Set<Task> lookup = new HashSet<>();
-        for (Task item : lastVisited) {
-            if (lookup.add(item)) {
-                clean.add(item);
-            }
-        }
-        if (clean.size() > 4) {
-            clean = clean.subList(0, 4);
-        }
-        account.setLast_visited_t(clean);
-        account = accSrv.update(account);
+        visitedSrv.addLastVisited(account.getId(), task);
         // TASK
         Set<Comment> comments = commRepo.findByTaskIdOrderByDateDesc(id);
         Map<TaskLinkType, List<DisplayTask>> links = linkService.findTaskLinks(id);
@@ -407,7 +398,7 @@ public class TaskController {
         Account currentAccount = Utils.getCurrentAccount();
         List<Project> projects = projectSrv.findAllByUser();
         Collections.sort(projects, new ProjectSorter(ProjectSorter.SORTBY.LAST_VISIT,
-                currentAccount.getActive_project(), true));
+                currentAccount.getActiveProject(), true));
         Account assigneeAccount = null;
         if (StringUtils.isNotEmpty(assignee)) {
             assigneeAccount = accSrv.findByUsername(assignee);
@@ -419,7 +410,7 @@ public class TaskController {
         // Get active or choosen project
         Optional<Project> projectObj;
         if (projId == null) {
-            projectObj = projects.stream().filter(p -> p.getId().equals(currentAccount.getActive_project())).findFirst();
+            projectObj = projects.stream().filter(p -> p.getProjectId().equals(currentAccount.getActiveProject())).findFirst();
         } else {
             projectObj = projects.stream().filter(p -> p.getProjectId().equals(projId)).findFirst();
         }
@@ -1219,15 +1210,16 @@ public class TaskController {
                         new Object[]{accountsWorking.toString()}, Utils.getCurrentLocale()));
             }
             if (remove) {
-                List<Task> lastVisited = account.getLast_visited_t();
-                if (lastVisited.contains(task)) {
-                    lastVisited.remove(task);
-                    account.setLast_visited_t(lastVisited);
-                    update = true;
-                }
-                if (account.equals(Utils.getCurrentAccount())) {
-                    Utils.getCurrentAccount().setLast_visited_t(lastVisited);
-                }
+                //TODO add last visited task
+//                List<Task> lastVisited = account.getLast_visited_t();
+//                if (lastVisited.contains(task)) {
+//                    lastVisited.remove(task);
+//                    account.setLast_visited_t(lastVisited);
+//                    update = true;
+//                }
+//                if (account.equals(Utils.getCurrentAccount())) {
+//                    Utils.getCurrentAccount().setLast_visited_t(lastVisited);
+//                }
             }
             if (update) {
                 accSrv.update(account);

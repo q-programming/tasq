@@ -1,9 +1,6 @@
 package com.qprogramming.tasq.home;
 
-import com.qprogramming.tasq.account.Account;
-import com.qprogramming.tasq.account.AccountService;
-import com.qprogramming.tasq.account.Roles;
-import com.qprogramming.tasq.account.UserService;
+import com.qprogramming.tasq.account.*;
 import com.qprogramming.tasq.events.EventsService;
 import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.projects.Project;
@@ -56,6 +53,8 @@ public class HomeControllersTest {
     @Mock
     private AppService appSrvMock;
     @Mock
+    private LastVisitedService visitedSrvMock;
+    @Mock
     private MockSecurityContext securityMock;
     @Mock
     private Authentication authMock;
@@ -73,7 +72,7 @@ public class HomeControllersTest {
         SecurityContextHolder.setContext(securityMock);
         projSrv = new ProjectService(projRepoMock, accSrvMock, usrSrvMock);
         homeCtrl = new HomeController(taskSrvMock, projSrv, appSrvMock, eventSrvMock);
-        homeAdvCtrl = new HomeControllerAdvice(accSrvMock, eventSrvMock);
+        homeAdvCtrl = new HomeControllerAdvice(accSrvMock, eventSrvMock, visitedSrvMock);
     }
 
     @Test
@@ -101,25 +100,25 @@ public class HomeControllersTest {
 
     }
 
+    //TODO add test
     @Test
     public void getLastProjectsTest() {
         Project project = createProject();
-        project.setId(2L);
-        testAccount.setActive_project(project.getId());
-        List<Project> projectList = new LinkedList<Project>();
-        projectList.add(project);
-        projectList.add(createProject(2L, "NEW"));
-        testAccount.setLast_visited_p(projectList);
+        Project project2 = createProject(2L, "NEW");
+        List<LastVisited> lastVisitedProjects = new LinkedList<>();
+        lastVisitedProjects.add(new LastVisited(project, testAccount.getId()));
+        lastVisitedProjects.add(new LastVisited(project2, testAccount.getId()));
+        testAccount.setActiveProject(project.getProjectId());
         when(accSrvMock.findByUsername(anyString())).thenReturn(testAccount);
-        Assert.assertEquals(PROJECT_ID, homeAdvCtrl.getLastProjects().get(0).getProjectId());
+        when(visitedSrvMock.getAccountLastProjects(testAccount.getId())).thenReturn(lastVisitedProjects);
+        Assert.assertEquals(PROJECT_NAME, homeAdvCtrl.getLastProjects().get(0).getItemName());
     }
 
     @Test
     public void getLastTasksTest() {
-        Project project = createProject();
-        testAccount.setLast_visited_t(createTaskList(project));
         when(accSrvMock.findByUsername(anyString())).thenReturn(testAccount);
-        Assert.assertEquals("TASK0", homeAdvCtrl.getLastTasks().get(0).getName());
+        when(visitedSrvMock.getAccountLastTasks(testAccount.getId())).thenReturn(TestUtils.createLastVisitedTasks(3));
+        Assert.assertEquals("TEST-0", homeAdvCtrl.getLastTasks().get(0).getItemId());
     }
 
     private List<Task> createTaskList(Project project) {

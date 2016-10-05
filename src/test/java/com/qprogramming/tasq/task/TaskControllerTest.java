@@ -2,6 +2,7 @@ package com.qprogramming.tasq.task;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
+import com.qprogramming.tasq.account.LastVisitedService;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.agile.Sprint;
@@ -87,6 +88,8 @@ public class TaskControllerTest {
     @Mock
     private EventsService eventSrvMock;
     @Mock
+    private LastVisitedService visitedSrvMock;
+    @Mock
     private MockSecurityContext securityMock;
     @Mock
     private Authentication authMock;
@@ -111,7 +114,7 @@ public class TaskControllerTest {
         SecurityContextHolder.setContext(securityMock);
         taskSrv = new TaskService(taskRepoMock, appSrv, sprintSrvMock);
         taskCtr = new TaskController(taskSrv, projSrvMock, accountServiceMock, wrkLogSrv, msgMock, sprintSrvMock,
-                taskLinkSrvMock, commRepoMock, tagsRepoMock, watchSrvMock, eventSrvMock);
+                taskLinkSrvMock, commRepoMock, tagsRepoMock, watchSrvMock, eventSrvMock, visitedSrvMock);
     }
 
     @Test
@@ -420,12 +423,6 @@ public class TaskControllerTest {
         when(taskRepoMock.findById(TEST_1)).thenReturn(task1);
         when(projSrvMock.canEdit(project)).thenReturn(true);
         when(taskRepoMock.findByParent(TEST_1)).thenReturn(subtasks);
-        List<Task> lastVisited = new LinkedList<Task>();
-        lastVisited.add(task2);
-        lastVisited.add(task3);
-        lastVisited.add(task4);
-        lastVisited.add(task5);
-        testAccount.setLast_visited_t(lastVisited);
         taskCtr.showTaskDetails(TEST_1, modelMock, raMock);
         Assert.assertEquals(44.0F, task1.getPercentage_left(), 0);
         verify(modelMock, times(6)).addAttribute(anyString(), anyObject());

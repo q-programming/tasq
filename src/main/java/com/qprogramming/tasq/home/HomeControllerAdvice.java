@@ -1,27 +1,20 @@
 package com.qprogramming.tasq.home;
 
-import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
-import com.qprogramming.tasq.events.Event;
+import com.qprogramming.tasq.account.LastVisited;
+import com.qprogramming.tasq.account.LastVisitedService;
 import com.qprogramming.tasq.events.EventsService;
-import com.qprogramming.tasq.projects.DisplayProject;
-import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.support.Utils;
-import com.qprogramming.tasq.support.sorters.ProjectSorter;
-import com.qprogramming.tasq.task.DisplayTask;
-import com.qprogramming.tasq.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Secured("ROLE_USER")
 @ControllerAdvice
@@ -29,48 +22,33 @@ public class HomeControllerAdvice {
     private AccountService accSrv;
     private EventsService eventSrv;
 
+    private LastVisitedService visitedSrv;
+
+
     @Autowired
-    public HomeControllerAdvice(AccountService accSrv, EventsService eventSrv) {
+    public HomeControllerAdvice(AccountService accSrv, EventsService eventSrv,LastVisitedService visitedSrv) {
         this.eventSrv = eventSrv;
         this.accSrv = accSrv;
-
+        this.visitedSrv = visitedSrv;
     }
 
-    @ModelAttribute("last_projects")
-    public List<DisplayProject> getLastProjects() {
+    @Transactional
+    @ModelAttribute("lastProjects")
+    public List<LastVisited> getLastProjects() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            // Get lasts 5 projects
-            Account currentAccount = Utils.getCurrentAccount();
-            currentAccount = accSrv.findByUsername(currentAccount.getUsername());
-            List<Project> projects = currentAccount.getLast_visited_p();
-            Collections.sort(projects, new ProjectSorter(ProjectSorter.SORTBY.LAST_VISIT,
-                    Utils.getCurrentAccount().getActive_project(), true));
-            return projects.stream().map(DisplayProject::new).collect(Collectors.toCollection(LinkedList::new));
+            return visitedSrv.getAccountLastProjects(Utils.getCurrentAccount().getId());
         }
         return null;
     }
 
-    @ModelAttribute("last_tasks")
-    public List<DisplayTask> getLastTasks() {
+    @Transactional
+    @ModelAttribute("lastTasks")
+    public List<LastVisited> getLastTasks() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            // Get lasts 5 Tasks
-            Account current_account = Utils.getCurrentAccount();
-            current_account = accSrv.findByUsername(current_account.getUsername());
-            List<Task> tasks = current_account.getLast_visited_t();
-            return tasks.stream().map(DisplayTask::new).collect(Collectors.toList());
+            return visitedSrv.getAccountLastTasks(Utils.getCurrentAccount().getId());
         }
         return null;
     }
-
-//    @ModelAttribute("eventCount")
-//    public int getEvents() {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-//            List<Event> events = eventSrv.getUnread();
-//            return events.size();
-//        }
-//        return 0;
-//    }
 }

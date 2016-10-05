@@ -14,6 +14,7 @@ import com.qprogramming.tasq.task.worklog.WorkLogService;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -43,6 +44,17 @@ public class CommentsController {
         this.wlSrv = wlSrv;
         this.msg = msg;
     }
+
+    @Transactional
+    @RequestMapping(value = "/task/{id}/comments", method = RequestMethod.POST)
+    public ResponseEntity<?> getComments(@PathVariable(value = "id") String id, HttpServletRequest request, RedirectAttributes ra) {
+        Task task = taskSrv.findById(id);
+        if (task == null) {
+            return ResponseEntity.badRequest().body(msg.getMessage("task.notexists", null, Utils.getCurrentLocale()));
+        }
+        return ResponseEntity.ok(commRepo.findByTaskIdOrderByDateDesc(id));
+    }
+
 
     @Transactional
     @RequestMapping(value = "/task/comment", method = RequestMethod.POST)
@@ -151,7 +163,7 @@ public class CommentsController {
 //                    msg.getMessage("comment.htmlTag", null, locale));
 //            return false;
 //        }
-        else if (message.length() > 4000){
+        else if (message.length() > 4000) {
             MessageHelper.addErrorAttribute(ra,
                     msg.getMessage("comment.tooLong", new Object[]{message.length()}, locale));
             return false;

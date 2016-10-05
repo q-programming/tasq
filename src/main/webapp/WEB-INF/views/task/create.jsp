@@ -76,7 +76,7 @@
             <c:set var="chosenProject" value="${param.p}"/>
         </c:if>
         <c:if test="${empty param.p}">
-            <c:set var="chosenProject" value="${user.active_project}"/>
+            <c:set var="chosenProject" value="${user.activeProject}"/>
         </c:if>
         <a class="anchor" id="projectA"></a>
         <div class="form-group">
@@ -89,7 +89,7 @@
                          disabled="${not empty param.project}">
                 <c:forEach items="${projects_list}" var="list_project">
                     <option id="${list_project.projectId}"
-                            <c:if test="${list_project.id eq chosenProject}">selected style="font-weight:bold"
+                            <c:if test="${list_project.projectId eq chosenProject}">selected style="font-weight:bold"
                     </c:if>
                             value="${list_project.id}">${list_project}</option>
                 </c:forEach>

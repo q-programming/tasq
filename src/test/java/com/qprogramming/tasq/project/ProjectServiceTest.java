@@ -99,8 +99,8 @@ public class ProjectServiceTest {
 
     @Test
     public void findUserActiveProjectTest() {
-        testAccount.setActive_project(1L);
-        when(projRepoMock.findById(1L)).thenReturn(testProject);
+        testAccount.setActiveProject(PROJECT_ID);
+        when(projRepoMock.findByProjectId(PROJECT_ID)).thenReturn(testProject);
         Assert.assertNotNull(projSrv.findUserActiveProject());
     }
 

@@ -31,7 +31,8 @@
         </c:choose>
     </li>
     <li role="presentation" class="divider"></li>
-    <li><a href='<c:url value="/tasks?assignee="/>${user.username}'><i class="fa fa-lg fa-user"></i>&nbsp;<strong><s:message code="task.list.my" text="Create"/></strong></a></li>
+    <li><a href='<c:url value="/tasks?assignee="/>${user.username}'><i
+            class="fa fa-lg fa-user"></i>&nbsp;<strong><s:message code="task.list.my" text="Create"/></strong></a></li>
 
     <li role="presentation" class="divider"></li>
     <!-- 		PROJECTS -->
@@ -40,15 +41,15 @@
             class="fa fa-list"></i>&nbsp;<strong><s:message
             code="project.projects" text="Projects"/></strong></a>
         <ul class="menu-items">
-            <c:forEach items="${last_projects}" var="l_project">
-                <c:if test="${l_project.id eq user.active_project}">
-                    <li><a href="<c:url value="/project/${l_project.projectId}"/>">[${l_project.projectId}]
-                            ${l_project.name}</a></li>
+            <c:forEach items="${lastProjects}" var="lProject">
+                <c:if test="${lProject.itemId eq user.activeProject}">
+                    <li><a href="<c:url value="/project/${lProject.itemId}"/>">[${lProject.itemId}]
+                            ${lProject.itemName}</a></li>
                 </c:if>
-                <c:if test="${l_project.id ne user.active_project}">
+                <c:if test="${lProject.itemId ne user.activeProject}">
                     <li class="project-menu"><a
-                            href="<c:url value="/project/${l_project.projectId}"/>">[${l_project.projectId}]
-                            ${l_project.name}</a></li>
+                            href="<c:url value="/project/${lProject.itemId}"/>">[${lProject.itemId}]
+                            ${lProject.itemName}</a></li>
                 </c:if>
             </c:forEach>
             <li role="presentation" class="divider project-menu"></li>
@@ -64,19 +65,19 @@
             class="fa fa-lg fa-check-square"></i>&nbsp;<strong><s:message
             code="task.tasks" text="Tasks"/></strong></a>
         <ul class="menu-items">
-            <c:forEach items="${last_tasks}" var="l_task">
-                <c:if test="${l_task.id eq user.active_task[0]}">
+            <c:forEach items="${lastTasks}" var="lTask">
+                <c:if test="${lTask.itemId eq user.active_task[0]}">
                     <li><span class="active-task"><i
                             class="fa fa-lg fa-spin fa-repeat"></i></span> <t:type
-                            type="${l_task.type}" list="true"/><a
-                            href="<c:url value="/task/${l_task.id}"/>">[${l_task.id}]
-                            ${l_task.name}</a></li>
+                            type="${lTask.type}" list="true"/><a
+                            href="<c:url value="/task/${lTask.itemId}"/>">[${lTask.itemId}]
+                            ${lTask.itemName}</a></li>
                 </c:if>
-                <c:if test="${l_task.id ne user.active_task[0]}">
-                    <li class="task-menu"><t:type type="${l_task.type}"
+                <c:if test="${lTask.itemId ne user.active_task[0]}">
+                    <li class="task-menu"><t:type type="${lTask.type}"
                                                   list="true"/><a
-                            href="<c:url value="/task/${l_task.id}"/>">[${l_task.id}]
-                            ${l_task.name}</a></li>
+                            href="<c:url value="/task/${lTask.itemId}"/>">[${lTask.itemId}]
+                            ${lTask.itemName}</a></li>
                 </c:if>
             </c:forEach>
             <li role="presentation" class="divider task-menu"></li>
@@ -93,17 +94,15 @@
             class="fa fa-lg fa-desktop"></i>&nbsp;<strong><s:message
             code="agile.agile" text="Agile"/></strong></a>
         <ul class="menu-items">
-            <c:forEach items="${last_projects}" var="l_project">
-                <c:if test="${l_project.id eq user.active_project}">
+            <c:forEach items="${lastProjects}" var="lProject">
+                <c:if test="${lProject.itemId eq user.activeProject}">
                     <li>
-                        <a href="<c:url value="/${l_project.projectId}/${l_project.agile.code}/board"/>">${l_project.name}
-                            (<s:message code="agile.board.${l_project.agile}"/>)
+                        <a href="<c:url value="/${lProject.itemId}/agile/board"/>">[${lProject.itemId}] ${lProject.itemName}
                         </a></li>
                 </c:if>
-                <c:if test="${l_project.id ne user.active_project}">
+                <c:if test="${lProject.itemId ne user.activeProject}">
                     <li class="agile-menu"><a
-                            href="<c:url value="/${l_project.projectId}/${l_project.agile.code}/board"/>">${l_project.name}
-                        (<s:message code="agile.board.${l_project.agile}"/>)
+                            href="<c:url value="/${lProject.itemId}/agile/board"/>">[${lProject.itemId}] ${lProject.itemName}
                     </a></li>
                 </c:if>
             </c:forEach>
