@@ -934,6 +934,16 @@ td.width200{
         border: 1px solid #000;
     }
 }
+.tour-bubble-button {
+    border: 1px solid lightgray;
+    padding: 3px;
+}
+.tour-button{
+    width: 200px;
+    padding-left: 30px;
+    text-align: left;
+}
+
 
 /* .search { position: relative; } */
 /* .search input { text-indent: 30px;} */

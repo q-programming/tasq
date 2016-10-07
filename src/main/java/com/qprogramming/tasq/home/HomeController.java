@@ -12,6 +12,7 @@ import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
@@ -114,4 +116,12 @@ public class HomeController {
         return "help/" + lang;
     }
 
+    @RequestMapping(value = "/tour")
+    public String taskTour(@RequestParam(required = false) String page) {
+        if (StringUtils.isBlank(page)) {
+            return "help/tour_tasker";
+        } else {
+            return "help/tour_" + page;
+        }
+    }
 }

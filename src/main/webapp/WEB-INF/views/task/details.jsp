@@ -1,3 +1,4 @@
+<!--Start details-->
 <%@page import="com.qprogramming.tasq.account.Roles" %>
 <%@ page trimDirectiveWhitespaces="true" %>
 <%@page import="com.qprogramming.tasq.task.TaskPriority" %>
@@ -864,6 +865,7 @@
 <c:if test="${task.subtask}">
     <jsp:include page="../modals/convert2task.jsp"/>
 </c:if>
+<!--End details-->
 <!-- Edit Comment Modal -->
 <div class="modal fade" id="commentModal" tabindex="-1" role="dialog"
      aria-labelledby="role" aria-hidden="true">

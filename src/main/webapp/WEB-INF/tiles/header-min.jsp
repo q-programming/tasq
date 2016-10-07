@@ -34,7 +34,7 @@
                         </ul>
                     </li>
                     <!-- Events -->
-                    <li>
+                    <li id="events-icon">
                         <a id="event-menu-icon" class="theme a-tooltip" href='<c:url value="/events"/>'
                            title="<s:message
 									code="events.events" />"> <i
@@ -42,7 +42,7 @@
                         </a>
                     </li>
                     <li>
-                        <div class="pull-right" style="margin-right: 40px">
+                        <div id="user-menu" class="pull-right" style="margin-right: 40px">
                             <a href="#" class="theme nav-dropdown" data-toggle="dropdown">
 								<span class="padding-right10">
 								<img src="<c:url value="/../avatar/${user.id}.png"/>"
