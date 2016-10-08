@@ -49,8 +49,8 @@ public class LastVisitedServiceTest {
 
     @Test
     public void addLastVisitedMoreTest() throws Exception {
-        Task visitedTask = TestUtils.createTask(TestUtils.TASK_NAME, 4, TestUtils.createProject());
-        List<LastVisited> lastVisitedTasks = TestUtils.createLastVisitedTasks(4);
+        Task visitedTask = TestUtils.createTask(TestUtils.TASK_NAME, 5, TestUtils.createProject());
+        List<LastVisited> lastVisitedTasks = TestUtils.createLastVisitedTasks(5);
         lastVisitedTasks.get(3).setTime(new DateTime().minusDays(1).toDate());
         LastVisited oldest = lastVisitedTasks.get(3);
         when(lastVisitedRepositoryMock.findByAccountAndTypeNotNullOrderByTimeAsc(testAccount.getId())).thenReturn(lastVisitedTasks);

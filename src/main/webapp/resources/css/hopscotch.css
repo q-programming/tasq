@@ -281,7 +281,7 @@ div.hopscotch-bubble .hopscotch-nav-button.next {
   margin: 0 0 0 10px;
   /* HS specific*/
   /*text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);*/
-  background-color: #287bbc;
+  background-color: #2c5aa0;
   filter: progid:DXImageTransform.Microsoft.gradient(gradientType=0, startColorstr='#287bbc', endColorstr='#23639a');
   /*background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #287bbc), color-stop(100%, #23639a));*/
   /*background-image: -webkit-linear-gradient(top, #287bbc 0%, #23639a 100%);*/
@@ -290,7 +290,7 @@ div.hopscotch-bubble .hopscotch-nav-button.next {
   /*background-image: linear-gradient(top, #287bbc 0%, #23639a 100%);*/
 }
 div.hopscotch-bubble .hopscotch-nav-button.next:hover {
-  background-color: #2672ae;
+  background-color: #1a3867;
   /*filter: progid:DXImageTransform.Microsoft.gradient(gradientType=0, startColorstr='#2672ae', endColorstr='#1e4f7e');*/
   /*background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #2672ae), color-stop(100%, #1e4f7e));*/
   /*background-image: -webkit-linear-gradient(top, #2672ae 0%, #1e4f7e 100%);*/

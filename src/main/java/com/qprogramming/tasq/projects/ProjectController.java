@@ -66,7 +66,7 @@ public class ProjectController {
 
     @Autowired
     public ProjectController(ProjectService projSrv, AccountService accSrv, TaskService taskSrv, AgileService sprintSrv,
-                             WorkLogService wrklSrv, MessageSource msg, EventsService eventsSrv, HolidayService holidayService,LastVisitedService visitedSrv) {
+                             WorkLogService wrklSrv, MessageSource msg, EventsService eventsSrv, HolidayService holidayService, LastVisitedService visitedSrv) {
         this.projSrv = projSrv;
         this.accSrv = accSrv;
         this.taskSrv = taskSrv;
@@ -93,7 +93,7 @@ public class ProjectController {
         Account account = Utils.getCurrentAccount();
         visitedSrv.addLastVisited(account.getId(), project);
         // Check status of all projects
-        List<Task> tasks = project.getTasks();
+        List<Task> tasks = project.getTasks().stream().filter(task -> !task.isSubtask()).collect(Collectors.toList());
         Map<TaskState, Integer> stateCount = new HashMap<>();
         for (TaskState state : TaskState.values()) {
             stateCount.put(state, 0);
@@ -115,9 +115,6 @@ public class ProjectController {
             taskList = taskSrv.findAllByProject(project);
         }
         Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID, false));
-        // Initilize getRawWorkLog for all task in this project . Otherwise lazy
-        // init exception is thrown
-        // Utils.initializeWorkLogs(taskList);
         model.addAttribute("tasks", taskList);
         model.addAttribute("project", project);
         return "project/details";

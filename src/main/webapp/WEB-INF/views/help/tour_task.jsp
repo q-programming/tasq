@@ -3,13 +3,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
-<%@ taglib uri="http://www.springframework.org/security/tags"
-           prefix="security" %>
-<security:authentication property="principal" var="user"/>
-<security:authorize access="hasRole('ROLE_ADMIN')">
-    <c:set var="is_admin" value="true"/>
-</security:authorize>
-
 <script src="<c:url value="/resources/js/hopscotch.js" />"></script>
 <link href="<c:url value="/resources/css/hopscotch.css" />" rel="stylesheet"
       media="screen"/>
@@ -53,7 +46,7 @@
                title="User story"></i>
             <a href='#'>TST</a>
             / [TST-1] Sample task<span id="task-name"></span>
-            <a href="<c:url value="/tour"/>" id="go-back" class="btn btn-default btn-success btn-lg"
+            <a href="<c:url value="/tour"/>" id="go-back" class="btn btn-default btn-success"
                style="margin-left:100px; display:none">
                 Click here to go back to tours page
             </a>
@@ -1157,10 +1150,9 @@
                 },
                 yOffset: -15,
             },
-
             {
                 title: "Done",
-                content: 'Go back to tour page or start using ${applicationName}',
+                content: 'Go back to tour page, or start using ${applicationName}',
                 target: "task-name",
                 placement: "bottom",
                 yOffset: 10,

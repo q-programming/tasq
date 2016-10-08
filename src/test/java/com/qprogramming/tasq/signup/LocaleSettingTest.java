@@ -2,6 +2,7 @@ package com.qprogramming.tasq.signup;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountRepository;
+import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.signin.LocaleSettingAuthenticationSuccessHandler;
 import com.qprogramming.tasq.test.MockSecurityContext;
 import com.qprogramming.tasq.test.TestUtils;
@@ -49,6 +50,8 @@ public class LocaleSettingTest {
     private SessionLocaleResolver localeResolver;
     @Mock
     private HttpSession sessionMock;
+    @Mock
+    private AccountService accountSrvMock;
     @Mock
     private SavedRequest savedRequestMock;
     private Account testAccount = TestUtils.createAccount();

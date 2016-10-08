@@ -43,17 +43,22 @@
         <ul class="menu-items">
             <c:forEach items="${lastProjects}" var="lProject">
                 <c:if test="${lProject.itemId eq user.activeProject}">
-                    <li><a href="<c:url value="/project/${lProject.itemId}"/>">[${lProject.itemId}]
-                            ${lProject.itemName}</a></li>
+                    <li>
+                        <a href="<c:url value="/project/${lProject.itemId}"/>" style="color: black;">
+                            [${lProject.itemId}] ${lProject.itemName}
+                        </a>
+                    </li>
                 </c:if>
                 <c:if test="${lProject.itemId ne user.activeProject}">
-                    <li class="project-menu"><a
-                            href="<c:url value="/project/${lProject.itemId}"/>">[${lProject.itemId}]
-                            ${lProject.itemName}</a></li>
+                    <li class="project-menu">
+                        <a href="<c:url value="/project/${lProject.itemId}"/>" style="color: black;">
+                            [${lProject.itemId}] ${lProject.itemName}
+                        </a>
+                    </li>
                 </c:if>
             </c:forEach>
             <li role="presentation" class="divider project-menu"></li>
-            <li class="project-menu"><a href="<c:url value="/projects"/>"><i
+            <li class="project-menu"><a href="<c:url value="/projects"/>" style="color: black;"><i
                     class="fa fa-list"></i> <s:message code="project.showAll"
                                                        text="Projects"/></a></li>
         </ul>
@@ -67,25 +72,30 @@
         <ul class="menu-items">
             <c:forEach items="${lastTasks}" var="lTask">
                 <c:if test="${lTask.itemId eq user.active_task[0]}">
-                    <li><span class="active-task"><i
-                            class="fa fa-lg fa-spin fa-repeat"></i></span> <t:type
-                            type="${lTask.type}" list="true"/><a
-                            href="<c:url value="/task/${lTask.itemId}"/>">[${lTask.itemId}]
-                            ${lTask.itemName}</a></li>
+                    <li>
+                        <span class="active-task"><i class="fa fa-lg fa-spin fa-repeat"></i></span>
+                        <t:type type="${lTask.type}" list="true"/>
+                        <a style="color: black;" href="<c:url value="/task/${lTask.itemId}"/>">
+                            [${lTask.itemId}] ${lTask.itemName}
+                        </a>
+                    </li>
                 </c:if>
                 <c:if test="${lTask.itemId ne user.active_task[0]}">
-                    <li class="task-menu"><t:type type="${lTask.type}"
-                                                  list="true"/><a
-                            href="<c:url value="/task/${lTask.itemId}"/>">[${lTask.itemId}]
-                            ${lTask.itemName}</a></li>
+                    <li class="task-menu">
+                        <t:type type="${lTask.type}" list="true"/>
+                        <a style="color: black;" href="<c:url value="/task/${lTask.itemId}"/>">
+                            [${lTask.itemId}] ${lTask.itemName}
+                        </a>
+                    </li>
                 </c:if>
             </c:forEach>
             <li role="presentation" class="divider task-menu"></li>
-            <li id="alltasks-menu" class="task-menu"><a href="<c:url value="/tasks"/>"><i
-                    class="fa fa-list"></i> <s:message code="task.showAll"
-                                                       text="Show all"/></a></li>
+            <li id="alltasks-menu" class="task-menu">
+                <a href="<c:url value="/tasks"/>" style="color: black;">
+                    <i class="fa fa-list"></i> <s:message code="task.showAll" text="Show all"/>
+                </a>
+            </li>
         </ul>
-    </li>
     </li>
     <li role="presentation" class="divider"></li>
     <!-- 		AGILE -->
@@ -97,56 +107,65 @@
             <c:forEach items="${lastProjects}" var="lProject">
                 <c:if test="${lProject.itemId eq user.activeProject}">
                     <li>
-                        <a href="<c:url value="/${lProject.itemId}/agile/board"/>">[${lProject.itemId}] ${lProject.itemName}
-                        </a></li>
+                        <a href="<c:url value="/${lProject.itemId}/agile/board"/>" style="color: black;">
+                            [${lProject.itemId}] ${lProject.itemName}
+                        </a>
+                    </li>
                 </c:if>
                 <c:if test="${lProject.itemId ne user.activeProject}">
-                    <li class="agile-menu"><a
-                            href="<c:url value="/${lProject.itemId}/agile/board"/>">[${lProject.itemId}] ${lProject.itemName}
-                    </a></li>
+                    <li class="agile-menu">
+                        <a href="<c:url value="/${lProject.itemId}/agile/board"/>" style="color: black;">
+                            [${lProject.itemId}] ${lProject.itemName}
+                        </a></li>
                 </c:if>
             </c:forEach>
             <li role="presentation" class="divider agile-menu"></li>
-            <li class="agile-menu"><a href="<c:url value="/boards"/>"><i
-                    class="fa fa-list"></i><strong> <s:message
-                    code="agile.showAll" text="Show all"/></strong></a></li>
+            <li class="agile-menu">
+                <a href="<c:url value="/boards"/>" style="color: black;">
+                    <i class="fa fa-list"></i><strong> <s:message code="agile.showAll" text="Show all"/></strong>
+                </a>
+            </li>
         </ul>
     </li>
     </li>
     <li role="presentation" class="divider"></li>
     <!-- 	USERS -->
-    <li id="users-menu" ><a class="show_users_btn clickable" data-toggle="modal"
-           title="" data-placement="bottom"><i class="fa fa-lg fa-users"></i>&nbsp;<strong><s:message
+    <li id="users-menu"><a class="show_users_btn clickable" data-toggle="modal"
+                           title="" data-placement="bottom"><i class="fa fa-lg fa-users"></i>&nbsp;<strong><s:message
             code="menu.users" text="Users"/></strong></a></li>
-    <li  role="presentation" class="divider"></li>
+    <li role="presentation" class="divider"></li>
     <!-- 	MANAGE -->
     <c:if test="${user.isAdmin == true}">
         <li id="admin-menu"><a href="#" class="menu-toggle" data-type="manage-menu">
-            <i class="menu-indicator fa  fa-lg fw fa-toggle-right"></i> <i
-                class="fa fa-wrench"></i> &nbsp;<strong><s:message code="menu.manage"
-                                                                   text="Settings"/></strong>
+            <i class="menu-indicator fa  fa-lg fw fa-toggle-right"></i>
+            <i class="fa fa-wrench"></i> &nbsp;<strong><s:message code="menu.manage" text="Settings"/></strong>
         </a>
             <ul class="menu-items">
-                <li class="manage-menu"><a
-                        href="<s:url value="/manage/app"></s:url>"><i
-                        class="fa fa-cogs"></i> &nbsp;<s:message code="menu.manage"
-                                                                 text="Settings"/></a></li>
-                <li class="manage-menu"><a
-                        href="<s:url value="/manage/users"></s:url>"><i
-                        class="fa fa-users"></i>&nbsp;<s:message code="menu.manage.users"/></a></li>
-                <li class="manage-menu"><a
-                        href="<s:url value="/manage/tasks"></s:url>"><i
-                        class="fa fa-lg fa-check-square"></i>&nbsp;<s:message
-                        code="menu.manage.tasks"/></a></li>
-
+                <li class="manage-menu">
+                    <a href="<s:url value="/manage/app"/>" style="color: black;">
+                        <i class="fa fa-cogs"></i> &nbsp;<s:message code="menu.manage" text="Settings"/>
+                    </a>
+                </li>
+                <li class="manage-menu">
+                    <a href="<s:url value="/manage/users"/>" style="color: black;">
+                        <i class="fa fa-users"></i>&nbsp;<s:message code="menu.manage.users"/>
+                    </a>
+                </li>
+                <li class="manage-menu">
+                    <a href="<s:url value="/manage/tasks"/>" style="color: black;">
+                        <i class="fa fa-lg fa-check-square"></i>&nbsp;<s:message code="menu.manage.tasks"/>
+                    </a>
+                </li>
             </ul>
         </li>
         <li role="presentation" class="divider"></li>
     </c:if>
     <!-- 	HELP -->
-    <li id="help-menu"><a href='<s:url value="/help"></s:url>' title=""
-           data-placement="bottom"><i class="fa fa-lg fa-question-circle"></i>&nbsp;<strong><s:message
-            code="menu.help" text="Help"/></strong></a></li>
+    <li id="help-menu">
+        <a href='<s:url value="/help"></s:url>' title="" data-placement="bottom">
+            <i class="fa fa-lg fa-question-circle"></i>&nbsp;<strong><s:message code="menu.help" text="Help"/></strong>
+        </a>
+    </li>
 </ul>
 <script>
     var linksRequested = $('a[href="${requestedLink}"]');

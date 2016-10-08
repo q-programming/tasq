@@ -44,7 +44,7 @@ public class LastVisitedService {
         } else {
             accountLastVisited.add(lastVisited);
         }
-        if (accountLastVisited.size() > 4) {
+        if (accountLastVisited.size() > 5) {
             List<LastVisited> sortMe = new ArrayList<>(accountLastVisited);
             Collections.sort(sortMe, new VisitedSorter());
             LastVisited oldest = sortMe.get(sortMe.size() - 1);

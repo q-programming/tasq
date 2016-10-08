@@ -4,32 +4,33 @@
 <%@ taglib uri="http://www.springframework.org/security/tags"
            prefix="security" %>
 <%@page import="com.qprogramming.tasq.task.TaskPriority" %>
-<security:authentication property="principal" var="user"/>
-<security:authorize access="hasRole('ROLE_ADMIN')">
-    <c:set var="is_admin" value="true"/>
-</security:authorize>
 <script src="<c:url value="/resources/js/hopscotch.js" />"></script>
 <link href="<c:url value="/resources/css/hopscotch.css" />" rel="stylesheet"
       media="screen"/>
 <div class="white-frame" style="overflow: auto;">
     <div class="pull-right">
-        <a class="btn btn-default a-tooltip pull-right" style="padding: 6px 11px;" href="#" title=""
+        <a id="project-manage" class="btn btn-default a-tooltip pull-right" style="padding: 6px 11px;" href="#" title=""
            data-placement="bottom"
            data-original-title="Manage project"><i class="fa fa-wrench"></i></a>
     </div>
     <div class="pull-right">
-        <a class="btn btn-default a-tooltip pull-right" href="#" title="" data-placement="bottom"
+        <a id="project-active" class="btn btn-default a-tooltip pull-right" href="#" title="" data-placement="bottom"
            data-original-title="Set as active project"> <i class="fa fa-refresh"></i>
         </a>
-        <a class="btn btn-default a-tooltip pull-right" title="" data-placement="bottom"
+        <a id="project-members" class="btn btn-default a-tooltip pull-right" title="" data-placement="bottom"
            data-original-title="Project members">
             <i class="fa fa-users"></i>
         </a>
     </div>
-    <h3>[TST] Testing Project</h3>
+    <h3>[TST] Testing Project<span id="project-title"></span>
+        <a href="<c:url value="/tour"/>" id="go-back" class="btn btn-default btn-success"
+           style="margin-left:100px; display:none">
+            Click here to go back to tours page
+        </a>
+    </h3>
     Project to test application
     <hr>
-    <div class="progress">
+    <div id="project-open-close" class="progress">
         <div class="progress-bar progress-bar-warning a-tooltip" style="width: 42.857142857142854%" title=""
              data-original-title="3&nbsp;To Do">
             <span>3&nbsp;To Do</span>
@@ -50,11 +51,12 @@
              data-original-title="0&nbsp;Blocked">
         </div>
     </div>
-    <div id="chart_divarea" class="row" style="height: 300px; width: 90%; margin: 20px auto;">
+    <div id="project-chart" class="row" style="height: 300px; width: 90%; margin: 20px auto;">
         <img class="responsive" src="<c:url value="/resources/img/help/sample_chart.png"/>">
     </div>
-    <div style="display: inherit; font-size: small; float: right">
-        <span id="" class="clickable" data-all="false"><span id="moreEventsCheck"><i class="fa fa-square-o"></i></span> Show more than 30 days</span>
+    <div style="display: inherit; font-size: small; float: right;margin-top: 20px;">
+        <span id="project-30" class="clickable" data-all="false"><span id="moreEventsCheck"><i
+                class="fa fa-square-o"></i></span> Show more than 30 days</span>
     </div>
 
     <div style="display: table; width: 100%">
@@ -78,7 +80,7 @@
                         <td><img data-src="holder.js/30x30" class="avatar small"
                                  src="<c:url value="/resources/img/avatar.png"/>"></td>
                         <td>
-                            <div class="time-div">07-10-2016 15:58</div>
+                            <div class="time-div" id="project-event">07-10-2016 15:58</div>
                             <a href="#">Jakub Romaniszyn</a>&nbsp;created task <a href="#">[TST-4] Some sample
                             task</a></td>
                     </tr>
@@ -307,11 +309,12 @@
                 <a href="#" style="color: black">Tasks</a>
                 <div class="pull-right">
                     <div>
-                        <a href="#"><span
+                        <a id="project-task-closed" href="#"><span
                                 style="display: inherit; font-size: small; font-weight: normal; color: black; float: right">
 									<i class="fa fa-check-square-o"></i> Hide closed tasks</span></a>
                     </div>
-                    <div style="display: inherit; font-size: small; font-weight: normal; color: black; float: right">
+                    <div id="project-subtasks"
+                         style="display: inherit; font-size: small; font-weight: normal; color: black; float: right">
                         Subtasks
                         &nbsp; <i id="opensubtask" class="fa fa-plus-square clickable a-tooltip" title=""
                                   data-original-title="Show all subtasks"></i> <i id="hidesubtask"
@@ -321,7 +324,7 @@
                     </div>
                 </div>
             </h3>
-            <table class="table table-hover">
+            <table id="project-tasklist" class="table table-hover">
                 <tbody>
                 <tr>
                     <td>
@@ -418,141 +421,108 @@
         showPrevButton: true,
         steps: [
             {
-                title: "Navigation bar",
-                content: "Contains main user related actions.<br> Clicking logo navigates to home page",
-                target: "navbar",
-                placement: "bottom",
-                xOffset: 'center',
-                arrowOffset: 'center'
-            },
-            {
-                title: "Side menu",
-                content: 'Side menu with project and task related options <c:if test="is_admin"> and contains application management</c:if>',
-                target: "side-menu",
+                title: "Project details",
+                content: "Project ID , project name and description. Description can be edited as rich text adding links, numbering etc.",
+                target: "project-title",
                 placement: "right"
             },
-//                SIDE MENU
-            <c:if test="${user.isUser == true}">
             {
-                title: "Create",
-                content: '<span class="tour-bubble-button"><i class="fa fa-plus"></i> <s:message code="task.create" text="Create"/></span> starts new task creation (by default active project will be selected)<c:if test="${user.isPowerUser == true}"><br><br>You can also create new projects by selecting <span class="tour-bubble-button"><i class="fa fa-plus"></i> <s:message code="project.create" text="Create project"/></span></c:if>',
-                target: "create-menu",
+                title: "Project open closed bar",
+                content: 'Shows how many tasks in total are open, in progress or closed',
+                target: "project-open-close",
+                placement: "top",
+                xOffset: "center",
+                arrowOffset: "center"
+            },
+            {
+                title: "Events chart",
+                content: 'Shows chart with latest project events.<br> Open line is in <strong><span style="color:#f0ad4e">orange</span></strong>, closed <strong><span style="color:#488A48">green</span></strong> and <strong><span style="color:#337ab7">blue in between</span></strong> - tasks in progress',
+                target: "project-chart",
+                placement: "top",
+                xOffset: "center",
+                arrowOffset: "center",
+                yOffset: 100
+            },
+            {
+                title: "More chart events",
+                content: 'By default chart is rendered only from last 30 days.<br>You can show all events from very beginning of project by selecting "Show more than 30 days checkbox"',
+                target: "project-30",
+                placement: "left",
+                width: 400,
+                yOffset: -22
+            },
+            {
+                title: "Project latest events",
+                content: 'All latest events in project.<br>Use pagination navigation at the top or bottom to show next pages',
+                target: "project-event",
                 placement: "right",
-                onNext: function () {
-                    $(".project-menu").show("blind");
-                },
                 yOffset: -20
             },
-            </c:if>
             {
-                title: "Projects menu",
-                content: 'Here you can find recently visited projects. Your active project will be always visible. To view all project you can access, select <span class="tour-bubble-button"><i class="fa fa-list"></i> <s:message code="project.showAll" text="Projects"/></span>',
-                target: "projects-menu",
-                placement: "right",
-                onNext: function () {
-                    $(".task-menu").show("blind");
-                    $(".project-menu").hide("blind");
-                },
-                onPrev: function () {
-                    $(".project-menu").hide("blind");
-                },
-                yOffset: -20
+                title: "Project tasks",
+                content: 'List of all tasks in project (sorted by ID). This is just for overview, as better option to view project task is via <a href="<c:url value="/tour?page=tasklist"/>" target="_blank">Task List</a>',
+                target: "project-tasklist",
+                placement: "top",
+                xOffset: "center",
+                arrowOffset: "center"
             },
             {
-                title: "Tasks menu",
-                content: '4 last visited task are shown here. You can also view all task from currently active project by clicking <span class="tour-bubble-button"><i class="fa fa-list"></i> <s:message code="task.showAll" text="Show all"/></span><br><br>More on task list later on',
-                target: "tasks-menu",
-                placement: "right",
-                onNext: function () {
-                    $(".agile-menu").show("blind");
-                    $(".task-menu").hide("blind");
-                },
-                onPrev: function () {
-                    $(".project-menu").show("blind");
-                    $(".task-menu").hide("blind");
-                },
-
-                yOffset: 0
+                title: "Show closed tasks",
+                content: 'By default closed tasks are hidden in this view. In order to view all task de-select this checkbox.',
+                target: "project-task-closed",
+                placement: "left",
+                yOffset: -24
             },
             {
-                title: "Agile section",
-                content: 'Last 4 visited project agile views are gathered here. You can also view all agile boards from your available project by selecting <span class="tour-bubble-button"><i class="fa fa-list"></i> <s:message code="agile.showAll" text="Show all"/></span>',
-                target: "agile-menu",
-                placement: "right",
-                onNext: function () {
-                    $(".agile-menu").hide("blind");
-                    <c:if test="${user.isAdmin == true}">
-                    $(".manage-menu").show("blind");
-                    </c:if>
-                },
-                onPrev: function () {
-                    $(".task-menu").show("blind");
-                    $(".agile-menu").hide("blind");
-                },
-                yOffset: -20
+                title: "Show all/hide subtasks",
+                content: "If one of tasks have subtasks <i class='fa fa-plus-square'></i> icon will be shown before it's name.<br> After clicking this button all subtasks for every task will be expanded",
+                target: "project-subtasks",
+                placement: "left",
+                yOffset: -23
             },
-            <c:if test="${user.isAdmin == true}">
             {
-                title: "Manage application",
-                content: 'This section is reserved only for application administrator. Here you can go to general application management, manage user, or perform some tasks technical related activities.<br><br>You can read more in help page <a href="<c:url value="/help#admin"/>" target="_blank">here</a>',
-                target: "admin-menu",
-                placement: "right",
-                onNext: function () {
-                    $(".manage-menu").hide("blind");
-                },
-                onPrev: function () {
-                    $(".agile-menu").show("blind");
-                    $(".manage-menu").hide("blind");
-                },
-                yOffset: -20
+                title: "Project members",
+                content: 'Show modal with all project participants.',
+                target: "project-members",
+                placement: "left",
+                yOffset: -14
             },
-            </c:if>
             {
-                title: "Help",
-                content: 'Help page, a recommended read for some free time :)',
-                target: "help-menu",
+                title: "Activate/Deactivate project",
+                content: 'set displayed project as active. It will be used while creating new tasks, listing and searching as first choice. It will also be visible on left side menu',
+                target: "project-active",
+                placement: "left",
+                yOffset: -14
+            },
+            {
+                title: "Project management",
+                content: 'This option is only visible for project administrators. It moves to project management view.<br>More info about <a href="<c:url value="/help#proj-edit"/>" target="_blank">configuration of projects</a>',
+                target: "project-manage",
+                placement: "left",
+                yOffset: -14,
+                width:400,
+                onNext: function () {
+                    $('#go-back').show();
+                }
+            },
+            {
+                title: "Done",
+                content: 'Go back to tour page, or start using ${applicationName}',
+                target: "project-title",
                 placement: "bottom",
-                <c:if test="${user.isAdmin}">
+                yOffset: 10,
+                xOffset: 40,
+                width: 400,
                 onPrev: function () {
-                    $(".manage-menu").show("blind");
-                }
-                </c:if>
-                <c:if test="${not user.isAdmin}">
-                onPrev: function () {
-                    $(".agile-menu").show("blind");
-                }
-                </c:if>
-            },
-
-//                END OF SIDE MENU
-            {
-                title: "Search",
-                content: 'Search field. Start typing to autocomplete with available tags. Active project will be searched for tasks with term in title or description (or tags)',
-                target: "searchField",
-                placement: "bottom"
-            },
-            {
-                title: "Events",
-                content: 'Shows count of unread events. Click to navigate to events pages ',
-                target: "event-menu-icon",
-                placement: "left"
-            },
-            {
-                title: "Personal menu",
-                content: 'Personal menu will be shown when clicking on avatar or name. Here we find links to events , watching pages and settings.<br><br> More info can be found <a href="<c:url value="/help#personal"/>" target="_blank">here</a>',
-                target: "user-menu",
-                placement: "left"
-            },
-            {
-                title: "More tours",
-                content: 'Select one of tours to learn more about rest of application',
-                target: "more-tours",
-                placement: "bottom"
+                    $('#go-back').hide();
+                },
+                arrowOffset: 'center'
             }
+
         ]
     };
-    $('#start').click(function () {
-        hopscotch.startTour(tour);
+    hopscotch.startTour(tour);
+    $(document).on("click", ".hopscotch-bubble-close", function () {
+        $('#go-back').show();
     });
-    // Start the tour!
 </script>

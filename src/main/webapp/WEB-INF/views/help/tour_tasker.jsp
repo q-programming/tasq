@@ -11,30 +11,31 @@
 <script src="<c:url value="/resources/js/hopscotch.js" />"></script>
 <link href="<c:url value="/resources/css/hopscotch.css" />" rel="stylesheet"
       media="screen"/>
-<div id="content" class="white-frame" style="overflow: auto;">
+<div id="content" class="white-frame" style="overflow: auto;text-align: center">
     <h3>
-        Welcome to ${applicationName}
+        <i class="fa fa-graduation-cap" aria-hidden="true"></i> Welcome to ${applicationName} tours page
+
     </h3>
-    <p>Following tours are availabe :</p>
-    <p><span id="start" class="btn btn-default tour-button"><span class="badge"
-                                                   aria-hidden="true">1</span> Start ${applicationName} tour</span></p>
-    <p>Other tours:</p>
-    <p>
-        <a href="<c:url value="/tour?page=project"/>" class="btn btn-default tour-button">
-            <span class="badge" aria-hidden="true">2</span> Project details
-        </a>
+    <p>This tours will show basics, how to use, and move within application.<br>Following tours are available:</p>
+    <p><span id="start" class="btn btn-default tour-button"><span class="badge theme"
+                                                                  aria-hidden="true">1</span> Start ${applicationName} tour</span>
     </p>
     <p>
-        <a href="<c:url value="/tour?page=task"/>" class="btn btn-default tour-button">
-            <span class="badge" aria-hidden="true">3</span>  Task details
+        <a href="<c:url value="/tour?page=project"/>" class="btn btn-default tour-button">
+            <span class="badge theme" aria-hidden="true">2</span> Project details
         </a>
     </p>
     <p>
         <a href="<c:url value="/tour?page=tasklist"/>" class="btn btn-default tour-button">
-            <span class="badge" aria-hidden="true">4</span>  Tasks list
+            <span class="badge theme" aria-hidden="true">3</span> Tasks list
         </a>
     </p>
-    <span id="more-tours"></span>
+    <p>
+        <a id="task-tour" href="<c:url value="/tour?page=task"/>" class="btn btn-default tour-button">
+            <span class="badge theme" aria-hidden="true">4</span> Task details
+        </a>
+    </p>
+    <p>You can alwyas come back to tours from <a href="<c:url value="/help"/>">help page</a></p>
 </div>
 
 <script>
@@ -63,12 +64,19 @@
                 content: '<span class="tour-bubble-button"><i class="fa fa-plus"></i> <s:message code="task.create" text="Create"/></span> starts new task creation (by default active project will be selected)<c:if test="${user.isPowerUser == true}"><br><br>You can also create new projects by selecting <span class="tour-bubble-button"><i class="fa fa-plus"></i> <s:message code="project.create" text="Create project"/></span></c:if>',
                 target: "create-menu",
                 placement: "right",
+                yOffset: -20
+            },
+            </c:if>
+            {
+                title: "My (active) project tasks",
+                content: 'Click to search within active project for all tasks assigned to your account. Afterwards you can switch to other project, or add more criteria.<br> More info on <a href="<c:url value="/tour?page=tasklist"/>" target="_blank">Task List</a>',
+                target: "mytasks-menu",
+                placement: "right",
                 onNext: function () {
                     $(".project-menu").show("blind");
                 },
                 yOffset: -20
             },
-            </c:if>
             {
                 title: "Projects menu",
                 content: 'Here you can find recently visited projects. Your active project will be always visible. To view all project you can access, select <span class="tour-bubble-button"><i class="fa fa-list"></i> <s:message code="project.showAll" text="Projects"/></span>',
@@ -114,7 +122,7 @@
                     $(".task-menu").show("blind");
                     $(".agile-menu").hide("blind");
                 },
-                yOffset: -20
+                yOffset: -40
             },
             <c:if test="${user.isAdmin == true}">
             {
@@ -160,19 +168,34 @@
                 title: "Events",
                 content: 'Shows count of unread events. Click to navigate to events pages ',
                 target: "event-menu-icon",
-                placement: "left"
+                placement: "left",
+                onNext: function () {
+                    $('#user-menu-dropdown').addClass("tour-dropdown");
+                }
             },
             {
                 title: "Personal menu",
                 content: 'Personal menu will be shown when clicking on avatar or name. Here we find links to events , watching pages and settings.<br><br> More info can be found <a href="<c:url value="/help#personal"/>" target="_blank">here</a>',
                 target: "user-menu",
-                placement: "left"
+                placement: "left",
+                onNext: function () {
+                    $('#user-menu-dropdown').removeClass("tour-dropdown");
+                },
+                onPrev: function () {
+                    $('#user-menu-dropdown').removeClass("tour-dropdown");
+                }
             },
             {
                 title: "More tours",
                 content: 'Select one of tours to learn more about rest of application',
-                target: "more-tours",
-                placement: "bottom"
+                target: "task-tour",
+                placement: "bottom",
+                xOffset: 'center',
+                onPrev: function () {
+                    $('#user-menu-dropdown').addClass("tour-dropdown");
+                },
+                arrowOffset: 'center'
+
             }
         ]
     };

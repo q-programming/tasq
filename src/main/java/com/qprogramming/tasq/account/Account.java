@@ -61,11 +61,8 @@ public class Account implements java.io.Serializable, UserDetails {
     @Column
     private boolean email_notifications;
 
-//    @ManyToMany(fetch = FetchType.EAGER)
-//    private Set<LastVisited> lastTasks = new HashSet<>();
-//
-//    @ManyToMany(fetch = FetchType.EAGER)
-//    private Set<LastVisited> lastProjects = new HashSet<>();
+    @Column(columnDefinition = "boolean default false")
+    private Boolean tour = false;
 
     @ManyToOne
     @JoinColumn(name = "theme")
@@ -77,20 +74,9 @@ public class Account implements java.io.Serializable, UserDetails {
      */
     @Column
     private Object[] active_task;
-//    @Column
-//    private Long active_project;
+
     @Column
     private String activeProject;
-
-
-//    @IndexColumn(name = "INDEX_COL")
-//    @JoinTable(name = "last_visited_t")
-//    private List<Task> last_visited_t = new LinkedList<>();
-//
-//    @ManyToMany(fetch = FetchType.LAZY)
-//    @IndexColumn(name = "INDEX_COL")
-//    @JoinTable(name = "last_visited_p")
-//    private List<Project> last_visited_p = new LinkedList<>();
 
     protected Account() {
 
@@ -102,28 +88,6 @@ public class Account implements java.io.Serializable, UserDetails {
         this.role = role;
         this.username = username;
     }
-
-//    public Set<LastVisited> getLastTasks() {
-//        if (lastTasks == null) {
-//            lastTasks = new HashSet<>();
-//        }
-//        return lastTasks;
-//    }
-//
-//    public void setLastTasks(Set<LastVisited> lastTasks) {
-//        this.lastTasks = lastTasks;
-//    }
-//
-//    public Set<LastVisited> getLastProjects() {
-//        if (lastProjects == null) {
-//            lastProjects = new HashSet<>();
-//        }
-//        return lastProjects;
-//    }
-//
-//    public void setLastProjects(Set<LastVisited> lastProjects) {
-//        this.lastProjects = lastProjects;
-//    }
 
     public Long getId() {
         return id;
@@ -218,22 +182,6 @@ public class Account implements java.io.Serializable, UserDetails {
         return new SimpleGrantedAuthority(role.toString());
     }
 
-//    public List<Task> getLast_visited_t() {
-//        return last_visited_t != null ? last_visited_t : new LinkedList<>();
-//    }
-//
-//    public void setLast_visited_t(List<Task> last_visited) {
-//        this.last_visited_t = last_visited;
-//    }
-//
-//    public List<Project> getLast_visited_p() {
-//        return last_visited_p;
-//    }
-//
-//    public void setLast_visited_p(List<Project> last_visited_p) {
-//        this.last_visited_p = last_visited_p;
-//    }
-
     /*
      * (non-Javadoc)
      *
@@ -323,14 +271,6 @@ public class Account implements java.io.Serializable, UserDetails {
         }
         return 0;
     }
-
-//    public Long getActive_project() {
-//        return active_project;
-//    }
-//
-//    public void setActive_project(Long active_project) {
-//        this.active_project = active_project;
-//    }
 
     public boolean getIsUser() {
         return getIsPowerUser() || role.equals(Roles.ROLE_USER);
@@ -455,6 +395,14 @@ public class Account implements java.io.Serializable, UserDetails {
             return false;
         }
         return true;
+    }
+
+    public Boolean hadTour() {
+        return tour;
+    }
+
+    public void setTour(Boolean tour) {
+        this.tour = tour;
     }
 
     public class ActiveTask {

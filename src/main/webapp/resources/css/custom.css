@@ -943,6 +943,9 @@ td.width200{
     padding-left: 30px;
     text-align: left;
 }
+.tour-dropdown{
+    display: initial !important;
+}
 
 
 /* .search { position: relative; } */
