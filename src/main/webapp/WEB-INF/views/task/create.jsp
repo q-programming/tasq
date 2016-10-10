@@ -88,10 +88,10 @@
             <form:select id="projects_list" style="width:300px;" path="project" class="form-control"
                          disabled="${not empty param.project}">
                 <c:forEach items="${projects_list}" var="list_project">
-                    <option id="${list_project.projectId}"
-                            <c:if test="${list_project.projectId eq chosenProject}">selected style="font-weight:bold"
-                    </c:if>
-                            value="${list_project.id}">${list_project}</option>
+                    <option
+                            <c:if test="${list_project.projectId eq chosenProject}">selected style="font-weight:bold"</c:if>
+                            value="${list_project.id}">${list_project}
+                    </option>
                 </c:forEach>
             </form:select>
             <span class="help-block"><s:message code="task.project.help"/></span>
@@ -143,7 +143,7 @@
                     %>
                     <c:forEach items="${types}" var="enum_type">
                         <c:if test="${not enum_type.subtask}">
-                            <li><a class="taskType clickable" tabindex="-1" id="${enum_type}"
+                            <li><a class="taskType clickable" tabindex="-1" id="TYPE_${enum_type}"
                                    data-type="${enum_type}"><t:type
                                     type="${enum_type}" show_text="true" list="true"/></a></li>
                         </c:if>
@@ -501,7 +501,7 @@
             $.get(url, {id: $("#projects_list").val()}, function (result, status) {
                 project = result;
                 //TYPE
-                var thisType = $("#" + project.default_type);
+                var thisType = $("#TYPE_" + project.default_type);
                 var type = thisType.data('type');
                 $("#task_type").html(thisType.html());
                 $("#type").val(type);

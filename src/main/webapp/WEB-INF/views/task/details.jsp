@@ -1403,4 +1403,10 @@
                 return 'not yet added ';
         }
     }
+
+    $(document).keypress(function (e) {
+        if(e.which = 97){
+            $("#assign_modal").modal('show');
+        }
+    });
 </script>

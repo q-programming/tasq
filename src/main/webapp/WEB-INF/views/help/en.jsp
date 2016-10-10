@@ -673,7 +673,8 @@
                     clicking <span class="btn btn-default btn-sm "><i
                             class="fa fa-lg fa-user-plus"></i> </span> button.<br>This will show
                     modal window. Start typing username to show autocomplete hints with
-                    all project members
+                    all project members.<br>
+                    <i class="fa fa-exclamation-circle" aria-hidden="true"></i>&nbsp;Assign modal can be called by pressing 'a' key on keyboard
                 </li>
                 <li><a class="anchor" id="task-18"></a><b>Creation, last
                     update and due dates</b></li>

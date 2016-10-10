@@ -1135,7 +1135,7 @@
             },
             {
                 title: "Task owner and current assignee",
-                content: 'You can quickly assign someone to this task by clicking <span class="btn btn-default btn-sm "><i class="fa fa-lg fa-user-plus"></i> </span> button.<br>This will show modal window. Start typing username to show autocomplete hints with all project members',
+                content: 'You can quickly assign someone to this task by clicking <span class="btn btn-default btn-sm "><i class="fa fa-lg fa-user-plus"></i> </span> button.<br>This will show modal window. Start typing username to show autocomplete hints with all project members<br><br><i class="fa fa-exclamation-circle" aria-hidden="true"></i>&nbsp;Assign modal can be called by pressing \'a\' key on keyboard',
                 target: "task-people",
                 placement: "left",
                 yOffset: 10
