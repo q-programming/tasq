@@ -274,10 +274,11 @@
                 </div>
                 <!-- logwork trigger modal -->
                 <c:if test="${can_edit && user.isPowerUser || is_assignee}">
-                    <button class="btn btn-default btn-sm worklog" data-toggle="modal"
+                    <button class="btn btn-default btn-sm worklog a-tooltip" data-toggle="modal"
+                            title="<s:message code="task.logWork"/>&nbsp;(l)"
                             data-target="#logWorkform" data-taskID="${task.id}">
                         <i class="fa fa-lg fa-calendar"></i>
-                        <s:message code="task.logWork"></s:message>
+                        <s:message code="task.logWork"/>
                     </button>
                     <c:if
                             test="${not empty user.active_task && user.active_task[0] eq task.id}">
@@ -285,7 +286,7 @@
                             <button class="btn btn-default btn-sm a-tooltip handleTimerBtn"
                                     title="<s:message code="task.stopTime.description" />">
                                 <i class="fa fa-lg fa-clock-o"></i>
-                                <s:message code="task.stopTime"></s:message>
+                                <s:message code="task.stopTime"/>
                             </button>
                         </a>
                         <div class="bar_td">
@@ -413,7 +414,7 @@
                         <c:if test="${project_participant}">
                             <a class="btn btn-default btn-xxs a-tooltip pull-right linkButton" style="min-width: 37px;"
                                href="#" title="" data-placement="top"
-                               data-original-title="<s:message code="task.link"/>"> <i
+                               data-original-title="<s:message code="task.link"/>&nbsp;(r)"> <i
                                     class="fa fa-plus"></i><i
                                     class="fa fa-lg fa-link fa-flip-horizontal"></i>
                             </a>
@@ -517,7 +518,7 @@
                             <a class="btn btn-default btn-xxs a-tooltip pull-right" style="min-width: 37px;"
                                href="<c:url value="/task/${task.id}/subtask"/>"
                                data-placement="top"
-                               data-original-title="<s:message code="task.subtasks.add"/>">
+                               title="<s:message code="task.subtasks.add"/>">
                                 <i class="fa fa-plus"></i> <i class="fa fa-lg fa-sitemap"></i>
                             </a>
                         </c:if>
@@ -613,7 +614,8 @@
                                 <tr>
                                     <td><i class="fa ${file_type}"></i>&nbsp;
                                         <c:if test="${file_type eq 'fa-file-image-o'}">
-                                            <a class="image-modal clickable" data-toggle="modal" data-target="#image-modal-dialog"
+                                            <a class="image-modal clickable" data-toggle="modal"
+                                               data-target="#image-modal-dialog"
                                                data-url="<c:url value="/task/${task.id}/file?get=${file}"></c:url>"
                                                data-filename="${file}"
                                                data-src="<c:url value="/task/${task.id}/imgfile?get=${file}"/>">
@@ -682,7 +684,7 @@
                             </c:if>
                             <c:if test="${project_participant}">
                                 <span class="btn btn-default btn-sm a-tooltip assignToTask"
-                                      title="<s:message code="task.assign"/>" data-toggle="modal"
+                                      title="<s:message code="task.assign"/> (a)" data-toggle="modal"
                                       data-target="#assign_modal" data-taskID="${task.id}"
                                       data-assignee="${task.assignee}"
                                       data-assigneeID="${task.assignee.id}"
@@ -843,7 +845,7 @@
                     </form>
                 </div>
                 <c:if test="${project_participant}">
-                    <button id="comments_add" class="btn btn-default btn-sm">
+                    <button id="comments_add" class="btn btn-default btn-sm a-tooltip" title="<s:message code="comment.add" text="Add Comment"/> (c)">
                         <i class="fa fa-comment"></i>&nbsp;
                         <s:message code="comment.add" text="Add Comment"/>
                     </button>
@@ -915,6 +917,7 @@
     pageContext.setAttribute("types", LogType.values());
 %>
 <script>
+    var inputInProgress = false;
     $(document).ready(function ($) {
         taskID = "${task.id}";
         updateWatchers();
@@ -924,13 +927,6 @@
         var maxchars = 4000;
 
         //--------------------------------------Coments----------------------------
-        function toggle_comment() {
-            $('#comments_add').toggle();
-            $('#comments_div').slideToggle("slow");
-            $(document.body).animate({
-                'scrollTop': $('#comments_div').offset().top
-            }, 2000);
-        }
 
         var btnsGrps = jQuery.trumbowyg.btnsGrps;
         $('.comment-message-text').trumbowyg({
@@ -977,6 +973,7 @@
         });
 
         $('.comments_edit').click(function () {
+            inputInProgress = true;
             var commentDiv = $(this).parent().parent().children("div.comment-div");
             var message = commentDiv.children(".comment-message").html();
 //		var message = $(this).data('message');
@@ -984,6 +981,9 @@
             $("#modal-comment-message").trumbowyg('html', message);
             //$(".trumbowyg-editor").html(message);
             $(".modal-body #comment_id").val(comment_id);
+        });
+        $('#commentModal').on('hidden.bs.modal', function () {
+            inputInProgress = false;
         });
 
         $('#comments_cancel').click(function () {
@@ -1075,11 +1075,7 @@
 
         $(".linkButton").click(function () {
             //clean regardles what is pressed
-            $("#task_link").val('');
-            $("#taskB").val('');
-            $("#task_link").parent().removeClass("has-error");
-            $("#linkDiv").slideToggle("slow");
-
+            showRelatedLinks();
         });
 
         $("#linkTask").submit(function (e) {
@@ -1404,9 +1400,53 @@
         }
     }
 
-    $(document).keypress(function (e) {
-        if(e.which = 97){
-            $("#assign_modal").modal('show');
+    //----------- Key shortcuts -----------------------
+    $(document).keyup(function (e) {
+        if (!inputInProgress) {
+            // Assign 'a'
+            if (e.which === 65) {
+                var assignee = '${task.assignee}';
+                var assigneeid;
+                if (assignee) {
+                    assigneeid = ${task.assignee.id};
+                }
+                projectID = '${task.project.projectId}';
+                taskID = '${task.id}';
+                fillAssigneeValues(projectID, taskID, assignee, assigneeid);
+                $("#assign_modal").modal('show');
+            } // Related links 'r'
+            else if (e.which === 82) {
+                showRelatedLinks();
+            } //  Log time 'l'
+            else if (e.which === 76) {
+                fillLogWorkValues('${task.id}');
+                $("#logWorkform").modal('show');
+            }
+            else if (e.which == 67) {
+                toggle_comment();
+            }
         }
     });
+
+    function showRelatedLinks() {
+        inputInProgress = !inputInProgress;
+        $("#linkDiv").slideToggle("slow");
+        $("#task_link").val('');
+        $("#taskB").val('');
+        $("#task_link").parent().removeClass("has-error");
+        if (inputInProgress) {
+            $("#task_link").focus();
+        }
+    }
+
+
+    function toggle_comment() {
+        inputInProgress = !inputInProgress;
+        $('#comments_add').toggle();
+        $('#comments_div').slideToggle("slow");
+        $(document.body).animate({
+            'scrollTop': $('#comments_div').offset().top
+        }, 2000);
+    }
+
 </script>

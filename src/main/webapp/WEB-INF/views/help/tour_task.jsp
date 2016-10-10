@@ -1054,7 +1054,7 @@
             },
             {
                 title: "Log work",
-                content: 'Use it to log time spent on this task. More information in help page in <a href="<c:url value="/help#task-work"/>" target="_blank">Working with tasks</a> section',
+                content: 'Use it to log time spent on this task. More information in help page in <a href="<c:url value="/help#task-work"/>" target="_blank">Working with tasks</a> section<p><i><i class="fa fa-exclamation-circle" aria-hidden="true"></i>&nbsp;Keyboard shortcut \'l\'</i></p>',
                 target: "task-logowork",
                 placement: "right",
                 yOffset: -15
@@ -1075,7 +1075,7 @@
             },
             {
                 title: "Related tasks",
-                content: 'Shows list of all task that are related/linked to it. In order to add new link , press <a class="btn btn-default btn-xxs" href="#" title=""> <i class="fa fa-plus"></i><i class="fa fa-lg fa-link fa-flip-horizontal"></i></a> button<br>(this option is also available under edit menu)',
+                content: 'Shows list of all task that are related/linked to it. In order to add new link , press <a class="btn btn-default btn-xxs" href="#" title=""> <i class="fa fa-plus"></i><i class="fa fa-lg fa-link fa-flip-horizontal"></i></a> button<br>(this option is also available under edit menu)<p><i><i class="fa fa-exclamation-circle" aria-hidden="true"></i>&nbsp;Keyboard shortcut \'r\'</i></p>',
                 target: "task-related",
                 width: 400,
                 placement: "top",
@@ -1105,7 +1105,7 @@
             },
             {
                 title: "Comments tab",
-                content: 'Click to switch to comments tab. All comments related to this task are listed  (sorted from newest).<br><br> New comment can be added by clicking <button id="comments_add" class="btn btn-default btn-sm"><i class="fa fa-comment"></i>&nbsp; Add comment</button> button',
+                content: 'Click to switch to comments tab. All comments related to this task are listed  (sorted from newest).<br><br> New comment can be added by clicking <button id="comments_add" class="btn btn-default btn-sm"><i class="fa fa-comment"></i>&nbsp; Add comment</button> button<p><i><i class="fa fa-exclamation-circle" aria-hidden="true"></i>&nbsp;Keyboard shortcut \'c\'</i></p>',
                 target: "comments-tab",
                 placement: "top",
                 onPrev: function () {
@@ -1135,7 +1135,7 @@
             },
             {
                 title: "Task owner and current assignee",
-                content: 'You can quickly assign someone to this task by clicking <span class="btn btn-default btn-sm "><i class="fa fa-lg fa-user-plus"></i> </span> button.<br>This will show modal window. Start typing username to show autocomplete hints with all project members<br><br><i class="fa fa-exclamation-circle" aria-hidden="true"></i>&nbsp;Assign modal can be called by pressing \'a\' key on keyboard',
+                content: 'You can quickly assign someone to this task by clicking <span class="btn btn-default btn-sm "><i class="fa fa-lg fa-user-plus"></i> </span> button.<br>This will show modal window. Start typing username to show autocomplete hints with all project members<br><p><i><i class="fa fa-exclamation-circle" aria-hidden="true"></i>&nbsp;Keyboard shortcut \'a\'</i></p>',
                 target: "task-people",
                 placement: "left",
                 yOffset: 10

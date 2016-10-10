@@ -586,101 +586,104 @@
                 <img class="responsive" src="<c:url value="/resources/img/help/task_details.png"/>">
             </p>
             <p>
-            <ol>
-                <li><a class="anchor" id="task-1"></a><b>Project ID/ [ Task
-                    ID ] Task name</b></li>
-                <li><a class="anchor" id="task-2"></a><b>Current task
-                    status</b> - in order to change this status click <span class="caret"></span>
-                    and choose new one
-                </li>
-                More about
-                <b><a href="#taskstatus">task statuses</a></b>
-                <li><a class="anchor" id="task-3"></a><b>Task priority</b> - to
-                    change click <span class="caret"></span> and choose new
-                </li>
-                <li><a class="anchor" id="task-4"></a><b>Tags</b> - to add new
-                    tag , input it. If there is similar tag, autocomplete box will
-                    popup. To remove tag , click <i class="fa fa-times"
-                                                    style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
-                    symbol<br> To view all tasks with this tag, click it. This
-                    will move you to <b><a href="#task-view">Browse all tasks</a></b>
-                    view with applied tag filter.
-                </li>
-                <li><a class="anchor" id="task-5"></a><b>Task description</b></li>
-                <li><a class="anchor" id="task-6"></a><b>Story points</b> - if
-                    task is estimated, story points for it will be shown. If no points
-                    were set ,question mark will be shown instead. This value can be
-                    changed either from <b><a href="#task-edit">Edit menu</a></b>, or
-                    from this view quickly by hovering over <span class="badge theme">?</span>
-                    to reveal extra <i class="fa fa-pencil"></i> button .<br>
-                    Click it to show input field <span class="badge theme"> <input
-                            class="point-input" style="display: inline-block;"> <span
-                            style="cursor: pointer;"><i class="fa fa-check"
-                                                        style="vertical-align: text-top"></i></span> <span
-                            style="cursor: pointer;"><i class="fa fa-times"
-                                                        style="vertical-align: text-top"></i></span>
+                <ol>
+                    <li><a class="anchor" id="task-1"></a><b>Project ID/ [ Task
+                        ID ] Task name</b></li>
+                    <li><a class="anchor" id="task-2"></a><b>Current task
+                        status</b> - in order to change this status click <span class="caret"></span>
+                        and choose new one
+                    </li>
+                    More about
+                    <b><a href="#taskstatus">task statuses</a></b>
+                    <li><a class="anchor" id="task-3"></a><b>Task priority</b> - to
+                        change click <span class="caret"></span> and choose new
+                    </li>
+                    <li><a class="anchor" id="task-4"></a><b>Tags</b> - to add new
+                        tag , input it. If there is similar tag, autocomplete box will
+                        popup. To remove tag , click <i class="fa fa-times"
+                                                        style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
+                        symbol<br> To view all tasks with this tag, click it. This
+                        will move you to <b><a href="#task-view">Browse all tasks</a></b>
+                        view with applied tag filter.
+                    </li>
+                    <li><a class="anchor" id="task-5"></a><b>Task description</b></li>
+                    <li><a class="anchor" id="task-6"></a><b>Story points</b> - if
+                        task is estimated, story points for it will be shown. If no points
+                        were set ,question mark will be shown instead. This value can be
+                        changed either from <b><a href="#task-edit">Edit menu</a></b>, or
+                        from this view quickly by hovering over <span class="badge theme">?</span>
+                        to reveal extra <i class="fa fa-pencil"></i> button .<br>
+                        Click it to show input field <span class="badge theme"> <input
+                                class="point-input" style="display: inline-block;"> <span
+                                style="cursor: pointer;"><i class="fa fa-check"
+                                                            style="vertical-align: text-top"></i></span> <span
+                                style="cursor: pointer;"><i class="fa fa-times"
+                                                            style="vertical-align: text-top"></i></span>
 				</span> Confirm it by either enter key, or clicking check-mark sign. Cancel
-                    input by clicking x <br>You have to be either task owner or
-                    project admin to do so
-                </li>
-                <li><a class="anchor" id="task-7"></a><b>Log work button</b> -
-                    use it to log time spent on this task. More information in <b><a
-                            href="#worklogging">Working with tasks</a></b> section
-                </li>
-                <li><a class="anchor" id="task-8"></a><b>Start timer button</b>
-                    - starts/stops active timer on this task
-                </li>
-                <li><a class="anchor" id="task-9"></a><b>Time bars</b> - shows
-                    how much time was estimated, how much logged and remaining
-                </li>
-                <li><a class="anchor" id="task-10"></a><b>Related tasks</b> -
-                    Shows list of all task that are related/linked to it. In order to
-                    add new link , press <a class="btn btn-default btn-xxs" href="#"
-                                            title=""> <i class="fa fa-plus"></i><i
-                            class="fa fa-lg fa-link fa-flip-horizontal"></i>
-                    </a> button ( this option is also available under edit menu)
-                </li>
-                <li><a class="anchor" id="task-11"></a><b>Subtasks list</b> -
-                    all subtasks are shown here with type, priority and progress. To
-                    create new subtask , click <a class="btn btn-default btn-xxs"
-                                                  href="#"> <i class="fa fa-plus"></i> <i
-                            class="fa fa-lg fa-sitemap"></i>
-                    </a> button ( option available from edit menu as well )
-                </li>
-                <li><a class="anchor" id="task-12"></a><b>Activity log tab</b>
-                    - click to show all activities related to this task
-                </li>
-                <li><a class="anchor" id="task-13"></a><b>Comments tab</b> -
-                    click to switch to comments tab. All comments related to this task
-                    are listed ( sorted from newest).<br> New comment can be added
-                    by clicking
-                    <button id="comments_add" class="btn btn-default btn-sm">
-                        <i class="fa fa-comment"></i>&nbsp; Add comment
-                    </button>
-                    button
-                </li>
-                <li><a class="anchor" id="task-14"></a><b>Show edit menu</b> -
-                    more information in <b><a href="#task-edit">Editing task</a></b>
-                    section
-                </li>
-                <li><a class="anchor" id="task-15"></a><b>Start/Stop
-                    watching task</b></li>
-                <li><a class="anchor" id="task-16"></a><b>Delete task</b> -
-                    deletes this task ( project admin only) More information in <b><a
-                            href="#task-remove">Removing tasks</a></b></li>
-                <li><a class="anchor" id="task-17"></a><b>Task owner and
-                    current assignee</b> - you can quickly assign someone to this task by
-                    clicking <span class="btn btn-default btn-sm "><i
-                            class="fa fa-lg fa-user-plus"></i> </span> button.<br>This will show
-                    modal window. Start typing username to show autocomplete hints with
-                    all project members.<br>
-                    <i class="fa fa-exclamation-circle" aria-hidden="true"></i>&nbsp;Assign modal can be called by pressing 'a' key on keyboard
-                </li>
-                <li><a class="anchor" id="task-18"></a><b>Creation, last
-                    update and due dates</b></li>
-                <li><a class="anchor" id="task-19"></a><b>Sprints</b> - if task
-                    belongs or belonged to one of sprints, it will be listed here
-                </li>
+                        input by clicking x <br>You have to be either task owner or
+                        project admin to do so
+                    </li>
+                    <li><a class="anchor" id="task-7"></a><b>Log work button</b> -
+                        use it to log time spent on this task. More information in <b><a
+                                href="#worklogging">Working with tasks</a></b> section
+            <p><i><i class="fa fa-exclamation-circle" aria-hidden="true"></i>&nbsp;Keyboard shortcut 'l'</i></p>
+            </li>
+            <li><a class="anchor" id="task-8"></a><b>Start timer button</b>
+                - starts/stops active timer on this task
+            </li>
+            <li><a class="anchor" id="task-9"></a><b>Time bars</b> - shows
+                how much time was estimated, how much logged and remaining
+            </li>
+            <li><a class="anchor" id="task-10"></a><b>Related tasks</b> -
+                Shows list of all task that are related/linked to it. In order to
+                add new link , press <a class="btn btn-default btn-xxs" href="#"
+                                        title=""> <i class="fa fa-plus"></i><i
+                        class="fa fa-lg fa-link fa-flip-horizontal"></i>
+                </a> button ( this option is also available under edit menu)
+                <p><i><i class="fa fa-exclamation-circle" aria-hidden="true"></i>&nbsp;Keyboard shortcut 'r'</i></p>
+            </li>
+            <li><a class="anchor" id="task-11"></a><b>Subtasks list</b> -
+                all subtasks are shown here with type, priority and progress. To
+                create new subtask , click <a class="btn btn-default btn-xxs"
+                                              href="#"> <i class="fa fa-plus"></i> <i
+                        class="fa fa-lg fa-sitemap"></i>
+                </a> button ( option available from edit menu as well )
+            </li>
+            <li><a class="anchor" id="task-12"></a><b>Activity log tab</b>
+                - click to show all activities related to this task
+            </li>
+            <li><a class="anchor" id="task-13"></a><b>Comments tab</b> -
+                click to switch to comments tab. All comments related to this task
+                are listed ( sorted from newest).<br> New comment can be added
+                by clicking
+                <button id="comments_add" class="btn btn-default btn-sm">
+                    <i class="fa fa-comment"></i>&nbsp; Add comment
+                </button>
+                button
+                <p><i><i class="fa fa-exclamation-circle" aria-hidden="true"></i>&nbsp;Keyboard shortcut 'c'</i></p>
+            </li>
+            <li><a class="anchor" id="task-14"></a><b>Show edit menu</b> -
+                more information in <b><a href="#task-edit">Editing task</a></b>
+                section
+            </li>
+            <li><a class="anchor" id="task-15"></a><b>Start/Stop
+                watching task</b></li>
+            <li><a class="anchor" id="task-16"></a><b>Delete task</b> -
+                deletes this task ( project admin only) More information in <b><a
+                        href="#task-remove">Removing tasks</a></b></li>
+            <li><a class="anchor" id="task-17"></a><b>Task owner and
+                current assignee</b> - you can quickly assign someone to this task by
+                clicking <span class="btn btn-default btn-sm "><i
+                        class="fa fa-lg fa-user-plus"></i> </span> button.<br>This will show
+                modal window. Start typing username to show autocomplete hints with
+                all project members.<br>
+                <p><i><i class="fa fa-exclamation-circle" aria-hidden="true"></i>&nbsp;Keyboard shortcut 'a'</i></p>
+            </li>
+            <li><a class="anchor" id="task-18"></a><b>Creation, last
+                update and due dates</b></li>
+            <li><a class="anchor" id="task-19"></a><b>Sprints</b> - if task
+                belongs or belonged to one of sprints, it will be listed here
+            </li>
             </ol>
             <hr>
             <%-------------------------CREATING------------------------------%>
