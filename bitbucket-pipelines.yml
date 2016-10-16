@@ -7,9 +7,7 @@ image: maven:3.3.3
 
 pipelines:
   default:
-    - step: 'Build'
+    - step:
         script:
           - mvn clean package -DskipTests=true
-    - step: 'Tests'
-        script:
           - mvn tests
