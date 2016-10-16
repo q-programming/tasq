@@ -138,7 +138,7 @@
                 <div class="mod-header">
                     <h5 class="mod-header-title">
                         <i class="fa fa-caret-down toggler" data-tab="detailsToggle"></i>
-						<span class="mod-header-title-txt"> <i
+                        <span class="mod-header-title-txt"> <i
                                 class="fa fa-align-left"></i> <s:message code="task.details"/>
 						</span>
                     </h5>
@@ -249,13 +249,13 @@
                                     class="points badge theme left"><span id="point_value">${points}</span>
 									<c:if test="${can_edit  && task.state ne'CLOSED'}">
                                         <input id="point-input" class="point-input">
-										<span id="point_approve"
+                                        <span id="point_approve"
                                               style="display: none; cursor: pointer;"><i
                                                 class="fa fa-check"></i></span>
-										<span id="point_cancel"
+                                        <span id="point_cancel"
                                               style="display: none; cursor: pointer;"><i
                                                 class="fa fa-times"></i></span>
-										<span id="point_edit" class="point-edit"><i
+                                        <span id="point_edit" class="point-edit"><i
                                                 class="fa fa-pencil points"></i></span>
                                     </c:if> </span></td>
                         </tr>
@@ -267,7 +267,7 @@
                 <div class="mod-header">
                     <h5 class="mod-header-title">
                         <i class="fa fa-caret-down toggler" data-tab="estimatesToggle"></i>
-						<span class="mod-header-title-txt"> <i
+                        <span class="mod-header-title-txt"> <i
                                 class="fa fa-lg fa-clock-o"></i> <s:message code="task.timetrack"/>
 						</span>
                     </h5>
@@ -509,7 +509,7 @@
                     <div class="mod-header">
                         <h5 class="mod-header-title">
                             <i class="fa fa-caret-down toggler" data-tab="subtasksToggle"></i>
-							<span class="mod-header-title-txt"> <i
+                            <span class="mod-header-title-txt"> <i
                                     class="fa fa-lg fa-sitemap"></i> <s:message
                                     code="tasks.subtasks"/>
 							</span>
@@ -845,7 +845,8 @@
                     </form>
                 </div>
                 <c:if test="${project_participant}">
-                    <button id="comments_add" class="btn btn-default btn-sm a-tooltip" title="<s:message code="comment.add" text="Add Comment"/> (c)">
+                    <button id="comments_add" class="btn btn-default btn-sm a-tooltip"
+                            title="<s:message code="comment.add" text="Add Comment"/> (c)">
                         <i class="fa fa-comment"></i>&nbsp;
                         <s:message code="comment.add" text="Add Comment"/>
                     </button>
@@ -893,8 +894,8 @@
                                       class="form-control comment-message-text max4kchars"
                                       rows="5"
                                       name="message" autofocus></textarea>
-                                <span class="remain-span"><span class="remain"></span> <s:message
-                                        code="comment.charsLeft"/></span>
+                            <span class="remain-span"><span class="remain"></span> <s:message
+                                    code="comment.charsLeft"/></span>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -1258,12 +1259,12 @@
                 }
         );
         $('.bootstrap-tagsinput').focusin(function () {
-            inputInProgress=true;
+            inputInProgress = true;
             $(this).addClass('focus');
         });
         $('.bootstrap-tagsinput').focusout(function () {
             $(this).removeClass('focus');
-            inputInProgress=false
+            inputInProgress = false
         });
 
         $("#tagsinput").autocomplete({
@@ -1428,6 +1429,12 @@
                 toggle_comment();
             }
         }
+    });
+    //disable shortcuts on search
+    $("#searchField").focusin(function () {
+        inputInProgress = true;
+    }).focusout(function () {
+        inputInProgress = false;
     });
 
     function showRelatedLinks() {
