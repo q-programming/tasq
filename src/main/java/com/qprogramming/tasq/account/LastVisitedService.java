@@ -55,15 +55,15 @@ public class LastVisitedService {
     }
 
     public Set<LastVisited> getAccountLastVisited(Long id) {
-        return new HashSet<>(lastVisitedRepository.findByAccountOrderByTimeAsc(id));
+        return new HashSet<>(lastVisitedRepository.findByAccountOrderByTimeDesc(id));
     }
 
     public List<LastVisited> getAccountLastTasks(Long id) {
-        return lastVisitedRepository.findByAccountAndTypeNotNullOrderByTimeAsc(id);
+        return lastVisitedRepository.findByAccountAndTypeNotNullOrderByTimeDesc(id);
     }
 
     public List<LastVisited> getAccountLastProjects(Long id) {
-        return lastVisitedRepository.findByAccountAndTypeNullOrderByTimeAsc(id);
+        return lastVisitedRepository.findByAccountAndTypeNullOrderByTimeDesc(id);
     }
 
 

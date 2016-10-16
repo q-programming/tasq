@@ -42,7 +42,7 @@ public class LastVisitedServiceTest {
         Task visitedTask = TestUtils.createTask(TestUtils.TASK_NAME, 3, TestUtils.createProject());
         List<LastVisited> lastVisitedTasks = TestUtils.createLastVisitedTasks(4);
         lastVisitedTasks.get(3).setTime(new DateTime().minusDays(1).toDate());
-        when(lastVisitedRepositoryMock.findByAccountAndTypeNotNullOrderByTimeAsc(testAccount.getId())).thenReturn(lastVisitedTasks);
+        when(lastVisitedRepositoryMock.findByAccountAndTypeNotNullOrderByTimeDesc(testAccount.getId())).thenReturn(lastVisitedTasks);
         visitedService.addLastVisited(testAccount.getId(), visitedTask);
         verify(lastVisitedRepositoryMock, times(1)).save(anyCollection());
     }
@@ -53,7 +53,7 @@ public class LastVisitedServiceTest {
         List<LastVisited> lastVisitedTasks = TestUtils.createLastVisitedTasks(5);
         lastVisitedTasks.get(3).setTime(new DateTime().minusDays(1).toDate());
         LastVisited oldest = lastVisitedTasks.get(3);
-        when(lastVisitedRepositoryMock.findByAccountAndTypeNotNullOrderByTimeAsc(testAccount.getId())).thenReturn(lastVisitedTasks);
+        when(lastVisitedRepositoryMock.findByAccountAndTypeNotNullOrderByTimeDesc(testAccount.getId())).thenReturn(lastVisitedTasks);
         visitedService.addLastVisited(testAccount.getId(), visitedTask);
         verify(lastVisitedRepositoryMock, times(1)).delete(oldest);
         verify(lastVisitedRepositoryMock, times(1)).save(anyCollection());
@@ -63,7 +63,7 @@ public class LastVisitedServiceTest {
     @Test
     public void getAccountLastVisited() throws Exception {
         List<LastVisited> lastVisitedTasks = TestUtils.createLastVisitedTasks(4);
-        when(lastVisitedRepositoryMock.findByAccountOrderByTimeAsc(testAccount.getId())).thenReturn(lastVisitedTasks);
+        when(lastVisitedRepositoryMock.findByAccountOrderByTimeDesc(testAccount.getId())).thenReturn(lastVisitedTasks);
         Set<LastVisited> accountLastVisited = visitedService.getAccountLastVisited(testAccount.getId());
         assertTrue(accountLastVisited.size() == 4);
 
