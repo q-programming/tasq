@@ -82,10 +82,13 @@
         $("#displayAssignee").html(showAssignee);
         $("#assign_btn").attr("disabled", "disabled");
     }
+
     $('#assign_modal').on('shown.bs.modal', function () {
+        if (typeof inputInProgress !== 'undefined') {
+            inputInProgress = true;
+        }
         $("#assignee_input").focus();
-    });
-    $('#assign_modal').on('hidden.bs.modal', function () {
+    }).on('hidden.bs.modal', function () {
         if (typeof inputInProgress !== 'undefined') {
             inputInProgress = false;
         }

@@ -1258,10 +1258,12 @@
                 }
         );
         $('.bootstrap-tagsinput').focusin(function () {
+            inputInProgress=true;
             $(this).addClass('focus');
         });
         $('.bootstrap-tagsinput').focusout(function () {
             $(this).removeClass('focus');
+            inputInProgress=false
         });
 
         $("#tagsinput").autocomplete({

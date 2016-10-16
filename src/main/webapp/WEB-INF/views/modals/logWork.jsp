@@ -75,8 +75,7 @@
         if (typeof inputInProgress !== 'undefined') {
             inputInProgress = !inputInProgress;
         }
-    });
-    $('#logWorkform').on('hidden.bs.modal', function () {
+    }).on('hidden.bs.modal', function () {
         if (typeof inputInProgress !== 'undefined') {
             inputInProgress = false;
         }

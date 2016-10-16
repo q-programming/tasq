@@ -46,15 +46,13 @@
 <script>
     $('#close_task').on('shown.bs.modal', function (e) {
         var subTasks = $("#modal_subtaskCount").html();
-        console.log(subTasks);
         if (subTasks > 0) {
             $("#closeSubtask").show();
         }
         if (typeof inputInProgress !== 'undefined') {
             inputInProgress = !inputInProgress;
         }
-    });
-    $('#close_task').on('hidden.bs.modal', function () {
+    }).on('hidden.bs.modal', function () {
         if (typeof inputInProgress !== 'undefined') {
             inputInProgress = false;
         }

@@ -11,7 +11,7 @@
 <script src="<c:url value="/resources/js/hopscotch.js" />"></script>
 <link href="<c:url value="/resources/css/hopscotch.css" />" rel="stylesheet"
       media="screen"/>
-<div id="content" class="white-frame" style="overflow: auto;text-align: center">
+<div id="content" class="white-frame" style="overflow: auto;text-align: center;width:700px">
     <h3>
         <i class="fa fa-graduation-cap" aria-hidden="true"></i> Welcome to ${applicationName} tours page
 
@@ -35,7 +35,10 @@
             <span class="badge theme" aria-hidden="true">4</span> Task details
         </a>
     </p>
+    <br>
+    <hr>
     <p>You can alwyas come back to tours from <a href="<c:url value="/help"/>">help page</a></p>
+    <br>
 </div>
 
 <script>
