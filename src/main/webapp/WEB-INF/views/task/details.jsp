@@ -1402,7 +1402,7 @@
 
     //----------- Key shortcuts -----------------------
     $(document).keyup(function (e) {
-        if (!inputInProgress) {
+        if (!inputInProgress && !e.ctrlKey) {
             // Assign 'a'
             if (e.which === 65) {
                 var assignee = '${task.assignee}';
