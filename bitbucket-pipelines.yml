@@ -10,4 +10,4 @@ pipelines:
     - step:
         script:
           - mvn clean package -DskipTests=true
-          - mvn tests
+          - mvn surefire:test
