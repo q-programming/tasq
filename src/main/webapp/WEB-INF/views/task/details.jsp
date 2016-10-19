@@ -363,8 +363,22 @@
                                          style="width: 100%;"></div>
                                 </div>
                             </td>
-                            <td class="bar_td">${task.estimate}</td>
+                            <td class="bar_td">${task.estimate}&nbsp;
+                                <c:if test="${not empty originalEstimate}">
+                                    <i id="estimatesDetails" class="fa fa-plus-square clickable" aria-hidden="true"
+                                       title="Click to show detialed estimates inc. subtasks"></i>
+                                </c:if>
+                            </td>
                         </tr>
+                        <c:if test="${not task.subtask && not empty originalEstimate}">
+                            <tr id="estimatesDetailsRow" style="display: none;">
+                                <td colspan="3" class="bar_td">
+                                    <div>[${task.id}]: ${originalEstimate} + <s:message
+                                            code="tasks.subtasks"/>: ${subtasksEstimate}</div>
+                                </td>
+                            </tr>
+                        </c:if>
+
                     </c:if>
                     <%-- Logged work bar --%>
                     <tr>
@@ -1379,6 +1393,11 @@
             table.append(rows[i])
         }
     });
+    $('#estimatesDetails').click(function () {
+        $(this).toggleClass('fa-minus-square');
+        $(this).toggleClass('fa-plus-square');
+        $('#estimatesDetailsRow').toggle();
+    });
 
     function convertToDate(str) {
         var reggie = /(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})/;
@@ -1411,7 +1430,7 @@
                 var assignee = '${task.assignee}';
                 var assigneeid;
                 if (assignee) {
-                    assigneeid = ${task.assignee.id};
+                    assigneeid = '${task.assignee.id}';
                 }
                 projectID = '${task.project.projectId}';
                 taskID = '${task.id}';
