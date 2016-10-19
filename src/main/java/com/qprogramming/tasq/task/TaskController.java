@@ -348,7 +348,6 @@ public class TaskController {
         return showTaskDetails(taskSrv.createSubId(id, subId), model, ra);
     }
 
-    @Transactional
     @RequestMapping(value = "task/{id}", method = RequestMethod.GET)
     public String showTaskDetails(@PathVariable String id, Model model, RedirectAttributes ra) {
         Task task = taskSrv.findById(id);
@@ -364,12 +363,16 @@ public class TaskController {
         if (!task.isSubtask()) {
             List<Task> subtasks = taskSrv.findSubtasks(task);
             // Add all subtasks into remaining work
+            Period parentEstimate = task.getRawEstimate();
             for (Task subtask : subtasks) {
                 task.setEstimate(PeriodHelper.plusPeriods(task.getRawEstimate(), subtask.getRawEstimate()));
                 task.setLoggedWork(PeriodHelper.plusPeriods(task.getRawLoggedWork(), subtask.getRawLoggedWork()));
                 task.setRemaining(PeriodHelper.plusPeriods(task.getRawRemaining(), subtask.getRawRemaining()));
             }
+            Period subtaskEstimates = PeriodHelper.minusPeriods(task.getRawEstimate(), parentEstimate);
             Collections.sort(subtasks, new TaskSorter(TaskSorter.SORTBY.ID, true));
+            model.addAttribute("originalEstimate", PeriodHelper.outFormat(parentEstimate));
+            model.addAttribute("subtasksEstimate", PeriodHelper.outFormat(subtaskEstimates));
             model.addAttribute("subtasks", subtasks);
         }
         model.addAttribute("watching", watchSrv.isWatching(task.getId()));
