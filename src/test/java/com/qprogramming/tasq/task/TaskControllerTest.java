@@ -425,7 +425,7 @@ public class TaskControllerTest {
         when(taskRepoMock.findByParent(TEST_1)).thenReturn(subtasks);
         taskCtr.showTaskDetails(TEST_1, modelMock, raMock);
         Assert.assertEquals(44.0F, task1.getPercentage_left(), 0);
-        verify(modelMock, times(6)).addAttribute(anyString(), anyObject());
+        verify(modelMock, times(8)).addAttribute(anyString(), anyObject());
     }
 
     @Test
