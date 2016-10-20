@@ -378,6 +378,7 @@ public class TaskControllerTest {
         project.setLastTaskNo(0L);
         Task task = createTask(TASK_NAME, 1, project);
         task.setInSprint(true);
+        task.setEstimated(true);
         testAccount.setRole(Roles.ROLE_POWERUSER);
         Account owner = new Account(NEW_EMAIL, PASSWORD, NEWUSERNAME, Roles.ROLE_POWERUSER);
         task.setOwner(owner);

@@ -44,7 +44,7 @@ public class TaskForm {
 
     private String story_points;
 
-    private Boolean estimated;
+    private Boolean notEstimated;
 
     private String remaining;
 
@@ -64,7 +64,7 @@ public class TaskForm {
         setName(task.getName());
         setProject(task.getProject().getId());
         setDescription(task.getDescription());
-        setEstimated(task.isEstimated());
+        setNotEstimated(!task.isEstimated());
         setEstimate(task.getEstimate());
         setStory_points(task.getStory_points() != null ? task.getStory_points()
                 .toString() : "");
@@ -102,11 +102,10 @@ public class TaskForm {
         }
         task.setDescription(getDescription());
         task.setState(TaskState.TO_DO);
-        boolean estimated = getEstimated();
         Period p = PeriodHelper.inFormat(Utils.matchTimeFormat(getEstimate()));
         task.setEstimate(p);
         task.setRemaining(p);
-        task.setEstimated(!estimated);
+        task.setEstimated(!getNotEstimated());
         task.setLoggedWork(PeriodHelper.inFormat(""));
         task.setOwner(Utils.getCurrentAccount());
         task.setPriority(TaskPriority.toPriority(getPriority()));
@@ -173,12 +172,12 @@ public class TaskForm {
         this.story_points = String.valueOf(story_points.intValue());
     }
 
-    public Boolean getEstimated() {
-        return estimated != null ? estimated : false;
+    public Boolean getNotEstimated() {
+        return notEstimated != null ? notEstimated : false;
     }
 
-    public void setEstimated(Boolean no_estimation) {
-        this.estimated = no_estimation;
+    public void setNotEstimated(Boolean no_estimation) {
+        this.notEstimated = no_estimation;
     }
 
     public String getRemaining() {

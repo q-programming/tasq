@@ -297,7 +297,7 @@ public class TaskController {
             task.setRemaining(remaining);
         }
 
-        boolean notestimated = !taskForm.getEstimated();
+        boolean notestimated = !taskForm.getNotEstimated();
         if (!task.isEstimated().equals(notestimated)) {
             message.append(
                     Utils.changedFromTo(ESTIMATED_TXT, task.getEstimated().toString(), Boolean.toString(notestimated)));
