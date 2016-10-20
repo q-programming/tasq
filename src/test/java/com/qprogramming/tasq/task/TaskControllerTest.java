@@ -41,6 +41,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
@@ -103,6 +104,8 @@ public class TaskControllerTest {
     private HttpServletRequest requestMock;
     @Mock
     private Model modelMock;
+    @Mock
+    private EntityManager entityManagerMock;
 
     @Before
     public void setUp() {
@@ -114,7 +117,12 @@ public class TaskControllerTest {
         SecurityContextHolder.setContext(securityMock);
         taskSrv = new TaskService(taskRepoMock, appSrv, sprintSrvMock);
         taskCtr = new TaskController(taskSrv, projSrvMock, accountServiceMock, wrkLogSrv, msgMock, sprintSrvMock,
-                taskLinkSrvMock, commRepoMock, tagsRepoMock, watchSrvMock, eventSrvMock, visitedSrvMock);
+                taskLinkSrvMock, commRepoMock, tagsRepoMock, watchSrvMock, eventSrvMock, visitedSrvMock) {
+            @Override
+            protected EntityManager getEntitymanager() {
+                return entityManagerMock;
+            }
+        };
     }
 
     @Test
@@ -425,7 +433,7 @@ public class TaskControllerTest {
         when(taskRepoMock.findByParent(TEST_1)).thenReturn(subtasks);
         taskCtr.showTaskDetails(TEST_1, modelMock, raMock);
         Assert.assertEquals(44.0F, task1.getPercentage_left(), 0);
-        verify(modelMock, times(6)).addAttribute(anyString(), anyObject());
+        verify(modelMock, times(12)).addAttribute(anyString(), anyObject());
     }
 
     @Test

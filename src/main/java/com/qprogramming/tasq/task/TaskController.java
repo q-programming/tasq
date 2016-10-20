@@ -54,6 +54,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -88,7 +90,8 @@ public class TaskController {
     private static final String REDIRECT_TASK = "redirect:/task/";
     private static final String REDIRECT = "redirect:";
     private static final String ERROR_ACCES_RIGHTS = "error.accesRights";
-
+    @PersistenceContext
+    private EntityManager entityManager;
     private TaskService taskSrv;
     private ProjectService projectSrv;
     private AccountService accSrv;
@@ -170,7 +173,6 @@ public class TaskController {
             }
             // lookup for sprint
             // Create log work
-            task = taskSrv.save(task);
             if (taskForm.getAddToSprint() != null) {
                 Sprint sprint = sprintSrv.findByProjectIdAndSprintNo(project.getId(), taskForm.getAddToSprint());
                 task.addSprint(sprint);
@@ -190,17 +192,24 @@ public class TaskController {
                     wlSrv.addActivityLog(task, message, LogType.TASKSPRINTADD);
                 }
             }
+            task = taskSrv.save(task);
             projectSrv.save(project);
             // Save files
             saveTaskFiles(taskForm.getFiles(), task);
             wlSrv.addActivityLog(task, "", LogType.CREATE);
             watchSrv.startWatching(task);
-            if (linked != null) {
+            if (StringUtils.isNotBlank(linked)) {
                 Task linkedTask = taskSrv.findById(linked);
                 if (linkedTask != null) {
-                    TaskLink link = new TaskLink(linkedTask.getId(), taskID, TaskLinkType.RELATES_TO);
-                    linkService.save(link);
-                    wlSrv.addWorkLogNoTask(linked + " - " + taskID, project, LogType.TASK_LINK);
+                    if (linkedTask.getProject().equals(project)) {
+                        TaskLink link = new TaskLink(linkedTask.getId(), taskID, TaskLinkType.RELATES_TO);
+                        linkService.save(link);
+                        wlSrv.addWorkLogNoTask(linked + " - " + taskID, project, LogType.TASK_LINK);
+                    } else {
+                        MessageHelper.addWarningAttribute(ra,
+                                msg.getMessage("task.create.not.linked", null, Utils.getCurrentLocale()));
+
+                    }
                 }
             }
             return REDIRECT_TASK + taskID;
@@ -342,12 +351,14 @@ public class TaskController {
 
     }
 
+    @Transactional
     @RequestMapping(value = "task/{id}/{subId}", method = RequestMethod.GET)
     public String showSubTaskDetails(@PathVariable(value = "id") String id, @PathVariable(value = "subId") String subId,
                                      Model model, RedirectAttributes ra) {
         return showTaskDetails(taskSrv.createSubId(id, subId), model, ra);
     }
 
+    @Transactional
     @RequestMapping(value = "task/{id}", method = RequestMethod.GET)
     public String showTaskDetails(@PathVariable String id, Model model, RedirectAttributes ra) {
         Task task = taskSrv.findById(id);
@@ -355,6 +366,7 @@ public class TaskController {
             MessageHelper.addErrorAttribute(ra, msg.getMessage("task.notexists", null, Utils.getCurrentLocale()));
             return "redirect:/tasks";
         }
+        getEntitymanager().detach(task);
         Account account = Utils.getCurrentAccount();
         visitedSrv.addLastVisited(account.getId(), task);
         // TASK
@@ -363,16 +375,23 @@ public class TaskController {
         if (!task.isSubtask()) {
             List<Task> subtasks = taskSrv.findSubtasks(task);
             // Add all subtasks into remaining work
-            Period parentEstimate = task.getRawEstimate();
-            for (Task subtask : subtasks) {
-                task.setEstimate(PeriodHelper.plusPeriods(task.getRawEstimate(), subtask.getRawEstimate()));
-                task.setLoggedWork(PeriodHelper.plusPeriods(task.getRawLoggedWork(), subtask.getRawLoggedWork()));
-                task.setRemaining(PeriodHelper.plusPeriods(task.getRawRemaining(), subtask.getRawRemaining()));
+            if (!subtasks.isEmpty()) {
+                Period parentEstimate = task.getRawEstimate();
+                Period parentLoggedWork = task.getRawLoggedWork();
+                Period parentRemaining = task.getRawRemaining();
+                for (Task subtask : subtasks) {
+                    task.setEstimate(PeriodHelper.plusPeriods(task.getRawEstimate(), subtask.getRawEstimate()));
+                    task.setLoggedWork(PeriodHelper.plusPeriods(task.getRawLoggedWork(), subtask.getRawLoggedWork()));
+                    task.setRemaining(PeriodHelper.plusPeriods(task.getRawRemaining(), subtask.getRawRemaining()));
+                }
+                Collections.sort(subtasks, new TaskSorter(TaskSorter.SORTBY.ID, true));
+                model.addAttribute("taskEstimate", PeriodHelper.outFormat(parentEstimate));
+                model.addAttribute("subtasksEstimate", PeriodHelper.outFormat(PeriodHelper.minusPeriods(task.getRawEstimate(), parentEstimate)));
+                model.addAttribute("taskLogged", PeriodHelper.outFormat(parentLoggedWork));
+                model.addAttribute("subtasksLogged", PeriodHelper.outFormat(PeriodHelper.minusPeriods(task.getRawLoggedWork(), parentLoggedWork)));
+                model.addAttribute("taskRemaining", PeriodHelper.outFormat(parentRemaining));
+                model.addAttribute("subtasksRemaining", PeriodHelper.outFormat(PeriodHelper.minusPeriods(task.getRawRemaining(), parentRemaining)));
             }
-            Period subtaskEstimates = PeriodHelper.minusPeriods(task.getRawEstimate(), parentEstimate);
-            Collections.sort(subtasks, new TaskSorter(TaskSorter.SORTBY.ID, true));
-            model.addAttribute("originalEstimate", PeriodHelper.outFormat(parentEstimate));
-            model.addAttribute("subtasksEstimate", PeriodHelper.outFormat(subtaskEstimates));
             model.addAttribute("subtasks", subtasks);
         }
         model.addAttribute("watching", watchSrv.isWatching(task.getId()));
@@ -487,6 +506,7 @@ public class TaskController {
      * @param model
      * @return
      */
+    @Transactional
     @RequestMapping(value = "logwork", method = RequestMethod.POST)
     public String logWork(@RequestParam(value = "taskID") String taskID,
                           @RequestParam(value = "loggedWork") String loggedWork,
@@ -498,9 +518,7 @@ public class TaskController {
             // check if can edit
             if (Roles.isPowerUser() | projectSrv.canEdit(task.getProject())) {
                 try {
-                    if (loggedWork.matches("[0-9]+")) {
-                        loggedWork += "h";
-                    }
+                    loggedWork = Utils.matchTimeFormat(loggedWork);
                     Period logged = PeriodHelper.inFormat(loggedWork);
                     StringBuilder message = new StringBuilder(loggedWork);
                     Date when = new Date();
@@ -515,9 +533,7 @@ public class TaskController {
                     }
                     Period remaining = null;
                     if (StringUtils.isNotEmpty(remainingTxt)) {
-                        if (remainingTxt.matches("[0-9]+")) {
-                            remainingTxt += "h";
-                        }
+                        remainingTxt = Utils.matchTimeFormat(remainingTxt);
                         remaining = PeriodHelper.inFormat(remainingTxt);
                         wlSrv.addDatedWorkLog(task, remainingTxt, when, LogType.ESTIMATE);
                     }
@@ -527,6 +543,7 @@ public class TaskController {
                 } catch (IllegalArgumentException e) {
                     MessageHelper.addErrorAttribute(ra,
                             msg.getMessage("error.estimateFormat", null, Utils.getCurrentLocale()));
+                    LOG.error("Error with arguments {}", e);
                     return REDIRECT + request.getHeader("Referer");
                 }
             } else {
@@ -537,6 +554,7 @@ public class TaskController {
         }
         return REDIRECT + request.getHeader("Referer");
     }
+
 
     @Transactional
     @RequestMapping(value = "/task/changeState", method = RequestMethod.POST)
@@ -1396,5 +1414,9 @@ public class TaskController {
         Task zerotask = new Task();
         zerotask.setId(task.getId());
         return zerotask;
+    }
+
+    protected EntityManager getEntitymanager() {
+        return entityManager;
     }
 }

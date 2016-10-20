@@ -11,7 +11,6 @@ import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
-import com.qprogramming.tasq.task.TaskState;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class HomeController {
@@ -53,6 +53,7 @@ public class HomeController {
         this.eventSrv = eventSrv;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String index(Account account, Model model) {
         if (account == null) {
@@ -69,19 +70,10 @@ public class HomeController {
             }
             List<Task> allTasks = new LinkedList<>();
             for (Project project : usersProjects) {
-                allTasks.addAll(taskSrv.findAllByProject(project));
+                allTasks.addAll(taskSrv.findByProjectAndOpen(project));
             }
-            List<Task> currentAccTasks = new LinkedList<>();
-            List<Task> unassignedTasks = new LinkedList<>();
-            for (Task task : allTasks) {
-                TaskState state = (TaskState) task.getState();
-                if (task.getAssignee() == null & !TaskState.CLOSED.equals(state)) {
-                    unassignedTasks.add(task);
-                }
-                if (Utils.getCurrentAccount().equals(task.getAssignee()) && !TaskState.CLOSED.equals(state)) {
-                    currentAccTasks.add(task);
-                }
-            }
+            List<Task> currentAccTasks = allTasks.stream().filter(task -> Utils.getCurrentAccount().equals(task.getAssignee())).collect(Collectors.toList());
+            List<Task> unassignedTasks = allTasks.stream().filter(task -> task.getAssignee() == null).collect(Collectors.toList());
             Collections.sort(currentAccTasks, new TaskSorter(TaskSorter.SORTBY.PRIORITY, true));
             Collections.sort(unassignedTasks, new TaskSorter(TaskSorter.SORTBY.PRIORITY, true));
             model.addAttribute("myTasks", currentAccTasks);

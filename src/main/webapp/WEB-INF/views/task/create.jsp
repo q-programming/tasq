@@ -86,7 +86,7 @@
                 </h5>
             </div>
             <form:select id="projects_list" style="width:300px;" path="project" class="form-control"
-                         disabled="${not empty param.project}">
+                         disabled="${not empty param.p}">
                 <c:forEach items="${projects_list}" var="list_project">
                     <option
                             <c:if test="${list_project.projectId eq chosenProject}">selected style="font-weight:bold"</c:if>
