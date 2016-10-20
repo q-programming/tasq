@@ -379,9 +379,8 @@
                         <c:if test="${not task.subtask && not empty taskEstimate}">
                             <tr class="time-details-row">
                                 <td></td>
-                                <td></td>
-                                <td colspan="2" class="bar_td">
-                                    <div>${taskEstimate} + ${subtasksEstimate}&nbsp;<s:message
+                                <td colspan="3" class="bar_td">
+                                    <div>${taskEstimate}&nbsp;[${task.id}] + ${subtasksEstimate}&nbsp;<s:message
                                             code="tasks.subtasks"/></div>
                                 </td>
                             </tr>
@@ -414,9 +413,8 @@
                     <c:if test="${not task.subtask && not empty taskLogged}">
                         <tr class="time-details-row">
                             <td></td>
-                            <td></td>
-                            <td colspan="2" class="bar_td">
-                                <div>${taskLogged} + ${subtasksLogged}&nbsp;<s:message
+                            <td colspan="3" class="bar_td">
+                                <div>${taskLogged}&nbsp;[${task.id}] + ${subtasksLogged}&nbsp;<s:message
                                         code="tasks.subtasks"/></div>
                             </td>
                         </tr>
@@ -445,9 +443,8 @@
                     <c:if test="${not task.subtask && not empty taskRemaining}">
                         <tr class="time-details-row">
                             <td></td>
-                            <td></td>
-                            <td colspan="2" class="bar_td">
-                                <div>${taskRemaining} + ${subtasksRemaining}&nbsp;<s:message
+                            <td colspan="3" class="bar_td">
+                                <div>${taskRemaining}&nbsp;[${task.id}] + ${subtasksRemaining}&nbsp;<s:message
                                         code="tasks.subtasks"/></div>
                             </td>
                         </tr>
