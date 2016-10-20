@@ -173,7 +173,6 @@ public class TaskController {
             }
             // lookup for sprint
             // Create log work
-            task = taskSrv.save(task);
             if (taskForm.getAddToSprint() != null) {
                 Sprint sprint = sprintSrv.findByProjectIdAndSprintNo(project.getId(), taskForm.getAddToSprint());
                 task.addSprint(sprint);
@@ -193,17 +192,24 @@ public class TaskController {
                     wlSrv.addActivityLog(task, message, LogType.TASKSPRINTADD);
                 }
             }
+            task = taskSrv.save(task);
             projectSrv.save(project);
             // Save files
             saveTaskFiles(taskForm.getFiles(), task);
             wlSrv.addActivityLog(task, "", LogType.CREATE);
             watchSrv.startWatching(task);
-            if (linked != null) {
+            if (StringUtils.isNotBlank(linked)) {
                 Task linkedTask = taskSrv.findById(linked);
                 if (linkedTask != null) {
-                    TaskLink link = new TaskLink(linkedTask.getId(), taskID, TaskLinkType.RELATES_TO);
-                    linkService.save(link);
-                    wlSrv.addWorkLogNoTask(linked + " - " + taskID, project, LogType.TASK_LINK);
+                    if (linkedTask.getProject().equals(project)) {
+                        TaskLink link = new TaskLink(linkedTask.getId(), taskID, TaskLinkType.RELATES_TO);
+                        linkService.save(link);
+                        wlSrv.addWorkLogNoTask(linked + " - " + taskID, project, LogType.TASK_LINK);
+                    } else {
+                        MessageHelper.addWarningAttribute(ra,
+                                msg.getMessage("task.create.not.linked", null, Utils.getCurrentLocale()));
+
+                    }
                 }
             }
             return REDIRECT_TASK + taskID;

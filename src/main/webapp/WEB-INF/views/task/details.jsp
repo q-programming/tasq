@@ -69,7 +69,7 @@
                         </li>
                     </c:if>
                     <li>
-                        <a href="<c:url value="/task/create"/>?linked=${task.id}&p=${task.project.id}">
+                        <a href="<c:url value="/task/create"/>?linked=${task.id}&p=${task.project.projectId}">
                             <i class="fa fw fa-plus"></i>
                             <s:message code="task.linked.create"/>
                         </a>
