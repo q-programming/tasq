@@ -135,7 +135,7 @@ a.filter{
 }
 
 .mod-header-title-txt {
-    padding-left: 12px
+    /*padding-left: 12px*/
 }
 
 .mod-header-title-txt.closed {
@@ -145,12 +145,12 @@ a.filter{
 .mod-header-title {
     background: white;
     display: inline;
-    padding: 5px;
+    /*padding: 5px;*/
     font-weight: bold;
 }
 
 .toggler {
-    display: none;
+    /*display: none;*/
     color: gray;
     background: white;
     cursor: pointer;
@@ -946,7 +946,15 @@ td.width200{
 .tour-dropdown{
     display: initial !important;
 }
-
+.time-details-row{
+    display: none;
+}
+.subtask-time-detail{
+    color: rgba(0,0,0, 0.4);
+}
+.subtask-time-detail:hover{
+    color: rgba(0,0,0, 0.8);
+}
 
 /* .search { position: relative; } */
 /* .search input { text-indent: 30px;} */

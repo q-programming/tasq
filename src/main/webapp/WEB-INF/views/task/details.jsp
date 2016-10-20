@@ -343,9 +343,12 @@
                 <c:if test="${task.estimate eq '0m' && task.remaining ne '0m'}">
                     <c:set var="remaining_bar">    ${100-task.percentage_logged}</c:set>
                 </c:if>
-                <table id="estimatesToggle" style="width: 400px;
+                <table id="estimatesToggle" style="width: 450px;
                 <c:if test="${task.remaining eq '0m' && task.loggedWork eq '0m' && task.estimate eq '0m'}"> display: none;</c:if> ">
                     <tr>
+                        <c:if test="${not empty taskEstimate}">
+                            <td style="width:15px;"></td>
+                        </c:if>
                         <td></td>
                         <td style="width: 150px"></td>
                         <td></td>
@@ -353,6 +356,13 @@
                     <%-- Estimate bar --%>
                     <c:if test="${task.estimate ne '0m'}">
                         <tr>
+                            <c:if test="${not empty taskEstimate}">
+                                <td>
+                                    <i class="fa fa-plus-square clickable subtask-time-detail a-tooltip"
+                                       aria-hidden="true"
+                                       title="<s:message code="task.subtask.time.detail"/>"></i>
+                                </td>
+                            </c:if>
                             <td class="bar_td" style="width: 50px"><s:message
                                     code="task.estimate"/></td>
                             <td class="bar_td">
@@ -364,17 +374,15 @@
                                 </div>
                             </td>
                             <td class="bar_td">${task.estimate}&nbsp;
-                                <c:if test="${not empty originalEstimate}">
-                                    <i id="estimatesDetails" class="fa fa-plus-square clickable" aria-hidden="true"
-                                       title="Click to show detialed estimates inc. subtasks"></i>
-                                </c:if>
                             </td>
                         </tr>
-                        <c:if test="${not task.subtask && not empty originalEstimate}">
-                            <tr id="estimatesDetailsRow" style="display: none;">
-                                <td colspan="3" class="bar_td">
-                                    <div>[${task.id}]: ${originalEstimate} + <s:message
-                                            code="tasks.subtasks"/>: ${subtasksEstimate}</div>
+                        <c:if test="${not task.subtask && not empty taskEstimate}">
+                            <tr class="time-details-row">
+                                <td></td>
+                                <td></td>
+                                <td colspan="2" class="bar_td">
+                                    <div>${taskEstimate} + ${subtasksEstimate}&nbsp;<s:message
+                                            code="tasks.subtasks"/></div>
                                 </td>
                             </tr>
                         </c:if>
@@ -382,6 +390,12 @@
                     </c:if>
                     <%-- Logged work bar --%>
                     <tr>
+                        <c:if test="${not empty taskLogged}">
+                            <td style="width:15px;">
+                                <i class="fa fa-plus-square clickable subtask-time-detail" aria-hidden="true"
+                                   title="<s:message code="task.subtask.time.detail"/>"></i>
+                            </td>
+                        </c:if>
                         <td class="bar_td"><s:message code="task.logged"/></td>
                         <td class="bar_td">
                             <div class="progress"
@@ -397,8 +411,25 @@
                         </td>
                         <td class="bar_td">${task.loggedWork}</td>
                     </tr>
+                    <c:if test="${not task.subtask && not empty taskLogged}">
+                        <tr class="time-details-row">
+                            <td></td>
+                            <td></td>
+                            <td colspan="2" class="bar_td">
+                                <div>${taskLogged} + ${subtasksLogged}&nbsp;<s:message
+                                        code="tasks.subtasks"/></div>
+                            </td>
+                        </tr>
+                    </c:if>
+
                     <%-- Remaining work bar --%>
                     <tr>
+                        <c:if test="${not empty taskRemaining}">
+                            <td style="width:15px;">
+                                <i class="fa fa-plus-square clickable subtask-time-detail a-tooltip" aria-hidden="true"
+                                   title="<s:message code="task.subtask.time.detail"/>"></i>
+                            </td>
+                        </c:if>
                         <td class="bar_td"><s:message code="task.remaining"/></td>
                         <td class="bar_td">
                             <div class="progress"
@@ -411,6 +442,16 @@
                         </td>
                         <td class="bar_td">${task.remaining }</td>
                     </tr>
+                    <c:if test="${not task.subtask && not empty taskRemaining}">
+                        <tr class="time-details-row">
+                            <td></td>
+                            <td></td>
+                            <td colspan="2" class="bar_td">
+                                <div>${taskRemaining} + ${subtasksRemaining}&nbsp;<s:message
+                                        code="tasks.subtasks"/></div>
+                            </td>
+                        </tr>
+                    </c:if>
                     <%-- 					</c:if> --%>
                 </table>
             </div>
@@ -1004,7 +1045,7 @@
         $('#comments_cancel').click(function () {
             toggle_comment();
         });
-
+        //-----------------------------Task link ---------------------
         $("#task_link").autocomplete({
             minLength: 2,
             delay: 500,
@@ -1047,6 +1088,19 @@
             }
         });
 
+        $(".linkButton").click(function () {
+            //clean regardles what is pressed
+            showRelatedLinks();
+        });
+
+        $("#linkTask").submit(function (e) {
+            if ($("#taskB").val() == '') {
+                $("#task_link").parent().addClass("has-error");
+                e.preventDefault();
+            }
+        });
+
+        //--------------------STATE-----------------------
         $("#change_state").change(function () {
             if ($(this).val() == 'CLOSED') {
                 $("#zero_remaining").toggle("blind");
@@ -1056,7 +1110,6 @@
             }
         });
 
-// 			change state
         $(".change_state").click(function () {
             var state = $(this).data('state');
             var current_state = $("#current_state").data('state');
@@ -1078,8 +1131,7 @@
                             showError(result.message);
                         }
                         else {
-                            $("#current_state").data('state', state);
-                            $("#current_state").html(newState);
+                            $("#current_state").data('state', state).html(newState);
                             showSuccess(result.message);
                         }
                         showWait(false);
@@ -1088,18 +1140,7 @@
             }
         });
 
-        $(".linkButton").click(function () {
-            //clean regardles what is pressed
-            showRelatedLinks();
-        });
-
-        $("#linkTask").submit(function (e) {
-            if ($("#taskB").val() == '') {
-                $("#task_link").parent().addClass("has-error");
-                e.preventDefault();
-            }
-        });
-
+        //-----------------------------Watch--------------------
         $("#watch").click(function () {
             var url = '<c:url value="/task/watch"/>';
             $.post(url, {id: taskID}, function (result) {
@@ -1108,14 +1149,13 @@
                 }
                 else {
                     showSuccess(result.message);
-                    $("#watch_icon").toggleClass("fa-eye");
-                    $("#watch_icon").toggleClass("fa-eye-slash");
+                    $("#watch_icon").toggleClass("fa-eye").toggleClass("fa-eye-slash");
                     updateWatchers();
                 }
             });
         });
 
-        //points
+        //---------------------------Points-------------------------------
         $('.point-edit').click(function () {
             togglePoints();
             $('#point_value').focus();
@@ -1139,8 +1179,7 @@
         });
 
         function togglePoints() {
-            $('#point-input').val('');
-            $('#point-input').toggle();
+            $('#point-input').val('').toggle();
             $('#point_value').toggle();
             $('#point_approve').toggle();
             $('#point_cancel').toggle();
@@ -1249,7 +1288,7 @@
             });
         });
 
-        //TAGS
+        // ----------------------------TAGS------------------------------------
         <c:if test="${not task.subtask}">
         var init = true;
         var noTags = '<s:message code="task.tags.noTags" htmlEscape="false"/>';
@@ -1393,10 +1432,10 @@
             table.append(rows[i])
         }
     });
-    $('#estimatesDetails').click(function () {
+    $('.subtask-time-detail').click(function () {
         $(this).toggleClass('fa-minus-square');
         $(this).toggleClass('fa-plus-square');
-        $('#estimatesDetailsRow').toggle();
+        $(this).closest('tr').next(".time-details-row").toggle();
     });
 
     function convertToDate(str) {

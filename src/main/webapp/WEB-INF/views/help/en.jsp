@@ -799,7 +799,8 @@
                     <td><b><s:message code="task.estimate"/></b></td>
                     <td>Time estimation of how much this task can take. Standard
                         format should be used : *w *d *h *m (weeks, days, hours, minutes ;
-                        where * is any number )
+                        where * is any number )<br>
+                        <i class="fa fa-exclamation-circle"></i>&nbsp;If only number is inputted , default (h) hours will be used.
                     </td>
                 </tr>
                 <tr>
