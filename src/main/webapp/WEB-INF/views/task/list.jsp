@@ -204,7 +204,7 @@
                                         <t:type type="${type}" list="true" show_text="true"/></a></li>
                             </c:forEach>
                         </ul>
-                    <span>
+                </span>
             </th>
             <th style="width: 30px;"><span class="dropdown a-tooltip"
                                            title="<s:message code="task.priority" />"
@@ -219,7 +219,7 @@
 							<c:forEach items="${priorities}" var="priority">
 								<li><a
                                         href="<c:url value="/tasks?${projID_url}${query_url}${state_url}${type_url}${assignee_url}priority=${priority}"/>">
-                                    <t:priority priority="${priority}"></t:priority></a></li>
+                                    <t:priority priority="${priority}"/></a></li>
                             </c:forEach>
 						</ul>
 				</span></th>
@@ -237,12 +237,12 @@
                         <c:forEach items="${states}" var="state">
                             <li><a
                                     href="<c:url value="/tasks?${projID_url}${query_url}${priority_url}${assignee_url}${type_url}state=${state}"/>">
-                                <t:state state="${state}"></t:state></a></li>
+                                <t:state state="${state}"/></a></li>
                         </c:forEach>
                         <li class="divider"></li>
                         <li><a
                                 href="<c:url value="/tasks?${projID_url}${query_url}${priority_url}${assignee_url}${type_url}state=ALL"/>">
-                            <t:state state="ALL"></t:state>
+                            <t:state state="ALL"/>
                         </a>
                         </li>
                     </ul>
@@ -311,7 +311,7 @@
                 <%-- 			</c:if> --%>
                 <%-- 			<c:if test="${task.estimated}"> --%>
                 <td>
-                    <div class="progress" style="width: 50px;">
+                    <div class="progress" style="width: 100px;">
                         <c:set var="logged_class"></c:set>
                         <c:set var="percentage">${100-task.percentage_left}</c:set>
                         <c:if
@@ -366,10 +366,6 @@
                 <img src="<c:url value="/resources/img/loading.gif"/>"></img>
                 <br><s:message code="task.export.prepareFile"/>
             </div>
-            <div class="centerPadded">
-                <a href="<c:url value="/tasks"/>"><i class="fa fa-lg fa-check-circle-o"></i></span> <s:message
-                        code="task.export.goBack"/></a>
-            </div>
         </div>
     </div>
 </div>
@@ -400,14 +396,20 @@
                 }
             });
             if (atLeastOnechecked) {
-                var type = $(this).data('type');
-                $("#exportType").val(type);
-                $("#exportTaskForm").submit();
                 $('#loading').modal({
                     show: true,
                     keyboard: false,
                     backdrop: 'static'
                 });
+                var type = $(this).data('type');
+                $("#exportType").val(type);
+                var params = "?type=" + type
+                $(".export:checked").each(function(){
+                    params+="&tasks="+this.value;
+                })
+                var url = '<c:url value="/task/export"/>' + params;
+                window.open(url);
+                location.reload();
             }
         });
 

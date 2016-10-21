@@ -76,7 +76,7 @@
             <c:set var="chosenProject" value="${param.p}"/>
         </c:if>
         <c:if test="${empty param.p}">
-            <c:set var="chosenProject" value="${user.active_project}"/>
+            <c:set var="chosenProject" value="${user.activeProject}"/>
         </c:if>
         <a class="anchor" id="projectA"></a>
         <div class="form-group">
@@ -86,14 +86,18 @@
                 </h5>
             </div>
             <form:select id="projects_list" style="width:300px;" path="project" class="form-control"
-                         disabled="${not empty param.project}">
+                         disabled="${not empty param.p}">
                 <c:forEach items="${projects_list}" var="list_project">
-                    <option id="${list_project.projectId}"
-                            <c:if test="${list_project.id eq chosenProject}">selected style="font-weight:bold"
-                    </c:if>
-                            value="${list_project.id}">${list_project}</option>
+                    <option
+                            <c:if test="${list_project.projectId eq chosenProject}">selected
+                            style="font-weight:bold"</c:if>
+                            value="${list_project.projectId}">${list_project}
+                    </option>
                 </c:forEach>
             </form:select>
+            <c:if test="${not empty param.p}">
+                <input type="hidden" name="project" value="${param.p}">
+            </c:if>
             <span class="help-block"><s:message code="task.project.help"/></span>
                 <%--------------------	Assign to -------------------------------%>
             <a class="anchor" id="assignToA"></a>
@@ -143,7 +147,7 @@
                     %>
                     <c:forEach items="${types}" var="enum_type">
                         <c:if test="${not enum_type.subtask}">
-                            <li><a class="taskType clickable" tabindex="-1" id="${enum_type}"
+                            <li><a class="taskType clickable" tabindex="-1" id="TYPE_${enum_type}"
                                    data-type="${enum_type}"><t:type
                                     type="${enum_type}" show_text="true" list="true"/></a></li>
                         </c:if>
@@ -242,7 +246,7 @@
             </div>
         </div>
         <label class="checkbox clickable" style="display: inherit; font-weight: normal; margin-left: 22px;">
-            <input type="checkbox" name="estimated" id="estimated"
+            <input type="checkbox" name="notEstimated" id="estimated"
                    value="true" style=""> <s:message code="task.withoutEstimation"/>&nbsp;<i
                 class="fa fa-question-circle a-tooltip"
                 data-html="true" title="<s:message  code ="task.withoutEstimation.help" />"
@@ -297,8 +301,11 @@
             <li class=""><a href="#nameA">${taskName_text}</a></li>
             <li class=""><a href="#descA">${taskDesc_text}</a></li>
             <li class=""><a href="#projectA"><s:message code="main.other"/></a></li>
-            <li class=""><a href="#createA"><s:message code="main.create" text="Create"/></a></li>
+            <button id="createSubmit" class="btn btn-success">
+                <i class="fa fa-plus"></i>&nbsp;<s:message code="main.create" text="Create"/>
+            </button>
         </ul>
+
         <!-- 				</nav> -->
     </div>
 </div>
@@ -331,6 +338,10 @@
 
         $("#addMoreFiles").click(function () {
             addFileInput();
+        });
+
+        $("#createSubmit").click(function () {
+            $("#taskForm").submit();
         });
 
         $(document).on("click", ".removeFile", function (e) {
@@ -501,7 +512,7 @@
             $.get(url, {id: $("#projects_list").val()}, function (result, status) {
                 project = result;
                 //TYPE
-                var thisType = $("#" + project.default_type);
+                var thisType = $("#TYPE_" + project.default_type);
                 var type = thisType.data('type');
                 $("#task_type").html(thisType.html());
                 $("#type").val(type);

@@ -245,7 +245,7 @@ public class Utils {
         return message.toString();
     }
 
-    public static String stripHtml(String string){
+    public static String stripHtml(String string) {
         return Jsoup.parse(string).text();
     }
 
@@ -273,6 +273,19 @@ public class Utils {
         } catch (IOException e) {
             LOG.error(e.getMessage());
         }
+    }
+
+    /**
+     * Check if time ( logged or estimated ) is number and add default time uni if missing
+     *
+     * @param time - time to be checked
+     * @return
+     */
+    public static String matchTimeFormat(String time) {
+        if (StringUtils.isNotBlank(time) && time.matches("[0-9]+")) {
+            time += "h";
+        }
+        return time;
     }
 
 }

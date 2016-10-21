@@ -20,7 +20,18 @@
         test="${(myfn:contains(project.participants,user) && user.isUser) || is_admin}">
     <c:set var="can_edit" value="true"/>
 </c:if>
-<h3>${project}</h3>
+<div class="row">
+    <div class="col-sm12 col-md-6">
+        <h3 class="">${project}</h3>
+    </div>
+    <div class="col-sm12 col-md-6">
+        <div class="margintop_20 pull-right ">
+            <a class="btn btn-default print_cards" style="width: 120px" data-sprintid="${sprint.id}">
+                <i class="fa fa-print"></i>&nbsp;<s:message code="agile.print"/></a>
+        </div>
+    </div>
+</div>
+
 <div class="white-frame"
      style="display: table; width: 100%; height: 85vh">
     <div style="display: table-caption; margin-left: 10px;">

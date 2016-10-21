@@ -18,7 +18,7 @@
 <c:set var="taskDesc_text">
 	<s:message code="task.description" text="Description" />
 </c:set>
-<div class="white-frame" style="width: 700px; overflow: auto;">
+<div class="white-frame" style="overflow: auto;">
 	<!-- 	<h3> -->
 	<%-- 		<s:message code="task.edit" text="Create task"></s:message> --%>
 	<!-- 	</h3> -->

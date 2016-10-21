@@ -26,7 +26,7 @@
         </tr>
         </thead>
         <c:forEach items="${projects}" var="project">
-            <c:if test="${project.id eq user.active_project}">
+            <c:if test="${project.projectId eq user.activeProject}">
                 <tr class="active-project">
                     <td><a class="black-link" href="<c:url value="${project.projectId}/${project.agile.code}/board"/>"><b>[${project.projectId}]
                             ${project.name}</b></a></td>
@@ -45,7 +45,7 @@
                     </c:forEach></td>
                 </tr>
             </c:if>
-            <c:if test="${project.id ne user.active_project}">
+            <c:if test="${project.projectId ne user.activeProject}">
                 <tr>
                     <td><a class="black-link"
                            href="<c:url value="${project.projectId}/${project.agile.code}/board"/>">[${project.projectId}]

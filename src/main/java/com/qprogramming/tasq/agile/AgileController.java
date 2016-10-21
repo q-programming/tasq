@@ -10,12 +10,12 @@ import com.qprogramming.tasq.task.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
@@ -37,10 +37,21 @@ public class AgileController {
             projects = projSrv.findAllByUser();
         }
         Collections.sort(projects, new ProjectSorter(ProjectSorter.SORTBY.LAST_VISIT,
-                Utils.getCurrentAccount().getActive_project(), true));
+                Utils.getCurrentAccount().getActiveProject(), true));
         model.addAttribute("projects", projects);
         return "agile/list";
     }
+
+    @RequestMapping(value = "{id}/agile/board", method = RequestMethod.GET)
+    public String showBoard(@PathVariable String id, Model model,
+                            HttpServletRequest request, RedirectAttributes ra) {
+        Project project = projSrv.findByProjectId(id);
+        if (project != null) {
+            return "redirect:/" + project.getProjectId() + "/" + project.getAgile().getCode() + "/board";
+        }
+        return "";
+    }
+
 
     @RequestMapping(value = "/agile/order", method = RequestMethod.POST)
     @ResponseBody
@@ -69,4 +80,25 @@ public class AgileController {
         return ResponseEntity.ok(true);
     }
 
+    @Transactional(readOnly = true)
+    @RequestMapping(value = "{id}/agile/cardsprint", method = RequestMethod.GET)
+    public String showBoard(@PathVariable String id, @RequestParam(name = "sprint", required = false) Long sprintID, Model model) {
+        Project project = projSrv.findByProjectId(id);
+        if (project != null) {
+            List<Task> taskList;
+            if (sprintID != null) {
+                taskList = taskSrv.findAllBySprintId(project, sprintID);
+            } else {
+                taskList = taskSrv.findByProjectAndOpen(project);
+            }
+            taskList.stream().forEach(task -> task.setDescription(eliminateHTML(task)));
+            model.addAttribute("tasks", taskSrv.convertToDisplay(taskList, true));
+            model.addAttribute("project", project);
+        }
+        return "/agile/print";
+    }
+
+    private String eliminateHTML(Task task) {
+        return task.getDescription().replaceAll("<img[^>]*>", "").replaceAll("<a[^>]*>", "").replaceAll("</a>", "");
+    }
 }

@@ -21,7 +21,29 @@
 <c:if test="${myfn:contains(project.administrators,user) || is_admin}">
     <c:set var="can_edit" value="true"/>
 </c:if>
-<h3>${project}</h3>
+<div class="row">
+    <div class="col-sm12 col-md-6">
+        <h3 class="">${project}</h3>
+    </div>
+    <div class="col-sm12 col-md-6">
+        <div class="dropdown margintop_20 pull-right ">
+            <a class="btn btn-default " style="width: 120px" data-toggle="dropdown">
+                <i class="fa fa-print"></i>&nbsp;<s:message code="agile.print"/></a>
+            <ul class="dropdown-menu">
+                <li><a class="print_cards clickable"> <i
+                        class="fa fw fa-list"></i>&nbsp;<s:message code="agile.print.all"/>
+                </a></li>
+                <c:forEach var="entry" items="${sprint_result}">
+                    <c:set var="sprint" value="${entry.key}"/>
+                    <li><a class="print_cards clickable" data-sprintid="${sprint.id}"><i
+                            class="fa fw fa-book"></i>&nbsp;<s:message
+                            code="agile.print.sprint"/>&nbsp;${sprint.sprintNo}
+                    </a></li>
+                </c:forEach>
+            </ul>
+        </div>
+    </div>
+</div>
 <div class="white-frame" style="display: table; width: 100%">
     <%--MENU --%>
     <div style="display: table-caption; margin-left: 10px;">
@@ -36,14 +58,16 @@
                         code="agile.reports"/></a></li>
         </ul>
     </div>
-    <c:if test="${not empty tags}">
-        <div class="row" style="margin-left: 30px">
-            <i class="fa fa-tags"></i>&nbsp;<s:message code="task.tags"/>:
-            <c:forEach items="${tags}" var="tag"><span class="tag label label-info theme tag_filter a-tooltip"
-                                                       title="<s:message code="task.tags.click.filter"/>"
-                                                       data-name="${tag}">${tag}</span></c:forEach>
-        </div>
-    </c:if>
+    <div class="row marginleft_0">
+        <c:if test="${not empty tags}">
+            <div>
+                <i class="fa fa-tags"></i>&nbsp;<s:message code="task.tags"/>:
+                <c:forEach items="${tags}" var="tag"><span class="tag label label-info theme tag_filter a-tooltip"
+                                                           title="<s:message code="task.tags.click.filter"/>"
+                                                           data-name="${tag}">${tag}</span></c:forEach>
+            </div>
+        </c:if>
+    </div>
     <div class="row">
         <div class="col-sm-12 col-md-7">
             <h4>
@@ -115,30 +139,52 @@
                         <c:forEach items="${entry.value}" var="task">
                             <c:set var="count" value="${count + task.story_points}"/>
                             <div class="agile-list"
-                                 data-id="${task.id}" id="${task.id}" data-tags="${task.getTagsList()}" sprint-id="${sprint.id}"
+                                 data-id="${task.id}" id="${task.id}" data-tags="${task.getTagsList()}"
+                                 sprint-id="${sprint.id}"
                                     <c:if test="${task.state eq 'CLOSED' }">
                                         style="text-decoration: line-through;"
                                     </c:if>>
                                 <div style="display: table-cell; width: 100%;"><t:type type="${task.type}" list="true"/><a
-                                        href="<c:url value="/task/${task.id}"/>" style="color: inherit;">[${task.id}] ${task.name}</a>
+                                        href="<c:url value="/task/${task.id}"/>"
+                                        style="color: inherit;">[${task.id}] ${task.name}</a>
                                     <form id="sprint_remove_${task.id}"
                                           action="<c:url value="/${project.projectId}/scrum/sprintRemove"/>"
                                           method="post">
                                         <input type="hidden" name="taskID" value="${task.id}">
                                     </form>
                                 </div>
-                                <div class="points-div" style="display: table-cell">
-                                    <c:if test="${task.story_points ne 0 && task.estimated}">
-								<span
-                                        class="badge theme point-value" data-points="${task.story_points}">
-                                        ${task.story_points} </span>
+                                <c:if test="${!sprint.active}">
+                                    <c:if test="${task.estimated}">
+                                        <div class="pointsdiv" style="display: table-cell">
+                                            <c:if test="${task.story_points == 0 && task.estimated}">
+                                                <c:set var="points_txt">?</c:set>
+                                            </c:if>
+                                            <c:if test="${task.story_points ne 0 && task.estimated}">
+                                                <c:set var="points_txt">${task.story_points}</c:set>
+                                            </c:if>
+                                    <span class="points badge theme">
+                                    <span class="point-value" data-points="${task.story_points}">${points_txt}</span>
+                                    <input class="point-input" data-id="${task.id}">
+                                    <span class="point-approve" style="display:none;cursor: pointer;"><i
+                                            class="fa fa-check"></i></span>
+                                    <span class="point-cancel" style="display:none;cursor: pointer;"><i
+                                            class="fa fa-times"></i></span>
+                                    <span class="point-edit"><i class="fa fa-pencil points"></i></span>
+                                    </span>
+                                        </div>
                                     </c:if>
-                                    <c:if test="${task.story_points eq 0 && task.estimated}">
-								<span
-                                        class="badge theme point-value" data-points=0>
-									? </span>
-                                    </c:if>
-                                </div>
+                                </c:if>
+                                <c:if test="${sprint.active}">
+                                    <div class="points-div" style="display: table-cell">
+                                        <c:if test="${task.story_points ne 0 && task.estimated}">
+                                            <span class="badge theme point-value"
+                                                  data-points="${task.story_points}">${task.story_points} </span>
+                                        </c:if>
+                                        <c:if test="${task.story_points eq 0 && task.estimated}">
+                                            <span class="badge theme point-value" data-points=0>? </span>
+                                        </c:if>
+                                    </div>
+                                </c:if>
                             </div>
                         </c:forEach>
                     </div>
@@ -155,7 +201,7 @@
         <div class="col-sm-12 col-md-5">
             <h4>
                 <s:message code="task.tasks"/>
-                <span class="btn btn-default pull-right" id="save_order" style="display:none"><i
+                <span class="btn btn-default pull-right" id="save_order" style="display:none;width: 120px"><i
                         class="fa fa-floppy-o"></i>&nbsp;Save order</span>
             </h4>
             <ul id="sortable" style="margin-top: 20px;margin-left: -40px;">
@@ -183,14 +229,15 @@
                                     <c:if test="${task.story_points ne 0 && task.estimated}">
                                         <c:set var="points_txt">${task.story_points}</c:set>
                                     </c:if>
-						<span class="points badge theme">
-							<span class="point-value" data-points="${task.story_points}">${points_txt}</span>
-							<input class="point-input" data-id="${task.id}">
-							<span class="point-approve" style="display:none;cursor: pointer;"><i
-                                    class="fa fa-check"></i></span>
-							<span class="point-cancel" style="display:none;cursor: pointer;"><i class="fa fa-times"></i></span>
-							<span class="point-edit"><i class="fa fa-pencil points"></i></span>
-						</span>
+                                    <span class="points badge theme">
+                                    <span class="point-value" data-points="${task.story_points}">${points_txt}</span>
+                                    <input class="point-input" data-id="${task.id}">
+                                    <span class="point-approve" style="display:none;cursor: pointer;"><i
+                                            class="fa fa-check"></i></span>
+                                    <span class="point-cancel" style="display:none;cursor: pointer;"><i
+                                            class="fa fa-times"></i></span>
+                                    <span class="point-edit"><i class="fa fa-pencil points"></i></span>
+                                    </span>
                                 </div>
                             </c:if>
                         </div>
@@ -249,6 +296,15 @@
                 showWait(false);
                 $("#save_order").hide("highlight", {color: '#5cb85c'}, 1000);
             });
+        });
+
+        $(".print_cards").click(function () {
+            var url = '<c:url value="/${project.projectId}/agile/cardsprint"/>';
+            var sprintid = $(this).data("sprintid");
+            if (sprintid) {
+                url += "?sprint=" + sprintid;
+            }
+            window.open(url, "Cards Print");
         });
 
         $(".table_sprint").droppable({
@@ -368,12 +424,7 @@
                     $(task).detach().prependTo("#sprint_" + sprintID);
                     reloadEvents();
                     showSuccess(result.message);
-                    var task_SP = parseInt($(task).find(".point-value").data("points"));
-                    if (!$.isNumeric(task_SP)) {
-                        task_SP = 0;
-                    }
-                    var current_SP = parseInt($("#sprint_points_" + sprintID).html()) + task_SP;
-                    $("#sprint_points_" + sprintID).html(current_SP);
+                    reloadPoints(sprintID);
                 } else {
                     showWarning(result.message);
                 }
@@ -393,18 +444,24 @@
                     $(task).detach().prependTo("#sortable");
                     reloadEvents();
                     showSuccess(result.message);
-                    var task_SP = parseInt($(task).find(".point-value").data("points"));
-                    if (!$.isNumeric(task_SP)) {
-                        task_SP = 0;
-                    }
-                    var current_SP = parseInt($("#sprint_points_" + sprintID).html()) - task_SP;
-                    $("#sprint_points_" + sprintID).html(current_SP);
-
+                    reloadPoints(sprintID);
                 } else {
                     showWarning(result.message);
                 }
                 showWait(false);
             });
+        }
+
+        function reloadPoints(sprintID) {
+            $("#sprint_points_" + sprintID).html(0);
+            $(".agile-list[sprint-id=" + sprintID + "]").each(function () {
+                var task_SP = parseInt($(this).find(".point-value").data("points"));
+                if (!$.isNumeric(task_SP)) {
+                    task_SP = 0;
+                }
+                var current_SP = parseInt($("#sprint_points_" + sprintID).html()) + task_SP;
+                $("#sprint_points_" + sprintID).html(current_SP);
+            })
         }
 
         //points
@@ -452,6 +509,12 @@
                     }
                     else {
                         parent.find('.point-value').html(points);
+                        parent.find('.point-value').data("points", points);
+                        //reload points
+                        var sprintID = parent.closest(".agile-list").attr("sprint-id");
+                        if(sprintID){
+                            reloadPoints(sprintID);
+                        }
                         showSuccess(result.message);
                         showWait(false);
                     }

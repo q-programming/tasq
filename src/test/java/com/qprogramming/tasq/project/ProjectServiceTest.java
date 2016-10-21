@@ -7,6 +7,7 @@ import com.qprogramming.tasq.projects.ProjectRepository;
 import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.projects.holiday.Holiday;
 import com.qprogramming.tasq.test.MockSecurityContext;
+import com.qprogramming.tasq.test.TestUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.junit.Assert;
@@ -24,16 +25,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import static com.qprogramming.tasq.test.TestUtils.PROJECT_ID;
+import static com.qprogramming.tasq.test.TestUtils.PROJECT_NAME;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectServiceTest {
 
-    private static final String EMAIL = "user@test.com";
-
-    private static final String PROJ_NAME = "Test project";
-    private static final String PROJ_ID = "TEST";
-    private static final String USERNAME = "user";
     @Rule
     public ExpectedException thrown = ExpectedException.none();
     private ProjectService projSrv;
@@ -54,26 +52,26 @@ public class ProjectServiceTest {
 
     @Before
     public void setUp() {
-        testAccount = new Account(EMAIL, "", USERNAME, Roles.ROLE_ADMIN);
+        testAccount = TestUtils.createAccount();
         when(securityMock.getAuthentication()).thenReturn(authMock);
         when(authMock.getPrincipal()).thenReturn(testAccount);
         SecurityContextHolder.setContext(securityMock);
         projSrv = new ProjectService(projRepoMock, accSrvMock, usrSrvMock);
-        testProject = createForm(PROJ_NAME, PROJ_ID).createProject();
+        testProject = TestUtils.createProject();
     }
 
     @Test
     public void findByNameTest() {
-        when(projRepoMock.findByName(PROJ_NAME)).thenReturn(testProject);
-        Assert.assertNotNull(projSrv.findByName(PROJ_NAME));
+        when(projRepoMock.findByName(PROJECT_NAME)).thenReturn(testProject);
+        Assert.assertNotNull(projSrv.findByName(PROJECT_NAME));
     }
 
     @Test
     public void findByIdTest() {
         when(projRepoMock.findById(1L)).thenReturn(testProject);
-        when(projRepoMock.findByProjectId(PROJ_ID)).thenReturn(testProject);
+        when(projRepoMock.findByProjectId(PROJECT_ID)).thenReturn(testProject);
         Assert.assertNotNull(projSrv.findById(1L));
-        Assert.assertNotNull(projSrv.findByProjectId(PROJ_ID));
+        Assert.assertNotNull(projSrv.findByProjectId(PROJECT_ID));
     }
 
     @Test
@@ -101,16 +99,16 @@ public class ProjectServiceTest {
 
     @Test
     public void findUserActiveProjectTest() {
-        testAccount.setActive_project(1L);
-        when(projRepoMock.findById(1L)).thenReturn(testProject);
+        testAccount.setActiveProject(PROJECT_ID);
+        when(projRepoMock.findByProjectId(PROJECT_ID)).thenReturn(testProject);
         Assert.assertNotNull(projSrv.findUserActiveProject());
     }
 
     @Test
     public void activateTest() {
-        when(projRepoMock.findByProjectId(PROJ_ID)).thenReturn(testProject);
+        when(projRepoMock.findByProjectId(PROJECT_ID)).thenReturn(testProject);
         when(projRepoMock.save(testProject)).thenReturn(testProject);
-        Assert.assertNotNull(projSrv.activateForCurrentUser(PROJ_ID));
+        Assert.assertNotNull(projSrv.activateForCurrentUser(PROJECT_ID));
         verify(accSrvMock, times(1)).update(testAccount);
     }
 
@@ -143,7 +141,7 @@ public class ProjectServiceTest {
 
     @Test
     public void getParticipantTest() {
-        Project project = createForm(PROJ_NAME, PROJ_ID).createProject();
+        Project project = createForm(PROJECT_NAME, PROJECT_ID).createProject();
         testAccount.setName("John");
         testAccount.setSurname("Doe");
         Account secondTestAccount = new Account("second@test.com", "", "second", Roles.ROLE_USER);
@@ -152,14 +150,14 @@ public class ProjectServiceTest {
         project.setId(1L);
         project.addParticipant(testAccount);
         project.addParticipant(secondTestAccount);
-        when(projRepoMock.findByProjectId(PROJ_ID)).thenReturn(project);
-        List<Account> result = projSrv.getProjectAccounts(PROJ_ID, null);
+        when(projRepoMock.findByProjectId(PROJECT_ID)).thenReturn(project);
+        List<Account> result = projSrv.getProjectAccounts(PROJECT_ID, null);
         Assert.assertEquals(2, result.size());
-        result = projSrv.getProjectAccounts(PROJ_ID, "Do");
+        result = projSrv.getProjectAccounts(PROJECT_ID, "Do");
         Assert.assertEquals(2, result.size());
-        result = projSrv.getProjectAccounts(PROJ_ID, "Jo");
+        result = projSrv.getProjectAccounts(PROJECT_ID, "Jo");
         Assert.assertEquals(1, result.size());
-        result = projSrv.getProjectAccounts(PROJ_ID, "Xx");
+        result = projSrv.getProjectAccounts(PROJECT_ID, "Xx");
         Assert.assertEquals(0, result.size());
     }
 

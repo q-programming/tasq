@@ -6,7 +6,17 @@
 <c:set var="taskDesc_text">
     <s:message code="task.description" text="Description" arguments=""/>
 </c:set>
-<h3>${project}</h3>
+<div class="row">
+    <div class="col-sm12 col-md-6">
+        <h3 class="">${project}</h3>
+    </div>
+    <div class="col-sm12 col-md-6">
+        <div class="margintop_20 pull-right ">
+            <a class="btn btn-default print_cards" style="width: 120px">
+                <i class="fa fa-print"></i>&nbsp;<s:message code="agile.print"/></a>
+        </div>
+    </div>
+</div>
 <div class="white-frame"
      style="display: table; width: 100%; height: 85vh">
     <div style="display: table-caption; margin-left: 10px;">
@@ -41,7 +51,7 @@
     <span class="btn btn-default pull-right" id="save_order"
           style="display: none"><i class="fa fa-floppy-o"></i>&nbsp;Save order
     </span>
-<table style="width:100%">
+    <table style="width:100%">
         <jsp:include page="../agile/board.jsp"/>
 </div>
 <jsp:include page="../modals/logWork.jsp"/>

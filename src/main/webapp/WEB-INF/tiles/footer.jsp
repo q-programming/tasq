@@ -6,7 +6,7 @@
 <security:authorize access="isAuthenticated()">
 	<c:set var="active_task_seconds">${user.active_task_seconds}</c:set>
 	<c:if test="${not empty user.active_task }">
-	<div class="row">
+	<div class="row hidden-print">
 		<div class="footer-time">
 			<div>
 				<s:message code="task.active"/>

@@ -192,6 +192,17 @@
         </c:if>
     });
 
+    $(".print_cards").click(function () {
+        var url = '<c:url value="/${project.projectId}/agile/cardsprint"/>';
+        var sprintid = $(this).data("sprintid");
+        if (sprintid) {
+            url += "?sprint=" + sprintid;
+        }
+        window.open(url, "Cards Print");
+    });
+
+
+
     function resizeDivs() {
         var bodyheight = $(document).height();
         $(".table_state").css("min-height", bodyheight * 0.65);

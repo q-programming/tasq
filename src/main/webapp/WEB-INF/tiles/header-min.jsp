@@ -4,7 +4,7 @@
            prefix="security" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <security:authentication property="principal" var="user"/>
-<nav class="navbar navbar-fixed-top theme">
+<nav class="navbar navbar-fixed-top theme hidden-print">
     <div class="container-fluid">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed"
@@ -17,7 +17,7 @@
             <a class="navbar-brand" href="<c:url value="/"/>"
                style="padding-top: 0px; padding-bottom: 4px;"><img
                     src="<c:url value="/../avatar/logo.png"/>"
-                    style="height: 50px; margin-top: 2px;"></img></a> <span
+                    style="height: 50px; margin-top: 2px;"></a> <span
                 class="theme-text" style="font-size: xx-large">${applicationName}</span>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
@@ -34,7 +34,7 @@
                         </ul>
                     </li>
                     <!-- Events -->
-                    <li>
+                    <li id="events-icon">
                         <a id="event-menu-icon" class="theme a-tooltip" href='<c:url value="/events"/>'
                            title="<s:message
 									code="events.events" />"> <i
@@ -43,13 +43,13 @@
                     </li>
                     <li>
                         <div class="pull-right" style="margin-right: 40px">
-                            <a href="#" class="theme nav-dropdown" data-toggle="dropdown">
+                            <a id="user-menu" href="#" class="theme nav-dropdown" data-toggle="dropdown">
 								<span class="padding-right10">
 								<img src="<c:url value="/../avatar/${user.id}.png"/>"
                                      class="avatar"></span><strong>${user}</strong><span
                                     class="caret theme"></span>
                             </a>
-                            <ul class="dropdown-menu" style="margin-top: 3px;">
+                            <ul id="user-menu-dropdown" class="dropdown-menu" style="margin-top: 3px;">
                                 <li><a href='<c:url value="/settings"/>'><i
                                         class="fa fa-cog"></i> <s:message code="menu.settings"
                                                                           text="Settings"/></a></li>

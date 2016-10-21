@@ -1,3 +1,4 @@
+<!--Start details-->
 <%@page import="com.qprogramming.tasq.account.Roles" %>
 <%@ page trimDirectiveWhitespaces="true" %>
 <%@page import="com.qprogramming.tasq.task.TaskPriority" %>
@@ -68,7 +69,7 @@
                         </li>
                     </c:if>
                     <li>
-                        <a href="<c:url value="/task/create"/>?linked=${task.id}&p=${task.project.id}">
+                        <a href="<c:url value="/task/create"/>?linked=${task.id}&p=${task.project.projectId}">
                             <i class="fa fw fa-plus"></i>
                             <s:message code="task.linked.create"/>
                         </a>
@@ -137,7 +138,7 @@
                 <div class="mod-header">
                     <h5 class="mod-header-title">
                         <i class="fa fa-caret-down toggler" data-tab="detailsToggle"></i>
-						<span class="mod-header-title-txt"> <i
+                        <span class="mod-header-title-txt"> <i
                                 class="fa fa-align-left"></i> <s:message code="task.details"/>
 						</span>
                     </h5>
@@ -248,13 +249,13 @@
                                     class="points badge theme left"><span id="point_value">${points}</span>
 									<c:if test="${can_edit  && task.state ne'CLOSED'}">
                                         <input id="point-input" class="point-input">
-										<span id="point_approve"
+                                        <span id="point_approve"
                                               style="display: none; cursor: pointer;"><i
                                                 class="fa fa-check"></i></span>
-										<span id="point_cancel"
+                                        <span id="point_cancel"
                                               style="display: none; cursor: pointer;"><i
                                                 class="fa fa-times"></i></span>
-										<span id="point_edit" class="point-edit"><i
+                                        <span id="point_edit" class="point-edit"><i
                                                 class="fa fa-pencil points"></i></span>
                                     </c:if> </span></td>
                         </tr>
@@ -266,17 +267,18 @@
                 <div class="mod-header">
                     <h5 class="mod-header-title">
                         <i class="fa fa-caret-down toggler" data-tab="estimatesToggle"></i>
-						<span class="mod-header-title-txt"> <i
+                        <span class="mod-header-title-txt"> <i
                                 class="fa fa-lg fa-clock-o"></i> <s:message code="task.timetrack"/>
 						</span>
                     </h5>
                 </div>
                 <!-- logwork trigger modal -->
                 <c:if test="${can_edit && user.isPowerUser || is_assignee}">
-                    <button class="btn btn-default btn-sm worklog" data-toggle="modal"
+                    <button class="btn btn-default btn-sm worklog a-tooltip" data-toggle="modal"
+                            title="<s:message code="task.logWork"/>&nbsp;(l)"
                             data-target="#logWorkform" data-taskID="${task.id}">
                         <i class="fa fa-lg fa-calendar"></i>
-                        <s:message code="task.logWork"></s:message>
+                        <s:message code="task.logWork"/>
                     </button>
                     <c:if
                             test="${not empty user.active_task && user.active_task[0] eq task.id}">
@@ -284,7 +286,7 @@
                             <button class="btn btn-default btn-sm a-tooltip handleTimerBtn"
                                     title="<s:message code="task.stopTime.description" />">
                                 <i class="fa fa-lg fa-clock-o"></i>
-                                <s:message code="task.stopTime"></s:message>
+                                <s:message code="task.stopTime"/>
                             </button>
                         </a>
                         <div class="bar_td">
@@ -341,9 +343,12 @@
                 <c:if test="${task.estimate eq '0m' && task.remaining ne '0m'}">
                     <c:set var="remaining_bar">    ${100-task.percentage_logged}</c:set>
                 </c:if>
-                <table id="estimatesToggle" style="width: 400px;
+                <table id="estimatesToggle" style="width: 450px;
                 <c:if test="${task.remaining eq '0m' && task.loggedWork eq '0m' && task.estimate eq '0m'}"> display: none;</c:if> ">
                     <tr>
+                        <c:if test="${not empty taskEstimate}">
+                            <td style="width:15px;"></td>
+                        </c:if>
                         <td></td>
                         <td style="width: 150px"></td>
                         <td></td>
@@ -351,6 +356,13 @@
                     <%-- Estimate bar --%>
                     <c:if test="${task.estimate ne '0m'}">
                         <tr>
+                            <c:if test="${not empty taskEstimate}">
+                                <td>
+                                    <i class="fa fa-plus-square clickable subtask-time-detail a-tooltip"
+                                       aria-hidden="true"
+                                       title="<s:message code="task.subtask.time.detail"/>"></i>
+                                </td>
+                            </c:if>
                             <td class="bar_td" style="width: 50px"><s:message
                                     code="task.estimate"/></td>
                             <td class="bar_td">
@@ -361,11 +373,28 @@
                                          style="width: 100%;"></div>
                                 </div>
                             </td>
-                            <td class="bar_td">${task.estimate}</td>
+                            <td class="bar_td">${task.estimate}&nbsp;
+                            </td>
                         </tr>
+                        <c:if test="${not task.subtask && not empty taskEstimate}">
+                            <tr class="time-details-row">
+                                <td></td>
+                                <td colspan="3" class="bar_td">
+                                    <div>${taskEstimate}&nbsp;[${task.id}] + ${subtasksEstimate}&nbsp;<s:message
+                                            code="tasks.subtasks"/></div>
+                                </td>
+                            </tr>
+                        </c:if>
+
                     </c:if>
                     <%-- Logged work bar --%>
                     <tr>
+                        <c:if test="${not empty taskLogged}">
+                            <td style="width:15px;">
+                                <i class="fa fa-plus-square clickable subtask-time-detail" aria-hidden="true"
+                                   title="<s:message code="task.subtask.time.detail"/>"></i>
+                            </td>
+                        </c:if>
                         <td class="bar_td"><s:message code="task.logged"/></td>
                         <td class="bar_td">
                             <div class="progress"
@@ -381,8 +410,24 @@
                         </td>
                         <td class="bar_td">${task.loggedWork}</td>
                     </tr>
+                    <c:if test="${not task.subtask && not empty taskLogged}">
+                        <tr class="time-details-row">
+                            <td></td>
+                            <td colspan="3" class="bar_td">
+                                <div>${taskLogged}&nbsp;[${task.id}] + ${subtasksLogged}&nbsp;<s:message
+                                        code="tasks.subtasks"/></div>
+                            </td>
+                        </tr>
+                    </c:if>
+
                     <%-- Remaining work bar --%>
                     <tr>
+                        <c:if test="${not empty taskRemaining}">
+                            <td style="width:15px;">
+                                <i class="fa fa-plus-square clickable subtask-time-detail a-tooltip" aria-hidden="true"
+                                   title="<s:message code="task.subtask.time.detail"/>"></i>
+                            </td>
+                        </c:if>
                         <td class="bar_td"><s:message code="task.remaining"/></td>
                         <td class="bar_td">
                             <div class="progress"
@@ -395,6 +440,15 @@
                         </td>
                         <td class="bar_td">${task.remaining }</td>
                     </tr>
+                    <c:if test="${not task.subtask && not empty taskRemaining}">
+                        <tr class="time-details-row">
+                            <td></td>
+                            <td colspan="3" class="bar_td">
+                                <div>${taskRemaining}&nbsp;[${task.id}] + ${subtasksRemaining}&nbsp;<s:message
+                                        code="tasks.subtasks"/></div>
+                            </td>
+                        </tr>
+                    </c:if>
                     <%-- 					</c:if> --%>
                 </table>
             </div>
@@ -412,7 +466,7 @@
                         <c:if test="${project_participant}">
                             <a class="btn btn-default btn-xxs a-tooltip pull-right linkButton" style="min-width: 37px;"
                                href="#" title="" data-placement="top"
-                               data-original-title="<s:message code="task.link"/>"> <i
+                               data-original-title="<s:message code="task.link"/>&nbsp;(r)"> <i
                                     class="fa fa-plus"></i><i
                                     class="fa fa-lg fa-link fa-flip-horizontal"></i>
                             </a>
@@ -507,7 +561,7 @@
                     <div class="mod-header">
                         <h5 class="mod-header-title">
                             <i class="fa fa-caret-down toggler" data-tab="subtasksToggle"></i>
-							<span class="mod-header-title-txt"> <i
+                            <span class="mod-header-title-txt"> <i
                                     class="fa fa-lg fa-sitemap"></i> <s:message
                                     code="tasks.subtasks"/>
 							</span>
@@ -516,7 +570,7 @@
                             <a class="btn btn-default btn-xxs a-tooltip pull-right" style="min-width: 37px;"
                                href="<c:url value="/task/${task.id}/subtask"/>"
                                data-placement="top"
-                               data-original-title="<s:message code="task.subtasks.add"/>">
+                               title="<s:message code="task.subtasks.add"/>">
                                 <i class="fa fa-plus"></i> <i class="fa fa-lg fa-sitemap"></i>
                             </a>
                         </c:if>
@@ -612,7 +666,8 @@
                                 <tr>
                                     <td><i class="fa ${file_type}"></i>&nbsp;
                                         <c:if test="${file_type eq 'fa-file-image-o'}">
-                                            <a class="image-modal clickable" data-toggle="modal" data-target="#image-modal-dialog"
+                                            <a class="image-modal clickable" data-toggle="modal"
+                                               data-target="#image-modal-dialog"
                                                data-url="<c:url value="/task/${task.id}/file?get=${file}"></c:url>"
                                                data-filename="${file}"
                                                data-src="<c:url value="/task/${task.id}/imgfile?get=${file}"/>">
@@ -681,7 +736,7 @@
                             </c:if>
                             <c:if test="${project_participant}">
                                 <span class="btn btn-default btn-sm a-tooltip assignToTask"
-                                      title="<s:message code="task.assign"/>" data-toggle="modal"
+                                      title="<s:message code="task.assign"/> (a)" data-toggle="modal"
                                       data-target="#assign_modal" data-taskID="${task.id}"
                                       data-assignee="${task.assignee}"
                                       data-assigneeID="${task.assignee.id}"
@@ -842,7 +897,8 @@
                     </form>
                 </div>
                 <c:if test="${project_participant}">
-                    <button id="comments_add" class="btn btn-default btn-sm">
+                    <button id="comments_add" class="btn btn-default btn-sm a-tooltip"
+                            title="<s:message code="comment.add" text="Add Comment"/> (c)">
                         <i class="fa fa-comment"></i>&nbsp;
                         <s:message code="comment.add" text="Add Comment"/>
                     </button>
@@ -864,6 +920,7 @@
 <c:if test="${task.subtask}">
     <jsp:include page="../modals/convert2task.jsp"/>
 </c:if>
+<!--End details-->
 <!-- Edit Comment Modal -->
 <div class="modal fade" id="commentModal" tabindex="-1" role="dialog"
      aria-labelledby="role" aria-hidden="true">
@@ -889,8 +946,8 @@
                                       class="form-control comment-message-text max4kchars"
                                       rows="5"
                                       name="message" autofocus></textarea>
-                                <span class="remain-span"><span class="remain"></span> <s:message
-                                        code="comment.charsLeft"/></span>
+                            <span class="remain-span"><span class="remain"></span> <s:message
+                                    code="comment.charsLeft"/></span>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -913,6 +970,7 @@
     pageContext.setAttribute("types", LogType.values());
 %>
 <script>
+    var inputInProgress = false;
     $(document).ready(function ($) {
         taskID = "${task.id}";
         updateWatchers();
@@ -922,13 +980,6 @@
         var maxchars = 4000;
 
         //--------------------------------------Coments----------------------------
-        function toggle_comment() {
-            $('#comments_add').toggle();
-            $('#comments_div').slideToggle("slow");
-            $(document.body).animate({
-                'scrollTop': $('#comments_div').offset().top
-            }, 2000);
-        }
 
         var btnsGrps = jQuery.trumbowyg.btnsGrps;
         $('.comment-message-text').trumbowyg({
@@ -975,6 +1026,7 @@
         });
 
         $('.comments_edit').click(function () {
+            inputInProgress = true;
             var commentDiv = $(this).parent().parent().children("div.comment-div");
             var message = commentDiv.children(".comment-message").html();
 //		var message = $(this).data('message');
@@ -983,11 +1035,14 @@
             //$(".trumbowyg-editor").html(message);
             $(".modal-body #comment_id").val(comment_id);
         });
+        $('#commentModal').on('hidden.bs.modal', function () {
+            inputInProgress = false;
+        });
 
         $('#comments_cancel').click(function () {
             toggle_comment();
         });
-
+        //-----------------------------Task link ---------------------
         $("#task_link").autocomplete({
             minLength: 2,
             delay: 500,
@@ -1030,6 +1085,19 @@
             }
         });
 
+        $(".linkButton").click(function () {
+            //clean regardles what is pressed
+            showRelatedLinks();
+        });
+
+        $("#linkTask").submit(function (e) {
+            if ($("#taskB").val() == '') {
+                $("#task_link").parent().addClass("has-error");
+                e.preventDefault();
+            }
+        });
+
+        //--------------------STATE-----------------------
         $("#change_state").change(function () {
             if ($(this).val() == 'CLOSED') {
                 $("#zero_remaining").toggle("blind");
@@ -1039,7 +1107,6 @@
             }
         });
 
-// 			change state
         $(".change_state").click(function () {
             var state = $(this).data('state');
             var current_state = $("#current_state").data('state');
@@ -1061,8 +1128,7 @@
                             showError(result.message);
                         }
                         else {
-                            $("#current_state").data('state', state);
-                            $("#current_state").html(newState);
+                            $("#current_state").data('state', state).html(newState);
                             showSuccess(result.message);
                         }
                         showWait(false);
@@ -1071,22 +1137,7 @@
             }
         });
 
-        $(".linkButton").click(function () {
-            //clean regardles what is pressed
-            $("#task_link").val('');
-            $("#taskB").val('');
-            $("#task_link").parent().removeClass("has-error");
-            $("#linkDiv").slideToggle("slow");
-
-        });
-
-        $("#linkTask").submit(function (e) {
-            if ($("#taskB").val() == '') {
-                $("#task_link").parent().addClass("has-error");
-                e.preventDefault();
-            }
-        });
-
+        //-----------------------------Watch--------------------
         $("#watch").click(function () {
             var url = '<c:url value="/task/watch"/>';
             $.post(url, {id: taskID}, function (result) {
@@ -1095,14 +1146,13 @@
                 }
                 else {
                     showSuccess(result.message);
-                    $("#watch_icon").toggleClass("fa-eye");
-                    $("#watch_icon").toggleClass("fa-eye-slash");
+                    $("#watch_icon").toggleClass("fa-eye").toggleClass("fa-eye-slash");
                     updateWatchers();
                 }
             });
         });
 
-        //points
+        //---------------------------Points-------------------------------
         $('.point-edit').click(function () {
             togglePoints();
             $('#point_value').focus();
@@ -1126,8 +1176,7 @@
         });
 
         function togglePoints() {
-            $('#point-input').val('');
-            $('#point-input').toggle();
+            $('#point-input').val('').toggle();
             $('#point_value').toggle();
             $('#point_approve').toggle();
             $('#point_cancel').toggle();
@@ -1236,7 +1285,7 @@
             });
         });
 
-        //TAGS
+        // ----------------------------TAGS------------------------------------
         <c:if test="${not task.subtask}">
         var init = true;
         var noTags = '<s:message code="task.tags.noTags" htmlEscape="false"/>';
@@ -1260,10 +1309,12 @@
                 }
         );
         $('.bootstrap-tagsinput').focusin(function () {
+            inputInProgress = true;
             $(this).addClass('focus');
         });
         $('.bootstrap-tagsinput').focusout(function () {
             $(this).removeClass('focus');
+            inputInProgress = false
         });
 
         $("#tagsinput").autocomplete({
@@ -1378,6 +1429,11 @@
             table.append(rows[i])
         }
     });
+    $('.subtask-time-detail').click(function () {
+        $(this).toggleClass('fa-minus-square');
+        $(this).toggleClass('fa-plus-square');
+        $(this).closest('tr').next(".time-details-row").toggle();
+    });
 
     function convertToDate(str) {
         var reggie = /(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})/;
@@ -1401,4 +1457,60 @@
                 return 'not yet added ';
         }
     }
+
+    //----------- Key shortcuts -----------------------
+    $(document).keyup(function (e) {
+        if (!inputInProgress && !e.ctrlKey) {
+            // Assign 'a'
+            if (e.which === 65) {
+                var assignee = '${task.assignee}';
+                var assigneeid;
+                if (assignee) {
+                    assigneeid = '${task.assignee.id}';
+                }
+                projectID = '${task.project.projectId}';
+                taskID = '${task.id}';
+                fillAssigneeValues(projectID, taskID, assignee, assigneeid);
+                $("#assign_modal").modal('show');
+            } // Related links 'r'
+            else if (e.which === 82) {
+                showRelatedLinks();
+            } //  Log time 'l'
+            else if (e.which === 76) {
+                fillLogWorkValues('${task.id}');
+                $("#logWorkform").modal('show');
+            }
+            else if (e.which == 67) {
+                toggle_comment();
+            }
+        }
+    });
+    //disable shortcuts on search
+    $("#searchField").focusin(function () {
+        inputInProgress = true;
+    }).focusout(function () {
+        inputInProgress = false;
+    });
+
+    function showRelatedLinks() {
+        inputInProgress = !inputInProgress;
+        $("#linkDiv").slideToggle("slow");
+        $("#task_link").val('');
+        $("#taskB").val('');
+        $("#task_link").parent().removeClass("has-error");
+        if (inputInProgress) {
+            $("#task_link").focus();
+        }
+    }
+
+
+    function toggle_comment() {
+        inputInProgress = !inputInProgress;
+        $('#comments_add').toggle();
+        $('#comments_div').slideToggle("slow");
+        $(document.body).animate({
+            'scrollTop': $('#comments_div').offset().top
+        }, 2000);
+    }
+
 </script>

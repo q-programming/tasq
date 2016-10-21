@@ -20,6 +20,7 @@ public interface SprintRepository extends JpaRepository<Sprint, Integer> {
 	 * @return
 	 */
 	List<Sprint> findByProjectIdAndFinished(Long projectId, boolean finished);
+	List<Sprint> findByProjectProjectIdAndFinished(String projectId, boolean finished);
 
 	/**
 	 * Returns active sprint from project (by default only one sprint per

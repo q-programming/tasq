@@ -2,9 +2,7 @@ package com.qprogramming.tasq.account;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.qprogramming.tasq.manage.Theme;
-import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.task.Task;
-import org.hibernate.annotations.IndexColumn;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,8 +12,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
 
 @SuppressWarnings("serial")
 @Entity
@@ -65,23 +61,14 @@ public class Account implements java.io.Serializable, UserDetails {
     @Column
     private boolean email_notifications;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @IndexColumn(name = "INDEX_COL")
-    @JoinTable(name = "last_visited_t")
-    private List<Task> last_visited_t = new LinkedList<>();
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    @IndexColumn(name = "INDEX_COL")
-    @JoinTable(name = "last_visited_p")
-    private List<Project> last_visited_p = new LinkedList<>();
+    @Column(columnDefinition = "boolean default false")
+    private Boolean tour = false;
 
     @ManyToOne
     @JoinColumn(name = "theme")
     private Theme theme;
-
     @Transient
     private Collection<GrantedAuthority> authorities;
-
     /**
      * [0] Task ID [1] active task start time [2] task description
      */
@@ -89,7 +76,7 @@ public class Account implements java.io.Serializable, UserDetails {
     private Object[] active_task;
 
     @Column
-    private Long active_project;
+    private String activeProject;
 
     protected Account() {
 
@@ -195,22 +182,6 @@ public class Account implements java.io.Serializable, UserDetails {
         return new SimpleGrantedAuthority(role.toString());
     }
 
-    public List<Task> getLast_visited_t() {
-        return last_visited_t != null ? last_visited_t : new LinkedList<>();
-    }
-
-    public void setLast_visited_t(List<Task> last_visited) {
-        this.last_visited_t = last_visited;
-    }
-
-    public List<Project> getLast_visited_p() {
-        return last_visited_p;
-    }
-
-    public void setLast_visited_p(List<Project> last_visited_p) {
-        this.last_visited_p = last_visited_p;
-    }
-
     /*
      * (non-Javadoc)
      *
@@ -282,6 +253,14 @@ public class Account implements java.io.Serializable, UserDetails {
         active_task = new Object[]{task.getId(), new DateTime(), task.getId() + " - " + task.getName()};
     }
 
+    public String getActiveProject() {
+        return activeProject;
+    }
+
+    public void setActiveProject(String activeProject) {
+        this.activeProject = activeProject;
+    }
+
     public void clearActive_task() {
         active_task = new Object[]{};
     }
@@ -291,14 +270,6 @@ public class Account implements java.io.Serializable, UserDetails {
             return ((DateTime) active_task[1]).getMillis() / 1000;
         }
         return 0;
-    }
-
-    public Long getActive_project() {
-        return active_project;
-    }
-
-    public void setActive_project(Long active_project) {
-        this.active_project = active_project;
     }
 
     public boolean getIsUser() {
@@ -424,6 +395,14 @@ public class Account implements java.io.Serializable, UserDetails {
             return false;
         }
         return true;
+    }
+
+    public Boolean hadTour() {
+        return tour;
+    }
+
+    public void setTour(Boolean tour) {
+        this.tour = tour;
     }
 
     public class ActiveTask {

@@ -80,13 +80,13 @@ public class Task implements java.io.Serializable {
 	@Column
 	private Enum<TaskPriority> priority;
 
-	@OneToMany(cascade = CascadeType.REMOVE, mappedBy = "worklogtask")
+	@OneToMany(cascade = CascadeType.REMOVE, mappedBy = "worklogtask",fetch = FetchType.LAZY)
 	private Set<WorkLog> worklog;
 
 	@Column
 	private Boolean estimated = false;
 
-	@OneToMany(cascade = CascadeType.REMOVE, mappedBy = "task")
+	@OneToMany(cascade = CascadeType.REMOVE, mappedBy = "task",fetch = FetchType.LAZY)
 	private Set<Comment> comments;
 
 	@ManyToOne

@@ -30,4 +30,13 @@
         $("#modal-fileLink").html(link);
     });
 
+    $('#image-modal-dialog').on('shown.bs.modal', function (e) {
+        if (typeof inputInProgress !== 'undefined') {
+            inputInProgress = !inputInProgress;
+        }
+    }).on('hidden.bs.modal', function () {
+        if (typeof inputInProgress !== 'undefined') {
+            inputInProgress = false;
+        }
+    });
 </script>

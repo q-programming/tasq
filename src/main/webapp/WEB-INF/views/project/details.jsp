@@ -50,14 +50,14 @@
 		</div>
 	</c:if>
 	<div class="pull-right">
-		<c:if test="${project.id eq user.active_project}">
+		<c:if test="${project.projectId eq user.activeProject}">
 			<a class="btn btn-default a-tooltip pull-right"
 			   style="padding: 6px 11px;" href='#'
 			   title="<s:message
 									code="project.active" text="Active project" />"
 			   data-placement="bottom"> <i class="fa fa-refresh fa-spin"></i></a>
 		</c:if>
-		<c:if test="${project.id ne user.active_project}">
+		<c:if test="${project.projectId ne user.activeProject}">
 			<a class="btn btn-default a-tooltip pull-right"
 			   href='<s:url value="/project/activate/${project.projectId}"></s:url>'
 			   title="<s:message
