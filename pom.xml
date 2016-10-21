@@ -4,7 +4,7 @@
 	<groupId>com.qprogramming</groupId>
 	<artifactId>tasq</artifactId>
 	<packaging>war</packaging>
-	<version>1.2.1</version>
+	<version>1.2.2</version>
 	<name>Task tracking app</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -301,6 +301,7 @@
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
 			<version>1.10.19</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.assertj</groupId>
@@ -331,7 +332,6 @@
 			<artifactId>spring-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 	</dependencies>
 	<build>
 		<plugins>
