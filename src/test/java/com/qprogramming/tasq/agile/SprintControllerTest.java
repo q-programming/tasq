@@ -434,8 +434,8 @@ public class SprintControllerTest {
         sprint.setActive(false);
         List<Sprint> list = new LinkedList<Sprint>();
         list.add(sprint);
-        when(sprintRepoMock.findByProjectIdAndFinished(1L, false)).thenReturn(list);
-        List<DisplaySprint> result = sprintCtrl.showProjectSprints(1L, responseMock);
+        when(sprintRepoMock.findByProjectProjectIdAndFinished(TestUtils.PROJECT_ID, false)).thenReturn(list);
+        List<DisplaySprint> result = sprintCtrl.showProjectSprints(TestUtils.PROJECT_ID, responseMock);
         Assert.assertEquals(1, result.size());
     }
 

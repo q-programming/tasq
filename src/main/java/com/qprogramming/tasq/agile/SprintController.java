@@ -125,7 +125,7 @@ public class SprintController {
 
             Map<Sprint, List<DisplayTask>> sprint_result = new LinkedHashMap<>();
             List<Sprint> sprintList = agileSrv.findByProjectIdAndFinished(
-                    project.getId(), false);
+                    project.getProjectId(), false);
             Collections.sort(sprintList, new SprintSorter());
             // Assign tasks to sprints in order to display them
             for (Sprint sprint : sprintList) {
@@ -298,7 +298,7 @@ public class SprintController {
         if (freeDays.contains(new LocalDate(startTime))) {
             return new ResultData(ResultData.WARNING, msg.getMessage(
                     "agile.sprint.start.freeday",
-                    new Object[]{sprintStart,freeDaysString},
+                    new Object[]{sprintStart, freeDaysString},
                     Utils.getCurrentLocale()));
         }
         if (freeDays.contains(new LocalDate(endTime))) {
@@ -592,7 +592,7 @@ public class SprintController {
     @RequestMapping(value = "/getSprints", method = RequestMethod.GET)
     @ResponseBody
     public List<DisplaySprint> showProjectSprints(
-            @RequestParam Long projectID, HttpServletResponse response) {
+            @RequestParam String projectID, HttpServletResponse response) {
         response.setContentType("application/json");
         List<Sprint> projectSprints = agileSrv.findByProjectIdAndFinished(
                 projectID, false);
