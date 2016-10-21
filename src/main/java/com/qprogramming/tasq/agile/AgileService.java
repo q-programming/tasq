@@ -34,8 +34,8 @@ public class AgileService {
 		return sprintRepo.findByProjectIdAndActiveTrue(id);
 	}
 
-	public List<Sprint> findByProjectIdAndFinished(Long id, boolean finished) {
-		return sprintRepo.findByProjectIdAndFinished(id, finished);
+	public List<Sprint> findByProjectIdAndFinished(String id, boolean finished) {
+		return sprintRepo.findByProjectProjectIdAndFinished(id, finished);
 	}
 
 	public List<Sprint> findByProjectId(Long id) {
