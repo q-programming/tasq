@@ -194,7 +194,7 @@ public class TaskControllerTest {
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
         when(projSrvMock.findUserActiveProject()).thenReturn(project);
         when(projSrvMock.findAllByUser()).thenReturn(list);
-        when(projSrvMock.findById(1L)).thenReturn(project);
+        when(projSrvMock.findByProjectId(TestUtils.PROJECT_ID)).thenReturn(project);
         when(projSrvMock.canEdit(project)).thenReturn(false);
         taskCtr.createTask(form, errors, null, raMock, requestMock, modelMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
@@ -214,7 +214,7 @@ public class TaskControllerTest {
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
         when(projSrvMock.findUserActiveProject()).thenReturn(project);
         when(projSrvMock.findAllByUser()).thenReturn(list);
-        when(projSrvMock.findById(1L)).thenReturn(project);
+        when(projSrvMock.findByProjectId(TestUtils.PROJECT_ID)).thenReturn(project);
         when(projSrvMock.canEdit(project)).thenReturn(true);
         taskCtr.createTask(form, errors, null, raMock, requestMock, modelMock);
         Assert.assertTrue(errors.hasErrors());
@@ -241,7 +241,7 @@ public class TaskControllerTest {
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
         when(projSrvMock.findUserActiveProject()).thenReturn(project);
         when(projSrvMock.findAllByUser()).thenReturn(list);
-        when(projSrvMock.findById(1L)).thenReturn(project);
+        when(projSrvMock.findByProjectId(TestUtils.PROJECT_ID)).thenReturn(project);
         when(projSrvMock.canEdit(project)).thenReturn(true);
         when(accountServiceMock.findById(1L)).thenReturn(testAccount);
         when(taskRepoMock.save(any(Task.class))).thenReturn(task);
@@ -554,7 +554,7 @@ public class TaskControllerTest {
         form.setAddToSprint(1L);
         Errors errors = new BeanPropertyBindingResult(form, "form");
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
-        when(projSrvMock.findById(1L)).thenReturn(project);
+        when(projSrvMock.findByProjectId(TestUtils.PROJECT_ID)).thenReturn(project);
         when(projSrvMock.canEdit(project)).thenReturn(true);
         when(accountServiceMock.findById(1L)).thenReturn(testAccount);
         when(sprintSrvMock.findByProjectIdAndSprintNo(1L, 1L)).thenReturn(sprint);

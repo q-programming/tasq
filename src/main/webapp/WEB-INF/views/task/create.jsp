@@ -89,11 +89,15 @@
                          disabled="${not empty param.p}">
                 <c:forEach items="${projects_list}" var="list_project">
                     <option
-                            <c:if test="${list_project.projectId eq chosenProject}">selected style="font-weight:bold"</c:if>
-                            value="${list_project.id}">${list_project}
+                            <c:if test="${list_project.projectId eq chosenProject}">selected
+                            style="font-weight:bold"</c:if>
+                            value="${list_project.projectId}">${list_project}
                     </option>
                 </c:forEach>
             </form:select>
+            <c:if test="${not empty param.p}">
+                <input type="hidden" name="project" value="${param.p}">
+            </c:if>
             <span class="help-block"><s:message code="task.project.help"/></span>
                 <%--------------------	Assign to -------------------------------%>
             <a class="anchor" id="assignToA"></a>
@@ -297,8 +301,11 @@
             <li class=""><a href="#nameA">${taskName_text}</a></li>
             <li class=""><a href="#descA">${taskDesc_text}</a></li>
             <li class=""><a href="#projectA"><s:message code="main.other"/></a></li>
-            <li class=""><a href="#createA"><s:message code="main.create" text="Create"/></a></li>
+            <button id="createSubmit" class="btn btn-success">
+                <i class="fa fa-plus"></i>&nbsp;<s:message code="main.create" text="Create"/>
+            </button>
         </ul>
+
         <!-- 				</nav> -->
     </div>
 </div>
@@ -331,6 +338,10 @@
 
         $("#addMoreFiles").click(function () {
             addFileInput();
+        });
+
+        $("#createSubmit").click(function () {
+            $("#taskForm").submit();
         });
 
         $(document).on("click", ".removeFile", function (e) {

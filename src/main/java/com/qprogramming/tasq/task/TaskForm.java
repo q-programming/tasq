@@ -30,7 +30,7 @@ public class TaskForm {
     @NotBlank(message = NOT_BLANK_MESSAGE)
     private String name;
 
-    private Long project;
+    private String project;
 
     @NotBlank(message = NOT_BLANK_MESSAGE)
     private String description;
@@ -62,7 +62,7 @@ public class TaskForm {
 
     public TaskForm(Task task) {
         setName(task.getName());
-        setProject(task.getProject().getId());
+        setProject(task.getProject().getProjectId());
         setDescription(task.getDescription());
         setNotEstimated(!task.isEstimated());
         setEstimate(task.getEstimate());
@@ -128,11 +128,11 @@ public class TaskForm {
         this.name = name;
     }
 
-    public Long getProject() {
+    public String getProject() {
         return project;
     }
 
-    public void setProject(Long project) {
+    public void setProject(String project) {
         this.project = project;
     }
 

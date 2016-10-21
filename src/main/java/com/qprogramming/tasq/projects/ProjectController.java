@@ -476,9 +476,12 @@ public class ProjectController {
     @RequestMapping(value = "/project/getDefaults", method = RequestMethod.GET)
     public
     @ResponseBody
-    ResponseEntity<DisplayProject> getDefaults(@RequestParam Long id, HttpServletResponse response) {
+    ResponseEntity<DisplayProject> getDefaults(@RequestParam String id, HttpServletResponse response) {
         response.setContentType(APPLICATION_JSON);
-        Project project = projSrv.findById(id);
+        Project project = projSrv.findByProjectId(id);
+        if (project == null) {
+            return ResponseEntity.badRequest().body(null);
+        }
         DisplayProject result = new DisplayProject(project);
         Account account = accSrv.findById(project.getDefaultAssigneeID());
         if (account != null) {

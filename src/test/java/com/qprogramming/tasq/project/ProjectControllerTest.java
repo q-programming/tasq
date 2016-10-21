@@ -564,10 +564,10 @@ public class ProjectControllerTest {
         project.setId(1L);
         project.setDefaultAssigneeID(1L);
         when(accountServiceMock.findById(1L)).thenReturn(testAccount);
-        when(projSrv.findById(1L)).thenReturn(project);
-        Assert.assertNotNull(projectCtr.getDefaults(1L, responseMock));
+        when(projSrv.findByProjectId(TestUtils.PROJECT_ID)).thenReturn(project);
+        Assert.assertNotNull(projectCtr.getDefaults(TestUtils.PROJECT_ID, responseMock));
         project.setDefaultAssigneeID(null);
-        Assert.assertNull(projectCtr.getDefaults(1L, responseMock).getBody().getDefaultAssignee());
+        Assert.assertNull(projectCtr.getDefaults(TestUtils.PROJECT_ID, responseMock).getBody().getDefaultAssignee());
     }
 
     @Test

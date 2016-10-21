@@ -140,7 +140,7 @@ public class TaskController {
             fillCreateTaskModel(model);
             return null;
         }
-        Project project = projectSrv.findById(taskForm.getProject());
+        Project project = projectSrv.findByProjectId(taskForm.getProject());
         if (project != null) {
             // check if can edit
             if (!projectSrv.canEdit(project)) {
@@ -474,7 +474,7 @@ public class TaskController {
             throw new TasqAuthException(msg);
         }
         Task task = taskSrv.findById(id);
-        Project project = projectSrv.findById(taskForm.getProject());
+        Project project = projectSrv.findByProjectId(taskForm.getProject());
         if (errors.hasErrors()) {
             model.addAttribute("project", project);
             model.addAttribute("task", task);
