@@ -16,7 +16,7 @@
 <script src="<c:url value="/resources/js/bootstrap-tagsinput.js" />"></script>
 <link href="<c:url value="/resources/css/bootstrap-tagsinput.css" />" rel="stylesheet" media="screen"/>
 <script src="<c:url value="/resources/js/trumbowyg.min.js" />"></script>
-<script src="<c:url value="/resources/js/trumbowyg.editlink.js" />"></script>
+<script src="<c:url value="/resources/js/trumbowyg.preformatted.js" />"></script>
 <link href="<c:url value="/resources/css/trumbowyg.min.css" />" rel="stylesheet" media="screen"/>
 <security:authorize access="hasRole('ROLE_ADMIN')">
     <c:set var="is_admin" value="true"/>
@@ -980,7 +980,7 @@
         var maxchars = 4000;
 
         //--------------------------------------Coments----------------------------
-
+        $.trumbowyg.svgPath = '<c:url value="/resources/img/trumbowyg-icons.svg"/>';
         var btnsGrps = jQuery.trumbowyg.btnsGrps;
         $('.comment-message-text').trumbowyg({
             lang: '${user.language}',
@@ -988,10 +988,10 @@
             removeformatPasted: true,
             autogrow: true,
             btns: ['formatting',
-                '|', btnsGrps.design,
+                '|', ['bold', 'italic', 'underline', 'strikethrough', 'preformatted' ],
                 '|', 'link',
-                '|', btnsGrps.justify,
-                '|', btnsGrps.lists]
+                '|', 'btnGrp-justify',
+                '|', 'btnGrp-lists']
         }).on('tbwchange ', function () {
             var tlength = $(this).val().length;
             remain = maxchars - parseInt(tlength);

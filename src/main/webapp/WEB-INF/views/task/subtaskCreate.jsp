@@ -8,8 +8,9 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <script src="<c:url value="/resources/js/trumbowyg.min.js" />"></script>
-<script src="<c:url value="/resources/js/trumbowyg.editlink.js" />"></script>
+<script src="<c:url value="/resources/js/trumbowyg.preformatted.js" />"></script>
 <link href="<c:url value="/resources/css/trumbowyg.min.css" />" rel="stylesheet" media="screen"/>
+
 <security:authentication property="principal" var="user"/>
 <c:if test="${user.language ne 'en' }">
     <script src="<c:url value="/resources/js/trumbowyg.${user.language}.min.js" />"></script>
@@ -207,16 +208,17 @@
 
 <script>
     $(document).ready(function ($) {
+        $.trumbowyg.svgPath = '<c:url value="/resources/img/trumbowyg-icons.svg"/>';
         var btnsGrps = jQuery.trumbowyg.btnsGrps;
         $('#description').trumbowyg({
             lang: '${user.language}',
             fullscreenable: false,
             btns: ['formatting',
-                '|', btnsGrps.design,
+                '|', ['bold', 'italic', 'underline', 'strikethrough', 'preformatted' ],
                 '|', 'link',
                 '|', 'insertImage',
-                '|', btnsGrps.justify,
-                '|', btnsGrps.lists]
+                '|', 'btnGrp-justify',
+                '|', 'btnGrp-lists']
         });
 
 

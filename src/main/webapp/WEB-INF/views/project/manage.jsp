@@ -13,7 +13,9 @@
     <c:set var="is_admin" value="true"/>
 </security:authorize>
 <script src="<c:url value="/resources/js/trumbowyg.min.js" />"></script>
+<script src="<c:url value="/resources/js/trumbowyg.preformatted.js" />"></script>
 <link href="<c:url value="/resources/css/trumbowyg.min.css" />" rel="stylesheet" media="screen"/>
+
 <security:authentication property="principal" var="user"/>
 <c:if test="${user.language ne 'en' }">
     <script src="<c:url value="/resources/js/trumbowyg.${user.language}.min.js" />"></script>
@@ -372,15 +374,16 @@
         });
 
         var btnsGrps = jQuery.trumbowyg.btnsGrps;
+        $.trumbowyg.svgPath = '<c:url value="/resources/img/trumbowyg-icons.svg"/>';
         $('#projectDescription').trumbowyg({
             lang: '${user.language}',
             fullscreenable: false,
             btns: ['formatting',
-                '|', btnsGrps.design,
+                '|', ['bold', 'italic', 'underline', 'strikethrough', 'preformatted' ],
                 '|', 'link',
                 '|', 'insertImage',
-                '|', btnsGrps.justify,
-                '|', btnsGrps.lists]
+                '|', 'btnGrp-justify',
+                '|', 'btnGrp-lists']
         });
 
         $("#participant").autocomplete({
