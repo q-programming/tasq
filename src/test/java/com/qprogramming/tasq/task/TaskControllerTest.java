@@ -322,7 +322,9 @@ public class TaskControllerTest {
         TaskForm form = new TaskForm(task);
         Errors errors = new BeanPropertyBindingResult(form, "form");
         errors.rejectValue("name", "Error name");
-        String result = taskCtr.editTask(form, errors, raMock, requestMock);
+        when(requestMock.getHeader("Referer")).thenReturn("test");
+        when(taskSrv.findById(TEST_1)).thenReturn(task);
+        String result = taskCtr.editTask(form, errors, raMock, requestMock, modelMock);
         Assert.assertNull(result);
     }
 
@@ -333,8 +335,9 @@ public class TaskControllerTest {
         Task task = createTask(TASK_NAME, 1, project);
         TaskForm form = new TaskForm(task);
         Errors errors = new BeanPropertyBindingResult(form, "form");
-        String result = taskCtr.editTask(form, errors, raMock, requestMock);
-        Assert.assertNull(result);
+        when(requestMock.getHeader("Referer")).thenReturn("test");
+        String result = taskCtr.editTask(form, errors, raMock, requestMock, modelMock);
+        Assert.assertEquals("redirect:test", result);
     }
 
     @Test
@@ -349,7 +352,7 @@ public class TaskControllerTest {
         Errors errors = new BeanPropertyBindingResult(form, "form");
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(false);
-        taskCtr.editTask(form, errors, raMock, requestMock);
+        taskCtr.editTask(form, errors, raMock, requestMock, modelMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
     }
@@ -367,7 +370,7 @@ public class TaskControllerTest {
         Errors errors = new BeanPropertyBindingResult(form, "form");
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(true);
-        taskCtr.editTask(form, errors, raMock, requestMock);
+        taskCtr.editTask(form, errors, raMock, requestMock, modelMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.WARNING, new Object[]{}));
     }
@@ -395,7 +398,7 @@ public class TaskControllerTest {
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(true);
         when(sprintSrvMock.taskInActiveSprint(task)).thenReturn(true);
-        taskCtr.editTask(form, errors, raMock, requestMock);
+        taskCtr.editTask(form, errors, raMock, requestMock, modelMock);
         verify(wrkLogSrv, times(1)).addActivityPeriodLog(any(Task.class), anyString(), any(Period.class),
                 any(LogType.class));
         verify(wrkLogSrv, times(2)).addActivityLog(any(Task.class), anyString(), any(LogType.class));

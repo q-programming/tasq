@@ -194,26 +194,26 @@ public class ProjectController {
         if (!Roles.isPowerUser()) {
             throw new TasqAuthException(msg);
         }
-        if (errors.hasErrors()) {
-            return null;
-        }
         if (newProjectForm.getProject_id().length() > 5) {
             errors.rejectValue("project_id", "project.idValid");
-            return null;
         }
         if (newProjectForm.getProject_id().matches(".*\\d.*")) {
             errors.rejectValue("project_id", "project.idValid.letters");
-            return null;
         }
+        if (Utils.containsHTMLTags(newProjectForm.getName())) {
+            errors.rejectValue("name", "error.name.html");
+        }
+
         Utils.setHttpRequest(request);
         String name = newProjectForm.getName();
         if (null != projSrv.findByName(name)) {
             errors.rejectValue("name", "project.exists", new Object[]{name}, "");
-            return null;
         }
         String projectId = newProjectForm.getProject_id();
         if (null != projSrv.findByProjectId(projectId)) {
             errors.rejectValue("project_id", "project.idunique", new Object[]{projectId}, "");
+        }
+        if (errors.hasErrors()) {
             return null;
         }
         Project newProject = newProjectForm.createProject();
@@ -536,6 +536,11 @@ public class ProjectController {
             MessageHelper.addErrorAttribute(ra, msg.getMessage("project.notexists", null, Utils.getCurrentLocale()));
             return "redirect:/projects";
         }
+        if (Utils.containsHTMLTags(name)) {
+            MessageHelper.addErrorAttribute(ra, msg.getMessage("error.name.html", null, Utils.getCurrentLocale()));
+            return "redirect:" + request.getHeader(REFERER);
+        }
+
         if (!projSrv.canEdit(project.getId())) {
             MessageHelper.addErrorAttribute(ra, msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
             return "redirect:" + request.getHeader(REFERER);

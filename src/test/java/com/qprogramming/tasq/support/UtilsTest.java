@@ -63,8 +63,18 @@ public class UtilsTest {
     public void containsHTMLTagsTest() {
         String test1 = "<html>test</html>";
         String test2 = "html test html";
-        Assert.assertFalse(Utils.containsHTMLTags(test2));
+        String test3 = "<b>";
+        String test4 = "<b>test</b>";
+        String test5 = "<script>test</script>";
+        String test6 = "< script >test</ script >";
+        String test7 = "Some test < script  and >";
         Assert.assertTrue(Utils.containsHTMLTags(test1));
+        Assert.assertFalse(Utils.containsHTMLTags(test2));
+        Assert.assertTrue(Utils.containsHTMLTags(test3));
+        Assert.assertTrue(Utils.containsHTMLTags(test4));
+        Assert.assertTrue(Utils.containsHTMLTags(test5));
+        Assert.assertFalse(Utils.containsHTMLTags(test6));
+        Assert.assertFalse(Utils.containsHTMLTags(test7));
     }
 
     @Test

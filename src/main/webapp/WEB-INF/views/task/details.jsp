@@ -92,7 +92,7 @@
                 </ul>
             </c:if>
             <c:if test="${task.state eq'CLOSED' && project_participant}">
-                <a href="<c:url value="/task/create"/>?linked=${task.id}&p=${task.project.id}"
+                <a href="<c:url value="/task/create"/>?linked=${task.id}&p=${task.project.projectId}"
                    class="btn btn-default btn-sm a-tooltip" title="<s:message code="task.linked.create" />">
                     <i class="fa fw fa-plus"></i>
                 </a>

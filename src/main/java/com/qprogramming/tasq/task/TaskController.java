@@ -136,6 +136,9 @@ public class TaskController {
         if (!Roles.isUser()) {
             throw new TasqAuthException(msg);
         }
+        if (Utils.containsHTMLTags(taskForm.getName())) {
+            result.rejectValue("name", "error.name.html");
+        }
         if (result.hasErrors()) {
             fillCreateTaskModel(model);
             return null;
@@ -217,19 +220,21 @@ public class TaskController {
         return null;
     }
 
-    @Transactional
     @RequestMapping(value = "/task/{id}/edit", method = RequestMethod.GET)
     public TaskForm startEditTask(@PathVariable("id") String id, Model model) {
         Task task = taskSrv.findById(id);
         if (projectSrv.canEdit(task.getProject())
                 && (Roles.isUser() | task.getOwner().equals(Utils.getCurrentAccount()))) {
-            Hibernate.initialize(task.getRawWorkLog());
-            model.addAttribute("task", task);
-            model.addAttribute("project", task.getProject());
+            fillModelForEdit(model, task);
             return new TaskForm(task);
         } else {
             throw new TasqAuthException(msg);
         }
+    }
+
+    private void fillModelForEdit(Model model, Task task) {
+        model.addAttribute("task", task);
+        model.addAttribute("project", task.getProject());
     }
 
     @Transactional
@@ -241,22 +246,26 @@ public class TaskController {
     @Transactional
     @RequestMapping(value = "/task/{id}/{subid}/edit", method = RequestMethod.POST)
     public String editSubTask(@Valid @ModelAttribute("taskForm") TaskForm taskForm, Errors errors,
-                              RedirectAttributes ra, HttpServletRequest request) {
-        return editTask(taskForm, errors, ra, request);
+                              RedirectAttributes ra, HttpServletRequest request, Model model) {
+        return editTask(taskForm, errors, ra, request, model);
     }
 
     @Transactional
     @RequestMapping(value = "/task/{id}/edit", method = RequestMethod.POST)
     public String editTask(@Valid @ModelAttribute("taskForm") TaskForm taskForm, Errors errors, RedirectAttributes ra,
-                           HttpServletRequest request) {
-        if (errors.hasErrors()) {
-            return null;
-        }
+                           HttpServletRequest request, Model model) {
         String taskID = taskForm.getId();
         Task task = taskSrv.findById(taskID);
-        if (task == null) {
-            // something went wrong
+        if (Utils.containsHTMLTags(taskForm.getName())) {
+            errors.rejectValue("name", "error.name.html");
+        }
+        if (errors.hasErrors()) {
+            fillModelForEdit(model, task);
             return null;
+        }
+        if (task == null) {
+            MessageHelper.addErrorAttribute(ra, msg.getMessage("error.task.notfound", null, Utils.getCurrentLocale()));
+            return REDIRECT + request.getHeader("Referer");
         }
         // check if can edit
         if (!projectSrv.canEdit(task.getProject())
@@ -473,8 +482,12 @@ public class TaskController {
         if (!Roles.isUser()) {
             throw new TasqAuthException(msg);
         }
+
         Task task = taskSrv.findById(id);
         Project project = projectSrv.findByProjectId(taskForm.getProject());
+        if (Utils.containsHTMLTags(taskForm.getName())) {
+            errors.rejectValue("name", "error.name.html");
+        }
         if (errors.hasErrors()) {
             model.addAttribute("project", project);
             model.addAttribute("task", task);
