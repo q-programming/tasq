@@ -550,6 +550,7 @@ public class ProjectController {
         }
         if (name != null) {
             project.setName(name);
+            visitedSrv.updateName(project);
         }
 
         projSrv.save(project);

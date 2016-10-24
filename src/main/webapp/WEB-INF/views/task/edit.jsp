@@ -162,7 +162,7 @@
                 </c:set>
             </c:if>
             <label class="checkbox clickable" style="display: inherit; font-weight: normal;margin-left: 20px;">
-                <input type="checkbox" name="estimated" id="estimated" ${checked}/>
+                <input type="checkbox" name="notEstimated" id="estimated" ${checked}/>
                 <s:message code="task.withoutEstimation"/>&nbsp;
                 <i class="fa fa-question-circle a-tooltip"
                    data-html="true" title="<s:message  code ="task.withoutEstimation.help" />"

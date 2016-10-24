@@ -54,6 +54,21 @@ public class LastVisitedService {
         lastVisitedRepository.save(accountLastVisited);
     }
 
+    public void updateName(Task task) {
+        List<LastVisited> list = lastVisitedRepository.findByItemIdAndTypeNotNull(task.getId());
+        list.stream().forEach(lastVisited -> lastVisited.setItemName(task.getName()));
+        lastVisitedRepository.save(list);
+
+    }
+
+    public void updateName(Project project) {
+        List<LastVisited> list = lastVisitedRepository.findByItemIdAndTypeNull(project.getProjectId());
+        list.stream().forEach(lastVisited -> lastVisited.setItemName(project.getName()));
+        lastVisitedRepository.save(list);
+
+    }
+
+
     public Set<LastVisited> getAccountLastVisited(Long id) {
         return new HashSet<>(lastVisitedRepository.findByAccountOrderByTimeDesc(id));
     }
@@ -67,4 +82,8 @@ public class LastVisitedService {
     }
 
 
+    public void delete(Task task) {
+        List<LastVisited> list = lastVisitedRepository.findByItemIdAndTypeNotNull(task.getId());
+        lastVisitedRepository.delete(list);
+    }
 }

@@ -7,6 +7,7 @@ import com.qprogramming.tasq.task.TaskType;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * Created by Khobar on 04.10.2016.
@@ -105,23 +106,21 @@ public class LastVisited implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         LastVisited that = (LastVisited) o;
-        if (!itemId.equals(that.itemId)) return false;
-        if (!itemName.equals(that.itemName)) return false;
-        if (type != that.type) return false;
-        return account.equals(that.account);
-
+        return Objects.equals(getItemId(), that.getItemId()) &&
+                getType() == that.getType() &&
+                Objects.equals(getAccount(), that.getAccount());
     }
 
     @Override
     public int hashCode() {
-        int result = itemId.hashCode();
-        result = 31 * result + (itemName != null ? itemName.hashCode() : 0);
-        result = 31 * result + (type != null ? type.hashCode() : 0);
-        result = 31 * result + (account != null ? account.hashCode() : 0);
-        return result;
+        return Objects.hash(getItemId(), getType(), getAccount());
     }
 
     @Override

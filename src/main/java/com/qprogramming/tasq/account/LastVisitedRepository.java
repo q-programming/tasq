@@ -25,5 +25,10 @@ public interface LastVisitedRepository extends JpaRepository<LastVisited, Intege
 
     List<LastVisited> findByAccountOrderByTimeDesc(Long id);
 
+    List<LastVisited> findByItemIdAndTypeNotNull(String id);
+
+    List<LastVisited> findByItemIdAndTypeNull(String id);
+
+
 //    LastVisited findByItemName(String name);
 }

@@ -279,7 +279,7 @@ public class TaskController {
             return REDIRECT + request.getHeader("Referer");
         }
         StringBuilder message = new StringBuilder(Utils.TABLE);
-        if (!task.getName().equalsIgnoreCase(taskForm.getName())) {
+        if (nameChanged(taskForm.getName(), task)) {
             message.append(Utils.changedFromTo(NAME_TXT, task.getName(), taskForm.getName()));
             task.setName(taskForm.getName());
             updateWatched(task);
@@ -306,11 +306,11 @@ public class TaskController {
             task.setRemaining(remaining);
         }
 
-        boolean notestimated = !taskForm.getNotEstimated();
-        if (!task.isEstimated().equals(notestimated)) {
+        boolean estimated = !taskForm.getNotEstimated();
+        if (!task.isEstimated().equals(estimated)) {
             message.append(
-                    Utils.changedFromTo(ESTIMATED_TXT, task.getEstimated().toString(), Boolean.toString(notestimated)));
-            task.setEstimated(notestimated);
+                    Utils.changedFromTo(ESTIMATED_TXT, task.getEstimated().toString(), Boolean.toString(estimated)));
+            task.setEstimated(estimated);
             if (!task.isEstimated()) {
                 task.setStory_points(0);
             }
@@ -343,12 +343,20 @@ public class TaskController {
             updateWatched(task);
         }
         LOG.debug(message.toString());
+        //update visited after name change
+        if (nameChanged(taskForm.getName(), task)) {
+            visitedSrv.updateName(task);
+        }
         taskSrv.save(task);
         message.append(Utils.TABLE_END);
         if (message.length() > 37) {
             wlSrv.addActivityLog(task, message.toString(), LogType.EDITED);
         }
         return REDIRECT_TASK + taskID;
+    }
+
+    private boolean nameChanged(String newName, Task task) {
+        return !task.getName().equals(newName);
     }
 
     private void updateWatched(Task task) {
@@ -870,6 +878,7 @@ public class TaskController {
                 Task purged = taskSrv.save(purgeTask(task));
                 taskSrv.delete(purged);
                 wlSrv.addWorkLogNoTask(message.toString(), project, LogType.DELETED);
+                visitedSrv.delete(task);
             }
             // TODO add message about removed task
             return "redirect:/";
