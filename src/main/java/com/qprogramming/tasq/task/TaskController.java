@@ -283,8 +283,9 @@ public class TaskController {
             message.append(Utils.changedFromTo(NAME_TXT, task.getName(), taskForm.getName()));
             task.setName(taskForm.getName());
             updateWatched(task);
+            visitedSrv.updateName(task);
         }
-        if (!task.getDescription().equalsIgnoreCase(taskForm.getDescription())) {
+        if (!task.getDescription().equals(taskForm.getDescription())) {
             message.append(Utils.changedFromTo(DESCRIPTION_TXT, task.getDescription(), taskForm.getDescription()));
             task.setDescription(taskForm.getDescription());
         }
@@ -344,9 +345,6 @@ public class TaskController {
         }
         LOG.debug(message.toString());
         //update visited after name change
-        if (nameChanged(taskForm.getName(), task)) {
-            visitedSrv.updateName(task);
-        }
         taskSrv.save(task);
         message.append(Utils.TABLE_END);
         if (message.length() > 37) {

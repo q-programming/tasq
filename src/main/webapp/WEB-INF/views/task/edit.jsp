@@ -26,9 +26,9 @@
     <form:form modelAttribute="taskForm" id="taskForm" method="post">
         <div>
             <h3>
-                <t:type type="${taskForm.type}"/>
-                [${taskForm.id}] - ${taskForm.name}
-                <form:hidden path="id"></form:hidden>
+                <t:type type="${task.type}"/>
+                [${task.id}] - ${task.name}
+                <form:hidden path="id"/>
             </h3>
         </div>
         <div>
