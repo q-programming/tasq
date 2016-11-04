@@ -141,7 +141,7 @@ public class TaskController {
         if (Utils.containsHTMLTags(taskForm.getName())) {
             result.rejectValue("name", ERROR_NAME_HTML);
         }
-        if (!Utils.correctEstimate(taskForm.getEstimate())) {
+        if (StringUtils.isNotBlank(taskForm.getEstimate()) && !Utils.correctEstimate(taskForm.getEstimate())) {
             result.rejectValue("estimate", "error.estimateFormat");
         }
         if (result.hasErrors()) {
@@ -538,7 +538,8 @@ public class TaskController {
                           RedirectAttributes ra, HttpServletRequest request) {
         loggedWork = Utils.matchTimeFormat(loggedWork);
         remainingTxt = Utils.matchTimeFormat(remainingTxt);
-        if (!Utils.correctEstimate(loggedWork) || !Utils.correctEstimate(remainingTxt)) {
+        if ((StringUtils.isNotBlank(loggedWork) && !Utils.correctEstimate(loggedWork))
+                || (StringUtils.isNotBlank(remainingTxt) && !Utils.correctEstimate(remainingTxt))) {
             MessageHelper.addErrorAttribute(ra,
                     msg.getMessage("error.estimateFormat", null, Utils.getCurrentLocale()));
             return REDIRECT + request.getHeader(REFERER);

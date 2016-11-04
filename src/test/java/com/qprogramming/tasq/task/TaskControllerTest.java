@@ -210,7 +210,7 @@ public class TaskControllerTest {
         list.add(project2);
         Task task = createTask(TASK_NAME, 1, project);
         TaskForm form = new TaskForm(task);
-        form.setStory_points("TEST");
+        form.setEstimate("TEST");
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
         when(projSrvMock.findUserActiveProject()).thenReturn(project);
         when(projSrvMock.findAllByUser()).thenReturn(list);
