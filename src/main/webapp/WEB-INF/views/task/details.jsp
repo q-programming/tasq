@@ -1130,6 +1130,12 @@
                         else {
                             $("#current_state").data('state', state).html(newState);
                             showSuccess(result.message);
+                            //Reopening task forces page to reload after 5s
+                            if(current_state=='CLOSED'){
+                                setTimeout(function(){
+                                    window.location.reload(1);
+                                }, 5000);
+                            }
                         }
                         showWait(false);
                     });
