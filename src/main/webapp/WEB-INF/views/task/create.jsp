@@ -50,6 +50,10 @@
         <c:set var="sprint_error">
             <form:errors path="addToSprint"/>
         </c:set>
+        <c:set var="estimate_error">
+            <form:errors path="estimate"/>
+        </c:set>
+
 
         <c:if test="${not empty name_error}">
             <c:set var="name_class" value="has-error"/>
@@ -60,6 +64,10 @@
         <c:if test="${not empty sprint_error}">
             <c:set var="sprint_class" value="has-error"/>
         </c:if>
+        <c:if test="${not empty estimate_error}">
+            <c:set var="estimate_class" value="has-error"/>
+        </c:if>
+
 
         <a class="anchor" id="nameA"></a>
         <div class="form-group ${name_class }">
@@ -229,7 +237,7 @@
             </h5>
         </div>
         <div>
-            <div class="form-group ${sprint_class}">
+            <div class="form-group ${estimate_class}">
                 <div class="input-group"><form:input path="estimate" class="form-control"
                                                      style="width:150px"/>&nbsp;<span id="estimate_optional"><s:message
                         code="main.optional"/></span></div>

@@ -47,11 +47,20 @@
         <c:set var="desc_error">
             <form:errors path="description"/>
         </c:set>
+        <c:set var="estimate_error">
+            <form:errors path="estimate"/>
+        </c:set>
+        <c:set var="remaining_error">
+            <form:errors path="remaining"/>
+        </c:set>
         <c:if test="${not empty name_error}">
             <c:set var="name_class" value="has-error"/>
         </c:if>
         <c:if test="${not empty desc_error}">
             <c:set var="desc_class" value="has-error"/>
+        </c:if>
+        <c:if test="${not empty estimate_error || not empty remaining_error}">
+            <c:set var="estimate_class" value="has-error"/>
         </c:if>
         <div class="form-group ${name_class }">
             <form:input path="name" class="form-control"
@@ -114,7 +123,7 @@
         </div>
         <%-- Estimate --%>
         <div id="estimate_div">
-            <div class="form-group">
+            <div class="form-group ${estimate_class}">
                 <c:if test="${task.loggedWork ne '0m' && task.subtasks lt 1}">
                     <div>
                         <div class="mod-header">

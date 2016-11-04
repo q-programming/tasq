@@ -130,4 +130,19 @@ public class UtilsTest {
         Assert.assertNotNull(timestamp);
     }
 
+    @Test
+    public void estimateMatcherTest() {
+        String estimate1 = "1w 2d 3h 30m";
+        String estimate2 = "3h 30m";
+        String estimate3 = "3h 30";
+        String estimate4 = "random";
+        String empty = "";
+        Assert.assertTrue(Utils.correctEstimate(empty));
+        Assert.assertTrue(Utils.correctEstimate(estimate1));
+        Assert.assertTrue(Utils.correctEstimate(estimate2));
+        Assert.assertFalse(Utils.correctEstimate(estimate3));
+        Assert.assertFalse(Utils.correctEstimate(estimate4));
+
+    }
+
 }

@@ -78,9 +78,8 @@ public class AccountService {
         }
         UUID uuid = Generators.timeBasedGenerator().generate();
         account.setUuid(uuid.toString());
-        accRepo.save(account);
+        return accRepo.save(account);
         // entityManager.persist(account);
-        return account;
     }
 
     public Account findByEmail(String email) {

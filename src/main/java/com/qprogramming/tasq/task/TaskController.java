@@ -141,6 +141,9 @@ public class TaskController {
         if (Utils.containsHTMLTags(taskForm.getName())) {
             result.rejectValue("name", ERROR_NAME_HTML);
         }
+        if (!Utils.correctEstimate(taskForm.getEstimate())) {
+            result.rejectValue("estimate", "error.estimateFormat");
+        }
         if (result.hasErrors()) {
             fillCreateTaskModel(model);
             return null;
@@ -154,13 +157,7 @@ public class TaskController {
                 return REDIRECT + request.getHeader(REFERER);
             }
             Task task;
-            try {
-                task = taskForm.createTask();
-            } catch (IllegalArgumentException e) {
-                result.rejectValue("estimate", "error.estimateFormat");
-                fillCreateTaskModel(model);
-                return null;
-            }
+            task = taskForm.createTask();
             // build ID
             long taskCount = project.getLastTaskNo();
             taskCount++;
@@ -260,6 +257,12 @@ public class TaskController {
         Task task = taskSrv.findById(taskID);
         if (Utils.containsHTMLTags(taskForm.getName())) {
             errors.rejectValue("name", ERROR_NAME_HTML);
+        }
+        if (StringUtils.isNotBlank(taskForm.getEstimate()) && !Utils.correctEstimate(taskForm.getEstimate())) {
+            errors.rejectValue("estimate", "error.estimateFormat");
+        }
+        if (StringUtils.isNotBlank(taskForm.getRemaining()) && !Utils.correctEstimate(taskForm.getRemaining())) {
+            errors.rejectValue("remaining", "error.estimateFormat");
         }
         if (errors.hasErrors()) {
             fillModelForEdit(model, task);
@@ -524,7 +527,6 @@ public class TaskController {
      * @param loggedWork - amount of time spent
      * @param ra
      * @param request
-     * @param model
      * @return
      */
     @Transactional
@@ -533,40 +535,38 @@ public class TaskController {
                           @RequestParam(value = "loggedWork") String loggedWork,
                           @RequestParam(value = "remaining", required = false) String remainingTxt,
                           @RequestParam("date_logged") String dateLogged, @RequestParam("time_logged") String timeLogged,
-                          RedirectAttributes ra, HttpServletRequest request, Model model) {
+                          RedirectAttributes ra, HttpServletRequest request) {
+        loggedWork = Utils.matchTimeFormat(loggedWork);
+        remainingTxt = Utils.matchTimeFormat(remainingTxt);
+        if (!Utils.correctEstimate(loggedWork) || !Utils.correctEstimate(remainingTxt)) {
+            MessageHelper.addErrorAttribute(ra,
+                    msg.getMessage("error.estimateFormat", null, Utils.getCurrentLocale()));
+            return REDIRECT + request.getHeader(REFERER);
+        }
         Task task = taskSrv.findById(taskID);
         if (task != null) {
             // check if can edit
             if (Roles.isPowerUser() | projectSrv.canEdit(task.getProject())) {
-                try {
-                    loggedWork = Utils.matchTimeFormat(loggedWork);
-                    Period logged = PeriodHelper.inFormat(loggedWork);
-                    StringBuilder message = new StringBuilder(loggedWork);
-                    Date when = new Date();
-                    if (StringUtils.isNotEmpty(dateLogged) && StringUtils.isNotEmpty(timeLogged)) {
-                        when = Utils.convertStringToDateAndTime(dateLogged + " " + timeLogged);
-                        message.append(BR);
-                        message.append("Date: ");
-                        message.append(dateLogged);
-                        message.append(" ");
-                        message.append(timeLogged);
+                Period logged = PeriodHelper.inFormat(loggedWork);
+                StringBuilder message = new StringBuilder(loggedWork);
+                Date when = new Date();
+                if (StringUtils.isNotEmpty(dateLogged) && StringUtils.isNotEmpty(timeLogged)) {
+                    when = Utils.convertStringToDateAndTime(dateLogged + " " + timeLogged);
+                    message.append(BR);
+                    message.append("Date: ");
+                    message.append(dateLogged);
+                    message.append(" ");
+                    message.append(timeLogged);
 
-                    }
-                    Period remaining = null;
-                    if (StringUtils.isNotEmpty(remainingTxt)) {
-                        remainingTxt = Utils.matchTimeFormat(remainingTxt);
-                        remaining = PeriodHelper.inFormat(remainingTxt);
-                        wlSrv.addDatedWorkLog(task, remainingTxt, when, LogType.ESTIMATE);
-                    }
-                    wlSrv.addTimedWorkLog(task, message.toString(), when, remaining, logged, LogType.LOG);
-                    MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.logWork.logged",
-                            new Object[]{loggedWork, task.getId()}, Utils.getCurrentLocale()));
-                } catch (IllegalArgumentException e) {
-                    MessageHelper.addErrorAttribute(ra,
-                            msg.getMessage("error.estimateFormat", null, Utils.getCurrentLocale()));
-                    LOG.error("Error with arguments {}", e);
-                    return REDIRECT + request.getHeader(REFERER);
                 }
+                Period remaining = null;
+                if (StringUtils.isNotEmpty(remainingTxt)) {
+                    remaining = PeriodHelper.inFormat(remainingTxt);
+                    wlSrv.addDatedWorkLog(task, remainingTxt, when, LogType.ESTIMATE);
+                }
+                wlSrv.addTimedWorkLog(task, message.toString(), when, remaining, logged, LogType.LOG);
+                MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.logWork.logged",
+                        new Object[]{loggedWork, task.getId()}, Utils.getCurrentLocale()));
             } else {
                 MessageHelper.addErrorAttribute(ra,
                         msg.getMessage(ERROR_ACCES_RIGHTS, null, Utils.getCurrentLocale()));

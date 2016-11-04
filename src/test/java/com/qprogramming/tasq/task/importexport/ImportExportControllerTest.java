@@ -128,16 +128,10 @@ public class ImportExportControllerTest {
         }
     }
 
-    @Test
+    @Test(expected = TasqAuthException.class)
     public void startImportFailedTaskTest() {
-        boolean catched = false;
         testAccount.setRole(Roles.ROLE_VIEWER);
-        try {
-            importExportCtrl.startImportTasks(modelMock);
-        } catch (TasqAuthException e) {
-            catched = true;
-        }
-        Assert.assertTrue("Exception not catched", catched);
+        importExportCtrl.startImportTasks(modelMock);
     }
 
     @Test
@@ -156,7 +150,7 @@ public class ImportExportControllerTest {
                     getClass().getResourceAsStream("sampleImport.xls"));
             importExportCtrl.importTasks(mockMultipartFile, PROJECT_ID, modelMock);
             verify(taskSrvMock, times(1)).save(any(Task.class));
-            verify(taskSrvMock, times(2)).createSubTask(any(Project.class), any(Task.class), any(Task.class));
+            verify(taskSrvMock, times(3)).createSubTask(any(Project.class), any(Task.class), any(Task.class));
         } catch (IOException e) {
             fail(e.getMessage());
         }

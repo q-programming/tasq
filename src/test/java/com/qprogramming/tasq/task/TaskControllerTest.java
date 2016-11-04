@@ -572,7 +572,7 @@ public class TaskControllerTest {
         testAccount.setRole(Roles.ROLE_USER);
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(false);
-        taskCtr.logWork(TEST_1, null, null, null, null, raMock, requestMock, modelMock);
+        taskCtr.logWork(TEST_1, null, null, null, null, raMock, requestMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
     }
@@ -585,7 +585,7 @@ public class TaskControllerTest {
         testAccount.setRole(Roles.ROLE_POWERUSER);
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(true);
-        taskCtr.logWork(TEST_1, "1", "10m", "1-05-2015", "12:00", raMock, requestMock, modelMock);
+        taskCtr.logWork(TEST_1, "1", "10m", "1-05-2015", "12:00", raMock, requestMock);
         verify(wrkLogSrv, times(1)).addDatedWorkLog(any(Task.class), anyString(), any(Date.class), any(LogType.class));
         verify(wrkLogSrv, times(1)).addTimedWorkLog(any(Task.class), anyString(), any(Date.class), any(Period.class),
                 any(Period.class), any(LogType.class));

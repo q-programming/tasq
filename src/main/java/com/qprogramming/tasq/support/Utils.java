@@ -34,6 +34,7 @@ public class Utils {
     private static final String DATE_FORMAT_TIME = "dd-MM-yyyy HH:mm";
     private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
     private static final String HTML_TAG_PATTERN = "<(\\/)?([A-Za-z][A-Za-z0-9]*)\\b[^>]*>";
+    private static final String ESTIMATES_PATTENR = "(\\d*w)?\\s?(\\d*d)?\\s?(\\d*h)?\\s?(\\d*m)?";
     private static final long NUM_100NS_INTERVALS_SINCE_UUID_EPOCH = 0x01b21dd213814000L;
     private static final String TD_TR = "</td></tr>";
     private static final String TD_TD = "</td><td>";
@@ -74,8 +75,14 @@ public class Utils {
         Pattern pattern = Pattern.compile(HTML_TAG_PATTERN);
         Matcher matcher = pattern.matcher(contents);
         return matcher.matches() || matcher.find();
-
     }
+
+    public static boolean correctEstimate(String estimate) {
+        Pattern pattern = Pattern.compile(ESTIMATES_PATTENR);
+        Matcher matcher = pattern.matcher(estimate);
+        return matcher.matches();
+    }
+
 
     public static String getBaseURL() {
         // TODO null port and server scheme
