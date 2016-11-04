@@ -38,7 +38,7 @@ public class Release implements java.io.Serializable {
 	@Column
 	private DateTime endDate;
 	
-	@Column
+	@Column(columnDefinition = "text")
 	private String comment;
 
 	@ManyToOne

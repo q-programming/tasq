@@ -32,7 +32,7 @@ public class Project implements Serializable {
     @Column(unique = true)
     private String name;
 
-    @Column(length = 4000)
+    @Column(columnDefinition = "text")
     private String description;
 
     @ManyToMany(fetch = FetchType.EAGER)

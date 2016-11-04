@@ -7,15 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 
 import org.hibernate.Hibernate;
 import org.joda.time.Period;
@@ -47,7 +39,7 @@ public class Task implements java.io.Serializable {
 	@Column
 	private String name;
 
-	@Column(length = 4000)
+    @Column(columnDefinition = "text")
 	private String description;
 
 	@Column

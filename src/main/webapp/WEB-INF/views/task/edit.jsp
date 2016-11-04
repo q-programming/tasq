@@ -187,7 +187,7 @@
                   onclick="location.href='<c:url value="/task/${task.id}"/>';"><s:message
                     code="main.cancel" text="Cancel"/></span>
             <button type="submit" class="btn btn-success">
-                <i class="fa fa-pencil"></i>&nbsp;<s:message code="task.edit" text="Edit"></s:message>
+                <i class="fa fa-pencil"></i>&nbsp;<s:message code="task.edit" text="Edit"/>
             </button>
 
         </div>

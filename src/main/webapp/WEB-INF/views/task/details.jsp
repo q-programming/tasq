@@ -888,7 +888,7 @@
                         <span class="remain-span"><span class="remain"></span> <s:message
                                 code="comment.charsLeft"/></span>
                         <div style="margin-top: 5px">
-                            <button class="btn btn-default btn-sm" type="submit">
+                            <button class="btn btn-default btn-sm addCommentButton" type="submit">
                                 <s:message code="main.add" text="Add"/>
                             </button>
                             <span class="btn btn-sm" id="comments_cancel"><s:message
@@ -930,8 +930,7 @@
                 <button type="button" class="close theme-close" data-dismiss="modal"
                         aria-hidden="true">&times;</button>
                 <h4>
-                    <i class="fa fa-pencil"></i>&nbsp;<s:message code="comment.edit"
-                                                                 text="Edit comment"></s:message>
+                    <i class="fa fa-pencil"></i>&nbsp;<s:message code="comment.edit" text="Edit comment"/>
                 </h4>
             </div>
             <div class="modal-body">
@@ -952,7 +951,7 @@
                     </div>
                     <div class="modal-footer">
                         <div class="form-group">
-                            <button class="btn btn-default pull-right" type="submit">
+                            <button class="btn btn-default pull-right addCommentButton" type="submit">
                                 <i class="fa fa-pencil"></i>
                                 <s:message code="main.edit" text="Edit"></s:message>
                             </button>
@@ -1000,8 +999,10 @@
                 $('.remain').text(remain);
                 if (remain < 0) {
                     $('.remain-span').addClass("invalid");
+                    $('.addCommentButton').prop('disabled', true);
                 } else {
                     $('.remain-span').removeClass("invalid");
+                    $('.addCommentButton').prop('disabled', false);
                 }
             } else {
                 $(".remain-span").hide();
