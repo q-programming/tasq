@@ -134,6 +134,8 @@ public class SignupControllerTest {
             when(mailerMock.sendMail(anyInt(), anyString(), anyString(), anyString(),
                     anyMapOf(String.class, Resource.class))).thenReturn(true);
             SignupForm form = fillForm();
+            Account account = form.createAccount();
+            when(accRepoMock.save(any(Account.class))).thenReturn(account);
             Errors errors = new BeanPropertyBindingResult(form, "form");
             signupCtr.signup(form, errors, raMock, requestMock);
             verify(accRepoMock, times(1)).save(any(Account.class));
