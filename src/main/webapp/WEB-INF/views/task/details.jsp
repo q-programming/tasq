@@ -153,7 +153,7 @@
                                             <%
                                                 pageContext.setAttribute("states", TaskState.values());
                                             %>
-                                            <div id="task_state" class="image-combo a-tooltip"
+                                            <div id="task_state" class="image-combo nowidth a-tooltip"
                                                  data-toggle="dropdown" data-placement="top"
                                                  title="<s:message code="main.click"/>">
                                                 <div id="current_state" data-state="${task.state}"
@@ -181,14 +181,16 @@
                             </div>
                         </div>
                         <!--RESOLUTION-->
-                        <div class="col-md-6">
-                            <div class="row">
-                                <div class="col-md-4 col-sm-6"><s:message code="task.resolution"/></div>
-                                <div class="col-md-8 col-sm-6 paddingleft_20">
-                                    Fixed
+                        <c:if test="${not empty task.resolution}">
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-md-4 col-sm-6"><s:message code="task.resolution"/></div>
+                                    <div class="col-md-8 col-sm-6 bold">
+                                        <s:message code="${task.resolution.code}"/>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </c:if>
                     </div>
                     <!--PRIORITY-->
                     <div class="row">
@@ -200,7 +202,7 @@
                                         pageContext.setAttribute("priorities",
                                                 TaskPriority.values());
                                     %>
-                                    <div id="task_priority" class="image-combo a-tooltip"
+                                    <div id="task_priority" class="image-combo nowidth a-tooltip"
                                          data-priority="${task.priority}"
                                          data-toggle="dropdown" data-placement=top
                                          title="<s:message code="main.click"/>">
@@ -270,12 +272,20 @@
                             </div>
                         </div>
                     </c:if>
-                    <!-------------------------DESCRIPTION------------------------>
-                    <div class="row">
-                        <div class="col-md-1 col-sm-12" style="vertical-align: top;"><s:message
-                                code="task.description"/></div>
-                        <div class="col-md-11 col-sm-12 paddingleft_20">${task.description}</div>
-                    </div>
+                </div>
+            </div>
+            <!-------------------------DESCRIPTION------------------------>
+            <div>
+                <div class="mod-header">
+                    <h5 class="mod-header-title">
+                        <i class="fa fa-caret-down toggler" data-tab="descriptionToggle"></i>
+                        <span class="mod-header-title-txt">
+                            <i class="fa fa-book"></i> <s:message code="task.description"/>
+                        </span>
+                    </h5>
+                </div>
+                <div id="descriptionToggle">
+                    ${task.description}
                 </div>
             </div>
             <%----------------ESTIMATES DIV -------------------------%>
@@ -724,24 +734,22 @@
                     </h5>
                 </div>
                 <div>
-                    <div style="display: table">
-                        <div style="display: table-cell; min-width: 100px">
-                            <s:message code="task.owner"/>
-                            :
+                    <div class="row">
+                        <div class="col-lg-5 col-md-12">
+                            <s:message code="task.owner"/>&nbsp;:
                         </div>
-                        <div style="display: table-cell">
+                        <div class="col-lg-7 col-md-12">
                             <img data-src="holder.js/30x30"
                                  class="avatar small"
                                  src="<c:url value="/../avatar/${task.owner.id}.png"/>"/>&nbsp;<a
                                 href="<c:url value="/user/${task.owner.username}"/>">${task.owner}</a>
                         </div>
                     </div>
-                    <div id="assign_button_div" style="display: table">
-                        <div style="display: table-cell; min-width: 100px">
-                            <s:message code="task.assignee"/>
-                            :
+                    <div class="row">
+                        <div class="col-lg-5 col-md-12">
+                            <s:message code="task.assignee"/>&nbsp;:
                         </div>
-                        <div style="display: table-cell;">
+                        <div class="col-lg-7 col-md-12">
                             <c:if test="${empty task.assignee}">
                                 <i>&nbsp;<s:message code="task.unassigned"/></i>
                             </c:if>
@@ -750,18 +758,22 @@
                                      src="<c:url value="/../avatar/${task.assignee.id}.png"/>"/>&nbsp;<a href="<c:url
                                     value="/user/${task.assignee.username}"/>">${task.assignee}</a>
                             </c:if>
-                            <c:if test="${project_participant}">
+                        </div>
+                    </div>
+                    <c:if test="${project_participant}">
+                        <div id="assign_button_div" class="row">
+                            <div class="col-md-12 text-center">
                                 <span class="btn btn-default btn-sm a-tooltip assignToTask"
                                       title="<s:message code="task.assign"/> (a)" data-toggle="modal"
                                       data-target="#assign_modal" data-taskID="${task.id}"
                                       data-assignee="${task.assignee}"
                                       data-assigneeID="${task.assignee.id}"
                                       data-projectID="${task.project.projectId}"> <i
-                                        class="fa fa-lg fa-user-plus"></i>
+                                        class="fa fa-lg fa-user-plus"></i> <s:message code="task.assign"/>
                                 </span>
-                            </c:if>
+                            </div>
                         </div>
-                    </div>
+                    </c:if>
                 </div>
             </div>
             <%----------------------DATES ----------------------------------------%>
@@ -772,22 +784,22 @@
                         <s:message code="task.dates"/>
                     </h5>
                 </div>
-                <table>
-                    <tr>
-                        <td><s:message code="task.created"/> :</td>
-                        <td class="paddingleft_20">${task.create_date}</td>
-                    </tr>
-                    <tr>
-                        <td><s:message code="task.lastUpdate"/> :</td>
-                        <td class="paddingleft_20">${task.lastUpdate}</td>
-                    </tr>
+                <div>
+                    <div class="row">
+                        <div class="col-sm-4"><s:message code="task.created"/>&nbsp;:</div>
+                        <div class="col-sm-8">${task.create_date}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4"><s:message code="task.lastUpdate"/>&nbsp;:</div>
+                        <div class="col-sm-8">${task.lastUpdate}</div>
+                    </div>
                     <c:if test="${not empty task.due_date}">
-                        <tr>
-                            <td><s:message code="task.due"/> :</td>
-                            <td class="paddingleft_20">${task.due_date}</td>
-                        </tr>
+                        <div class="row">
+                            <div class="col-sm-4"><s:message code="task.due"/>&nbsp;:</div>
+                            <div class="col-sm-8">${task.due_date}</div>
+                        </div>
                     </c:if>
-                </table>
+                </div>
             </div>
             <%----------------SPRITNS/RELEASES ----------------------%>
             <c:set var="hidden">none</c:set>

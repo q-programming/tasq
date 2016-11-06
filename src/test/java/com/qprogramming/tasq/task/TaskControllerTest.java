@@ -19,6 +19,7 @@ import com.qprogramming.tasq.task.link.TaskLinkService;
 import com.qprogramming.tasq.task.tag.TagsRepository;
 import com.qprogramming.tasq.task.watched.WatchedTaskService;
 import com.qprogramming.tasq.task.worklog.LogType;
+import com.qprogramming.tasq.task.worklog.TaskResolution;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 import com.qprogramming.tasq.test.MockSecurityContext;
 import com.qprogramming.tasq.test.TestUtils;
@@ -598,7 +599,7 @@ public class TaskControllerTest {
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(false);
         testAccount.setRole(Roles.ROLE_VIEWER);
-        ResponseEntity<ResultData> data = taskCtr.changeState(TEST_1, TaskState.COMPLETE, null, null, null);
+        ResponseEntity<ResultData> data = taskCtr.changeState(TEST_1, TaskState.COMPLETE, null, null, null,null);
         Assert.assertEquals(ResultData.ERROR, data.getBody().code);
         boolean catched = false;
         try {
@@ -618,7 +619,7 @@ public class TaskControllerTest {
         task.setComments(new HashSet<Comment>());
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(true);
-        ResponseEntity<ResultData> data = taskCtr.changeState(TEST_1, TaskState.TO_DO, true, null, "Done");
+        ResponseEntity<ResultData> data = taskCtr.changeState(TEST_1, TaskState.TO_DO, true, null, "Done",null);
         Assert.assertEquals(ResultData.WARNING, data.getBody().code);
     }
 
@@ -638,7 +639,7 @@ public class TaskControllerTest {
         when(accountServiceMock.findAll()).thenReturn(accounts);
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(true);
-        ResponseEntity<ResultData> data = taskCtr.changeState(TEST_1, TaskState.CLOSED, true, null, "Done");
+        ResponseEntity<ResultData> data = taskCtr.changeState(TEST_1, TaskState.CLOSED, true, null, "Done", TaskResolution.CANNOT_REPRODUCE);
         Assert.assertEquals(ResultData.WARNING, data.getBody().code);
     }
 
@@ -657,7 +658,7 @@ public class TaskControllerTest {
         when(taskRepoMock.findByParent(TEST_1)).thenReturn(subtasks);
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(true);
-        ResponseEntity<ResultData> result = taskCtr.changeState(TEST_1, TaskState.CLOSED, true, true, "Done");
+        ResponseEntity<ResultData> result = taskCtr.changeState(TEST_1, TaskState.CLOSED, true, true, "Done", TaskResolution.FINISHED);
         verify(wrkLogSrv, times(1)).addActivityLog(subtask, "", LogType.CLOSED);
         verify(taskRepoMock, times(1)).save(any(Task.class));
         Assert.assertEquals(ResultData.OK, result.getBody().code);

@@ -31,6 +31,7 @@ import com.qprogramming.tasq.task.tag.TagsRepository;
 import com.qprogramming.tasq.task.watched.WatchedTask;
 import com.qprogramming.tasq.task.watched.WatchedTaskService;
 import com.qprogramming.tasq.task.worklog.LogType;
+import com.qprogramming.tasq.task.worklog.TaskResolution;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 import org.apache.commons.io.FileUtils;
@@ -585,7 +586,8 @@ public class TaskController {
                                                   @RequestParam(value = "state") TaskState state,
                                                   @RequestParam(value = "zero_checkbox", required = false) Boolean remainingZero,
                                                   @RequestParam(value = "closesubtasks", required = false) Boolean closeSubtasks,
-                                                  @RequestParam(value = "message", required = false) String commentMessage) {
+                                                  @RequestParam(value = "message", required = false) String commentMessage,
+                                                  @RequestParam(value = "resolution", required = false) TaskResolution resolution) {
         // check if not admin or user
         Task task = taskSrv.findById(taskID);
         if (task != null) {
@@ -623,7 +625,13 @@ public class TaskController {
                     });
                     taskSrv.save(subtasks);
                 }
-
+                //Resolution
+                if (resolution != null) {
+                    task.setResolution(resolution);
+                }
+                if (task.getState().equals(TaskState.CLOSED)) {
+                    task.setResolution(null);
+                }
                 TaskState oldState = (TaskState) task.getState();
                 task.setState(state);
                 if (StringUtils.isNotEmpty(commentMessage)) {
