@@ -65,7 +65,7 @@
                 <table id="detailsToggle">
                     <tr>
                         <td style="width: 80px;">Status</td>
-                        <td class="left-margin">
+                        <td class="paddingleft_20">
                             <div class="dropdown pointer">
                                 <%
                                     pageContext.setAttribute("states", TaskState.values());
@@ -93,7 +93,7 @@
                     </tr>
                     <tr>
                         <td>Priority</td>
-                        <td class="left-margin">
+                        <td class="paddingleft_20">
                             <div class="dropdown pointer">
                                 <%
                                     pageContext.setAttribute("priorities",
@@ -123,7 +123,7 @@
                     <!-------------------------	TAGS ------------------->
                     <tr>
                         <td style="vertical-align: top;">Tags</td>
-                        <td class="left-margin">
+                        <td class="paddingleft_20">
                             <span class="tag label label-info theme"><span class="tagSearch"
                                                                            data-name="subtask"
                                                                            id="task-tag">subtask</span><span
@@ -132,14 +132,14 @@
                     </tr>
                     <tr>
                         <td style="vertical-align: top;">Description</td>
-                        <td class="left-margin">Description of sample task;
+                        <td class="paddingleft_20">Description of sample task;
                             <div>Additional information about task will be stored in here<span
                                     id="task-description"></span></div>
                         </td>
                     </tr>
                     <tr>
                         <td>Story points</td>
-                        <td class="left-margin"><span
+                        <td class="paddingleft_20"><span
                                 class="points badge theme left"><span id="point_value">3</span>
 									<input id="point-input" class="point-input">
 										<span id="point_approve"
@@ -447,7 +447,7 @@
                 </div>
             </div>
         </div>
-        <div class="left-margin" style="display: table-cell; width: 400px">
+        <div class="paddingleft_20" style="display: table-cell; width: 400px">
             <div id="task-people">
                 <div class="mod-header">
                     <h5 class="mod-header-title">
@@ -496,15 +496,15 @@
                 <table>
                     <tr>
                         <td>Created</td>
-                        <td class="left-margin">: 01-04-2015 00:23</td>
+                        <td class="paddingleft_20">: 01-04-2015 00:23</td>
                     </tr>
                     <tr>
                         <td>Updated</td>
-                        <td class="left-margin">: 01-04-2015 00:31</td>
+                        <td class="paddingleft_20">: 01-04-2015 00:31</td>
                     </tr>
                     <tr>
                         <td>Due</td>
-                        <td class="left-margin">: 29-04-2015</td>
+                        <td class="paddingleft_20">: 29-04-2015</td>
                     </tr>
                 </table>
             </div>

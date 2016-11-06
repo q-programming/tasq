@@ -1,11 +1,13 @@
 .white-frame {
     border: 1px solid lightgray;
-    margin-bottom: 10px;
-    /* 	border-radius: 5px; */
     padding: 10px;
     margin: 10px auto;
     background: white;
 }
+.white-frame.sidepadded{
+    padding: 10px 25px;
+}
+
 
 .hidden {
     visibility: hidden;
@@ -165,12 +167,15 @@ a.filter{
     display: inline;
     cursor: pointer;
 }
+.bold{
+    font-weight: bold;
+}
 
 table.togglerContent {
     width: 100%;
 }
 
-.left-margin {
+.paddingleft_20 {
     padding-left: 20px;
 }
 
@@ -190,6 +195,10 @@ table.togglerContent {
 .margintop_20{
     margin-top: 20px;
 }
+.marginLeft_20{
+    margin-left: 20px;
+}
+
 
 .table_state {
     margin: 10px;

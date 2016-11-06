@@ -153,9 +153,11 @@
 					var hours = Math.round(timeDiff % 8);
 					timeDiff = Math.floor(timeDiff / 8);
 					var days = timeDiff;
-					$("#activeTaskTimer").text(
-							days + "d " + hours + "h " + minutes + "m "
-									+ seconds + "s");
+					var currentTime = days + "d " + hours + "h " + minutes + "m "
+							+ seconds + "s";
+					$("#activeTaskTimer").text(currentTime);
+					$("#task_timer").html(currentTime);
+
 					if(days>0){
 						$("#activeTaskTimer").attr('days',days);
 					}

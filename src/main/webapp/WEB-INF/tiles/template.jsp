@@ -14,6 +14,7 @@
 <head>
 <title>${applicationName}</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="<c:url value="/resources/js/jquery-1.11.1.min.js" />"></script>
 <%-- jQuery UI --%>
 <script src="<c:url value="/resources/js/jquery-ui-1.10.4.custom.js" />"></script>
