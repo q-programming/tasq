@@ -763,7 +763,7 @@
                     <c:if test="${project_participant}">
                         <div id="assign_button_div" class="row">
                             <div class="col-md-12 text-center">
-                                <span class="btn btn-default btn-sm a-tooltip assignToTask"
+                                <span class="btn btn-default btn-sm a-tooltip assignToTask" style="width: 150px;margin-top: 5px;"
                                       title="<s:message code="task.assign"/> (a)" data-toggle="modal"
                                       data-target="#assign_modal" data-taskID="${task.id}"
                                       data-assignee="${task.assignee}"

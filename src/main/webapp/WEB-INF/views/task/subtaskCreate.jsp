@@ -200,7 +200,9 @@
             <li class=""><a href="#nameA">${taskName_text}</a></li>
             <li class=""><a href="#descA">${taskDesc_text}</a></li>
             <li class=""><a href="#otherA"><s:message code="main.other"/></a></li>
-            <li class=""><a href="#createA"><s:message code="main.create" text="Create"/></a></li>
+            <button id="createSubmit" class="btn btn-success">
+                <i class="fa fa-plus"></i>&nbsp;<s:message code="main.create" text="Create"/>
+            </button>
         </ul>
         <!-- 				</nav> -->
     </div>
@@ -221,6 +223,9 @@
                 '|', 'btnGrp-lists']
         });
 
+        $("#createSubmit").click(function () {
+            $("#taskForm").submit();
+        });
 
         $(".taskType").click(function () {
             var type = $(this).data('type');

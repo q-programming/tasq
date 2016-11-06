@@ -609,7 +609,7 @@ public class TaskController {
                     Hibernate.initialize(task.getLoggedWork());
                     if (!("0m").equals(task.getLoggedWork())) {
                         return ResponseEntity.ok(new ResultData(ResultData.ERROR,
-                                msg.getMessage("task.alreadyStarted", null, Utils.getCurrentLocale())));
+                                msg.getMessage("task.alreadyStarted", new Object[]{taskID}, Utils.getCurrentLocale())));
                     }
                 } else if (TaskState.CLOSED.equals(state)) {
                     ResultData result = checkTaskCanOperated(task, false);
