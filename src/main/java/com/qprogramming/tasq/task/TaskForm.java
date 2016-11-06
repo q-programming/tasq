@@ -5,6 +5,7 @@ package com.qprogramming.tasq.task;
 
 import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.support.Utils;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.validator.constraints.NotBlank;
 import org.joda.time.Period;
 import org.slf4j.Logger;
@@ -78,7 +79,7 @@ public class TaskForm {
     public Task createTask() {
         Task task = new Task();
         task = createBaseTask(task);
-        if (getStory_points() != null && !"".equals(getStory_points())) {
+        if (StringUtils.isNotBlank(getStory_points())) {
             task.setStory_points(Integer.parseInt(getStory_points()));
         } else {
             task.setStory_points(0);

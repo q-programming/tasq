@@ -455,12 +455,11 @@ public class ImportExportController {
         }
         if (!isEstimateCellValid(row)) {
             logger.append(logHeader);
-            logger.append("Estimate has to be blank or in correct *w *d *h *m format in cell");
+            logger.append("Estimate has to be blank or in correct *w *d *h *m format in cell ");
             logger.append(COLS.charAt(ESTIMATE_CELL));
             logger.append(row.getRowNum() + 1);
             logger.append(BR);
         }
-
         if (!isDATECellValid(row, DUE_DATE_CELL)) {
             logger.append(logHeader);
             logger.append("Due date must be blank or date formated in cell ");
@@ -514,6 +513,11 @@ public class ImportExportController {
         if (taskXML.getStory_points() != null && !isNumerical(taskXML.getStory_points())) {
             logger.append(logHeader);
             logger.append("Story points must be empty or a number");
+            logger.append(BR);
+        }
+        if(!Utils.correctEstimate(taskXML.getEstimate())){
+            logger.append(logHeader);
+            logger.append("Estimate has to be blank or in correct *w *d *h *m format");
             logger.append(BR);
         }
         if (logger.length() > 0) {
