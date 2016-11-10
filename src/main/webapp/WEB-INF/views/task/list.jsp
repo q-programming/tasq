@@ -25,160 +25,172 @@
     <c:set var="active_project" value="${param.projectID}"/>
 </c:if>
 <div class="padding-top5">
-    <div style="display: table-cell;">
-        <h4>${tasks_text}</h4>
+    <div class="row margintop_10">
+        <%--PROJECT--%>
+        <div class="col-sm-12 col-md-4 margintop_10 form-inline">
+            <div class="form-group">
+                <span>${tasks_text}</span>&nbsp;
+                <select id="project" name="project" class="form-control">
+                    <c:forEach items="${projects}" var="project">
+                        <option
+                                <c:if test="${active_project eq project.projectId}">
+                                    selected
+                                </c:if>
+                                value="${project.projectId}">${project}</option>
+                    </c:forEach>
+                </select>
+            </div>
+        </div>
+        <%--END PROJECT--%>
+        <%-- EXPORT --%>
+        <div class="hidden-xs hidden-sm col-md-offset-5 col-md-3 margintop_10">
+            <div id="buttDiv" class="pull-right">
+                <a class="btn btn-default export_startstop" style="width: 200px;">
+                    <i class="fa fa-upload"></i>
+                    <s:message code="task.export"/>
+                </a>
+            </div>
+            <div id="fileDiv" style="display:none" class="pull-right">
+                <div class="row">
+                    <div class="col-md-3">
+                        <a class="btn export_startstop"><s:message code="main.cancel"/></a>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="btn-group">
+                            <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                <i class="fa fa-long-arrow-down"></i><i class="fa fa-file"></i> <s:message
+                                    code="task.export.selected"/>&nbsp;
+                                <b class="caret"></b>
+                            </a>
+                            <ul class="dropdown-menu " role="menu">
+                                <li>
+                                    <a href="#" class="fileExport" data-type="xls"><i
+                                            class="fa fa-file-excel-o"></i> <s:message
+                                            code="task.export.type.excel"/>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="fileExport" data-type="xml"><i
+                                            class="fa fa-file-code-o"></i> <s:message code="task.export.type.xml"/>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <%--END EXPORT--%>
     </div>
-    <div style="display: table-cell; padding-left: 20px">
-        <select id="project" name="project" style="width: 300px;"
-                class="form-control">
-            <c:forEach items="${projects}" var="project">
-                <option
-                        <c:if test="${active_project eq project.projectId}">
-                            selected
-                        </c:if>
-                        value="${project.projectId}">${project}</option>
-            </c:forEach>
-        </select>
-    </div>
-    <%--------------FILTERS ----------------------------%>
-    <div style="display: table-cell; padding-left: 20px; width: 100%;line-height: 30px;">
-        <c:if test="${not empty param.projectID
+    <div class="row">
+        <%--------------FILTERS ----------------------------%>
+        <div style="line-height: 30px;" class="col-sm-12 col-md-10 margintop_10">
+            <c:if test="${not empty param.projectID
             || not empty param.state
             || not empty param.query
             || not empty param.priority
             || not empty param.type
             || not empty param.assignee}">
-            <c:if test="${not empty param.projectID}">
-                <c:set var="projID_url">
-                    projectID=${param.projectID}&
-                </c:set>
-            </c:if>
-            <c:if test="${not empty param.type}">
-                <c:set var="type_url">
-                    type=${param.type}&
-                </c:set>
-            </c:if>
-            <c:if test="${not empty param.state}">
-                <c:set var="state_url">
-                    state=${param.state}&
-                </c:set>
-            </c:if>
-            <c:if test="${not empty param.query}">
-                <c:set var="query_url">
-                    query=${param.query}&
-                </c:set>
-            </c:if>
-            <c:if test="${not empty param.priority}">
-                <c:set var="priority_url">
-                    priority=${param.priority}&
-                </c:set>
-            </c:if>
-            <c:if test="${not empty param.assignee}">
-                <c:set var="assignee_url">
-                    assignee=${param.assignee}&
-                </c:set>
-            </c:if>
-            <c:if test="${not empty param.projectID}">
-				<span class="filter"><s:message code="project.project"/>: <span
+                <c:if test="${not empty param.projectID}">
+                    <c:set var="projID_url">
+                        projectID=${param.projectID}&
+                    </c:set>
+                </c:if>
+                <c:if test="${not empty param.type}">
+                    <c:set var="type_url">
+                        type=${param.type}&
+                    </c:set>
+                </c:if>
+                <c:if test="${not empty param.state}">
+                    <c:set var="state_url">
+                        state=${param.state}&
+                    </c:set>
+                </c:if>
+                <c:if test="${not empty param.query}">
+                    <c:set var="query_url">
+                        query=${param.query}&
+                    </c:set>
+                </c:if>
+                <c:if test="${not empty param.priority}">
+                    <c:set var="priority_url">
+                        priority=${param.priority}&
+                    </c:set>
+                </c:if>
+                <c:if test="${not empty param.assignee}">
+                    <c:set var="assignee_url">
+                        assignee=${param.assignee}&
+                    </c:set>
+                </c:if>
+                <c:if test="${not empty param.projectID}">
+                <span class="filter"><s:message code="project.project"/>: <span
                         class="filter_span"> ${param.projectID}<a
                         href="<c:url value="/tasks?${state_url}${query_url}${priority_url}${assignee_url}${type_url}"/>">
-						<i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
-						</a></span></span>
-            </c:if>
-            <c:if test="${not empty param.type}">
-				<span class="filter"><s:message code="task.type"/>: <span
-                        class="filter_span">  <t:type type="${param.type}" list="true" show_text="true"/>
-						<a
-                                href="<c:url value="/tasks?${projID_url}${query_url}${priority_url}${state_url}${assignee_url}"/>">
-						<i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
-						</a></span></span>
-            </c:if>
-            <c:if test="${not empty param.priority}">
-				<span class="filter"><s:message code="task.priority"/>: <span
-                        class="filter_span"><t:priority priority="${param.priority}"/>
-						<a
-                                href="<c:url value="/tasks?${projID_url}${query_url}${state_url}${assignee_url}${type_url}"/>">
-						<i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
-						</a></span></span>
-            </c:if>
-            <c:if test="${not empty param.state}">
-				<span class="filter"><s:message code="task.state"/>: <span
-                        class="filter_span"><t:state state="${param.state}"/> <a
-                        href="<c:url value="/tasks?${projID_url}${query_url}${priority_url}${assignee_url}${type_url}"/>">
-						<i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i></a>
-						</span></span>
-            </c:if>
-            <c:if test="${not empty assignee}">
-				<span class="filter"><s:message code="task.assignee"/>: <span
-                        class="filter_span">
+                        <i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
+                        </a></span></span>
+                </c:if>
+                <c:if test="${not empty param.type}">
+                <span class="filter"><s:message code="task.type"/>:&nbsp;
+                    <span
+                            class="filter_span">  <t:type type="${param.type}" list="true" show_text="true"/>
+                        <a href="<c:url value="/tasks?${projID_url}${query_url}${priority_url}${state_url}${assignee_url}"/>">
+                        <i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
+                        </a>
+                    </span>
+                </span>
+                </c:if>
+                <c:if test="${not empty param.priority}">
+                <span class="filter"><s:message code="task.priority"/>:&nbsp;
+                    <span class="filter_span"><t:priority priority="${param.priority}"/>
+                        <a href="<c:url value="/tasks?${projID_url}${query_url}${state_url}${assignee_url}${type_url}"/>">
+                        <i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
+                        </a></span></span>
+                </c:if>
+                <c:if test="${not empty param.state}">
+                    <span class="filter"><s:message code="task.state"/>: <span
+                            class="filter_span"><t:state state="${param.state}"/> <a
+                            href="<c:url value="/tasks?${projID_url}${query_url}${priority_url}${assignee_url}${type_url}"/>">
+                        <i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i></a>
+                        </span></span>
+                </c:if>
+                <c:if test="${not empty assignee}">
+                    <span class="filter"><s:message code="task.assignee"/>: <span
+                            class="filter_span">
                             <c:if test="${user eq assignee}"><s:message code="task.assignee.me"/></c:if>
                             <c:if test="${user ne assignee}">${assignee}</c:if>
-						<a href="<c:url value="/tasks?${projID_url}${query_url}${priority_url}${state_url}${type_url}"/>">
-						<i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
-						</a></span></span>
-            </c:if>
-            <c:if test="${not empty param.query}">
-                <c:set var="query_url">
-                    query=${param.query}&
-                </c:set>
-                <c:if test="${fn:length(param.query) > 40}">
-                    <c:set var="searchQueryTag">${fn:substring(param.query, 0, 40)}...</c:set>
+                        <a href="<c:url value="/tasks?${projID_url}${query_url}${priority_url}${state_url}${type_url}"/>">
+                        <i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
+                    </a></span></span>
                 </c:if>
-                <c:if test="${fn:length(param.query) < 40}">
-                    <c:set var="searchQueryTag">${param.query}</c:set>
-                </c:if>
-				
-				<span style="white-space:nowrap;"><s:message code="main.search"/>: <span
-                        class="filter_span"> ${searchQueryTag}<a
+                <c:if test="${not empty param.query}">
+                    <c:set var="query_url">
+                        query=${param.query}&
+                    </c:set>
+                    <c:if test="${fn:length(param.query) > 40}">
+                        <c:set var="searchQueryTag">${fn:substring(param.query, 0, 40)}...</c:set>
+                    </c:if>
+                    <c:if test="${fn:length(param.query) < 40}">
+                        <c:set var="searchQueryTag">${param.query}</c:set>
+                    </c:if>
+                    &nbsp;<span style="white-space:nowrap;"><s:message code="main.search"/>:&nbsp;<span
+                    class="filter_span"> ${searchQueryTag}<a
                         href="<c:url value="/tasks?${projID_url}${state_url}${priority_url}"/>">
-						<i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
-						</a></span></span>
+                        <i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i>
+                        </a></span></span>
+                </c:if>
             </c:if>
-        </c:if>
-    </div>
-    <%-- EXPORT --%>
-    <div style="display: table-cell; padding-left: 20px;">
-        <div style="display:table-row">
-            <div id="buttDiv" style="display: table-cell;">
-                <a class="btn btn-default export_startstop" style="width: 120px;">
-                    <i class="fa fa-upload"></i>
-                    <s:message code="task.export"/>
-                </a>
-            </div>
-            <div id="fileDiv" style="display:none">
-                <div style="display: table-cell">
-                    <a class="btn export_startstop"><s:message code="main.cancel"/></a>
-                </div>
-                <div style="display: table-cell">
-                    <div class="btn-group">
-                        <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                            <i class="fa fa-long-arrow-down"></i><i class="fa fa-file"></i> <s:message
-                                code="task.export.selected"/>&nbsp;
-                            <b class="caret"></b>
-                        </a>
-                        <ul class="dropdown-menu " role="menu">
-                            <li>
-                                <a href="#" class="fileExport" data-type="xls"><i
-                                        class="fa fa-file-excel-o"></i> <s:message code="task.export.type.excel"/>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" class="fileExport" data-type="xml"><i
-                                        class="fa fa-file-code-o"></i> <s:message code="task.export.type.xml"/>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+        </div>
+        <%--END FILTERS--%>
+        <%--SUBTASK--%>
+        <div class="col-md-2 margintop_10" style="white-space: nowrap;">
+            <div class="pull-right">
+                <s:message code="tasks.subtasks"/>&nbsp;
+                <i id="opensubtask" class="fa fa-plus-square clickable a-tooltip"
+                   title="<s:message code="task.subtask.showall"/>"></i>
+                <i id="hidesubtask" class="fa fa-minus-square clickable a-tooltip"
+                   title="<s:message code="task.subtask.hideall"/>"></i>
             </div>
         </div>
-        <div style="margin-top:10px">
-            <s:message code="tasks.subtasks"/>&nbsp;
-            <i id="opensubtask" class="fa fa-plus-square clickable a-tooltip"
-               title="<s:message code="task.subtask.showall"/>"></i>
-            <i id="hidesubtask" class="fa fa-minus-square clickable a-tooltip"
-               title="<s:message code="task.subtask.hideall"/>"></i>
-        </div>
+        <%--END SUBTASK--%>
     </div>
 </div>
 <%--------TASK LIST ----------%>
@@ -194,7 +206,7 @@
                 <span class="dropdown a-tooltip clickable" title="<s:message code="task.type" />">
                     <a class="filter dropdown-toggle theme" type="button" id="dropdownMenuType"
                        data-toggle="dropdown">
-                        <s:message code="task.type"/> <span class="caret theme"></span></a>
+                        <s:message code="task.type"/> <span class="caret theme hidden-xs hidden-sm"></span></a>
                         <ul class="dropdown-menu">
                             <%
                                 pageContext.setAttribute("types", TaskType.getTypes(false));
@@ -224,12 +236,12 @@
 						</ul>
 				</span></th>
             <th style="width: 500px"><s:message code="task.name"/></th>
-            <th><s:message code="task.progress"/></th>
+            <th class="hidden-xs hidden-sm"><s:message code="task.progress"/></th>
             <th>
                 <div class="dropdown" style="padding-top: 5px; cursor: pointer;">
                     <a class="filter dropdown-toggle theme" type="button" id="dropdownMenu1"
                        data-toggle="dropdown"><s:message code="task.state"/><span
-                            class="caret theme"></span></a>
+                            class="caret theme hidden-xs hidden-sm"></span></a>
                     <%
                         pageContext.setAttribute("states", TaskState.values());
                     %>
@@ -252,7 +264,7 @@
                 <div class="dropdown" style="padding-top: 5px; cursor: pointer;">
                     <a class="filter dropdown-toggle theme" type="button" id="dropdownMenuAssignee"
                        data-toggle="dropdown"><s:message code="task.assignee"/><span
-                            class="caret theme"></span></a>
+                            class="caret theme hidden-xs hidden-sm"></span></a>
                     <ul class="dropdown-menu" style="padding: 5px;width: 200px;z-index: 1;">
                         <li>
                             <input type="text" class="form-control input-sm"
@@ -310,7 +322,7 @@
                 <%-- 				<td>${task.loggedWork}</td> --%>
                 <%-- 			</c:if> --%>
                 <%-- 			<c:if test="${task.estimated}"> --%>
-                <td>
+                <td class="hidden-xs hidden-sm">
                     <div class="progress" style="width: 100px;">
                         <c:set var="logged_class"></c:set>
                         <c:set var="percentage">${100-task.percentage_left}</c:set>
@@ -404,8 +416,8 @@
                 var type = $(this).data('type');
                 $("#exportType").val(type);
                 var params = "?type=" + type
-                $(".export:checked").each(function(){
-                    params+="&tasks="+this.value;
+                $(".export:checked").each(function () {
+                    params += "&tasks=" + this.value;
                 })
                 var url = '<c:url value="/task/export"/>' + params;
                 window.open(url);

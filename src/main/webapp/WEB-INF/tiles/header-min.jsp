@@ -18,7 +18,7 @@
                style="padding-top: 0px; padding-bottom: 4px;"><img
                     src="<c:url value="/../avatar/logo.png"/>"
                     style="height: 50px; margin-top: 2px;"></a> <span
-                class="theme-text" style="font-size: xx-large">${applicationName}</span>
+                class="theme-text pull-left" style="font-size: xx-large">${applicationName}</span>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right hidden-xs">
@@ -110,6 +110,17 @@
                 <li><a href="<c:url value="/boards"/>" class="theme"><i
                         class="fa fa-lg fa-desktop"></i>&nbsp;<s:message
                         code="agile.agile" text="Agile"/></a></li>
+                <li>
+                    <form class="navbar-form navbar-right custom-search"
+                          action="<s:url value="/tasks"></s:url>">
+                        <div class="form-group has-feedback">
+                            <input type="text" name="query"
+                                   class="form-control nav-search small search-query input-sm"
+                                   placeholder="<s:message code="task.search"/>"/> <span
+                                class="fa fa-2x fa-search theme-text form-control-feedback"></span>
+                        </div>
+                    </form>
+                </li>
                 <li role="presentation" class="divider"></li>
                 <li><a href='<c:url value="/settings"/>' class="theme"><i
                         class="fa fa-cog"></i> <s:message code="menu.settings"

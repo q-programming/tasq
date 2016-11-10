@@ -251,7 +251,7 @@
                     <div id="linkDiv" style="display: none" class="form-group">
                         <form id="linkTask" name="mainForm" method="get"
                               action="#">
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-3">
                                 <select id="link" name="link" class="form-control input-sm">
                                     <option value="RELATES_TO">relates to</option>
                                     <option value="BLOCKS">blocks</option>
@@ -268,7 +268,7 @@
                                     Loading...<br>
                                 </div>
                             </div>
-                            <div class="form-group col-md-4" style="padding-left: 10px">
+                            <div class="form-group col-md-3" style="padding-left: 10px">
                                 <button type="submit" class="btn btn-default a-tooltip btn-sm"
                                         title="" data-placement="top"
                                         data-original-title="Link task TST-1 with selected">

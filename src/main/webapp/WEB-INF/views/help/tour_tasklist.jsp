@@ -10,35 +10,27 @@
 <link href="<c:url value="/resources/css/hopscotch.css" />" rel="stylesheet"
       media="screen"/>
 <div class="padding-top5">
-    <div style="display: table-cell;">
-        <h4>Tasks</h4>
-    </div>
-    <div style="display: table-cell; padding-left: 20px">
-        <select id="tasklist-project" name="project" style="width: 300px;" class="form-control">
-            <option value="TST">[TST] Testing Project</option>
-            <option value="TSTII">[TSTII] Test 2</option>
-            <option value="TSTI">[TSTI] Test</option>
-            <option value="DEMO">[DEMO] Demo project :)</option>
-        </select>
-    </div>
-    <div style="display: table-cell; padding-left: 20px; width: 100%;line-height: 30px;">
-        <span id="tasklist-filters" class="filter">Status:
-            <span class="filter_span">
-                <span class="state_span a-tooltip" data-original-title="" title="">
-                    <i class="fa fa-lg fa-list"></i>&nbsp;All tasks
-                </span>
-                <a href="#"><i class="fa fa-times"
-                               style="font-size: smaller; margin-left: 3px; color: lightgray"></i></a>
-            </span>
-        </span>
-        <a href="<c:url value="/tour"/>" id="go-back" class="btn btn-default btn-success"
-           style="margin-left:20px; display:none">
-            Click here to go back to tours page
-        </a>
-    </div>
-    <div style="display: table-cell; padding-left: 20px;">
-        <div style="display:table-row">
-            <div id="buttDiv" style="display: table-cell;">
+    <div class="row margintop_10">
+        <div class="col-sm-12 col-md-4 margintop_10 form-inline">
+            <div class="form-group">
+                <span>Tasks</span>
+                <select id="tasklist-project" name="project" class="form-control">
+                    <option value="TST">[TST] Testing Project</option>
+                    <option value="TSTII">[TSTII] Test 2</option>
+                    <option value="TSTI">[TSTI] Test</option>
+                    <option value="DEMO">[DEMO] Demo project :)</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <span id="more-tours"></span>
+            <a href="<c:url value="/tour"/>" id="go-back" class="btn btn-default btn-success"
+               style="margin-left:20px; display:none">
+                Click here to go back to tours page
+            </a>
+        </div>
+        <div class="hidden-xs hidden-sm col-md-3 margintop_10">
+            <div id="buttDiv" class="pull-right">
                 <a id="tasklist-export" class="btn btn-default export_startstop" style="width: 120px;">
                     <i class="fa fa-upload"></i>
                     Export</a>
@@ -67,12 +59,27 @@
                 </div>
             </div>
         </div>
-        <div id="tasklist-subtasks" style="margin-top:10px">
-            Subtasks&nbsp;
-            <i id="opensubtask" class="fa fa-plus-square clickable a-tooltip" title=""
-               data-original-title="Show all subtasks"></i>
-            <i id="hidesubtask" class="fa fa-minus-square clickable a-tooltip" title=""
-               data-original-title="Hide all subtasks"></i>
+    </div>
+    <div class="row">
+        <div style="line-height: 30px;" class="col-sm-12 col-md-10 margintop_10">
+        <span id="tasklist-filters" class="filter">Status:
+            <span class="filter_span">
+                <span class="state_span a-tooltip" data-original-title="" title="">
+                    <i class="fa fa-lg fa-list"></i>&nbsp;All tasks
+                </span>
+                <a href="#"><i class="fa fa-times"
+                               style="font-size: smaller; margin-left: 3px; color: lightgray"></i></a>
+            </span>
+        </span>
+        </div>
+        <div class="col-md-2 margintop_10" style="white-space: nowrap;">
+            <div id="tasklist-subtasks" class="pull-right">
+                Subtasks&nbsp;
+                <i id="opensubtask" class="fa fa-plus-square clickable a-tooltip" title=""
+                   data-original-title="Show all subtasks"></i>
+                <i id="hidesubtask" class="fa fa-minus-square clickable a-tooltip" title=""
+                   data-original-title="Hide all subtasks"></i>
+            </div>
         </div>
     </div>
 </div>
@@ -87,7 +94,7 @@
             <th style="width: 60px;text-align: center;">
                 <span id="tasklist-type" class="dropdown a-tooltip clickable" title="" data-original-title="Type">
                     <a class="filter dropdown-toggle theme" type="button" id="dropdownMenuType" data-toggle="dropdown">
-                        Type <span class="caret theme"></span></a>
+                        Type <span class="caret theme hidden-xs hidden-sm"></span></a>
                         <ul id="dropdown-types" class="dropdown-menu">
                             <%
                                 pageContext.setAttribute("types", TaskType.getTypes(false));
@@ -118,11 +125,13 @@
                 </span>
             </th>
             <th style="width: 500px">Summary</th>
-            <th>Progress</th>
+            <th id="tasklist-progress" style="width: 1px"></th>
+            <th class="hidden-xs hidden-sm">Progress</th>
+
             <th>
                 <div id="tasklist-state" class="dropdown" style="padding-top: 5px; cursor: pointer;">
                     <a class="filter dropdown-toggle theme" type="button" id="dropdownMenu1" data-toggle="dropdown">Status<span
-                            class="caret theme"></span></a>
+                            class="caret theme hidden-xs hidden-sm"></span></a>
                     <%
                         pageContext.setAttribute("states", TaskState.values());
                     %>
@@ -139,7 +148,7 @@
             <th style="width: 200px">
                 <div id="tasklist-assignee" class="dropdown" style="padding-top: 5px; cursor: pointer;">
                     <a class="filter dropdown-toggle theme" type="button" id="dropdownMenuAssignee"
-                       data-toggle="dropdown">Assignee<span class="caret theme"></span></a>
+                       data-toggle="dropdown">Assignee<span class="caret theme hidden-xs hidden-sm"></span></a>
                     <ul id="dropdown-assignee" class="dropdown-menu" style="padding: 5px;width: 200px;z-index: 1;">
                         <li>
                             <span role="status" aria-live="polite" class="ui-helper-hidden-accessible"></span><input
@@ -175,8 +184,9 @@
                                ">[TST-2]
                     Sample bug</a>
             </td>
-            <td>
-                <div class="progress" style="width: 100px;" id="tasklist-progress">
+            <td></td>
+            <td class="hidden-xs hidden-sm">
+                <div class="progress" style="width: 100px;" >
                     <div class="progress-bar progress-bar-success a-tooltip" role="progressbar" aria-valuenow="100"
                          aria-valuemin="0" aria-valuemax="100" style="width:100%;" title=""
                          data-original-title="100%"></div>
@@ -217,7 +227,8 @@
                         Completed one</a></div>
                 </div>
             </td>
-            <td>
+            <td></td>
+            <td class="hidden-xs hidden-sm">
                 <div class="progress" style="width: 100px;">
                     <div class="progress-bar  a-tooltip" role="progressbar" aria-valuenow="43.0" aria-valuemin="0"
                          aria-valuemax="100" style="width:43.0%;" title="" data-original-title="43.0%"></div>
@@ -250,11 +261,10 @@
                 title: "Filters",
                 content: 'All active filters will be shown here. Either if searched by term, status or assignee.<br>To widen search/display click <i class="fa fa-times" style="font-size: smaller; margin-left: 3px; color: lightgray"></i> icon on filter tab',
                 target: "tasklist-filters",
-                placement: "right",
+                placement: "bottom",
                 onNext: function () {
                     $("#dropdown-types").addClass("tour-dropdown");
-                },
-                yOffset: -25
+                }
             },
 //                SIDE MENU
             {
@@ -284,17 +294,21 @@
                     $("#dropdown-priority").removeClass("tour-dropdown");
                 },
                 width: 300,
-                xOffset: -26
+                xOffset: -30
             },
             {
                 title: "Progress",
                 content: 'Tasks progress bars.<br><span style="color: #337ab7"><strong>Blue</strong></span> bar means task is in progress and <span style="color: #5cb85c"><strong>Green</strong></span> task is closed. If bar is in <span style="color: #d9534f"><strong>red</strong></span>, that means that more time that it was originally estimated, was already spent',
                 target: "tasklist-progress",
-                placement: "left",
+                placement: "top",
                 onNext: function () {
                     $("#dropdown-status").addClass("tour-dropdown");
                 },
-                yOffset: -25,
+                onPrev: function () {
+                    $("#dropdown-priority").addClass("tour-dropdown");
+                },
+
+                yOffset:30,
                 width: 300
             },
 
@@ -350,10 +364,9 @@
             {
                 title: "Done",
                 content: 'Go back to tour page, or start using ${applicationName}',
-                target: "tasklist-filters",
+                target: "more-tours",
                 placement: "bottom",
-                yOffset: 10,
-                xOffset: 40,
+                yOffset: 40,
                 width: 400,
                 onPrev: function () {
                     $('#go-back').hide();

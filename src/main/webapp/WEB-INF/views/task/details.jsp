@@ -369,8 +369,7 @@
                 <c:if test="${task.estimate eq '0m' && task.remaining ne '0m'}">
                     <c:set var="remaining_bar">    ${100-task.percentage_logged}</c:set>
                 </c:if>
-                <table id="estimatesToggle" style="width: 450px;
-                <c:if test="${task.remaining eq '0m' && task.loggedWork eq '0m' && task.estimate eq '0m'}"> display: none;</c:if> ">
+                <table id="estimatesToggle" style="<c:if test="${task.remaining eq '0m' && task.loggedWork eq '0m' && task.estimate eq '0m'}"> display: none;</c:if>">
                     <tr>
                         <c:if test="${not empty taskEstimate}">
                             <td style="width:15px;"></td>
@@ -502,7 +501,7 @@
                         <div id="linkDiv" style="display: none" class="form-group">
                             <form id="linkTask" name="mainForm" method="post"
                                   action="<c:url value="/task/link"/>">
-                                <div class="form-group col-md-4">
+                                <div class="form-group col-md-3">
                                     <select id="link" name="link" class="form-control input-sm">
                                         <%
                                             pageContext.setAttribute("linkTypes", TaskLinkType.values());
@@ -524,7 +523,7 @@
                                 </div>
                                 <input type="hidden" name="taskA" value="${task.id}"> <input
                                     type="hidden" id="taskB" name="taskB">
-                                <div class="form-group col-md-4" style="padding-left: 10px">
+                                <div class="form-group col-md-3" style="padding-left: 10px">
                                     <button type="submit" class="btn btn-default a-tooltip btn-sm"
                                             title="" data-placement="top"
                                             data-original-title="<s:message code="task.link.help" arguments="${task.id}"/>">
