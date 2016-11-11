@@ -243,7 +243,7 @@ public class SignupControllerTest {
 
     private SignupForm fillForm() {
         SignupForm form = signupCtr.signup();
-        form.setName(ADAM);
+        form.setFirstname(ADAM);
         form.setSurname(DOE);
         form.setEmail(NEW_EMAIL);
         form.setPassword(PASSWORD);

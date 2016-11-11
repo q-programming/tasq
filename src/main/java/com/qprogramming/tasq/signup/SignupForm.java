@@ -20,7 +20,7 @@ public class SignupForm {
 	private String username;
 
 	@NotBlank(message = SignupForm.NOT_BLANK_MESSAGE)
-	private String name;
+	private String firstname;
 
 	@NotBlank(message = SignupForm.NOT_BLANK_MESSAGE)
 	private String surname;
@@ -55,16 +55,16 @@ public class SignupForm {
 		this.password = password;
 	}
 
-	public String getName() {
-		return name;
+	public String getFirstname() {
+		return firstname;
 	}
 
 	public String getSurname() {
 		return surname;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setFirstname(String firstname) {
+		this.firstname = firstname;
 	}
 
 	public void setSurname(String surname) {
@@ -73,7 +73,7 @@ public class SignupForm {
 
 	public Account createAccount() {
 		Account account = new Account(getEmail(), getPassword(), getUsername(), Roles.ROLE_VIEWER);
-		account.setName(getName());
+		account.setName(getFirstname());
 		account.setSurname(getSurname());
 		account.setLanguage(Utils.getDefaultLocale().getLanguage());
 		return account;
