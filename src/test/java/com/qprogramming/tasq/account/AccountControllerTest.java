@@ -161,7 +161,8 @@ public class AccountControllerTest {
             mockMultipartFile = new MockMultipartFile("content", fileURL.getFile(), "text/plain",
                     getClass().getResourceAsStream("/com/qprogramming/tasq/avatar.png"));
             when(themeSrvMock.findById(1L)).thenReturn(new Theme());
-            accountCtr.saveSettings(mockMultipartFile, EMAIL, "true", "true", "true", "en", 1L, raMock, requestMock, responseMock);
+            when(accSrvMock.verifyPassword(any(Account.class), anyString())).thenReturn(true);
+            accountCtr.saveSettings(mockMultipartFile, EMAIL, testAccount.getName(), testAccount.getSurname(), "true", "true", "true", "en", 1L, "", raMock, requestMock, responseMock);
             verify(accSrvMock, times(1)).update(any(Account.class));
             verify(localeResolverMock, times(1)).setLocale(requestMock, responseMock, new Locale("en"));
         } catch (IOException e) {
@@ -179,7 +180,8 @@ public class AccountControllerTest {
             mockMultipartFile = new MockMultipartFile("content", fileURL.getFile(), "text/plain",
                     getClass().getResourceAsStream("/com/qprogramming/tasq/avatar_tooBig.png"));
             when(themeSrvMock.findById(1L)).thenReturn(new Theme());
-            accountCtr.saveSettings(mockMultipartFile, EMAIL, "true", "true", "true", "en", 1L, raMock, requestMock, responseMock);
+            when(accSrvMock.verifyPassword(any(Account.class), anyString())).thenReturn(true);
+            accountCtr.saveSettings(mockMultipartFile, EMAIL, testAccount.getName(), testAccount.getSurname(), "true", "true", "true", "en", 1L, "", raMock, requestMock, responseMock);
             verify(raMock, times(1)).addFlashAttribute(anyString(),
                     new Message(anyString(), Message.Type.DANGER, new Object[]{}));
         } catch (IOException e) {

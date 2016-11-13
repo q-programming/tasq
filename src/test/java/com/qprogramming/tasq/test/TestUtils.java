@@ -58,15 +58,15 @@ public class TestUtils {
 
     public static Account createAccount() {
         Account testAccount = new Account(EMAIL, "", "user", Roles.ROLE_ADMIN);
-        testAccount.setLanguage("en");
-        testAccount.setId(1L);
-        return testAccount;
+        return createAccount("user", "surname");
     }
 
     public static Account createAccount(String name, String surname) {
         Account account = new Account(name + "@test.com", "", name, Roles.ROLE_POWERUSER);
         account.setName(name);
         account.setSurname(surname);
+        account.setLanguage("en");
+        account.setId(1L);
         return account;
     }
 

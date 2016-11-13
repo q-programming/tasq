@@ -56,7 +56,8 @@ public class SignupController {
     }
 
     @RequestMapping(value = "signup")
-    public SignupForm signup() {
+    public SignupForm signup(HttpServletRequest request) {
+        Utils.forceLogout(request);
         return new SignupForm();
     }
 
@@ -118,10 +119,7 @@ public class SignupController {
             account.setConfirmed(true);
             accountSrv.update(account);
             MessageHelper.addSuccessAttribute(ra, msg.getMessage("signup.confirmed", null, Utils.getDefaultLocale()));
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (!(authentication instanceof AnonymousAuthenticationToken)) {
-                request.logout();
-            }
+            Utils.forceLogout(request);
         } else {
             MessageHelper.addErrorAttribute(ra, "Verification error!");
         }
@@ -137,9 +135,11 @@ public class SignupController {
 
     @Transactional
     @RequestMapping(value = "/password", method = RequestMethod.POST)
-    public String resetSubmit(PasswordResetForm form, Errors errors, RedirectAttributes ra) {
+    public String resetSubmit(@Valid @ModelAttribute PasswordResetForm form, Errors errors, RedirectAttributes ra, HttpServletRequest request) {
         if (!form.isPasswordConfirmed()) {
             errors.rejectValue("password", "error.notMatchedPasswords");
+        }
+        if (errors.hasErrors()) {
             return null;
         }
         Account account = accountSrv.findByUuid(form.getId());
@@ -160,6 +160,8 @@ public class SignupController {
             MessageHelper.addErrorAttribute(ra,
                     msg.getMessage("signin.password.token.invalid", null, Utils.getDefaultLocale()));
         }
+        //if logged in user was chaning password, logout him
+        Utils.forceLogout(request);
         return "redirect:/";
     }
 
@@ -178,15 +180,34 @@ public class SignupController {
                     msg.getMessage("signin.password.notfound", new Object[]{email}, Utils.getDefaultLocale()));
             return "redirect:" + request.getHeader("Referer");
         } else {
-            accountSrv.save(account, false);
-            Utils.setHttpRequest(request);
-            if (!accountSrv.sendResetLink(account)) {
-                throw new TasqException(msg.getMessage("error.email.sending", null, Utils.getCurrentLocale()));
-            }
-            MessageHelper.addSuccessAttribute(ra,
-                    msg.getMessage("singin.password.token.sent", new Object[]{email}, Utils.getDefaultLocale()));
+            resetAccountPassword(account, ra, request);
         }
         return "redirect:/";
+    }
+
+    /**
+     * Sends reset link for currently logged in user
+     *
+     * @param ra
+     * @param request
+     * @return
+     */
+    @Transactional(rollbackFor = TasqException.class)
+    @RequestMapping(value = "/sendResetPassword", method = RequestMethod.GET)
+    public String sendResetPassword(RedirectAttributes ra, HttpServletRequest request) {
+        resetAccountPassword(Utils.getCurrentAccount(), ra, request);
+        return "redirect:/settings";
+
+    }
+
+    private void resetAccountPassword(Account account, RedirectAttributes ra, HttpServletRequest request) {
+        accountSrv.save(account, false);
+        Utils.setHttpRequest(request);
+        if (!accountSrv.sendResetLink(account)) {
+            throw new TasqException(msg.getMessage("error.email.sending", null, Utils.getCurrentLocale()));
+        }
+        MessageHelper.addSuccessAttribute(ra,
+                msg.getMessage("singin.password.token.sent", new Object[]{account.getEmail()}, Utils.getDefaultLocale()));
     }
 
     private String getAvatarDir() {

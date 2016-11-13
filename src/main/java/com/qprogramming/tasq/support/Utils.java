@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -82,7 +83,6 @@ public class Utils {
         Matcher matcher = pattern.matcher(estimate);
         return matcher.matches();
     }
-
 
     public static String getBaseURL() {
         // TODO null port and server scheme
@@ -293,6 +293,22 @@ public class Utils {
             time += "h";
         }
         return time;
+    }
+
+    /**
+     * If user is logged in he will be forecebly logged out
+     *
+     * @param request HttpServletRequest
+     */
+    public static void forceLogout(HttpServletRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            SecurityContextHolder.clearContext();
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                session.invalidate();
+            }
+        }
     }
 
 }

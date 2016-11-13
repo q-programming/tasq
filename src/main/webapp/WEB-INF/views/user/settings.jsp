@@ -26,15 +26,20 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-8">
-                        <h3>
-                            <c:if test="${not user.confirmed}">
-                                <i style="color: red"
-                                   class="fa fa-exclamation-triangle a-tooltip"
-                                   title="<s:message code="panel.emails.notconfirmed"/>"></i>
-                            </c:if>
-                            ${user}
-                        </h3>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <input id="firstname" class="form-control" name="firstname" value="${user.name}">
+                        </div>
+                        <div class="form-group">
+                            <input id="surname" class="form-control margintop_20" name="surname"
+                                   value="${user.surname}">
+                        </div>
+                        <input id="current-password" type="hidden" name="password">
+                        <%--<c:if test="${not user.confirmed}">--%>
+                        <%--<i style="color: red"--%>
+                        <%--class="fa fa-exclamation-triangle a-tooltip"--%>
+                        <%--title="<s:message code="panel.emails.notconfirmed"/>"></i>--%>
+                        <%--</c:if>--%>
                     </div>
                 </div>
                 <%--EMAIL--%>
@@ -52,12 +57,14 @@
                                 <input id="email" name="email" type="email" class="form-control" placeholder="e-mail"
                                        value="${user.email}">
                                 <input id="useremail" type="hidden" value="${user.email}">
-
                             </div>
+                            <c:if test="${not user.confirmed}">
+                            <span style="color: red"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i>&nbsp;<s:message
+                                    code="panel.emails.notconfirmed"/>
+                            </c:if>
                         </div>
                         <div id="notConfirmed" class="col-md-4 col-sm-12" <c:if
                                 test="${user.confirmed}"> style="display:none" </c:if>>
-                            <span style="color: red"> <s:message code="panel.emails.notconfirmed"/>&nbsp;
                             <a href="<c:url value="/emailResend"/>" class="btn btn-default">
                                 <i class="fa fa-reply"></i><i class="fa fa-envelope"></i>&nbsp;
                                 <s:message code="panel.emails.resend"/>
@@ -140,18 +147,64 @@
                     </div>
                 </div>
             </div>
-            <div style="text-align: center;">
-                <button class="btn btn-success" type="submit">
+            <div class="text-center">
+                <span id="submit-settings" class="btn btn-success">
                     <i class="fa fa-floppy-o"></i>&nbsp;
                     <s:message code="panel.save" text="Save settings"/>
-                </button>
+                </span>
             </div>
         </form>
         <jsp:include page="../other/invite.jsp"/>
+        <div>
+            <div class="mod-header">
+                <h5 class="mod-header-title">
+                    <i class="fa fa-lock" aria-hidden="true"></i>
+                    <s:message code="signup.password"/>
+                </h5>
+            </div>
+            <span style="padding-left: 20px" class="help-block"><s:message
+                    code="signin.password.reset.help" htmlEscape="false"/></span>
+            <div class="text-center">
+                <a href="<c:url value="/sendResetPassword"/>" class="btn btn-default">
+                    <i class="fa fa-envelope-o"></i>
+                    <s:message code="signin.password.reset"/>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="password-confirm-modal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header theme">
+                <h4 class="modal-title" id="closeDialogTitle">
+                    <i class="fa fa-lock" aria-hidden="true"></i>&nbsp;<s:message code="signup.confirmPassword"/>
+                </h4>
+            </div>
+            <div class="modal-body">
+                <div style="padding: 20px">
+                    <p><s:message code="panel.vitals.changed"/></p>
+                </div>
+                <div class="row marginleft_0 marginright_0">
+                    <div class="form-group col-md-7 col-sm-12">
+                        <input class="form-control"
+                               type="password" id="current-password-modal">
+                    </div>
+                    <div class="col-md-2 col-sm-12">
+                        <span id="password-confirmed-btn" class="btn btn-success"><s:message code="signup.confirm"/></span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 <script>
     var settings = true;
+    function passwordConfirmed() {
+        $("#current-password").val($("#current-password-modal").val());
+        $("#panelForm").submit();
+    }
     $(document).ready(function ($) {
         $("#email").change(function () {
             var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
@@ -177,6 +230,46 @@
         $("#file_upload").change(function () {
             readURL(this);
         });
+        //Validate all vital input and submit
+        $("#submit-settings").click(function () {
+            $(".form-group").removeClass("has-error");
+            var firstname = $("#firstname").val();
+            var surname = $("#surname").val();
+            var email = $("#email").val();
+            if (firstname == null || firstname == '') {
+                invalid($("#firstname"));
+            } else if (surname == null || surname == '') {
+                invalid($("#surname"));
+            } else if (email == null || email == '') {
+                invalid($("#email"));
+            } else {
+                if (firstname != "${user.name}" || surname != "${user.surname}" || email != "${user.email}") {
+                    $("#password-confirm-modal").modal({
+                        show: true,
+                        keyboard: false,
+                        backdrop: 'static'
+                    });
+                } else {
+                    //just submit form
+                    $("#panelForm").submit();
+                }
+            }
+        });
+
+        function invalid(obj) {
+            obj.parent().addClass('has-error');
+        }
+
+        $("#current-password-modal").keyup(function (e) {
+            if (e.keyCode == 13) {
+                passwordConfirmed();
+            }
+        });
+
+        $("#password-confirmed-btn").click(function () {
+            passwordConfirmed();
+        });
+
 
         function readURL(input) {
             if (input.files && input.files[0]) {

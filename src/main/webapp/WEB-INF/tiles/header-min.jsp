@@ -70,14 +70,14 @@
                         </div>
                     </li>
                 </security:authorize>
-                <security:authorize access="!isAuthenticated()">
-                    <li>
-                        <div style="padding-top: 5px; padding: 5px">
-                            <a class="btn login theme" href="<c:url value="/signin"></c:url>"><s:message
-                                    code="menu.signin"/></a>
-                        </div>
-                    </li>
-                </security:authorize>
+                <%--<security:authorize access="!isAuthenticated()">--%>
+                <%--<li>--%>
+                <%--<div style="padding-top: 5px; padding: 5px">--%>
+                <%--<a class="btn login theme" href="<c:url value="/signin"></c:url>"><s:message--%>
+                <%--code="menu.signin"/></a>--%>
+                <%--</div>--%>
+                <%--</li>--%>
+                <%--</security:authorize>--%>
             </ul>
             <security:authorize access="isAuthenticated()">
                 <form class="navbar-form navbar-right custom-search hidden-xs" id="searchForm"
@@ -156,7 +156,7 @@
                 setEventsCount(e.data, appName, eventsTxt);
             };
         } else {
-            setInterval(getEventCount,60*1000);
+            setInterval(getEventCount, 60 * 1000);
         }
         // Clock
         setInterval(display_time, 1000);
@@ -171,7 +171,7 @@
         $("#header_time_span").text(time);
     }
 
-    function getEventCount(){
+    function getEventCount() {
         $.get(appUrl, function (count) {
             setEventsCount(count, appName, eventsTxt);
         });
