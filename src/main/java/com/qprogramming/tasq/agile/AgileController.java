@@ -18,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 public class AgileController {
@@ -86,19 +87,28 @@ public class AgileController {
         Project project = projSrv.findByProjectId(id);
         if (project != null) {
             List<Task> taskList;
+            List<Task> result = new LinkedList<>();
             if (sprintID != null) {
                 taskList = taskSrv.findAllBySprintId(project, sprintID);
             } else {
                 taskList = taskSrv.findByProjectAndOpen(project);
             }
-            taskList.stream().forEach(task -> task.setDescription(eliminateHTML(task)));
-            model.addAttribute("tasks", taskSrv.convertToDisplay(taskList, true));
+            for (Task task : taskList) {
+                if (task.getSubtasks() > 0) {
+                    result.addAll(taskSrv.findSubtasks(task).stream().map(this::eliminateHTML).collect(Collectors.toList()));
+                } else {
+                    result.add(eliminateHTML(task));
+                }
+            }
+            model.addAttribute("tasks", taskSrv.convertToDisplay(result, true));
             model.addAttribute("project", project);
         }
         return "/agile/print";
     }
 
-    private String eliminateHTML(Task task) {
-        return task.getDescription().replaceAll("<img[^>]*>", "").replaceAll("<a[^>]*>", "").replaceAll("</a>", "");
+    private Task eliminateHTML(Task task) {
+        String description = task.getDescription().replaceAll("<img[^>]*>", "").replaceAll("<a[^>]*>", "").replaceAll("</a>", "");
+        task.setDescription(description);
+        return task;
     }
 }
