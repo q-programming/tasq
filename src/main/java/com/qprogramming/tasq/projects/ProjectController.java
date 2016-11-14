@@ -275,7 +275,7 @@ public class ProjectController {
     }
 
     @Transactional
-    @RequestMapping(value = "project/{id}/workdays ", method = RequestMethod.POST)
+    @RequestMapping(value = "project/{id}/workdays", method = RequestMethod.POST)
     public String saveWorkdays(@PathVariable(value = "id") String id,
                                @RequestParam(value = "workingWeekends", required = false, defaultValue = "false") boolean workingWeekends,
                                @RequestParam(value = "holiday", required = false) Set<String> holidays,
