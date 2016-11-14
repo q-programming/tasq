@@ -257,7 +257,7 @@
         if (plot) {
             plot.destroy();
         }
-        $("#chart_divarea").show('slow');
+        $("#chart_divarea").show();
         $("#no_events").hide('slow');
         $("#chartdiv").append(loading_indicator);
         projectId = '${project.projectId}';
