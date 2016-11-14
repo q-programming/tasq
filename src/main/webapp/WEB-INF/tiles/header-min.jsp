@@ -62,7 +62,7 @@
                                         class="fa fa-eye"></i>&nbsp;<s:message code="events.watching"/>
                                 </a></li>
                                 <li class="divider"></li>
-                                <li><a href='<s:url value="/logout"></s:url>'><i
+                                <li><a href='<c:url value="/logout"/>'><i
                                         class="fa fa-power-off"></i> <s:message code="menu.logout"
                                                                                 text="Log out"/></a></li>
                             </ul>
@@ -81,7 +81,7 @@
             </ul>
             <security:authorize access="isAuthenticated()">
                 <form class="navbar-form navbar-right custom-search hidden-xs" id="searchForm"
-                      action="<s:url value="/tasks"></s:url>">
+                      action="<s:url value="/tasks"/>">
                     <div class="form-group has-feedback">
                         <input id="searchField" type="text" name="query"
                                class="form-control nav-search search-query input-sm"
@@ -112,7 +112,7 @@
                         code="agile.agile" text="Agile"/></a></li>
                 <li>
                     <form class="navbar-form navbar-right custom-search"
-                          action="<s:url value="/tasks"></s:url>">
+                          action="<s:url value="/tasks"/>">
                         <div class="form-group has-feedback">
                             <input type="text" name="query"
                                    class="form-control nav-search small search-query input-sm"
@@ -131,7 +131,7 @@
                             code="events.events"/></a>
                 </li>
                 <li role="presentation" class="divider"></li>
-                <li><a href='<c:url value="/logout"></c:url>' class="theme"><i
+                <li><a href='<c:url value="/logout"/>' class="theme"><i
                         class="fa fa-power-off"></i> <s:message code="menu.logout"
                                                                 text="Log out"/></a></li>
             </ul>

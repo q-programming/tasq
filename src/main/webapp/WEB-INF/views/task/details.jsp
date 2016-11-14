@@ -1076,7 +1076,7 @@
             delay: 500,
             //define callback to format results
             source: function (request, response) {
-                $(this).closest(".ui-menu").hide();
+                $("#task_link").autocomplete("widget").hide();
                 $("#linkLoader").show();
                 var url = '<c:url value="/getTasks?taskID=${task.id}&projectID=${task.project.id}"/>';
                 $.getJSON(url, request, function (result) {
@@ -1088,7 +1088,7 @@
                             value: item.id,
                         }
                     }));
-                    $(this).closest(".ui-menu").show();
+                    $("#task_link").autocomplete("widget").show();
                 });
             },
             open: function (e, ui) {
@@ -1353,7 +1353,7 @@
 
         $("#tagsinput").autocomplete({
             source: function (request, response) {
-                $(this).closest(".ui-menu").hide();
+                $("#tagsinput").autocomplete("widget").hide();
                 $("#searchFieldHelp").show();
                 var term = request.term;
                 if (term in cache) {
@@ -1372,7 +1372,7 @@
                         results.push(itemToAdd);
                     });
                     cache[term] = results;
-                    $(this).closest(".ui-menu").show();
+                    $("#tagsinput").autocomplete("widget").show();
                     return response(results);
                 });
             },

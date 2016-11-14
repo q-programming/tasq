@@ -391,11 +391,11 @@
             delay: 500,
             //define callback to format results
             source: function (request, response) {
-                $(this).closest(".ui-menu").hide();
+                $("#participant").autocomplete("widget").hide();
                 $("#participantsLoader").show();
                 $.getJSON("<c:url value="/getAccounts"/>", request, function (result) {
                     $("#participantsLoader").hide();
-                    $(this).closest(".ui-menu").show();
+                    $("#participant").autocomplete("widget").show();
                     response($.map(result, function (item) {
                         return {
                             // following property gets displayed in drop down
@@ -432,7 +432,7 @@
             minLength: 1,
             delay: 500,
             source: function (request, response) {
-                $(this).closest(".ui-menu").hide();
+                $("#assignee_input").autocomplete("widget").hide();
                 var term = request.term;
                 var projectID = "${project.projectId}";
                 if (term in cache) {
@@ -462,7 +462,7 @@
                         results.push(itemToAdd);
                     });
                     cache[term] = results;
-                    $(this).closest(".ui-menu").show();
+                    $("#assignee_input").autocomplete("widget").show();
                     return response(results);
                 });
             },
