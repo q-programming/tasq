@@ -45,7 +45,7 @@ public class CommentsControllerTest {
     private Account testAccount;
     private CommentsController commentsController;
     @Mock
-    private CommentsRepository commentsRepoMock;
+    private CommentService commSrvMock;
     @Mock
     private TaskService taskSrvMock;
     @Mock
@@ -75,7 +75,7 @@ public class CommentsControllerTest {
         when(securityMock.getAuthentication()).thenReturn(authMock);
         when(authMock.getPrincipal()).thenReturn(testAccount);
         SecurityContextHolder.setContext(securityMock);
-        commentsController = new CommentsController(commentsRepoMock, taskSrvMock, wrkLogSrvMock, msgMock);
+        commentsController = new CommentsController(commSrvMock, taskSrvMock, wrkLogSrvMock, msgMock);
     }
 
     @Test
@@ -111,6 +111,8 @@ public class CommentsControllerTest {
         Task task = createTask(TASK_NAME, 1, createProject());
         task.setComments(new HashSet<>());
         when(taskSrvMock.findById(TEST_1)).thenReturn(task);
+        when(commSrvMock.isCommentAllowed(task)).thenReturn(true);
+        when(commSrvMock.commentMessageValid("Comment", raMock)).thenReturn(true);
         commentsController.addComment(TEST_1, "Comment", requestMock, raMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.SUCCESS, new Object[]{}));
@@ -150,7 +152,7 @@ public class CommentsControllerTest {
         comments.add(comment);
         task.setComments(comments);
         when(taskSrvMock.findById(TEST_1)).thenReturn(task);
-        when(commentsRepoMock.findById(1L)).thenReturn(comment);
+        when(commSrvMock.findById(1L)).thenReturn(comment);
         commentsController.deleteComment(TEST_1, 1L, requestMock, raMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
@@ -167,9 +169,10 @@ public class CommentsControllerTest {
         comments.add(comment);
         task.setComments(comments);
         when(taskSrvMock.findById(TEST_1)).thenReturn(task);
-        when(commentsRepoMock.findById(1L)).thenReturn(comment);
+        when(commSrvMock.findById(1L)).thenReturn(comment);
+        when(commSrvMock.isCommentAllowed(task)).thenReturn(true);
         commentsController.deleteComment(TEST_1, 1L, requestMock, raMock);
-        verify(commentsRepoMock, times(1)).save(any(Comment.class));
+        verify(commSrvMock, times(1)).save(any(Comment.class));
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.SUCCESS, new Object[]{}));
     }
@@ -204,11 +207,10 @@ public class CommentsControllerTest {
         comments.add(comment);
         task.setComments(comments);
         when(taskSrvMock.findById(TEST_1)).thenReturn(task);
-        when(commentsRepoMock.findById(1L)).thenReturn(comment);
+        when(commSrvMock.findById(1L)).thenReturn(comment);
+        when(commSrvMock.isCommentAllowed(task)).thenReturn(true);
         commentsController.editComment(TEST_1, 1L, "new comment content", requestMock, raMock);
-        verify(commentsRepoMock, times(1)).save(any(Comment.class));
-        verify(raMock, times(1)).addFlashAttribute(anyString(),
-                new Message(anyString(), Message.Type.SUCCESS, new Object[]{}));
+        verify(commSrvMock, times(1)).editComment(anyLong(), anyString(), any(RedirectAttributes.class));
     }
 
     @Test

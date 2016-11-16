@@ -1067,6 +1067,7 @@
         });
 
         $('#comments_cancel').click(function () {
+            $('#comment-message').trumbowyg('empty');
             toggle_comment();
         });
         //-----------------------------Task link ---------------------

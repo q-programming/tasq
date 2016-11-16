@@ -162,7 +162,7 @@
     </c:if>
     <!-- 	HELP -->
     <li id="help-menu">
-        <a href='<s:url value="/help"></s:url>' title="" data-placement="bottom">
+        <a href='<s:url value="/help"/>' title="" data-placement="bottom">
             <i class="fa fa-lg fa-question-circle"></i>&nbsp;<strong><s:message code="menu.help" text="Help"/></strong>
         </a>
     </li>

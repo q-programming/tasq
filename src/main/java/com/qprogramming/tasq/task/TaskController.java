@@ -22,7 +22,7 @@ import com.qprogramming.tasq.support.sorters.ProjectSorter;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
 import com.qprogramming.tasq.task.comments.Comment;
-import com.qprogramming.tasq.task.comments.CommentsRepository;
+import com.qprogramming.tasq.task.comments.CommentService;
 import com.qprogramming.tasq.task.link.TaskLink;
 import com.qprogramming.tasq.task.link.TaskLinkService;
 import com.qprogramming.tasq.task.link.TaskLinkType;
@@ -103,14 +103,14 @@ public class TaskController {
     private AgileService sprintSrv;
     private TaskLinkService linkService;
     private WatchedTaskService watchSrv;
-    private CommentsRepository commRepo;
+    private CommentService commSrv;
     private TagsRepository tagsRepo;
     private EventsService eventSrv;
     private LastVisitedService visitedSrv;
 
     @Autowired
     public TaskController(TaskService taskSrv, ProjectService projectSrv, AccountService accSrv, WorkLogService wlSrv,
-                          MessageSource msg, AgileService sprintSrv, TaskLinkService linkService, CommentsRepository commRepo,
+                          MessageSource msg, AgileService sprintSrv, TaskLinkService linkService, CommentService commSrv,
                           TagsRepository tagsRepo, WatchedTaskService watchSrv, EventsService eventSrv, LastVisitedService visitedSrv) {
         this.taskSrv = taskSrv;
         this.projectSrv = projectSrv;
@@ -119,7 +119,7 @@ public class TaskController {
         this.msg = msg;
         this.sprintSrv = sprintSrv;
         this.linkService = linkService;
-        this.commRepo = commRepo;
+        this.commSrv = commSrv;
         this.tagsRepo = tagsRepo;
         this.watchSrv = watchSrv;
         this.eventSrv = eventSrv;
@@ -391,7 +391,7 @@ public class TaskController {
         Account account = Utils.getCurrentAccount();
         visitedSrv.addLastVisited(account.getId(), task);
         // TASK
-        Set<Comment> comments = commRepo.findByTaskIdOrderByDateDesc(id);
+        Set<Comment> comments = commSrv.findByTaskIdOrderByDateDesc(id);
         Map<TaskLinkType, List<DisplayTask>> links = linkService.findTaskLinks(id);
         if (!task.isSubtask()) {
             List<Task> subtasks = taskSrv.findSubtasks(task);
@@ -635,20 +635,8 @@ public class TaskController {
                 TaskState oldState = (TaskState) task.getState();
                 task.setState(state);
                 if (StringUtils.isNotEmpty(commentMessage)) {
-                    if (Utils.containsHTMLTags(commentMessage)) {
-                        return ResponseEntity.ok(new ResultData(ResultData.ERROR,
-                                msg.getMessage("comment.htmlTag", null, Utils.getCurrentLocale())));
-                    } else {
-                        Comment comment = new Comment();
-                        comment.setTask(task);
-                        comment.setAuthor(Utils.getCurrentAccount());
-                        comment.setDate(new Date());
-                        comment.setMessage(commentMessage);
-                        commRepo.save(comment);
-                        Hibernate.initialize(task.getComments());
-                        task.addComment(comment);
-                        wlSrv.addActivityLog(task, commentMessage, LogType.COMMENT);
-                    }
+                    Hibernate.initialize(task.getComments());
+                    task.addComment(commSrv.addComment(commentMessage, Utils.getCurrentAccount(), task));
                 }
                 // Zero remaining time
                 if (remainingZero != null && remainingZero) {
@@ -1027,7 +1015,7 @@ public class TaskController {
             for (WorkLog workLog : worklogs) {
                 workLog.setTask(task);
             }
-            Set<Comment> comments = commRepo.findByTaskIdOrderByDateDesc(id);
+            Set<Comment> comments = commSrv.findByTaskIdOrderByDateDesc(id);
             for (Comment comment : comments) {
                 comment.setTask(task);
             }
@@ -1212,8 +1200,8 @@ public class TaskController {
             task.setProject(null);
             task.setTags(null);
             wlSrv.deleteTaskWorklogs(task);
-            Set<Comment> comments = commRepo.findByTaskIdOrderByDateDesc(task.getId());
-            commRepo.delete(comments);
+            Set<Comment> comments = commSrv.findByTaskIdOrderByDateDesc(task.getId());
+            commSrv.delete(comments);
         }
         return result;
     }

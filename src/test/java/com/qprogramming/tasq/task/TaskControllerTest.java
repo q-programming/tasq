@@ -14,7 +14,7 @@ import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.ResultData;
 import com.qprogramming.tasq.support.web.Message;
 import com.qprogramming.tasq.task.comments.Comment;
-import com.qprogramming.tasq.task.comments.CommentsRepository;
+import com.qprogramming.tasq.task.comments.CommentService;
 import com.qprogramming.tasq.task.link.TaskLinkService;
 import com.qprogramming.tasq.task.tag.TagsRepository;
 import com.qprogramming.tasq.task.watched.WatchedTaskService;
@@ -76,7 +76,7 @@ public class TaskControllerTest {
     @Mock
     private AppService appSrv;
     @Mock
-    private CommentsRepository commRepoMock;
+    private CommentService commentSrvMock;
     @Mock
     private EventsService eventsSrvMock;
     @Mock
@@ -118,7 +118,7 @@ public class TaskControllerTest {
         SecurityContextHolder.setContext(securityMock);
         taskSrv = new TaskService(taskRepoMock, appSrv, sprintSrvMock);
         taskCtr = new TaskController(taskSrv, projSrvMock, accountServiceMock, wrkLogSrv, msgMock, sprintSrvMock,
-                taskLinkSrvMock, commRepoMock, tagsRepoMock, watchSrvMock, eventSrvMock, visitedSrvMock) {
+                taskLinkSrvMock, commentSrvMock, tagsRepoMock, watchSrvMock, eventSrvMock, visitedSrvMock) {
             @Override
             protected EntityManager getEntitymanager() {
                 return entityManagerMock;

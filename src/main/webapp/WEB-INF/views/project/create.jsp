@@ -3,14 +3,7 @@
 <%@ taglib prefix="security"
            uri="http://www.springframework.org/security/tags" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
-<script src="<c:url value="/resources/js/trumbowyg.min.js" />"></script>
-<script src="<c:url value="/resources/js/trumbowyg.preformatted.js" />"></script>
-<link href="<c:url value="/resources/css/trumbowyg.min.css" />" rel="stylesheet" media="screen"/>
 
-<security:authentication property="principal" var="user"/>
-<c:if test="${user.language ne 'en' }">
-    <script src="<c:url value="/resources/js/trumbowyg.${user.language}.min.js" />"></script>
-</c:if>
 
 <c:set var="projectName_text">
     <s:message code="project.name"/>
@@ -88,14 +81,21 @@
         </div>
     </form:form>
 </div>
+<script src="<c:url value="/resources/js/trumbowyg.min.js" />"></script>
+<script src="<c:url value="/resources/js/trumbowyg.preformatted.js" />"></script>
+<link href="<c:url value="/resources/css/trumbowyg.min.css" />" rel="stylesheet" media="screen"/>
+
+<security:authentication property="principal" var="user"/>
+<c:if test="${user.language ne 'en' }">
+    <script src="<c:url value="/resources/js/trumbowyg.${user.language}.min.js" />"></script>
+</c:if>
 <script>
     $(document).ready(function ($) {
         $.trumbowyg.svgPath = '<c:url value="/resources/img/trumbowyg-icons.svg"/>';
-        var btnsGrps = jQuery.trumbowyg.btnsGrps;
         $('#description').trumbowyg({
             lang: '${user.language}',
             removeformatPasted: true,
-            fullscreenable: false,
+            autogrow: true,
             btns: ['formatting',
                 '|', ['bold', 'italic', 'underline', 'strikethrough', 'preformatted'],
                 '|', 'link',
