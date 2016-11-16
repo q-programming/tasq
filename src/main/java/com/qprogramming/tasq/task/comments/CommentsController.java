@@ -70,15 +70,19 @@ public class CommentsController {
             if (commentSrv.commentMessageValid(message, ra)) {
                 task.addComment(commentSrv.addComment(message, currAccount, task));
                 taskSrv.save(task);
-                wlSrv.addActivityLog(task, message, LogType.COMMENT);
                 // search for watchers and send notifications
-
-                // TODO
                 MessageHelper.addSuccessAttribute(ra,
                         msg.getMessage("comment.added", null, locale));
             }
         }
         return "redirect:" + request.getHeader("Referer");
+    }
+
+    @RequestMapping(value = "/task/{taskId}/{taskSubId}/comment/delete", method = RequestMethod.GET)
+    public String deleteComment(@PathVariable String taskId, @PathVariable String taskSubId,
+                                @RequestParam(value = "id") Long id, HttpServletRequest request,
+                                RedirectAttributes ra) {
+        return deleteComment(taskSrv.createSubId(taskId, taskSubId), id, request, ra);
     }
 
 
