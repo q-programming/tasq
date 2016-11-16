@@ -48,6 +48,7 @@
                     }
                     var message = '';
                     if (content.message != null && content.message != '') {
+
                         message = '<div class="quote">' + content.message + '</div>';
                     }
                     row += timeLogged + account + event + task + message;
@@ -55,6 +56,8 @@
                     rows += row;
                 }
                 $("#eventsTable").append(rows);
+                addMessagesEvents();
+                fixOldTables();
             }
         });
 
@@ -86,5 +89,7 @@
                 return 'not yet added ';
         }
     }
+
+
 
 </script>

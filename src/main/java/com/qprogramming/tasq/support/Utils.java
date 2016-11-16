@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 public class Utils {
     public static final int MILLIS_PER_SECOND = DateTimeConstants.MILLIS_PER_SECOND;
     public static final int SECONDS_PER_HOUR = DateTimeConstants.SECONDS_PER_HOUR;
-    public static final String TABLE = "<table class=\"worklog_table\">";
+    public static final String TABLE = "<table class=\"table worklog_table\">";
     public static final String TABLE_END = "</table>";
     private static final String DATE_FORMAT = "dd-MM-yyyy";
     private static final String DATE_FORMAT_TIME = "dd-MM-yyyy HH:mm";

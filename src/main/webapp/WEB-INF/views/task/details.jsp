@@ -1281,6 +1281,8 @@
                     $("#taskworklogs").append(row);
                     $(".a-tooltip").tooltip();
                 });
+                addMessagesEvents();
+                fixOldTables();
             });
         }
 

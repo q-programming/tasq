@@ -305,7 +305,7 @@ span.badge.left {
 .quote {
     margin-bottom: 0;
     font-size: smaller;
-    padding: 10px;
+    padding: 5px;
 }
 
 .time-div {
@@ -426,6 +426,7 @@ ul.auto-complete-list {
 }
 
 table.worklog_table {
+    vertical-align: top;
     width: 100%;
     border-collapse: collapse;
     border: 1px lightgray;
@@ -448,7 +449,11 @@ _:-ms-lang(x), table.worklog_table {
 
 table.worklog_table td {
     width: 50%;
-    padding: 1px;
+    padding: 2px;
+    border: 1px solid lightgray;
+}
+div.quote > table.worklog_table > tbody > tr > td{
+    padding: 2px;
     border: 1px solid lightgray;
 }
 
