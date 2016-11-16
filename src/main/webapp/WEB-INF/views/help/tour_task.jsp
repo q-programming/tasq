@@ -1,7 +1,7 @@
 <%@page import="com.qprogramming.tasq.task.TaskPriority" %>
 <%@page import="com.qprogramming.tasq.task.TaskState" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%@ taglib prefix="t" uri="/WEB-INF/tasq.tld" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
 <script src="<c:url value="/resources/js/hopscotch.js" />"></script>
 <link href="<c:url value="/resources/css/hopscotch.css" />" rel="stylesheet"

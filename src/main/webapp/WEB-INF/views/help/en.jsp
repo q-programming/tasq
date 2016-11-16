@@ -2,7 +2,7 @@
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
 <%@ taglib uri="http://www.springframework.org/security/tags"
            prefix="security" %>
-<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%@ taglib prefix="t" uri="/WEB-INF/tasq.tld" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <div class="row white-frame">
     <div class="col-md-10 col-sm-10 col-lg-10" role="main">

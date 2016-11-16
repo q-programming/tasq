@@ -3,8 +3,7 @@
 <%@ taglib prefix="security"
            uri="http://www.springframework.org/security/tags" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
-<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<%@ taglib prefix="myfn" uri="/WEB-INF/tags/custom.tld" %>
+<%@ taglib prefix="t" uri="/WEB-INF/tasq.tld" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <c:set var="tasks_text">
     <s:message code="task.tasks" text="Tasks"/>
@@ -17,7 +16,7 @@
     <c:set var="is_admin" value="true"/>
 </security:authorize>
 <c:if
-        test="${(myfn:contains(project.participants,user) && user.isUser) || is_admin}">
+        test="${(t:contains(project.participants,user) && user.isUser) || is_admin}">
     <c:set var="can_edit" value="true"/>
 </c:if>
 <div class="row">

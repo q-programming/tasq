@@ -2,7 +2,7 @@
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
 <%@ taglib uri="http://www.springframework.org/security/tags"
 	prefix="security"%>
-<%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
+<%@ taglib prefix="t" uri="/WEB-INF/tasq.tld" %>
 <%@page import="com.qprogramming.tasq.account.Roles"%>
 <%
 	pageContext.setAttribute("roles", Roles.values());

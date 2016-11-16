@@ -4,7 +4,7 @@
 <%@ taglib prefix="security"
            uri="http://www.springframework.org/security/tags" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
-<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%@ taglib prefix="t" uri="/WEB-INF/tasq.tld" %>
 <script src="<c:url value="/resources/js/trumbowyg.min.js" />"></script>
 <script src="<c:url value="/resources/js/trumbowyg.preformatted.js" />"></script>
 <link href="<c:url value="/resources/css/trumbowyg.min.css" />" rel="stylesheet" media="screen"/>

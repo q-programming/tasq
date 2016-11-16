@@ -2,7 +2,7 @@
 <%@ page import="com.qprogramming.tasq.task.TaskState" %>
 <%@ page import="com.qprogramming.tasq.task.TaskType" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%@ taglib prefix="t" uri="/WEB-INF/tasq.tld" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
 <%@ taglib uri="http://www.springframework.org/security/tags"
            prefix="security" %>

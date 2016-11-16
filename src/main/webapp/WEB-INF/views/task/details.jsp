@@ -10,8 +10,7 @@
 <%@ taglib prefix="security"
            uri="http://www.springframework.org/security/tags" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
-<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<%@ taglib prefix="myfn" uri="/WEB-INF/tags/custom.tld" %>
+<%@ taglib prefix="t" uri="/WEB-INF/tasq.tld" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <script src="<c:url value="/resources/js/bootstrap-tagsinput.js" />"></script>
 <link href="<c:url value="/resources/css/bootstrap-tagsinput.css" />" rel="stylesheet" media="screen"/>
@@ -27,10 +26,10 @@
 </c:if>
 
 <c:set var="is_user" value="<%=Roles.isUser()%>"/>
-<c:if test="${(myfn:contains(task.project.administrators,user) || is_admin || task.owner.id == user.id)}">
+<c:if test="${(t:contains(task.project.administrators,user) || is_admin || task.owner.id == user.id)}">
     <c:set var="can_edit" value="true"/>
 </c:if>
-<c:if test="${((myfn:contains(task.project.participants,user) && is_user) || task.owner.id == user.id ) || is_admin}">
+<c:if test="${((t:contains(task.project.participants,user) && is_user) || task.owner.id == user.id ) || is_admin}">
     <c:set var="project_participant" value="true"/>
 </c:if>
 <c:if test="${task.assignee.id == user.id}">
@@ -668,19 +667,19 @@
                             <c:forEach items="${files}" var="file">
                                 <c:choose>
                                     <c:when
-                                            test="${myfn:endsWithIgnoreCase(file,'pptx') || myfn:endsWithIgnoreCase(file,'ppt') || myfn:endsWithIgnoreCase(file,'pps')}">
+                                            test="${t:endsWithIgnoreCase(file,'pptx') || t:endsWithIgnoreCase(file,'ppt') || t:endsWithIgnoreCase(file,'pps')}">
                                         <c:set var="file_type">fa-file-powerpoint-o</c:set>
                                     </c:when>
                                     <c:when
-                                            test="${myfn:endsWithIgnoreCase(file,'doc') || myfn:endsWithIgnoreCase(file,'docx') || myfn:endsWithIgnoreCase(file,'rtf') || myfn:endsWithIgnoreCase(file,'txt') || myfn:endsWithIgnoreCase(file,'odt')}">
+                                            test="${t:endsWithIgnoreCase(file,'doc') || t:endsWithIgnoreCase(file,'docx') || t:endsWithIgnoreCase(file,'rtf') || t:endsWithIgnoreCase(file,'txt') || t:endsWithIgnoreCase(file,'odt')}">
                                         <c:set var="file_type">fa-file-word-o</c:set>
                                     </c:when>
                                     <c:when
-                                            test="${myfn:endsWithIgnoreCase(file,'xls') || myfn:endsWithIgnoreCase(file,'xlsx') || myfn:endsWithIgnoreCase(file,'ods') || myfn:endsWithIgnoreCase(file,'csv')}">
+                                            test="${t:endsWithIgnoreCase(file,'xls') || t:endsWithIgnoreCase(file,'xlsx') || t:endsWithIgnoreCase(file,'ods') || t:endsWithIgnoreCase(file,'csv')}">
                                         <c:set var="file_type">fa-file-excel-o</c:set>
                                     </c:when>
                                     <c:when
-                                            test="${myfn:endsWithIgnoreCase(file,'jpg') || myfn:endsWithIgnoreCase(file,'png') || myfn:endsWithIgnoreCase(file,'gif')}">
+                                            test="${t:endsWithIgnoreCase(file,'jpg') || t:endsWithIgnoreCase(file,'png') || t:endsWithIgnoreCase(file,'gif')}">
                                         <c:set var="file_type">fa-file-image-o</c:set>
                                     </c:when>
 

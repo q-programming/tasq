@@ -4,7 +4,7 @@
            uri="http://www.springframework.org/security/tags" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
-<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%@ taglib prefix="t" uri="/WEB-INF/tasq.tld" %>
 <script language="javascript" type="text/javascript"
         src="<c:url value="/resources/js/jquery.jqplot.min.js"/>"></script>
 <script language="javascript" type="text/javascript"

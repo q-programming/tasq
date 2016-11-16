@@ -3,13 +3,13 @@
 <%@ taglib prefix="security"
            uri="http://www.springframework.org/security/tags" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
-<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<%@ taglib prefix="myfn" uri="/WEB-INF/tags/custom.tld" %>
+<%@ taglib prefix="t" uri="/WEB-INF/tasq.tld" %>
+
 <security:authentication property="principal" var="user"/>
 <security:authorize access="hasRole('ROLE_ADMIN')">
     <c:set var="is_admin" value="true"/>
 </security:authorize>
-<c:if test="${(myfn:contains(project.participants,user) && user.isUser) || is_admin}">
+<c:if test="${(t:contains(project.participants,user) && user.isUser) || is_admin}">
     <c:set var="can_edit" value="true"/>
 </c:if>
 <tr>

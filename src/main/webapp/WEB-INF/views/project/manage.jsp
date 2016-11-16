@@ -6,8 +6,7 @@
            uri="http://www.springframework.org/security/tags" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
-<%@ taglib prefix="myfn" uri="/WEB-INF/tags/custom.tld" %>
-<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%@ taglib prefix="t" uri="/WEB-INF/tasq.tld" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <security:authorize access="hasRole('ROLE_ADMIN')">
     <c:set var="is_admin" value="true"/>
@@ -281,7 +280,7 @@
                                 </form>
                             </div>
                             <c:if
-                                    test="${myfn:contains(project.administrators,participant)}">
+                                    test="${t:contains(project.administrators,participant)}">
                                 <div class="pull-right">
                                     <form action="<c:url value="/project/removeAdmin"/>"
                                           method="post">
@@ -297,7 +296,7 @@
                                 </div>
                             </c:if>
                             <c:if
-                                    test="${not myfn:contains(project.administrators,participant)}">
+                                    test="${not t:contains(project.administrators,participant)}">
                                 <div class="pull-right">
                                     <form action="<c:url value="/project/grantAdmin"/>"
                                           method="post">
