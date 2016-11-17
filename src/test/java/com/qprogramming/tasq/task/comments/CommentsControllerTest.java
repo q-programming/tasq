@@ -7,7 +7,6 @@ import com.qprogramming.tasq.support.web.Message;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
 import com.qprogramming.tasq.task.TaskState;
-import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 import com.qprogramming.tasq.test.MockSecurityContext;
 import com.qprogramming.tasq.test.TestUtils;
@@ -44,8 +43,9 @@ public class CommentsControllerTest {
     public ExpectedException thrown = ExpectedException.none();
     private Account testAccount;
     private CommentsController commentsController;
+    private CommentService commentService;
     @Mock
-    private CommentService commSrvMock;
+    private CommentsRepository commRepoMock;
     @Mock
     private TaskService taskSrvMock;
     @Mock
@@ -75,7 +75,8 @@ public class CommentsControllerTest {
         when(securityMock.getAuthentication()).thenReturn(authMock);
         when(authMock.getPrincipal()).thenReturn(testAccount);
         SecurityContextHolder.setContext(securityMock);
-        commentsController = new CommentsController(commSrvMock, taskSrvMock, wrkLogSrvMock, msgMock);
+        commentService = new CommentService(commRepoMock, msgMock, wrkLogSrvMock);
+        commentsController = new CommentsController(commentService, taskSrvMock, wrkLogSrvMock, msgMock);
     }
 
     @Test
@@ -111,13 +112,10 @@ public class CommentsControllerTest {
         Task task = createTask(TASK_NAME, 1, createProject());
         task.setComments(new HashSet<>());
         when(taskSrvMock.findById(TEST_1)).thenReturn(task);
-        when(commSrvMock.isCommentAllowed(task)).thenReturn(true);
-        when(commSrvMock.commentMessageValid("Comment", raMock)).thenReturn(true);
         commentsController.addComment(TEST_1, "Comment", requestMock, raMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.SUCCESS, new Object[]{}));
         verify(taskSrvMock, times(1)).save(task);
-        verify(wrkLogSrvMock, times(1)).addActivityLog(any(Task.class), anyString(), any(LogType.class));
     }
 
     @Test
@@ -152,7 +150,7 @@ public class CommentsControllerTest {
         comments.add(comment);
         task.setComments(comments);
         when(taskSrvMock.findById(TEST_1)).thenReturn(task);
-        when(commSrvMock.findById(1L)).thenReturn(comment);
+        when(commRepoMock.findById(1L)).thenReturn(comment);
         commentsController.deleteComment(TEST_1, 1L, requestMock, raMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
@@ -169,10 +167,11 @@ public class CommentsControllerTest {
         comments.add(comment);
         task.setComments(comments);
         when(taskSrvMock.findById(TEST_1)).thenReturn(task);
-        when(commSrvMock.findById(1L)).thenReturn(comment);
-        when(commSrvMock.isCommentAllowed(task)).thenReturn(true);
+        when(commRepoMock.findById(1L)).thenReturn(comment);
         commentsController.deleteComment(TEST_1, 1L, requestMock, raMock);
-        verify(commSrvMock, times(1)).save(any(Comment.class));
+        comment.setMessage(null);
+        comment.setDate_edited(null);
+        verify(commRepoMock, times(1)).save(comment);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.SUCCESS, new Object[]{}));
     }
@@ -207,10 +206,10 @@ public class CommentsControllerTest {
         comments.add(comment);
         task.setComments(comments);
         when(taskSrvMock.findById(TEST_1)).thenReturn(task);
-        when(commSrvMock.findById(1L)).thenReturn(comment);
-        when(commSrvMock.isCommentAllowed(task)).thenReturn(true);
+        when(commRepoMock.findById(1L)).thenReturn(comment);
         commentsController.editComment(TEST_1, 1L, "new comment content", requestMock, raMock);
-        verify(commSrvMock, times(1)).editComment(anyLong(), anyString(), any(RedirectAttributes.class));
+        comment.setMessage("new comment content");
+        verify(commRepoMock, times(1)).save(comment);
     }
 
     @Test
