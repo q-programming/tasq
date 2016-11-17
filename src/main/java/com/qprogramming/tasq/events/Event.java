@@ -36,7 +36,7 @@ public class Event {
 	@Column
 	private String who;
 
-	@Column(length = 4000)
+	@Column(columnDefinition = "text")
 	private String message;
 
 	@Column

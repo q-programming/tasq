@@ -134,6 +134,8 @@ public class SignupControllerTest {
             when(mailerMock.sendMail(anyInt(), anyString(), anyString(), anyString(),
                     anyMapOf(String.class, Resource.class))).thenReturn(true);
             SignupForm form = fillForm();
+            Account account = form.createAccount();
+            when(accRepoMock.save(any(Account.class))).thenReturn(account);
             Errors errors = new BeanPropertyBindingResult(form, "form");
             signupCtr.signup(form, errors, raMock, requestMock);
             verify(accRepoMock, times(1)).save(any(Account.class));
@@ -152,7 +154,7 @@ public class SignupControllerTest {
     public void signUpFormErrorTest() {
         SignupForm form = fillForm();
         Errors errors = new BeanPropertyBindingResult(form, "form");
-        errors.rejectValue("name", "error");
+        errors.rejectValue("firstname", "error");
         signupCtr.signup(form, errors, raMock, requestMock);
         Assert.assertTrue(errors.hasErrors());
     }
@@ -189,7 +191,7 @@ public class SignupControllerTest {
         PasswordResetForm form = fillPasswordForm();
         Errors errors = new BeanPropertyBindingResult(form, "form");
         form.setConfirmPassword("wrong");
-        signupCtr.resetSubmit(form, errors, raMock);
+        signupCtr.resetSubmit(form, errors, raMock,requestMock);
         Assert.assertTrue(errors.hasErrors());
     }
 
@@ -199,7 +201,7 @@ public class SignupControllerTest {
 
         PasswordResetForm form = fillPasswordForm();
         Errors errors = new BeanPropertyBindingResult(form, "form");
-        signupCtr.resetSubmit(form, errors, raMock);
+        signupCtr.resetSubmit(form, errors, raMock,requestMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
     }
@@ -211,7 +213,7 @@ public class SignupControllerTest {
         when(encoderMock.encode(any(CharSequence.class))).thenReturn("encodedPassword");
         PasswordResetForm form = fillPasswordForm();
         Errors errors = new BeanPropertyBindingResult(form, "form");
-        signupCtr.resetSubmit(form, errors, raMock);
+        signupCtr.resetSubmit(form, errors, raMock,requestMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
     }
@@ -240,8 +242,8 @@ public class SignupControllerTest {
     }
 
     private SignupForm fillForm() {
-        SignupForm form = signupCtr.signup();
-        form.setName(ADAM);
+        SignupForm form = signupCtr.signup(requestMock);
+        form.setFirstname(ADAM);
         form.setSurname(DOE);
         form.setEmail(NEW_EMAIL);
         form.setPassword(PASSWORD);

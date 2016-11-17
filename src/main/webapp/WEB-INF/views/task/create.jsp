@@ -5,14 +5,16 @@
 <%@ taglib prefix="security"
            uri="http://www.springframework.org/security/tags" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
-<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%@ taglib prefix="t" uri="/WEB-INF/tasq.tld" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <script src="<c:url value="/resources/js/trumbowyg.min.js" />"></script>
-<script src="<c:url value="/resources/js/bootstrap.file-input.js"/>"></script>
+<script src="<c:url value="/resources/js/trumbowyg.preformatted.js" />"></script>
 <link href="<c:url value="/resources/css/trumbowyg.min.css" />" rel="stylesheet" media="screen"/>
+
+<script src="<c:url value="/resources/js/bootstrap.file-input.js"/>"></script>
 <security:authentication property="principal" var="user"/>
 <c:if test="${user.language ne 'en' }">
-    <script src="<c:url value="/resources/js/trumbowyg.${user.language}.min.js" />"></script>
+    <script src="<c:url value="/resources/js/trumbowyg.${user.language}2.min.js" />"></script>
 </c:if>
 
 <c:set var="taskName_text">
@@ -48,6 +50,10 @@
         <c:set var="sprint_error">
             <form:errors path="addToSprint"/>
         </c:set>
+        <c:set var="estimate_error">
+            <form:errors path="estimate"/>
+        </c:set>
+
 
         <c:if test="${not empty name_error}">
             <c:set var="name_class" value="has-error"/>
@@ -58,6 +64,10 @@
         <c:if test="${not empty sprint_error}">
             <c:set var="sprint_class" value="has-error"/>
         </c:if>
+        <c:if test="${not empty estimate_error}">
+            <c:set var="estimate_class" value="has-error"/>
+        </c:if>
+
 
         <a class="anchor" id="nameA"></a>
         <div class="form-group ${name_class }">
@@ -227,7 +237,7 @@
             </h5>
         </div>
         <div>
-            <div class="form-group ${sprint_class}">
+            <div class="form-group ${estimate_class}">
                 <div class="input-group"><form:input path="estimate" class="form-control"
                                                      style="width:150px"/>&nbsp;<span id="estimate_optional"><s:message
                         code="main.optional"/></span></div>
@@ -315,17 +325,19 @@
         var btnsGrps = jQuery.trumbowyg.btnsGrps;
         var project;
         var paramProject = '${param.project}';
+        $.trumbowyg.svgPath = '<c:url value="/resources/img/trumbowyg-icons.svg"/>';
 
         $('#description').trumbowyg({
             lang: '${user.language}',
             autogrow: true,
+            removeformatPasted: true,
             fullscreenable: false,
             btns: ['formatting',
-                '|', btnsGrps.design,
+                '|', ['bold', 'italic', 'underline', 'strikethrough', 'preformatted' ],
                 '|', 'link',
                 '|', 'insertImage',
-                '|', btnsGrps.justify,
-                '|', btnsGrps.lists]
+                '|', 'btnGrp-justify',
+                '|', 'btnGrp-lists']
         });
 
         $(".file_upload").bootstrapFileInput();

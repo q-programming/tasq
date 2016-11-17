@@ -3,8 +3,7 @@
 <%@ taglib prefix="security"
            uri="http://www.springframework.org/security/tags" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
-<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<%@ taglib prefix="myfn" uri="/WEB-INF/tags/custom.tld" %>
+<%@ taglib prefix="t" uri="/WEB-INF/tasq.tld" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <c:set var="tasks_text">
     <s:message code="task.tasks" text="Tasks"/>
@@ -17,7 +16,7 @@
     <c:set var="is_admin" value="true"/>
 </security:authorize>
 <c:if
-        test="${(myfn:contains(project.participants,user) && user.isUser) || is_admin}">
+        test="${(t:contains(project.participants,user) && user.isUser) || is_admin}">
     <c:set var="can_edit" value="true"/>
 </c:if>
 <div class="row">
@@ -46,38 +45,47 @@
                     class="fa fa-line-chart"></i> <s:message code="agile.reports"/></a></li>
         </ul>
     </div>
-    <div class="row marginleft_0 marginright_0 text-centered">
-        <h4>
-            Sprint ${sprint.sprintNo} <span
-                style="font-size: small; margin-left: 5px">(${sprint.start_date}
+    <div class=".visible-sm-* .visible-xs-* text-center">
+        <h3><i class="fa fa-mobile" aria-hidden="true"></i>
+            <i class="fa fa-arrow-right" aria-hidden="true"></i>
+            <i class="fa fa-desktop" aria-hidden="true"></i>
+        </h3>
+        <s:message code="agile.board.nomobile"/>
+    </div>
+    <div class="hidden-xs hidden-sm">
+        <div class="row marginleft_0 marginright_0 text-centered">
+            <h4>
+                Sprint ${sprint.sprintNo} <span
+                    style="font-size: small; margin-left: 5px">(${sprint.start_date}
 					- ${sprint.end_date})</span>
-        </h4>
-    </div>
-    <div class="row marginleft_0 marginright_0">
-        <div class="col-sm-12 col-md-6">
-            <i class="fa fa-users"></i>&nbsp;<s:message code="project.members"/>
+            </h4>
         </div>
-        <div class="col-sm-12 col-md-6 text-right">
-            <i class="fa fa-tags"></i>&nbsp;<s:message code="task.tags"/>
+        <div class="row marginleft_0 marginright_0">
+            <div class="col-sm-12 col-md-6">
+                <i class="fa fa-users"></i>&nbsp;<s:message code="project.members"/>
+            </div>
+            <div class="col-sm-12 col-md-6 text-right">
+                <i class="fa fa-tags"></i>&nbsp;<s:message code="task.tags"/>
+            </div>
         </div>
-    </div>
-    <div class="row marginbottom_20 marginleft_0 marginright_0">
-        <div class="col-sm-12 col-md-6" id="members">
+        <div class="row marginbottom_20 marginleft_0 marginright_0">
+            <div class="col-sm-12 col-md-6" id="members">
             <span class="avatar small member clickable a-tooltip unassigned button" data-account=""
                   title="<s:message code="task.unassigned" />"><i class="fa fa-2x fa-user v-middle"></i></span>
-        </div>
-        <div class="col-sm-12 col-md-6 pull-right text-right">
-            <c:forEach items="${tags}" var="tag">
+            </div>
+            <div class="col-sm-12 col-md-6 pull-right text-right">
+                <c:forEach items="${tags}" var="tag">
                 <span class="tag label label-info theme tag_filter a-tooltip"
                       title="<s:message code="task.tags.click.filter"/>" data-name="${tag}">${tag}</span>
-            </c:forEach>
+                </c:forEach>
+            </div>
         </div>
-    </div>
     <span class="btn btn-default pull-right" id="save_order"
           style="display: none"><i class="fa fa-floppy-o"></i>&nbsp;Save order
     </span>
-    <table style="width:100%">
-        <jsp:include page="../agile/board.jsp"/>
+        <table style="width:100%">
+            <jsp:include page="../agile/board.jsp"/>
+    </div>
 </div>
 <jsp:include page="../modals/logWork.jsp"/>
 <jsp:include page="../modals/close.jsp"/>

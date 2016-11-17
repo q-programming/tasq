@@ -12,6 +12,7 @@ import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
@@ -223,7 +224,7 @@ public class ImportExportController {
             }
             Task task = taskForm.createTask();
             // optional fields
-            if (row.getCell(SP_CELL) != null) {
+            if (row.getCell(SP_CELL) != null && row.getCell(SP_CELL).getCellType() == Cell.CELL_TYPE_NUMERIC) {
                 task.setStory_points(((Double) row.getCell(SP_CELL).getNumericCellValue()).intValue());
             }
             if (row.getCell(DUE_DATE_CELL) != null
@@ -452,6 +453,13 @@ public class ImportExportController {
             logger.append(row.getRowNum() + 1);
             logger.append(BR);
         }
+        if (!isEstimateCellValid(row)) {
+            logger.append(logHeader);
+            logger.append("Estimate has to be blank or in correct *w *d *h *m format in cell ");
+            logger.append(COLS.charAt(ESTIMATE_CELL));
+            logger.append(row.getRowNum() + 1);
+            logger.append(BR);
+        }
         if (!isDATECellValid(row, DUE_DATE_CELL)) {
             logger.append(logHeader);
             logger.append("Due date must be blank or date formated in cell ");
@@ -507,6 +515,11 @@ public class ImportExportController {
             logger.append("Story points must be empty or a number");
             logger.append(BR);
         }
+        if(!Utils.correctEstimate(taskXML.getEstimate())){
+            logger.append(logHeader);
+            logger.append("Estimate has to be blank or in correct *w *d *h *m format");
+            logger.append(BR);
+        }
         if (logger.length() > 0) {
             logger.append(logHeader);
             logger.append(NODE_SKIPPED);
@@ -532,8 +545,11 @@ public class ImportExportController {
      * @return
      */
     private boolean isNumericCellValid(Row row, int cell) {
-        return !(row.getCell(cell) != null)
-                || (row.getCell(cell) != null && row.getCell(cell).getCellType() == Cell.CELL_TYPE_NUMERIC);
+        Cell numericCell = row.getCell(cell);
+        return !(numericCell != null
+                && numericCell.getCellType() != Cell.CELL_TYPE_NUMERIC
+                && numericCell.getCellType() == Cell.CELL_TYPE_STRING
+                && StringUtils.isNotBlank(numericCell.getStringCellValue()));
     }
 
     /**
@@ -545,7 +561,7 @@ public class ImportExportController {
      */
     private boolean isDATECellValid(Row row, int cell) {
         try {
-            if (row.getCell(cell) != null && !"".equals(row.getCell(cell).getStringCellValue())
+            if (row.getCell(cell) != null && StringUtils.isNotBlank(row.getCell(cell).getStringCellValue())
                     && (!HSSFDateUtil.isCellDateFormatted(row.getCell(cell)))) {
                 return false;
             }
@@ -555,6 +571,13 @@ public class ImportExportController {
         }
         return true;
     }
+
+    private boolean isEstimateCellValid(Row row) {
+        Cell estimateCell = row.getCell(ESTIMATE_CELL);
+        return estimateCell == null || estimateCell.getCellType() == Cell.CELL_TYPE_BLANK || (estimateCell.getCellType() == Cell.CELL_TYPE_STRING && Utils.correctEstimate(estimateCell.getStringCellValue()));
+
+    }
+
 
     /**
      * Check if cell in row is has correct TaskType value

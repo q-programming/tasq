@@ -14,11 +14,12 @@ import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.ResultData;
 import com.qprogramming.tasq.support.web.Message;
 import com.qprogramming.tasq.task.comments.Comment;
-import com.qprogramming.tasq.task.comments.CommentsRepository;
+import com.qprogramming.tasq.task.comments.CommentService;
 import com.qprogramming.tasq.task.link.TaskLinkService;
 import com.qprogramming.tasq.task.tag.TagsRepository;
 import com.qprogramming.tasq.task.watched.WatchedTaskService;
 import com.qprogramming.tasq.task.worklog.LogType;
+import com.qprogramming.tasq.task.worklog.TaskResolution;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 import com.qprogramming.tasq.test.MockSecurityContext;
 import com.qprogramming.tasq.test.TestUtils;
@@ -75,7 +76,7 @@ public class TaskControllerTest {
     @Mock
     private AppService appSrv;
     @Mock
-    private CommentsRepository commRepoMock;
+    private CommentService commentSrvMock;
     @Mock
     private EventsService eventsSrvMock;
     @Mock
@@ -117,7 +118,7 @@ public class TaskControllerTest {
         SecurityContextHolder.setContext(securityMock);
         taskSrv = new TaskService(taskRepoMock, appSrv, sprintSrvMock);
         taskCtr = new TaskController(taskSrv, projSrvMock, accountServiceMock, wrkLogSrv, msgMock, sprintSrvMock,
-                taskLinkSrvMock, commRepoMock, tagsRepoMock, watchSrvMock, eventSrvMock, visitedSrvMock) {
+                taskLinkSrvMock, commentSrvMock, tagsRepoMock, watchSrvMock, eventSrvMock, visitedSrvMock) {
             @Override
             protected EntityManager getEntitymanager() {
                 return entityManagerMock;
@@ -210,7 +211,7 @@ public class TaskControllerTest {
         list.add(project2);
         Task task = createTask(TASK_NAME, 1, project);
         TaskForm form = new TaskForm(task);
-        form.setStory_points("TEST");
+        form.setEstimate("TEST");
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
         when(projSrvMock.findUserActiveProject()).thenReturn(project);
         when(projSrvMock.findAllByUser()).thenReturn(list);
@@ -322,7 +323,9 @@ public class TaskControllerTest {
         TaskForm form = new TaskForm(task);
         Errors errors = new BeanPropertyBindingResult(form, "form");
         errors.rejectValue("name", "Error name");
-        String result = taskCtr.editTask(form, errors, raMock, requestMock);
+        when(requestMock.getHeader("Referer")).thenReturn("test");
+        when(taskSrv.findById(TEST_1)).thenReturn(task);
+        String result = taskCtr.editTask(form, errors, raMock, requestMock, modelMock);
         Assert.assertNull(result);
     }
 
@@ -333,8 +336,9 @@ public class TaskControllerTest {
         Task task = createTask(TASK_NAME, 1, project);
         TaskForm form = new TaskForm(task);
         Errors errors = new BeanPropertyBindingResult(form, "form");
-        String result = taskCtr.editTask(form, errors, raMock, requestMock);
-        Assert.assertNull(result);
+        when(requestMock.getHeader("Referer")).thenReturn("test");
+        String result = taskCtr.editTask(form, errors, raMock, requestMock, modelMock);
+        Assert.assertEquals("redirect:test", result);
     }
 
     @Test
@@ -349,7 +353,7 @@ public class TaskControllerTest {
         Errors errors = new BeanPropertyBindingResult(form, "form");
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(false);
-        taskCtr.editTask(form, errors, raMock, requestMock);
+        taskCtr.editTask(form, errors, raMock, requestMock, modelMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
     }
@@ -367,7 +371,7 @@ public class TaskControllerTest {
         Errors errors = new BeanPropertyBindingResult(form, "form");
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(true);
-        taskCtr.editTask(form, errors, raMock, requestMock);
+        taskCtr.editTask(form, errors, raMock, requestMock, modelMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.WARNING, new Object[]{}));
     }
@@ -395,7 +399,7 @@ public class TaskControllerTest {
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(true);
         when(sprintSrvMock.taskInActiveSprint(task)).thenReturn(true);
-        taskCtr.editTask(form, errors, raMock, requestMock);
+        taskCtr.editTask(form, errors, raMock, requestMock, modelMock);
         verify(wrkLogSrv, times(1)).addActivityPeriodLog(any(Task.class), anyString(), any(Period.class),
                 any(LogType.class));
         verify(wrkLogSrv, times(2)).addActivityLog(any(Task.class), anyString(), any(LogType.class));
@@ -569,7 +573,7 @@ public class TaskControllerTest {
         testAccount.setRole(Roles.ROLE_USER);
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(false);
-        taskCtr.logWork(TEST_1, null, null, null, null, raMock, requestMock, modelMock);
+        taskCtr.logWork(TEST_1, null, null, null, null, raMock, requestMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
     }
@@ -582,7 +586,7 @@ public class TaskControllerTest {
         testAccount.setRole(Roles.ROLE_POWERUSER);
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(true);
-        taskCtr.logWork(TEST_1, "1", "10m", "1-05-2015", "12:00", raMock, requestMock, modelMock);
+        taskCtr.logWork(TEST_1, "1", "10m", "1-05-2015", "12:00", raMock, requestMock);
         verify(wrkLogSrv, times(1)).addDatedWorkLog(any(Task.class), anyString(), any(Date.class), any(LogType.class));
         verify(wrkLogSrv, times(1)).addTimedWorkLog(any(Task.class), anyString(), any(Date.class), any(Period.class),
                 any(Period.class), any(LogType.class));
@@ -595,7 +599,7 @@ public class TaskControllerTest {
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(false);
         testAccount.setRole(Roles.ROLE_VIEWER);
-        ResponseEntity<ResultData> data = taskCtr.changeState(TEST_1, TaskState.COMPLETE, null, null, null);
+        ResponseEntity<ResultData> data = taskCtr.changeState(TEST_1, TaskState.COMPLETE, null, null, null,null);
         Assert.assertEquals(ResultData.ERROR, data.getBody().code);
         boolean catched = false;
         try {
@@ -615,7 +619,7 @@ public class TaskControllerTest {
         task.setComments(new HashSet<Comment>());
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(true);
-        ResponseEntity<ResultData> data = taskCtr.changeState(TEST_1, TaskState.TO_DO, true, null, "Done");
+        ResponseEntity<ResultData> data = taskCtr.changeState(TEST_1, TaskState.TO_DO, true, null, "Done",null);
         Assert.assertEquals(ResultData.WARNING, data.getBody().code);
     }
 
@@ -635,7 +639,7 @@ public class TaskControllerTest {
         when(accountServiceMock.findAll()).thenReturn(accounts);
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(true);
-        ResponseEntity<ResultData> data = taskCtr.changeState(TEST_1, TaskState.CLOSED, true, null, "Done");
+        ResponseEntity<ResultData> data = taskCtr.changeState(TEST_1, TaskState.CLOSED, true, null, "Done", TaskResolution.CANNOT_REPRODUCE);
         Assert.assertEquals(ResultData.WARNING, data.getBody().code);
     }
 
@@ -654,7 +658,7 @@ public class TaskControllerTest {
         when(taskRepoMock.findByParent(TEST_1)).thenReturn(subtasks);
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(true);
-        ResponseEntity<ResultData> result = taskCtr.changeState(TEST_1, TaskState.CLOSED, true, true, "Done");
+        ResponseEntity<ResultData> result = taskCtr.changeState(TEST_1, TaskState.CLOSED, true, true, "Done", TaskResolution.FINISHED);
         verify(wrkLogSrv, times(1)).addActivityLog(subtask, "", LogType.CLOSED);
         verify(taskRepoMock, times(1)).save(any(Task.class));
         Assert.assertEquals(ResultData.OK, result.getBody().code);

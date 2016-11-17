@@ -1,7 +1,7 @@
 <%@page import="com.qprogramming.tasq.task.TaskType"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
+<%@ taglib prefix="t" uri="/WEB-INF/tasq.tld" %>
 <%---------------------CONVERT TO TASK MODAL --%>
 <div class="modal fade" id="convert2task" tabindex="-1" role="dialog"
 	aria-labelledby="" aria-hidden="true">

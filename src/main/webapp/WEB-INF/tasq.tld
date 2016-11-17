@@ -1,9 +1,41 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<taglib xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<?xml version="1.0" encoding="UTF-8" ?>
+<taglib
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://java.sun.com/xml/ns/javaee"
         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd"
-        version="2.1">
+        version="2.1"
+>
+    <display-name>Tasker custom tags</display-name>
     <tlib-version>1.0</tlib-version>
-    <short-name>myfn</short-name>
+    <short-name>t</short-name>
+    <tag-file>
+        <name>card</name>
+        <path>/WEB-INF/tags/tlds/card.tag</path>
+    </tag-file>
+
+    <tag-file>
+        <name>cardprint</name>
+        <path>/WEB-INF/tags/tlds/cardprint.tag</path>
+    </tag-file>
+
+    <tag-file>
+        <name>logType</name>
+        <path>/WEB-INF/tags/tlds/logType.tag</path>
+    </tag-file>
+    <tag-file>
+        <name>priority</name>
+        <path>/WEB-INF/tags/tlds/priority.tag</path>
+    </tag-file>
+    <tag-file>
+        <name>state</name>
+        <path>/WEB-INF/tags/tlds/state.tag</path>
+    </tag-file>
+    <tag-file>
+        <name>type</name>
+        <path>/WEB-INF/tags/tlds/type.tag</path>
+    </tag-file>
+    <!--functions-->
+
     <function>
         <name>contains</name>
         <function-class>com.qprogramming.tasq.support.Utils</function-class>

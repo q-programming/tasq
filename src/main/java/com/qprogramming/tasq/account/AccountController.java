@@ -80,12 +80,16 @@ public class AccountController {
     @Transactional(rollbackFor = {TasqException.class})
     @RequestMapping(value = "settings", method = RequestMethod.POST)
     public String saveSettings(@RequestParam(value = "avatar", required = false) MultipartFile avatarFile,
-                               @RequestParam(value = "email", required = false) String email,
+                               @RequestParam(value = "email") String email,
+                               @RequestParam(value = "firstname") String firstname,
+                               @RequestParam(value = "surname") String surname,
                                @RequestParam(value = "watched", required = false) String watched,
                                @RequestParam(value = "system", required = false) String system,
                                @RequestParam(value = "comments", required = false) String comments,
                                @RequestParam(value = "language", required = false) String language,
-                               @RequestParam(value = "theme", required = false) Long themeID, RedirectAttributes ra,
+                               @RequestParam(value = "theme", required = false) Long themeID,
+                               @RequestParam(value = "password", required = false) String password,
+                               RedirectAttributes ra,
                                HttpServletRequest request, HttpServletResponse response) {
         Account account = Utils.getCurrentAccount();
         if (avatarFile.getSize() != 0) {
@@ -95,6 +99,19 @@ public class AccountController {
             } catch (IOException e) {
                 LOG.error(e.getMessage());
             }
+        }
+        //check if something vital was changed and password matches
+        if (!account.getName().equals(firstname) || !account.getSurname().equals(surname) || !account.getEmail().equals(email)) {
+            if (!accountSrv.verifyPassword(account, password)) {
+                MessageHelper.addErrorAttribute(ra, msg.getMessage("user.reset.badpassword", null, Utils.getCurrentLocale()));
+                return "redirect:/settings";
+            }
+        }
+        if (StringUtils.isNotBlank(firstname)) {
+            account.setName(firstname);
+        }
+        if (StringUtils.isNotBlank(surname)) {
+            account.setSurname(surname);
         }
         account.setLanguage(language);
         localeResolver.setLocale(request, response, new Locale(language));
@@ -166,10 +183,9 @@ public class AccountController {
 
     @RequestMapping(value = "/project/participants", method = RequestMethod.GET)
     @ResponseBody
-    public
-    ResponseEntity<Page<DisplayAccount>> listParticipants(@RequestParam(required = false) String term,
-                                          @RequestParam String projId,
-                                          @PageableDefault(size = 25, page = 0, sort = "surname", direction = Direction.ASC) Pageable p) {
+    public ResponseEntity<Page<DisplayAccount>> listParticipants(@RequestParam(required = false) String term,
+                                                                 @RequestParam String projId,
+                                                                 @PageableDefault(size = 25, page = 0, sort = "surname", direction = Direction.ASC) Pageable p) {
         List<Object> principals = sessionRegistry.getAllPrincipals();
         List<Account> projectAccounts = projSrv.getProjectAccounts(projId, term);
         List<DisplayAccount> participants = projectAccounts.stream().map(account -> accountWithSession(principals, account)).collect(Collectors.toList());

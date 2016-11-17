@@ -229,6 +229,9 @@ span.tag.label.label-info.theme {
 	color: ${invcolor};
 	border-color: transparent;
 }
+.nav-search.small{
+	height: inherit;
+}
 .nav-search:FOCUS{
 	border-color: transparent;
 }

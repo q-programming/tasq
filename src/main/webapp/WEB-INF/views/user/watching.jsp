@@ -1,6 +1,6 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
-<%@ taglib prefix="t" tagdir="/WEB-INF/tags"%>
+<%@ taglib prefix="t" uri="/WEB-INF/tasq.tld" %>
 <div class="white-frame"
 	style="width: 80%; overflow: auto; display: table">
 	<div style="display: table-caption; margin-left: 10px;">

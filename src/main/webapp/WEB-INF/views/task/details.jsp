@@ -10,13 +10,12 @@
 <%@ taglib prefix="security"
            uri="http://www.springframework.org/security/tags" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
-<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<%@ taglib prefix="myfn" uri="/WEB-INF/tags/custom.tld" %>
+<%@ taglib prefix="t" uri="/WEB-INF/tasq.tld" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <script src="<c:url value="/resources/js/bootstrap-tagsinput.js" />"></script>
 <link href="<c:url value="/resources/css/bootstrap-tagsinput.css" />" rel="stylesheet" media="screen"/>
 <script src="<c:url value="/resources/js/trumbowyg.min.js" />"></script>
-<script src="<c:url value="/resources/js/trumbowyg.editlink.js" />"></script>
+<script src="<c:url value="/resources/js/trumbowyg.preformatted.js" />"></script>
 <link href="<c:url value="/resources/css/trumbowyg.min.css" />" rel="stylesheet" media="screen"/>
 <security:authorize access="hasRole('ROLE_ADMIN')">
     <c:set var="is_admin" value="true"/>
@@ -27,16 +26,16 @@
 </c:if>
 
 <c:set var="is_user" value="<%=Roles.isUser()%>"/>
-<c:if test="${(myfn:contains(task.project.administrators,user) || is_admin || task.owner.id == user.id)}">
+<c:if test="${(t:contains(task.project.administrators,user) || is_admin || task.owner.id == user.id)}">
     <c:set var="can_edit" value="true"/>
 </c:if>
-<c:if test="${((myfn:contains(task.project.participants,user) && is_user) || task.owner.id == user.id ) || is_admin}">
+<c:if test="${((t:contains(task.project.participants,user) && is_user) || task.owner.id == user.id ) || is_admin}">
     <c:set var="project_participant" value="true"/>
 </c:if>
 <c:if test="${task.assignee.id == user.id}">
     <c:set var="is_assignee" value="true"/>
 </c:if>
-<div class="white-frame" style="overflow: auto;">
+<div class="white-frame sidepadded" style="overflow: auto;">
     <%----------------------TASK NAME-----------------------------%>
     <c:set var="taskName_text">
         <s:message code="task.name" text="Name"/>
@@ -44,8 +43,8 @@
     <c:set var="taskDesc_text">
         <s:message code="task.description"/>
     </c:set>
-    <%----------------------EDIT MENU-----------------------------%>
-    <div>
+    <div class="row">
+        <%----------------------EDIT MENU-----------------------------%>
         <div class="pull-right">
             <c:if test="${project_participant  && task.state ne'CLOSED'}">
                 <a class="btn btn-default btn-sm a-tooltip" href="#"
@@ -79,20 +78,18 @@
                             class="fa fw fa-file"></i>&nbsp;<s:message code="task.addFile"/>
                     </a></li>
                     <c:if test="${task.subtask}">
-                        <li><a href="#" class="convert2task" data-toggle="modal" data-target="#convert2task"
-                               data-taskid="${task.id}" data-type="${task.type}" data-project="${task.project.id}"
-                        >
-                            <i class="fa fw fa-level-up"></i>&nbsp;<s:message
-                                code="task.subtasks.2task"/>
-                        </a>
+                        <li>
+                            <a href="#" class="convert2task" data-toggle="modal" data-target="#convert2task"
+                               data-taskid="${task.id}" data-type="${task.type}" data-project="${task.project.id}">
+                                <i class="fa fw fa-level-up"></i>&nbsp;<s:message
+                                    code="task.subtasks.2task"/>
+                            </a>
                         </li>
                     </c:if>
-
-
                 </ul>
             </c:if>
             <c:if test="${task.state eq'CLOSED' && project_participant}">
-                <a href="<c:url value="/task/create"/>?linked=${task.id}&p=${task.project.id}"
+                <a href="<c:url value="/task/create"/>?linked=${task.id}&p=${task.project.projectId}"
                    class="btn btn-default btn-sm a-tooltip" title="<s:message code="task.linked.create" />">
                     <i class="fa fw fa-plus"></i>
                 </a>
@@ -106,18 +103,18 @@
                     <i id="watch_icon" class="fa fa-lg fa-eye"></i>
                 </c:if>
             </button>
-
             <c:if test="${can_edit}">
                 <a class="btn btn-default btn-sm a-tooltip delete_btn"
                    href="<c:url value="/task/delete?id=${task.id}"/>"
                    title="<s:message code="task.delete" text="Delete task" />"
                    data-lang="${pageContext.response.locale}"
-                   data-msg='<s:message code="task.delete.confirm"></s:message>'>
+                   data-msg='<s:message code="task.delete.confirm"/>'>
                     <i class="fa fa-lg fa-trash-o"></i>
                 </a>
             </c:if>
         </div>
-        <h3>
+        <!--Type  Project / ID / Name-->
+        <h3 class="marginleft_20">
             <t:type type="${task.type}"/>
             <c:if test="${task.subtask}">
                 <a href='<c:url value="/project/${task.project.projectId}"/>'>${task.project.projectId}</a> /
@@ -130,63 +127,81 @@
             </c:if>
         </h3>
     </div>
-    <div style="display: table">
+    <div class="row">
         <%--------------------LEFT SIDE DIV -------------------------------------%>
-        <div style="display: table-cell; width: 70%">
+        <div class="col-md-9 col-sm-12">
             <%-----------------TASK DETAILS ---------------------------------%>
             <div>
                 <div class="mod-header">
                     <h5 class="mod-header-title">
                         <i class="fa fa-caret-down toggler" data-tab="detailsToggle"></i>
-                        <span class="mod-header-title-txt"> <i
-                                class="fa fa-align-left"></i> <s:message code="task.details"/>
-						</span>
+                        <span class="mod-header-title-txt">
+                            <i class="fa fa-align-left"></i> <s:message code="task.details"/>
+                        </span>
                     </h5>
                 </div>
-                <table id="detailsToggle">
-                    <tr>
-                        <td style="width: 80px;"><s:message code="task.state"/></td>
-                        <td class="left-margin"><c:choose>
-                            <c:when test="${(can_edit || user.isPowerUser) || is_assignee}">
-                                <div class="dropdown pointer">
-                                    <%
-                                        pageContext.setAttribute("states", TaskState.values());
-                                    %>
-                                    <div id="task_state" class="image-combo a-tooltip"
-                                         data-toggle="dropdown" data-placement="top"
-                                         title="<s:message code="main.click"/>">
-                                        <div id="current_state" data-state="${task.state}"
-                                             style="float: left; padding-right: 5px;">
-                                            <t:state state="${task.state}"/>
+                <div id="detailsToggle">
+                    <!--STATUS-->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-4 col-sm-6"><s:message code="task.state"/></div>
+                                <div class="col-md-8 col-sm-6 paddingleft_20"><c:choose>
+                                    <c:when test="${(can_edit || user.isPowerUser) || is_assignee}">
+                                        <div class="dropdown pointer">
+                                            <%
+                                                pageContext.setAttribute("states", TaskState.values());
+                                            %>
+                                            <div id="task_state" class="image-combo nowidth a-tooltip"
+                                                 data-toggle="dropdown" data-placement="top"
+                                                 title="<s:message code="main.click"/>">
+                                                <div id="current_state" data-state="${task.state}"
+                                                     style="float: left; padding-right: 5px;">
+                                                    <t:state state="${task.state}"/>
+                                                </div>
+                                                <span class="caret"></span>
+                                            </div>
+                                            <ul class="dropdown-menu" role="menu"
+                                                aria-labelledby="dropdownMenu2">
+                                                <c:forEach items="${states}" var="enum_state">
+                                                    <li><a href="#" class="change_state"
+                                                           data-state="${enum_state}"> <t:state
+                                                            state="${enum_state}"/>
+                                                    </a></li>
+                                                </c:forEach>
+                                            </ul>
                                         </div>
-                                        <span class="caret"></span>
-                                    </div>
-                                    <ul class="dropdown-menu" role="menu"
-                                        aria-labelledby="dropdownMenu2">
-                                        <c:forEach items="${states}" var="enum_state">
-                                            <li><a href="#" class="change_state"
-                                                   data-state="${enum_state}"> <t:state
-                                                    state="${enum_state}"/>
-                                            </a></li>
-                                        </c:forEach>
-                                    </ul>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <t:state state="${task.state}"/>
+                                    </c:otherwise>
+                                </c:choose>
                                 </div>
-                            </c:when>
-                            <c:otherwise>
-                                <t:state state="${task.state}"/>
-                            </c:otherwise>
-                        </c:choose></td>
-                    </tr>
-                    <tr>
-                        <td><s:message code="task.priority"/></td>
-                        <td class="left-margin"><c:choose>
+                            </div>
+                        </div>
+                        <!--RESOLUTION-->
+                        <c:if test="${not empty task.resolution}">
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-md-4 col-sm-6"><s:message code="task.resolution"/></div>
+                                    <div class="col-md-8 col-sm-6 bold">
+                                        <s:message code="${task.resolution.code}"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </c:if>
+                    </div>
+                    <!--PRIORITY-->
+                    <div class="row">
+                        <div class="col-md-2 col-sm-6"><s:message code="task.priority"/></div>
+                        <div class="col-md-4 col-sm-6 paddingleft_20"><c:choose>
                             <c:when test="${(can_edit || user.isPowerUser) || is_assignee}">
                                 <div class="dropdown pointer">
                                     <%
                                         pageContext.setAttribute("priorities",
                                                 TaskPriority.values());
                                     %>
-                                    <div id="task_priority" class="image-combo a-tooltip"
+                                    <div id="task_priority" class="image-combo nowidth a-tooltip"
                                          data-priority="${task.priority}"
                                          data-toggle="dropdown" data-placement=top
                                          title="<s:message code="main.click"/>">
@@ -208,13 +223,39 @@
                             <c:otherwise>
                                 <t:priority priority="${task.priority}"/>
                             </c:otherwise>
-                        </c:choose></td>
-                    </tr>
+                        </c:choose></div>
+                    </div>
+                    <!-------------------------STORY POINTS------------------------>
+                    <c:if test="${task.story_points eq 0}">
+                        <c:set var="points">?</c:set>
+                    </c:if>
+                    <c:if test="${task.story_points ne 0}">
+                        <c:set var="points">${task.story_points}</c:set>
+                    </c:if>
+                    <c:if
+                            test="${(not task.subtask) && (task.estimated) && not task.project.timeTracked}">
+                        <div class="row">
+                            <div class="col-md-2 col-sm-6"><s:message code="task.storyPoints"/></div>
+                            <div class="col-md-4 col-sm-6 paddingleft_20"><span
+                                    class="points badge theme left"><span id="point_value">${points}</span>
+                                <c:if test="${can_edit  && task.state ne'CLOSED'}">
+                                    <input id="point-input" class="point-input">
+                                    <span id="point_approve"
+                                          style="display: none; cursor: pointer;"><i
+                                            class="fa fa-check"></i></span>
+                                    <span id="point_cancel"
+                                          style="display: none; cursor: pointer;"><i
+                                            class="fa fa-times"></i></span>
+                                    <span id="point_edit" class="point-edit"><i
+                                            class="fa fa-pencil points"></i></span>
+                                </c:if> </span></div>
+                        </div>
+                    </c:if>
                     <!-------------------------	TAGS ------------------->
                     <c:if test="${not task.subtask}">
-                        <tr>
-                            <td style="vertical-align: top;">Tags</td>
-                            <td class="left-margin">
+                        <div class="row">
+                            <div class="col-md-2 col-sm-12" style="vertical-align: top;">Tags</div>
+                            <div class="col-md-10 col-sm-12 paddingleft_20">
                                 <c:if test="${can_edit}">
                                     <input id="taskTags" type="text" title="<s:message code="task.tags.add"/>"
                                            value=""/>
@@ -227,40 +268,24 @@
                                     <div id="taskTagslist" style="color: rgb(187, 186, 186);padding: 6px 6px;">
                                     </div>
                                 </c:if>
-                            </td>
-                        </tr>
+                            </div>
+                        </div>
                     </c:if>
-                    <tr>
-                        <td style="vertical-align: top;"><s:message
-                                code="task.description"/></td>
-                        <td class="left-margin">${task.description}</td>
-                    </tr>
-                    <c:if test="${task.story_points eq 0}">
-                        <c:set var="points">?</c:set>
-                    </c:if>
-                    <c:if test="${task.story_points ne 0}">
-                        <c:set var="points">${task.story_points}</c:set>
-                    </c:if>
-                    <c:if
-                            test="${(not task.subtask) && (task.estimated) && not task.project.timeTracked}">
-                        <tr>
-                            <td><s:message code="task.storyPoints"/></td>
-                            <td class="left-margin"><span
-                                    class="points badge theme left"><span id="point_value">${points}</span>
-									<c:if test="${can_edit  && task.state ne'CLOSED'}">
-                                        <input id="point-input" class="point-input">
-                                        <span id="point_approve"
-                                              style="display: none; cursor: pointer;"><i
-                                                class="fa fa-check"></i></span>
-                                        <span id="point_cancel"
-                                              style="display: none; cursor: pointer;"><i
-                                                class="fa fa-times"></i></span>
-                                        <span id="point_edit" class="point-edit"><i
-                                                class="fa fa-pencil points"></i></span>
-                                    </c:if> </span></td>
-                        </tr>
-                    </c:if>
-                </table>
+                </div>
+            </div>
+            <!-------------------------DESCRIPTION------------------------>
+            <div>
+                <div class="mod-header">
+                    <h5 class="mod-header-title">
+                        <i class="fa fa-caret-down toggler" data-tab="descriptionToggle"></i>
+                        <span class="mod-header-title-txt">
+                            <i class="fa fa-book"></i> <s:message code="task.description"/>
+                        </span>
+                    </h5>
+                </div>
+                <div id="descriptionToggle">
+                    ${task.description}
+                </div>
             </div>
             <%----------------ESTIMATES DIV -------------------------%>
             <div>
@@ -291,7 +316,7 @@
                         </a>
                         <div class="bar_td">
                             <s:message code="task.currentTime"/>
-                            : <span class="timer"></span>
+                            : <span id="task_timer"></span>
                         </div>
                     </c:if>
                     <c:if
@@ -343,8 +368,7 @@
                 <c:if test="${task.estimate eq '0m' && task.remaining ne '0m'}">
                     <c:set var="remaining_bar">    ${100-task.percentage_logged}</c:set>
                 </c:if>
-                <table id="estimatesToggle" style="width: 450px;
-                <c:if test="${task.remaining eq '0m' && task.loggedWork eq '0m' && task.estimate eq '0m'}"> display: none;</c:if> ">
+                <table id="estimatesToggle" style="<c:if test="${task.remaining eq '0m' && task.loggedWork eq '0m' && task.estimate eq '0m'}"> display: none;</c:if>">
                     <tr>
                         <c:if test="${not empty taskEstimate}">
                             <td style="width:15px;"></td>
@@ -476,7 +500,7 @@
                         <div id="linkDiv" style="display: none" class="form-group">
                             <form id="linkTask" name="mainForm" method="post"
                                   action="<c:url value="/task/link"/>">
-                                <div class="form-group col-md-4">
+                                <div class="form-group col-md-3">
                                     <select id="link" name="link" class="form-control input-sm">
                                         <%
                                             pageContext.setAttribute("linkTypes", TaskLinkType.values());
@@ -498,7 +522,7 @@
                                 </div>
                                 <input type="hidden" name="taskA" value="${task.id}"> <input
                                     type="hidden" id="taskB" name="taskB">
-                                <div class="form-group col-md-4" style="padding-left: 10px">
+                                <div class="form-group col-md-3" style="padding-left: 10px">
                                     <button type="submit" class="btn btn-default a-tooltip btn-sm"
                                             title="" data-placement="top"
                                             data-original-title="<s:message code="task.link.help" arguments="${task.id}"/>">
@@ -643,19 +667,19 @@
                             <c:forEach items="${files}" var="file">
                                 <c:choose>
                                     <c:when
-                                            test="${myfn:endsWithIgnoreCase(file,'pptx') || myfn:endsWithIgnoreCase(file,'ppt') || myfn:endsWithIgnoreCase(file,'pps')}">
+                                            test="${t:endsWithIgnoreCase(file,'pptx') || t:endsWithIgnoreCase(file,'ppt') || t:endsWithIgnoreCase(file,'pps')}">
                                         <c:set var="file_type">fa-file-powerpoint-o</c:set>
                                     </c:when>
                                     <c:when
-                                            test="${myfn:endsWithIgnoreCase(file,'doc') || myfn:endsWithIgnoreCase(file,'docx') || myfn:endsWithIgnoreCase(file,'rtf') || myfn:endsWithIgnoreCase(file,'txt') || myfn:endsWithIgnoreCase(file,'odt')}">
+                                            test="${t:endsWithIgnoreCase(file,'doc') || t:endsWithIgnoreCase(file,'docx') || t:endsWithIgnoreCase(file,'rtf') || t:endsWithIgnoreCase(file,'txt') || t:endsWithIgnoreCase(file,'odt')}">
                                         <c:set var="file_type">fa-file-word-o</c:set>
                                     </c:when>
                                     <c:when
-                                            test="${myfn:endsWithIgnoreCase(file,'xls') || myfn:endsWithIgnoreCase(file,'xlsx') || myfn:endsWithIgnoreCase(file,'ods') || myfn:endsWithIgnoreCase(file,'csv')}">
+                                            test="${t:endsWithIgnoreCase(file,'xls') || t:endsWithIgnoreCase(file,'xlsx') || t:endsWithIgnoreCase(file,'ods') || t:endsWithIgnoreCase(file,'csv')}">
                                         <c:set var="file_type">fa-file-excel-o</c:set>
                                     </c:when>
                                     <c:when
-                                            test="${myfn:endsWithIgnoreCase(file,'jpg') || myfn:endsWithIgnoreCase(file,'png') || myfn:endsWithIgnoreCase(file,'gif')}">
+                                            test="${t:endsWithIgnoreCase(file,'jpg') || t:endsWithIgnoreCase(file,'png') || t:endsWithIgnoreCase(file,'gif')}">
                                         <c:set var="file_type">fa-file-image-o</c:set>
                                     </c:when>
 
@@ -698,7 +722,7 @@
             </c:if>
         </div>
         <%--------------------RIGHT SIDE DIV -------------------------------------%>
-        <div class="left-margin" style="display: table-cell; width: 400px">
+        <div class="col-md-3 col-sm-12">
             <%-------------------------PEOPLE ----------------------------------%>
             <div>
                 <div class="mod-header">
@@ -708,44 +732,46 @@
                     </h5>
                 </div>
                 <div>
-                    <div style="display: table">
-                        <div style="display: table-cell; min-width: 100px">
-                            <s:message code="task.owner"/>
-                            :
+                    <div class="row">
+                        <div class="col-lg-5 col-md-12">
+                            <s:message code="task.owner"/>&nbsp;:
                         </div>
-                        <div style="display: table-cell">
+                        <div class="col-lg-7 col-md-12">
                             <img data-src="holder.js/30x30"
                                  class="avatar small"
                                  src="<c:url value="/../avatar/${task.owner.id}.png"/>"/>&nbsp;<a
                                 href="<c:url value="/user/${task.owner.username}"/>">${task.owner}</a>
                         </div>
                     </div>
-                    <div id="assign_button_div" style="display: table">
-                        <div style="display: table-cell; min-width: 100px">
-                            <s:message code="task.assignee"/>
-                            :
+                    <div class="row">
+                        <div class="col-lg-5 col-md-12">
+                            <s:message code="task.assignee"/>&nbsp;:
                         </div>
-                        <div style="display: table-cell;">
+                        <div class="col-lg-7 col-md-12">
                             <c:if test="${empty task.assignee}">
-                                <i><s:message code="task.unassigned"/></i>
+                                <i>&nbsp;<s:message code="task.unassigned"/></i>
                             </c:if>
                             <c:if test="${not empty task.assignee}">
                                 <img data-src="holder.js/30x30" class="avatar small"
                                      src="<c:url value="/../avatar/${task.assignee.id}.png"/>"/>&nbsp;<a href="<c:url
                                     value="/user/${task.assignee.username}"/>">${task.assignee}</a>
                             </c:if>
-                            <c:if test="${project_participant}">
-                                <span class="btn btn-default btn-sm a-tooltip assignToTask"
+                        </div>
+                    </div>
+                    <c:if test="${project_participant}">
+                        <div id="assign_button_div" class="row">
+                            <div class="col-md-12 text-center">
+                                <span class="btn btn-default btn-sm a-tooltip assignToTask" style="width: 150px;margin-top: 5px;"
                                       title="<s:message code="task.assign"/> (a)" data-toggle="modal"
                                       data-target="#assign_modal" data-taskID="${task.id}"
                                       data-assignee="${task.assignee}"
                                       data-assigneeID="${task.assignee.id}"
                                       data-projectID="${task.project.projectId}"> <i
-                                        class="fa fa-lg fa-user-plus"></i>
+                                        class="fa fa-lg fa-user-plus"></i> <s:message code="task.assign"/>
                                 </span>
-                            </c:if>
+                            </div>
                         </div>
-                    </div>
+                    </c:if>
                 </div>
             </div>
             <%----------------------DATES ----------------------------------------%>
@@ -756,22 +782,22 @@
                         <s:message code="task.dates"/>
                     </h5>
                 </div>
-                <table>
-                    <tr>
-                        <td><s:message code="task.created"/></td>
-                        <td class="left-margin">: ${task.create_date}</td>
-                    </tr>
-                    <tr>
-                        <td><s:message code="task.lastUpdate"/></td>
-                        <td class="left-margin">: ${task.lastUpdate}</td>
-                    </tr>
+                <div>
+                    <div class="row">
+                        <div class="col-sm-4"><s:message code="task.created"/>&nbsp;:</div>
+                        <div class="col-sm-8">${task.create_date}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4"><s:message code="task.lastUpdate"/>&nbsp;:</div>
+                        <div class="col-sm-8">${task.lastUpdate}</div>
+                    </div>
                     <c:if test="${not empty task.due_date}">
-                        <tr>
-                            <td><s:message code="task.due"/></td>
-                            <td class="left-margin">: ${task.due_date}</td>
-                        </tr>
+                        <div class="row">
+                            <div class="col-sm-4"><s:message code="task.due"/>&nbsp;:</div>
+                            <div class="col-sm-8">${task.due_date}</div>
+                        </div>
                     </c:if>
-                </table>
+                </div>
             </div>
             <%----------------SPRITNS/RELEASES ----------------------%>
             <c:set var="hidden">none</c:set>
@@ -805,7 +831,7 @@
         </div>
     </div>
     <%--------------------------- BOTTOM TABS------------------------------------%>
-    <div>
+    <div class="row">
         <hr>
         <ul class="nav nav-tabs">
             <li><a id="worklogs" style="color: black" href="#logWork"
@@ -888,7 +914,7 @@
                         <span class="remain-span"><span class="remain"></span> <s:message
                                 code="comment.charsLeft"/></span>
                         <div style="margin-top: 5px">
-                            <button class="btn btn-default btn-sm" type="submit">
+                            <button class="btn btn-default btn-sm addCommentButton" type="submit">
                                 <s:message code="main.add" text="Add"/>
                             </button>
                             <span class="btn btn-sm" id="comments_cancel"><s:message
@@ -930,8 +956,7 @@
                 <button type="button" class="close theme-close" data-dismiss="modal"
                         aria-hidden="true">&times;</button>
                 <h4>
-                    <i class="fa fa-pencil"></i>&nbsp;<s:message code="comment.edit"
-                                                                 text="Edit comment"></s:message>
+                    <i class="fa fa-pencil"></i>&nbsp;<s:message code="comment.edit" text="Edit comment"/>
                 </h4>
             </div>
             <div class="modal-body">
@@ -952,7 +977,7 @@
                     </div>
                     <div class="modal-footer">
                         <div class="form-group">
-                            <button class="btn btn-default pull-right" type="submit">
+                            <button class="btn btn-default pull-right addCommentButton" type="submit">
                                 <i class="fa fa-pencil"></i>
                                 <s:message code="main.edit" text="Edit"></s:message>
                             </button>
@@ -980,7 +1005,7 @@
         var maxchars = 4000;
 
         //--------------------------------------Coments----------------------------
-
+        $.trumbowyg.svgPath = '<c:url value="/resources/img/trumbowyg-icons.svg"/>';
         var btnsGrps = jQuery.trumbowyg.btnsGrps;
         $('.comment-message-text').trumbowyg({
             lang: '${user.language}',
@@ -988,10 +1013,10 @@
             removeformatPasted: true,
             autogrow: true,
             btns: ['formatting',
-                '|', btnsGrps.design,
+                '|', ['bold', 'italic', 'underline', 'strikethrough', 'preformatted'],
                 '|', 'link',
-                '|', btnsGrps.justify,
-                '|', btnsGrps.lists]
+                '|', 'btnGrp-justify',
+                '|', 'btnGrp-lists']
         }).on('tbwchange ', function () {
             var tlength = $(this).val().length;
             remain = maxchars - parseInt(tlength);
@@ -1000,8 +1025,10 @@
                 $('.remain').text(remain);
                 if (remain < 0) {
                     $('.remain-span').addClass("invalid");
+                    $('.addCommentButton').prop('disabled', true);
                 } else {
                     $('.remain-span').removeClass("invalid");
+                    $('.addCommentButton').prop('disabled', false);
                 }
             } else {
                 $(".remain-span").hide();
@@ -1040,6 +1067,7 @@
         });
 
         $('#comments_cancel').click(function () {
+            $('#comment-message').trumbowyg('empty');
             toggle_comment();
         });
         //-----------------------------Task link ---------------------
@@ -1048,7 +1076,7 @@
             delay: 500,
             //define callback to format results
             source: function (request, response) {
-                $(this).closest(".ui-menu").hide();
+                $("#task_link").autocomplete("widget").hide();
                 $("#linkLoader").show();
                 var url = '<c:url value="/getTasks?taskID=${task.id}&projectID=${task.project.id}"/>';
                 $.getJSON(url, request, function (result) {
@@ -1060,7 +1088,7 @@
                             value: item.id,
                         }
                     }));
-                    $(this).closest(".ui-menu").show();
+                    $("#task_link").autocomplete("widget").show();
                 });
             },
             open: function (e, ui) {
@@ -1130,6 +1158,12 @@
                         else {
                             $("#current_state").data('state', state).html(newState);
                             showSuccess(result.message);
+                            //Reopening task forces page to reload after 5s
+                            if (current_state == 'CLOSED') {
+                                setTimeout(function () {
+                                    window.location.reload(1);
+                                }, 5000);
+                            }
                         }
                         showWait(false);
                     });
@@ -1247,6 +1281,8 @@
                     $("#taskworklogs").append(row);
                     $(".a-tooltip").tooltip();
                 });
+                addMessagesEvents();
+                fixOldTables();
             });
         }
 
@@ -1319,7 +1355,7 @@
 
         $("#tagsinput").autocomplete({
             source: function (request, response) {
-                $(this).closest(".ui-menu").hide();
+                $("#tagsinput").autocomplete("widget").hide();
                 $("#searchFieldHelp").show();
                 var term = request.term;
                 if (term in cache) {
@@ -1338,7 +1374,7 @@
                         results.push(itemToAdd);
                     });
                     cache[term] = results;
-                    $(this).closest(".ui-menu").show();
+                    $("#tagsinput").autocomplete("widget").show();
                     return response(results);
                 });
             },

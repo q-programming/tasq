@@ -5,11 +5,12 @@
 <%@ taglib prefix="security"
            uri="http://www.springframework.org/security/tags" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
-<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%@ taglib prefix="t" uri="/WEB-INF/tasq.tld" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <script src="<c:url value="/resources/js/trumbowyg.min.js" />"></script>
-<script src="<c:url value="/resources/js/trumbowyg.editlink.js" />"></script>
+<script src="<c:url value="/resources/js/trumbowyg.preformatted.js" />"></script>
 <link href="<c:url value="/resources/css/trumbowyg.min.css" />" rel="stylesheet" media="screen"/>
+
 <security:authentication property="principal" var="user"/>
 <c:if test="${user.language ne 'en' }">
     <script src="<c:url value="/resources/js/trumbowyg.${user.language}.min.js" />"></script>
@@ -22,11 +23,11 @@
 </c:set>
 <a class="anchor" id="nameA"></a>
 <div class="white-frame col-lg-10 col-md-10" style="overflow: auto;display:table">
-    <h4><s:message code="task.subtasks.add" /> : [${task.id}] - ${task.name}</h4>
+    <h4><s:message code="task.subtasks.add"/> : [${task.id}] - ${task.name}</h4>
 </div>
 <div class="white-frame col-lg-10 col-md-10" style="overflow: auto;display:table">
     <form:form modelAttribute="taskForm" id="taskForm" method="post" style="margin-top: 5px;">
-        <input type="hidden" id="projects_list" name="project" value="${project.id}">
+        <input type="hidden" id="projects_list" name="project" value="${project.projectId}">
         <%-- Check all potential errors --%>
         <c:set var="name_error">
             <form:errors path="name"/>
@@ -65,7 +66,7 @@
         <div class="form-inline">
             <div class="form-group has-feedback">
                 <input id="assignee_auto" class="form-control" type="text" value="" style="width:300px;">
-                    <span class="form-control-feedback" id="createUsersLoader" style="display: none; left: 270px;">
+                <span class="form-control-feedback" id="createUsersLoader" style="display: none; left: 270px;">
                         <i class="fa fa-cog fa-spin"></i>
                     </span>
                 <input id="assignee" type="hidden" name="assignee">
@@ -158,7 +159,7 @@
             <div class="form-group ${sprint_class}">
                 <form:input path="estimate" class="form-control" style="width:150px"/>
                 <form:errors path="estimate" element="p" class="text-danger"/>
-				<span class="help-block"><s:message code="task.estimate.help"/><br>
+                <span class="help-block"><s:message code="task.estimate.help"/><br>
 					<s:message code="task.estimate.help.pattern"/> </span>
             </div>
         </div>
@@ -177,8 +178,8 @@
             </div>
             <form:input path="due_date" class="form-control datepicker"
                         id="due_date" style="width:150px"/>
-				<span class="help-block"><s:message
-                        code="task.dueDate.help"/></span>
+            <span class="help-block"><s:message
+                    code="task.dueDate.help"/></span>
         </div>
         <%--------------Submit button -----------------%>
         <a class="anchor" id="createA"></a>
@@ -199,7 +200,9 @@
             <li class=""><a href="#nameA">${taskName_text}</a></li>
             <li class=""><a href="#descA">${taskDesc_text}</a></li>
             <li class=""><a href="#otherA"><s:message code="main.other"/></a></li>
-            <li class=""><a href="#createA"><s:message code="main.create" text="Create"/></a></li>
+            <button id="createSubmit" class="btn btn-success">
+                <i class="fa fa-plus"></i>&nbsp;<s:message code="main.create" text="Create"/>
+            </button>
         </ul>
         <!-- 				</nav> -->
     </div>
@@ -207,18 +210,22 @@
 
 <script>
     $(document).ready(function ($) {
+        $.trumbowyg.svgPath = '<c:url value="/resources/img/trumbowyg-icons.svg"/>';
         var btnsGrps = jQuery.trumbowyg.btnsGrps;
         $('#description').trumbowyg({
             lang: '${user.language}',
             fullscreenable: false,
             btns: ['formatting',
-                '|', btnsGrps.design,
+                '|', ['bold', 'italic', 'underline', 'strikethrough', 'preformatted'],
                 '|', 'link',
                 '|', 'insertImage',
-                '|', btnsGrps.justify,
-                '|', btnsGrps.lists]
+                '|', 'btnGrp-justify',
+                '|', 'btnGrp-lists']
         });
 
+        $("#createSubmit").click(function () {
+            $("#taskForm").submit();
+        });
 
         $(".taskType").click(function () {
             var type = $(this).data('type');
@@ -240,11 +247,11 @@
         });
         //------------------------------------Datepickers
         $(".datepicker").datepicker({
-            minDate: '0'
-        });
-        $(".datepicker").datepicker("option", "dateFormat", "dd-mm-yy");
-        $('.datepicker').datepicker("option", "firstDay", 1);
-        $('.datepicker').datepicker($.datepicker.regional['${user.language}']);
+            minDate: '0',
+            dateFormat: 'dd-mm-yy',
+            firstDay: 1
+        }).datepicker($.datepicker.regional['${user.language}']);
+
         var currentDue = "${taskForm.due_date}";
         $("#due_date").val(currentDue);
 
@@ -253,8 +260,7 @@
 
         $("#assignee_auto").click(function () {
             $(this).select();
-        });
-        $("#assignee_auto").change(function () {
+        }).change(function () {
             if (!$("#assignee_auto").val()) {
                 $("#assignee").val(null);
             }
@@ -287,7 +293,7 @@
                 $("#createUsersLoader").show();
                 var url = '<c:url value="/project/getParticipants"/>';
                 var projectID = $("#projects_list").val();
-                $.get(url, {id: projectID, term: term,userOnly: true}, function (result) {
+                $.get(url, {id: projectID, term: term, userOnly: true}, function (result) {
                     $("#createUsersLoader").hide();
                     cache[term] = result;
                     response($.map(result, function (item) {
@@ -314,8 +320,7 @@
                 if (ui.item) {
                     event.preventDefault();
                     $("#assignee").val(ui.item.value);
-                    $("#assignee_auto").val(ui.item.label);
-                    $("#assignee_auto").removeClass("input-italic");
+                    $("#assignee_auto").val(ui.item.label).removeClass("input-italic");
                     checkIfEmpty();
                     return false;
                 }
@@ -356,8 +361,7 @@
         function checkIfEmpty() {
             if (!$("#assignee").val()) {
                 var unassign = '<s:message code="task.unassigned" />';
-                $("#assignee_auto").val(unassign);
-                $("#assignee_auto").addClass("input-italic");
+                $("#assignee_auto").val(unassign).addClass("input-italic");
             }
         }
 

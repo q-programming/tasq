@@ -3,7 +3,7 @@
 <%@ taglib prefix="security"
            uri="http://www.springframework.org/security/tags" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
-<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%@ taglib prefix="t" uri="/WEB-INF/tasq.tld" %>
 <div class="row">
     <c:forEach items="${tasks}" var="task" varStatus="count">
         <t:cardprint task="${task}" can_edit="false"/>

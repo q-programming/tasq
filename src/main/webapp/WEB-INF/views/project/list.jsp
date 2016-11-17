@@ -4,7 +4,7 @@
            uri="http://www.springframework.org/security/tags" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<%@ taglib prefix="myfn" uri="/WEB-INF/tags/custom.tld" %>
+<%@ taglib prefix="t" uri="/WEB-INF/tasq.tld" %>
 <c:set var="projects_text">
     <s:message code="project.projects"/>
 </c:set>
@@ -34,7 +34,7 @@
                             ${project.name}</b></a></td>
                     <td>
                         <c:if test="${fn:length(project.description) > 200}">
-                            <b>${fn:substring(myfn:stripHtml(project.description), 0, 200)} ...</b>
+                            <b>${fn:substring(t:stripHtml(project.description), 0, 200)} ...</b>
                         </c:if>
                         <c:if test="${fn:length(project.description) < 200}">
                             <b>${project.description}</b>
@@ -56,7 +56,7 @@
                     <td><a class="black-link" href="<c:url value="/project/${project.projectId}"/>">[${project.projectId}]
                             ${project.name}</a></td>
                     <td><c:if test="${fn:length(project.description) > 200}">
-                        ${fn:substring(myfn:stripHtml(project.description), 0, 200)} ...
+                        ${fn:substring(t:stripHtml(project.description), 0, 200)} ...
                     </c:if>
                         <c:if test="${fn:length(project.description) < 200}">
                             ${project.description}

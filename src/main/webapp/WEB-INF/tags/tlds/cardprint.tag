@@ -1,7 +1,7 @@
 <%@ tag language="java" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%@ taglib prefix="t" uri="/WEB-INF/tasq.tld" %>
 <%@ taglib prefix="security"
            uri="http://www.springframework.org/security/tags" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
@@ -13,10 +13,10 @@
      style="display: table; page-break-inside: avoid;margin-bottom: 0px;">
     <div style="padding: 10px; min-height: 30px; border-bottom: 1px solid;">
         <c:if test="${task.estimated}">
-            <c:if test="${task.story_points eq 0}">
+            <c:if test="${task.story_points eq 0 && !task.subtask}">
                 <span class="badge theme pull-right" style="border: 1px solid #000;">&nbsp;</span>
             </c:if>
-            <c:if test="${task.story_points ne 0}">
+            <c:if test="${task.story_points ne 0 && !task.subtask}">
                 <span class="badge theme pull-right" style="border: 1px solid #000;">${task.story_points}</span>
             </c:if>
         </c:if>
@@ -37,5 +37,10 @@
                 <span class="tag label label-info theme">${tag}</span>
             </c:forEach>
         </div>
+    </c:if>
+    <hr style="margin: 0px;">
+    &nbsp;
+    <c:if test="${task.estimate ne '0m'}">
+        ${task.estimate}
     </c:if>
 </div>

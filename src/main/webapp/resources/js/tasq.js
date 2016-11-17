@@ -196,3 +196,36 @@ $(document).on("click", ".tag_filter", function () {
         currentTag = "";
     }
 });
+
+function addMessagesEvents(){
+    var minimized_elements = $('div.quote > table.worklog_table > tbody > tr > td');
+
+    minimized_elements.each(function(){
+        var t = $(this).text();
+        if(t.length < 500) {return;}
+
+        $(this).html(
+            t.slice(0,500)+'<span>... </span>&nbsp;<a href="#" class="more-info"><i class="fa fa-caret-square-o-down" aria-hidden="true"></i></a>'+
+            '<span style="display:none;">'+ t.slice(500,t.length)+'&nbsp;<a href="#" class="less-info"><i class="fa fa-caret-square-o-up" aria-hidden="true"></i></a></span>'
+        );
+
+    });
+
+    $('a.more-info', minimized_elements).click(function(event){
+        event.preventDefault();
+        $(this).hide().prev().hide();
+        $(this).next().show();
+    });
+
+    $('a.less-info', minimized_elements).click(function(event){
+        event.preventDefault();
+        $(this).parent().hide().prev().show().prev().show();
+    });
+}
+
+function fixOldTables(){
+    var oldTables = $('table.worklog_table');
+    oldTables.each(function () {
+        var t = $(this).addClass("table");
+    })
+}

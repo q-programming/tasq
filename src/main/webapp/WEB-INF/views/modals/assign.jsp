@@ -111,7 +111,7 @@
         delay: 500,
         //define callback to format results
         source: function (request, response) {
-            $(this).closest(".ui-menu").hide();
+            $("#assignee_input").autocomplete("widget").hide()
             var term = request.term;
             if (term in cache) {
                 var result = cache[term];
@@ -137,7 +137,8 @@
                     results.push(itemToAdd);
                 });
                 cache[term] = results;
-                $(this).closest(".ui-menu").show();
+                $("#assignee_input").autocomplete("widget").show();
+                //$(this).closest(".ui-menu").show();
                 return response(results);
             });
         },

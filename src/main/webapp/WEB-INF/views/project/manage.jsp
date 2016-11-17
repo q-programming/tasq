@@ -6,14 +6,15 @@
            uri="http://www.springframework.org/security/tags" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
-<%@ taglib prefix="myfn" uri="/WEB-INF/tags/custom.tld" %>
-<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%@ taglib prefix="t" uri="/WEB-INF/tasq.tld" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <security:authorize access="hasRole('ROLE_ADMIN')">
     <c:set var="is_admin" value="true"/>
 </security:authorize>
 <script src="<c:url value="/resources/js/trumbowyg.min.js" />"></script>
+<script src="<c:url value="/resources/js/trumbowyg.preformatted.js" />"></script>
 <link href="<c:url value="/resources/css/trumbowyg.min.css" />" rel="stylesheet" media="screen"/>
+
 <security:authentication property="principal" var="user"/>
 <c:if test="${user.language ne 'en' }">
     <script src="<c:url value="/resources/js/trumbowyg.${user.language}.min.js" />"></script>
@@ -279,7 +280,7 @@
                                 </form>
                             </div>
                             <c:if
-                                    test="${myfn:contains(project.administrators,participant)}">
+                                    test="${t:contains(project.administrators,participant)}">
                                 <div class="pull-right">
                                     <form action="<c:url value="/project/removeAdmin"/>"
                                           method="post">
@@ -295,7 +296,7 @@
                                 </div>
                             </c:if>
                             <c:if
-                                    test="${not myfn:contains(project.administrators,participant)}">
+                                    test="${not t:contains(project.administrators,participant)}">
                                 <div class="pull-right">
                                     <form action="<c:url value="/project/grantAdmin"/>"
                                           method="post">
@@ -372,15 +373,16 @@
         });
 
         var btnsGrps = jQuery.trumbowyg.btnsGrps;
+        $.trumbowyg.svgPath = '<c:url value="/resources/img/trumbowyg-icons.svg"/>';
         $('#projectDescription').trumbowyg({
             lang: '${user.language}',
             fullscreenable: false,
             btns: ['formatting',
-                '|', btnsGrps.design,
+                '|', ['bold', 'italic', 'underline', 'strikethrough', 'preformatted' ],
                 '|', 'link',
                 '|', 'insertImage',
-                '|', btnsGrps.justify,
-                '|', btnsGrps.lists]
+                '|', 'btnGrp-justify',
+                '|', 'btnGrp-lists']
         });
 
         $("#participant").autocomplete({
@@ -388,11 +390,11 @@
             delay: 500,
             //define callback to format results
             source: function (request, response) {
-                $(this).closest(".ui-menu").hide();
+                $("#participant").autocomplete("widget").hide();
                 $("#participantsLoader").show();
                 $.getJSON("<c:url value="/getAccounts"/>", request, function (result) {
                     $("#participantsLoader").hide();
-                    $(this).closest(".ui-menu").show();
+                    $("#participant").autocomplete("widget").show();
                     response($.map(result, function (item) {
                         return {
                             // following property gets displayed in drop down
@@ -429,7 +431,7 @@
             minLength: 1,
             delay: 500,
             source: function (request, response) {
-                $(this).closest(".ui-menu").hide();
+                $("#assignee_input").autocomplete("widget").hide();
                 var term = request.term;
                 var projectID = "${project.projectId}";
                 if (term in cache) {
@@ -459,7 +461,7 @@
                         results.push(itemToAdd);
                     });
                     cache[term] = results;
-                    $(this).closest(".ui-menu").show();
+                    $("#assignee_input").autocomplete("widget").show();
                     return response(results);
                 });
             },

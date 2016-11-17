@@ -40,7 +40,7 @@
     </div>
     <div class="row">
         <a class="anchor" id="sprint"></a>
-        <div class="col-lg-2 col-md-3 col-sm-4">
+        <div class="col-lg-2 col-md-3 col-sm-4 hidden-xs hidden-sm">
             <div id="menu" class="bs-docs-sidebar hidden-print affix">
                 <!-- 				<nav> -->
                 <ul class="nav bs-docs-sidenav">

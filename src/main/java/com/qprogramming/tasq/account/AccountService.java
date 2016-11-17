@@ -78,9 +78,8 @@ public class AccountService {
         }
         UUID uuid = Generators.timeBasedGenerator().generate();
         account.setUuid(uuid.toString());
-        accRepo.save(account);
+        return accRepo.save(account);
         // entityManager.persist(account);
-        return account;
     }
 
     public Account findByEmail(String email) {
@@ -179,4 +178,15 @@ public class AccountService {
         return mailer.sendMail(MailMail.REGISTER, email, subject, message, resources);
     }
 
+    /**
+     * Fetches account once more from database to ensure that security principal was not tampered with, and verifies if entered password is valid
+     *
+     * @param account  user to be checked for valid password
+     * @param password user password which will be matched with encoded DB password
+     * @return
+     */
+    public boolean verifyPassword(Account account, String password) {
+        Account dbAccount = findById(account.getId());
+        return passwordEncoder.matches(password, dbAccount.getPassword());
+    }
 }

@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE tiles-definitions PUBLIC
-	"-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
-	"http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+        "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+        "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
 <tiles-definitions>
-	<definition name="generalError" extends="default">
-		<put-attribute name="body" value="/WEB-INF/views/error/generalError.jsp"></put-attribute>
-	</definition>
-	<definition name="authError" extends="default">
-		<put-attribute name="body" value="/WEB-INF/views/error/authError.jsp"></put-attribute>
-	</definition>		
+    <definition name="generalError" extends="default">
+        <put-attribute name="body" value="/WEB-INF/views/error/generalError.jsp"/>
+    </definition>
+    <definition name="authError" extends="default">
+        <put-attribute name="body" value="/WEB-INF/views/error/authError.jsp"/>
+    </definition>
+    <definition name="404" extends="default">
+        <put-attribute name="body" value="/WEB-INF/views/error/404.jsp"/>
+    </definition>
 </tiles-definitions>

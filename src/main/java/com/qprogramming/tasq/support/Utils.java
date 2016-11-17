@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -28,12 +29,13 @@ import java.util.regex.Pattern;
 public class Utils {
     public static final int MILLIS_PER_SECOND = DateTimeConstants.MILLIS_PER_SECOND;
     public static final int SECONDS_PER_HOUR = DateTimeConstants.SECONDS_PER_HOUR;
-    public static final String TABLE = "<table class=\"worklog_table\">";
+    public static final String TABLE = "<table class=\"table worklog_table\">";
     public static final String TABLE_END = "</table>";
     private static final String DATE_FORMAT = "dd-MM-yyyy";
     private static final String DATE_FORMAT_TIME = "dd-MM-yyyy HH:mm";
     private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
-    private static final String HTML_TAG_PATTERN = "<([A-Za-z][A-Za-z0-9]*)\\b[^>]*>(.*?)</\\1>";
+    private static final String HTML_TAG_PATTERN = "<(\\/)?([A-Za-z][A-Za-z0-9]*)\\b[^>]*>";
+    private static final String ESTIMATES_PATTENR = "(\\d*w)?\\s?(\\d*d)?\\s?(\\d*h)?\\s?(\\d*m)?";
     private static final long NUM_100NS_INTERVALS_SINCE_UUID_EPOCH = 0x01b21dd213814000L;
     private static final String TD_TR = "</td></tr>";
     private static final String TD_TD = "</td><td>";
@@ -73,8 +75,13 @@ public class Utils {
     public static boolean containsHTMLTags(String contents) {
         Pattern pattern = Pattern.compile(HTML_TAG_PATTERN);
         Matcher matcher = pattern.matcher(contents);
-        return matcher.matches();
+        return matcher.matches() || matcher.find();
+    }
 
+    public static boolean correctEstimate(String estimate) {
+        Pattern pattern = Pattern.compile(ESTIMATES_PATTENR);
+        Matcher matcher = pattern.matcher(estimate);
+        return matcher.matches();
     }
 
     public static String getBaseURL() {
@@ -286,6 +293,22 @@ public class Utils {
             time += "h";
         }
         return time;
+    }
+
+    /**
+     * If user is logged in he will be forecebly logged out
+     *
+     * @param request HttpServletRequest
+     */
+    public static void forceLogout(HttpServletRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            SecurityContextHolder.clearContext();
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                session.invalidate();
+            }
+        }
     }
 
 }

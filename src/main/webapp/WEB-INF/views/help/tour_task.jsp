@@ -1,12 +1,12 @@
 <%@page import="com.qprogramming.tasq.task.TaskPriority" %>
 <%@page import="com.qprogramming.tasq.task.TaskState" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%@ taglib prefix="t" uri="/WEB-INF/tasq.tld" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
 <script src="<c:url value="/resources/js/hopscotch.js" />"></script>
 <link href="<c:url value="/resources/css/hopscotch.css" />" rel="stylesheet"
       media="screen"/>
-<div id="content" class="white-frame" style="overflow: auto;">
+<div id="content" class="white-frame sidepadded" style="overflow: auto;">
     <div>
         <div class="pull-right">
             <a id="task-editmenu" class="btn btn-default btn-sm a-tooltip" href="#"
@@ -41,7 +41,7 @@
                 <i class="fa fa-lg fa-trash-o"></i>
             </a>
         </div>
-        <h3>
+        <h3 class="marginleft_20">
             <i class="fa fa-lg fa-lightbulb-o a-tooltip fa-border"
                title="User story"></i>
             <a href='#'>TST</a>
@@ -52,55 +52,60 @@
             </a>
         </h3>
     </div>
-    <div style="display: table">
-        <div style="display: table-cell; width: 70%">
+    <div class="row">
+        <div class="col-md-9 col-sm-12">
             <div>
                 <div class="mod-header">
                     <h5 class="mod-header-title">
                         <i class="fa fa-caret-down toggler" data-tab="detailsToggle"></i>
-						<span class="mod-header-title-txt"> <i
+                        <span class="mod-header-title-txt"> <i
                                 class="fa fa-align-left"></i> Details</span>
                     </h5>
                 </div>
-                <table id="detailsToggle">
-                    <tr>
-                        <td style="width: 80px;">Status</td>
-                        <td class="left-margin">
-                            <div class="dropdown pointer">
-                                <%
-                                    pageContext.setAttribute("states", TaskState.values());
-                                %>
-                                <div class="image-combo a-tooltip"
-                                     data-toggle="dropdown" data-placement="top"
-                                     title="Click to change">
-                                    <div id="current_state" data-state="ONGOING"
-                                         style="float: left; padding-right: 5px;">
-                                        <span class="state_span a-tooltip"><i class="fa fa-lg fa-spin fa-repeat"></i>&nbsp;In progress</span>
+                <div id="detailsToggle">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-4 col-sm-6">Status</div>
+                                <div class="col-md-8 col-sm-6 paddingleft_20">
+                                    <div class="dropdown pointer">
+                                        <%
+                                            pageContext.setAttribute("states", TaskState.values());
+                                        %>
+                                        <div class="image-combo nowidth a-tooltip"
+                                             data-toggle="dropdown" data-placement="top"
+                                             title="Click to change">
+                                            <div id="current_state" data-state="ONGOING"
+                                                 style="float: left; padding-right: 5px;">
+                                            <span class="state_span a-tooltip"><i
+                                                    class="fa fa-lg fa-spin fa-repeat"></i>&nbsp;In progress</span>
+                                            </div>
+                                            <span class="caret" id="task_state"></span>
+                                        </div>
+                                        <ul class="dropdown-menu" role="menu"
+                                            aria-labelledby="dropdownMenu2">
+                                            <c:forEach items="${states}" var="enum_state">
+                                                <li><a href="#" class="change_state"
+                                                       data-state="${enum_state}"> <t:state
+                                                        state="${enum_state}"/>
+                                                </a></li>
+                                            </c:forEach>
+                                        </ul>
                                     </div>
-                                    <span class="caret" id="task_state"></span>
                                 </div>
-                                <ul class="dropdown-menu" role="menu"
-                                    aria-labelledby="dropdownMenu2">
-                                    <c:forEach items="${states}" var="enum_state">
-                                        <li><a href="#" class="change_state"
-                                               data-state="${enum_state}"> <t:state
-                                                state="${enum_state}"/>
-                                        </a></li>
-                                    </c:forEach>
-                                </ul>
                             </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Priority</td>
-                        <td class="left-margin">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-6">Priority</div>
+                        <div class="col-md-4 col-sm-6 paddingleft_20">
                             <div class="dropdown pointer">
                                 <%
                                     pageContext.setAttribute("priorities",
                                             TaskPriority.values());
                                     pageContext.setAttribute("critical", TaskPriority.MAJOR);
                                 %>
-                                <div class="image-combo a-tooltip"
+                                <div class="image-combo nowidth a-tooltip"
                                      data-priority="CRITICAL"
                                      data-toggle="dropdown" data-placement=top
                                      title="Click to change">
@@ -118,28 +123,12 @@
                                     </c:forEach>
                                 </ul>
                             </div>
-                        </td>
-                    </tr>
-                    <!-------------------------	TAGS ------------------->
-                    <tr>
-                        <td style="vertical-align: top;">Tags</td>
-                        <td class="left-margin">
-                            <span class="tag label label-info theme"><span class="tagSearch"
-                                                                           data-name="subtask"
-                                                                           id="task-tag">subtask</span><span
-                                    data-role="remove"></span></span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="vertical-align: top;">Description</td>
-                        <td class="left-margin">Description of sample task;
-                            <div>Additional information about task will be stored in here<span
-                                    id="task-description"></span></div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Story points</td>
-                        <td class="left-margin"><span
+                        </div>
+                    </div>
+                    <!--STORY POINTS-->
+                    <div class="row">
+                        <div class="col-md-2 col-sm-6">Story points</div>
+                        <div class="col-md-4 col-sm-6 paddingleft_20"><span
                                 class="points badge theme left"><span id="point_value">3</span>
 									<input id="point-input" class="point-input">
 										<span id="point_approve"
@@ -150,15 +139,39 @@
                                                 class="fa fa-times"></i></span>
 										<span id="point_edit" class="point-edit"><i
                                                 class="fa fa-pencil points"></i></span>
-                                    </span></td>
-                    </tr>
-                </table>
+                                    </span></div>
+                    </div>
+
+                    <!-------------------------	TAGS ------------------->
+                    <div class="row">
+                        <div class="col-md-2 col-sm-12" style="vertical-align: top;">Tags</div>
+                        <div class="col-md-10 col-sm-12 paddingleft_20">
+                            <span class="tag label label-info theme"><span class="tagSearch"
+                                                                           data-name="subtask"
+                                                                           id="task-tag">subtask</span><span
+                                    data-role="remove"></span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="mod-header">
+                    <h5 class="mod-header-title">
+                        <i class="fa fa-caret-down toggler" data-tab="descriptionToggle"></i>
+                        <span class="mod-header-title-txt"> <i
+                                class="fa fa-book"></i> Description</span>
+                    </h5>
+                </div>
+                <div id="descriptionToggle">
+                    Additional information about task will be stored in here<span
+                        id="task-description"></span>
+                </div>
             </div>
             <div>
                 <div class="mod-header">
                     <h5 class="mod-header-title">
                         <i class="fa fa-caret-down toggler" data-tab="estimatesToggle"></i>
-						<span class="mod-header-title-txt"> <i
+                        <span class="mod-header-title-txt"> <i
                                 class="fa fa-lg fa-clock-o"></i> Time tracking</span>
                     </h5>
                 </div>
@@ -238,7 +251,7 @@
                     <div id="linkDiv" style="display: none" class="form-group">
                         <form id="linkTask" name="mainForm" method="get"
                               action="#">
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-3">
                                 <select id="link" name="link" class="form-control input-sm">
                                     <option value="RELATES_TO">relates to</option>
                                     <option value="BLOCKS">blocks</option>
@@ -255,7 +268,7 @@
                                     Loading...<br>
                                 </div>
                             </div>
-                            <div class="form-group col-md-4" style="padding-left: 10px">
+                            <div class="form-group col-md-3" style="padding-left: 10px">
                                 <button type="submit" class="btn btn-default a-tooltip btn-sm"
                                         title="" data-placement="top"
                                         data-original-title="Link task TST-1 with selected">
@@ -314,8 +327,8 @@
                 <div class="mod-header">
                     <h5 class="mod-header-title">
                         <i class="fa fa-caret-down toggler" data-tab="subtasksToggle"></i>
-							<span class="mod-header-title-txt"> <i
-                                    class="fa fa-lg fa-sitemap"></i> Subtasks</span>
+                        <span class="mod-header-title-txt"> <i
+                                class="fa fa-lg fa-sitemap"></i> Subtasks</span>
                     </h5>
                     <a class="btn btn-default btn-xxs a-tooltip pull-right" style="min-width: 37px;"
                        href="#"
@@ -447,7 +460,7 @@
                 </div>
             </div>
         </div>
-        <div class="left-margin" style="display: table-cell; width: 400px">
+        <div class="col-md-3 col-sm-12">
             <div id="task-people">
                 <div class="mod-header">
                     <h5 class="mod-header-title">
@@ -455,34 +468,36 @@
                         People</h5>
                 </div>
                 <div>
-                    <div style="display: table">
-                        <div style="display: table-cell; min-width: 100px">
-                            Task owner
-                            :
+                    <div class="row">
+                        <div class="col-lg-5 col-md-12">
+                            Task owner&nbsp;:
                         </div>
-                        <div style="display: table-cell">
+                        <div class="col-lg-7 col-md-12">
                             <img data-src="holder.js/30x30"
                                  class="avatar small"
                                  src="<c:url value="/resources/img/avatar.png"/>"/>&nbsp;<a
                                 href="#">Jakub Romaniszyn</a>
                         </div>
                     </div>
-                    <div id="assign_button_div" style="display: table">
-                        <div style="display: table-cell; min-width: 100px">
-                            Assignee
-                            :
+                    <div class="row">
+                        <div class="col-lg-5 col-md-12">
+                            Assignee&nbsp;:
                         </div>
-                        <div style="display: table-cell;">
+                        <div class="col-lg-7 col-md-12">
                             <img data-src="holder.js/30x30" class="avatar small"
                                  src="<c:url value="/resources/img/avatar.png"/>"/>&nbsp;<a href="#">Demo User</a>
-                            <span class="btn btn-default btn-sm a-tooltip assignToTask"
+                        </div>
+                    </div>
+                    <div id="assign_button_div" class="row">
+                        <div class="col-md-12 text-center" >
+                            <span class="btn btn-default btn-sm a-tooltip assignToTask" style="width: 150px;margin-top: 5px;"
                                   title="Assign" data-toggle="modal"
                                   data-target="#assign_modal" data-taskID="TST-1"
                                   data-assignee="Demo  User"
                                   data-assigneeID="2"
                                   data-projectID="TST"> <i
-                                    class="fa fa-lg fa-user-plus"></i>
-                                </span>
+                                    class="fa fa-lg fa-user-plus"></i>&nbsp;Assign
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -493,20 +508,20 @@
                         <i class="fa fa-calendar"></i>
                         Dates</h5>
                 </div>
-                <table>
-                    <tr>
-                        <td>Created</td>
-                        <td class="left-margin">: 01-04-2015 00:23</td>
-                    </tr>
-                    <tr>
-                        <td>Updated</td>
-                        <td class="left-margin">: 01-04-2015 00:31</td>
-                    </tr>
-                    <tr>
-                        <td>Due</td>
-                        <td class="left-margin">: 29-04-2015</td>
-                    </tr>
-                </table>
+                <div>
+                    <div class="row">
+                        <div class="col-sm-4">Created</div>
+                        <div class="col-sm-8">: 01-04-2015 00:23</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">Updated</div>
+                        <div class="col-sm-8">: 01-04-2015 00:31</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">Due</div>
+                        <div class="col-sm-8">: 29-04-2015</div>
+                    </div>
+                </div>
             </div>
             <div id="sprint_release" style="">
                 <div class="mod-header">

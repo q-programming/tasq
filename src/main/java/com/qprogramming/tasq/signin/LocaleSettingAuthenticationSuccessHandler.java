@@ -48,7 +48,7 @@ public class LocaleSettingAuthenticationSuccessHandler extends SavedRequestAware
         if (savedRequest != null) {
             String[] redirectUlr = savedRequest.getRedirectUrl().split("/");
             String redirectParam = redirectUlr[redirectUlr.length - 1];
-            if ("sigin".equals(redirectParam) || "generalError".equals(redirectParam)) {
+            if ("sigin".equals(redirectParam) || "generalError".equals(redirectParam) || "eventCount".equals(redirectParam)) {
                 new HttpSessionRequestCache().removeRequest(request, response);
             }
         }

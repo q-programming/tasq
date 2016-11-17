@@ -1,6 +1,6 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
-<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%@ taglib prefix="t" uri="/WEB-INF/tasq.tld" %>
 
 <script language="javascript" type="text/javascript"
         src="<c:url value="/resources/js/jquery.jqplot.min.js"/>"></script>
@@ -39,7 +39,7 @@
     </div>
     <div class="row">
         <a class="anchor" id="sprint"></a>
-        <div class="col-lg-2 col-md-3 col-sm-4">
+        <div class="col-lg-2 col-md-3 col-sm-4 hidden-xs hidden-sm">
             <div id="menu" class="bs-docs-sidebar hidden-print affix">
                 <nav>
                     <ul class="nav bs-docs-sidenav">
