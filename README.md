@@ -33,7 +33,7 @@ If running app localy , FakeSMTP can be used.
 * To use custom properties file,there are two aproaches:
 *  1.Add VM arg `properties.location` for example : `-Dproperties.location=/usr/local/tasq/application.properties`. It can be added to JAVA_OPTS in catalina.sh
 *  2.Add context param into tomcat context for example: `<Parameter name="propertiesPath" value="C:/work/application.properties" override="false"/>`
-* While application is sarting it will look for VM arg first, then context param. If none found, application.properties from resources will be used
+* While application is starting it will look for VM arg first, then context param. If none found, application.properties from resources will be used
 
 * Deploy on tomcat (copy to webapp dir)
 
