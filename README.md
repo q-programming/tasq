@@ -29,9 +29,12 @@ If running app localy , FakeSMTP can be used.
 * Map avatar directory in tomcat config `/etc/tomcat7/server.xml` 
 <br> `<Context docBase="/usr/local/tasq/avatar" path="/avatar" />` in 
 `<Host name="localhost"  appBase="webapps"unpackWARs="true" autoDeploy="true">` section ( at the bottom of config )
-* To use custom properties file , add VM arg `properties.location` for example :
-`-Dproperties.location=/usr/local/tasq/application.properties`
-* To launch tomcat with custom properties add property to JAVA_OPTS in catalina.sh
+
+* To use custom properties file,there are two aproaches:
+*  1.Add VM arg `properties.location` for example : `-Dproperties.location=/usr/local/tasq/application.properties`. It can be added to JAVA_OPTS in catalina.sh
+*  2.Add context param into tomcat context for example: `<Parameter name="propertiesPath" value="C:/work/application.properties" override="false"/>`
+* While application is sarting it will look for VM arg first, then context param. If none found, application.properties from resources will be used
+
 * Deploy on tomcat (copy to webapp dir)
 
 * First registered user will be made application administrator, default theme, and logo will also be created. This step is crucial as if failed , there might be issues with showing logo etc.
