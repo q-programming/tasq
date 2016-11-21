@@ -435,16 +435,7 @@
                 var term = request.term;
                 var projectID = "${project.projectId}";
                 if (term in cache) {
-                    var results = [];
-                    var data =cache[term];
-                    $.each(data, function (i, item) {
-                        var itemToAdd = {
-                            value: item.email,
-                            label: item.name + " " + item.surname,
-                            id: item.id
-                        };
-                        results.push(itemToAdd);
-                    });
+                    response(cache[term]);
                     return;
                 }
                 $("#assignUsersLoader").show();

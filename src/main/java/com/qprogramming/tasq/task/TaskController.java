@@ -169,8 +169,8 @@ public class TaskController {
             project.getTasks().add(task);
             project.setLastTaskNo(taskCount);
             // assigne
-            if (taskForm.getAssignee() != null) {
-                Account assignee = accSrv.findById(taskForm.getAssignee());
+            if (StringUtils.isNotBlank(taskForm.getAssignee())) {
+                Account assignee = accSrv.findByEmail(taskForm.getAssignee());
                 task.setAssignee(assignee);
                 watchSrv.addToWatchers(task, assignee);
             }
@@ -511,8 +511,8 @@ public class TaskController {
         }
         Task subTask = taskForm.createSubTask();
         // assigne
-        if (taskForm.getAssignee() != null) {
-            Account assignee = accSrv.findById(taskForm.getAssignee());
+        if (StringUtils.isNotBlank(taskForm.getAssignee())) {
+            Account assignee = accSrv.findByEmail(taskForm.getAssignee());
             subTask.setAssignee(assignee);
         }
         taskSrv.createSubTask(project, task, subTask);

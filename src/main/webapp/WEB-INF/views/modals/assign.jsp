@@ -114,13 +114,7 @@
             $("#assignee_input").autocomplete("widget").hide()
             var term = request.term;
             if (term in cache) {
-                var result = cache[term];
-                response($.map(result, function (item) {
-                    return {
-                        label: item.name + " " + item.surname,
-                        value: item.id
-                    }
-                }));
+                response(cache[term]);
                 return;
             }
             $("#assignUsersLoader").show();

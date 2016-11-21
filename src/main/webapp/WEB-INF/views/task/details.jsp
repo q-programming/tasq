@@ -80,7 +80,7 @@
                     <c:if test="${task.subtask}">
                         <li>
                             <a href="#" class="convert2task" data-toggle="modal" data-target="#convert2task"
-                               data-taskid="${task.id}" data-type="${task.type}" data-project="${task.project.id}">
+                               data-taskid="${task.id}" data-type="${task.type}" data-project="${task.project.projectId}">
                                 <i class="fa fw fa-level-up"></i>&nbsp;<s:message
                                     code="task.subtasks.2task"/>
                             </a>

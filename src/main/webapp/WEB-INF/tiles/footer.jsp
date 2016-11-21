@@ -85,15 +85,7 @@
             $(".ui-menu").hide();
             var term = request.term;
             if (term in cache) {
-                var results = [];
-                var data = cache[term];
-                $.each(data, function (i, item) {
-                    var itemToAdd = {
-                        value: item.name,
-                        label: item.name
-                    };
-                    results.push(itemToAdd);
-                });
+                response(cache[term]);
                 return;
             }
             $("#tagsLoading").show();

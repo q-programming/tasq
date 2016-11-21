@@ -53,7 +53,7 @@ public class TaskForm {
 
     private Long addToSprint;
 
-    private Long assignee;
+    private String assignee;
 
     private List<MultipartFile> files;
 
@@ -213,11 +213,11 @@ public class TaskForm {
         this.addToSprint = addToSprint;
     }
 
-    public Long getAssignee() {
+    public String getAssignee() {
         return assignee;
     }
 
-    public void setAssignee(Long assignee) {
+    public void setAssignee(String assignee) {
         this.assignee = assignee;
     }
 

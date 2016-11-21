@@ -279,30 +279,29 @@
             delay: 500,
             //define callback to format results
             source: function (request, response) {
+                $("#assignee_auto").autocomplete("widget").hide();
                 var term = request.term;
                 if (term in cache) {
-                    var result = cache[term];
-                    response($.map(result, function (item) {
-                        return {
-                            label: item.name + " " + item.surname,
-                            value: item.id
-                        }
-                    }));
+                    response(cache[term]);
                     return;
                 }
                 $("#createUsersLoader").show();
                 var url = '<c:url value="/project/getParticipants"/>';
                 var projectID = $("#projects_list").val();
-                $.get(url, {id: projectID, term: term, userOnly: true}, function (result) {
+                $.get(url, {id: projectID, term: term, userOnly: true}, function (data) {
                     $("#createUsersLoader").hide();
-                    cache[term] = result;
-                    response($.map(result, function (item) {
-                        return {
-                            // following property gets displayed in drop down
+                    var results = [];
+                    $.each(data, function (i, item) {
+                        var itemToAdd = {
+                            value: item.email,
                             label: item.name + " " + item.surname,
-                            value: item.id,
-                        }
-                    }));
+                            id: item.id
+                        };
+                        results.push(itemToAdd);
+                    });
+                    cache[term] = results;
+                    $("#assignee_auto").autocomplete("widget").show();
+                    return response(results);
                 });
             },
             open: function (e, ui) {
@@ -345,7 +344,7 @@
                 }
                 else {
                     $("#assignee_auto").val(project.defaultAssignee.name + " " + project.defaultAssignee.surname);
-                    $("#assignee").val(project.defaultAssignee.id);
+                    $("#assignee").val(project.defaultAssignee.email);
                     $("#assignee_auto").removeClass("input-italic");
                 }
                 checkIfEmpty();
