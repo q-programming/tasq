@@ -166,6 +166,9 @@
             <i class="fa fa-lg fa-question-circle"></i>&nbsp;<strong><s:message code="menu.help" text="Help"/></strong>
         </a>
     </li>
+    <li class="nav-bottom">
+        <a href="#" id="small-sidebar-show"><i class="fa fa-lg fw fa-caret-square-o-left" aria-hidden="true"></i>&nbsp;<s:message code="menu.small.sidebar.show"/> </a>
+    </li>
 </ul>
 <script>
     var linksRequested = $('a[href="${requestedLink}"]');

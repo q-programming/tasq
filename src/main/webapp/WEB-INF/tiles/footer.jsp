@@ -74,9 +74,9 @@
                         && thrownError.__proto__.name != 'SyntaxError') {
                     console.log(thrownError);
                     var message = '<s:message code="error.session"/>';
+                    showError(message);
                     var url = '<c:url value="/"/>';
-                    alert(message);
-                    window.location.href = url;
+//                    window.location.href = url;
                 }
             });
     $("#searchField").autocomplete({
@@ -164,6 +164,10 @@
                     setTimeout(display, 1000);
                 }
             });
-
-
+    //toggle sidebars
+    function saveSmallSidebarSize(enable) {
+        var url = '<c:url value="/sidebar"/>';
+        $.get(url, {enable: enable}, function (result) {
+        });
+    }
 </script>

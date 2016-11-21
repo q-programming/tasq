@@ -78,6 +78,9 @@ public class Account implements java.io.Serializable, UserDetails {
     @Column
     private String activeProject;
 
+    @Column
+    private Boolean smallSidebar = false;
+
     protected Account() {
 
     }
@@ -395,6 +398,14 @@ public class Account implements java.io.Serializable, UserDetails {
             return false;
         }
         return true;
+    }
+
+    public Boolean getSmallSidebar() {
+        return smallSidebar;
+    }
+
+    public void setSmallSidebar(Boolean smallSidebar) {
+        this.smallSidebar = smallSidebar;
     }
 
     public Boolean hadTour() {

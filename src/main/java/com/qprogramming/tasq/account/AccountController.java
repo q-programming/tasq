@@ -276,6 +276,20 @@ public class AccountController {
         return "redirect:" + request.getHeader("Referer");
     }
 
+    @RequestMapping(value = "/sidebar")
+    @ResponseBody
+    public ResponseEntity saveSidebarSize(@RequestParam Boolean enable) {
+        Account account = Utils.getCurrentAccount();
+        if (account == null) {
+            LOG.error("Something went wrong while fetching current account");
+            return ResponseEntity.badRequest().body("Error while saving property");
+        }
+        account.setSmallSidebar(enable);
+        accountSrv.save(account, false);
+        return ResponseEntity.ok("");
+    }
+
+
     private String getAvatarDir() {
         return appSrv.getProperty(AppService.TASQROOTDIR) + File.separator + AVATAR_DIR + File.separator;
     }

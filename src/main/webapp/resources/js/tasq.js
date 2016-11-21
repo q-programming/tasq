@@ -86,6 +86,21 @@ $(document).on("click", ".menu-toggle", function () {
     indicator.toggleClass('fa-toggle-down');
     indicator.toggleClass('fa-toggle-right');
 });
+$(document).on("click", "#small-sidebar-show", function (e) {
+    e.preventDefault();
+    $("#sidebar-div").hide("slide");
+    $(".main").toggleClass("col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2").toggleClass("col-sm-12 col-md-12 big");
+    $("#small-sidebar-div").show("slide");
+    saveSmallSidebarSize(true);
+});
+$(document).on("click", "#sidebar-show", function (e) {
+    e.preventDefault();
+    $("#sidebar-div").show("slide");
+    $(".main").toggleClass("col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2").toggleClass("col-sm-12 col-md-12 big");
+    $("#small-sidebar-div").hide("slide");
+    saveSmallSidebarSize(false);
+});
+
 
 function getTaskType(type) {
     switch (type) {
@@ -118,7 +133,7 @@ function getTaskType(type) {
     }
     ;
 }
-var currentAccount=-1;
+var currentAccount = -1;
 $(document).on("click", ".avatar.small.member", function () {
     var account = $(this).data('account');
     //first show all
@@ -197,33 +212,35 @@ $(document).on("click", ".tag_filter", function () {
     }
 });
 
-function addMessagesEvents(){
+function addMessagesEvents() {
     var minimized_elements = $('div.quote > table.worklog_table > tbody > tr > td');
 
-    minimized_elements.each(function(){
+    minimized_elements.each(function () {
         var t = $(this).text();
-        if(t.length < 500) {return;}
+        if (t.length < 500) {
+            return;
+        }
 
         $(this).html(
-            t.slice(0,500)+'<span>... </span>&nbsp;<a href="#" class="more-info"><i class="fa fa-caret-square-o-down" aria-hidden="true"></i></a>'+
-            '<span style="display:none;">'+ t.slice(500,t.length)+'&nbsp;<a href="#" class="less-info"><i class="fa fa-caret-square-o-up" aria-hidden="true"></i></a></span>'
+            t.slice(0, 500) + '<span>... </span>&nbsp;<a href="#" class="more-info"><i class="fa fa-caret-square-o-down" aria-hidden="true"></i></a>' +
+            '<span style="display:none;">' + t.slice(500, t.length) + '&nbsp;<a href="#" class="less-info"><i class="fa fa-caret-square-o-up" aria-hidden="true"></i></a></span>'
         );
 
     });
 
-    $('a.more-info', minimized_elements).click(function(event){
+    $('a.more-info', minimized_elements).click(function (event) {
         event.preventDefault();
         $(this).hide().prev().hide();
         $(this).next().show();
     });
 
-    $('a.less-info', minimized_elements).click(function(event){
+    $('a.less-info', minimized_elements).click(function (event) {
         event.preventDefault();
         $(this).parent().hide().prev().show().prev().show();
     });
 }
 
-function fixOldTables(){
+function fixOldTables() {
     var oldTables = $('table.worklog_table');
     oldTables.each(function () {
         var t = $(this).addClass("table");

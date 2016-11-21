@@ -13,6 +13,9 @@
 .white-frame.sidepadded {
     padding: 10px 25px;
 }
+.big > .main-container{
+    margin-left: 35px;
+}
 
 .hidden {
     visibility: hidden;
@@ -771,6 +774,11 @@ body {
         background-color: #f5f5f5;
         border-right: 1px solid #eee;
     }
+    .sidebar.smaller{
+        top:52px;
+        padding: -1px;
+        display: none;
+    }
 }
 
 /* Sidebar navigation */
@@ -781,6 +789,10 @@ body {
     /* 	background: white; */
     /*     margin-left: -8px; */
     /*     border-radius: 0px; */
+}
+.nav-bottom{
+    position: fixed !important;
+    bottom: 0;
 }
 
 a.black-link {

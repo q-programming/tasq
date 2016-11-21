@@ -1,6 +1,8 @@
 package com.qprogramming.tasq.error;
 
 import com.google.common.base.Throwables;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,6 +14,8 @@ import java.text.MessageFormat;
 
 @Controller
 class CustomErrorController {
+
+    private static final Logger LOG = LoggerFactory.getLogger(CustomErrorController.class);
 
     /**
      * Display an error page, as defined in web.xml <code>custom-error</code>
@@ -38,8 +42,10 @@ class CustomErrorController {
                 requestUri, exceptionMessage);
 
         model.addAttribute("errorMessage", message);
+        LOG.error("General error {} for {} with message {}", statusCode, requestUri, exceptionMessage);
         return "generalError";
     }
+
     @RequestMapping("404")
     public String pageNotFound() {
         return "404";
