@@ -169,11 +169,7 @@ public class TaskController {
             project.getTasks().add(task);
             project.setLastTaskNo(taskCount);
             // assigne
-            if (StringUtils.isNotBlank(taskForm.getAssignee())) {
-                Account assignee = accSrv.findByEmail(taskForm.getAssignee());
-                task.setAssignee(assignee);
-                watchSrv.addToWatchers(task, assignee);
-            }
+            setCreatedTaskAssignee(taskForm, task);
             // lookup for sprint
             // Create log work
             if (taskForm.getAddToSprint() != null) {
@@ -218,6 +214,16 @@ public class TaskController {
             return REDIRECT_TASK + taskID;
         }
         return null;
+    }
+
+    private void setCreatedTaskAssignee(TaskForm taskForm, Task task) {
+        if (StringUtils.isNotBlank(taskForm.getAssignee())) {
+            Account assignee = accSrv.findByEmail(taskForm.getAssignee());
+            if (assignee != null) {
+                task.setAssignee(assignee);
+                watchSrv.addToWatchers(task, assignee);
+            }
+        }
     }
 
     @RequestMapping(value = "/task/{id}/edit", method = RequestMethod.GET)

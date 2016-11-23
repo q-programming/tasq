@@ -140,7 +140,7 @@
                     $(".agile-menu").show("blind");
                     $(".manage-menu").hide("blind");
                 },
-                yOffset: -20
+                yOffset: -40
             },
             </c:if>
             {
@@ -158,6 +158,12 @@
                     $(".agile-menu").show("blind");
                 }
                 </c:if>
+            },
+            {
+                title: "Small Side menu",
+                content: "If you'd like to have more space you can click this button to toggle smaller side menu, showing only vital application shortcuts<br/> Your choice will be saved to your account",
+                target: "small-sidebar-show",
+                placement: "top"
             },
 
 //                END OF SIDE MENU
@@ -203,6 +209,11 @@
         ]
     };
     $('#start').click(function () {
+        //toggle side menu
+        $("#sidebar-div").show();
+        $(".main").addClass("col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2").removeClass("col-sm-12 col-md-12 big");
+        $("#small-sidebar-div").hide();
+
         hopscotch.startTour(tour);
     });
     // Start the tour!

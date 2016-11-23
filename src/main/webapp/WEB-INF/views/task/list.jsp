@@ -324,7 +324,7 @@
                 <%-- 			<c:if test="${task.estimated}"> --%>
                 <td class="hidden-xs hidden-sm">
                     <div class="progress" style="width: 100px;">
-                        <c:set var="logged_class"></c:set>
+                        <c:set var="logged_class"/>
                         <c:set var="percentage">${100-task.percentage_left}</c:set>
                         <c:if
                                 test="${task.percentage_logged gt 100 or task.state eq 'BLOCKED'}">
@@ -347,7 +347,7 @@
                     </div>
                 </td>
                 <%-- 			</c:if> --%>
-                <td class="${blinker}"><t:state state="${task.state}"></t:state></td>
+                <td class="${blinker}"><t:state state="${task.state}"/></td>
                 <td><c:if test="${empty task.assignee }">
                     <i><s:message code="task.unassigned"/></i>
                     <c:if test="${user.getIsUser()}">
@@ -375,7 +375,7 @@
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="centerPadded">
-                <img src="<c:url value="/resources/img/loading.gif"/>"></img>
+                <img src="<c:url value="/resources/img/loading.gif"/>">
                 <br><s:message code="task.export.prepareFile"/>
             </div>
         </div>

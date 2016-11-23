@@ -440,7 +440,7 @@
             }
         });
         $("#assignMe").click(function () {
-            $("#assignee").val("${user.id}");
+            $("#assignee").val("${user.email}");
             $("#assignee_auto").val("${user}");
             $("#assignee_auto").removeClass("input-italic");
         });

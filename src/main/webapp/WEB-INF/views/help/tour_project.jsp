@@ -51,16 +51,16 @@
              data-original-title="0&nbsp;Blocked">
         </div>
     </div>
-    <div id="project-chart" class="row" style="height: 300px; width: 90%; margin: 20px auto;">
+    <div id="project-chart" class="row" style="width: 90%; margin: 20px auto;">
         <img class="responsive" src="<c:url value="/resources/img/help/sample_chart.png"/>">
     </div>
-    <div style="display: inherit; font-size: small; float: right;margin-top: 20px;">
+    <div class="row" style="display: inherit; font-size: small; float: right;margin-top: 20px;">
         <span id="project-30" class="clickable" data-all="false"><span id="moreEventsCheck"><i
                 class="fa fa-square-o"></i></span> Show more than 30 days</span>
     </div>
 
-    <div style="display: table; width: 100%">
-        <div style="display: table-cell; width: 600px">
+    <div class="row">
+        <div class="col-md-6 col-sm-12">
             <h3>
                 Latest events</h3>
             <div class="text-center">
@@ -304,7 +304,7 @@
             </div>
 
         </div>
-        <div style="display: table-cell; padding-left: 30px">
+        <div class="col-md-6 col-sm-12">
             <h3>
                 <a href="#" style="color: black">Tasks</a>
                 <div class="pull-right">
