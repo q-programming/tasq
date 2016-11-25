@@ -4,6 +4,7 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.error.TasqException;
+import com.qprogramming.tasq.mail.MailMail;
 import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.manage.ThemeService;
 import com.qprogramming.tasq.support.Utils;
@@ -13,9 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Errors;
@@ -46,13 +44,15 @@ public class SignupController {
     private MessageSource msg;
     private ThemeService themeSrv;
     private AppService appSrv;
+    private MailMail mailer;
 
     @Autowired
-    public SignupController(AccountService accountSrv, MessageSource msg, ThemeService themeSrv, AppService appSrv) {
+    public SignupController(AccountService accountSrv, MessageSource msg, ThemeService themeSrv, AppService appSrv, MailMail mailer) {
         this.accountSrv = accountSrv;
         this.msg = msg;
         this.themeSrv = themeSrv;
         this.appSrv = appSrv;
+        this.mailer = mailer;
     }
 
     @RequestMapping(value = "signup")
@@ -104,10 +104,13 @@ public class SignupController {
         // copy default avatar
         File userAvatar = new File(getAvatar(account.getId()));
         Utils.copyFile(sc, "/resources/img/avatar.png", userAvatar);
-        if (!accountSrv.sendConfirmationLink(account)) {
-            throw new TasqException(msg.getMessage("error.email.sending", null, Utils.getDefaultLocale()));
+        if (mailer.testConnection()) {
+            if (!accountSrv.sendConfirmationLink(account)) {
+                throw new TasqException(msg.getMessage("error.email.sending", null, Utils.getDefaultLocale()));
+            }
+            MessageHelper.addSuccessAttribute(ra, msg.getMessage("signup.success", null, Utils.getDefaultLocale()));
         }
-        MessageHelper.addSuccessAttribute(ra, msg.getMessage("signup.success", null, Utils.getDefaultLocale()));
+        MessageHelper.addWarningAttribute(ra, msg.getMessage("signup.success.emailerror", null, Utils.getDefaultLocale()));
         return "redirect:/";
     }
 

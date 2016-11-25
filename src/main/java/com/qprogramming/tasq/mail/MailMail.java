@@ -97,7 +97,23 @@ public class MailMail {
     }
 
     /**
+     * Test current connection
+     *
+     * @return true if everything is ok, false if connection is down
+     */
+    public boolean testConnection() {
+        try {
+            ((JavaMailSenderImpl) mailSender).testConnection();
+        } catch (MessagingException e) {
+            return false;
+        }
+        return true;
+    }
+
+
+    /**
      * Test if connection is correct. If there are some errors MessagingException will be thrown which should be catched
+     *
      * @param host
      * @param port
      * @param username

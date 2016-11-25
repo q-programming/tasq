@@ -108,7 +108,7 @@ public class SignupControllerTest {
     public void setUp() {
         accountSrv = new AccountService(accRepoMock, msgMock, velocityMock, resourceMock, mailerMock, encoderMock,
                 appSrvMock);
-        signupCtr = new SignupController(accountSrv, msgMock, themeSrvMock, appSrvMock);
+        signupCtr = new SignupController(accountSrv, msgMock, themeSrvMock, appSrvMock, mailerMock);
         testAccount = TestUtils.createAccount();
         testAccount.setLanguage("en");
         when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");
@@ -191,7 +191,7 @@ public class SignupControllerTest {
         PasswordResetForm form = fillPasswordForm();
         Errors errors = new BeanPropertyBindingResult(form, "form");
         form.setConfirmPassword("wrong");
-        signupCtr.resetSubmit(form, errors, raMock,requestMock);
+        signupCtr.resetSubmit(form, errors, raMock, requestMock);
         Assert.assertTrue(errors.hasErrors());
     }
 
@@ -201,7 +201,7 @@ public class SignupControllerTest {
 
         PasswordResetForm form = fillPasswordForm();
         Errors errors = new BeanPropertyBindingResult(form, "form");
-        signupCtr.resetSubmit(form, errors, raMock,requestMock);
+        signupCtr.resetSubmit(form, errors, raMock, requestMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
     }
@@ -213,7 +213,7 @@ public class SignupControllerTest {
         when(encoderMock.encode(any(CharSequence.class))).thenReturn("encodedPassword");
         PasswordResetForm form = fillPasswordForm();
         Errors errors = new BeanPropertyBindingResult(form, "form");
-        signupCtr.resetSubmit(form, errors, raMock,requestMock);
+        signupCtr.resetSubmit(form, errors, raMock, requestMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
     }

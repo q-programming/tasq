@@ -33,16 +33,9 @@ import java.util.stream.Collectors;
 @Service
 public class WorkLogService {
 
-    @Autowired
     private WorkLogRepository wlRepo;
-
-    @Autowired
     private TaskService taskSrv;
-
-    @Autowired
     private ProjectService projSrv;
-
-    @Autowired
     private EventsService eventSrv;
 
     @Autowired
@@ -125,7 +118,7 @@ public class WorkLogService {
             Hibernate.initialize(loggedTask.getWorklog());
             loggedTask.addWorkLog(wl);
             loggedTask.setLastUpdate(new Date());
-            taskSrv.save(task);
+            taskSrv.save(loggedTask);
             eventSrv.addWatchEvent(wl, msg, new Date());
         }
     }
