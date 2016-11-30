@@ -11,6 +11,7 @@ import com.qprogramming.tasq.task.watched.WatchedTask;
 import com.qprogramming.tasq.task.watched.WatchedTaskService;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLog;
+import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,22 +21,24 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.velocity.VelocityEngineUtils;
 
+import java.io.StringWriter;
 import java.util.*;
 
 @Service
 public class EventsService {
 
-    public static final String APPLICATION_NAME = "applicationName";
+    private static final String APPLICATION_NAME = "applicationName";
     public static final String TASK = "task";
-    public static final String WL_MESSAGE = "wlMessage";
-    public static final String LOG_KEY = "log";
-    public static final String CUR_ACCOUNT = "curAccount";
-    public static final String EVENT_STR = "eventStr";
-    public static final String APPLICATION = "application";
-    public static final String ACCOUNT = "account";
+    private static final String WL_MESSAGE = "wlMessage";
+    private static final String LOG_KEY = "log";
+    private static final String CUR_ACCOUNT = "curAccount";
+    private static final String EVENT_STR = "eventStr";
+    private static final String APPLICATION = "application";
+    private static final String ACCOUNT = "account";
     private static final Logger LOG = LoggerFactory.getLogger(EventsService.class);
+    private static final String UTF_8 = "UTF-8";
+    private static final String EMAIL_TEMP_PATH = "email/";
     private EventsRepository eventsRepo;
     private WatchedTaskService watchSrv;
     private MailMail mailer;
@@ -135,18 +138,18 @@ public class EventsService {
                         subject.append("] ");
                         subject.append(task.getName());
                         String type = task.getType().getCode();
-                        Map<String, Object> model = new HashMap<>();
-                        model.put(ACCOUNT, account);
-                        model.put(APPLICATION, baseUrl);
-                        model.put(APPLICATION_NAME, applicationName);
-                        model.put(TASK, task);
-                        model.put(WL_MESSAGE, wlMessage);
-                        model.put(LOG_KEY, log);
-                        model.put(CUR_ACCOUNT, Utils.getCurrentAccount());
-                        model.put(EVENT_STR, eventStr);
-                        String message;
-                        message = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
-                                "email/" + account.getLanguage() + "/task.vm", "UTF-8", model);
+                        StringWriter stringWriter = new StringWriter();
+                        VelocityContext context = new VelocityContext();
+                        context.put(ACCOUNT, account);
+                        context.put(APPLICATION, baseUrl);
+                        context.put(APPLICATION_NAME, applicationName);
+                        context.put(TASK, task);
+                        context.put(WL_MESSAGE, wlMessage);
+                        context.put(LOG_KEY, log);
+                        context.put(CUR_ACCOUNT, Utils.getCurrentAccount());
+                        context.put(EVENT_STR, eventStr);
+                        velocityEngine.mergeTemplate(EMAIL_TEMP_PATH + account.getLanguage() + "/task.vm", UTF_8, context, stringWriter);
+                        String message = stringWriter.toString();
                         LOG.info(account.getEmail());
                         LOG.info(subject.toString());
                         LOG.info(message);
@@ -186,16 +189,16 @@ public class EventsService {
             String subject = msg.getMessage("event.newSystemEvent",
                     new Object[]{Utils.getCurrentAccount(), eventStr}, locale);
 
-            Map<String, Object> model = new HashMap<>();
-            model.put(ACCOUNT, account);
-            model.put("type", type);
-            model.put(APPLICATION, baseUrl);
-            model.put(APPLICATION_NAME, applicationName);
-            model.put("project", project);
-            model.put(CUR_ACCOUNT, Utils.getCurrentAccount());
-            String message;
-            message = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
-                    "email/" + account.getLanguage() + "/project.vm", "UTF-8", model);
+            StringWriter stringWriter = new StringWriter();
+            VelocityContext context = new VelocityContext();
+            context.put(ACCOUNT, account);
+            context.put("type", type);
+            context.put(APPLICATION, baseUrl);
+            context.put(APPLICATION_NAME, applicationName);
+            context.put("project", project);
+            context.put(CUR_ACCOUNT, Utils.getCurrentAccount());
+            velocityEngine.mergeTemplate(EMAIL_TEMP_PATH + account.getLanguage() + "/project.vm", UTF_8, context, stringWriter);
+            String message = stringWriter.toString();
             mailer.sendMail(MailMail.NOTIFICATION, account.getEmail(), subject, message,
                     resourceSrv.getBasicResourceMap());
         }

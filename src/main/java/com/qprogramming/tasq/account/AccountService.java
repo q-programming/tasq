@@ -9,6 +9,7 @@ import com.qprogramming.tasq.mail.MailMail;
 import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.manage.Theme;
 import com.qprogramming.tasq.support.Utils;
+import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,9 +22,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.velocity.VelocityEngineUtils;
 
-import java.util.*;
+import java.io.StringWriter;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author romanjak
@@ -32,14 +36,16 @@ import java.util.*;
 @Service
 public class AccountService {
 
-    public static final String CUR_ACCOUNT = "curAccount";
-    public static final String THEME = "theme";
-    public static final String AVATAR = "avatar";
+    private static final String CUR_ACCOUNT = "curAccount";
+    private static final String THEME = "theme";
+    private static final String AVATAR = "avatar";
     private static final String APPLICATION = "application";
     private static final String LINK = "link";
     private static final String APPLICATION_NAME = "applicationName";
     private static final String ACCOUNT = "account";
     private static final Logger LOG = LoggerFactory.getLogger(AccountService.class);
+    private static final String UTF_8 = "UTF-8";
+    private static final String EMAIL_TEMP_PATH = "email/";
     @Value("${default.locale}")
     private String defaultLang;
 
@@ -133,13 +139,14 @@ public class AccountService {
         String baseUrl = appSrv.getProperty(AppService.URL);
         String confirmlink = baseUrl + "/confirm?id=" + account.getUuid();
         String subject = msg.getMessage("signup.register", new Object[]{applicationName}, Utils.getDefaultLocale());
-        Map<String, Object> model = new HashMap<>();
-        model.put(ACCOUNT, account);
-        model.put(LINK, confirmlink);
-        model.put(APPLICATION, baseUrl);
-        model.put(APPLICATION_NAME, applicationName);
-        String message = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
-                "email/" + Utils.getDefaultLocale() + "/register.vm", "UTF-8", model);
+        StringWriter stringWriter = new StringWriter();
+        VelocityContext context = new VelocityContext();
+        context.put(ACCOUNT, account);
+        context.put(LINK, confirmlink);
+        context.put(APPLICATION, baseUrl);
+        context.put(APPLICATION_NAME, applicationName);
+        velocityEngine.mergeTemplate(EMAIL_TEMP_PATH + Utils.getDefaultLocale() + "/register.vm", UTF_8, context, stringWriter);
+        String message = stringWriter.toString();
         return mailer.sendMail(MailMail.REGISTER, account.getEmail(), subject, message,
                 resourceSrv.getBasicResourceMap());
     }
@@ -152,13 +159,14 @@ public class AccountService {
         url.append("password?id=");
         url.append(account.getUuid());
         String subject = msg.getMessage("singin.password.reset", new Object[]{applicationName}, new Locale(account.getLanguage()));
-        Map<String, Object> model = new HashMap<>();
-        model.put(ACCOUNT, account);
-        model.put(LINK, url);
-        model.put(APPLICATION_NAME, applicationName);
-        model.put(APPLICATION, baseUrl);
-        String message = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
-                "email/" + account.getLanguage() + "/password.vm", "UTF-8", model);
+        VelocityContext context = new VelocityContext();
+        StringWriter stringWriter = new StringWriter();
+        context.put(ACCOUNT, account);
+        context.put(LINK, url);
+        context.put(APPLICATION, baseUrl);
+        context.put(APPLICATION_NAME, applicationName);
+        velocityEngine.mergeTemplate(EMAIL_TEMP_PATH + account.getLanguage() + "/password.vm", UTF_8, context, stringWriter);
+        String message = stringWriter.toString();
         LOG.info(url.toString());
         return mailer.sendMail(MailMail.OTHER, account.getEmail(), subject, message, resourceSrv.getBasicResourceMap());
     }
@@ -166,13 +174,14 @@ public class AccountService {
     public boolean sendInvite(String email, Theme theme) {
         String baseUrl = appSrv.getProperty(AppService.URL);
         String subject = msg.getMessage("panel.invite.subject", new Object[]{applicationName}, Utils.getDefaultLocale());
-        Map<String, Object> model = new HashMap<>();
-        model.put(APPLICATION, baseUrl);
-        model.put(APPLICATION_NAME, applicationName);
-        model.put(CUR_ACCOUNT, Utils.getCurrentAccount());
-        model.put(THEME, theme);
-        String message = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
-                "email/" + Utils.getDefaultLocale() + "/invite.vm", "UTF-8", model);
+        StringWriter stringWriter = new StringWriter();
+        VelocityContext context = new VelocityContext();
+        context.put(APPLICATION, baseUrl);
+        context.put(APPLICATION_NAME, applicationName);
+        context.put(CUR_ACCOUNT, Utils.getCurrentAccount());
+        context.put(THEME, theme);
+        velocityEngine.mergeTemplate(EMAIL_TEMP_PATH + Utils.getDefaultLocale() + "/invite.vm", UTF_8, context, stringWriter);
+        String message = stringWriter.toString();
         Map<String, Resource> resources = resourceSrv.getBasicResourceMap();
         resources.put(AVATAR, resourceSrv.getUserAvatar());
         return mailer.sendMail(MailMail.REGISTER, email, subject, message, resources);
