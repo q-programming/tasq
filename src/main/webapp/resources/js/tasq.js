@@ -239,10 +239,13 @@ function addMessagesEvents() {
         $(this).parent().hide().prev().show().prev().show();
     });
 }
+function detectmob() {
+    return window.innerWidth <= 800;
+}
 
 function fixOldTables() {
     var oldTables = $('table.worklog_table');
     oldTables.each(function () {
-        var t = $(this).addClass("table");
+        $(this).addClass("table");
     })
 }

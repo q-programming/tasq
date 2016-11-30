@@ -167,7 +167,7 @@
         </a>
     </li>
     <li class="nav-bottom">
-        <a href="#" id="small-sidebar-show"><i class="fa fa-lg fw fa-caret-square-o-left" aria-hidden="true"></i>&nbsp;<s:message code="menu.small.sidebar.show"/> </a>
+        <a href="#" id="small-sidebar-show"><i class="fa fa-lg fw fa-angle-double-left" aria-hidden="true"></i>&nbsp;<s:message code="menu.small.sidebar.show"/> </a>
     </li>
 </ul>
 <script>

@@ -56,7 +56,7 @@
         <li class="nav-bottom">
             <a href="#" id="sidebar-show" class="a-tooltip" data-container="body" data-placement="right"
                title="<s:message code="menu.small.sidebar.hide"/>">
-                <i class="fa fa-lg fa-fw fa-caret-square-o-right" aria-hidden="true"></i></a>
+                <i class="fa fa-lg fa-fw fa-angle-double-right" aria-hidden="true"></i></a>
         </li>
     </ul>
 </div>
