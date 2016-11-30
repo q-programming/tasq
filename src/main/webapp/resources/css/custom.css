@@ -141,7 +141,7 @@ a.filter {
 }
 
 .mod-header {
-    background: url(/resources/img/mod_header_bg.png) repeat-x center;
+    background: url(images/mod_header_bg.png) repeat-x center;
     margin-top: 15px;
     padding-bottom: 5px;
 }
