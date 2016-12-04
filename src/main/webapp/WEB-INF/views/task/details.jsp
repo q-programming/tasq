@@ -1522,7 +1522,7 @@
         }
     });
     //disable shortcuts on search
-    $("#searchField").focusin(function () {
+    $(".search-query").focusin(function () {
         inputInProgress = true;
     }).focusout(function () {
         inputInProgress = false;
