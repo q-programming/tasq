@@ -24,11 +24,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Controller
@@ -38,6 +40,7 @@ public class HomeController {
     private ProjectService projSrv;
     private EventsService eventSrv;
     private AppService appSrv;
+    private SessionLocaleResolver localeResolver;
 
     @Value("${skip.landing.page}")
     private String skipLandingPage;
@@ -46,17 +49,19 @@ public class HomeController {
     private String version;
 
     @Autowired
-    public HomeController(TaskService taskSrv, ProjectService projSrv, AppService appSrv, EventsService eventSrv) {
+    public HomeController(TaskService taskSrv, ProjectService projSrv, AppService appSrv, EventsService eventSrv, SessionLocaleResolver localeResolver) {
         this.taskSrv = taskSrv;
         this.projSrv = projSrv;
         this.appSrv = appSrv;
         this.eventSrv = eventSrv;
+        this.localeResolver = localeResolver;
     }
 
     @SuppressWarnings("ConstantConditions")
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String index(Account account, Model model) {
         if (account == null) {
+            localeResolver.setDefaultLocale(new Locale(appSrv.getProperty(AppService.DEFAULTLANG)));
             if (Boolean.parseBoolean(skipLandingPage)) {
                 return "signin";
             } else {
