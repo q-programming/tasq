@@ -1034,6 +1034,11 @@ td.width200 {
     color: rgba(0, 0, 0, 0.8);
 }
 
+.passwordStrength >.progress {
+    height: 10px;
+    margin-top: -10px;
+}
+
 /* .search { position: relative; } */
 /* .search input { text-indent: 30px;} */
 /* .search .fa-search {  */

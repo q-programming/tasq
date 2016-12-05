@@ -30,16 +30,17 @@ import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.io.File;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Controller
 public class SignupController {
+    public static final String PASSWORD_REGEXP = "^^(?=.*[A-Z])(?=.*[0-9])(?=.*[a-z].*[a-z].*[a-z]).{8,}$";
     private static final Logger LOG = LoggerFactory.getLogger(SignupController.class);
-
     private static final String AVATAR_DIR = "avatar";
     private static final String PNG = ".png";
     private static final String LOGO = "logo";
     private static final String SMALL = "small_";
-
     private AccountService accountSrv;
     private MessageSource msg;
     private ThemeService themeSrv;
@@ -71,14 +72,20 @@ public class SignupController {
             errors.rejectValue("password", "error.notMatchedPasswords");
             return null;
         }
+        Pattern pattern = Pattern.compile(PASSWORD_REGEXP);
+        Matcher matcher = pattern.matcher(signupForm.getPassword());
+        if (!matcher.matches()) {
+            errors.rejectValue("password", "signup.password.strength.hint");
+            return null;
+        }
         Utils.setHttpRequest(request);
         if (null != accountSrv.findByEmail(signupForm.getEmail())) {
-            errors.rejectValue("email", "error.email.notunique");
+            errors.rejectValue("email", "error.email.notunique", new Object[]{signupForm.getEmail()}, Utils.getDefaultLocale().toString());
             return null;
         }
 
         if (null != accountSrv.findByUsername((signupForm.getUsername()))) {
-            errors.rejectValue("username", "error.username.notunique");
+            errors.rejectValue("username", "error.username.notunique", new Object[]{signupForm.getUsername()}, Utils.getDefaultLocale().toString());
             return null;
         }
         HttpSession session = request.getSession();
@@ -88,16 +95,19 @@ public class SignupController {
         account.setRole(Roles.valueOf(appSrv.getProperty(AppService.DEFAULTROLE)));
         if (accountSrv.findAll().isEmpty()) {
             // FIRST ACCOUNT EVER, LAUNCH SETUP TASKS
+            LOG.info("Creating first user in application and making him administrator");
             account.setRole(Roles.ROLE_ADMIN);
             // Copy logo
             File appLogo = new File(getAvatarDir() + LOGO + PNG);
             File smallAppLogo = new File(getAvatarDir() + SMALL + LOGO + PNG);
             Utils.copyFile(sc, "/resources/img/logo.png", appLogo);
             Utils.copyFile(sc, "/resources/img/small_logo.png", smallAppLogo);
+            LOG.info("Default logo app coppied into {}", appLogo.getAbsolutePath());
             // set base url
             Utils.setHttpRequest(request);
             String url = Utils.getBaseURL();
             appSrv.setProperty(AppService.URL, url);
+            LOG.info("App url set to {}", url);
         }
         account.setTheme(themeSrv.getDefault());
         account = accountSrv.save(account, true);

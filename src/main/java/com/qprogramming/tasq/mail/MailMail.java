@@ -105,6 +105,7 @@ public class MailMail {
         try {
             ((JavaMailSenderImpl) mailSender).testConnection();
         } catch (MessagingException e) {
+            LOG.error("SMTP server {}:{} is not responding", ((JavaMailSenderImpl) mailSender).getHost(), ((JavaMailSenderImpl) mailSender).getPort());
             return false;
         }
         return true;

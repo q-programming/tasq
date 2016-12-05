@@ -55,7 +55,7 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class SignupControllerTest {
 
-    private static final String PASSWORD = "password";
+    private static final String PASSWORD = "Password1";
     private static final String EMAIL = "user@test.com";
     private static final String NEW_EMAIL = "newuser@test.com";
     @Rule
@@ -182,6 +182,24 @@ public class SignupControllerTest {
         SignupForm form = fillForm();
         Errors errors = new BeanPropertyBindingResult(form, "form");
         form.setConfirmPassword("wrong");
+        signupCtr.signup(form, errors, raMock, requestMock);
+        Assert.assertTrue(errors.hasErrors());
+    }
+
+    @Test
+    public void SignupPasswordToWeakTest() {
+        String weak = "weak";
+        String longer = "verylongpasswordbutmissingAdigit";
+        SignupForm form = fillForm();
+        Errors errors = new BeanPropertyBindingResult(form, "form");
+        form.setPassword(weak);
+        form.setConfirmPassword(weak);
+        signupCtr.signup(form, errors, raMock, requestMock);
+        Assert.assertTrue(errors.hasErrors());
+        form = fillForm();
+        errors = new BeanPropertyBindingResult(form, "form");
+        form.setPassword(longer);
+        form.setConfirmPassword(longer);
         signupCtr.signup(form, errors, raMock, requestMock);
         Assert.assertTrue(errors.hasErrors());
     }

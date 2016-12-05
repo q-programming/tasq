@@ -1,7 +1,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
-
+<script src="<c:url value="/resources/js/pwstrength-bootstrap.js"/>"></script>
 <c:set var="name_txt">
     <s:message code="signup.name"/>
 </c:set>
@@ -64,7 +64,7 @@
                 <i class="fa fa-times inputcheck invalid" style="display: none;"></i>
             </div>
         </div>
-        <div class="form-group">
+        <div class="form-group has-feedback">
             <label for="username" class="col-lg-3 control-label">${username_txt}</label>
             <div class="col-lg-9">
                 <form:input path="username" class="form-control"
@@ -84,6 +84,13 @@
                 <i class="fa fa-times inputcheck invalid" style="display: none;"></i>
             </div>
         </div>
+        <div id="pwdContainer" class="form-group">
+            <div class="col-lg-offset-3 col-lg-9 ">
+                <div class="passwordStrength a-tooltip" title="<s:message code="signup.password.strength"/> "></div>
+                <span class="help-block"><s:message code="signup.password.strength.hint"/>&nbsp;</span>
+            </div>
+
+        </div>
         <div class="form-group">
             <label for="confirmPassword" class="col-lg-3 control-label">${confirmPassword_txt}</label>
             <div class="col-lg-9">
@@ -97,7 +104,7 @@
 
         <div class="form-group">
             <div class="col-lg-offset-3 col-lg-9">
-                <button type="submit" class="btn btn-default">
+                <button id="submitbtn" type="submit" class="btn btn-default" disabled>
                     <s:message code="signup.signup" text="Sign up"/>
                 </button>
             </div>
@@ -114,6 +121,7 @@
     </fieldset>
 </form:form>
 <script>
+
     $("form#signupForm :input").each(function () {
         $('#firstname').blur(function () {
             if ($(this).val() == "") {
@@ -167,4 +175,27 @@
         field.siblings(".inputcheck.valid").show();
         field.siblings(".inputcheck.invalid").hide();
     }
+    var options = {};
+    options.ui = {
+        container: "#pwdContainer",
+        showVerdictsInsideProgressBar: false,
+        viewports: {
+            progress: ".passwordStrength"
+        },
+        colorClasses: ["danger", "danger", "warning", "warning", "success", "success"]
+    };
+    options.common = {
+        minChar: 8,
+        onScore: function (options, word, score) {
+            $('.a-tooltip').tooltip();
+            if (score > 10) {
+                $("#submitbtn").prop('disabled', false);
+            } else {
+                $("#submitbtn").prop('disabled', true);
+            }
+            return score;
+        }
+    };
+    $("#password").pwstrength(options).pwstrength("ruleActive", "wordOneSpecialChar", false);
+    $('.a-tooltip').tooltip();
 </script>
