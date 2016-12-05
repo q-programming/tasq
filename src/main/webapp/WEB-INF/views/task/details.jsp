@@ -80,7 +80,8 @@
                     <c:if test="${task.subtask}">
                         <li>
                             <a href="#" class="convert2task" data-toggle="modal" data-target="#convert2task"
-                               data-taskid="${task.id}" data-type="${task.type}" data-project="${task.project.projectId}">
+                               data-taskid="${task.id}" data-type="${task.type}"
+                               data-project="${task.project.projectId}">
                                 <i class="fa fw fa-level-up"></i>&nbsp;<s:message
                                     code="task.subtasks.2task"/>
                             </a>
@@ -368,7 +369,8 @@
                 <c:if test="${task.estimate eq '0m' && task.remaining ne '0m'}">
                     <c:set var="remaining_bar">    ${100-task.percentage_logged}</c:set>
                 </c:if>
-                <table id="estimatesToggle" style="<c:if test="${task.remaining eq '0m' && task.loggedWork eq '0m' && task.estimate eq '0m'}"> display: none;</c:if>">
+                <table id="estimatesToggle" style="<c:if
+                        test="${task.remaining eq '0m' && task.loggedWork eq '0m' && task.estimate eq '0m'}"> display: none;</c:if>">
                     <tr>
                         <c:if test="${not empty taskEstimate}">
                             <td style="width:15px;"></td>
@@ -761,7 +763,8 @@
                     <c:if test="${project_participant}">
                         <div id="assign_button_div" class="row">
                             <div class="col-md-12 text-center">
-                                <span class="btn btn-default btn-sm a-tooltip assignToTask" style="width: 150px;margin-top: 5px;"
+                                <span class="btn btn-default btn-sm a-tooltip assignToTask"
+                                      style="width: 150px;margin-top: 5px;"
                                       title="<s:message code="task.assign"/> (a)" data-toggle="modal"
                                       data-target="#assign_modal" data-taskID="${task.id}"
                                       data-assignee="${task.assignee}"
@@ -866,9 +869,10 @@
                                 </div>
                                     <%-- Comment buttons --%>
                                 <div class="buttons_panel" style="float: right">
-                                    <a href="<c:url value="/task/${task.id}#c${comment.id}"/>"
-                                       title="<s:message code="comment.link" text="Link to this comment" />"
-                                       style="color: #676767"><i class="fa fa-link"></i></a>
+                                    <span data-url="<c:url value="/task/${task.id}#c${comment.id}"/>"
+                                          class="comment-link clickable a-tooltip"
+                                          title="<s:message code="comment.link" text="Link to this comment" />"
+                                          style="color: #676767"><i class="fa fa-link"></i></span>
                                     <c:if test="${user == comment.author }">
                                         <c:if test="${not empty comment.message}">
                                             <a href="#" class="comments_edit" data-toggle="modal"
@@ -903,6 +907,8 @@
                         </tr>
                     </c:forEach>
                 </table>
+                <%--textarea to copy comment link--%>
+                <textarea id="comment-link" style="display:none; position: relative; left: -10000px;"></textarea>
                 <%-- End of comments, comment addition div display --%>
                 <div id="comments_div" style="display: none">
                     <form id="commentForm" name="commentForm" method="post"
@@ -979,7 +985,7 @@
                         <div class="form-group">
                             <button class="btn btn-default pull-right addCommentButton" type="submit">
                                 <i class="fa fa-pencil"></i>
-                                <s:message code="main.edit" text="Edit"></s:message>
+                                <s:message code="main.edit" text="Edit"/>
                             </button>
                         </div>
                     </div>
@@ -1493,6 +1499,17 @@
                 return 'not yet added ';
         }
     }
+    $(".comment-link").on("click", function (e) {
+        e.preventDefault();
+        var url = getURLAbsolutePath() + $(this).data('url');
+        $("#comment-link").css('display', 'block').val(url).select();//show comment div for duration of copy
+        try {
+            document.execCommand('copy');
+            $("#comment-link").css('display', 'none');
+        } catch (err) {
+            console.error('There was error while trying to copy link');
+        }
+    });
 
     //----------- Key shortcuts -----------------------
     $(document).keyup(function (e) {
@@ -1548,5 +1565,4 @@
             'scrollTop': $('#comments_div').offset().top
         }, 2000);
     }
-
 </script>
