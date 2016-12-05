@@ -34,14 +34,9 @@
                 //check if greater that 1d
                 var days = $("#activeTaskTimer").attr('days');
                 if (days > 0) {
-                    bootbox.confirm(message, function (result) {
-                        if (result) {
-                            url += 'stop';
-                            window.location.href = url;
-                        } else {
-                            url += 'cancel';
-                            window.location.href = url;
-                        }
+                    bootbox.alert(message, function () {
+                        url += 'cancel';
+                        window.location.href = url;
                     });
                 } else {
                     url += 'stop';

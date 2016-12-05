@@ -798,9 +798,11 @@
                 <tr>
                     <td><b><s:message code="task.estimate"/></b></td>
                     <td>Time estimation of how much this task can take. Standard
-                        format should be used : *w *d *h *m (weeks, days, hours, minutes ;
+                        format should be used : *d *h *m (weeks, days, hours, minutes ;
                         where * is any number )<br>
-                        <i class="fa fa-exclamation-circle"></i>&nbsp;If only number is inputted , default (h) hours will be used.
+                        <i class="fa fa-exclamation-circle"></i>&nbsp;If only number is inputted , default (h) hours
+                        will be used. Also values longer than 4 weeks ( 28 days ) will be rejected as it's not reccomend
+                        to plan so long tasks , and they should be splitted to smaller once
                     </td>
                 </tr>
                 <tr>
@@ -1028,16 +1030,16 @@
                     <i class="fa fa-lg fa-calendar"></i> Log work
                 </button>
                 button to show logging modal window.<br>On it , input how much
-                time was spent on this task in format <i>*w *d *h *m</i> (weeks,
-                days, hours, minutes ; where * is any number ).<br>If work was
+                time was spent on this task in format <i>*d *h *m</i> (days, hours, minutes ; where * is any number
+                ).<br>If work was
                 done in other date ( for ex. yesterday ) , mark correct date and
                 time in <b>Date</b> and <b>Time</b> fields.<br> <br>By
                 default remaining time will be automatically reduced, or it can be
                 manually set by selecting <b><input type="radio"
                                                     name="estimate_reduce" id="estimate_manual" value="auto">
-                Set manually</b> radio button and inputing remaining time ( same format
+                Set manually</b> radio button and inputting remaining time ( same format
                 applies).<br>The remaining time can never be less than 0.<br>If
-                more work was logged in task, it will be marked on task detials
+                more work was logged in task, it will be marked on task details
                 screen accordingly.
             </p>
             <a class="anchor" id="taskstatus"></a>
@@ -1081,8 +1083,8 @@
             </p>
             <p>
                 <i class="fa fa-exclamation-circle"></i>&nbsp;If more than one day
-                is on timer , user will be asked to confirm if he in fact would like
-                to log this time. Please remember that Tasker uses 8h = 1d
+                is on timer , user will be redirected to task page and timer canceled, because it's not possible to log more than 1 day at once.
+                Please remember that Tasker uses 8h = 1d
                 conversion. This can be changed by admin
             <hr>
             <%--------------------------------SUBTASK ------------------------------------%>

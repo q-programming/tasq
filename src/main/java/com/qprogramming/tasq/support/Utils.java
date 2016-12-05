@@ -35,7 +35,7 @@ public class Utils {
     private static final String DATE_FORMAT_TIME = "dd-MM-yyyy HH:mm";
     private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
     private static final String HTML_TAG_PATTERN = "<(\\/)?([A-Za-z][A-Za-z0-9]*)\\b[^>]*>";
-    private static final String ESTIMATES_PATTENR = "(\\d*w)?\\s?(\\d*d)?\\s?(\\d*h)?\\s?(\\d*m)?";
+    private static final String ESTIMATES_PATTENR = "\\s?(\\d*d)?\\s?(\\d*h)?\\s?(\\d*m)?";
     private static final long NUM_100NS_INTERVALS_SINCE_UUID_EPOCH = 0x01b21dd213814000L;
     private static final String TD_TR = "</td></tr>";
     private static final String TD_TD = "</td><td>";

@@ -39,6 +39,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Hibernate;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,19 +134,17 @@ public class TaskController {
     }
 
     @RequestMapping(value = "task/create", method = RequestMethod.POST)
-    public String createTask(@Valid @ModelAttribute("taskForm") TaskForm taskForm, BindingResult result,
+    public String createTask(@Valid @ModelAttribute("taskForm") TaskForm taskForm, BindingResult errors,
                              @RequestParam(value = "linked", required = false) String linked, RedirectAttributes ra,
                              HttpServletRequest request, Model model) {
         if (!Roles.isUser()) {
             throw new TasqAuthException(msg);
         }
         if (Utils.containsHTMLTags(taskForm.getName())) {
-            result.rejectValue("name", ERROR_NAME_HTML);
+            errors.rejectValue("name", ERROR_NAME_HTML);
         }
-        if (StringUtils.isNotBlank(taskForm.getEstimate()) && !Utils.correctEstimate(taskForm.getEstimate())) {
-            result.rejectValue("estimate", "error.estimateFormat");
-        }
-        if (result.hasErrors()) {
+        checkEstimatesValues(taskForm, errors);
+        if (errors.hasErrors()) {
             fillCreateTaskModel(model);
             return null;
         }
@@ -178,7 +177,7 @@ public class TaskController {
                 // increase scope
                 if (sprint.isActive()) {
                     if (checkIfNotEstimated(task, project)) {
-                        result.rejectValue("addToSprint", "agile.task2Sprint.Notestimated",
+                        errors.rejectValue("addToSprint", "agile.task2Sprint.Notestimated",
                                 new Object[]{"", sprint.getSprintNo()},
                                 "Unable to add not estimated task to active sprint");
                         fillCreateTaskModel(model);
@@ -216,6 +215,16 @@ public class TaskController {
         return null;
     }
 
+    private void checkEstimatesValues(@Valid @ModelAttribute("taskForm") TaskForm taskForm, BindingResult result) {
+        if (StringUtils.isNotBlank(taskForm.getEstimate())) {
+            if (!Utils.correctEstimate(taskForm.getEstimate())) {
+                result.rejectValue("estimate", "error.estimateFormat");
+            } else if (PeriodHelper.inFormat(taskForm.getEstimate()).getDays() > 28) {
+                result.rejectValue("estimate", "error.estimateTooLong");
+            }
+        }
+    }
+
     private void setCreatedTaskAssignee(TaskForm taskForm, Task task) {
         if (StringUtils.isNotBlank(taskForm.getAssignee())) {
             Account assignee = accSrv.findByEmail(taskForm.getAssignee());
@@ -251,23 +260,21 @@ public class TaskController {
 
     @Transactional
     @RequestMapping(value = "/task/{id}/{subid}/edit", method = RequestMethod.POST)
-    public String editSubTask(@Valid @ModelAttribute("taskForm") TaskForm taskForm, Errors errors,
+    public String editSubTask(@Valid @ModelAttribute("taskForm") TaskForm taskForm, BindingResult errors,
                               RedirectAttributes ra, HttpServletRequest request, Model model) {
         return editTask(taskForm, errors, ra, request, model);
     }
 
     @Transactional
     @RequestMapping(value = "/task/{id}/edit", method = RequestMethod.POST)
-    public String editTask(@Valid @ModelAttribute("taskForm") TaskForm taskForm, Errors errors, RedirectAttributes ra,
+    public String editTask(@Valid @ModelAttribute("taskForm") TaskForm taskForm, BindingResult errors, RedirectAttributes ra,
                            HttpServletRequest request, Model model) {
         String taskID = taskForm.getId();
         Task task = taskSrv.findById(taskID);
         if (Utils.containsHTMLTags(taskForm.getName())) {
             errors.rejectValue("name", ERROR_NAME_HTML);
         }
-        if (StringUtils.isNotBlank(taskForm.getEstimate()) && !Utils.correctEstimate(taskForm.getEstimate())) {
-            errors.rejectValue("estimate", "error.estimateFormat");
-        }
+        checkEstimatesValues(taskForm, errors);
         if (StringUtils.isNotBlank(taskForm.getRemaining()) && !Utils.correctEstimate(taskForm.getRemaining())) {
             errors.rejectValue("remaining", "error.estimateFormat");
         }
@@ -551,11 +558,22 @@ public class TaskController {
                     msg.getMessage("error.estimateFormat", null, Utils.getCurrentLocale()));
             return REDIRECT + request.getHeader(REFERER);
         }
+        Period logged = PeriodHelper.inFormat(loggedWork);
+        if (!validLoggedWork(logged)) {
+            MessageHelper.addErrorAttribute(ra,
+                    msg.getMessage("error.logged.minmax", null, Utils.getCurrentLocale()));
+            return REDIRECT + request.getHeader(REFERER);
+        }
+        if (StringUtils.isNotBlank(remainingTxt) && PeriodHelper.inFormat(remainingTxt).getDays() > 28) {
+            MessageHelper.addErrorAttribute(ra,
+                    msg.getMessage("error.estimateTooLong", null, Utils.getCurrentLocale()));
+            return REDIRECT + request.getHeader(REFERER);
+        }
         Task task = taskSrv.findById(taskID);
         if (task != null) {
             // check if can edit
             if (Roles.isPowerUser() | projectSrv.canEdit(task.getProject())) {
-                Period logged = PeriodHelper.inFormat(loggedWork);
+
                 StringBuilder message = new StringBuilder(loggedWork);
                 Date when = new Date();
                 if (StringUtils.isNotEmpty(dateLogged) && StringUtils.isNotEmpty(timeLogged)) {
@@ -573,8 +591,13 @@ public class TaskController {
                     wlSrv.addDatedWorkLog(task, remainingTxt, when, LogType.ESTIMATE);
                 }
                 wlSrv.addTimedWorkLog(task, message.toString(), when, remaining, logged, LogType.LOG);
-                MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.logWork.logged",
-                        new Object[]{loggedWork, task.getId()}, Utils.getCurrentLocale()));
+                if (!totalLoggedTimeValid(logged, task)) {
+                    MessageHelper.addWarningAttribute(ra, msg.getMessage("task.logWork.logged.tooMuch",
+                            new Object[]{loggedWork, task.getId()}, Utils.getCurrentLocale()));
+                } else {
+                    MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.logWork.logged",
+                            new Object[]{loggedWork, task.getId()}, Utils.getCurrentLocale()));
+                }
             } else {
                 MessageHelper.addErrorAttribute(ra,
                         msg.getMessage(ERROR_ACCES_RIGHTS, null, Utils.getCurrentLocale()));
@@ -582,6 +605,25 @@ public class TaskController {
             }
         }
         return REDIRECT + request.getHeader(REFERER);
+    }
+
+    /**
+     * Check if total logged time is not longer than 4 weeks which is total sprint durration
+     *
+     * @param logged
+     * @param task
+     * @return
+     */
+    private boolean totalLoggedTimeValid(Period logged, Task task) {
+        Period loggedWork = task.getRawLoggedWork();
+        Period totalWork = PeriodHelper.plusPeriods(loggedWork, logged);
+        return totalWork.getDays() <= 28;
+    }
+
+    private boolean validLoggedWork(Period logged) {
+        Duration min = PeriodHelper.toStandardDuration(new Period().withMinutes(1));
+        Duration duration = PeriodHelper.toStandardDuration(logged);
+        return duration.isLongerThan(min) && logged.getDays() <= 1;
     }
 
 
