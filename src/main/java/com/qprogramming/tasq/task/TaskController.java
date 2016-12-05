@@ -623,7 +623,7 @@ public class TaskController {
     private boolean validLoggedWork(Period logged) {
         Duration min = PeriodHelper.toStandardDuration(new Period().withMinutes(1));
         Duration duration = PeriodHelper.toStandardDuration(logged);
-        return duration.isLongerThan(min) && logged.getDays() <= 1;
+        return duration.isLongerThan(min) && logged.getDays() <= 5;
     }
 
 

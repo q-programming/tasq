@@ -1031,7 +1031,8 @@
                 </button>
                 button to show logging modal window.<br>On it , input how much
                 time was spent on this task in format <i>*d *h *m</i> (days, hours, minutes ; where * is any number
-                ).<br>If work was
+                ).<br><i class="fa fa-exclamation-circle"></i>&nbsp;It's not possible to log more than 5 days at once to force user to log work daily
+                <br>If work was
                 done in other date ( for ex. yesterday ) , mark correct date and
                 time in <b>Date</b> and <b>Time</b> fields.<br> <br>By
                 default remaining time will be automatically reduced, or it can be
@@ -1083,7 +1084,8 @@
             </p>
             <p>
                 <i class="fa fa-exclamation-circle"></i>&nbsp;If more than one day
-                is on timer , user will be redirected to task page and timer canceled, because it's not possible to log more than 1 day at once.
+                is on timer , user will be redirected to task page and timer canceled, because it's not possible to log
+                more than 1 day at once.
                 Please remember that Tasker uses 8h = 1d
                 conversion. This can be changed by admin
             <hr>
