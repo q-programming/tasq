@@ -652,8 +652,9 @@ public class SprintController {
      */
     private SprintData fillLeftAndBurned(SprintData result, Sprint sprint,
                                          List<WorkLog> wrkList, boolean timeTracked) {
-        Map<DateTime, Float> leftMap = fillLeftMap(wrkList, timeTracked);
-        Map<DateTime, Float> burnedMap = fillBurnedMap(wrkList, timeTracked);
+        List<WorkLog> tasksOnly = wrkList.stream().filter(w -> !w.getTask().isSubtask()).collect(Collectors.toList());
+        Map<DateTime, Float> leftMap = fillLeftMap(tasksOnly, timeTracked);
+        Map<DateTime, Float> burnedMap = fillBurnedMap(tasksOnly, timeTracked);
         DateTime endTime = new DateTime(sprint.getRawEnd_date());
         SprintData data = result;
         Float burned = 0f;
