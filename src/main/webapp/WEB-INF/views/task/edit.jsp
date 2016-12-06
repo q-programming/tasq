@@ -134,7 +134,7 @@
                         <form:input path="remaining" class="form-control"
                                     style="width:150px"/>
                         <form:errors path="remaining" element="p" class="text-danger"/>
-						<span class="help-block"><s:message
+                        <span class="help-block"><s:message
                                 code="task.edit.remaining.help"/><br> <s:message
                                 code="task.estimate.help.pattern"/> </span>
                     </div>
@@ -148,7 +148,7 @@
                     <form:input path="estimate" class="form-control"
                                 style="width:150px"/>
                     <form:errors path="estimate" element="p" class="text-danger"/>
-					<span class="help-block"><s:message
+                    <span class="help-block"><s:message
                             code="task.estimate.help"/><br> <s:message
                             code="task.estimate.help.pattern"/> </span>
                 </c:if>
@@ -158,12 +158,14 @@
                     <label><s:message code="task.storyPoints"/></label>
                     <form:input path="story_points" class="form-control"
                                 style="width:150px"/>
-					<span class="help-block"><s:message
-                            code="task.storyPoints.help"/></span>
+                    <span class="help-block"><s:message
+                            code="task.storyPoints.help"/><i class="a-tooltip fa fa-question-circle black-link"
+                                                             title="<s:message code="task.storyPoints.help.values"/>"
+                                                             data-placement="right"></i></span>
                 </div>
             </c:if>
-
         </div>
+        <form:errors path="story_points" element="p" class="text-danger"/>
         <c:if test="${not task.inSprint}">
             <c:if test="${not task.estimated}">
                 <c:set var="checked">
@@ -226,7 +228,7 @@
             removeformatPasted: true,
             autogrow: true,
             btns: ['formatting',
-                '|', ['bold', 'italic', 'underline', 'strikethrough', 'preformatted' ],
+                '|', ['bold', 'italic', 'underline', 'strikethrough', 'preformatted'],
                 '|', 'link',
                 '|', 'insertImage',
                 '|', 'btnGrp-justify',

@@ -25,6 +25,9 @@ public class TaskForm {
 
     private static final String NOT_BLANK_MESSAGE = "{notBlank.message}";
     private static final String TYPE_NOT_BLANK_MESSAGE = "{error.taskType}";
+    public static final String STORY_POINTS = "story_points";
+    public static final String REMAINING = "remaining";
+    public static final String NAME = "name";
 
     private String id;
 

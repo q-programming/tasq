@@ -34,6 +34,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -49,6 +50,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
 import static com.qprogramming.tasq.test.TestUtils.*;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
@@ -136,7 +138,7 @@ public class TaskControllerTest {
         } catch (TasqAuthException e) {
             catched = true;
         }
-        Assert.assertTrue("AuthException not thrown on user roles", catched);
+        assertTrue("AuthException not thrown on user roles", catched);
         // Auth valid
         testAccount.setRole(Roles.ROLE_USER);
         catched = false;
@@ -145,7 +147,7 @@ public class TaskControllerTest {
         } catch (TasqAuthException e) {
             catched = true;
         }
-        Assert.assertTrue("AuthException not thrown on no project", catched);
+        assertTrue("AuthException not thrown on no project", catched);
         Project project = createProject(1L);
         Project project2 = createProject(2L);
         List<Project> list = new LinkedList<Project>();
@@ -177,7 +179,7 @@ public class TaskControllerTest {
         } catch (TasqAuthException e) {
             catched = true;
         }
-        Assert.assertTrue("AuthException not thrown on user roles", catched);
+        assertTrue("AuthException not thrown on user roles", catched);
         testAccount.setRole(Roles.ROLE_POWERUSER);
         errors.rejectValue("name", "Error name");
         String result = taskCtr.createTask(form, errors, null, raMock, requestMock, modelMock);
@@ -219,7 +221,7 @@ public class TaskControllerTest {
         when(projSrvMock.findByProjectId(TestUtils.PROJECT_ID)).thenReturn(project);
         when(projSrvMock.canEdit(project)).thenReturn(true);
         taskCtr.createTask(form, errors, null, raMock, requestMock, modelMock);
-        Assert.assertTrue(errors.hasErrors());
+        assertTrue(errors.hasErrors());
     }
 
     @Test
@@ -249,7 +251,7 @@ public class TaskControllerTest {
         when(taskRepoMock.save(any(Task.class))).thenReturn(task);
         when(sprintSrvMock.findByProjectIdAndSprintNo(1L, 1L)).thenReturn(sprint);
         taskCtr.createTask(form, errors, null, raMock, requestMock, modelMock);
-        Assert.assertTrue(errors.hasErrors());
+        assertTrue(errors.hasErrors());
     }
 
     @Test
@@ -290,7 +292,7 @@ public class TaskControllerTest {
         } catch (TasqAuthException e) {
             catched = true;
         }
-        Assert.assertTrue("AuthException not thrown on not reporter", catched);
+        assertTrue("AuthException not thrown on not reporter", catched);
         testAccount.setRole(Roles.ROLE_USER);
         Account owner = new Account(NEW_EMAIL, PASSWORD, NEWUSERNAME, Roles.ROLE_POWERUSER);
         task.setOwner(owner);
@@ -300,7 +302,7 @@ public class TaskControllerTest {
         } catch (TasqAuthException e) {
             catched = true;
         }
-        Assert.assertTrue("AuthException not thrown on not owner project", catched);
+        assertTrue("AuthException not thrown on not owner project", catched);
     }
 
     @Test
@@ -407,6 +409,73 @@ public class TaskControllerTest {
     }
 
     @Test
+    public void editTaskInvalidSPTest() {
+        Project project = createProject(1L);
+        project.setLastTaskNo(0L);
+        Task task = createTask(TASK_NAME, 1, project);
+        testAccount.setRole(Roles.ROLE_POWERUSER);
+        TaskForm form = new TaskForm(task);
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(projSrvMock.canEdit(project)).thenReturn(true);
+        //Negative
+        form.setStory_points("-3");
+        BindingResult errors = new BeanPropertyBindingResult(form, "form");
+        taskCtr.editTask(form, errors, raMock, requestMock, modelMock);
+        assertNotNull(errors.getFieldError("story_points"));
+        assertTrue(errors.hasErrors());
+        //wrong value
+        form.setStory_points("6");
+        errors = new BeanPropertyBindingResult(form, "form");
+        taskCtr.editTask(form, errors, raMock, requestMock, modelMock);
+        assertNotNull(errors.getFieldError("story_points"));
+        assertTrue(errors.hasErrors());
+        //too large value
+        form.setStory_points("106");
+        errors = new BeanPropertyBindingResult(form, "form");
+        taskCtr.editTask(form, errors, raMock, requestMock, modelMock);
+        assertNotNull(errors.getFieldError("story_points"));
+        assertTrue(errors.hasErrors());
+    }
+
+    @Test
+    public void changePointsTest() {
+        Project project = createProject(1L);
+        project.setLastTaskNo(0L);
+        Task task = createTask(TASK_NAME, 1, project);
+        testAccount.setRole(Roles.ROLE_POWERUSER);
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(projSrvMock.canEdit(project)).thenReturn(true);
+        ResponseEntity<ResultData> responseEntity = taskCtr.changeStoryPoints(TEST_1, 3);
+        assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
+        assertEquals(responseEntity.getBody().code, ResultData.OK);
+    }
+
+    @Test
+    public void changePointsInvalidPointTest() {
+        Project project = createProject(1L);
+        project.setLastTaskNo(0L);
+        Task task = createTask(TASK_NAME, 1, project);
+        testAccount.setRole(Roles.ROLE_POWERUSER);
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(projSrvMock.canEdit(project)).thenReturn(true);
+        ResponseEntity<ResultData> responseEntity = taskCtr.changeStoryPoints(TEST_1, 6);
+        assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
+        assertEquals(responseEntity.getBody().code, ResultData.ERROR);
+    }
+
+    @Test(expected = TasqAuthException.class)
+    public void changePointsCannotEditTest() {
+        Project project = createProject(1L);
+        project.setLastTaskNo(0L);
+        Task task = createTask(TASK_NAME, 1, project);
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(projSrvMock.canEdit(project)).thenReturn(false);
+        ResponseEntity<ResultData> responseEntity = taskCtr.changeStoryPoints(TEST_1, 3);
+        fail("Exception was not thrown");
+    }
+
+
+    @Test
     public void showTaskDetailsNoTaskTest() {
         taskCtr.showTaskDetails(TEST_1, modelMock, raMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
@@ -508,7 +577,7 @@ public class TaskControllerTest {
         } catch (TasqAuthException e) {
             catched = true;
         }
-        Assert.assertTrue(TASQ_AUTH_MSG, catched);
+        assertTrue(TASQ_AUTH_MSG, catched);
     }
 
     @Test
@@ -650,7 +719,7 @@ public class TaskControllerTest {
         } catch (TasqAuthException e) {
             catched = true;
         }
-        Assert.assertTrue(TASQ_AUTH_MSG, catched);
+        assertTrue(TASQ_AUTH_MSG, catched);
 
     }
 

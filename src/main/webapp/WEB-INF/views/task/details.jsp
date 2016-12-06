@@ -1224,19 +1224,22 @@
         }
 
         function changePoints() {
+            var message = "<s:message code="task.storyPoints.invalid"/>";
             var points = $('#point-input').val();
-            if (isNumber(points) && points < 40) {
+            if (isNumber(points) && (points >= 0 && points <= 100)) {
                 showWait(true);
                 $.post('<c:url value="/task/changePoints"/>', {id: taskID, points: points}, function (result) {
-                    if (result.code == 'Error') {
+                    if (result.code == 'ERROR') {
                         showError(result.message);
                     }
                     else {
                         $("#point_value").html(points);
                         showSuccess(result.message);
-                        showWait(false);
                     }
+                    showWait(false);
                 });
+            }else{
+                showError(message);
             }
             togglePoints();
         }
@@ -1276,14 +1279,14 @@
                     <security:authorize access="hasRole('ROLE_ADMIN')">
                     var delurl = '<c:url value="/task/delWorklog?id="/>';
                     delbtn = '<div class="buttons_panel" style="float: right;">'
-                            + '<a class="delete_btn a-tooltip" style="color: #555;" href="' + delurl + worklog.id + '"'
-                            + ' title = "<s:message code="task.worklog.delete"/>"'
-                            + ' data-lang="${pageContext.response.locale}"'
-                            + ' data-msg="<s:message code="task.worklog.delete.confirm"/>" >'
-                            + '<i class="fa fa-trash-o"></i></a></div>';
+                        + '<a class="delete_btn a-tooltip" style="color: #555;" href="' + delurl + worklog.id + '"'
+                        + ' title = "<s:message code="task.worklog.delete"/>"'
+                        + ' data-lang="${pageContext.response.locale}"'
+                        + ' data-msg="<s:message code="task.worklog.delete.confirm"/>" >'
+                        + '<i class="fa fa-trash-o"></i></a></div>';
                     </security:authorize>
                     var row = '<tr><td>' + avatar + '</td><td style="font-size: smaller; color: dimgray;width: 100%;">' + account + '&nbsp;' + type + '<div class="time-div">' + worklog.timeLogged + '</div> ' + delbtn + message
-                            + '</td></tr>';
+                        + '</td></tr>';
                     $("#taskworklogs").append(row);
                     $(".a-tooltip").tooltip();
                 });
@@ -1313,7 +1316,7 @@
 
         $('body').on('click', 'a.delete_btn', function (e) {
             var msg = '<p style="text-align:center"><i class="fa fa-lg fa-exclamation-triangle" style="display: initial;"></i>&nbsp'
-                    + $(this).data('msg') + '</p>';
+                + $(this).data('msg') + '</p>';
             var lang = $(this).data('lang');
             bootbox.setDefaults({
                 locale: lang
@@ -1332,23 +1335,23 @@
         var init = true;
         var noTags = '<s:message code="task.tags.noTags" htmlEscape="false"/>';
         $('#taskTags').tagsinput(
-                {
-                    maxChars: 12,
-                    maxTags: 6,
-                    trimValue: true
-                }
+            {
+                maxChars: 12,
+                maxTags: 6,
+                trimValue: true
+            }
         );
         loadTags();
 // 	checkIfEmptyTags()
 
         $(".bootstrap-tagsinput").hover(
-                function () {
-                    $(this).addClass("inputHover");
-                    $("#editTags").show();
-                }, function () {
-                    $(this).removeClass("inputHover");
-                    $("#editTags").hide();
-                }
+            function () {
+                $(this).addClass("inputHover");
+                $("#editTags").show();
+            }, function () {
+                $(this).removeClass("inputHover");
+                $("#editTags").hide();
+            }
         );
         $('.bootstrap-tagsinput').focusin(function () {
             inputInProgress = true;
@@ -1481,20 +1484,20 @@
         var reggie = /(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})/;
         var dateArray = reggie.exec(str);
         return new Date(
-                (+dateArray[3]),
-                (+dateArray[2]) - 1, // Careful, month starts at 0!
-                (+dateArray[1]),
-                (+dateArray[4]),
-                (+dateArray[5])
+            (+dateArray[3]),
+            (+dateArray[2]) - 1, // Careful, month starts at 0!
+            (+dateArray[1]),
+            (+dateArray[4]),
+            (+dateArray[5])
         );
     }
 
     function getEventTypeMsg(type) {
         switch (type) {
-                <c:forEach items="${types}" var="enum_type">
+            <c:forEach items="${types}" var="enum_type">
             case "${enum_type}":
                 return '<s:message code="${enum_type.code}"/> ';
-                </c:forEach>
+            </c:forEach>
             default:
                 return 'not yet added ';
         }

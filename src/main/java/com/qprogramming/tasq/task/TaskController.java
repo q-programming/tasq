@@ -65,6 +65,8 @@ import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.qprogramming.tasq.task.TaskForm.*;
+
 /**
  * @author romanjak
  * @date 26 maj 2014
@@ -141,9 +143,13 @@ public class TaskController {
             throw new TasqAuthException(msg);
         }
         if (Utils.containsHTMLTags(taskForm.getName())) {
-            errors.rejectValue("name", ERROR_NAME_HTML);
+            errors.rejectValue(NAME, ERROR_NAME_HTML);
         }
         checkEstimatesValues(taskForm, errors);
+        int storyPoints = getStoryPoints(taskForm);
+        if (!StringUtils.isNumeric(taskForm.getStory_points()) || !Utils.validStoryPoint(storyPoints)) {
+            errors.rejectValue(STORY_POINTS, "task.storyPoints.invalid");
+        }
         if (errors.hasErrors()) {
             fillCreateTaskModel(model);
             return null;
@@ -151,13 +157,13 @@ public class TaskController {
         Project project = projectSrv.findByProjectId(taskForm.getProject());
         if (project != null) {
             // check if can edit
+            Task task;
+            task = taskForm.createTask();
             if (!projectSrv.canEdit(project)) {
                 MessageHelper.addErrorAttribute(ra,
                         msg.getMessage(ERROR_ACCES_RIGHTS, null, Utils.getCurrentLocale()));
                 return REDIRECT + request.getHeader(REFERER);
             }
-            Task task;
-            task = taskForm.createTask();
             // build ID
             long taskCount = project.getLastTaskNo();
             taskCount++;
@@ -272,11 +278,15 @@ public class TaskController {
         String taskID = taskForm.getId();
         Task task = taskSrv.findById(taskID);
         if (Utils.containsHTMLTags(taskForm.getName())) {
-            errors.rejectValue("name", ERROR_NAME_HTML);
+            errors.rejectValue(NAME, ERROR_NAME_HTML);
         }
         checkEstimatesValues(taskForm, errors);
         if (StringUtils.isNotBlank(taskForm.getRemaining()) && !Utils.correctEstimate(taskForm.getRemaining())) {
-            errors.rejectValue("remaining", "error.estimateFormat");
+            errors.rejectValue(REMAINING, "error.estimateFormat");
+        }
+        int storyPoints = getStoryPoints(taskForm);
+        if (!StringUtils.isNumeric(taskForm.getStory_points()) || !Utils.validStoryPoint(storyPoints)) {
+            errors.rejectValue(STORY_POINTS, "task.storyPoints.invalid");
         }
         if (errors.hasErrors()) {
             fillModelForEdit(model, task);
@@ -338,8 +348,7 @@ public class TaskController {
         // Don't check for SP if task is not estimated
         if (task.isEstimated()) {
             try {
-                int storyPoints = taskForm.getStory_points() == null || ("").equals(taskForm.getStory_points()) ? 0
-                        : Integer.parseInt(taskForm.getStory_points());
+
 
                 if (task.getStory_points() != null && task.getStory_points() != storyPoints) {
                     if (shouldAddWorklogPointsChanged(task, storyPoints)) {
@@ -370,6 +379,11 @@ public class TaskController {
             wlSrv.addActivityLog(task, message.toString(), LogType.EDITED);
         }
         return REDIRECT_TASK + taskID;
+    }
+
+    private int getStoryPoints(TaskForm taskForm) {
+        return (StringUtils.isNotBlank(taskForm.getStory_points()) && StringUtils.isNumeric(taskForm.getStory_points())) ? Integer.parseInt(taskForm.getStory_points())
+                : 0;
     }
 
     private boolean nameChanged(String newName, Task task) {
@@ -511,7 +525,7 @@ public class TaskController {
         Task task = taskSrv.findById(id);
         Project project = projectSrv.findByProjectId(taskForm.getProject());
         if (Utils.containsHTMLTags(taskForm.getName())) {
-            errors.rejectValue("name", ERROR_NAME_HTML);
+            errors.rejectValue(NAME, ERROR_NAME_HTML);
         }
         if (errors.hasErrors()) {
             model.addAttribute("project", project);
@@ -547,7 +561,7 @@ public class TaskController {
     @RequestMapping(value = "logwork", method = RequestMethod.POST)
     public String logWork(@RequestParam(value = "taskID") String taskID,
                           @RequestParam(value = "loggedWork") String loggedWork,
-                          @RequestParam(value = "remaining", required = false) String remainingTxt,
+                          @RequestParam(value = REMAINING, required = false) String remainingTxt,
                           @RequestParam("date_logged") String dateLogged, @RequestParam("time_logged") String timeLogged,
                           RedirectAttributes ra, HttpServletRequest request) {
         loggedWork = Utils.matchTimeFormat(loggedWork);
@@ -707,6 +721,10 @@ public class TaskController {
     @ResponseBody
     public ResponseEntity<ResultData> changeStoryPoints(@RequestParam(value = "id") String taskID,
                                                         @RequestParam(value = "points") Integer points) {
+        //check if valud story point
+        if (!Utils.validStoryPoint(points)) {
+            return ResponseEntity.ok(new ResultData(ResultData.ERROR, msg.getMessage("task.storyPoints.invalid", new Object[]{points}, Utils.getCurrentLocale())));
+        }
         // check if not admin or user
         Task task = taskSrv.findById(taskID);
         if (task != null) {

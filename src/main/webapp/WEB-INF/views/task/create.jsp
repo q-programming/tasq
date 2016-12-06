@@ -53,8 +53,9 @@
         <c:set var="estimate_error">
             <form:errors path="estimate"/>
         </c:set>
-
-
+        <c:set var="storypoint_error">
+            <form:errors path="story_points"/>
+        </c:set>
         <c:if test="${not empty name_error}">
             <c:set var="name_class" value="has-error"/>
         </c:if>
@@ -67,8 +68,9 @@
         <c:if test="${not empty estimate_error}">
             <c:set var="estimate_class" value="has-error"/>
         </c:if>
-
-
+        <c:if test="${not empty storypoint_error}">
+            <c:set var="story_points_class" value="has-error"/>
+        </c:if>
         <a class="anchor" id="nameA"></a>
         <div class="form-group ${name_class }">
             <form:input path="name" class="form-control"
@@ -164,8 +166,8 @@
                     </c:forEach>
                 </ul>
             </div>
-            <span class="help-block"><s:message code="task.type.help"/> <a href="<c:url value="/help"/>#task-types"
-                                                                           target="_blank" style="color:black">&nbsp;<i
+            <span class="help-block"><s:message code="task.type.help"/>&nbsp;<a href="<c:url value="/help"/>#task-types"
+                                                                                target="_blank" style="color:black"><i
                     class="fa fa-question-circle"></i></a></span>
             <form:hidden path="type" id="type"/>
             <form:errors path="type" element="p" class="text-danger"/>
@@ -242,18 +244,23 @@
                                                      style="width:150px"/>&nbsp;<span id="estimate_optional"><s:message
                         code="main.optional"/></span></div>
                 <form:errors path="estimate" element="p" class="text-danger"/>
-				<span class="help-block"><s:message code="task.estimate.help"/><br>
+                <span class="help-block"><s:message code="task.estimate.help"/><br>
 					<s:message code="task.estimate.help.pattern"/> </span>
             </div>
             <div id="estimate_div">
-                <div class="form-group ${sprint_class}">
+                <div class="form-group ${story_points_class}">
                     <label><s:message code="task.storyPoints"/></label>
                     <form:input path="story_points" class="form-control "
                                 style="width:150px"/>
-					<span class="help-block"><s:message
-                            code="task.storyPoints.help"/></span>
+                    <span class="help-block"><s:message
+                            code="task.storyPoints.help"/>&nbsp;
+                        <i class="a-tooltip fa fa-question-circle " style="color: black;"
+                           title="<s:message code="task.storyPoints.help.values" />" data-placement="right"
+                           data-html="true"></i>
+                    </span>
                 </div>
             </div>
+            <form:errors path="story_points" element="p" class="text-danger"/>
         </div>
         <label class="checkbox clickable" style="display: inherit; font-weight: normal; margin-left: 22px;">
             <input type="checkbox" name="notEstimated" id="estimated"
@@ -272,8 +279,8 @@
             </div>
             <form:input path="due_date" class="form-control datepicker"
                         id="due_date" style="width:150px"/>
-				<span class="help-block"><s:message
-                        code="task.dueDate.help"/></span>
+            <span class="help-block"><s:message
+                    code="task.dueDate.help"/></span>
         </div>
         <%----------FILE UPLOAD --------------------------%>
         <a class="anchor" id="filesA"></a>
@@ -333,7 +340,7 @@
             removeformatPasted: true,
             fullscreenable: false,
             btns: ['formatting',
-                '|', ['bold', 'italic', 'underline', 'strikethrough', 'preformatted' ],
+                '|', ['bold', 'italic', 'underline', 'strikethrough', 'preformatted'],
                 '|', 'link',
                 '|', 'insertImage',
                 '|', 'btnGrp-justify',
@@ -435,7 +442,7 @@
             var active = $('#addToSprint option:selected').data('active');
             if (active) {
                 var message = '<i class="fa fa-exclamation-circle"></i>'
-                        + ' <s:message code="task.sprint.add.warning"/>';
+                    + ' <s:message code="task.sprint.add.warning"/>';
                 $("#sprintWarning").html(message);
             }
         });
@@ -574,10 +581,10 @@
                         isActive = " (<s:message code="agile.sprint.active"/>)";
                     }
                     $('#addToSprint')
-                            .append($("<option></option>")
-                                    .attr("value", sprint.sprintNo)
-                                    .attr("data-active", sprint.active)
-                                    .text("Sprint " + sprint.sprintNo + isActive));
+                        .append($("<option></option>")
+                            .attr("value", sprint.sprintNo)
+                            .attr("data-active", sprint.active)
+                            .text("Sprint " + sprint.sprintNo + isActive));
                     $('#addToSprint').val('');
                 });
             });

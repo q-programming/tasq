@@ -476,9 +476,7 @@
                     for team<br></li>
                 <li><b>Story points</b> recommended for agile projects. Each
                     task then is measured with points - which measures complexity of
-                    this task. Each team can freely translate how point is translated
-                    to work time. It's important to remember that 1SP is <b>not
-                        necessary</b> 1h!
+                    this task. More on <b><a href="#scrum-storypoints">story points</a></b>
                 </li>
             </ul>
             <p>Please note that it's not recommended to switch how progress
@@ -810,6 +808,7 @@
                     <td>Complexity measurement of newly created task. This value
                         can be changed later on via Edit menu, from Details screen , or
                         from Backlog view
+                        <br> More on <b><a href="#scrum-storypoints">story points</a></b>
                         <p></p>
                         <p>
                             <i class="fa fa-exclamation-circle"></i>&nbsp;If task is not
@@ -1031,7 +1030,8 @@
                 </button>
                 button to show logging modal window.<br>On it , input how much
                 time was spent on this task in format <i>*d *h *m</i> (days, hours, minutes ; where * is any number
-                ).<br><i class="fa fa-exclamation-circle"></i>&nbsp;It's not possible to log more than 5 days at once to force user to log work daily
+                ).<br><i class="fa fa-exclamation-circle"></i>&nbsp;It's not possible to log more than 5 days at once to
+                force user to log work daily
                 <br>If work was
                 done in other date ( for ex. yesterday ) , mark correct date and
                 time in <b>Date</b> and <b>Time</b> fields.<br> <br>By
@@ -1155,6 +1155,14 @@
             very good in tracking how team progresses within new areas or known
             ones, but with new project
             </p>
+            <a class="anchor" id="scrum-storypoints"></a>
+            <h4>Story points</h4>
+            <p>Each team can freely translate how point is translated
+                to work time. It's important to remember that 1SP is <b>not
+                    necessary</b> 1h!<br>To find 1 story point, try to take one of finished stories which was
+                smallest and quickest to do and try to estimate other based on hom much work is needed in them.
+                <br>Available values of story points is modified fibbonaci sequence : 1, 2 ,3 ,5 ,8 ,13 ,20 ,40 ,100 where
+                points above 13 indicate that story is big and could possibly divided into smaller onece</p>
             <a class="anchor" id="scrum-backlog"></a>
             <h4>
                 <i class="fa fa-book"></i> Backlog
