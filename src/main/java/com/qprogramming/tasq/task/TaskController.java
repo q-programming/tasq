@@ -585,6 +585,11 @@ public class TaskController {
         }
         Task task = taskSrv.findById(taskID);
         if (task != null) {
+            if (task.getState().equals(TaskState.CLOSED)) {
+                ResultData result = taskIsClosed(ra, request, task);
+                MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
+                return REDIRECT + request.getHeader(REFERER);
+            }
             // check if can edit
             if (Roles.isPowerUser() | projectSrv.canEdit(task.getProject())) {
 
