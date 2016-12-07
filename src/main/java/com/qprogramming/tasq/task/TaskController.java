@@ -337,7 +337,7 @@ public class TaskController {
         }
 
         boolean estimated = !taskForm.getNotEstimated();
-        if (!task.isEstimated().equals(estimated)) {
+        if (!task.isEstimated().equals(estimated) && !task.isInSprint()) {
             message.append(
                     Utils.changedFromTo(ESTIMATED_TXT, task.getEstimated().toString(), Boolean.toString(estimated)));
             task.setEstimated(estimated);

@@ -181,6 +181,9 @@
                 </i>
             </label>
         </c:if>
+        <c:if test="${task.inSprint}">
+            <input type="hidden" name="notEstimated" id="estimated" value="${not task.estimated}"/>
+        </c:if>
         <div>
             <div class="mod-header">
                 <h5 class="mod-header-title">
