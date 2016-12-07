@@ -598,10 +598,6 @@ public class Task implements java.io.Serializable {
         this.subtasks = getSubtasks() + 1;
     }
 
-    public void removeSubTask() {
-        this.subtasks = getSubtasks() - 1;
-    }
-
     public boolean isSubtask() {
         return parent != null;
     }

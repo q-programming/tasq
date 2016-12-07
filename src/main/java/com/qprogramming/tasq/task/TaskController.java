@@ -303,7 +303,7 @@ public class TaskController {
             return REDIRECT + request.getHeader(REFERER);
         }
         if (task.getState().equals(TaskState.CLOSED)) {
-            ResultData result = taskIsClosed(ra, request, task);
+            ResultData result = taskIsClosed(task);
             MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
             return REDIRECT + request.getHeader(REFERER);
         }
@@ -523,28 +523,37 @@ public class TaskController {
         }
 
         Task task = taskSrv.findById(id);
-        Project project = projectSrv.findByProjectId(taskForm.getProject());
-        if (Utils.containsHTMLTags(taskForm.getName())) {
-            errors.rejectValue(NAME, ERROR_NAME_HTML);
+        if (task != null) {
+            if (task.getState().equals(TaskState.CLOSED)) {
+                ResultData result = taskIsClosed(task);
+                MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
+                return REDIRECT + request.getHeader(REFERER);
+            }
+            Project project = projectSrv.findByProjectId(taskForm.getProject());
+            if (Utils.containsHTMLTags(taskForm.getName())) {
+                errors.rejectValue(NAME, ERROR_NAME_HTML);
+            }
+            if (errors.hasErrors()) {
+                model.addAttribute("project", project);
+                model.addAttribute("task", task);
+                return null;
+            }
+            if (!projectSrv.canEdit(project)) {
+                MessageHelper.addErrorAttribute(ra, msg.getMessage(ERROR_ACCES_RIGHTS, null, Utils.getCurrentLocale()));
+                return REDIRECT + request.getHeader(REFERER);
+            }
+            Task subTask = taskForm.createSubTask();
+            // assigne
+            if (StringUtils.isNotBlank(taskForm.getAssignee())) {
+                Account assignee = accSrv.findByEmail(taskForm.getAssignee());
+                subTask.setAssignee(assignee);
+            }
+            taskSrv.createSubTask(project, task, subTask);
+            wlSrv.addActivityLog(subTask, "", LogType.SUBTASK);
+            return REDIRECT_TASK + id;
         }
-        if (errors.hasErrors()) {
-            model.addAttribute("project", project);
-            model.addAttribute("task", task);
-            return null;
-        }
-        if (!projectSrv.canEdit(project)) {
-            MessageHelper.addErrorAttribute(ra, msg.getMessage(ERROR_ACCES_RIGHTS, null, Utils.getCurrentLocale()));
-            return REDIRECT + request.getHeader(REFERER);
-        }
-        Task subTask = taskForm.createSubTask();
-        // assigne
-        if (StringUtils.isNotBlank(taskForm.getAssignee())) {
-            Account assignee = accSrv.findByEmail(taskForm.getAssignee());
-            subTask.setAssignee(assignee);
-        }
-        taskSrv.createSubTask(project, task, subTask);
-        wlSrv.addActivityLog(subTask, "", LogType.SUBTASK);
-        return REDIRECT_TASK + id;
+        MessageHelper.addErrorAttribute(ra, msg.getMessage("task.notexists", null, Utils.getCurrentLocale()));
+        return REDIRECT + request.getHeader(REFERER);
     }
 
     /**
@@ -586,7 +595,7 @@ public class TaskController {
         Task task = taskSrv.findById(taskID);
         if (task != null) {
             if (task.getState().equals(TaskState.CLOSED)) {
-                ResultData result = taskIsClosed(ra, request, task);
+                ResultData result = taskIsClosed(task);
                 MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
                 return REDIRECT + request.getHeader(REFERER);
             }
@@ -807,7 +816,7 @@ public class TaskController {
         if (task != null) {
             if (Roles.isPowerUser() | projectSrv.canEdit(task.getProject())) {
                 if (task.getState().equals(TaskState.CLOSED)) {
-                    ResultData result = taskIsClosed(ra, request, task);
+                    ResultData result = taskIsClosed(task);
                     MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
                     return REDIRECT + request.getHeader(REFERER);
 
@@ -879,7 +888,7 @@ public class TaskController {
         Task task = taskSrv.findById(taskID);
         if (task != null) {
             if (task.getState().equals(TaskState.CLOSED)) {
-                ResultData result = taskIsClosed(ra, request, task);
+                ResultData result = taskIsClosed(task);
                 MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
                 return REDIRECT + request.getHeader(REFERER);
             }
@@ -937,12 +946,6 @@ public class TaskController {
                 message.append("]");
                 message.append(" - ");
                 message.append(task.getName());
-                if (task.isSubtask()) {
-                    Task parentTask = taskSrv.findById(task.getParent());
-                    int count = parentTask.getSubtasks();
-                    parentTask.setSubtasks(--count);
-                    taskSrv.save(parentTask);
-                }
                 Task purged = taskSrv.save(purgeTask(task));
                 taskSrv.delete(purged);
                 wlSrv.addWorkLogNoTask(message.toString(), project, LogType.DELETED);
@@ -1065,9 +1068,6 @@ public class TaskController {
             return REDIRECT + request.getHeader(REFERER);
         } else {
             Task parent = taskSrv.findById(subtask.getParent());
-            parent.removeSubTask();
-            taskSrv.save(parent);
-
             long taskCount = project.getLastTaskNo();
             taskCount++;
             String taskID = project.getProjectId() + "-" + taskCount;
@@ -1101,15 +1101,17 @@ public class TaskController {
                 linkService.save(taskLink);
             }
             // files
-            // TODO After TASQ-165 fixed
-            // File oldDir = new File(taskSrv.getTaskDir(subtask));
-            // if (oldDir.exists()){
-            // File newDir = new File(taskSrv.getTaskDir(task));
-            // newDir.mkdirs();
-            // newDir.setWritable(true, false);
-            // newDir.setReadable(true, false);
-            // FileUtils.copyDirectory(oldDir, newDir);
-            // }
+            File oldDir = new File(taskSrv.getTaskDir(subtask));
+            if (oldDir.exists()) {
+                File newDir = new File(taskSrv.getTaskDir(task));
+                if (!newDir.mkdirs()) {
+                    LOG.error("Failed to create new dir {}", newDir.getAbsolutePath());
+                }
+                newDir.setWritable(true, false);
+                newDir.setReadable(true, false);
+                FileUtils.copyDirectory(oldDir, newDir);
+                FileUtils.deleteDirectory(oldDir);
+            }
             project.setLastTaskNo(taskCount);
             project.getTasks().add(task);
             projectSrv.save(project);
@@ -1250,7 +1252,7 @@ public class TaskController {
         }
     }
 
-    private ResultData taskIsClosed(RedirectAttributes ra, HttpServletRequest request, Task task) {
+    private ResultData taskIsClosed(Task task) {
         String localized = msg.getMessage(((TaskState) task.getState()).getCode(), null, Utils.getCurrentLocale());
         return new ResultData(ResultData.ERROR,
                 msg.getMessage("task.closed", new Object[]{localized}, Utils.getCurrentLocale()));

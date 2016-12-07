@@ -587,6 +587,7 @@ public class TaskControllerTest {
         Task task = createTask(TASK_NAME, 1, project);
         task.setSubtasks(1);
         task.setInSprint(true);
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         Task subtask = createTask(TASK_NAME, 2, project);
         TaskForm form = new TaskForm(subtask);
         Errors errors = new BeanPropertyBindingResult(form, "form");
