@@ -191,12 +191,19 @@ public class Task implements java.io.Serializable {
         return create_date;
     }
 
-    public Date getFinishDate() {
-        return finishDate;
+    public String getFinishDate() {
+        if (finishDate != null) {
+            Utils.convertDateToString(finishDate);
+        }
+        return "";
     }
 
     public void setFinishDate(Date finishDate) {
         this.finishDate = finishDate;
+    }
+
+    public Date getRawFinishDate() {
+        return finishDate;
     }
 
     public String getEstimate() {

@@ -97,8 +97,8 @@ public class AgileData {
     public void setTasksByStatus(DateTime endTime, List<Task> tasks) {
         for (Task task : tasks) {
             DateTime finishDate = null;
-            if (task.getFinishDate() != null) {
-                finishDate = new DateTime(task.getFinishDate());
+            if (task.getRawFinishDate() != null) {
+                finishDate = new DateTime(task.getRawFinishDate());
             }
             if (task.getState().equals(TaskState.CLOSED)
                     && (finishDate != null && endTime.isAfter(finishDate))) {

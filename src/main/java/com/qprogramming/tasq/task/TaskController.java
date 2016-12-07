@@ -1255,7 +1255,7 @@ public class TaskController {
     private ResultData taskIsClosed(Task task) {
         String localized = msg.getMessage(((TaskState) task.getState()).getCode(), null, Utils.getCurrentLocale());
         return new ResultData(ResultData.ERROR,
-                msg.getMessage("task.closed", new Object[]{localized}, Utils.getCurrentLocale()));
+                msg.getMessage("task.closed.cannot.operate=", new Object[]{localized}, Utils.getCurrentLocale()));
     }
 
     /**
