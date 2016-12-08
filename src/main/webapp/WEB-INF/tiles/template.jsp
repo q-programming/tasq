@@ -18,7 +18,6 @@
     <script src="<c:url value="/resources/js/jquery-1.11.1.min.js" />"></script>
     <%-- jQuery UI --%>
     <script src="<c:url value="/resources/js/jquery-ui-1.10.4.custom.js" />"></script>
-    <script src="<c:url value="/resources/js/jquery.ui.datepicker-pl.js" />"></script>
     <link
             href="<c:url value="/resources/css/jquery-ui-1.10.4.custom.min.css" />"
             rel="stylesheet" media="screen"/>
@@ -80,6 +79,11 @@
             <link href="<c:url value="/resources/css/theme.css" />"
                   rel="stylesheet" media="screen"/>
         </c:if>
+        <%--Load language based datepickers--%>
+        <c:if test="${user.language eq 'pl'}">
+            <script src="<c:url value="/resources/js/jquery.ui.datepicker-pl.js" />"></script>
+        </c:if>
+
     </security:authorize>
 </head>
 <body>

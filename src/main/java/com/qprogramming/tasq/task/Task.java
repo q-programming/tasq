@@ -193,7 +193,7 @@ public class Task implements java.io.Serializable {
 
     public String getFinishDate() {
         if (finishDate != null) {
-            Utils.convertDateToString(finishDate);
+            return Utils.convertDateTimeToString(finishDate);
         }
         return "";
     }
