@@ -277,6 +277,10 @@ public class TaskController {
                            HttpServletRequest request, Model model) {
         String taskID = taskForm.getId();
         Task task = taskSrv.findById(taskID);
+        if (task == null) {
+            MessageHelper.addErrorAttribute(ra, msg.getMessage("error.task.notfound", null, Utils.getCurrentLocale()));
+            return REDIRECT + request.getHeader(REFERER);
+        }
         if (Utils.containsHTMLTags(taskForm.getName())) {
             errors.rejectValue(NAME, ERROR_NAME_HTML);
         }
@@ -285,16 +289,12 @@ public class TaskController {
             errors.rejectValue(REMAINING, "error.estimateFormat");
         }
         int storyPoints = getStoryPoints(taskForm);
-        if (!StringUtils.isNumeric(taskForm.getStory_points()) || !Utils.validStoryPoint(storyPoints)) {
+        if (!task.isSubtask() && !StringUtils.isNumeric(taskForm.getStory_points()) || !Utils.validStoryPoint(storyPoints)) {
             errors.rejectValue(STORY_POINTS, "task.storyPoints.invalid");
         }
         if (errors.hasErrors()) {
             fillModelForEdit(model, task);
             return null;
-        }
-        if (task == null) {
-            MessageHelper.addErrorAttribute(ra, msg.getMessage("error.task.notfound", null, Utils.getCurrentLocale()));
-            return REDIRECT + request.getHeader(REFERER);
         }
         // check if can edit
         if (!projectSrv.canEdit(task.getProject())

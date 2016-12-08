@@ -256,3 +256,17 @@ function getURLAbsolutePath() {
     pathName = pathName.substring(0, pathName.lastIndexOf('/'));
     return loc.href.substring(0, loc.href.length - ((loc.pathname + loc.search + loc.hash).length - pathName.length));
 }
+function invalid(field) {
+    field.parent().parent().addClass('has-error');
+    field.parent().parent().removeClass('has-success');
+    field.siblings(".inputcheck.valid").hide();
+    field.siblings(".inputcheck.invalid").show();
+    $("#submitbtn").prop('disabled', true);
+}
+function valid(field) {
+    field.parent().parent().addClass('has-success');
+    field.parent().parent().removeClass('has-error');
+    field.siblings(".inputcheck.valid").show();
+    field.siblings(".inputcheck.invalid").hide();
+    $("#submitbtn").prop('disabled', false);
+}

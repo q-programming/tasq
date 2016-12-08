@@ -152,6 +152,12 @@ public class SignupController {
         if (!form.isPasswordConfirmed()) {
             errors.rejectValue("password", "error.notMatchedPasswords");
         }
+        Pattern pattern = Pattern.compile(PASSWORD_REGEXP);
+        Matcher matcher = pattern.matcher(form.getPassword());
+        if (!matcher.matches()) {
+            errors.rejectValue("password", "signup.password.strength.hint");
+            return null;
+        }
         if (errors.hasErrors()) {
             return null;
         }

@@ -84,13 +84,6 @@
                 <i class="fa fa-times inputcheck invalid" style="display: none;"></i>
             </div>
         </div>
-        <div id="pwdContainer" class="form-group">
-            <div class="col-lg-offset-3 col-lg-9 ">
-                <div class="passwordStrength a-tooltip" title="<s:message code="signup.password.strength"/> "></div>
-                <span class="help-block"><s:message code="signup.password.strength.hint"/>&nbsp;</span>
-            </div>
-
-        </div>
         <div class="form-group">
             <label for="confirmPassword" class="col-lg-3 control-label">${confirmPassword_txt}</label>
             <div class="col-lg-9">
@@ -101,7 +94,13 @@
                 <i class="fa fa-times inputcheck invalid" style="display: none;"></i>
             </div>
         </div>
+        <div id="pwdContainer" class="form-group">
+            <div class="col-lg-offset-3 col-lg-9 ">
+                <div class="passwordStrength a-tooltip" title="<s:message code="signup.password.strength"/> "></div>
+                <span class="help-block"><s:message code="signup.password.strength.hint"/>&nbsp;</span>
+            </div>
 
+        </div>
         <div class="form-group">
             <div class="col-lg-offset-3 col-lg-9">
                 <button id="submitbtn" type="submit" class="btn btn-default" disabled>
@@ -163,18 +162,7 @@
             }
         });
     });
-    function invalid(field) {
-        field.parent().parent().addClass('has-error');
-        field.parent().parent().removeClass('has-success');
-        field.siblings(".inputcheck.valid").hide();
-        field.siblings(".inputcheck.invalid").show();
-    }
-    function valid(field) {
-        field.parent().parent().addClass('has-success');
-        field.parent().parent().removeClass('has-error');
-        field.siblings(".inputcheck.valid").show();
-        field.siblings(".inputcheck.invalid").hide();
-    }
+//    password check
     var options = {};
     options.ui = {
         container: "#pwdContainer",
