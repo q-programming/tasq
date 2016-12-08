@@ -6,6 +6,14 @@
 <script src="<c:url value="/resources/js/hopscotch.js" />"></script>
 <link href="<c:url value="/resources/css/hopscotch.css" />" rel="stylesheet"
       media="screen"/>
+<style>
+    .tooltip-inner {
+        white-space: pre;
+        max-width: none;
+        text-align: left;
+    }
+</style>
+
 <div id="content" class="white-frame sidepadded" style="overflow: auto;">
     <div class="visible-sm visible-xs text-center">
         <h3><i class="fa fa-mobile" aria-hidden="true"></i>
@@ -195,14 +203,17 @@
                             Start time
                         </button>
                     </a>
-                    <table id="estimatesToggle" style="width: 400px;
-                 ">
+                    <table id="estimatesToggle" style="width: 400px;">
                         <tr>
+                            <td style="width:15px;"></td>
                             <td></td>
                             <td style="width: 150px"></td>
                             <td></td>
                         </tr>
                         <tr>
+                            <td>
+                                <i class="fa fa-plus-square clickable subtask-time-detail a-tooltip" data-container="body" aria-hidden="true" title="" data-original-title="Click to show detailed time including subtasks"></i>
+                            </td>
                             <td class="bar_td" style="width: 50px">Estimate</td>
                             <td class="bar_td">
                                 <div class="progress"
@@ -215,6 +226,9 @@
                             <td class="bar_td">5d</td>
                         </tr>
                         <tr>
+                            <td>
+                                <i class="fa fa-plus-square clickable subtask-time-detail a-tooltip" data-container="body" aria-hidden="true" title="" data-original-title="Click to show detailed time including subtasks"></i>
+                            </td>
                             <td class="bar_td">Logged</td>
                             <td class="bar_td">
                                 <div class="progress"
@@ -227,6 +241,9 @@
                             <td class="bar_td">2d 40m</td>
                         </tr>
                         <tr>
+                            <td>
+                                <i class="fa fa-plus-square clickable subtask-time-detail a-tooltip" data-container="body" aria-hidden="true" title="" data-original-title="Click to show detailed time including subtasks"></i>
+                            </td>
                             <td class="bar_td">Remaining</td>
                             <td class="bar_td">
                                 <div class="progress"
@@ -367,7 +384,9 @@
                                 <td style="width: 100px">
                                     <t:state state="TO_DO"/>
                                 </td>
-                                <td style="width: 50px; padding-top: 14px;">
+                                <td style="width: 50px; padding-top: 14px;cursor:help;" class="a-tooltip"
+                                    data-html="true"
+                                    title="Closed: 0%<br>Estimate: 2d 5h<br>Logged: 0m<br>Remaining: 2d 5h">
                                     <div class="progress" style="height: 5px;">
                                         <div class="progress-bar  a-tooltip"
                                              title="0%" role="progressbar"
@@ -394,10 +413,11 @@
                                 <td style="width: 100px">
                                     <t:state state="ONGOING"/>
                                 </td>
-                                <td style="width: 50px; padding-top: 14px;">
+                                <td style="width: 50px; padding-top: 14px;cursor:help;" class="a-tooltip"
+                                    data-html="true"
+                                    title="Closed: 42.0%<br>Estimate: 3h<br>Logged:1h 20m<br>Remaining: 1h 40m">
                                     <div class="progress" style="height: 5px;">
-                                        <div class="progress-bar  a-tooltip"
-                                             title="42.0%" role="progressbar"
+                                        <div class="progress-bar" role="progressbar"
                                              aria-valuenow="42.0" aria-valuemin="0"
                                              aria-valuemax="100" style="width:42.0%"></div>
                                     </div>
@@ -421,10 +441,12 @@
                                 <td style="width: 100px">
                                     <t:state state="CLOSED"/>
                                 </td>
-                                <td style="width: 50px; padding-top: 14px;">
+                                <td style="width: 50px; padding-top: 14px; cursor:help;" class="a-tooltip"
+                                    data-html="true"
+                                    title="Closed: 100.0%<br>Estimate: 1h 15m<br>Logged:1h 5m<br>Remaining: 0m">
                                     <div class="progress" style="height: 5px;">
-                                        <div class="progress-bar progress-bar-success a-tooltip"
-                                             title="100%" role="progressbar"
+                                        <div class="progress-bar progress-bar-success"
+                                             role="progressbar"
                                              aria-valuenow="100" aria-valuemin="0"
                                              aria-valuemax="100" style="width:100%"></div>
                                     </div>
@@ -1098,9 +1120,10 @@
             },
             {
                 title: "Time bars",
-                content: 'Shows how much time was estimated, how much logged and remaining',
+                content: 'Shows how much time was estimated, how much logged and remaining.<br>You can view detailed time values by clicking <i class="fa fa-plus-square clickable subtask-time-detail a-tooltip" data-container="body" aria-hidden="true" title="" data-original-title="Click to show detailed time including subtasks"></i> button',
                 target: "task-estimates",
                 placement: "right",
+                width: 400,
                 yOffset: -40
             },
             {
@@ -1113,7 +1136,7 @@
             },
             {
                 title: "Subtasks",
-                content: 'All subtasks are shown here with type, priority and progress. To create new subtask , click <a class="btn btn-default btn-xxs" href="#"> <i class="fa fa-plus"></i> <i class="fa fa-lg fa-sitemap"></i> </a> button<br>(option available from edit menu as well)',
+                content: 'All subtasks are shown here with type, priority and progress.<br>You can view subtask time values while hovering over left most progress bar.<br>To create new subtask,<br>click <a class="btn btn-default btn-xxs" href="#"> <i class="fa fa-plus"></i> <i class="fa fa-lg fa-sitemap"></i> </a> button<br>(option available from edit menu as well)',
                 target: "task-subtasks",
                 placement: "top",
                 yOffset: 40,
@@ -1121,7 +1144,7 @@
                 arrowOffset: 'center',
                 onNext: function () {
                     $('.nav-tabs a[href="#logWork"]').tab('show');
-                },
+                }
             },
             {
                 title: "Activity log",

@@ -1,4 +1,3 @@
-<!--Start details-->
 <%@page import="com.qprogramming.tasq.account.Roles" %>
 <%@ page trimDirectiveWhitespaces="true" %>
 <%@page import="com.qprogramming.tasq.task.TaskPriority" %>
@@ -17,6 +16,13 @@
 <script src="<c:url value="/resources/js/trumbowyg.min.js" />"></script>
 <script src="<c:url value="/resources/js/trumbowyg.preformatted.js" />"></script>
 <link href="<c:url value="/resources/css/trumbowyg.min.css" />" rel="stylesheet" media="screen"/>
+<style>
+    .tooltip-inner {
+        white-space: pre;
+        max-width: none;
+        text-align: left;
+    }
+</style>
 <security:authorize access="hasRole('ROLE_ADMIN')">
     <c:set var="is_admin" value="true"/>
 </security:authorize>
@@ -385,7 +391,7 @@
                             <c:if test="${not empty taskEstimate}">
                                 <td>
                                     <i class="fa fa-plus-square clickable subtask-time-detail a-tooltip"
-                                       aria-hidden="true"
+                                       data-target="subtask-estimate" data-container="body" aria-hidden="true"
                                        title="<s:message code="task.subtask.time.detail"/>"></i>
                                 </td>
                             </c:if>
@@ -403,13 +409,8 @@
                             </td>
                         </tr>
                         <c:if test="${not task.subtask && not empty taskEstimate}">
-                            <tr class="time-details-row">
-                                <td></td>
-                                <td colspan="3" class="bar_td">
-                                    <div>${taskEstimate}&nbsp;[${task.id}] + ${subtasksEstimate}&nbsp;<s:message
-                                            code="tasks.subtasks"/></div>
-                                </td>
-                            </tr>
+                            <t:timeDetails task="${task}" taskTime="${taskEstimate}" subtasks="${subtasks}"
+                                           subtasksTime="${subtasksEstimate}" method="estimate"/>
                         </c:if>
 
                     </c:if>
@@ -417,7 +418,8 @@
                     <tr>
                         <c:if test="${not empty taskLogged}">
                             <td style="width:15px;">
-                                <i class="fa fa-plus-square clickable subtask-time-detail" aria-hidden="true"
+                                <i class="fa fa-plus-square clickable subtask-time-detail a-tooltip" aria-hidden="true"
+                                   data-container="body" data-target="subtask-logged"
                                    title="<s:message code="task.subtask.time.detail"/>"></i>
                             </td>
                         </c:if>
@@ -437,13 +439,8 @@
                         <td class="bar_td">${task.loggedWork}</td>
                     </tr>
                     <c:if test="${not task.subtask && not empty taskLogged}">
-                        <tr class="time-details-row">
-                            <td></td>
-                            <td colspan="3" class="bar_td">
-                                <div>${taskLogged}&nbsp;[${task.id}] + ${subtasksLogged}&nbsp;<s:message
-                                        code="tasks.subtasks"/></div>
-                            </td>
-                        </tr>
+                        <t:timeDetails task="${task}" taskTime="${taskLogged}" subtasks="${subtasks}"
+                                       subtasksTime="${subtasksLogged}" method="logged"/>
                     </c:if>
 
                     <%-- Remaining work bar --%>
@@ -451,6 +448,7 @@
                         <c:if test="${not empty taskRemaining}">
                             <td style="width:15px;">
                                 <i class="fa fa-plus-square clickable subtask-time-detail a-tooltip" aria-hidden="true"
+                                   data-target="subtask-remaining" data-container="body"
                                    title="<s:message code="task.subtask.time.detail"/>"></i>
                             </td>
                         </c:if>
@@ -467,15 +465,9 @@
                         <td class="bar_td">${task.remaining }</td>
                     </tr>
                     <c:if test="${not task.subtask && not empty taskRemaining}">
-                        <tr class="time-details-row">
-                            <td></td>
-                            <td colspan="3" class="bar_td">
-                                <div>${taskRemaining}&nbsp;[${task.id}] + ${subtasksRemaining}&nbsp;<s:message
-                                        code="tasks.subtasks"/></div>
-                            </td>
-                        </tr>
+                        <t:timeDetails task="${task}" taskTime="${taskRemaining}" subtasks="${subtasks}"
+                                       subtasksTime="${subtasksRemaining}" method="remaining"/>
                     </c:if>
-                    <%-- 					</c:if> --%>
                 </table>
             </div>
             <%-------------- RELATED TASKS ------------------%>
@@ -618,23 +610,25 @@
                                             href="<c:url value="/task/${subTask.id}"/>">[${subTask.id}]
                                             ${subTask.name}</a></td>
                                     <td style="width: 100px"><t:state state="${subTask.state}"/></td>
-                                    <td style="width: 50px; padding-top: 14px;">
+                                        <%--count percentage of done--%>
+                                    <c:set var="percentage">${subTask.percentage_logged}</c:set>
+                                    <c:set var="logged_class"/>
+                                    <c:if test="${subTask.state eq 'TO_DO'}">
+                                        <c:set var="percentage">0</c:set>
+                                    </c:if>
+                                    <c:if test="${subTask.state eq 'CLOSED'}">
+                                        <c:set var="logged_class">progress-bar-success</c:set>
+                                        <c:set var="percentage">100</c:set>
+                                    </c:if>
+                                    <c:if test="${subTask.state eq 'BLOCKED' || subTask.percentage_logged gt 100}">
+                                        <c:set var="logged_class">progress-bar-danger</c:set>
+                                    </c:if>
+                                    <td style="width: 50px; padding-top: 14px;cursor:help;" class="a-tooltip"
+                                        title="<s:message code="task.closed"/>: ${percentage}%<br><s:message code="task.estimate"/>: ${subTask.estimate}<br><s:message code="task.logged"/>: ${subTask.loggedWork}<br><s:message code="task.remaining"/>: ${subTask.remaining}"
+                                        data-html="true">
                                         <div class="progress" style="height: 5px;">
-                                            <c:set var="logged_class"></c:set>
-                                            <c:set var="percentage">${subTask.percentage_logged}</c:set>
-                                            <c:if test="${subTask.state eq 'TO_DO'}">
-                                                <c:set var="percentage">0</c:set>
-                                            </c:if>
-                                            <c:if test="${subTask.state eq 'CLOSED'}">
-                                                <c:set var="logged_class">progress-bar-success</c:set>
-                                                <c:set var="percentage">100</c:set>
-                                            </c:if>
-                                            <c:if
-                                                    test="${subTask.state eq 'BLOCKED' || subTask.percentage_logged gt 100}">
-                                                <c:set var="logged_class">progress-bar-danger</c:set>
-                                            </c:if>
                                             <div class="progress-bar ${logged_class} a-tooltip"
-                                                 title="${percentage}%" role="progressbar"
+                                                 role="progressbar"
                                                  aria-valuenow="${percentage}" aria-valuemin="0"
                                                  aria-valuemax="100" style="width:${percentage}%"></div>
                                         </div>
@@ -1279,14 +1273,14 @@
                     <security:authorize access="hasRole('ROLE_ADMIN')">
                     var delurl = '<c:url value="/task/delWorklog?id="/>';
                     delbtn = '<div class="buttons_panel" style="float: right;">'
-                        + '<a class="delete_btn a-tooltip" style="color: #555;" href="' + delurl + worklog.id + '"'
-                        + ' title = "<s:message code="task.worklog.delete"/>"'
-                        + ' data-lang="${pageContext.response.locale}"'
-                        + ' data-msg="<s:message code="task.worklog.delete.confirm"/>" >'
-                        + '<i class="fa fa-trash-o"></i></a></div>';
+                            + '<a class="delete_btn a-tooltip" style="color: #555;" href="' + delurl + worklog.id + '"'
+                            + ' title = "<s:message code="task.worklog.delete"/>"'
+                            + ' data-lang="${pageContext.response.locale}"'
+                            + ' data-msg="<s:message code="task.worklog.delete.confirm"/>" >'
+                            + '<i class="fa fa-trash-o"></i></a></div>';
                     </security:authorize>
                     var row = '<tr><td>' + avatar + '</td><td style="font-size: smaller; color: dimgray;width: 100%;">' + account + '&nbsp;' + type + '<div class="time-div">' + worklog.timeLogged + '</div> ' + delbtn + message
-                        + '</td></tr>';
+                            + '</td></tr>';
                     $("#taskworklogs").append(row);
                     $(".a-tooltip").tooltip();
                 });
@@ -1316,7 +1310,7 @@
 
         $('body').on('click', 'a.delete_btn', function (e) {
             var msg = '<p style="text-align:center"><i class="fa fa-lg fa-exclamation-triangle" style="display: initial;"></i>&nbsp'
-                + $(this).data('msg') + '</p>';
+                    + $(this).data('msg') + '</p>';
             var lang = $(this).data('lang');
             bootbox.setDefaults({
                 locale: lang
@@ -1335,23 +1329,23 @@
         var init = true;
         var noTags = '<s:message code="task.tags.noTags" htmlEscape="false"/>';
         $('#taskTags').tagsinput(
-            {
-                maxChars: 12,
-                maxTags: 6,
-                trimValue: true
-            }
+                {
+                    maxChars: 12,
+                    maxTags: 6,
+                    trimValue: true
+                }
         );
         loadTags();
 // 	checkIfEmptyTags()
 
         $(".bootstrap-tagsinput").hover(
-            function () {
-                $(this).addClass("inputHover");
-                $("#editTags").show();
-            }, function () {
-                $(this).removeClass("inputHover");
-                $("#editTags").hide();
-            }
+                function () {
+                    $(this).addClass("inputHover");
+                    $("#editTags").show();
+                }, function () {
+                    $(this).removeClass("inputHover");
+                    $("#editTags").hide();
+                }
         );
         $('.bootstrap-tagsinput').focusin(function () {
             inputInProgress = true;
@@ -1475,29 +1469,30 @@
         }
     });
     $('.subtask-time-detail').click(function () {
+        var target = $(this).data('target');
         $(this).toggleClass('fa-minus-square');
         $(this).toggleClass('fa-plus-square');
-        $(this).closest('tr').next(".time-details-row").toggle();
+        $("." + target).toggle("slow");
     });
 
     function convertToDate(str) {
         var reggie = /(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})/;
         var dateArray = reggie.exec(str);
         return new Date(
-            (+dateArray[3]),
-            (+dateArray[2]) - 1, // Careful, month starts at 0!
-            (+dateArray[1]),
-            (+dateArray[4]),
-            (+dateArray[5])
+                (+dateArray[3]),
+                (+dateArray[2]) - 1, // Careful, month starts at 0!
+                (+dateArray[1]),
+                (+dateArray[4]),
+                (+dateArray[5])
         );
     }
 
     function getEventTypeMsg(type) {
         switch (type) {
-            <c:forEach items="${types}" var="enum_type">
+                <c:forEach items="${types}" var="enum_type">
             case "${enum_type}":
                 return '<s:message code="${enum_type.code}"/> ';
-            </c:forEach>
+                </c:forEach>
             default:
                 return 'not yet added ';
         }
