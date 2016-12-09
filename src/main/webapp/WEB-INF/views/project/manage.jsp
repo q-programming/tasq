@@ -161,8 +161,8 @@
             </div>
             <div class="row marginleft_0 paddedleft40">
                 <input id="holidayInput" class="form-control datepicker pull-left" style="width: 200px">
-                    <span id="addHoliday" class="btn btn-default clickable pull-left"><i
-                            class="fa fa-calendar-plus-o"></i></span>
+                    <button id="addHoliday" class="btn btn-default clickable pull-left"><i
+                            class="fa fa-calendar-plus-o"></i></button>
             </div>
             <div class="row marginleft_0 paddedleft40 margintop_20">
                 <table id="holidaysTable" class="table table-condensed table-hover table-striped table-bordered"
@@ -511,9 +511,16 @@
         // project workdays
         $(".datepicker").datepicker({
             dateFormat: 'dd-mm-yy',
-            firstDay: 1
+            firstDay: 1,
+            regional:['${user.language}']
+        }).change(function () {
+            if (!isValidDate($(this).val())) {
+                showWarning("<s:message code="warning.date.invalid"/>");
+                $("#addHoliday").prop('disabled', true);
+            } else {
+                $("#addHoliday").prop('disabled', false);
+            }
         });
-        $('.datepicker').datepicker($.datepicker.regional['${user.language}']);
 
         $("#addHoliday").click(function () {
             var holiday = $("#holidayInput").val();

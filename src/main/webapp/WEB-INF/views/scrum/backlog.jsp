@@ -275,11 +275,11 @@
             $("#sprintEndTime").val("");
         });
 
-        $(".datepicker").datepicker({
-// 		minDate : '0',
-            dateFormat: "dd-mm-yy",
-            firstDay: 1
-        });
+//        $(".datepicker").datepicker({
+//            minDate : '0',
+//            dateFormat: "dd-mm-yy",
+//            firstDay: 1
+//        });
         $("#sortable").sortable({
             cursor: 'move',
             update: function (event, ui) {

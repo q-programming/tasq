@@ -249,8 +249,18 @@
         $(".datepicker").datepicker({
             minDate: '0',
             dateFormat: 'dd-mm-yy',
-            firstDay: 1
-        }).datepicker($.datepicker.regional['${user.language}']);
+            firstDay: 1,
+            regional: ['${user.language}']
+        }).change(function () {
+            if (!isValidDate($(this).val())) {
+                showWarning("<s:message code="warning.date.invalid"/>");
+                $("#createSubmit").prop('disabled', true);
+                $(this).parent("div").addClass('has-error');
+            } else {
+                $("#createSubmit").prop('disabled', false);
+                $(this).parent("div").removeClass('has-error');
+            }
+        });
 
         var currentDue = "${taskForm.due_date}";
         $("#due_date").val(currentDue);

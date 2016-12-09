@@ -200,7 +200,7 @@
 			<span class="btn"
                   onclick="location.href='<c:url value="/task/${task.id}"/>';"><s:message
                     code="main.cancel" text="Cancel"/></span>
-            <button type="submit" class="btn btn-success">
+            <button id="edit-submit" type="submit" class="btn btn-success">
                 <i class="fa fa-pencil"></i>&nbsp;<s:message code="task.edit" text="Edit"/>
             </button>
 
@@ -240,10 +240,20 @@
 
         //------------------------------------Datepickers
         $(".datepicker").datepicker({
-            minDate: '0'
+            minDate: '0',
+            dateFormat: "dd-mm-yy",
+            firstDay: 1,
+            regional: ['${user.language}']
+        }).change(function () {
+            if (!isValidDate($(this).val())) {
+                showWarning("<s:message code="warning.date.invalid"/>");
+                $("#edit-submit").prop('disabled', true);
+                $(this).parent("div").addClass('has-error');
+            } else {
+                $("#edit-submit").prop('disabled', false);
+                $(this).parent("div").removeClass('has-error');
+            }
         });
-        $(".datepicker").datepicker("option", "dateFormat", "dd-mm-yy");
-        $('.datepicker').datepicker("option", "firstDay", 1);
         var currentDue = "${taskForm.due_date}";
         $("#due_date").val(currentDue);
         getDefaultTaskType();

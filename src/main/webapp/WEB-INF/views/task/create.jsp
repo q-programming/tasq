@@ -271,16 +271,18 @@
         </label>
         <%----------DUE DATE --------------------------%>
         <a class="anchor" id="dueDateA"></a>
-        <div>
+        <div class="has-feedback">
             <div class="mod-header">
                 <h5 class="mod-header-title">
                     <s:message code="task.dueDate"/>
                 </h5>
             </div>
-            <form:input path="due_date" class="form-control datepicker"
-                        id="due_date" style="width:150px"/>
+            <div>
+                <form:input path="due_date" class="form-control datepicker"
+                            id="due_date" style="width:150px"/>
             <span class="help-block"><s:message
                     code="task.dueDate.help"/></span>
+            </div>
         </div>
         <%----------FILE UPLOAD --------------------------%>
         <a class="anchor" id="filesA"></a>
@@ -424,11 +426,20 @@
 
         //------------------------------------Datepickers
         $(".datepicker").datepicker({
-            minDate: '0'
+            minDate: '0',
+            dateFormat: "dd-mm-yy",
+            firstDay: 1,
+            regional: ['${user.language}']
+        }).change(function () {
+            if (!isValidDate($(this).val())) {
+                showWarning("<s:message code="warning.date.invalid"/>");
+                $("#createSubmit").prop('disabled', true);
+                $(this).parent("div").addClass('has-error');
+            } else {
+                $("#createSubmit").prop('disabled', false);
+                $(this).parent("div").removeClass('has-error');
+            }
         });
-        $(".datepicker").datepicker("option", "dateFormat", "dd-mm-yy");
-        $('.datepicker').datepicker("option", "firstDay", 1);
-        $('.datepicker').datepicker($.datepicker.regional['${user.language}']);
         var currentDue = "${taskForm.due_date}";
         $("#due_date").val(currentDue);
 
@@ -442,7 +453,7 @@
             var active = $('#addToSprint option:selected').data('active');
             if (active) {
                 var message = '<i class="fa fa-exclamation-circle"></i>'
-                    + ' <s:message code="task.sprint.add.warning"/>';
+                        + ' <s:message code="task.sprint.add.warning"/>';
                 $("#sprintWarning").html(message);
             }
         });
@@ -581,10 +592,10 @@
                         isActive = " (<s:message code="agile.sprint.active"/>)";
                     }
                     $('#addToSprint')
-                        .append($("<option></option>")
-                            .attr("value", sprint.sprintNo)
-                            .attr("data-active", sprint.active)
-                            .text("Sprint " + sprint.sprintNo + isActive));
+                            .append($("<option></option>")
+                                    .attr("value", sprint.sprintNo)
+                                    .attr("data-active", sprint.active)
+                                    .text("Sprint " + sprint.sprintNo + isActive));
                     $('#addToSprint').val('');
                 });
             });
