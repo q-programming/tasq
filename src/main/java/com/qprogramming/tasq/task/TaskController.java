@@ -216,6 +216,8 @@ public class TaskController {
                     }
                 }
             }
+            MessageHelper.addSuccessAttribute(ra,
+                    msg.getMessage("task.create.success", new Object[]{taskID}, Utils.getCurrentLocale()));
             return REDIRECT_TASK + taskID;
         }
         return null;
