@@ -22,31 +22,30 @@
                         <s:message code="main.loading"/>
                         <br>
                     </div>
-                    <table style="width:100%;margin-top: 20px;">
-                        <tr>
-                            <td>
+                    <div style="margin-top: 20px;">
+                        <div class="row">
+                            <div class="col-md-10">
                                 <s:message code="task.assignee"/>:
                                 <span id="displayAssignee" style="  margin: 0 auto;  margin-top: 20px;"></span>
-                            </td>
-                            <td class="pull-right">
+                            </div>
+                            <div class="col-md-2 text-right">
                                 <button id="unassign_btn" class="btn btn-default a-tooltip"
                                         title="<s:message code="task.unassign"/>"><i class="fa fa-user-times"></i>
                                 </button>
 
-                            </td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td class="pull-right" style="margin-top:20px">
-							<span id="assign_me_btn" class="btn btn-default" style="width:150px">
-								<i class="fa fa-user"></i> <s:message code="task.assignme"/>
-							</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-offset-4 col-lg-8 margintop_20 text-right" >
+                                <span id="assign_me_btn" class="btn btn-default" style="width:150px">
+                                    <i class="fa fa-user"></i> <s:message code="task.assignme"/>
+                                </span>
                                 <button id="assign_btn" class="btn btn-default" disabled="disabled" style="width:150px">
                                     <i class="fa fa-user"></i> <s:message code="task.assign"/>
                                 </button>
-                            </td>
-                        </tr>
-                    </table>
+                            </div>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
@@ -70,7 +69,7 @@
         taskID = task;
         var showAssignee;
         var title = '<i class="fa fa-lg fa-user-plus"></i>' + taskID
-                + ' - <s:message code="task.assign" /> ... ';
+            + ' - <s:message code="task.assign" /> ... ';
         $("#assignToModalLabel").html(title);
         $("#assign_taskID").val(taskID);
         if (assignee == '') {
@@ -125,7 +124,7 @@
                 $.each(data, function (i, item) {
                     var itemToAdd = {
                         value: item.email,
-                        label: item.name + " " + item.surname,
+                        label: item.name + " " + item.surname + " (" + item.username + ")",
                         id: item.id
                     };
                     results.push(itemToAdd);

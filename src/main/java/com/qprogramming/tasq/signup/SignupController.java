@@ -119,6 +119,7 @@ public class SignupController {
                 throw new TasqException(msg.getMessage("error.email.sending", null, Utils.getDefaultLocale()));
             }
             MessageHelper.addSuccessAttribute(ra, msg.getMessage("signup.success", null, Utils.getDefaultLocale()));
+            return "redirect:/";
         }
         MessageHelper.addWarningAttribute(ra, msg.getMessage("signup.success.emailerror", null, Utils.getDefaultLocale()));
         return "redirect:/";

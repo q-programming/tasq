@@ -124,11 +124,11 @@ public class AccountService {
     }
 
     public Page<Account> findByNameSurnameContaining(String term, Pageable p) {
-        return accRepo.findBySurnameContainingIgnoreCaseOrNameContainingIgnoreCase(term, term, p);
+        return accRepo.findBySurnameContainingIgnoreCaseOrNameContainingIgnoreCaseOrUsernameContainingIgnoreCase(term, term, term, p);
     }
 
     public List<Account> findByNameSurnameContaining(String term) {
-        return accRepo.findBySurnameContainingIgnoreCaseOrNameContainingIgnoreCase(term, term);
+        return accRepo.findBySurnameContainingIgnoreCaseOrNameContainingIgnoreCaseOrUsernameContainingIgnoreCase(term, term, term);
     }
 
     public List<Account> findAdmins() {

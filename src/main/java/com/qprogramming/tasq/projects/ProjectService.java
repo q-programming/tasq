@@ -112,7 +112,8 @@ public class ProjectService {
             if (term == null) {
                 return allParticipants.stream().collect(Collectors.toList());
             } else {
-                return allParticipants.stream().filter(account -> StringUtils.containsIgnoreCase(account.toString(), term)).collect(Collectors.toList());
+                return allParticipants.stream().filter(account -> StringUtils.containsIgnoreCase(account.toString(), term)
+                        || StringUtils.containsIgnoreCase(account.getUsername(), term)).collect(Collectors.toList());
             }
         }
         return new LinkedList<>();

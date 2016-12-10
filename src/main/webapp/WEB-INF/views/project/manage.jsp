@@ -74,7 +74,7 @@
                                     priority="${enum_priority}"/></a></li>
                         </c:forEach>
                     </ul>
-					<span class="help-block"><s:message
+                    <span class="help-block"><s:message
                             code="project.manage.priority.help"/></span> <input
                         name="default_priority" id="default_priority" type="hidden"
                         value="${project.default_priority}">
@@ -106,7 +106,7 @@
                             </c:if>
                         </c:forEach>
                     </ul>
-					<span class="help-block"><s:message
+                    <span class="help-block"><s:message
                             code="project.manage.type.help"/></span> <input name="default_type"
                                                                             id="default_type" type="hidden"
                                                                             value="${project.default_type}">
@@ -117,7 +117,7 @@
                     <b><s:message code="project.manage.assignee"/></b>
                 </h5>
                 <input id="assign_taskID" name="defaultAssignee" type="hidden" value="${project.defaultAssigneeID}">
-                <input name="account" class="form-control" style="width:250px" id="assignee_input"
+                <input name="account" class="form-control" style="width:400px" id="assignee_input"
                        value="${defaultAssignee}">
                 <div id="assignUsersLoader" style="display: none">
                     <i class="fa fa-cog fa-spin"></i>
@@ -148,8 +148,8 @@
                                <c:if test="${project.workingWeekends}">checked</c:if>> <s:message
                             code="project.manage.workingweekends"
                             htmlEscape="false"/>
-                    <span class="help-block"><s:message
-                            code="project.manage.workingweekends.help" htmlEscape="false"/></span>
+                        <span class="help-block"><s:message
+                                code="project.manage.workingweekends.help" htmlEscape="false"/></span>
                     </label>
                 </h5>
             </div>
@@ -161,8 +161,8 @@
             </div>
             <div class="row marginleft_0 paddedleft40">
                 <input id="holidayInput" class="form-control datepicker pull-left" style="width: 200px">
-                    <button id="addHoliday" class="btn btn-default clickable pull-left"><i
-                            class="fa fa-calendar-plus-o"></i></button>
+                <button id="addHoliday" class="btn btn-default clickable pull-left"><i
+                        class="fa fa-calendar-plus-o"></i></button>
             </div>
             <div class="row marginleft_0 paddedleft40 margintop_20">
                 <table id="holidaysTable" class="table table-condensed table-hover table-striped table-bordered"
@@ -226,14 +226,14 @@
             </div>
             <div class="padding-left5 pull-left" style="display: none" id="add_div">
                 <div>
-                    <div class="input-group" style="width: 250px;">
+                    <div class="input-group" style="width: 400px;">
                         <input type="text" class="form-control input-sm"
                                placeholder="<s:message code="project.participant.hint"/>"
                                id="participant">
-							<span class="input-group-btn">
+                        <span class="input-group-btn">
 							<i id="participantsLoader" class="fa fa-lg fa-cog fa-spin" style="display:none"></i>
 							</span>
-							 <span class="input-group-btn">
+                        <span class="input-group-btn">
 								<button type="button" id="dismiss_add" class="close theme-close"
                                         style="padding-left: 5px">&times;</button>
 							</span>
@@ -261,7 +261,7 @@
                     <td><img data-src="holder.js/30x30"
                              style="height: 30px; float: left; padding-right: 10px;"
                              src="<c:url value="/../avatar/${participant.id}.png"/>"/>${participant}
-						<span style="color: #737373">(<s:message
+                        <span style="color: #737373">(<s:message
                                 code="${participant.role.code}"/>)
 					</span></td>
                     <td><c:if test="${can_edit}">
@@ -378,7 +378,7 @@
             lang: '${user.language}',
             fullscreenable: false,
             btns: ['formatting',
-                '|', ['bold', 'italic', 'underline', 'strikethrough', 'preformatted' ],
+                '|', ['bold', 'italic', 'underline', 'strikethrough', 'preformatted'],
                 '|', 'link',
                 '|', 'insertImage',
                 '|', 'btnGrp-justify',
@@ -398,8 +398,8 @@
                     response($.map(result, function (item) {
                         return {
                             // following property gets displayed in drop down
-                            label: item.name + " " + item.surname,
-                            value: item.email,
+                            label: item.name + " " + item.surname + " (" + item.username + ")",
+                            value: item.email
                         }
                     }));
                 });
@@ -446,7 +446,7 @@
                     $.each(data, function (i, item) {
                         var itemToAdd = {
                             value: item.email,
-                            label: item.name + " " + item.surname,
+                            label: item.name + " " + item.surname + " (" + item.username + ")",
                             id: item.id
                         };
                         results.push(itemToAdd);
@@ -512,7 +512,7 @@
         $(".datepicker").datepicker({
             dateFormat: 'dd-mm-yy',
             firstDay: 1,
-            regional:['${user.language}']
+            regional: ['${user.language}']
         }).change(function () {
             if (!isValidDate($(this).val())) {
                 showWarning("<s:message code="warning.date.invalid"/>");

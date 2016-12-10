@@ -773,38 +773,40 @@ public class TaskController {
         Task task = taskSrv.findById(taskID);
         if (task != null) {
             // check if can edit
-            if (!projectSrv.canEdit(task.getProject()) || !Roles.isPowerUser()) {
+            if (Roles.isPowerUser() | projectSrv.canEdit(task.getProject())) {
+                switch (action) {
+                    case START: {
+                        Account account = Utils.getCurrentAccount();
+                        if (account.getActive_task() != null && account.getActive_task().length > 0
+                                && !("").equals(account.getActive_task()[0])) {
+                            MessageHelper.addWarningAttribute(ra, msg.getMessage("task.stopTime.warning",
+                                    new Object[]{account.getActive_task()[0]}, Utils.getCurrentLocale()));
+                            return REDIRECT + request.getHeader(REFERER);
+                        }
+                        account.startTimerOnTask(task);
+                        accSrv.update(account);
+                        wlSrv.checkStateAndSave(task);
+                        break;
+                    }
+                    case STOP:
+                        Period logWork = stopTimer(task);
+                        MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.logWork.logged",
+                                new Object[]{PeriodHelper.outFormat(logWork), task.getId()}, Utils.getCurrentLocale()));
+                        break;
+                    case CANCEL: {
+                        Account account = Utils.getCurrentAccount();
+                        account.clearActive_task();
+                        accSrv.update(account);
+                        return REDIRECT_TASK + taskID;
+                    }
+                }
+            } else {
                 MessageHelper.addErrorAttribute(ra,
                         msg.getMessage(ERROR_ACCES_RIGHTS, null, Utils.getCurrentLocale()));
                 return REDIRECT + request.getHeader(REFERER);
             }
-            switch (action) {
-                case START: {
-                    Account account = Utils.getCurrentAccount();
-                    if (account.getActive_task() != null && account.getActive_task().length > 0
-                            && !("").equals(account.getActive_task()[0])) {
-                        MessageHelper.addWarningAttribute(ra, msg.getMessage("task.stopTime.warning",
-                                new Object[]{account.getActive_task()[0]}, Utils.getCurrentLocale()));
-                        return REDIRECT + request.getHeader(REFERER);
-                    }
-                    account.startTimerOnTask(task);
-                    accSrv.update(account);
-                    wlSrv.checkStateAndSave(task);
-                    break;
-                }
-                case STOP:
-                    Period logWork = stopTimer(task);
-                    MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.logWork.logged",
-                            new Object[]{PeriodHelper.outFormat(logWork), task.getId()}, Utils.getCurrentLocale()));
-                    break;
-                case CANCEL: {
-                    Account account = Utils.getCurrentAccount();
-                    account.clearActive_task();
-                    accSrv.update(account);
-                    return REDIRECT_TASK + taskID;
-                }
-            }
         } else {
+            MessageHelper.addErrorAttribute(ra, msg.getMessage("error.task.notfound", null, Utils.getCurrentLocale()));
             return REDIRECT + request.getHeader(REFERER);
         }
         return REDIRECT + request.getHeader(REFERER);
@@ -940,7 +942,10 @@ public class TaskController {
                     MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
                     return REDIRECT + request.getHeader(REFERER);
                 }
-                // delete files
+                //send event to owner if needed
+                if (!task.getOwner().equals(Utils.getCurrentAccount())) {
+                    //TODO send event to task owner
+                }
                 // leave message and clear all
                 StringBuilder message = new StringBuilder();
                 message.append("[");
@@ -953,7 +958,8 @@ public class TaskController {
                 wlSrv.addWorkLogNoTask(message.toString(), project, LogType.DELETED);
                 visitedSrv.delete(task);
             }
-            // TODO add message about removed task
+            MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.delete.success",
+                    new Object[]{taskID}, Utils.getCurrentLocale()), Utils.getCurrentLocale());
             return "redirect:/";
         }
         return REDIRECT + request.getHeader(REFERER);
@@ -1300,45 +1306,20 @@ public class TaskController {
 
     private ResultData checkTaskCanOperated(Task task, boolean remove) {
         List<Account> accounts = accSrv.findAll();
-        StringBuilder accountsWorking = new StringBuilder();
-        String separator = "";
-
-        for (Account account : accounts) {
-            boolean update = false;
-            if (account.getActive_task() != null && account.getActive_task().length > 0
-                    && account.getActive_task()[0].equals(task.getId())) {
-                if (account.equals(Utils.getCurrentAccount())) {
-                    if (remove) {
-                        account.clearActive_task();
-                    } else {
-                        stopTimer(task);
-                    }
-                    update = true;
-                } else {
-                    accountsWorking.append(separator);
-                    accountsWorking.append(account.toString());
-                    separator = ", ";
-                }
-            }
-            if (accountsWorking.length() > 0) {
+        List<Account> workingAccounts = accounts.stream().filter(x -> x.getActive_task() != null && x.getActive_task().length > 0
+                && x.getActive_task()[0].equals(task.getId())).collect(Collectors.toList());
+        if (workingAccounts.size() > 0) {
+            Account currentAccount = Utils.getCurrentAccount();
+            if (workingAccounts.size() > 1 || !workingAccounts.get(0).equals(currentAccount)) {
                 return new ResultData(ResultData.ERROR, msg.getMessage("task.changeState.change.working",
-                        new Object[]{accountsWorking.toString()}, Utils.getCurrentLocale()));
+                        new Object[]{String.join(",", workingAccounts.stream().map(Account::toString).collect(Collectors.toList()))}, Utils.getCurrentLocale()));
             }
             if (remove) {
-                //TODO add last visited task
-//                List<Task> lastVisited = account.getLast_visited_t();
-//                if (lastVisited.contains(task)) {
-//                    lastVisited.remove(task);
-//                    account.setLast_visited_t(lastVisited);
-//                    update = true;
-//                }
-//                if (account.equals(Utils.getCurrentAccount())) {
-//                    Utils.getCurrentAccount().setLast_visited_t(lastVisited);
-//                }
+                currentAccount.clearActive_task();
+            } else {
+                stopTimer(task);
             }
-            if (update) {
-                accSrv.update(account);
-            }
+            accSrv.update(currentAccount);
         }
         return new ResultData(ResultData.OK, null);
     }

@@ -504,7 +504,7 @@
                     $.each(data, function (i, item) {
                         var itemToAdd = {
                             value: item.email,
-                            label: item.name + " " + item.surname,
+                            label: item.name + " " + item.surname+ " (" + item.username + ")",
                             id: item.id
                         };
                         results.push(itemToAdd);
