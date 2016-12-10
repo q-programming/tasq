@@ -38,7 +38,7 @@ public class ProjectService {
     }
 
     public Project findByName(String name) {
-        return projRepo.findByName(name);
+        return projRepo.findByNameIgnoreCase(name);
     }
 
     public Project findById(Long id) {

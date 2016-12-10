@@ -62,7 +62,7 @@ public class ProjectServiceTest {
 
     @Test
     public void findByNameTest() {
-        when(projRepoMock.findByName(PROJECT_NAME)).thenReturn(testProject);
+        when(projRepoMock.findByNameIgnoreCase(PROJECT_NAME)).thenReturn(testProject);
         Assert.assertNotNull(projSrv.findByName(PROJECT_NAME));
     }
 
