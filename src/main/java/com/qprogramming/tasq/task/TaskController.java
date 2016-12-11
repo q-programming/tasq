@@ -910,7 +910,6 @@ public class TaskController {
                     && Roles.isPowerUser()) {
                 StringBuilder message = new StringBuilder();
                 String oldPriority = "";
-                // TODO temporary due to old DB
                 if (task.getPriority() != null) {
                     oldPriority = task.getPriority().toString();
                 }
@@ -937,38 +936,27 @@ public class TaskController {
             if (isAdmin(task, project)) {
                 Account currentAccount = Utils.getCurrentAccount();
                 Account owner = task.getOwner();
+                String taskName = task.getName();
                 ResultData result;
-                // check for links and subtasks
-                List<Task> subtasks = taskSrv.findSubtasks(taskID);
-                for (Task subtask : subtasks) {
-                    result = removeTaskRelations(subtask);
-                    if (ResultData.ERROR.equals(result.code)) {
-                        MessageHelper.addWarningAttribute(ra, result.message, currentLocale);
-                        return REDIRECT + request.getHeader(REFERER);
-                    }
-                }
-                taskSrv.deleteAll(subtasks);
-                taskSrv.deleteFiles(task);//TODO handle IOException
-                result = removeTaskRelations(task);
+                result = taskSrv.deleteTask(task);
                 if (result.code.equals(ResultData.ERROR)) {
                     MessageHelper.addWarningAttribute(ra, result.message, currentLocale);
+                    //TODO rollback ?
                     return REDIRECT + request.getHeader(REFERER);
                 }
                 //send event to owner if needed
                 // leave message and clear all
                 StringBuilder message = new StringBuilder();
                 message.append("[");
-                message.append(task.getId());
+                message.append(taskID);
                 message.append("]");
                 message.append(" - ");
-                message.append(task.getName());
+                message.append(taskName);
                 if (!owner.equals(currentAccount)) {
                     Locale ownerLocale = new Locale(owner.getLanguage());
-                    String moreDetails = msg.getMessage("log.type.delete.info", new Object[]{currentAccount, taskID, task.getName()}, ownerLocale);
+                    String moreDetails = msg.getMessage("log.type.delete.info", new Object[]{currentAccount, taskID, taskName}, ownerLocale);
                     eventSrv.addSystemEvent(owner, LogType.DELETED, msg.getMessage(LogType.DELETED.getCode(), null, ownerLocale), moreDetails);
                 }
-                Task purged = taskSrv.save(purgeTask(task));
-                taskSrv.delete(purged);
                 wlSrv.addWorkLogNoTask(message.toString(), project, LogType.DELETED);
                 visitedSrv.delete(task);
             }
@@ -1089,6 +1077,11 @@ public class TaskController {
             MessageHelper.addErrorAttribute(ra, msg.getMessage(ERROR_ACCES_RIGHTS, null, Utils.getCurrentLocale()));
             return REDIRECT + request.getHeader(REFERER);
         } else {
+            ResultData checkResult = taskSrv.checkTaskCanOperated(subtask, false);
+            if (checkResult.code.equals(ResultData.ERROR)) {
+                MessageHelper.addWarningAttribute(ra, checkResult.message, Utils.getCurrentLocale());
+                return REDIRECT + request.getHeader(REFERER);
+            }
             Task parent = taskSrv.findById(subtask.getParent());
             long taskCount = project.getLastTaskNo();
             taskCount++;
@@ -1132,7 +1125,6 @@ public class TaskController {
                 newDir.setWritable(true, false);
                 newDir.setReadable(true, false);
                 FileUtils.copyDirectory(oldDir, newDir);
-                FileUtils.deleteDirectory(oldDir);
             }
             project.setLastTaskNo(taskCount);
             project.getTasks().add(task);
@@ -1145,15 +1137,7 @@ public class TaskController {
             wlSrv.addActivityLog(task, message.toString(), LogType.SUBTASK2TASK);
             taskSrv.save(task);
             // cleanup
-            ResultData checkResult = taskSrv.checkTaskCanOperated(subtask, false);
-            if (checkResult.code.equals(ResultData.OK)) {//TODO refactor double result data
-                ResultData result = removeTaskRelations(subtask);
-                if (result.code.equals(ResultData.ERROR)) {
-                    throw new TasqException(result.message);
-                }
-            }
-            subtask = taskSrv.save(purgeTask(subtask));
-            taskSrv.delete(subtask);
+            taskSrv.deleteTask(subtask);
             MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.subtasks.2task.success",
                     new Object[]{id, taskID}, Utils.getCurrentLocale()));
             TaskLink link = new TaskLink(parent.getId(), taskID, TaskLinkType.RELATES_TO);
@@ -1450,7 +1434,7 @@ public class TaskController {
     private List<String> getTaskFiles(Task task) {
         File folder = new File(taskSrv.getTaskDirectory(task));
         File[] listOfFiles = folder.listFiles();
-        List<String> fileNames = new ArrayList<String>();
+        List<String> fileNames = new ArrayList<>();
         if (listOfFiles != null) {
             for (File file : listOfFiles) {
                 if (file.isFile()) {
@@ -1484,15 +1468,6 @@ public class TaskController {
             return true;
         }
         return false;
-    }
-
-    /**
-     * Nuke Task - set everything to null
-     */
-    private Task purgeTask(Task task) {
-        Task zerotask = new Task();
-        zerotask.setId(task.getId());
-        return zerotask;
     }
 
     protected EntityManager getEntitymanager() {

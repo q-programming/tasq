@@ -16,6 +16,8 @@ import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Hibernate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
 @Service
 public class TaskService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(TaskService.class);
     private TaskRepository taskRepo;
     private AppService appSrv;
     private AgileService sprintSrv;
@@ -235,10 +238,38 @@ public class TaskService {
     }
 
 
-    public ResultData deleteTask() {
-
-
-        return null;
+    public ResultData deleteTask(Task task) {
+        //check if we can operate on task
+        ResultData resultData = checkTaskCanOperated(task, true);
+        if (resultData.code.equals(ResultData.ERROR)) {
+            return resultData;
+        }
+        //check it's subtasks
+        if(!task.isSubtask()){
+            List<Task> subtasks = findSubtasks(task.getId());
+            for (Task subtask : subtasks) {
+                resultData = checkTaskCanOperated(subtask, true);
+                if (ResultData.ERROR.equals(resultData.code)) {
+                    return resultData;
+                }
+            }
+            //all ok proceed with removal
+            subtasks.forEach(this::removeTaskRelations);
+            deleteAll(subtasks);
+        }
+        try {
+            deleteFiles(task);
+        } catch (IOException e) {
+            String message = "Failed to remove files from task %s";
+            message = String.format(message, task.getId());
+            LOG.error(message + " Exception {}", e.getMessage());
+            LOG.debug("{}", e);
+            return new ResultData(ResultData.ERROR, message);
+        }
+        removeTaskRelations(task);
+        Task purged = save(purgeTask(task));
+        delete(purged);
+        return new ResultData(ResultData.OK, null);
     }
 
 
@@ -250,12 +281,12 @@ public class TaskService {
             Account currentAccount = Utils.getCurrentAccount();
             if (workingAccounts.size() > 1 || !workingAccounts.get(0).equals(currentAccount)) {
                 return new ResultData(ResultData.ERROR, msg.getMessage("task.changeState.change.working",
-                        new Object[]{String.join(",", workingAccounts.stream().map(Account::toString).collect(Collectors.toList()))}, Utils.getCurrentLocale()));
+                        new Object[]{task.getId(), String.join(",", workingAccounts.stream().map(Account::toString).collect(Collectors.toList()))}, Utils.getCurrentLocale()));
             }
             if (remove) {
                 currentAccount.clearActive_task();
+                accountSrv.update(currentAccount);
             }
-            accountSrv.update(currentAccount);
         }
         return new ResultData(ResultData.OK, null);
     }
@@ -295,6 +326,7 @@ public class TaskService {
         Set<Comment> comments = comSrv.findByTaskIdOrderByDateDesc(task.getId());
         comSrv.delete(comments);
     }
+
     /**
      * Adds event about state changed
      *
@@ -305,5 +337,15 @@ public class TaskService {
     public void changeState(TaskState oldState, TaskState newState, Task task) {
         wlSrv.addActivityLog(task, Utils.changedFromTo(oldState.getDescription(), newState.getDescription()), LogType.STATUS);
     }
+
+    /**
+     * Nuke Task - set everything to null
+     */
+    private Task purgeTask(Task task) {
+        Task zerotask = new Task();
+        zerotask.setId(task.getId());
+        return zerotask;
+    }
+
 
 }
