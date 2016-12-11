@@ -1,19 +1,31 @@
 package com.qprogramming.tasq.task;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.agile.Release;
 import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.projects.Project;
+import com.qprogramming.tasq.support.ResultData;
+import com.qprogramming.tasq.support.Utils;
+import com.qprogramming.tasq.task.comments.Comment;
+import com.qprogramming.tasq.task.comments.CommentService;
+import com.qprogramming.tasq.task.link.TaskLinkService;
+import com.qprogramming.tasq.task.worklog.LogType;
+import com.qprogramming.tasq.task.worklog.WorkLogService;
+import org.apache.commons.io.FileUtils;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class TaskService {
@@ -21,12 +33,23 @@ public class TaskService {
     private TaskRepository taskRepo;
     private AppService appSrv;
     private AgileService sprintSrv;
+    private AccountService accountSrv;
+    private TaskLinkService linkSrv;
+    private WorkLogService wlSrv;
+    private CommentService comSrv;
+    private MessageSource msg;
 
     @Autowired
-    public TaskService(TaskRepository taskRepo, AppService appSrv, AgileService sprintSrv) {
+    public TaskService(TaskRepository taskRepo, AppService appSrv, AgileService sprintSrv, AccountService accountSrv,
+                       MessageSource msg, WorkLogService wlSrv, CommentService comSrv, TaskLinkService linkSrv) {
         this.taskRepo = taskRepo;
         this.appSrv = appSrv;
         this.sprintSrv = sprintSrv;
+        this.accountSrv = accountSrv;
+        this.msg = msg;
+        this.linkSrv = linkSrv;
+        this.wlSrv = wlSrv;
+        this.comSrv = comSrv;
     }
 
     public Task save(Task task) {
@@ -211,5 +234,76 @@ public class TaskService {
         return id + "/" + subId;
     }
 
+
+    public ResultData deleteTask() {
+
+
+        return null;
+    }
+
+
+    public ResultData checkTaskCanOperated(Task task, boolean remove) {
+        List<Account> accounts = accountSrv.findAll();
+        List<Account> workingAccounts = accounts.stream().filter(x -> x.getActive_task() != null && x.getActive_task().length > 0
+                && x.getActive_task()[0].equals(task.getId())).collect(Collectors.toList());
+        if (workingAccounts.size() > 0) {
+            Account currentAccount = Utils.getCurrentAccount();
+            if (workingAccounts.size() > 1 || !workingAccounts.get(0).equals(currentAccount)) {
+                return new ResultData(ResultData.ERROR, msg.getMessage("task.changeState.change.working",
+                        new Object[]{String.join(",", workingAccounts.stream().map(Account::toString).collect(Collectors.toList()))}, Utils.getCurrentLocale()));
+            }
+            if (remove) {
+                currentAccount.clearActive_task();
+            }
+            accountSrv.update(currentAccount);
+        }
+        return new ResultData(ResultData.OK, null);
+    }
+
+    public void deleteFiles(Task task) throws IOException {
+        File folder = new File(getTaskDirectory(task));
+        FileUtils.deleteDirectory(folder);
+    }
+
+    /**
+     * Checks if state should be changed to ongoing and saves task
+     *
+     * @param task
+     * @return
+     */
+    public Task checkStateAndSave(Task task) {
+        if (task.getState().equals(TaskState.TO_DO)) {
+            task.setState(TaskState.ONGOING);
+            changeState(TaskState.TO_DO, TaskState.ONGOING, task);
+        }
+        return save(task);
+    }
+
+    /**
+     * private method to remove task and all potential links
+     *
+     * @param task
+     * @return
+     */
+    public void removeTaskRelations(Task task) {
+        linkSrv.deleteTaskLinks(task);
+        task.setOwner(null);
+        task.setAssignee(null);
+        task.setProject(null);
+        task.setTags(null);
+        wlSrv.deleteTaskWorklogs(task);
+        Set<Comment> comments = comSrv.findByTaskIdOrderByDateDesc(task.getId());
+        comSrv.delete(comments);
+    }
+    /**
+     * Adds event about state changed
+     *
+     * @param newState
+     * @param oldState
+     * @param task
+     */
+    public void changeState(TaskState oldState, TaskState newState, Task task) {
+        wlSrv.addActivityLog(task, Utils.changedFromTo(oldState.getDescription(), newState.getDescription()), LogType.STATUS);
+    }
 
 }

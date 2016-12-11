@@ -7,13 +7,10 @@ import com.qprogramming.tasq.agile.Release;
 import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.events.EventsService;
 import com.qprogramming.tasq.projects.Project;
-import com.qprogramming.tasq.projects.ProjectService;
 import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.WorkLogSorter;
 import com.qprogramming.tasq.task.Task;
-import com.qprogramming.tasq.task.TaskService;
-import com.qprogramming.tasq.task.TaskState;
 import org.hibernate.Hibernate;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
@@ -34,154 +31,100 @@ import java.util.stream.Collectors;
 public class WorkLogService {
 
     private WorkLogRepository wlRepo;
-    private TaskService taskSrv;
-    private ProjectService projSrv;
     private EventsService eventSrv;
 
     @Autowired
-    public WorkLogService(WorkLogRepository wlRepo, TaskService taskSrv, ProjectService projSrv,
-                          EventsService eventSrv) {
+    public WorkLogService(WorkLogRepository wlRepo, EventsService eventSrv) {
         this.wlRepo = wlRepo;
-        this.taskSrv = taskSrv;
-        this.projSrv = projSrv;
         this.eventSrv = eventSrv;
     }
 
     @Transactional
-    public void addTimedWorkLog(Task task, String msg, Date when, Period remaining, Period activity, LogType type) {
-        Task loggedTask = taskSrv.findById(task.getId());
-        if (loggedTask != null) {
-            WorkLog wl = new WorkLog();
-            wl.setTask(loggedTask);
-            wl.setProject_id(loggedTask.getProject().getId());
-            wl.setAccount(Utils.getCurrentAccount());
-            wl.setTimeLogged(new Date());
-            wl.setTime(when);
-            wl.setType(type);
-            wl.setMessage(msg);
-            wl = wlRepo.save(wl);
-            wl.setActivity(activity);
-            Hibernate.initialize(loggedTask.getWorklog());
-            loggedTask.addWorkLog(wl);
-            if (remaining == null) {
-                loggedTask.reduceRemaining(activity);
-            } else {
-                loggedTask.setRemaining(remaining);
-            }
-            loggedTask.addLoggedWork(activity);
-            loggedTask.setLastUpdate(new Date());
-            checkStateAndSave(loggedTask);
-            eventSrv.addWatchEvent(wl, PeriodHelper.outFormat(activity), when);
-        }
-    }
-
-    @Transactional
-    public void addDatedWorkLog(Task task, String msg, Date when, LogType type) {
-        Task loggedTask = taskSrv.findById(task.getId());
-        if (loggedTask != null) {
-            WorkLog wl = new WorkLog();
-            wl.setTask(loggedTask);
-            wl.setProject_id(loggedTask.getProject().getId());
-            wl.setAccount(Utils.getCurrentAccount());
-            wl.setTimeLogged(new Date());
-            wl.setTime(when);
-            wl.setType(type);
-            wl.setMessage(msg);
-            wl = wlRepo.save(wl);
-            Hibernate.initialize(loggedTask.getWorklog());
-            loggedTask.addWorkLog(wl);
-            loggedTask.setLastUpdate(new Date());
-            taskSrv.save(loggedTask);
-            eventSrv.addWatchEvent(wl, msg, when);
-        }
-    }
-
-    /**
-     *
-     * @param task
-     * @param msg
-     * @param type
-     */
-    @Transactional
-    public void addActivityLog(Task task, String msg, LogType type) {
-        Task loggedTask = taskSrv.findById(task.getId());
-        if (loggedTask != null) {
-            WorkLog wl = new WorkLog();
-            wl.setTask(loggedTask);
-            wl.setProject_id(loggedTask.getProject().getId());
-            wl.setAccount(Utils.getCurrentAccount());
-            wl.setTime(new Date());
-            wl.setTimeLogged(new Date());
-            wl.setType(type);
-            wl.setMessage(msg);
-            wl = wlRepo.save(wl);
-            Hibernate.initialize(loggedTask.getWorklog());
-            loggedTask.addWorkLog(wl);
-            loggedTask.setLastUpdate(new Date());
-            taskSrv.save(loggedTask);
-            eventSrv.addWatchEvent(wl, msg, new Date());
-        }
-    }
-
-    @Transactional
-    public void addActivityPeriodLog(Task task, String msg, Period activity, LogType type) {
-        Task loggedTask = taskSrv.findById(task.getId());
-        if (loggedTask != null) {
-            WorkLog wl = new WorkLog();
-            wl.setTask(loggedTask);
-            wl.setProject_id(loggedTask.getProject().getId());
-            wl.setAccount(Utils.getCurrentAccount());
-            wl.setTime(new Date());
-            wl.setTimeLogged(new Date());
-            wl.setType(type);
-            wl.setMessage(msg);
-            wl.setActivity(activity);
-            wl = wlRepo.save(wl);
-            Hibernate.initialize(loggedTask.getWorklog());
-            loggedTask.addWorkLog(wl);
-            loggedTask.setLastUpdate(new Date());
-            taskSrv.save(loggedTask);
-            eventSrv.addWatchEvent(wl, PeriodHelper.outFormat(activity), new Date());
-        }
-    }
-
-    /**
-     *
-     * @param task
-     * @param msg
-     * @param activity
-     * @param type
-     */
-    @Transactional
-    public void addNormalWorkLog(Task task, String msg, Period activity, LogType type) {
-        Task loggedTask = taskSrv.findById(task.getId());
-        if (loggedTask != null) {
-            WorkLog wl = new WorkLog();
-            wl.setTask(loggedTask);
-            wl.setProject_id(loggedTask.getProject().getId());
-            wl.setAccount(Utils.getCurrentAccount());
-            wl.setTimeLogged(new Date());
-            wl.setTime(new Date());
-            wl.setType(type);
-            wl.setMessage(msg);
-            wl.setActivity(activity);
-            wl = wlRepo.save(wl);
-            Hibernate.initialize(loggedTask.getWorklog());
-            loggedTask.addWorkLog(wl);
+    public Task addTimedWorkLog(Task loggedTask, String msg, Date when, Period remaining, Period activity, LogType type) {
+        WorkLog wl = new WorkLog();
+        wl.setTask(loggedTask);
+        wl.setProject_id(loggedTask.getProject().getId());
+        wl.setAccount(Utils.getCurrentAccount());
+        wl.setTimeLogged(new Date());
+        wl.setTime(when);
+        wl.setType(type);
+        wl.setMessage(msg);
+        wl.setActivity(activity);
+        wl = wlRepo.save(wl);
+        Hibernate.initialize(loggedTask.getWorklog());
+        loggedTask.addWorkLog(wl);
+        if (remaining == null) {
             loggedTask.reduceRemaining(activity);
-            loggedTask.addLoggedWork(activity);
-            loggedTask.setLastUpdate(new Date());
-            if (!type.equals(LogType.ESTIMATE)) {
-                checkStateAndSave(loggedTask);
-            } else {
-                taskSrv.save(loggedTask);
-            }
-            eventSrv.addWatchEvent(wl, PeriodHelper.outFormat(activity), new Date());
+        } else {
+            loggedTask.setRemaining(remaining);
         }
+        loggedTask.addLoggedWork(activity);
+        loggedTask.setLastUpdate(new Date());
+        eventSrv.addWatchEvent(wl, PeriodHelper.outFormat(activity), when);
+        return loggedTask;
+        }
+
+    @Transactional
+    public Task addDatedWorkLog(Task loggedTask, String msg, Date when, LogType type) {
+        WorkLog wl = new WorkLog();
+        wl.setTask(loggedTask);
+        wl.setProject_id(loggedTask.getProject().getId());
+        wl.setAccount(Utils.getCurrentAccount());
+        wl.setTimeLogged(new Date());
+        wl.setTime(when);
+        wl.setType(type);
+        wl.setMessage(msg);
+        wl = wlRepo.save(wl);
+        Hibernate.initialize(loggedTask.getWorklog());
+        loggedTask.addWorkLog(wl);
+        loggedTask.setLastUpdate(new Date());
+        eventSrv.addWatchEvent(wl, msg, when);
+        return loggedTask;
+    }
+
+    /**
+     * @param loggedTask
+     * @param msg
+     * @param type
+     */
+    @Transactional
+    public void addActivityLog(Task loggedTask, String msg, LogType type) {
+        WorkLog wl = new WorkLog();
+        wl.setTask(loggedTask);
+        wl.setProject_id(loggedTask.getProject().getId());
+        wl.setAccount(Utils.getCurrentAccount());
+        wl.setTime(new Date());
+        wl.setTimeLogged(new Date());
+        wl.setType(type);
+        wl.setMessage(msg);
+        wl = wlRepo.save(wl);
+        Hibernate.initialize(loggedTask.getWorklog());
+        loggedTask.addWorkLog(wl);
+        loggedTask.setLastUpdate(new Date());
+        eventSrv.addWatchEvent(wl, msg, new Date());
+    }
+
+    @Transactional
+    public void addActivityPeriodLog(Task loggedTask, String msg, Period activity, LogType type) {
+        WorkLog wl = new WorkLog();
+        wl.setTask(loggedTask);
+        wl.setProject_id(loggedTask.getProject().getId());
+        wl.setAccount(Utils.getCurrentAccount());
+        wl.setTime(new Date());
+        wl.setTimeLogged(new Date());
+        wl.setType(type);
+        wl.setMessage(msg);
+        wl.setActivity(activity);
+        wl = wlRepo.save(wl);
+        Hibernate.initialize(loggedTask.getWorklog());
+        loggedTask.addWorkLog(wl);
+        loggedTask.setLastUpdate(new Date());
+        eventSrv.addWatchEvent(wl, PeriodHelper.outFormat(activity), new Date());
     }
 
     /**
      * Add worklog without task ( for example for project only )
+     *
      * @param msg
      * @param project
      * @param type
@@ -194,7 +137,7 @@ public class WorkLogService {
         wl.setTime(new Date());
         wl.setType(type);
         wl.setMessage(msg);
-        wl = wlRepo.save(wl);
+        wlRepo.save(wl);
     }
 
     public List<DisplayWorkLog> getProjectEvents(Project project) {
@@ -208,7 +151,7 @@ public class WorkLogService {
      * events with logged activity ( time ) will be returned, otherwise only
      * events which were closing task will be returned
      *
-     * @param sprint      sprint for which all events must be fetched
+     * @param sprint sprint for which all events must be fetched
      * @return
      */
     @Transactional
@@ -218,7 +161,7 @@ public class WorkLogService {
         List<WorkLog> list = wlRepo.findByProjectIdAndTimeBetweenAndWorklogtaskNotNullOrderByTimeAsc(
                 sprint.getProject().getId(), start.toDate(), end.toDate());
         // Filter out not important events
-        return list.stream().filter(workLog -> isSprintRelevant(workLog,sprint)).collect(Collectors.toList());
+        return list.stream().filter(workLog -> isSprintRelevant(workLog, sprint)).collect(Collectors.toList());
     }
 
     @Transactional
@@ -251,19 +194,6 @@ public class WorkLogService {
                 || LogType.CLOSED.equals(workLog.getType())).collect(Collectors.toCollection(LinkedList::new));
     }
 
-    /**
-     * Checks if state should be changed to ongoing and saves task
-     *
-     * @param task
-     * @return
-     */
-    public Task checkStateAndSave(Task task) {
-        if (task.getState().equals(TaskState.TO_DO)) {
-            task.setState(TaskState.ONGOING);
-            changeState(TaskState.TO_DO, TaskState.ONGOING, task);
-        }
-        return taskSrv.save(task);
-    }
 
     private List<DisplayWorkLog> packIntoDisplay(List<WorkLog> list) {
         return list.stream().map(DisplayWorkLog::new).collect(Collectors.toCollection(LinkedList::new));
@@ -292,22 +222,8 @@ public class WorkLogService {
         return wlRepo.findByWorklogtaskIdOrderByTimeLoggedDesc(taskID);
     }
 
-    /**
-     * Adds event about state changed
-     *
-     * @param newState
-     * @param oldState
-     * @param task
-     */
-    public void changeState(TaskState oldState, TaskState newState, Task task) {
-        // StringBuilder message = new StringBuilder(Utils.TABLE);
-        // message.append(Utils.changedFromTo(null, oldState.getDescription(),
-        // newState.getDescription()));
-        // message.append(Utils.TABLE_END);
-        addActivityLog(task, Utils.changedFromTo(oldState.getDescription(), newState.getDescription()), LogType.STATUS);
 
-    }
-    public void deleteTaskWorklogs(Task task){
+    public void deleteTaskWorklogs(Task task) {
         List<WorkLog> workLogList = wlRepo.findByWorklogtaskId(task.getId());
         wlRepo.delete(workLogList);
     }

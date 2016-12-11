@@ -119,7 +119,7 @@ public class TaskControllerTest {
         when(securityMock.getAuthentication()).thenReturn(authMock);
         when(authMock.getPrincipal()).thenReturn(testAccount);
         SecurityContextHolder.setContext(securityMock);
-        taskSrv = new TaskService(taskRepoMock, appSrv, sprintSrvMock);
+        taskSrv = new TaskService(taskRepoMock, appSrv, sprintSrvMock, accountServiceMock, msgMock, wrkLogSrv, commentSrvMock, taskLinkSrvMock);
         taskCtr = new TaskController(taskSrv, projSrvMock, accountServiceMock, wrkLogSrv, msgMock, sprintSrvMock,
                 taskLinkSrvMock, commentSrvMock, tagsRepoMock, watchSrvMock, eventSrvMock, visitedSrvMock) {
             @Override
@@ -634,7 +634,7 @@ public class TaskControllerTest {
         when(accountServiceMock.findByEmail(testAccount.getEmail())).thenReturn(testAccount);
         when(sprintSrvMock.findByProjectIdAndSprintNo(1L, 1L)).thenReturn(sprint);
         taskCtr.createSubTask(TEST_1, form, errors, raMock, requestMock, modelMock);
-        verify(taskRepoMock, times(2)).save(any(Task.class));
+        verify(taskRepoMock, times(3)).save(any(Task.class));
     }
 
     @Test
@@ -654,9 +654,15 @@ public class TaskControllerTest {
         Project project = createProject(1L);
         Task task = createTask(TASK_NAME, 1, project);
         task.setEstimate(new Period(1, 20, 0, 0));
+        Task loggedTask = createTask(TASK_NAME, 1, project);
+        task.setEstimate(new Period(1, 20, 0, 0));
+        task.addLoggedWork(new Period().withDays(1));
+        task.setRemaining(new Period().withMinutes(10));
         testAccount.setRole(Roles.ROLE_POWERUSER);
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(true);
+        when(wrkLogSrv.addTimedWorkLog(any(Task.class), anyString(), any(Date.class), any(Period.class), any(Period.class), any(LogType.class))).thenReturn(loggedTask);
+        when(taskRepoMock.save(loggedTask)).thenReturn(loggedTask);
         taskCtr.logWork(TEST_1, "1d", "10m", "1-05-2015", "12:00", raMock, requestMock);
         verify(wrkLogSrv, times(1)).addDatedWorkLog(any(Task.class), anyString(), any(Date.class), any(LogType.class));
         verify(wrkLogSrv, times(1)).addTimedWorkLog(any(Task.class), anyString(), any(Date.class), any(Period.class),
@@ -668,9 +674,14 @@ public class TaskControllerTest {
         Project project = createProject(1L);
         Task task = createTask(TASK_NAME, 1, project);
         task.addLoggedWork(PeriodHelper.inFormat("27d 7h"));
+        Task loggedTask = createTask(TASK_NAME, 1, project);
+        loggedTask.addLoggedWork(PeriodHelper.inFormat("27d 7h"));
+        loggedTask.addLoggedWork(new Period(5, 0, 0, 0));
         testAccount.setRole(Roles.ROLE_POWERUSER);
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(taskSrv.save(loggedTask)).thenReturn(loggedTask);
         when(projSrvMock.canEdit(project)).thenReturn(true);
+        when(wrkLogSrv.addTimedWorkLog(any(Task.class), anyString(), any(Date.class), any(Period.class), any(Period.class), any(LogType.class))).thenReturn(loggedTask);
         taskCtr.logWork(TEST_1, "5h", null, null, null, raMock, requestMock);
         verify(wrkLogSrv, times(1)).addTimedWorkLog(any(Task.class), anyString(), any(Date.class), any(Period.class),
                 any(Period.class), any(LogType.class));
@@ -773,7 +784,7 @@ public class TaskControllerTest {
         when(projSrvMock.canEdit(project)).thenReturn(true);
         ResponseEntity<ResultData> result = taskCtr.changeState(TEST_1, TaskState.CLOSED, true, true, "Done", TaskResolution.FINISHED);
         verify(wrkLogSrv, times(1)).addActivityLog(subtask, "", LogType.CLOSED);
-        verify(taskRepoMock, times(1)).save(any(Task.class));
+        verify(taskRepoMock, times(2)).save(any(Task.class));
         Assert.assertEquals(ResultData.OK, result.getBody().code);
     }
 
