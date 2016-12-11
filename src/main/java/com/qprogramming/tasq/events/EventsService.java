@@ -28,8 +28,8 @@ import java.util.*;
 @Service
 public class EventsService {
 
-    private static final String APPLICATION_NAME = "applicationName";
     public static final String TASK = "task";
+    private static final String APPLICATION_NAME = "applicationName";
     private static final String WL_MESSAGE = "wlMessage";
     private static final String LOG_KEY = "log";
     private static final String CUR_ACCOUNT = "curAccount";
@@ -39,6 +39,8 @@ public class EventsService {
     private static final Logger LOG = LoggerFactory.getLogger(EventsService.class);
     private static final String UTF_8 = "UTF-8";
     private static final String EMAIL_TEMP_PATH = "email/";
+    private static final String MORE_DETAILS = "moreDetails";
+    private static final String TITLE = "title";
     private EventsRepository eventsRepo;
     private WatchedTaskService watchSrv;
     private MailMail mailer;
@@ -206,6 +208,44 @@ public class EventsService {
     }
 
     /**
+     * Add system event with custom passed message and more info
+     *
+     * @param account     account for which message will be sent
+     * @param type        type of event
+     * @param message     message ( will be sent as subject and event summary )
+     * @param moreDetails more detials message ( send as mail more info body )
+     */
+    public void addSystemEvent(Account account, LogType type, String message, String moreDetails) {
+        Event event = new Event();
+        event.setAccount(account);
+        event.setWho(Utils.getCurrentAccount().toString());
+        event.setUnread(true);
+        event.setLogtype(type);
+        event.setDate(new Date());
+        event.setType(Type.SYSTEM);
+        event.setMessage(moreDetails);
+        eventsRepo.save(event);
+        if (sendEmail(account, event.getType())) {
+            String baseUrl = appSrv.getProperty(AppService.URL);
+            Locale locale = new Locale(account.getLanguage());
+            String subject = msg.getMessage("event.newSystemEvent",
+                    new Object[]{Utils.getCurrentAccount(), message}, locale);
+            StringWriter stringWriter = new StringWriter();
+            VelocityContext context = new VelocityContext();
+            context.put(TITLE, subject);
+            context.put(ACCOUNT, account);
+            context.put(APPLICATION, baseUrl);
+            context.put(APPLICATION_NAME, applicationName);
+            context.put(CUR_ACCOUNT, Utils.getCurrentAccount());
+            context.put(MORE_DETAILS, moreDetails);
+            velocityEngine.mergeTemplate(EMAIL_TEMP_PATH + account.getLanguage() + "/other.vm", UTF_8, context, stringWriter);
+            String messageContent = stringWriter.toString();
+            mailer.sendMail(MailMail.NOTIFICATION, account.getEmail(), subject, messageContent,
+                    resourceSrv.getBasicResourceMap());
+        }
+    }
+
+    /**
      * Checks if user have e-mail notification enabled for passed type
      *
      * @param account - account checked for email settings
@@ -244,9 +284,9 @@ public class EventsService {
 
     private Type getEventType(LogType type) {
         switch (type) {
-            case ASSIGN_PROJ:
+            case ASSIGN_TO_PROJ:
                 return Type.SYSTEM;
-            case REMOVE_PROJ:
+            case REMOVE_FROM_PROJ:
                 return Type.SYSTEM;
             case COMMENT:
                 return Type.COMMENT;

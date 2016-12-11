@@ -924,14 +924,17 @@ public class TaskController {
         if (task != null) {
             Project project = projectSrv.findById(task.getProject().getId());
             // Only allow delete for administrators, owner or app admin
+            Locale currentLocale = Utils.getCurrentLocale();
             if (isAdmin(task, project)) {
+                Account currentAccount = Utils.getCurrentAccount();
+                Account owner = task.getOwner();
                 ResultData result;
                 // check for links and subtasks
                 List<Task> subtasks = taskSrv.findSubtasks(taskID);
                 for (Task subtask : subtasks) {
                     result = removeTaskRelations(subtask);
                     if (ResultData.ERROR.equals(result.code)) {
-                        MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
+                        MessageHelper.addWarningAttribute(ra, result.message, currentLocale);
                         return REDIRECT + request.getHeader(REFERER);
                     }
                 }
@@ -939,13 +942,10 @@ public class TaskController {
                 deleteFiles(task);
                 result = removeTaskRelations(task);
                 if (result.code.equals(ResultData.ERROR)) {
-                    MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
+                    MessageHelper.addWarningAttribute(ra, result.message, currentLocale);
                     return REDIRECT + request.getHeader(REFERER);
                 }
                 //send event to owner if needed
-                if (!task.getOwner().equals(Utils.getCurrentAccount())) {
-                    //TODO send event to task owner
-                }
                 // leave message and clear all
                 StringBuilder message = new StringBuilder();
                 message.append("[");
@@ -953,13 +953,18 @@ public class TaskController {
                 message.append("]");
                 message.append(" - ");
                 message.append(task.getName());
+                if (!owner.equals(currentAccount)) {
+                    Locale ownerLocale = new Locale(owner.getLanguage());
+                    String moreDetails = msg.getMessage("log.type.delete.info", new Object[]{currentAccount, taskID, task.getName()}, ownerLocale);
+                    eventSrv.addSystemEvent(owner, LogType.DELETED, msg.getMessage(LogType.DELETED.getCode(), null, ownerLocale), moreDetails);
+                }
                 Task purged = taskSrv.save(purgeTask(task));
                 taskSrv.delete(purged);
                 wlSrv.addWorkLogNoTask(message.toString(), project, LogType.DELETED);
                 visitedSrv.delete(task);
             }
             MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.delete.success",
-                    new Object[]{taskID}, Utils.getCurrentLocale()), Utils.getCurrentLocale());
+                    new Object[]{taskID}, currentLocale), currentLocale);
             return "redirect:/";
         }
         return REDIRECT + request.getHeader(REFERER);

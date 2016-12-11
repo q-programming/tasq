@@ -3,7 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>${project}</title>
+    <title>${applicationName}</title>
     <style>
         * {
             margin: 0;
@@ -178,37 +178,16 @@
 <div class="content">
     <div class="header" style="background-color:${account.theme.color}">
         <img src='cid:logo' style="height:50px; padding:2px">
-        &nbps;${project}
+        &nbsp;${applicationName}
     </div>
     <table class="main">
         <tbody>
         <tr>
             <td>
-                #set ($assign = "assigntoproj")
-                #set ($remove = "removefromproj")
-                #if ($type.string == $assign)
-                    <p>
-                        Użytkownik <a href="${application}/user/${curAccount.username}">${curAccount}</a> przypisał Cię
-                        do projektu
-                        <a
-                                href="${application}/project/${project.projectId}" target="_blank">[${project.projectId}]
-                            ${project.name}</a>
-                    </p>
-                #elseif ($type.string == $remove)
-                    <p>
-                        Użytkownik <a href="${application}/user/${curAccount.username}">${curAccount}</a> usunał Cię z
-                        projektu
-                        <a
-                                href="${application}/project/${project.projectId}" target="_blank">[${project.projectId}]
-                            ${project.name}</a>
-                    </p>
-
-                #else
-                    <p>
-                        <a href="${application}/user/${curAccount.username}">${curAccount}</a>
-                        ${project.name}
-                    </p>
-                #end
+                <p>
+                    ${title}
+                    <blockquote class="quote">${moreDetails}</blockquote>
+                </p>
             </td>
         </tr>
         </tbody>

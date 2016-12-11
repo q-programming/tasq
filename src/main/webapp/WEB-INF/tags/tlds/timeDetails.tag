@@ -7,14 +7,14 @@
 <%@ attribute name="subtasksTime" required="false" %>
 <%@ attribute name="method" required="true" %>
 
-<tr class="time-details-row subtask-${method}" style="border-top: 2px solid">
+<tr class="time-details-row subtask-${method}" style="border-top: 2px solid lightgray;">
     <td colspan="2"></td>
     <td class="bar_td">
         <div>[${task.id}]</div>
     </td>
     <td class="bar_td">${taskTime}</td>
 </tr>
-<tr class="time-details-row subtask-${method}" style="border-bottom: 1px solid">
+<tr class="time-details-row subtask-${method}" style="border-bottom: 1px solid lightgray;">
     <td></td>
     <td colspan="2" class="bar_td">
         <div><s:message

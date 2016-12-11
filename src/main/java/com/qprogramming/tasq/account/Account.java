@@ -58,9 +58,6 @@ public class Account implements java.io.Serializable, UserDetails {
     @Column
     private Boolean watchnotification = false;
 
-    @Column
-    private boolean email_notifications;
-
     @Column(columnDefinition = "boolean default false")
     private Boolean tour = false;
 
@@ -206,14 +203,6 @@ public class Account implements java.io.Serializable, UserDetails {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
-    }
-
-    public boolean getEmail_notifications() {
-        return email_notifications;
-    }
-
-    public void setEmail_notifications(boolean email_notifications) {
-        this.email_notifications = email_notifications;
     }
 
     public boolean getSystemnotification() {
