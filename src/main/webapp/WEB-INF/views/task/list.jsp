@@ -285,14 +285,14 @@
         <form id="exportTaskForm" method="POST" enctype="multipart/form-data" action="<c:url value="/task/export"/>">
             <input id="exportType" type="hidden" name="type" value="xml">
             <c:forEach items="${tasks}" var="task">
-                <c:if test="${task.id eq user.active_task[0]}">
+                <c:if test="${task.id eq user.activeTask}">
                     <tr class="bg-color theme">
                     <c:set var="blinker" value="blink"/>
                     <c:set var="link">
                         class="theme"
                     </c:set>
                 </c:if>
-                <c:if test="${task.id ne user.active_task[0]}">
+                <c:if test="${task.id ne user.activeTask}">
                     <c:set var="blinker" value=""/>
                     <c:set var="tr_bg" value=""/>
                     <c:set var="link" value=""/>

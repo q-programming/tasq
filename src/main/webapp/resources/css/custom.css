@@ -16,6 +16,9 @@
 .big > .main-container{
     margin-left: 35px;
 }
+.big > .footer-time{
+    margin-left: 35px;
+}
 
 .hidden {
     visibility: hidden;

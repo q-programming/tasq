@@ -31,4 +31,6 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     List<Account> findBySurnameContainingIgnoreCaseOrNameContainingIgnoreCaseOrUsernameContainingIgnoreCase(String term, String term1, String term2);
 
     Page<Account> findBySurnameContainingIgnoreCaseOrNameContainingIgnoreCaseOrUsernameContainingIgnoreCase(String term, String term1, String term2, Pageable p);
+
+    List<Account> findByActiveTask(String taskID);
 }

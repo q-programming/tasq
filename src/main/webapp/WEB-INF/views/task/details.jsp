@@ -313,7 +313,7 @@
                         <s:message code="task.logWork"/>
                     </button>
                     <c:if
-                            test="${not empty user.active_task && user.active_task[0] eq task.id}">
+                            test="${user.activeTask eq task.id}">
                         <a href="#">
                             <button class="btn btn-default btn-sm a-tooltip handleTimerBtn"
                                     title="<s:message code="task.stopTime.description" />">
@@ -327,7 +327,7 @@
                         </div>
                     </c:if>
                     <c:if
-                            test="${empty user.active_task || user.active_task[0] ne task.id}">
+                            test="${empty user.activeTask ne task.id}">
                         <a href="<c:url value="/task/time?id=${task.id}&action=start"/>">
                             <button class="btn btn-default btn-sm">
                                 <i class="fa fa-lg fa-clock-o"></i>

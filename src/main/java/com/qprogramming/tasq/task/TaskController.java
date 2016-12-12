@@ -786,10 +786,9 @@ public class TaskController {
                 switch (action) {
                     case START: {
                         Account account = Utils.getCurrentAccount();
-                        if (account.getActive_task() != null && account.getActive_task().length > 0
-                                && !("").equals(account.getActive_task()[0])) {
+                        if (StringUtils.isNotBlank(account.getActiveTask())) {
                             MessageHelper.addWarningAttribute(ra, msg.getMessage("task.stopTime.warning",
-                                    new Object[]{account.getActive_task()[0]}, Utils.getCurrentLocale()));
+                                    new Object[]{account.getActiveTask()}, Utils.getCurrentLocale()));
                             return REDIRECT + request.getHeader(REFERER);
                         }
                         account.startTimerOnTask(task);
@@ -804,7 +803,7 @@ public class TaskController {
                         break;
                     case CANCEL: {
                         Account account = Utils.getCurrentAccount();
-                        account.clearActive_task();
+                        account.clearActiveTask();
                         accSrv.update(account);
                         return REDIRECT_TASK + taskID;
                     }
@@ -945,7 +944,6 @@ public class TaskController {
                 result = taskSrv.deleteTask(task);
                 if (result.code.equals(ResultData.ERROR)) {
                     MessageHelper.addWarningAttribute(ra, result.message, currentLocale);
-                    //TODO rollback ?
                     TransactionInterceptor.currentTransactionStatus().setRollbackOnly();
                     return REDIRECT + request.getHeader(REFERER);
                 }
@@ -1347,16 +1345,15 @@ public class TaskController {
      */
     private Period stopTimer(Task task) {
         Account account = Utils.getCurrentAccount();
-        if (account.getActive_task() != null && account.getActive_task().length > 0
-                && !(task.getId()).equals(account.getActive_task()[0])) {
+        if (StringUtils.isNotBlank(account.getActiveTask()) && task.getId().equals(account.getActiveTask())) {
             DateTime now = new DateTime();
-            Period logWork = new Period((DateTime) account.getActive_task_time(), now);
+            Period logWork = new Period((DateTime) account.getActiveTaskTimer(), now);
             // Only log work if greater than 1 minute
             if (logWork.toStandardDuration().getMillis() / 1000 / 60 < 1) {
                 logWork = new Period().plusMinutes(1);
             }
             wlSrv.addTimedWorkLog(task, PeriodHelper.outFormat(logWork), new Date(), null, logWork, LogType.LOG);
-            account.clearActive_task();
+            account.clearActiveTask();
             accSrv.update(account);
             return logWork;
         }

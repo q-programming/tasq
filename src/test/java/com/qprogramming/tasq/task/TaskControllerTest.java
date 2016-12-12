@@ -755,8 +755,7 @@ public class TaskControllerTest {
         task.setState(TaskState.CLOSED);
         task.setComments(new HashSet<Comment>());
         Account account = new Account(NEW_EMAIL, PASSWORD, NEWUSERNAME, Roles.ROLE_POWERUSER);
-        Object[] activeTask = {task.getId()};
-        account.setActive_task(activeTask);
+        account.startTimerOnTask(task);
         List<Account> accounts = new LinkedList<Account>();
         accounts.add(testAccount);
         accounts.add(account);
@@ -777,8 +776,7 @@ public class TaskControllerTest {
         subtask.setParent(TEST_1);
         List<Task> subtasks = new LinkedList<Task>();
         subtasks.add(subtask);
-        Object[] activeTask = {task.getId()};
-        testAccount.setActive_task(activeTask);
+        testAccount.startTimerOnTask(task);
         when(taskRepoMock.findByParent(TEST_1)).thenReturn(subtasks);
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(true);

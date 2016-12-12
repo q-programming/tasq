@@ -276,17 +276,15 @@ public class TaskService {
 
 
     public ResultData checkTaskCanOperated(Task task, boolean remove) {
-        List<Account> accounts = accountSrv.findAll();
-        List<Account> workingAccounts = accounts.stream().filter(x -> x.getActive_task() != null && x.getActive_task().length > 0
-                && x.getActive_task()[0].equals(task.getId())).collect(Collectors.toList());
-        if (workingAccounts.size() > 0) {
+        List<Account> accounts = accountSrv.findAllWithActiveTask(task.getId());
+        if (!accounts.isEmpty()) {
             Account currentAccount = Utils.getCurrentAccount();
-            if (workingAccounts.size() > 1 || !workingAccounts.get(0).equals(currentAccount)) {
+            if (accounts.size() > 1 || !accounts.get(0).equals(currentAccount)) {
                 return new ResultData(ResultData.ERROR, msg.getMessage("task.changeState.change.working",
-                        new Object[]{task.getId(), String.join(",", workingAccounts.stream().map(Account::toString).collect(Collectors.toList()))}, Utils.getCurrentLocale()));
+                        new Object[]{task.getId(), String.join(",", accounts.stream().map(Account::toString).collect(Collectors.toList()))}, Utils.getCurrentLocale()));
             }
             if (remove) {
-                currentAccount.clearActive_task();
+                currentAccount.clearActiveTask();
                 accountSrv.update(currentAccount);
             }
         }

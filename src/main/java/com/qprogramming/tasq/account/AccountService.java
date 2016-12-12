@@ -119,6 +119,10 @@ public class AccountService {
         return accRepo.findAll();
     }
 
+    public List<Account> findAllWithActiveTask(String taskID){
+        return accRepo.findByActiveTask(taskID);
+    }
+
     public Page<Account> findAll(Pageable p) {
         return accRepo.findAll(p);
     }
