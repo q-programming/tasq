@@ -263,8 +263,7 @@ public class TaskService {
         try {
             deleteFiles(task);
         } catch (IOException e) {
-            String message = "Failed to remove files from task %s";
-            message = String.format(message, task.getId());
+            String message = msg.getMessage("error.task.delete.files", new Object[]{task.getId(), e.getMessage()}, Utils.getCurrentLocale());
             LOG.error(message + " Exception {}", e.getMessage());
             LOG.debug("{}", e);
             return new ResultData(ResultData.ERROR, message);

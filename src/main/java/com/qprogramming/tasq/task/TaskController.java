@@ -49,6 +49,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionInterceptor;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -135,6 +136,7 @@ public class TaskController {
         return new TaskForm();
     }
 
+    @Transactional
     @RequestMapping(value = "task/create", method = RequestMethod.POST)
     public String createTask(@Valid @ModelAttribute("taskForm") TaskForm taskForm, BindingResult errors,
                              @RequestParam(value = "linked", required = false) String linked, RedirectAttributes ra,
@@ -353,8 +355,6 @@ public class TaskController {
         // Don't check for SP if task is not estimated
         if (task.isEstimated()) {
             try {
-
-
                 if (task.getStory_points() != null && task.getStory_points() != storyPoints) {
                     if (shouldAddWorklogPointsChanged(task, storyPoints)) {
                         message.append(Utils.changedFromTo(STORY_POINTS_TXT, task.getStory_points().toString(),
@@ -821,6 +821,7 @@ public class TaskController {
         return REDIRECT + request.getHeader(REFERER);
     }
 
+    @Transactional
     @RequestMapping(value = "/task/assign", method = RequestMethod.POST)
     public String assign(@RequestParam(value = "taskID") String taskID, @RequestParam(value = "email") String email,
                          RedirectAttributes ra, HttpServletRequest request) {
@@ -871,6 +872,7 @@ public class TaskController {
         return task.getAssignee() == null ? UNASSIGNED : task.getAssignee().toString();
     }
 
+    @Transactional
     @RequestMapping(value = "/task/assignMe", method = RequestMethod.GET)
     public String assignMe(@RequestParam(value = "id") String taskID, RedirectAttributes ra,
                            HttpServletRequest request) {
@@ -878,6 +880,7 @@ public class TaskController {
         return REDIRECT + request.getHeader(REFERER);
     }
 
+    @Transactional
     @RequestMapping(value = "/task/assignMe", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<ResultData> assignMePOST(@RequestParam(value = "id") String id) {
@@ -894,6 +897,7 @@ public class TaskController {
         }
     }
 
+    @Transactional
     @RequestMapping(value = "/task/priority", method = RequestMethod.GET)
     public String changePriority(@RequestParam(value = "id") String taskID,
                                  @RequestParam(value = "priority") String priority, RedirectAttributes ra, HttpServletRequest request) {
@@ -942,6 +946,7 @@ public class TaskController {
                 if (result.code.equals(ResultData.ERROR)) {
                     MessageHelper.addWarningAttribute(ra, result.message, currentLocale);
                     //TODO rollback ?
+                    TransactionInterceptor.currentTransactionStatus().setRollbackOnly();
                     return REDIRECT + request.getHeader(REFERER);
                 }
 
@@ -1266,20 +1271,6 @@ public class TaskController {
     }
 
     /**
-     * private method to remove task and all potential links
-     *
-     * @param task
-     * @return
-     */
-    private ResultData removeTaskRelations(Task task) {//TODO move check to srv
-        ResultData result = taskSrv.checkTaskCanOperated(task, true);
-        if (ResultData.OK.equals(result.code)) {
-            taskSrv.removeTaskRelations(task);
-        }
-        return result;
-    }
-
-    /**
      * Fills model with project list and user's active project
      *
      * @param model
@@ -1295,26 +1286,6 @@ public class TaskController {
         model.addAttribute("project", project);
         model.addAttribute("projects_list", projectSrv.findAllByUser());
     }
-
-//    private ResultData checkTaskCanOperated(Task task, boolean remove) {
-//        List<Account> accounts = accSrv.findAll();
-//        List<Account> workingAccounts = accounts.stream().filter(x -> x.getActive_task() != null && x.getActive_task().length > 0
-//                && x.getActive_task()[0].equals(task.getId())).collect(Collectors.toList());
-//        if (workingAccounts.size() > 0) {
-//            Account currentAccount = Utils.getCurrentAccount();
-//            if (workingAccounts.size() > 1 || !workingAccounts.get(0).equals(currentAccount)) {
-//                return new ResultData(ResultData.ERROR, msg.getMessage("task.changeState.change.working",
-//                        new Object[]{String.join(",", workingAccounts.stream().map(Account::toString).collect(Collectors.toList()))}, Utils.getCurrentLocale()));
-//            }
-//            if (remove) {
-//                currentAccount.clearActive_task();
-//            } else {
-//                stopTimer(task);
-//            }
-//            accSrv.update(currentAccount);
-//        }
-//        return new ResultData(ResultData.OK, null);
-//    }
 
     private boolean checkIfNotEstimated(Task task, Project project) {
         if (!project.getTimeTracked()) {
