@@ -12,6 +12,7 @@ import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.task.comments.Comment;
 import com.qprogramming.tasq.task.comments.CommentService;
 import com.qprogramming.tasq.task.link.TaskLinkService;
+import com.qprogramming.tasq.task.watched.WatchedTaskService;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 import org.apache.commons.io.FileUtils;
@@ -41,10 +42,11 @@ public class TaskService {
     private WorkLogService wlSrv;
     private CommentService comSrv;
     private MessageSource msg;
+    private WatchedTaskService watchSrv;
 
     @Autowired
     public TaskService(TaskRepository taskRepo, AppService appSrv, AgileService sprintSrv, AccountService accountSrv,
-                       MessageSource msg, WorkLogService wlSrv, CommentService comSrv, TaskLinkService linkSrv) {
+                       MessageSource msg, WorkLogService wlSrv, CommentService comSrv, TaskLinkService linkSrv, WatchedTaskService watchSrv) {
         this.taskRepo = taskRepo;
         this.appSrv = appSrv;
         this.sprintSrv = sprintSrv;
@@ -53,6 +55,7 @@ public class TaskService {
         this.linkSrv = linkSrv;
         this.wlSrv = wlSrv;
         this.comSrv = comSrv;
+        this.watchSrv = watchSrv;
     }
 
     public Task save(Task task) {
@@ -245,7 +248,7 @@ public class TaskService {
             return resultData;
         }
         //check it's subtasks
-        if(!task.isSubtask()){
+        if (!task.isSubtask()) {
             List<Task> subtasks = findSubtasks(task.getId());
             for (Task subtask : subtasks) {
                 resultData = checkTaskCanOperated(subtask, true);
@@ -325,6 +328,7 @@ public class TaskService {
         wlSrv.deleteTaskWorklogs(task);
         Set<Comment> comments = comSrv.findByTaskIdOrderByDateDesc(task.getId());
         comSrv.delete(comments);
+        watchSrv.deleteWatchedTask(task.getId());
     }
 
     /**
@@ -348,4 +352,7 @@ public class TaskService {
     }
 
 
+    public String printID(String taskID) {
+        return "[ " + taskID + " ]";
+    }
 }

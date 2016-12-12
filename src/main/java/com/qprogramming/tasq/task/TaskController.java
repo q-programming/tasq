@@ -175,6 +175,7 @@ public class TaskController {
             project.setLastTaskNo(taskCount);
             // assigne
             setCreatedTaskAssignee(taskForm, task);
+            task = taskSrv.save(task);//save before adding rest
             // lookup for sprint
             // Create log work
             if (taskForm.getAddToSprint() != null) {
@@ -452,7 +453,7 @@ public class TaskController {
         model.addAttribute("watching", watchSrv.isWatching(task.getId()));
         model.addAttribute("comments", comments);
         model.addAttribute("task", task);
-        model.addAttribute("links", links);
+        model.addAttribute("links", taskLinks);
         model.addAttribute("files", getTaskFiles(task));
         return "task/details";
     }
@@ -528,7 +529,6 @@ public class TaskController {
         if (!Roles.isUser()) {
             throw new TasqAuthException(msg);
         }
-
         Task task = taskSrv.findById(id);
         if (task != null) {
             if (task.getState().equals(TaskState.CLOSED)) {
@@ -555,9 +555,9 @@ public class TaskController {
                 Account assignee = accSrv.findByEmail(taskForm.getAssignee());
                 subTask.setAssignee(assignee);
             }
-            taskSrv.createSubTask(project, task, subTask);
+            subTask = taskSrv.createSubTask(project, task, subTask);
             wlSrv.addActivityLog(subTask, "", LogType.SUBTASK);
-            taskSrv.save(task);
+            taskSrv.save(subTask);
             return REDIRECT_TASK + id;
         }
         MessageHelper.addErrorAttribute(ra, msg.getMessage("task.notexists", null, Utils.getCurrentLocale()));
@@ -944,14 +944,11 @@ public class TaskController {
                     //TODO rollback ?
                     return REDIRECT + request.getHeader(REFERER);
                 }
-                //send event to owner if needed
-                // leave message and clear all
-                StringBuilder message = new StringBuilder();
-                message.append("[");
-                message.append(taskID);
-                message.append("]");
+
+                StringBuilder message = new StringBuilder(taskSrv.printID(taskID));
                 message.append(" - ");
                 message.append(taskName);
+                //send event to owner if needed
                 if (!owner.equals(currentAccount)) {
                     Locale ownerLocale = new Locale(owner.getLanguage());
                     String moreDetails = msg.getMessage("log.type.delete.info", new Object[]{currentAccount, taskID, taskName}, ownerLocale);

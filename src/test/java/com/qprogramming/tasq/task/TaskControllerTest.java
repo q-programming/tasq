@@ -119,7 +119,7 @@ public class TaskControllerTest {
         when(securityMock.getAuthentication()).thenReturn(authMock);
         when(authMock.getPrincipal()).thenReturn(testAccount);
         SecurityContextHolder.setContext(securityMock);
-        taskSrv = new TaskService(taskRepoMock, appSrv, sprintSrvMock, accountServiceMock, msgMock, wrkLogSrv, commentSrvMock, taskLinkSrvMock);
+        taskSrv = new TaskService(taskRepoMock, appSrv, sprintSrvMock, accountServiceMock, msgMock, wrkLogSrv, commentSrvMock, taskLinkSrvMock, watchSrvMock);
         taskCtr = new TaskController(taskSrv, projSrvMock, accountServiceMock, wrkLogSrv, msgMock, sprintSrvMock,
                 taskLinkSrvMock, commentSrvMock, tagsRepoMock, watchSrvMock, eventSrvMock, visitedSrvMock) {
             @Override
