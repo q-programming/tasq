@@ -47,6 +47,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.*;
 
 import static com.qprogramming.tasq.test.TestUtils.*;
@@ -54,6 +55,8 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.anyCollectionOf;
+import static org.mockito.Mockito.anyListOf;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -80,8 +83,6 @@ public class TaskControllerTest {
     private AppService appSrv;
     @Mock
     private CommentService commentSrvMock;
-    @Mock
-    private EventsService eventsSrvMock;
     @Mock
     private TaskLinkService taskLinkSrvMock;
     @Mock
@@ -119,14 +120,24 @@ public class TaskControllerTest {
         when(securityMock.getAuthentication()).thenReturn(authMock);
         when(authMock.getPrincipal()).thenReturn(testAccount);
         SecurityContextHolder.setContext(securityMock);
-        taskSrv = new TaskService(taskRepoMock, appSrv, sprintSrvMock, accountServiceMock, msgMock, wrkLogSrv, commentSrvMock, taskLinkSrvMock, watchSrvMock);
-        taskCtr = new TaskController(taskSrv, projSrvMock, accountServiceMock, wrkLogSrv, msgMock, sprintSrvMock,
-                taskLinkSrvMock, commentSrvMock, tagsRepoMock, watchSrvMock, eventSrvMock, visitedSrvMock) {
-            @Override
-            protected EntityManager getEntitymanager() {
-                return entityManagerMock;
-            }
-        };
+        taskSrv = spy(new TaskService(taskRepoMock, appSrv, sprintSrvMock, accountServiceMock, msgMock, wrkLogSrv, commentSrvMock, taskLinkSrvMock, watchSrvMock, visitedSrvMock));
+        taskCtr = spy(new TaskController(taskSrv, projSrvMock, accountServiceMock, wrkLogSrv, msgMock, sprintSrvMock,
+                taskLinkSrvMock, commentSrvMock, tagsRepoMock, watchSrvMock, eventSrvMock, visitedSrvMock));
+        doNothing().when(taskCtr).rollBack();
+        doReturn(entityManagerMock).when(taskCtr).getEntitymanager();
+
+//        taskCtr = new TaskController(taskSrv, projSrvMock, accountServiceMock, wrkLogSrv, msgMock, sprintSrvMock,
+//                taskLinkSrvMock, commentSrvMock, tagsRepoMock, watchSrvMock, eventSrvMock, visitedSrvMock) {
+//            @Override
+//            protected EntityManager getEntitymanager() {
+//                return entityManagerMock;
+//            }
+//
+//            @Override
+//            void rollBack() {
+//                LOG.info("Rollback performed");
+//            }
+//        };
     }
 
     @Test
@@ -279,6 +290,139 @@ public class TaskControllerTest {
         when(sprintSrvMock.findByProjectIdAndSprintNo(1L, 1L)).thenReturn(sprint);
         taskCtr.createTask(form, errors, null, raMock, requestMock, modelMock);
     }
+
+    @Test(expected = TasqAuthException.class)
+    public void deleteTaskNoPermissionTest() {
+        Project project = createProject(1L);
+        project.setAdministrators(new HashSet<>());
+        Task task = createTask(TASK_NAME, 1, project);
+        Account owner = createAccount("John", "Doe");
+        task.setOwner(owner);
+        when(taskSrv.findById(TEST_1)).thenReturn(task);
+        when(projSrvMock.findById(1L)).thenReturn(project);
+        testAccount.setRole(Roles.ROLE_USER);
+        taskCtr.deleteTask(TEST_1, raMock, requestMock);
+        fail("Exception not thrown");
+    }
+
+    @Test
+    public void deleteTaskIsActiveTest() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        Account owner = createAccount("John", "Doe");
+        task.setOwner(owner);
+        owner.startTimerOnTask(task);
+        List<Account> active = new LinkedList<>();
+        active.add(owner);
+        when(taskSrv.findById(TEST_1)).thenReturn(task);
+        when(projSrvMock.findById(1L)).thenReturn(project);
+        when(accountServiceMock.findAllWithActiveTask(TEST_1)).thenReturn(active);
+        taskCtr.deleteTask(TEST_1, raMock, requestMock);
+        verify(raMock, times(1)).addFlashAttribute(anyString(),
+                new Message(anyString(), Message.Type.WARNING, new Object[]{}));
+    }
+
+    @Test
+    public void deleteTaskIsActiveSubtaskTest() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        Task subtask = createTask(TASK_NAME, 2, project);
+        subtask.setParent(task.getId());
+        String subId = TEST_1 + "/1";
+        subtask.setId(subId);
+        List<Task> listSubtask = new LinkedList<>();
+        listSubtask.add(subtask);
+        Account owner = createAccount("John", "Doe");
+        task.setOwner(owner);
+        owner.startTimerOnTask(subtask);
+        List<Account> active = new LinkedList<>();
+        active.add(owner);
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(taskRepoMock.findByParent(TEST_1)).thenReturn(listSubtask);
+        when(projSrvMock.findById(1L)).thenReturn(project);
+        when(accountServiceMock.findAllWithActiveTask(TEST_1)).thenReturn(new LinkedList<>());
+        when(accountServiceMock.findAllWithActiveTask(subId)).thenReturn(active);
+        taskCtr.deleteTask(TEST_1, raMock, requestMock);
+        verify(raMock, times(1)).addFlashAttribute(anyString(),
+                new Message(anyString(), Message.Type.WARNING, new Object[]{}));
+    }
+
+    @Test
+    public void deleteTaskTest() throws IOException {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        Task subtask = createTask(TASK_NAME, 2, project);
+        subtask.setParent(task.getId());
+        String subId = TEST_1 + "/1";
+        subtask.setId(subId);
+        List<Task> listSubtask = new LinkedList<>();
+        listSubtask.add(subtask);
+        Account owner = createAccount("John", "Doe");
+        task.setOwner(owner);
+        testAccount.startTimerOnTask(task);
+        List<Account> active = new LinkedList<>();
+        active.add(testAccount);
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(taskRepoMock.findByParent(TEST_1)).thenReturn(listSubtask);
+        when(projSrvMock.findById(1L)).thenReturn(project);
+        when(accountServiceMock.findAllWithActiveTask(TEST_1)).thenReturn(active);
+        when(accountServiceMock.findAllWithActiveTask(subId)).thenReturn(new LinkedList<>());
+        doNothing().when(taskSrv).deleteFiles(task);
+        taskCtr.deleteTask(TEST_1, raMock, requestMock);
+        verify(taskRepoMock, times(1)).delete(anyCollectionOf(Task.class));
+        verify(taskRepoMock, times(1)).delete(any(Task.class));
+        verify(eventSrvMock, times(1)).addSystemEvent(any(Account.class), any(LogType.class), anyString(), anyString());
+        verify(wrkLogSrv, times(1)).addWorkLogNoTask(anyString(), any(Project.class), any(LogType.class));
+        verify(taskSrv, times(1)).deleteFiles(any(Task.class));
+        verify(raMock, times(1)).addFlashAttribute(anyString(),
+                new Message(anyString(), Message.Type.SUCCESS, new Object[]{}));
+        verify(visitedSrvMock, times(2)).delete(any(Task.class));
+    }
+
+    @Test
+    public void forceDeleteTaskTest() throws IOException {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        Account owner = createAccount("John", "Doe");
+        task.setOwner(owner);
+        owner.startTimerOnTask(task);
+        Task subtask = createTask(TASK_NAME, 2, project);
+        subtask.setParent(task.getId());
+        String subId = TEST_1 + "/1";
+        subtask.setId(subId);
+        testAccount.startTimerOnTask(subtask);
+        List<Task> listSubtask = new LinkedList<>();
+        listSubtask.add(subtask);
+        List<Account> active = new LinkedList<>();
+        active.add(owner);
+        when(taskRepoMock.findByParent(TEST_1)).thenReturn(listSubtask);
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(projSrvMock.findById(1L)).thenReturn(project);
+        when(accountServiceMock.findAllWithActiveTask(TEST_1)).thenReturn(active);
+        doNothing().when(taskSrv).deleteFiles(task);
+        ResultData resultData = taskSrv.deleteTask(task, true);
+        assertEquals(ResultData.OK, resultData.code);
+        verify(accountServiceMock, times(2)).update(anyListOf(Account.class));
+        verify(taskRepoMock, times(1)).delete(any(Task.class));
+        verify(visitedSrvMock, times(2)).delete(any(Task.class));
+    }
+
+    @Test
+    public void deleteTaskFileLockedTest() throws IOException {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        Account owner = createAccount("John", "Doe");
+        task.setOwner(owner);
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(projSrvMock.findById(1L)).thenReturn(project);
+        when(accountServiceMock.findAllWithActiveTask(TEST_1)).thenReturn(new LinkedList<>());
+        doThrow(IOException.class).when(taskSrv).deleteFiles(task);
+        taskCtr.deleteTask(TEST_1, raMock, requestMock);
+        verify(taskCtr, times(1)).rollBack();
+        verify(raMock, times(1)).addFlashAttribute(anyString(),
+                new Message(anyString(), Message.Type.WARNING, new Object[]{}));
+    }
+
 
     @Test
     public void startEditNotReporterAndNotOwnerTask() {

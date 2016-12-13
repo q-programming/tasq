@@ -108,6 +108,17 @@ public class AccountService {
         return accRepo.save(account);
     }
 
+    /**
+     * Bulk updates all accounts from list
+     *
+     * @param accounts accounts list
+     */
+    @Transactional
+    public void update(List<Account> accounts) {
+        accRepo.save(accounts);
+    }
+
+
     public Account findById(Long id) {
         return accRepo.findById(id);
     }
@@ -119,7 +130,7 @@ public class AccountService {
         return accRepo.findAll();
     }
 
-    public List<Account> findAllWithActiveTask(String taskID){
+    public List<Account> findAllWithActiveTask(String taskID) {
         return accRepo.findByActiveTask(taskID);
     }
 

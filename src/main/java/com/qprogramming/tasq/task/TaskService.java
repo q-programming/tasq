@@ -2,6 +2,7 @@ package com.qprogramming.tasq.task;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
+import com.qprogramming.tasq.account.LastVisitedService;
 import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.agile.Release;
 import com.qprogramming.tasq.agile.Sprint;
@@ -43,10 +44,11 @@ public class TaskService {
     private CommentService comSrv;
     private MessageSource msg;
     private WatchedTaskService watchSrv;
+    private LastVisitedService visitedSrv;
 
     @Autowired
     public TaskService(TaskRepository taskRepo, AppService appSrv, AgileService sprintSrv, AccountService accountSrv,
-                       MessageSource msg, WorkLogService wlSrv, CommentService comSrv, TaskLinkService linkSrv, WatchedTaskService watchSrv) {
+                       MessageSource msg, WorkLogService wlSrv, CommentService comSrv, TaskLinkService linkSrv, WatchedTaskService watchSrv,LastVisitedService visitedSrv) {
         this.taskRepo = taskRepo;
         this.appSrv = appSrv;
         this.sprintSrv = sprintSrv;
@@ -56,6 +58,7 @@ public class TaskService {
         this.wlSrv = wlSrv;
         this.comSrv = comSrv;
         this.watchSrv = watchSrv;
+        this.visitedSrv = visitedSrv;
     }
 
     public Task save(Task task) {
@@ -240,26 +243,45 @@ public class TaskService {
         return id + "/" + subId;
     }
 
+    private void clearActiveTimersForTask(Task task) {
+        List<Account> withActiveTask = accountSrv.findAllWithActiveTask(task.getId());
+        withActiveTask.stream().forEach(Account::clearActiveTask);
+        accountSrv.update(withActiveTask);
+    }
 
-    public ResultData deleteTask(Task task) {
-        //check if we can operate on task
-        ResultData resultData = checkTaskCanOperated(task, true);
-        if (resultData.code.equals(ResultData.ERROR)) {
-            return resultData;
+    /**
+     * Deletes task with all it's subtasks and relations. It can be forced to zero all active tasks and just removed
+     * or if force is set to false , all tasks and subtaks will be checked if somebody is not working on them
+     *
+     * @param task  task to be deleted
+     * @param force if set to true, no check of active tasks will be made
+     * @return {@link com.qprogramming.tasq.support.ResultData}
+     */
+    public ResultData deleteTask(Task task, boolean force) {
+        ResultData resultData;
+        if (force) {
+            clearActiveTimersForTask(task);
+        } else {
+            resultData = checkTaskCanOperated(task, true);
+            if (resultData.code.equals(ResultData.ERROR)) {
+                return resultData;
+            }
         }
         //check it's subtasks
-        if (!task.isSubtask()) {
-            List<Task> subtasks = findSubtasks(task.getId());
-            for (Task subtask : subtasks) {
+        List<Task> subtasks = findSubtasks(task.getId());
+        for (Task subtask : subtasks) {
+            if (force) {
+                clearActiveTimersForTask(subtask);
+            } else {
                 resultData = checkTaskCanOperated(subtask, true);
                 if (ResultData.ERROR.equals(resultData.code)) {
                     return resultData;
                 }
             }
-            //all ok proceed with removal
-            subtasks.forEach(this::removeTaskRelations);
-            deleteAll(subtasks);
         }
+        //all ok proceed with removal
+        subtasks.forEach(this::removeTaskRelations);
+        deleteAll(subtasks);
         try {
             deleteFiles(task);
         } catch (IOException e) {
@@ -326,6 +348,8 @@ public class TaskService {
         Set<Comment> comments = comSrv.findByTaskIdOrderByDateDesc(task.getId());
         comSrv.delete(comments);
         watchSrv.deleteWatchedTask(task.getId());
+        visitedSrv.delete(task);
+
     }
 
     /**

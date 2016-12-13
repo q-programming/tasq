@@ -3,10 +3,8 @@
  */
 package com.qprogramming.tasq.task;
 
-import com.qprogramming.tasq.account.Account;
-import com.qprogramming.tasq.account.AccountService;
-import com.qprogramming.tasq.account.LastVisitedService;
-import com.qprogramming.tasq.account.Roles;
+import com.google.common.annotations.VisibleForTesting;
+import com.qprogramming.tasq.account.*;
 import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.error.TasqAuthException;
@@ -66,6 +64,8 @@ import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.qprogramming.tasq.support.Utils.REDIRECT;
+import static com.qprogramming.tasq.support.Utils.REDIRECT_TASK;
 import static com.qprogramming.tasq.task.TaskForm.*;
 
 /**
@@ -86,14 +86,13 @@ public class TaskController {
     private static final String UNASSIGNED = "<i>Unassigned</i>";
     private static final String OPEN = "OPEN";
     private static final String ALL = "ALL";
-    private static final Logger LOG = LoggerFactory.getLogger(TaskController.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(TaskController.class);
     private static final String CHANGE_TO = " -> ";
     private static final String BR = "<br>";
     private static final String START = "start";
     private static final String STOP = "stop";
     private static final String CANCEL = "cancel";
-    private static final String REDIRECT_TASK = "redirect:/task/";
-    private static final String REDIRECT = "redirect:";
+
     private static final String ERROR_ACCES_RIGHTS = "error.accesRights";
     private static final String REFERER = "Referer";
     private static final String ERROR_NAME_HTML = "error.name.html";
@@ -930,7 +929,7 @@ public class TaskController {
     @Transactional
     @RequestMapping(value = "/task/delete", method = RequestMethod.GET)
     public String deleteTask(@RequestParam(value = "id") String taskID, RedirectAttributes ra,
-                             HttpServletRequest request) throws IOException {
+                             HttpServletRequest request) {
         Task task = taskSrv.findById(taskID);
         if (task != null) {
             Project project = projectSrv.findById(task.getProject().getId());
@@ -941,10 +940,10 @@ public class TaskController {
                 Account owner = task.getOwner();
                 String taskName = task.getName();
                 ResultData result;
-                result = taskSrv.deleteTask(task);
+                result = taskSrv.deleteTask(task, false);
                 if (result.code.equals(ResultData.ERROR)) {
                     MessageHelper.addWarningAttribute(ra, result.message, currentLocale);
-                    TransactionInterceptor.currentTransactionStatus().setRollbackOnly();
+                    rollBack();
                     return REDIRECT + request.getHeader(REFERER);
                 }
 
@@ -958,13 +957,18 @@ public class TaskController {
                     eventSrv.addSystemEvent(owner, LogType.DELETED, msg.getMessage(LogType.DELETED.getCode(), null, ownerLocale), moreDetails);
                 }
                 wlSrv.addWorkLogNoTask(message.toString(), project, LogType.DELETED);
-                visitedSrv.delete(task);
+                MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.delete.success",
+                        new Object[]{taskID}, currentLocale), currentLocale);
+            } else {
+                throw new TasqAuthException(msg, "role.error.task.permission");
             }
-            MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.delete.success",
-                    new Object[]{taskID}, currentLocale), currentLocale);
             return "redirect:/";
         }
         return REDIRECT + request.getHeader(REFERER);
+    }
+    @VisibleForTesting
+    void rollBack() {
+        TransactionInterceptor.currentTransactionStatus().setRollbackOnly();
     }
 
     @RequestMapping(value = "/task/attachFiles", method = RequestMethod.POST)
@@ -1137,7 +1141,7 @@ public class TaskController {
             wlSrv.addActivityLog(task, message.toString(), LogType.SUBTASK2TASK);
             taskSrv.save(task);
             // cleanup
-            taskSrv.deleteTask(subtask);
+            taskSrv.deleteTask(subtask, false);
             MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.subtasks.2task.success",
                     new Object[]{id, taskID}, Utils.getCurrentLocale()));
             TaskLink link = new TaskLink(parent.getId(), taskID, TaskLinkType.RELATES_TO);
@@ -1262,6 +1266,15 @@ public class TaskController {
         }
     }
 
+    @RequestMapping(value = "/activeTaskAccounts", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<List<DisplayAccount>> getActiveTaskAccounts(@RequestParam String taskID, HttpServletResponse response) {
+        response.setContentType("application/json");
+        List<Account> accounts = accSrv.findAllWithActiveTask(taskID);
+        return ResponseEntity.ok(accounts.stream().map(DisplayAccount::new).collect(Collectors.toList()));
+    }
+
+
     private ResultData taskIsClosed(Task task) {
         String localized = msg.getMessage(((TaskState) task.getState()).getCode(), null, Utils.getCurrentLocale());
         return new ResultData(ResultData.ERROR,
@@ -1347,7 +1360,7 @@ public class TaskController {
         Account account = Utils.getCurrentAccount();
         if (StringUtils.isNotBlank(account.getActiveTask()) && task.getId().equals(account.getActiveTask())) {
             DateTime now = new DateTime();
-            Period logWork = new Period((DateTime) account.getActiveTaskTimer(), now);
+            Period logWork = new Period(account.getActiveTaskTimer(), now);
             // Only log work if greater than 1 minute
             if (logWork.toStandardDuration().getMillis() / 1000 / 60 < 1) {
                 logWork = new Period().plusMinutes(1);

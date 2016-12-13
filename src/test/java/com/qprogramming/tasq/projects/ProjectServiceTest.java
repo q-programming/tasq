@@ -1,4 +1,4 @@
-package com.qprogramming.tasq.project;
+package com.qprogramming.tasq.projects;
 
 import com.qprogramming.tasq.account.*;
 import com.qprogramming.tasq.projects.NewProjectForm;

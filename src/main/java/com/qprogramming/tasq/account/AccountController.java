@@ -285,7 +285,7 @@ public class AccountController {
             return ResponseEntity.badRequest().body("Error while saving property");
         }
         account.setSmallSidebar(enable);
-        accountSrv.save(account, false);
+        accountSrv.update(account);
         return ResponseEntity.ok("");
     }
 
