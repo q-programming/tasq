@@ -32,6 +32,8 @@ public class Utils {
     public static final int SECONDS_PER_HOUR = DateTimeConstants.SECONDS_PER_HOUR;
     public static final String TABLE = "<table class=\"table worklog_table\">";
     public static final String TABLE_END = "</table>";
+    public static final String REDIRECT_TASK = "redirect:/task/";
+    public static final String REDIRECT = "redirect:";
     private static final String DATE_FORMAT = "dd-MM-yyyy";
     private static final String DATE_FORMAT_TIME = "dd-MM-yyyy HH:mm";
     private static final Logger LOG = LoggerFactory.getLogger(Utils.class);

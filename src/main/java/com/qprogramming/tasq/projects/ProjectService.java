@@ -186,4 +186,9 @@ public class ProjectService {
         }
         return freeDays;
     }
+
+    @Transactional
+    public void delete(Project project) {
+        projRepo.delete(project);
+    }
 }

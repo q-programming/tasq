@@ -1,32 +1,64 @@
 package com.qprogramming.tasq.task;
 
 import com.qprogramming.tasq.account.Account;
+import com.qprogramming.tasq.account.AccountService;
+import com.qprogramming.tasq.account.LastVisitedService;
 import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.agile.Release;
 import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.projects.Project;
+import com.qprogramming.tasq.support.ResultData;
+import com.qprogramming.tasq.support.Utils;
+import com.qprogramming.tasq.task.comments.Comment;
+import com.qprogramming.tasq.task.comments.CommentService;
+import com.qprogramming.tasq.task.link.TaskLinkService;
+import com.qprogramming.tasq.task.watched.WatchedTaskService;
+import com.qprogramming.tasq.task.worklog.LogType;
+import com.qprogramming.tasq.task.worklog.WorkLogService;
+import org.apache.commons.io.FileUtils;
 import org.hibernate.Hibernate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class TaskService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(TaskService.class);
     private TaskRepository taskRepo;
     private AppService appSrv;
     private AgileService sprintSrv;
+    private AccountService accountSrv;
+    private TaskLinkService linkSrv;
+    private WorkLogService wlSrv;
+    private CommentService comSrv;
+    private MessageSource msg;
+    private WatchedTaskService watchSrv;
+    private LastVisitedService visitedSrv;
 
     @Autowired
-    public TaskService(TaskRepository taskRepo, AppService appSrv, AgileService sprintSrv) {
+    public TaskService(TaskRepository taskRepo, AppService appSrv, AgileService sprintSrv, AccountService accountSrv,
+                       MessageSource msg, WorkLogService wlSrv, CommentService comSrv, TaskLinkService linkSrv, WatchedTaskService watchSrv,LastVisitedService visitedSrv) {
         this.taskRepo = taskRepo;
         this.appSrv = appSrv;
         this.sprintSrv = sprintSrv;
+        this.accountSrv = accountSrv;
+        this.msg = msg;
+        this.linkSrv = linkSrv;
+        this.wlSrv = wlSrv;
+        this.comSrv = comSrv;
+        this.watchSrv = watchSrv;
+        this.visitedSrv = visitedSrv;
     }
 
     public Task save(Task task) {
@@ -211,5 +243,137 @@ public class TaskService {
         return id + "/" + subId;
     }
 
+    private void clearActiveTimersForTask(Task task) {
+        List<Account> withActiveTask = accountSrv.findAllWithActiveTask(task.getId());
+        withActiveTask.stream().forEach(Account::clearActiveTask);
+        accountSrv.update(withActiveTask);
+    }
 
+    /**
+     * Deletes task with all it's subtasks and relations. It can be forced to zero all active tasks and just removed
+     * or if force is set to false , all tasks and subtaks will be checked if somebody is not working on them
+     *
+     * @param task  task to be deleted
+     * @param force if set to true, no check of active tasks will be made
+     * @return {@link com.qprogramming.tasq.support.ResultData}
+     */
+    public ResultData deleteTask(Task task, boolean force) {
+        ResultData resultData;
+        if (force) {
+            clearActiveTimersForTask(task);
+        } else {
+            resultData = checkTaskCanOperated(task, true);
+            if (resultData.code.equals(ResultData.ERROR)) {
+                return resultData;
+            }
+        }
+        //check it's subtasks
+        List<Task> subtasks = findSubtasks(task.getId());
+        for (Task subtask : subtasks) {
+            if (force) {
+                clearActiveTimersForTask(subtask);
+            } else {
+                resultData = checkTaskCanOperated(subtask, true);
+                if (ResultData.ERROR.equals(resultData.code)) {
+                    return resultData;
+                }
+            }
+        }
+        //all ok proceed with removal
+        subtasks.forEach(this::removeTaskRelations);
+        deleteAll(subtasks);
+        try {
+            deleteFiles(task);
+        } catch (IOException e) {
+            String message = msg.getMessage("error.task.delete.files", new Object[]{task.getId(), e.getMessage()}, Utils.getCurrentLocale());
+            LOG.error(message + " Exception {}", e.getMessage());
+            LOG.debug("{}", e);
+            return new ResultData(ResultData.ERROR, message);
+        }
+        removeTaskRelations(task);
+        Task purged = save(purgeTask(task));
+        delete(purged);
+        return new ResultData(ResultData.OK, null);
+    }
+
+
+    public ResultData checkTaskCanOperated(Task task, boolean remove) {
+        List<Account> accounts = accountSrv.findAllWithActiveTask(task.getId());
+        if (!accounts.isEmpty()) {
+            Account currentAccount = Utils.getCurrentAccount();
+            if (accounts.size() > 1 || !accounts.get(0).equals(currentAccount)) {
+                return new ResultData(ResultData.ERROR, msg.getMessage("task.changeState.change.working",
+                        new Object[]{task.getId(), String.join(",", accounts.stream().map(Account::toString).collect(Collectors.toList()))}, Utils.getCurrentLocale()));
+            }
+            if (remove) {
+                currentAccount.clearActiveTask();
+                accountSrv.update(currentAccount);
+            }
+        }
+        return new ResultData(ResultData.OK, null);
+    }
+
+    public void deleteFiles(Task task) throws IOException {
+        File folder = new File(getTaskDirectory(task));
+        FileUtils.deleteDirectory(folder);
+    }
+
+    /**
+     * Checks if state should be changed to ongoing and saves task
+     *
+     * @param task
+     * @return
+     */
+    public Task checkStateAndSave(Task task) {
+        if (task.getState().equals(TaskState.TO_DO)) {
+            task.setState(TaskState.ONGOING);
+            changeState(TaskState.TO_DO, TaskState.ONGOING, task);
+        }
+        return save(task);
+    }
+
+    /**
+     * private method to remove task and all potential links
+     *
+     * @param task
+     * @return
+     */
+    public void removeTaskRelations(Task task) {
+        linkSrv.deleteTaskLinks(task);
+        task.setOwner(null);
+        task.setAssignee(null);
+        task.setProject(null);
+        task.setTags(null);
+        wlSrv.deleteTaskWorklogs(task);
+        Set<Comment> comments = comSrv.findByTaskIdOrderByDateDesc(task.getId());
+        comSrv.delete(comments);
+        watchSrv.deleteWatchedTask(task.getId());
+        visitedSrv.delete(task);
+
+    }
+
+    /**
+     * Adds event about state changed
+     *
+     * @param newState
+     * @param oldState
+     * @param task
+     */
+    public void changeState(TaskState oldState, TaskState newState, Task task) {
+        wlSrv.addActivityLog(task, Utils.changedFromTo(oldState.getDescription(), newState.getDescription()), LogType.STATUS);
+    }
+
+    /**
+     * Nuke Task - set everything to null
+     */
+    private Task purgeTask(Task task) {
+        Task zerotask = new Task();
+        zerotask.setId(task.getId());
+        return zerotask;
+    }
+
+
+    public String printID(String taskID) {
+        return "[ " + taskID + " ]";
+    }
 }

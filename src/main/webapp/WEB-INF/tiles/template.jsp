@@ -110,6 +110,7 @@
                 <div class="main-container">
                     <tiles:insertAttribute name="body" defaultValue=""/>
                 </div>
+                <tiles:insertAttribute name="footer" defaultValue=""/>
             </div>
 
         </security:authorize>
@@ -117,7 +118,7 @@
             <tiles:insertAttribute name="body" defaultValue=""/>
         </security:authorize>
         <!-- End of page content -->
-        <tiles:insertAttribute name="footer" defaultValue=""/>
+
         <a href="#" class="back-to-top a-tooltip"
            title="<s:message code="main.backToTop"/>"><i
                 class="fa fa-2x fa-angle-up"></i></a>

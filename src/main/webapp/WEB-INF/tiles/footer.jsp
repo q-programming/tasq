@@ -4,25 +4,23 @@
            uri="http://www.springframework.org/security/tags" %>
 <security:authentication property="principal" var="user"/>
 <security:authorize access="isAuthenticated()">
-    <c:set var="active_task_seconds">${user.active_task_seconds}</c:set>
-    <c:if test="${not empty user.active_task }">
-        <div class="row hidden-print">
-            <div class="footer-time">
-                <div>
-                    <s:message code="task.active"/>
-                    <a class="a-tooltip"
-                       href="<c:url value="/task/${user.active_task[0]}"/>"
-                       title='${user.active_task[2]}' data-html="true">${user.active_task[0]}</a>
-                    <a class="btn btn-default btn-xxs a-tooltip handleTimerBtn"
-                       title="<s:message code="task.stopTime.description"/>">
-                        <i class="fa fa-lg fa-clock-o"></i>
-                    </a> <span id="activeTaskTimer" class="timer"></span>
-                </div>
+    <c:set var="active_task_seconds">${user.activeTaskSeconds}</c:set>
+    <c:if test="${not empty user.activeTask }">
+        <div class="row hidden-print footer-time">
+            <div>
+                <s:message code="task.active"/>
+                <a class="a-tooltip"
+                   href="<c:url value="/task/${user.activeTask}"/>"
+                   data-html="true">${user.activeTask}</a>
+                <a class="btn btn-default btn-xxs a-tooltip handleTimerBtn"
+                   title="<s:message code="task.stopTime.description"/>">
+                    <i class="fa fa-lg fa-clock-o"></i>
+                </a> <span id="activeTaskTimer" class="timer"></span>
             </div>
         </div>
     </c:if>
     <jsp:include page="../views/modals/users.jsp"/>
-    <c:if test="${not empty user.active_task }">
+    <c:if test="${not empty user.activeTask }">
         <script>
             $(".handleTimerBtn").click(function () {
                 var message = '<s:message code="error.longerThanDay"  htmlEscape="false"/>';
@@ -30,7 +28,7 @@
                 bootbox.setDefaults({
                     locale: lang
                 });
-                var url = '<c:url value="/task/time?id=${user.active_task[0]}&action="/>';
+                var url = '<c:url value="/task/time?id=${user.activeTask}&action="/>';
                 //check if greater that 1d
                 var days = $("#activeTaskTimer").attr('days');
                 if (days > 0) {

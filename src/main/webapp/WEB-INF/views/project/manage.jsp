@@ -19,7 +19,7 @@
 <c:if test="${user.language ne 'en' }">
     <script src="<c:url value="/resources/js/trumbowyg.${user.language}.min.js" />"></script>
 </c:if>
-<div class="white-frame" style="overflow: auto;">
+<div class="white-frame">
     <h2>
         <a href="<c:url value="/project/${project.projectId}"/>">[${project.projectId}]
             ${project.name}</a>
@@ -192,26 +192,28 @@
         </h3>
     </div>
     <%-----------ADMINS --%>
-    <div class="paddedleft40">
+    <div class="paddedleft40 row marginright_0">
         <div class="mod-header">
             <h5 class="mod-header-title">
                 <s:message code="project.admins"/>
             </h5>
         </div>
-        <table class="table">
-            <c:forEach items="${project.administrators}" var="admin">
-                <c:if test="${admin.id == user.id || is_admin}">
-                    <c:set var="can_edit" value="true"/>
-                </c:if>
-                <tr>
-                    <td><img data-src="holder.js/30x30"
-                             style="height: 30px; float: left; padding-right: 10px;"
-                             src="<c:url value="/../avatar/${admin.id}.png"/>"/>${admin}</td>
-                </tr>
-            </c:forEach>
-        </table>
+        <div class="col-md-12 marginright_0">
+            <table class="table">
+                <c:forEach items="${project.administrators}" var="admin">
+                    <c:if test="${admin.id == user.id || is_admin}">
+                        <c:set var="can_edit" value="true"/>
+                    </c:if>
+                    <tr>
+                        <td><img data-src="holder.js/30x30"
+                                 style="height: 30px; float: left; padding-right: 10px;"
+                                 src="<c:url value="/../avatar/${admin.id}.png"/>"/>${admin}</td>
+                    </tr>
+                </c:forEach>
+            </table>
+        </div>
     </div>
-    <div class="paddedleft40">
+    <div class="paddedleft40 row marginright_0">
         <div class="mod-header">
             <h5 class="mod-header-title">
                 <s:message code="project.members"/>
@@ -254,68 +256,89 @@
         </div>
     </div>
     <%------------PARTICIPANTS --------------------------%>
-    <div class="paddedleft40">
-        <table class="table">
-            <c:forEach items="${project.participants}" var="participant">
-                <tr>
-                    <td><img data-src="holder.js/30x30"
-                             style="height: 30px; float: left; padding-right: 10px;"
-                             src="<c:url value="/../avatar/${participant.id}.png"/>"/>${participant}
+    <div class="paddedleft40 row marginright_0">
+        <div class="col-md-12">
+            <table class="table">
+                <c:forEach items="${project.participants}" var="participant">
+                    <tr>
+                        <td><img data-src="holder.js/30x30"
+                                 style="height: 30px; float: left; padding-right: 10px;"
+                                 src="<c:url value="/../avatar/${participant.id}.png"/>"/>${participant}
                         <span style="color: #737373">(<s:message
                                 code="${participant.role.code}"/>)
 					</span></td>
-                    <td><c:if test="${can_edit}">
-                        <div class="pull-right">
+                        <td><c:if test="${can_edit}">
                             <div class="pull-right">
-                                <form action="<c:url value="/project/userRemove"/>"
-                                      method="post">
-                                    <input type="hidden" name="project_id" value="${project.projectId}">
-                                    <input type="hidden" name="account_id"
-                                           value="${participant.id}">
-                                    <button type="submit"
-                                            class="btn btn-default btn-sm a-tooltip "
-                                            title="<s:message code="project.participant.remove"/>">
-                                        <i class="fa fa-user-times"></i>
-                                    </button>
-                                </form>
+                                <div class="pull-right">
+                                    <form action="<c:url value="/project/userRemove"/>"
+                                          method="post">
+                                        <input type="hidden" name="project_id" value="${project.projectId}">
+                                        <input type="hidden" name="account_id"
+                                               value="${participant.id}">
+                                        <button type="submit"
+                                                class="btn btn-default btn-sm a-tooltip "
+                                                title="<s:message code="project.participant.remove"/>">
+                                            <i class="fa fa-user-times"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                                <c:if
+                                        test="${t:contains(project.administrators,participant)}">
+                                    <div class="pull-right">
+                                        <form action="<c:url value="/project/removeAdmin"/>"
+                                              method="post">
+                                            <input type="hidden" name="project_id" value="${project.projectId}">
+                                            <input type="hidden" name="account_id"
+                                                   value="${participant.id}">
+                                            <button type="submit"
+                                                    class="btn btn-default btn-sm a-tooltip "
+                                                    title="<s:message code="project.participant.admin.remove"/>">
+                                                <i class="fa fa-minus"></i><i class="fa fa-wrench"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </c:if>
+                                <c:if
+                                        test="${not t:contains(project.administrators,participant)}">
+                                    <div class="pull-right">
+                                        <form action="<c:url value="/project/grantAdmin"/>"
+                                              method="post">
+                                            <input type="hidden" name="project_id" value="${project.projectId}">
+                                            <input type="hidden" name="account_id"
+                                                   value="${participant.id}">
+                                            <button type="submit"
+                                                    class="btn btn-default btn-sm a-tooltip "
+                                                    title="<s:message code="project.participant.admin.add"/>">
+                                                <i class="fa fa-plus"></i><i class="fa fa-wrench"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </c:if>
                             </div>
-                            <c:if
-                                    test="${t:contains(project.administrators,participant)}">
-                                <div class="pull-right">
-                                    <form action="<c:url value="/project/removeAdmin"/>"
-                                          method="post">
-                                        <input type="hidden" name="project_id" value="${project.projectId}">
-                                        <input type="hidden" name="account_id"
-                                               value="${participant.id}">
-                                        <button type="submit"
-                                                class="btn btn-default btn-sm a-tooltip "
-                                                title="<s:message code="project.participant.admin.remove"/>">
-                                            <i class="fa fa-minus"></i><i class="fa fa-wrench"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </c:if>
-                            <c:if
-                                    test="${not t:contains(project.administrators,participant)}">
-                                <div class="pull-right">
-                                    <form action="<c:url value="/project/grantAdmin"/>"
-                                          method="post">
-                                        <input type="hidden" name="project_id" value="${project.projectId}">
-                                        <input type="hidden" name="account_id"
-                                               value="${participant.id}">
-                                        <button type="submit"
-                                                class="btn btn-default btn-sm a-tooltip "
-                                                title="<s:message code="project.participant.admin.add"/>">
-                                            <i class="fa fa-plus"></i><i class="fa fa-wrench"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </c:if>
-                        </div>
-                    </c:if></td>
-                </tr>
-            </c:forEach>
-        </table>
+                        </c:if></td>
+                    </tr>
+                </c:forEach>
+            </table>
+        </div>
+    </div>
+    <div>
+        <div class="mod-header">
+            <h3 class="mod-header-title">
+                <s:message code="project.delete"/>
+            </h3>
+        </div>
+        <div class="paddedleft40">
+             <span class="help-block"><i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+                 <s:message code="project.delete.help" htmlEscape="false"/>
+             </span>
+            <div class="text-center">
+                <button id="remove-project" class="btn btn-danger"
+                        data-toggle="modal" data-target="#delete-project-modal" data-backdrop="static"
+                        data-keyboard="false">
+                    <i class="fa fa-trash-o" aria-hidden="true"></i>&nbsp;<s:message code="project.delete"/>
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 <div class="modal fade" id="editDescription" role="dialog"
@@ -343,6 +366,43 @@
                     <button id="" class="btn btn-default" type="submit">
                         <i class="fa fa-pencil"></i>&nbsp;<s:message code="main.edit"/>
                     </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="delete-project-modal" role="dialog"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="delete-form" action="<c:url value="/project/${project.projectId}/delete"/>" method="post">
+                <div class="modal-header theme">
+                    <h4 class="modal-title">
+                        <s:message code="project.delete"/>&nbsp;[${project.projectId}] ${project.name}
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this project? All information and all tasks will be deleted and
+                    cannot be recovered! <br>
+                    In order to confirm type project Id and project name in fields below
+                    <div class="form-group">
+                        <label for="deleteProjectName"><s:message code="project.id"/>:</label>
+                        <input class="form-control" style="width: 150px;"
+                               name="projectId" id="deleteProjectid">
+                    </div>
+                    <div class="form-group">
+                        <label for="deleteProjectName"><s:message code="project.name"/>:</label>
+                        <input class="form-control"
+                               name="projectname" id="deleteProjectName">
+                    </div>
+                    <div id="deleteProjectError" style="display: none; color: red"><s:message code="project.delete.confirm"/></div>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn" data-dismiss="modal"><s:message
+                            code="main.cancel"/></a>
+                    <span id="deleteProjectSubmit" class="btn btn-danger clickable">
+                        <i class="fa fa-trash-o" aria-hidden="true"></i>&nbsp;<s:message code="project.delete"/>
+                    </span>
                 </div>
             </form>
         </div>
@@ -498,6 +558,39 @@
                 $("#assignee_input").removeClass("input-italic");
             }
         }
+
+        //delete project
+        $("#deleteProjectSubmit").click(function (e) {
+            e.preventDefault();
+            var id = "${project.projectId}";
+            var name = "${project.name}";
+            var valid = true;
+            var inputedID = $("#deleteProjectid").val();
+            var inputedName = $("#deleteProjectName").val();
+            if (inputedID != id) {
+                $("#deleteProjectid").parent().addClass("has-error");
+                valid = false;
+            } else {
+                $("#deleteProjectid").parent().removeClass("has-error");
+                valid = true;
+            }
+            if (inputedName != name) {
+                $("#deleteProjectName").parent().addClass("has-error");
+                valid = false;
+            } else {
+                $("#deleteProjectName").parent().removeClass("has-error");
+                valid = true;
+            }
+            if (valid) {
+                $("#deleteProjectError").hide();
+                $("#delete-form").submit();
+            }else{
+                $("#deleteProjectError").show();
+            }
+
+
+        })
+
 
         $("#add_button").click(function () {
             $('#add_button_div').toggle();

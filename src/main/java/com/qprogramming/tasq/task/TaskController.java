@@ -3,10 +3,8 @@
  */
 package com.qprogramming.tasq.task;
 
-import com.qprogramming.tasq.account.Account;
-import com.qprogramming.tasq.account.AccountService;
-import com.qprogramming.tasq.account.LastVisitedService;
-import com.qprogramming.tasq.account.Roles;
+import com.google.common.annotations.VisibleForTesting;
+import com.qprogramming.tasq.account.*;
 import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.error.TasqAuthException;
@@ -49,6 +47,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionInterceptor;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -65,6 +64,8 @@ import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.qprogramming.tasq.support.Utils.REDIRECT;
+import static com.qprogramming.tasq.support.Utils.REDIRECT_TASK;
 import static com.qprogramming.tasq.task.TaskForm.*;
 
 /**
@@ -85,14 +86,13 @@ public class TaskController {
     private static final String UNASSIGNED = "<i>Unassigned</i>";
     private static final String OPEN = "OPEN";
     private static final String ALL = "ALL";
-    private static final Logger LOG = LoggerFactory.getLogger(TaskController.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(TaskController.class);
     private static final String CHANGE_TO = " -> ";
     private static final String BR = "<br>";
     private static final String START = "start";
     private static final String STOP = "stop";
     private static final String CANCEL = "cancel";
-    private static final String REDIRECT_TASK = "redirect:/task/";
-    private static final String REDIRECT = "redirect:";
+
     private static final String ERROR_ACCES_RIGHTS = "error.accesRights";
     private static final String REFERER = "Referer";
     private static final String ERROR_NAME_HTML = "error.name.html";
@@ -135,6 +135,7 @@ public class TaskController {
         return new TaskForm();
     }
 
+    @Transactional
     @RequestMapping(value = "task/create", method = RequestMethod.POST)
     public String createTask(@Valid @ModelAttribute("taskForm") TaskForm taskForm, BindingResult errors,
                              @RequestParam(value = "linked", required = false) String linked, RedirectAttributes ra,
@@ -175,6 +176,7 @@ public class TaskController {
             project.setLastTaskNo(taskCount);
             // assigne
             setCreatedTaskAssignee(taskForm, task);
+            task = taskSrv.save(task);//save before adding rest
             // lookup for sprint
             // Create log work
             if (taskForm.getAddToSprint() != null) {
@@ -216,6 +218,8 @@ public class TaskController {
                     }
                 }
             }
+            //everything went well , save task
+            taskSrv.save(task);
             MessageHelper.addSuccessAttribute(ra,
                     msg.getMessage("task.create.success", new Object[]{taskID}, Utils.getCurrentLocale()));
             return REDIRECT_TASK + taskID;
@@ -350,8 +354,6 @@ public class TaskController {
         // Don't check for SP if task is not estimated
         if (task.isEstimated()) {
             try {
-
-
                 if (task.getStory_points() != null && task.getStory_points() != storyPoints) {
                     if (shouldAddWorklogPointsChanged(task, storyPoints)) {
                         message.append(Utils.changedFromTo(STORY_POINTS_TXT, task.getStory_points().toString(),
@@ -374,12 +376,11 @@ public class TaskController {
             updateWatched(task);
         }
         LOG.debug(message.toString());
-        //update visited after name change
-        taskSrv.save(task);
         message.append(Utils.TABLE_END);
         if (message.length() > 37) {
             wlSrv.addActivityLog(task, message.toString(), LogType.EDITED);
         }
+        taskSrv.save(task);
         return REDIRECT_TASK + taskID;
     }
 
@@ -421,7 +422,11 @@ public class TaskController {
         visitedSrv.addLastVisited(account.getId(), task);
         // TASK
         Set<Comment> comments = commSrv.findByTaskIdOrderByDateDesc(id);
-        Map<TaskLinkType, List<DisplayTask>> links = linkService.findTaskLinks(id);
+        Map<TaskLinkType, List<String>> links = linkService.findTaskLinks(id);
+        Map<TaskLinkType, List<Task>> taskLinks = new HashMap<>();
+        for (Map.Entry<TaskLinkType, List<String>> taskLink : links.entrySet()) {
+            taskLinks.put(taskLink.getKey(), taskLink.getValue().stream().map(s -> taskSrv.findById(s)).collect(Collectors.toList()));
+        }
         if (!task.isSubtask()) {
             List<Task> subtasks = taskSrv.findSubtasks(task);
             // Add all subtasks into remaining work
@@ -447,7 +452,7 @@ public class TaskController {
         model.addAttribute("watching", watchSrv.isWatching(task.getId()));
         model.addAttribute("comments", comments);
         model.addAttribute("task", task);
-        model.addAttribute("links", links);
+        model.addAttribute("links", taskLinks);
         model.addAttribute("files", getTaskFiles(task));
         return "task/details";
     }
@@ -523,7 +528,6 @@ public class TaskController {
         if (!Roles.isUser()) {
             throw new TasqAuthException(msg);
         }
-
         Task task = taskSrv.findById(id);
         if (task != null) {
             if (task.getState().equals(TaskState.CLOSED)) {
@@ -550,8 +554,9 @@ public class TaskController {
                 Account assignee = accSrv.findByEmail(taskForm.getAssignee());
                 subTask.setAssignee(assignee);
             }
-            taskSrv.createSubTask(project, task, subTask);
+            subTask = taskSrv.createSubTask(project, task, subTask);
             wlSrv.addActivityLog(subTask, "", LogType.SUBTASK);
+            taskSrv.save(subTask);
             return REDIRECT_TASK + id;
         }
         MessageHelper.addErrorAttribute(ra, msg.getMessage("task.notexists", null, Utils.getCurrentLocale()));
@@ -618,9 +623,10 @@ public class TaskController {
                 Period remaining = null;
                 if (StringUtils.isNotEmpty(remainingTxt)) {
                     remaining = PeriodHelper.inFormat(remainingTxt);
-                    wlSrv.addDatedWorkLog(task, remainingTxt, when, LogType.ESTIMATE);
+                    task = wlSrv.addDatedWorkLog(task, remainingTxt, when, LogType.ESTIMATE);
                 }
-                wlSrv.addTimedWorkLog(task, message.toString(), when, remaining, logged, LogType.LOG);
+                task = wlSrv.addTimedWorkLog(task, message.toString(), when, remaining, logged, LogType.LOG);
+                task = taskSrv.checkStateAndSave(task);
                 if (!totalLoggedTimeValid(logged, task)) {
                     MessageHelper.addWarningAttribute(ra, msg.getMessage("task.logWork.logged.tooMuch",
                             new Object[]{loggedWork, task.getId()}, Utils.getCurrentLocale()));
@@ -690,9 +696,11 @@ public class TaskController {
                                 msg.getMessage("task.alreadyStarted", new Object[]{taskID}, Utils.getCurrentLocale())));
                     }
                 } else if (TaskState.CLOSED.equals(state)) {
-                    ResultData result = checkTaskCanOperated(task, false);
+                    ResultData result = taskSrv.checkTaskCanOperated(task, false);
                     if (result.code.equals(ResultData.ERROR)) {
                         return ResponseEntity.ok(result);
+                    } else {
+                        stopTimer(task);
                     }
                 }
                 if (closeSubtasks != null && closeSubtasks) {
@@ -777,15 +785,14 @@ public class TaskController {
                 switch (action) {
                     case START: {
                         Account account = Utils.getCurrentAccount();
-                        if (account.getActive_task() != null && account.getActive_task().length > 0
-                                && !("").equals(account.getActive_task()[0])) {
+                        if (StringUtils.isNotBlank(account.getActiveTask())) {
                             MessageHelper.addWarningAttribute(ra, msg.getMessage("task.stopTime.warning",
-                                    new Object[]{account.getActive_task()[0]}, Utils.getCurrentLocale()));
+                                    new Object[]{account.getActiveTask()}, Utils.getCurrentLocale()));
                             return REDIRECT + request.getHeader(REFERER);
                         }
                         account.startTimerOnTask(task);
                         accSrv.update(account);
-                        wlSrv.checkStateAndSave(task);
+                        taskSrv.checkStateAndSave(task);
                         break;
                     }
                     case STOP:
@@ -795,7 +802,7 @@ public class TaskController {
                         break;
                     case CANCEL: {
                         Account account = Utils.getCurrentAccount();
-                        account.clearActive_task();
+                        account.clearActiveTask();
                         accSrv.update(account);
                         return REDIRECT_TASK + taskID;
                     }
@@ -812,6 +819,7 @@ public class TaskController {
         return REDIRECT + request.getHeader(REFERER);
     }
 
+    @Transactional
     @RequestMapping(value = "/task/assign", method = RequestMethod.POST)
     public String assign(@RequestParam(value = "taskID") String taskID, @RequestParam(value = "email") String email,
                          RedirectAttributes ra, HttpServletRequest request) {
@@ -828,8 +836,8 @@ public class TaskController {
                 if (("").equals(email) && task.getAssignee() != null) {
                     task.setAssignee(null);
                     task.setLastUpdate(new Date());
-                    taskSrv.save(task);
                     wlSrv.addActivityLog(task, Utils.changedFromTo(previous, UNASSIGNED), LogType.ASSIGNED);
+                    taskSrv.save(task);
 
                 } else {
                     Account assignee = accSrv.findByEmail(email);
@@ -842,10 +850,10 @@ public class TaskController {
                         }
                         task.setAssignee(assignee);
                         task.setLastUpdate(new Date());
-                        taskSrv.save(task);
                         watchSrv.addToWatchers(task, assignee);
                         wlSrv.addActivityLog(task, Utils.changedFromTo(previous, assignee.toString()),
                                 LogType.ASSIGNED);
+                        taskSrv.save(task);
                         MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.assigned",
                                 new Object[]{task.getId(), assignee.toString()}, Utils.getCurrentLocale()));
                     }
@@ -862,6 +870,7 @@ public class TaskController {
         return task.getAssignee() == null ? UNASSIGNED : task.getAssignee().toString();
     }
 
+    @Transactional
     @RequestMapping(value = "/task/assignMe", method = RequestMethod.GET)
     public String assignMe(@RequestParam(value = "id") String taskID, RedirectAttributes ra,
                            HttpServletRequest request) {
@@ -869,6 +878,7 @@ public class TaskController {
         return REDIRECT + request.getHeader(REFERER);
     }
 
+    @Transactional
     @RequestMapping(value = "/task/assignMe", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<ResultData> assignMePOST(@RequestParam(value = "id") String id) {
@@ -885,6 +895,7 @@ public class TaskController {
         }
     }
 
+    @Transactional
     @RequestMapping(value = "/task/priority", method = RequestMethod.GET)
     public String changePriority(@RequestParam(value = "id") String taskID,
                                  @RequestParam(value = "priority") String priority, RedirectAttributes ra, HttpServletRequest request) {
@@ -901,7 +912,6 @@ public class TaskController {
                     && Roles.isPowerUser()) {
                 StringBuilder message = new StringBuilder();
                 String oldPriority = "";
-                // TODO temporary due to old DB
                 if (task.getPriority() != null) {
                     oldPriority = task.getPriority().toString();
                 }
@@ -909,8 +919,8 @@ public class TaskController {
                 message.append(CHANGE_TO);
                 task.setPriority(newPriority);
                 message.append(task.getPriority().toString());
-                taskSrv.save(task);
                 wlSrv.addActivityLog(task, message.toString(), LogType.PRIORITY);
+                taskSrv.save(task);
             }
         }
         return REDIRECT + request.getHeader(REFERER);
@@ -928,46 +938,37 @@ public class TaskController {
             if (isAdmin(task, project)) {
                 Account currentAccount = Utils.getCurrentAccount();
                 Account owner = task.getOwner();
+                String taskName = task.getName();
                 ResultData result;
-                // check for links and subtasks
-                List<Task> subtasks = taskSrv.findSubtasks(taskID);
-                for (Task subtask : subtasks) {
-                    result = removeTaskRelations(subtask);
-                    if (ResultData.ERROR.equals(result.code)) {
-                        MessageHelper.addWarningAttribute(ra, result.message, currentLocale);
-                        return REDIRECT + request.getHeader(REFERER);
-                    }
-                }
-                taskSrv.deleteAll(subtasks);
-                deleteFiles(task);
-                result = removeTaskRelations(task);
+                result = taskSrv.deleteTask(task, false);
                 if (result.code.equals(ResultData.ERROR)) {
                     MessageHelper.addWarningAttribute(ra, result.message, currentLocale);
+                    rollBack();
                     return REDIRECT + request.getHeader(REFERER);
                 }
-                //send event to owner if needed
-                // leave message and clear all
-                StringBuilder message = new StringBuilder();
-                message.append("[");
-                message.append(task.getId());
-                message.append("]");
+
+                StringBuilder message = new StringBuilder(taskSrv.printID(taskID));
                 message.append(" - ");
-                message.append(task.getName());
+                message.append(taskName);
+                //send event to owner if needed
                 if (!owner.equals(currentAccount)) {
                     Locale ownerLocale = new Locale(owner.getLanguage());
-                    String moreDetails = msg.getMessage("log.type.delete.info", new Object[]{currentAccount, taskID, task.getName()}, ownerLocale);
+                    String moreDetails = msg.getMessage("log.type.delete.info", new Object[]{currentAccount, taskID, taskName}, ownerLocale);
                     eventSrv.addSystemEvent(owner, LogType.DELETED, msg.getMessage(LogType.DELETED.getCode(), null, ownerLocale), moreDetails);
                 }
-                Task purged = taskSrv.save(purgeTask(task));
-                taskSrv.delete(purged);
                 wlSrv.addWorkLogNoTask(message.toString(), project, LogType.DELETED);
-                visitedSrv.delete(task);
+                MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.delete.success",
+                        new Object[]{taskID}, currentLocale), currentLocale);
+            } else {
+                throw new TasqAuthException(msg, "role.error.task.permission");
             }
-            MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.delete.success",
-                    new Object[]{taskID}, currentLocale), currentLocale);
             return "redirect:/";
         }
         return REDIRECT + request.getHeader(REFERER);
+    }
+    @VisibleForTesting
+    void rollBack() {
+        TransactionInterceptor.currentTransactionStatus().setRollbackOnly();
     }
 
     @RequestMapping(value = "/task/attachFiles", method = RequestMethod.POST)
@@ -1080,6 +1081,11 @@ public class TaskController {
             MessageHelper.addErrorAttribute(ra, msg.getMessage(ERROR_ACCES_RIGHTS, null, Utils.getCurrentLocale()));
             return REDIRECT + request.getHeader(REFERER);
         } else {
+            ResultData checkResult = taskSrv.checkTaskCanOperated(subtask, false);
+            if (checkResult.code.equals(ResultData.ERROR)) {
+                MessageHelper.addWarningAttribute(ra, checkResult.message, Utils.getCurrentLocale());
+                return REDIRECT + request.getHeader(REFERER);
+            }
             Task parent = taskSrv.findById(subtask.getParent());
             long taskCount = project.getLastTaskNo();
             taskCount++;
@@ -1123,7 +1129,6 @@ public class TaskController {
                 newDir.setWritable(true, false);
                 newDir.setReadable(true, false);
                 FileUtils.copyDirectory(oldDir, newDir);
-                FileUtils.deleteDirectory(oldDir);
             }
             project.setLastTaskNo(taskCount);
             project.getTasks().add(task);
@@ -1134,13 +1139,9 @@ public class TaskController {
             message.append(Utils.changedFromTo(TYPE_TXT, subtask.getType().toString(), type.toString()));
             message.append(Utils.TABLE_END);
             wlSrv.addActivityLog(task, message.toString(), LogType.SUBTASK2TASK);
+            taskSrv.save(task);
             // cleanup
-            ResultData result = removeTaskRelations(subtask);
-            if (result.code.equals(ResultData.ERROR)) {
-                throw new TasqException(result.message);
-            }
-            subtask = taskSrv.save(purgeTask(subtask));
-            taskSrv.delete(subtask);
+            taskSrv.deleteTask(subtask, false);
             MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.subtasks.2task.success",
                     new Object[]{id, taskID}, Utils.getCurrentLocale()));
             TaskLink link = new TaskLink(parent.getId(), taskID, TaskLinkType.RELATES_TO);
@@ -1265,31 +1266,19 @@ public class TaskController {
         }
     }
 
+    @RequestMapping(value = "/activeTaskAccounts", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<List<DisplayAccount>> getActiveTaskAccounts(@RequestParam String taskID, HttpServletResponse response) {
+        response.setContentType("application/json");
+        List<Account> accounts = accSrv.findAllWithActiveTask(taskID);
+        return ResponseEntity.ok(accounts.stream().map(DisplayAccount::new).collect(Collectors.toList()));
+    }
+
+
     private ResultData taskIsClosed(Task task) {
         String localized = msg.getMessage(((TaskState) task.getState()).getCode(), null, Utils.getCurrentLocale());
         return new ResultData(ResultData.ERROR,
                 msg.getMessage("task.closed.cannot.operate=", new Object[]{localized}, Utils.getCurrentLocale()));
-    }
-
-    /**
-     * private method to remove task and all potential links
-     *
-     * @param task
-     * @return
-     */
-    private ResultData removeTaskRelations(Task task) {
-        ResultData result = checkTaskCanOperated(task, true);
-        if (ResultData.OK.equals(result.code)) {
-            linkService.deleteTaskLinks(task);
-            task.setOwner(null);
-            task.setAssignee(null);
-            task.setProject(null);
-            task.setTags(null);
-            wlSrv.deleteTaskWorklogs(task);
-            Set<Comment> comments = commSrv.findByTaskIdOrderByDateDesc(task.getId());
-            commSrv.delete(comments);
-        }
-        return result;
     }
 
     /**
@@ -1307,26 +1296,6 @@ public class TaskController {
         }
         model.addAttribute("project", project);
         model.addAttribute("projects_list", projectSrv.findAllByUser());
-    }
-
-    private ResultData checkTaskCanOperated(Task task, boolean remove) {
-        List<Account> accounts = accSrv.findAll();
-        List<Account> workingAccounts = accounts.stream().filter(x -> x.getActive_task() != null && x.getActive_task().length > 0
-                && x.getActive_task()[0].equals(task.getId())).collect(Collectors.toList());
-        if (workingAccounts.size() > 0) {
-            Account currentAccount = Utils.getCurrentAccount();
-            if (workingAccounts.size() > 1 || !workingAccounts.get(0).equals(currentAccount)) {
-                return new ResultData(ResultData.ERROR, msg.getMessage("task.changeState.change.working",
-                        new Object[]{String.join(",", workingAccounts.stream().map(Account::toString).collect(Collectors.toList()))}, Utils.getCurrentLocale()));
-            }
-            if (remove) {
-                currentAccount.clearActive_task();
-            } else {
-                stopTimer(task);
-            }
-            accSrv.update(currentAccount);
-        }
-        return new ResultData(ResultData.OK, null);
     }
 
     private boolean checkIfNotEstimated(Task task, Project project) {
@@ -1347,14 +1316,16 @@ public class TaskController {
         if (TaskState.CLOSED.equals(state)) {
             task.setFinishDate(new Date());
             wlSrv.addActivityLog(task, "", LogType.CLOSED);
+            taskSrv.save(task);
             return msg.getMessage("task.state.changed.closed", new Object[]{task.getId()}, Utils.getCurrentLocale());
         } else if (TaskState.CLOSED.equals(oldState)) {
             wlSrv.addActivityLog(task, "", LogType.REOPEN);
             task.setFinishDate(null);
+            taskSrv.save(task);
             return msg.getMessage("task.state.changed.reopened", new Object[]{task.getId()},
                     Utils.getCurrentLocale());
         } else {
-            wlSrv.changeState(oldState, state, task);
+            taskSrv.changeState(oldState, state, task);
             String localised = msg.getMessage(state.getCode(), null, Utils.getCurrentLocale());
             return msg.getMessage("task.state.changed", new Object[]{task.getId(), localised},
                     Utils.getCurrentLocale());
@@ -1370,9 +1341,9 @@ public class TaskController {
      * @return
      */
     private boolean shouldAddWorklogPointsChanged(Task task, int storyPoints) {
-
         if (sprintSrv.taskInActiveSprint(task)) {
             wlSrv.addActivityLog(task, Integer.toString(-1 * (task.getStory_points() - storyPoints)), LogType.ESTIMATE);
+            taskSrv.save(task);
             return false;
         } else {
             return true;
@@ -1387,16 +1358,19 @@ public class TaskController {
      */
     private Period stopTimer(Task task) {
         Account account = Utils.getCurrentAccount();
-        DateTime now = new DateTime();
-        Period logWork = new Period((DateTime) account.getActive_task_time(), now);
-        // Only log work if greater than 1 minute
-        if (logWork.toStandardDuration().getMillis() / 1000 / 60 < 1) {
-            logWork = new Period().plusMinutes(1);
+        if (StringUtils.isNotBlank(account.getActiveTask()) && task.getId().equals(account.getActiveTask())) {
+            DateTime now = new DateTime();
+            Period logWork = new Period(account.getActiveTaskTimer(), now);
+            // Only log work if greater than 1 minute
+            if (logWork.toStandardDuration().getMillis() / 1000 / 60 < 1) {
+                logWork = new Period().plusMinutes(1);
+            }
+            wlSrv.addTimedWorkLog(task, PeriodHelper.outFormat(logWork), new Date(), null, logWork, LogType.LOG);
+            account.clearActiveTask();
+            accSrv.update(account);
+            return logWork;
         }
-        wlSrv.addNormalWorkLog(task, PeriodHelper.outFormat(logWork), logWork, LogType.LOG);
-        account.clearActive_task();
-        accSrv.update(account);
-        return logWork;
+        return null;
     }
 
     /**
@@ -1438,7 +1412,7 @@ public class TaskController {
     private List<String> getTaskFiles(Task task) {
         File folder = new File(taskSrv.getTaskDirectory(task));
         File[] listOfFiles = folder.listFiles();
-        List<String> fileNames = new ArrayList<String>();
+        List<String> fileNames = new ArrayList<>();
         if (listOfFiles != null) {
             for (File file : listOfFiles) {
                 if (file.isFile()) {
@@ -1448,19 +1422,6 @@ public class TaskController {
             }
         }
         return fileNames;
-    }
-
-    private void deleteFiles(Task task) {
-        File folder = new File(taskSrv.getTaskDirectory(task));
-        File[] listOfFiles = folder.listFiles();
-        if (listOfFiles != null) {
-            for (File file : listOfFiles) {
-                if (file.isFile()) {
-                    file.delete();
-                }
-            }
-        }
-        folder.delete();
     }
 
     /**
@@ -1479,21 +1440,12 @@ public class TaskController {
         if (!assignee.equals(task.getAssignee())) {
             task.setAssignee(assignee);
             task.setLastUpdate(new Date());
-            taskSrv.save(task);
             wlSrv.addActivityLog(task, Utils.changedFromTo(previous, assignee.toString()), LogType.ASSIGNED);
+            task = taskSrv.save(task);
             watchSrv.startWatching(task);
             return true;
         }
         return false;
-    }
-
-    /**
-     * Nuke Task - set everything to null
-     */
-    private Task purgeTask(Task task) {
-        Task zerotask = new Task();
-        zerotask.setId(task.getId());
-        return zerotask;
     }
 
     protected EntityManager getEntitymanager() {

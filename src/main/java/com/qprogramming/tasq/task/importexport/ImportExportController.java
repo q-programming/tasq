@@ -288,9 +288,9 @@ public class ImportExportController {
             project.getTasks().add(task);
             project.setLastTaskNo(taskCount);
         }
-        task = taskSrv.save(task);
         projectSrv.save(project);
         wlSrv.addActivityLog(task, "", LogType.CREATE);
+        task = taskSrv.save(task);
         return task;
     }
 
