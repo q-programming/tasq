@@ -172,6 +172,7 @@ public class TaskController {
             // assigne
             setCreatedTaskAssignee(taskForm, task);
             task = taskSrv.save(task);//save before adding rest
+            wlSrv.addActivityLog(task, "", LogType.CREATE);
             // lookup for sprint
             // Create log work
             if (taskForm.getAddToSprint() != null) {
@@ -197,7 +198,6 @@ public class TaskController {
             projectSrv.save(project);
             // Save files
             saveTaskFiles(taskForm.getFiles(), task);
-            wlSrv.addActivityLog(task, "", LogType.CREATE);
             watchSrv.startWatching(task);
             if (StringUtils.isNotBlank(linked)) {
                 Task linkedTask = taskSrv.findById(linked);
