@@ -55,8 +55,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -75,6 +73,7 @@ import static com.qprogramming.tasq.task.TaskForm.*;
 @Controller
 public class TaskController {
 
+    protected static final Logger LOG = LoggerFactory.getLogger(TaskController.class);
     private static final String TYPE_TXT = "Type";
     private static final String ESTIMATED_TXT = "Estimated ";
     private static final String REMAINING_TXT = "Remaining";
@@ -82,11 +81,9 @@ public class TaskController {
     private static final String DESCRIPTION_TXT = "Description";
     private static final String NAME_TXT = "Name";
     private static final String STORY_POINTS_TXT = "Story points";
-
     private static final String UNASSIGNED = "<i>Unassigned</i>";
     private static final String OPEN = "OPEN";
     private static final String ALL = "ALL";
-    protected static final Logger LOG = LoggerFactory.getLogger(TaskController.class);
     private static final String CHANGE_TO = " -> ";
     private static final String BR = "<br>";
     private static final String START = "start";
@@ -922,33 +919,32 @@ public class TaskController {
 
     @Transactional
     @RequestMapping(value = "/task/delete", method = RequestMethod.GET)
-    public String deleteTask(@RequestParam(value = "id") String taskID, RedirectAttributes ra,
+    public String deleteTask(@RequestParam(value = "id") String taskID, @RequestParam(value = "force", required = false) boolean force, RedirectAttributes ra,
                              HttpServletRequest request) {
         Task task = taskSrv.findById(taskID);
         if (task != null) {
             Project project = projectSrv.findById(task.getProject().getId());
             // Only allow delete for administrators, owner or app admin
             Locale currentLocale = Utils.getCurrentLocale();
-            if (isAdmin(task, project)) {
+            if (isAdmin(task, project) && canForceRemove(force)) {
                 Account currentAccount = Utils.getCurrentAccount();
-                Account owner = task.getOwner();
+                Set<Account> notify = notifyWhileDeleting(task);
                 String taskName = task.getName();
                 ResultData result;
-                result = taskSrv.deleteTask(task, false);
+                result = taskSrv.deleteTask(task, force);
                 if (result.code.equals(ResultData.ERROR)) {
                     MessageHelper.addWarningAttribute(ra, result.message, currentLocale);
                     rollBack();
                     return REDIRECT + request.getHeader(REFERER);
                 }
-
                 StringBuilder message = new StringBuilder(taskSrv.printID(taskID));
                 message.append(" - ");
                 message.append(taskName);
-                //send event to owner if needed
-                if (!owner.equals(currentAccount)) {
-                    Locale ownerLocale = new Locale(owner.getLanguage());
-                    String moreDetails = msg.getMessage("log.type.delete.info", new Object[]{currentAccount, taskID, taskName}, ownerLocale);
-                    eventSrv.addSystemEvent(owner, LogType.DELETED, msg.getMessage(LogType.DELETED.getCode(), null, ownerLocale), moreDetails);
+                //send event to owner/assignee if needed
+                for (Account account : notify) {
+                    Locale accountLocale = new Locale(account.getLanguage());
+                    String moreDetails = msg.getMessage("log.type.delete.info", new Object[]{currentAccount, taskID, taskName}, accountLocale);
+                    eventSrv.addSystemEvent(account, LogType.DELETED, msg.getMessage(LogType.DELETED.getCode(), null, accountLocale), moreDetails);
                 }
                 wlSrv.addWorkLogNoTask(message.toString(), project, LogType.DELETED);
                 MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.delete.success",
@@ -960,6 +956,26 @@ public class TaskController {
         }
         return REDIRECT + request.getHeader(REFERER);
     }
+
+    /**
+     * Gets all accounts which should be notified while deleting task, don't include current account
+     *
+     * @param task
+     * @return
+     */
+    private Set<Account> notifyWhileDeleting(Task task) {
+        Set<Account> notify = new HashSet<>();
+        notify.add(task.getOwner());
+        notify.add(task.getAssignee());
+        notify.remove(Utils.getCurrentAccount());
+        notify.remove(null);
+        return notify;
+    }
+
+    private boolean canForceRemove(Boolean force) {
+        return !force || Roles.isPowerUser();
+    }
+
     @VisibleForTesting
     void rollBack() {
         TransactionInterceptor.currentTransactionStatus().setRollbackOnly();
@@ -1262,10 +1278,14 @@ public class TaskController {
 
     @RequestMapping(value = "/activeTaskAccounts", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<List<DisplayAccount>> getActiveTaskAccounts(@RequestParam String taskID, HttpServletResponse response) {
+    public ResponseEntity<Set<DisplayAccount>> getActiveTaskAccounts(@RequestParam String taskID, HttpServletResponse response) {
         response.setContentType("application/json");
         List<Account> accounts = accSrv.findAllWithActiveTask(taskID);
-        return ResponseEntity.ok(accounts.stream().map(DisplayAccount::new).collect(Collectors.toList()));
+        List<Task> subtasks = taskSrv.findSubtasks(taskID);
+        for (Task subtask : subtasks) {
+            accounts.addAll(accSrv.findAllWithActiveTask(subtask.getId()));
+        }
+        return ResponseEntity.ok(accounts.stream().map(DisplayAccount::new).collect(Collectors.toSet()));
     }
 
 

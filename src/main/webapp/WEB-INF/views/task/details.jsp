@@ -111,13 +111,10 @@
                 </c:if>
             </button>
             <c:if test="${can_edit}">
-                <a class="btn btn-default btn-sm a-tooltip delete_btn"
-                   href="<c:url value="/task/delete?id=${task.id}"/>"
-                   title="<s:message code="task.delete" text="Delete task" />"
-                   data-lang="${pageContext.response.locale}"
-                   data-msg='<s:message code="task.delete.confirm"/>'>
+                <span class="btn btn-default btn-sm a-tooltip clickable delete-task-modal" title="<s:message code="task.delete" text="Delete task" />" data-taskid="${task.id}"
+                      data-toggle="modal" data-target="#delete-task-modal-dialog">
                     <i class="fa fa-lg fa-trash-o"></i>
-                </a>
+                </span>
             </c:if>
         </div>
         <!--Type  Project / ID / Name-->
@@ -943,6 +940,7 @@
 <jsp:include page="../modals/file.jsp"/>
 <jsp:include page="../modals/assign.jsp"/>
 <jsp:include page="../modals/image.jsp"/>
+<jsp:include page="../modals/delete.jsp"/>
 <c:if test="${task.subtask}">
     <jsp:include page="../modals/convert2task.jsp"/>
 </c:if>

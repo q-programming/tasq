@@ -75,7 +75,7 @@ public class HomeControllersTest {
         SecurityContextHolder.setContext(securityMock);
         projSrv = new ProjectService(projRepoMock, accSrvMock, usrSrvMock);
         homeCtrl = new HomeController(taskSrvMock, projSrv, appSrvMock, eventSrvMock, localeResolverMock);
-        homeAdvCtrl = new HomeControllerAdvice(accSrvMock, eventSrvMock, visitedSrvMock);
+        homeAdvCtrl = new HomeControllerAdvice(visitedSrvMock);
     }
 
     @Test
@@ -104,7 +104,6 @@ public class HomeControllersTest {
 
     }
 
-    //TODO add test
     @Test
     public void getLastProjectsTest() {
         Project project = createProject();

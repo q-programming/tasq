@@ -104,7 +104,7 @@
                                 </c:if>
                                 <a class="btn btn-default btn-sm a-tooltip confirm_action"
                                    href="<c:url value="/scrum/delete?id=${sprint.id}"/>"
-                                   title="<s:message code="agile.sprint.delete" />"
+                                   title="<s:message code="main.delete" />"
                                    data-lang="${pageContext.response.locale}"
                                    data-msg='<s:message code="agile.sprint.delete.confirm"></s:message>'>
                                     <i class="fa fa-lg fa-trash-o"></i>

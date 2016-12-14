@@ -1,9 +1,7 @@
 package com.qprogramming.tasq.home;
 
-import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.LastVisited;
 import com.qprogramming.tasq.account.LastVisitedService;
-import com.qprogramming.tasq.events.EventsService;
 import com.qprogramming.tasq.support.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
@@ -14,21 +12,17 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+import java.util.Collections;
 import java.util.List;
 
 @Secured("ROLE_USER")
 @ControllerAdvice
 public class HomeControllerAdvice {
-    private AccountService accSrv;
-    private EventsService eventSrv;
-
+    private static final List<LastVisited> emptyList = Collections.emptyList();
     private LastVisitedService visitedSrv;
 
-
     @Autowired
-    public HomeControllerAdvice(AccountService accSrv, EventsService eventSrv,LastVisitedService visitedSrv) {
-        this.eventSrv = eventSrv;
-        this.accSrv = accSrv;
+    public HomeControllerAdvice(LastVisitedService visitedSrv) {
         this.visitedSrv = visitedSrv;
     }
 
@@ -39,7 +33,7 @@ public class HomeControllerAdvice {
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
             return visitedSrv.getAccountLastProjects(Utils.getCurrentAccount().getId());
         }
-        return null;
+        return emptyList;
     }
 
     @Transactional
@@ -49,6 +43,6 @@ public class HomeControllerAdvice {
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
             return visitedSrv.getAccountLastTasks(Utils.getCurrentAccount().getId());
         }
-        return null;
+        return emptyList;
     }
 }

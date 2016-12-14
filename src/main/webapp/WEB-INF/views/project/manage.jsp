@@ -331,7 +331,7 @@
              <span class="help-block"><i class="fa fa-exclamation-circle" aria-hidden="true"></i>
                  <s:message code="project.delete.help" htmlEscape="false"/>
              </span>
-            <div class="text-center">
+            <div>
                 <button id="remove-project" class="btn btn-danger"
                         data-toggle="modal" data-target="#delete-project-modal" data-backdrop="static"
                         data-keyboard="false">
@@ -378,13 +378,13 @@
             <form id="delete-form" action="<c:url value="/project/${project.projectId}/delete"/>" method="post">
                 <div class="modal-header theme">
                     <h4 class="modal-title">
-                        <s:message code="project.delete"/>&nbsp;[${project.projectId}] ${project.name}
+                        <i class="fa fa-trash-o" aria-hidden="true"></i>&nbsp;<s:message code="project.delete"/>&nbsp;[${project.projectId}] ${project.name}
                     </h4>
                 </div>
                 <div class="modal-body">
-                    Are you sure you want to delete this project? All information and all tasks will be deleted and
-                    cannot be recovered! <br>
-                    In order to confirm type project Id and project name in fields below
+                    <p>
+                        <i class="fa fa-lg fa-exclamation-triangle" style="display: initial;"></i>&nbsp<s:message code="project.delete.confirm.help" htmlEscape="false"/>
+                    </p>
                     <div class="form-group">
                         <label for="deleteProjectName"><s:message code="project.id"/>:</label>
                         <input class="form-control" style="width: 150px;"

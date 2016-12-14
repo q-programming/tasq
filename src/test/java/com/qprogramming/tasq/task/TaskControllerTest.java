@@ -288,7 +288,7 @@ public class TaskControllerTest {
         when(taskSrv.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.findById(1L)).thenReturn(project);
         testAccount.setRole(Roles.ROLE_USER);
-        taskCtr.deleteTask(TEST_1, raMock, requestMock);
+        taskCtr.deleteTask(TEST_1,false, raMock, requestMock);
         fail("Exception not thrown");
     }
 
@@ -304,7 +304,7 @@ public class TaskControllerTest {
         when(taskSrv.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.findById(1L)).thenReturn(project);
         when(accountServiceMock.findAllWithActiveTask(TEST_1)).thenReturn(active);
-        taskCtr.deleteTask(TEST_1, raMock, requestMock);
+        taskCtr.deleteTask(TEST_1,false, raMock, requestMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.WARNING, new Object[]{}));
     }
@@ -329,7 +329,7 @@ public class TaskControllerTest {
         when(projSrvMock.findById(1L)).thenReturn(project);
         when(accountServiceMock.findAllWithActiveTask(TEST_1)).thenReturn(new LinkedList<>());
         when(accountServiceMock.findAllWithActiveTask(subId)).thenReturn(active);
-        taskCtr.deleteTask(TEST_1, raMock, requestMock);
+        taskCtr.deleteTask(TEST_1,false, raMock, requestMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.WARNING, new Object[]{}));
     }
@@ -355,7 +355,7 @@ public class TaskControllerTest {
         when(accountServiceMock.findAllWithActiveTask(TEST_1)).thenReturn(active);
         when(accountServiceMock.findAllWithActiveTask(subId)).thenReturn(new LinkedList<>());
         doNothing().when(taskSrv).deleteFiles(task);
-        taskCtr.deleteTask(TEST_1, raMock, requestMock);
+        taskCtr.deleteTask(TEST_1,false, raMock, requestMock);
         verify(taskRepoMock, times(1)).delete(anyCollectionOf(Task.class));
         verify(taskRepoMock, times(1)).delete(any(Task.class));
         verify(eventSrvMock, times(1)).addSystemEvent(any(Account.class), any(LogType.class), anyString(), anyString());
@@ -404,7 +404,7 @@ public class TaskControllerTest {
         when(projSrvMock.findById(1L)).thenReturn(project);
         when(accountServiceMock.findAllWithActiveTask(TEST_1)).thenReturn(new LinkedList<>());
         doThrow(IOException.class).when(taskSrv).deleteFiles(task);
-        taskCtr.deleteTask(TEST_1, raMock, requestMock);
+        taskCtr.deleteTask(TEST_1,false, raMock, requestMock);
         verify(taskCtr, times(1)).rollBack();
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.WARNING, new Object[]{}));
