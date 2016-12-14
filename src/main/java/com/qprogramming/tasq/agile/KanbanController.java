@@ -211,7 +211,7 @@ public class KanbanController {
                     .map(localDate -> new StartStop(fmt.print(localDate.minusDays(1).toDateTime(nearMidnight)), fmt.print(localDate.toDateTime(nearMidnight))))
                     .collect(Collectors.toList()));
             List<WorkLog> wrkList = wrkLogSrv.getAllReleaseEvents(release);
-            result.setTasksByStatus(endTime, releaseTasks);
+            agileSrv.setTasksByStatus(result,endTime,releaseTasks);
             result.setWorklogs(DisplayWorkLog.convertToDisplayWorkLogs(wrkList));
             result.setTimeBurned(agileSrv.fillTimeBurndownMap(wrkList,
                     startTime, endTime));

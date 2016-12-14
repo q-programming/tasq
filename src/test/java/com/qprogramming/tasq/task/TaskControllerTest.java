@@ -120,24 +120,11 @@ public class TaskControllerTest {
         when(securityMock.getAuthentication()).thenReturn(authMock);
         when(authMock.getPrincipal()).thenReturn(testAccount);
         SecurityContextHolder.setContext(securityMock);
-        taskSrv = spy(new TaskService(taskRepoMock, appSrv, sprintSrvMock, accountServiceMock, msgMock, wrkLogSrv, commentSrvMock, taskLinkSrvMock, watchSrvMock, visitedSrvMock));
+        taskSrv = spy(new TaskService(taskRepoMock, appSrv, accountServiceMock, msgMock, wrkLogSrv, commentSrvMock, taskLinkSrvMock, watchSrvMock, visitedSrvMock));
         taskCtr = spy(new TaskController(taskSrv, projSrvMock, accountServiceMock, wrkLogSrv, msgMock, sprintSrvMock,
                 taskLinkSrvMock, commentSrvMock, tagsRepoMock, watchSrvMock, eventSrvMock, visitedSrvMock));
         doNothing().when(taskCtr).rollBack();
-        doReturn(entityManagerMock).when(taskCtr).getEntitymanager();
-
-//        taskCtr = new TaskController(taskSrv, projSrvMock, accountServiceMock, wrkLogSrv, msgMock, sprintSrvMock,
-//                taskLinkSrvMock, commentSrvMock, tagsRepoMock, watchSrvMock, eventSrvMock, visitedSrvMock) {
-//            @Override
-//            protected EntityManager getEntitymanager() {
-//                return entityManagerMock;
-//            }
-//
-//            @Override
-//            void rollBack() {
-//                LOG.info("Rollback performed");
-//            }
-//        };
+        doReturn(entityManagerMock).when(taskSrv).getEntitymanager();
     }
 
     @Test

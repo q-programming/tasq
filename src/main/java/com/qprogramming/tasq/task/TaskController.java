@@ -96,8 +96,6 @@ public class TaskController {
     private static final String ERROR_ACCES_RIGHTS = "error.accesRights";
     private static final String REFERER = "Referer";
     private static final String ERROR_NAME_HTML = "error.name.html";
-    @PersistenceContext
-    private EntityManager entityManager;
     private TaskService taskSrv;
     private ProjectService projectSrv;
     private AccountService accSrv;
@@ -417,7 +415,6 @@ public class TaskController {
             MessageHelper.addErrorAttribute(ra, msg.getMessage("task.notexists", null, Utils.getCurrentLocale()));
             return "redirect:/tasks";
         }
-        getEntitymanager().detach(task);
         Account account = Utils.getCurrentAccount();
         visitedSrv.addLastVisited(account.getId(), task);
         // TASK
@@ -434,11 +431,7 @@ public class TaskController {
                 Period parentEstimate = task.getRawEstimate();
                 Period parentLoggedWork = task.getRawLoggedWork();
                 Period parentRemaining = task.getRawRemaining();
-                for (Task subtask : subtasks) {
-                    task.setEstimate(PeriodHelper.plusPeriods(task.getRawEstimate(), subtask.getRawEstimate()));
-                    task.setLoggedWork(PeriodHelper.plusPeriods(task.getRawLoggedWork(), subtask.getRawLoggedWork()));
-                    task.setRemaining(PeriodHelper.plusPeriods(task.getRawRemaining(), subtask.getRawRemaining()));
-                }
+                taskSrv.addSubtaskTimers(task, subtasks);
                 Collections.sort(subtasks, new TaskSorter(TaskSorter.SORTBY.ID, true));
                 model.addAttribute("taskEstimate", PeriodHelper.outFormat(parentEstimate));
                 model.addAttribute("subtasksEstimate", PeriodHelper.outFormat(PeriodHelper.minusPeriods(task.getRawEstimate(), parentEstimate)));
@@ -456,6 +449,7 @@ public class TaskController {
         model.addAttribute("files", getTaskFiles(task));
         return "task/details";
     }
+
 
     @Transactional
     @RequestMapping(value = "tasks", method = RequestMethod.GET)
@@ -1446,9 +1440,5 @@ public class TaskController {
             return true;
         }
         return false;
-    }
-
-    protected EntityManager getEntitymanager() {
-        return entityManager;
     }
 }

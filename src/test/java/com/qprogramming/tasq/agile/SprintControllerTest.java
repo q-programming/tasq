@@ -35,6 +35,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
@@ -79,9 +80,12 @@ public class SprintControllerTest {
     private HttpServletResponse responseMock;
     @Mock
     private HttpServletRequest requestMock;
+    @Mock
+    private EntityManager entityManagerMock;
     private Account testAccount;
     private Project project;
     private SprintController sprintCtrl;
+    private AgileService sprintSrv;
 
     @Before
     public void setUp() {
@@ -90,7 +94,7 @@ public class SprintControllerTest {
         project = TestUtils.createProject();
         Set<Account> participants = new HashSet<>(createAccountList());
         project.setParticipants(participants);
-        AgileService sprintSrv = new AgileService(sprintRepoMock, releaseRepoMock);
+        sprintSrv = spy(new AgileService(sprintRepoMock, releaseRepoMock,taskSrvMock));
         sprintCtrl = new SprintController(projSrvMock, taskSrvMock, sprintSrv, wrkLogSrvMock, msgMock);
         when(securityMock.getAuthentication()).thenReturn(authMock);
         when(authMock.getPrincipal()).thenReturn(testAccount);

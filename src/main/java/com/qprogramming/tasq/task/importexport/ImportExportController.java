@@ -1,6 +1,8 @@
 package com.qprogramming.tasq.task.importexport;
 
 import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.agile.AgileService;
+import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
@@ -77,14 +79,16 @@ public class ImportExportController {
     private TaskService taskSrv;
     private WorkLogService wlSrv;
     private MessageSource msg;
+    private AgileService agileSrv;
 
     @Autowired
     public ImportExportController(ProjectService projectSrv, TaskService taskSrv, WorkLogService wlSrv,
-                                  MessageSource msg) {
+                                  MessageSource msg,AgileService agileSrv) {
         this.projectSrv = projectSrv;
         this.taskSrv = taskSrv;
         this.wlSrv = wlSrv;
         this.msg = msg;
+        this.agileSrv = agileSrv;
     }
 
     @RequestMapping(value = "/task/getTemplateFile", method = RequestMethod.GET)
@@ -172,6 +176,11 @@ public class ImportExportController {
                         continue;
                     }
                     Task subTask = taskSrv.createSubTask(project, task, createTaskFromXMLTask(subTaskXML));
+                    if (agileSrv.taskInActiveSprint(task)) {
+                        Sprint active = agileSrv.findByProjectIdAndActiveTrue(task.getProject().getId());
+                        subTask.addSprint(active);
+                    }
+
                     logHeader = "<br>[Task number=" + subTaskXML.getNumber() + "]";
                     logger.append(logHeader);
                     logger.append(SUCCESS_SUBTASK);

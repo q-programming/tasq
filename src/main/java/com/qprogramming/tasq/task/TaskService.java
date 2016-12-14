@@ -8,6 +8,7 @@ import com.qprogramming.tasq.agile.Release;
 import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.projects.Project;
+import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.support.ResultData;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.task.comments.Comment;
@@ -24,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -37,7 +40,6 @@ public class TaskService {
     private static final Logger LOG = LoggerFactory.getLogger(TaskService.class);
     private TaskRepository taskRepo;
     private AppService appSrv;
-    private AgileService sprintSrv;
     private AccountService accountSrv;
     private TaskLinkService linkSrv;
     private WorkLogService wlSrv;
@@ -45,13 +47,14 @@ public class TaskService {
     private MessageSource msg;
     private WatchedTaskService watchSrv;
     private LastVisitedService visitedSrv;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Autowired
-    public TaskService(TaskRepository taskRepo, AppService appSrv, AgileService sprintSrv, AccountService accountSrv,
-                       MessageSource msg, WorkLogService wlSrv, CommentService comSrv, TaskLinkService linkSrv, WatchedTaskService watchSrv,LastVisitedService visitedSrv) {
+    public TaskService(TaskRepository taskRepo, AppService appSrv, AccountService accountSrv,
+                       MessageSource msg, WorkLogService wlSrv, CommentService comSrv, TaskLinkService linkSrv, WatchedTaskService watchSrv, LastVisitedService visitedSrv) {
         this.taskRepo = taskRepo;
         this.appSrv = appSrv;
-        this.sprintSrv = sprintSrv;
         this.accountSrv = accountSrv;
         this.msg = msg;
         this.linkSrv = linkSrv;
@@ -229,10 +232,6 @@ public class TaskService {
         subTask.setParent(parentTask.getId());
         subTask.setProject(project);
         parentTask.addSubTask();
-        if (sprintSrv.taskInActiveSprint(parentTask)) {
-            Sprint active = sprintSrv.findByProjectIdAndActiveTrue(parentTask.getProject().getId());
-            subTask.addSprint(active);
-        }
         Hibernate.initialize(parentTask.getSubtasks());
         Task subtask = save(subTask);
         save(parentTask);
@@ -372,6 +371,37 @@ public class TaskService {
         return zerotask;
     }
 
+    /**
+     * It's crucial that passed task MUST be detached from session , otherwise it's original value will be overwritten
+     *
+     * @param task
+     * @param subtasks
+     * @return
+     */
+    public Task addSubtaskTimers(Task task, List<Task> subtasks) {
+        getEntitymanager().detach(task);
+        for (Task subtask : subtasks) {
+            task.setEstimate(PeriodHelper.plusPeriods(task.getRawEstimate(), subtask.getRawEstimate()));
+            task.setLoggedWork(PeriodHelper.plusPeriods(task.getRawLoggedWork(), subtask.getRawLoggedWork()));
+            task.setRemaining(PeriodHelper.plusPeriods(task.getRawRemaining(), subtask.getRawRemaining()));
+        }
+        return task;
+    }
+
+    /**
+     * It's crucial that passed task MUST be detached from session , otherwise it's original value will be overwritten
+     *
+     * @param task
+     * @return
+     */
+    public Task addSubtaskTimers(Task task) {
+        List<Task> subtasks = findSubtasks(task);
+        return addSubtaskTimers(task, subtasks);
+    }
+
+    protected EntityManager getEntitymanager() {
+        return entityManager;
+    }
 
     public String printID(String taskID) {
         return "[ " + taskID + " ]";

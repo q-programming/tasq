@@ -87,28 +87,4 @@ public class AgileData {
         this.stop = stop;
     }
 
-    /**
-     * Set tasks based if task was finished in endTime or not. If was finished before
-     * , it will be moved to CLOSED tasks, otherwise it will be in ALL
-     *
-     * @param endTime - end time before tasks should be finished
-     * @param tasks   - task liest
-     */
-    public void setTasksByStatus(DateTime endTime, List<Task> tasks) {
-        for (Task task : tasks) {
-            DateTime finishDate = null;
-            if (task.getRawFinishDate() != null) {
-                finishDate = new DateTime(task.getRawFinishDate());
-            }
-            if (task.getState().equals(TaskState.CLOSED)
-                    && (finishDate != null && endTime.isAfter(finishDate))) {
-                this.getTasks().get(CLOSED)
-                        .add(new DisplayTask(task));
-            } else {
-                this.getTasks().get(ALL)
-                        .add(new DisplayTask(task));
-            }
-        }
-    }
-
 }

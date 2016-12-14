@@ -503,7 +503,7 @@ public class SprintController {
             result.setStart(fmt.print(startTime));
             result.setStop(fmt.print(endTime));
             List<Task> sprintTasks = taskSrv.findAllBySprint(sprint);
-            result.setTasksByStatus(endTime, sprintTasks);
+            agileSrv.setTasksByStatus(result,endTime,sprintTasks);
             // Fill maps based on time or story point driven board
             boolean timeTracked = project.getTimeTracked();
             List<WorkLog> wrkList = wrkLogSrv.getAllSprintEvents(sprint);
