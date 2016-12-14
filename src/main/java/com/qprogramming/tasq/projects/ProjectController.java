@@ -286,6 +286,14 @@ public class ProjectController {
             }
         }
         notifyAccounts.remove(null);
+        sendNotificationsAfterRemove(project, notifyAccounts);
+        MessageHelper.addSuccessAttribute(ra, msg.getMessage("project.delete.success", new Object[]{project.toString()}, Utils.getCurrentLocale()), Utils.getCurrentLocale());
+        visitedSrv.delete(project);
+        projSrv.delete(project);
+        return "redirect:/projects";
+    }
+
+    private void sendNotificationsAfterRemove(Project project, Set<Account> notifyAccounts) {
         Map<String, String[]> localeMap = new HashMap<>();
         for (Account account : notifyAccounts) {
             Locale locale = new Locale(account.getLanguage());
@@ -300,10 +308,6 @@ public class ProjectController {
                 eventsSrv.addSystemEvent(account, LogType.PROJ_REMOVE, localeMap.get(account.getLanguage())[0], localeMap.get(account.getLanguage())[1]);
             }
         }
-        MessageHelper.addSuccessAttribute(ra, msg.getMessage("project.delete.success", new Object[]{project.toString()}, Utils.getCurrentLocale()), Utils.getCurrentLocale());
-        visitedSrv.delete(project);
-        projSrv.delete(project);
-        return "redirect:/projects";
     }
 
     private Set<Account> updateActiveProjects(Project project) {

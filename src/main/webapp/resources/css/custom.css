@@ -19,6 +19,14 @@
 .big > .footer-time{
     margin-left: 35px;
 }
+@media ( max-width: 768px) {
+    .big > .main-container{
+        margin-left: 0;
+    }
+    .big > .footer-time{
+        margin-left: 0;
+    }
+}
 
 .hidden {
     visibility: hidden;
@@ -881,14 +889,6 @@ li.divider {
 .main {
     /*   padding: 20px; */
 
-}
-
-@media ( min-width: 768px) {
-    .main {
-        /*     padding-right: 40px; */
-        /*     padding-left: 40px; */
-
-    }
 }
 
 .main .page-header {
