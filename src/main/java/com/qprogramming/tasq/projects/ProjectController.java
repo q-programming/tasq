@@ -1,5 +1,6 @@
 package com.qprogramming.tasq.projects;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.qprogramming.tasq.account.*;
 import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.agile.Sprint;
@@ -7,6 +8,7 @@ import com.qprogramming.tasq.agile.StartStop;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.events.EventsService;
 import com.qprogramming.tasq.projects.holiday.HolidayService;
+import com.qprogramming.tasq.support.ResultData;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.ProjectSorter;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
@@ -34,6 +36,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionInterceptor;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
@@ -249,6 +252,74 @@ public class ProjectController {
         return "project/manage";
     }
 
+    @Transactional
+    @RequestMapping(value = "project/{id}/delete", method = RequestMethod.POST)
+    public String deleteProject(@PathVariable(value = "id") String id, @RequestParam(value = "projectId") String projectId, @RequestParam(value = "projectname") String name, RedirectAttributes ra, HttpServletRequest request) {
+        Project project = projSrv.findByProjectId(id);
+        ResultData result;
+        if (project == null) {
+            MessageHelper.addErrorAttribute(ra, msg.getMessage("project.notexists", null, Utils.getCurrentLocale()));
+            return "redirect:/projects";
+        }
+        if (!Roles.isAdmin()) {
+            throw new TasqAuthException(msg);
+        }
+        if (!projectId.equals(project.getProjectId()) || !name.equals(project.getName())) {
+            MessageHelper.addErrorAttribute(ra, msg.getMessage("project.delete.confirm", null, Utils.getCurrentLocale()));
+            return Utils.REDIRECT + request.getHeader(REFERER);
+        }
+        //add owners, assignees, participants, admins and active tasks ppl to list to notify about project removal
+        List<Task> projectTasks = taskSrv.findAllByProject(project);
+        Set<Account> notifyAccounts = new LinkedHashSet<>();
+        notifyAccounts.addAll(projectTasks.stream().map(Task::getOwner).collect(Collectors.toSet()));
+        notifyAccounts.addAll(projectTasks.stream().map(Task::getAssignee).collect(Collectors.toSet()));
+        //remove active project from project participants
+        Set<Account> participantsAndAdmins = updateActiveProjects(project);
+        notifyAccounts.addAll(participantsAndAdmins);
+        for (Task task : projectTasks) {
+            notifyAccounts.addAll(accSrv.findAllWithActiveTask(task.getId()));
+            result = taskSrv.deleteTask(task, true);
+            if (result.code.equals(ResultData.Code.ERROR)) {
+                MessageHelper.addErrorAttribute(ra, result.message, Utils.getCurrentLocale());
+                rollBack();
+                return Utils.REDIRECT + request.getHeader(REFERER);
+            }
+        }
+        notifyAccounts.remove(null);
+        sendNotificationsAfterRemove(project, notifyAccounts);
+        MessageHelper.addSuccessAttribute(ra, msg.getMessage("project.delete.success", new Object[]{project.toString()}, Utils.getCurrentLocale()), Utils.getCurrentLocale());
+        visitedSrv.delete(project);
+        projSrv.delete(project);
+        return "redirect:/projects";
+    }
+
+    private void sendNotificationsAfterRemove(Project project, Set<Account> notifyAccounts) {
+        Map<String, String[]> localeMap = new HashMap<>();
+        for (Account account : notifyAccounts) {
+            Locale locale = new Locale(account.getLanguage());
+            String moreDetails;
+            String message;
+            if (!localeMap.containsKey(account.getLanguage())) {
+                moreDetails = msg.getMessage("project.delete.event", new Object[]{Utils.getCurrentAccount(), project.toString()}, locale);
+                message = msg.getMessage(LogType.PROJ_REMOVE.getCode(), null, locale);
+                localeMap.put(account.getLanguage(), new String[]{message, moreDetails});
+            }
+            if (!account.equals(Utils.getCurrentAccount())) {
+                eventsSrv.addSystemEvent(account, LogType.PROJ_REMOVE, localeMap.get(account.getLanguage())[0], localeMap.get(account.getLanguage())[1]);
+            }
+        }
+    }
+
+    private Set<Account> updateActiveProjects(Project project) {
+        Set<Account> participantsAndAdmins = new HashSet<>();
+        participantsAndAdmins.addAll(project.getParticipants());
+        participantsAndAdmins.addAll(project.getAdministrators());
+        Set<Account> removeActive = participantsAndAdmins.stream().filter(account -> project.getProjectId().equals(account.getActiveProject())).collect(Collectors.toSet());
+        removeActive.stream().forEach(account -> account.setActiveProject(null));
+        accSrv.update(new ArrayList<>(removeActive));
+        return participantsAndAdmins;
+    }
+
     @RequestMapping(value = "project/useradd", method = RequestMethod.POST)
     public String addParticipant(@RequestParam(value = "id") String id, @RequestParam(value = "email") String email,
                                  RedirectAttributes ra, HttpServletRequest request) {
@@ -268,7 +339,7 @@ public class ProjectController {
                 account.setActiveProject(project.getProjectId());
                 accSrv.update(account);
             }
-            eventsSrv.addProjectEvent(account, LogType.ASSIGN_PROJ, project);
+            eventsSrv.addProjectEvent(account, LogType.ASSIGN_TO_PROJ, project);
             projSrv.save(project);
         }
         return "redirect:" + request.getHeader(REFERER);
@@ -324,7 +395,7 @@ public class ProjectController {
 
             }
             project.removeParticipant(account);
-            eventsSrv.addProjectEvent(account, LogType.REMOVE_PROJ, project);
+            eventsSrv.addProjectEvent(account, LogType.REMOVE_FROM_PROJ, project);
             projSrv.save(project);
         }
         return "redirect:" + request.getHeader(REFERER);
@@ -555,6 +626,11 @@ public class ProjectController {
 
         projSrv.save(project);
         return "redirect:" + request.getHeader(REFERER);
+    }
+
+    @VisibleForTesting
+    void rollBack() {
+        TransactionInterceptor.currentTransactionStatus().setRollbackOnly();
     }
 
 }

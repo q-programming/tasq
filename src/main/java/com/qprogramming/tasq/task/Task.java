@@ -191,12 +191,19 @@ public class Task implements java.io.Serializable {
         return create_date;
     }
 
-    public Date getFinishDate() {
-        return finishDate;
+    public String getFinishDate() {
+        if (finishDate != null) {
+            return Utils.convertDateTimeToString(finishDate);
+        }
+        return "";
     }
 
     public void setFinishDate(Date finishDate) {
         this.finishDate = finishDate;
+    }
+
+    public Date getRawFinishDate() {
+        return finishDate;
     }
 
     public String getEstimate() {
@@ -596,10 +603,6 @@ public class Task implements java.io.Serializable {
 
     public void addSubTask() {
         this.subtasks = getSubtasks() + 1;
-    }
-
-    public void removeSubTask() {
-        this.subtasks = getSubtasks() - 1;
     }
 
     public boolean isSubtask() {

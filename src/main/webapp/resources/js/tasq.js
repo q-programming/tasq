@@ -8,37 +8,42 @@ $(document).on("click", "area , a", function (e) {
 });
 
 function showError(message) {
-    var errorMsg = '<div class="alert alert-danger fade in alert-overlay">'
+    var timestamp = new Date().getUTCMilliseconds();
+    var errorMsg = '<div class="alert alert-danger fade in alert-overlay" id="alert' + timestamp + '">'
         + '<button type="button" class="close" data-dismiss="alert">&times;</button>'
         + message
         + '</div>';
     $('#messages_div').append(errorMsg);
 };
 
-function showSuccess(message) {
-    var successMsg = '<div class="alert alert-success fade in alert-overlay">'
+function showSuccess(message,timeout) {
+    timeout = timeout || 10000;
+    var timestamp = new Date().getUTCMilliseconds();
+    var successMsg = '<div class="alert alert-success fade in alert-overlay" id="alert' + timestamp + '">'
         + '<button type="button" class="close" data-dismiss="alert">&times;</button>'
         + message
         + '</div>';
     $('#messages_div').append(successMsg);
     $(".alert").alert();
     window.setTimeout(function () {
-            $(".alert-success").alert('close');
-            $(".alert-info").alert('close');
+            $("#alert" + timestamp).alert('close');
         }
-        , 10000);
+        , timeout);
 };
 
-function showWarning(message) {
-    var warningMsg = '<div class="alert alert-warning fade in alert-overlay">'
+function showWarning(message, timeout) {
+    var timestamp = new Date().getUTCMilliseconds();
+    timeout = timeout || 15000;
+    var warningMsg = '<div class="alert alert-warning fade in alert-overlay" id="alert' + timestamp + '">'
         + '<button type="button" class="close" data-dismiss="alert">&times;</button>'
         + message
         + '</div>';
     $('#messages_div').append(warningMsg);
     $(".alert").alert();
     window.setTimeout(function () {
-        $(".alert-warning").alert('close');
-    }, 15000);
+        $("#alert" + timestamp).alert('close');
+    }, timeout);
+
 }
 
 $(".alert").alert();
@@ -86,6 +91,21 @@ $(document).on("click", ".menu-toggle", function () {
     indicator.toggleClass('fa-toggle-down');
     indicator.toggleClass('fa-toggle-right');
 });
+$(document).on("click", "#small-sidebar-show", function (e) {
+    e.preventDefault();
+    $("#sidebar-div").hide("slide");
+    $(".main").toggleClass("col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2").toggleClass("col-sm-12 col-md-12 big");
+    $("#small-sidebar-div").show("slide");
+    saveSmallSidebarSize(true);
+});
+$(document).on("click", "#sidebar-show", function (e) {
+    e.preventDefault();
+    $("#sidebar-div").show("slide");
+    $(".main").toggleClass("col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2").toggleClass("col-sm-12 col-md-12 big");
+    $("#small-sidebar-div").hide("slide");
+    saveSmallSidebarSize(false);
+});
+
 
 function getTaskType(type) {
     switch (type) {
@@ -118,7 +138,7 @@ function getTaskType(type) {
     }
     ;
 }
-var currentAccount=-1;
+var currentAccount = -1;
 $(document).on("click", ".avatar.small.member", function () {
     var account = $(this).data('account');
     //first show all
@@ -197,35 +217,83 @@ $(document).on("click", ".tag_filter", function () {
     }
 });
 
-function addMessagesEvents(){
+function addMessagesEvents() {
     var minimized_elements = $('div.quote > table.worklog_table > tbody > tr > td');
 
-    minimized_elements.each(function(){
+    minimized_elements.each(function () {
         var t = $(this).text();
-        if(t.length < 500) {return;}
+        if (t.length < 500) {
+            return;
+        }
 
         $(this).html(
-            t.slice(0,500)+'<span>... </span>&nbsp;<a href="#" class="more-info"><i class="fa fa-caret-square-o-down" aria-hidden="true"></i></a>'+
-            '<span style="display:none;">'+ t.slice(500,t.length)+'&nbsp;<a href="#" class="less-info"><i class="fa fa-caret-square-o-up" aria-hidden="true"></i></a></span>'
+            t.slice(0, 500) + '<span>... </span>&nbsp;<a href="#" class="more-info"><i class="fa fa-caret-square-o-down" aria-hidden="true"></i></a>' +
+            '<span style="display:none;">' + t.slice(500, t.length) + '&nbsp;<a href="#" class="less-info"><i class="fa fa-caret-square-o-up" aria-hidden="true"></i></a></span>'
         );
 
     });
 
-    $('a.more-info', minimized_elements).click(function(event){
+    $('a.more-info', minimized_elements).click(function (event) {
         event.preventDefault();
         $(this).hide().prev().hide();
         $(this).next().show();
     });
 
-    $('a.less-info', minimized_elements).click(function(event){
+    $('a.less-info', minimized_elements).click(function (event) {
         event.preventDefault();
         $(this).parent().hide().prev().show().prev().show();
     });
 }
+function detectmob() {
+    return window.innerWidth <= 800;
+}
 
-function fixOldTables(){
+function fixOldTables() {
     var oldTables = $('table.worklog_table');
     oldTables.each(function () {
-        var t = $(this).addClass("table");
+        $(this).addClass("table");
     })
+}
+
+function getURLAbsolutePath() {
+    var loc = window.location;
+    var pathName = loc.pathname.substring(0, loc.pathname.lastIndexOf('/'));
+    pathName = pathName.substring(0, pathName.lastIndexOf('/'));
+    return loc.href.substring(0, loc.href.length - ((loc.pathname + loc.search + loc.hash).length - pathName.length));
+}
+function invalid(field) {
+    field.parent().parent().addClass('has-error');
+    field.parent().parent().removeClass('has-success');
+    field.siblings(".inputcheck.valid").hide();
+    field.siblings(".inputcheck.invalid").show();
+    $("#submitbtn").prop('disabled', true);
+}
+function valid(field) {
+    field.parent().parent().addClass('has-success');
+    field.parent().parent().removeClass('has-error');
+    field.siblings(".inputcheck.valid").show();
+    field.siblings(".inputcheck.invalid").hide();
+    $("#submitbtn").prop('disabled', false);
+}
+/**
+ * Check if date correct. Used format is DD-MM-YYYY
+ * @param date
+ * @returns {boolean}
+ */
+function isValidDate(date) {
+    var matches = /^(\d{1,2})-(\d{1,2})-(\d{4})$/.exec(date);
+    if (matches == null) {
+        return false;
+    }
+    var d = matches[1];
+    var m = matches[2] - 1;
+    var y = matches[3];
+    var composedDate = new Date(y, m, d);
+    return composedDate.getDate() == d &&
+        composedDate.getMonth() == m &&
+        composedDate.getFullYear() == y;
+}
+jQuery.ui.autocomplete.prototype._resizeMenu = function () {
+    var ul = this.menu.element;
+    ul.outerWidth(this.element.outerWidth());
 }

@@ -16,15 +16,15 @@
                   action="<c:url value="/logwork"/>">
                 <div class="modal-body">
                     <input id="modal_taskID" type="hidden" name="taskID">
-                    <div class="form-group">
+                    <div class="form-group has-feedback">
                         <label><s:message code="task.logWork.spent"/></label> <input
                             id="loggedWork" name="loggedWork"
                             style="width: 150px; height: 25px" class="form-control"
                             type="text" value=""> <span class="help-block"><s:message
-                            code="task.logWork.help"></s:message> </span>
+                            code="task.logWork.help"/> </span>
                     </div>
                     <div>
-                        <div style="float: left; margin-right: 50px;">
+                        <div id="log-date-div" style="float: left; margin-right: 50px;">
                             <label><s:message code="main.date" htmlEscape="false"/></label> <input
                                 id="datepicker" name="date_logged"
                                 style="width: 150px; height: 25px"
@@ -38,7 +38,7 @@
                         </div>
                     </div>
 					<span class="help-block"><s:message
-                            code="task.logWork.when.help"></s:message> </span>
+                            code="task.logWork.when.help"/> </span>
                     <div>
                         <label><s:message code="task.remaining"/></label>
                         <div class="radio">
@@ -61,7 +61,7 @@
                 <div class="modal-footer">
                     <a class="btn" data-dismiss="modal"><s:message
                             code="main.cancel"/></a>
-                    <button class="btn btn-default" type="submit">
+                    <button id="log-submit" class="btn btn-default" type="submit">
                         <s:message code="main.log"/>
                     </button>
                 </div>
@@ -71,6 +71,12 @@
 </div>
 <script>
     $('#logWorkform').on('shown.bs.modal', function () {
+        $('#loggedWork').val('');
+        $('#datepicker').val('');
+        $('#time_logged').val('');
+        $('#remaining').val('');
+        $('#log-submit').prop('disabled', false);
+        $("#log-date-div").removeClass('has-error');
         $("#loggedWork").focus();
         if (typeof inputInProgress !== 'undefined') {
             inputInProgress = !inputInProgress;
@@ -98,10 +104,18 @@
         firstDay: 1
     });
     $(".datepicker").change(function () {
-        var date = new Date;
-        var minutes = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
-        var hour = date.getHours();
-        $("#time_logged").val(hour + ":" + minutes);
+        if (!isValidDate($(this).val())) {
+            showWarning("<s:message code="warning.date.invalid"/>");
+            $('#log-submit').prop('disabled', true);
+            $("#log-date-div").addClass('has-error');
+        } else {
+            $('#log-submit').prop('disabled', false);
+            $("#log-date-div").removeClass('has-error');
+            var date = new Date;
+            var minutes = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
+            var hour = date.getHours();
+            $("#time_logged").val(hour + ":" + minutes);
+        }
     });
     $("#time_logged").mask("Z0:A0", {
         translation: {

@@ -48,7 +48,7 @@ public class WatchedTaskController {
 					.getCode(), null, Utils.getCurrentLocale());
 			String message = msg.getMessage("role.error.auth",
 					new Object[] { role }, Utils.getCurrentLocale());
-			result = new ResultData(ResultData.ERROR, message);
+			result = new ResultData(ResultData.Code.ERROR, message);
 		} else {
 			Task task = taskSrv.findById(id);
 			WatchedTask watched = watchSrv.getByTask(id);
@@ -56,12 +56,12 @@ public class WatchedTaskController {
 					&& watched.getWatchers()
 							.contains(Utils.getCurrentAccount())) {
 				watched = watchSrv.stopWatching(task);
-				result.code = ResultData.OK;
+				result.code = ResultData.Code.OK;
 				result.message = msg.getMessage("task.watch.stoped",
 						new Object[] { id }, Utils.getCurrentLocale());
 			} else {
 				watched = watchSrv.startWatching(task);
-				result.code = ResultData.OK;
+				result.code = ResultData.Code.OK;
 				result.message = msg.getMessage("task.watch.started",
 						new Object[] { id }, Utils.getCurrentLocale());
 			}

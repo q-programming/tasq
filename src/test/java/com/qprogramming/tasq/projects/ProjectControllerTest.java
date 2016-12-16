@@ -1,4 +1,4 @@
-package com.qprogramming.tasq.project;
+package com.qprogramming.tasq.projects;
 
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
@@ -8,8 +8,8 @@ import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.events.EventsService;
-import com.qprogramming.tasq.projects.*;
 import com.qprogramming.tasq.projects.holiday.HolidayService;
+import com.qprogramming.tasq.support.ResultData;
 import com.qprogramming.tasq.support.web.Message;
 import com.qprogramming.tasq.task.*;
 import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
@@ -45,6 +45,7 @@ import static com.qprogramming.tasq.test.TestUtils.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -64,7 +65,7 @@ public class ProjectControllerTest {
     @Mock
     private ProjectService projSrv;
     @Mock
-    private TaskService taskSrv;
+    private TaskService taskSrvMock;
     @Mock
     private AgileService sprintSrvMock;
     @Mock
@@ -103,8 +104,9 @@ public class ProjectControllerTest {
         when(securityMock.getAuthentication()).thenReturn(authMock);
         when(authMock.getPrincipal()).thenReturn(testAccount);
         SecurityContextHolder.setContext(securityMock);
-        projectCtr = new ProjectController(projSrv, accountServiceMock, taskSrv, sprintSrvMock, wrkLogSrv, msg,
-                eventsSrvMock, holidayServiceMock, visitedSrvMock);
+        projectCtr = spy(new ProjectController(projSrv, accountServiceMock, taskSrvMock, sprintSrvMock, wrkLogSrv, msg,
+                eventsSrvMock, holidayServiceMock, visitedSrvMock));
+        doNothing().when(projectCtr).rollBack();
     }
 
     @Test
@@ -129,7 +131,7 @@ public class ProjectControllerTest {
 
         project.setTasks(taskList);
         when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
-        when(taskSrv.findByProjectAndOpen(project)).thenReturn(openTaskList);
+        when(taskSrvMock.findByProjectAndOpen(project)).thenReturn(openTaskList);
         projectCtr.showDetails(PROJECT_ID, null, modelMock, raMock);
         verify(modelMock, times(1)).addAttribute("TO_DO", 1);
         verify(modelMock, times(1)).addAttribute("ONGOING", 1);
@@ -613,6 +615,80 @@ public class ProjectControllerTest {
         verify(projSrv, times(1)).findByProjectId(PROJECT_ID);
         verify(projSrv, times(1)).save(newProject);
     }
+
+    @Test(expected = TasqAuthException.class)
+    public void deleteProjectNotAdminTest() {
+        testAccount.setRole(Roles.ROLE_USER);
+        Project project = TestUtils.createProject();
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
+        projectCtr.deleteProject(TestUtils.PROJECT_ID,PROJECT_ID,PROJECT_NAME, raMock, requestMock);
+    }
+
+    @Test
+    public void deleteProjectFailedToRemoveTaskTest() {
+        testAccount.setRole(Roles.ROLE_ADMIN);
+        Project project = TestUtils.createProject();
+        Task task = TestUtils.createTask(TASK_NAME, 1, project);
+        task.setOwner(testAccount);
+        List<Task> tasksList = new LinkedList<>();
+        tasksList.add(task);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
+        when(taskSrvMock.findAllByProject(project)).thenReturn(tasksList);
+        when(taskSrvMock.deleteTask(task, true)).thenReturn(new ResultData(ResultData.Code.ERROR, "MESSAGE"));
+        projectCtr.deleteProject(TestUtils.PROJECT_ID, PROJECT_ID,PROJECT_NAME, raMock, requestMock);
+        verify(projectCtr, times(1)).rollBack();
+        verify(raMock, times(1)).addFlashAttribute(anyString(),
+                new Message(anyString(), Message.Type.DANGER, new Object[]{}));
+    }
+
+    @Test
+    public void deleteProjectTest() {
+        testAccount.setRole(Roles.ROLE_ADMIN);
+        Project project = TestUtils.createProject();
+        List<Account> accountList = TestUtils.createAccountList();
+        Task task1 = TestUtils.createTask(TASK_NAME, 1, project);
+        Task task2 = TestUtils.createTask(TASK_NAME, 2, project);
+        Task task3 = TestUtils.createTask(TASK_NAME, 3, project);
+        Task task4 = TestUtils.createTask(TASK_NAME, 4, project);
+        Task task5 = TestUtils.createTask(TASK_NAME, 5, project);
+        task1.setOwner(testAccount);
+        task1.setAssignee(accountList.get(0));
+        task2.setOwner(accountList.get(0));
+        task2.setAssignee(accountList.get(3));
+        task3.setOwner(testAccount);
+        task4.setOwner(testAccount);
+        task4.setAssignee(accountList.get(3));
+        task5.setOwner(testAccount);
+        accountList.get(2).startTimerOnTask(task4);
+        accountList.get(1).startTimerOnTask(task3);
+        List<Account> working = new LinkedList<>();
+        working.add(accountList.get(2));
+        working.add(accountList.get(1));
+        List<Task> tasksList = new LinkedList<>();
+        tasksList.add(task1);
+        tasksList.add(task2);
+        tasksList.add(task3);
+        tasksList.add(task4);
+        tasksList.add(task5);
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
+        when(taskSrvMock.findAllByProject(project)).thenReturn(tasksList);
+        when(taskSrvMock.deleteTask(any(Task.class), anyBoolean())).thenReturn(new ResultData(ResultData.Code.OK, null));
+        when(accountServiceMock.findAllWithActiveTask(task4.getId())).thenReturn(working);
+        projectCtr.deleteProject(TestUtils.PROJECT_ID,PROJECT_ID,PROJECT_NAME, raMock, requestMock);
+        verify(eventsSrvMock, times(3)).addSystemEvent(any(Account.class), any(LogType.class), anyString(), anyString());
+        verify(projSrv, times(1)).delete(project);
+        verify(raMock, times(1)).addFlashAttribute(anyString(),
+                new Message(anyString(), Message.Type.SUCCESS, new Object[]{}));
+    }
+
+
+    @Test
+    public void deleteProjectNotExistsTest() {
+        projectCtr.deleteProject(TestUtils.PROJECT_ID,PROJECT_ID,PROJECT_NAME, raMock, requestMock);
+        verify(raMock, times(1)).addFlashAttribute(anyString(),
+                new Message(anyString(), Message.Type.DANGER, new Object[]{}));
+    }
+
 
     private List<Project> createList(int count) {
         List<Project> list = new LinkedList<Project>();

@@ -53,8 +53,9 @@
         <c:set var="estimate_error">
             <form:errors path="estimate"/>
         </c:set>
-
-
+        <c:set var="storypoint_error">
+            <form:errors path="story_points"/>
+        </c:set>
         <c:if test="${not empty name_error}">
             <c:set var="name_class" value="has-error"/>
         </c:if>
@@ -67,8 +68,9 @@
         <c:if test="${not empty estimate_error}">
             <c:set var="estimate_class" value="has-error"/>
         </c:if>
-
-
+        <c:if test="${not empty storypoint_error}">
+            <c:set var="story_points_class" value="has-error"/>
+        </c:if>
         <a class="anchor" id="nameA"></a>
         <div class="form-group ${name_class }">
             <form:input path="name" class="form-control"
@@ -164,8 +166,8 @@
                     </c:forEach>
                 </ul>
             </div>
-            <span class="help-block"><s:message code="task.type.help"/> <a href="<c:url value="/help"/>#task-types"
-                                                                           target="_blank" style="color:black">&nbsp;<i
+            <span class="help-block"><s:message code="task.type.help"/>&nbsp;<a href="<c:url value="/help"/>#task-types"
+                                                                                target="_blank" style="color:black"><i
                     class="fa fa-question-circle"></i></a></span>
             <form:hidden path="type" id="type"/>
             <form:errors path="type" element="p" class="text-danger"/>
@@ -242,18 +244,23 @@
                                                      style="width:150px"/>&nbsp;<span id="estimate_optional"><s:message
                         code="main.optional"/></span></div>
                 <form:errors path="estimate" element="p" class="text-danger"/>
-				<span class="help-block"><s:message code="task.estimate.help"/><br>
+                <span class="help-block"><s:message code="task.estimate.help"/><br>
 					<s:message code="task.estimate.help.pattern"/> </span>
             </div>
             <div id="estimate_div">
-                <div class="form-group ${sprint_class}">
+                <div class="form-group ${story_points_class}">
                     <label><s:message code="task.storyPoints"/></label>
                     <form:input path="story_points" class="form-control "
                                 style="width:150px"/>
-					<span class="help-block"><s:message
-                            code="task.storyPoints.help"/></span>
+                    <span class="help-block"><s:message
+                            code="task.storyPoints.help"/>&nbsp;
+                        <i class="a-tooltip fa fa-question-circle " style="color: black;"
+                           title="<s:message code="task.storyPoints.help.values" />" data-placement="right"
+                           data-html="true"></i>
+                    </span>
                 </div>
             </div>
+            <form:errors path="story_points" element="p" class="text-danger"/>
         </div>
         <label class="checkbox clickable" style="display: inherit; font-weight: normal; margin-left: 22px;">
             <input type="checkbox" name="notEstimated" id="estimated"
@@ -264,16 +271,18 @@
         </label>
         <%----------DUE DATE --------------------------%>
         <a class="anchor" id="dueDateA"></a>
-        <div>
+        <div class="has-feedback">
             <div class="mod-header">
                 <h5 class="mod-header-title">
                     <s:message code="task.dueDate"/>
                 </h5>
             </div>
-            <form:input path="due_date" class="form-control datepicker"
-                        id="due_date" style="width:150px"/>
-				<span class="help-block"><s:message
-                        code="task.dueDate.help"/></span>
+            <div>
+                <form:input path="due_date" class="form-control datepicker"
+                            id="due_date" style="width:150px"/>
+            <span class="help-block"><s:message
+                    code="task.dueDate.help"/></span>
+            </div>
         </div>
         <%----------FILE UPLOAD --------------------------%>
         <a class="anchor" id="filesA"></a>
@@ -333,7 +342,7 @@
             removeformatPasted: true,
             fullscreenable: false,
             btns: ['formatting',
-                '|', ['bold', 'italic', 'underline', 'strikethrough', 'preformatted' ],
+                '|', ['bold', 'italic', 'underline', 'strikethrough', 'preformatted'],
                 '|', 'link',
                 '|', 'insertImage',
                 '|', 'btnGrp-justify',
@@ -417,11 +426,20 @@
 
         //------------------------------------Datepickers
         $(".datepicker").datepicker({
-            minDate: '0'
+            minDate: '0',
+            dateFormat: "dd-mm-yy",
+            firstDay: 1,
+            regional: ['${user.language}']
+        }).change(function () {
+            if (!isValidDate($(this).val())) {
+                showWarning("<s:message code="warning.date.invalid"/>");
+                $("#createSubmit").prop('disabled', true);
+                $(this).parent("div").addClass('has-error');
+            } else {
+                $("#createSubmit").prop('disabled', false);
+                $(this).parent("div").removeClass('has-error');
+            }
         });
-        $(".datepicker").datepicker("option", "dateFormat", "dd-mm-yy");
-        $('.datepicker').datepicker("option", "firstDay", 1);
-        $('.datepicker').datepicker($.datepicker.regional['${user.language}']);
         var currentDue = "${taskForm.due_date}";
         $("#due_date").val(currentDue);
 
@@ -440,7 +458,7 @@
             }
         });
         $("#assignMe").click(function () {
-            $("#assignee").val("${user.id}");
+            $("#assignee").val("${user.email}");
             $("#assignee_auto").val("${user}");
             $("#assignee_auto").removeClass("input-italic");
         });
@@ -471,29 +489,29 @@
             autoFocus: true,
             //define callback to format results
             source: function (request, response) {
+                $("#assignee_auto").autocomplete("widget").hide();
                 var term = request.term;
                 if (term in cache) {
-                    var result = cache[term];
-                    response($.map(result, function (item) {
-                        return {
-                            label: item.name + " " + item.surname,
-                            value: item.id
-                        }
-                    }));
+                    response(cache[term]);
                     return;
                 }
                 $("#createUsersLoader").show();
                 var url = '<c:url value="/project/getParticipants"/>';
                 var projectID = $("#projects_list").val();
-                $.get(url, {id: projectID, term: term, userOnly: true}, function (result) {
+                $.get(url, {id: projectID, term: term, userOnly: true}, function (data) {
                     $("#createUsersLoader").hide();
-                    cache[term] = result;
-                    response($.map(result, function (item) {
-                        return {
-                            label: item.name + " " + item.surname,
-                            value: item.id,
-                        }
-                    }));
+                    var results = [];
+                    $.each(data, function (i, item) {
+                        var itemToAdd = {
+                            value: item.email,
+                            label: item.name + " " + item.surname+ " (" + item.username + ")",
+                            id: item.id
+                        };
+                        results.push(itemToAdd);
+                    });
+                    cache[term] = results;
+                    $("#assignee_auto").autocomplete("widget").show();
+                    return response(results);
                 });
             },
             open: function (e, ui) {
@@ -537,7 +555,7 @@
                 }
                 else {
                     $("#assignee_auto").val(project.defaultAssignee.name + " " + project.defaultAssignee.surname);
-                    $("#assignee").val(project.defaultAssignee.id);
+                    $("#assignee").val(project.defaultAssignee.email);
                     $("#assignee_auto").removeClass("input-italic");
                 }
                 checkIfEmpty();

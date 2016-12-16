@@ -1,0 +1,54 @@
+#Here are commands to execute while setting tasker under Debian7 
+#-------------Java 8------------------------
+echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main" | tee /etc/apt/sources.list.d/webupd8team-java.list
+echo "deb-src http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main" | tee -a /etc/apt/sources.list.d/webupd8team-java.list
+apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys EEA14886
+apt-get update
+apt-get install oracle-java8-installer
+
+#------------Set tomcat7 manually ----------
+# This can be skipped if tomcat is installed form apt-get install tomcat7
+groupadd tomcat7
+useradd -m -s /bin/bash -g tomcat7 tomcat7
+
+#download and unpack tomcat to your location
+#update permision for tomcat7
+cd /etc/init.d/
+touch /etc/init.d/tomcat7
+chmod +x /etc/init.d/tomcat7
+#copy contents of tomcat7_init.txt updating paths to point to tomcat location
+#script will redirect 8080 to 80 and launch tomcat 
+update-rc.d tomcat7 defaults
+
+#------------Tomcat 7 settings
+#copy conf(default settings) and bin catalina(more ram added in JAVA_OPS) to tomcat correct dirs, or update them manually
+#In case of redirecting tomcat to 80 , autobind=yes must be set in /etc/defaults/tomcat7
+
+#----------------Postgresql 9.4
+nano /etc/apt/sources.list.d/pgdg.list
+#add following : 
+# deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main
+wget https://www.postgresql.org/media/keys/ACCC4CF8.asc
+apt-key add ACCC4CF8.asc
+apt-get update
+apt-get install postgresql-9.4
+
+#remote access to db
+#http://askubuntu.com/questions/423165/remotely-access-postgresql-database
+
+#create tasq db
+su - postgres
+psql
+#: alter role postgres with password 'YOURNEWPASSWORD'
+
+---------------Directories
+mkdir /usr/local/tasq/
+mkdir /usr/local/tasq/avatar
+chown -R tomcat7:tomcat7 /usr/local/tasq
+
+#update and copy application.properties to /usr/local/tasq/
+
+
+
+postgres/MSPtas3ym4Vvuc2D
+tasker/BTkv2e7SD74FcB9e

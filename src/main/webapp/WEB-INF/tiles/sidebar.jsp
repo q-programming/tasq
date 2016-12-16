@@ -71,7 +71,7 @@
             code="task.tasks" text="Tasks"/></strong></a>
         <ul class="menu-items">
             <c:forEach items="${lastTasks}" var="lTask">
-                <c:if test="${lTask.itemId eq user.active_task[0]}">
+                <c:if test="${lTask.itemId eq user.activeTask}">
                     <li>
                         <span class="active-task"><i class="fa fa-lg fa-spin fa-repeat"></i></span>
                         <t:type type="${lTask.type}" list="true"/>
@@ -80,7 +80,7 @@
                         </a>
                     </li>
                 </c:if>
-                <c:if test="${lTask.itemId ne user.active_task[0]}">
+                <c:if test="${lTask.itemId ne user.activeTask}">
                     <li class="task-menu">
                         <t:type type="${lTask.type}" list="true"/>
                         <a style="color: black;" href="<c:url value="/task/${lTask.itemId}"/>">
@@ -165,6 +165,9 @@
         <a href='<s:url value="/help"/>' title="" data-placement="bottom">
             <i class="fa fa-lg fa-question-circle"></i>&nbsp;<strong><s:message code="menu.help" text="Help"/></strong>
         </a>
+    </li>
+    <li class="nav-bottom">
+        <a href="#" id="small-sidebar-show"><i class="fa fa-lg fw fa-angle-double-left" aria-hidden="true"></i>&nbsp;<s:message code="menu.small.sidebar.show"/> </a>
     </li>
 </ul>
 <script>

@@ -134,7 +134,7 @@
                         <form:input path="remaining" class="form-control"
                                     style="width:150px"/>
                         <form:errors path="remaining" element="p" class="text-danger"/>
-						<span class="help-block"><s:message
+                        <span class="help-block"><s:message
                                 code="task.edit.remaining.help"/><br> <s:message
                                 code="task.estimate.help.pattern"/> </span>
                     </div>
@@ -148,7 +148,7 @@
                     <form:input path="estimate" class="form-control"
                                 style="width:150px"/>
                     <form:errors path="estimate" element="p" class="text-danger"/>
-					<span class="help-block"><s:message
+                    <span class="help-block"><s:message
                             code="task.estimate.help"/><br> <s:message
                             code="task.estimate.help.pattern"/> </span>
                 </c:if>
@@ -158,12 +158,14 @@
                     <label><s:message code="task.storyPoints"/></label>
                     <form:input path="story_points" class="form-control"
                                 style="width:150px"/>
-					<span class="help-block"><s:message
-                            code="task.storyPoints.help"/></span>
+                    <span class="help-block"><s:message
+                            code="task.storyPoints.help"/><i class="a-tooltip fa fa-question-circle black-link"
+                                                             title="<s:message code="task.storyPoints.help.values"/>"
+                                                             data-placement="right"></i></span>
                 </div>
             </c:if>
-
         </div>
+        <form:errors path="story_points" element="p" class="text-danger"/>
         <c:if test="${not task.inSprint}">
             <c:if test="${not task.estimated}">
                 <c:set var="checked">
@@ -178,6 +180,9 @@
                    data-placement="right">
                 </i>
             </label>
+        </c:if>
+        <c:if test="${task.inSprint}">
+            <input type="hidden" name="notEstimated" id="estimated" value="${not task.estimated}"/>
         </c:if>
         <div>
             <div class="mod-header">
@@ -195,7 +200,7 @@
 			<span class="btn"
                   onclick="location.href='<c:url value="/task/${task.id}"/>';"><s:message
                     code="main.cancel" text="Cancel"/></span>
-            <button type="submit" class="btn btn-success">
+            <button id="edit-submit" type="submit" class="btn btn-success">
                 <i class="fa fa-pencil"></i>&nbsp;<s:message code="task.edit" text="Edit"/>
             </button>
 
@@ -226,7 +231,7 @@
             removeformatPasted: true,
             autogrow: true,
             btns: ['formatting',
-                '|', ['bold', 'italic', 'underline', 'strikethrough', 'preformatted' ],
+                '|', ['bold', 'italic', 'underline', 'strikethrough', 'preformatted'],
                 '|', 'link',
                 '|', 'insertImage',
                 '|', 'btnGrp-justify',
@@ -235,10 +240,20 @@
 
         //------------------------------------Datepickers
         $(".datepicker").datepicker({
-            minDate: '0'
+            minDate: '0',
+            dateFormat: "dd-mm-yy",
+            firstDay: 1,
+            regional: ['${user.language}']
+        }).change(function () {
+            if (!isValidDate($(this).val())) {
+                showWarning("<s:message code="warning.date.invalid"/>");
+                $("#edit-submit").prop('disabled', true);
+                $(this).parent("div").addClass('has-error');
+            } else {
+                $("#edit-submit").prop('disabled', false);
+                $(this).parent("div").removeClass('has-error');
+            }
         });
-        $(".datepicker").datepicker("option", "dateFormat", "dd-mm-yy");
-        $('.datepicker').datepicker("option", "firstDay", 1);
         var currentDue = "${taskForm.due_date}";
         $("#due_date").val(currentDue);
         getDefaultTaskType();

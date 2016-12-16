@@ -12,7 +12,7 @@ public class PeriodHelperTest {
 
 	@Test
 	public void createResultDatatest() {
-		ResultData result = new ResultData(ResultData.OK, "message");
+		ResultData result = new ResultData(ResultData.Code.OK, "message");
 		Assert.assertNotNull(result);
 	}
 

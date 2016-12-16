@@ -1,4 +1,3 @@
-<!--Start details-->
 <%@page import="com.qprogramming.tasq.account.Roles" %>
 <%@ page trimDirectiveWhitespaces="true" %>
 <%@page import="com.qprogramming.tasq.task.TaskPriority" %>
@@ -17,6 +16,13 @@
 <script src="<c:url value="/resources/js/trumbowyg.min.js" />"></script>
 <script src="<c:url value="/resources/js/trumbowyg.preformatted.js" />"></script>
 <link href="<c:url value="/resources/css/trumbowyg.min.css" />" rel="stylesheet" media="screen"/>
+<style>
+    .tooltip-inner {
+        white-space: pre;
+        max-width: none;
+        text-align: left;
+    }
+</style>
 <security:authorize access="hasRole('ROLE_ADMIN')">
     <c:set var="is_admin" value="true"/>
 </security:authorize>
@@ -80,7 +86,8 @@
                     <c:if test="${task.subtask}">
                         <li>
                             <a href="#" class="convert2task" data-toggle="modal" data-target="#convert2task"
-                               data-taskid="${task.id}" data-type="${task.type}" data-project="${task.project.id}">
+                               data-taskid="${task.id}" data-type="${task.type}"
+                               data-project="${task.project.projectId}">
                                 <i class="fa fw fa-level-up"></i>&nbsp;<s:message
                                     code="task.subtasks.2task"/>
                             </a>
@@ -104,13 +111,10 @@
                 </c:if>
             </button>
             <c:if test="${can_edit}">
-                <a class="btn btn-default btn-sm a-tooltip delete_btn"
-                   href="<c:url value="/task/delete?id=${task.id}"/>"
-                   title="<s:message code="task.delete" text="Delete task" />"
-                   data-lang="${pageContext.response.locale}"
-                   data-msg='<s:message code="task.delete.confirm"/>'>
+                <span class="btn btn-default btn-sm a-tooltip clickable delete-task-modal" title="<s:message code="task.delete" text="Delete task" />" data-taskid="${task.id}"
+                      data-toggle="modal" data-target="#delete-task-modal-dialog">
                     <i class="fa fa-lg fa-trash-o"></i>
-                </a>
+                </span>
             </c:if>
         </div>
         <!--Type  Project / ID / Name-->
@@ -306,7 +310,7 @@
                         <s:message code="task.logWork"/>
                     </button>
                     <c:if
-                            test="${not empty user.active_task && user.active_task[0] eq task.id}">
+                            test="${user.activeTask eq task.id}">
                         <a href="#">
                             <button class="btn btn-default btn-sm a-tooltip handleTimerBtn"
                                     title="<s:message code="task.stopTime.description" />">
@@ -320,7 +324,7 @@
                         </div>
                     </c:if>
                     <c:if
-                            test="${empty user.active_task || user.active_task[0] ne task.id}">
+                            test="${empty user.activeTask ne task.id}">
                         <a href="<c:url value="/task/time?id=${task.id}&action=start"/>">
                             <button class="btn btn-default btn-sm">
                                 <i class="fa fa-lg fa-clock-o"></i>
@@ -368,7 +372,8 @@
                 <c:if test="${task.estimate eq '0m' && task.remaining ne '0m'}">
                     <c:set var="remaining_bar">    ${100-task.percentage_logged}</c:set>
                 </c:if>
-                <table id="estimatesToggle" style="<c:if test="${task.remaining eq '0m' && task.loggedWork eq '0m' && task.estimate eq '0m'}"> display: none;</c:if>">
+                <table id="estimatesToggle" style="<c:if
+                        test="${task.remaining eq '0m' && task.loggedWork eq '0m' && task.estimate eq '0m'}"> display: none;</c:if>">
                     <tr>
                         <c:if test="${not empty taskEstimate}">
                             <td style="width:15px;"></td>
@@ -383,7 +388,7 @@
                             <c:if test="${not empty taskEstimate}">
                                 <td>
                                     <i class="fa fa-plus-square clickable subtask-time-detail a-tooltip"
-                                       aria-hidden="true"
+                                       data-target="subtask-estimate" data-container="body" aria-hidden="true"
                                        title="<s:message code="task.subtask.time.detail"/>"></i>
                                 </td>
                             </c:if>
@@ -401,13 +406,8 @@
                             </td>
                         </tr>
                         <c:if test="${not task.subtask && not empty taskEstimate}">
-                            <tr class="time-details-row">
-                                <td></td>
-                                <td colspan="3" class="bar_td">
-                                    <div>${taskEstimate}&nbsp;[${task.id}] + ${subtasksEstimate}&nbsp;<s:message
-                                            code="tasks.subtasks"/></div>
-                                </td>
-                            </tr>
+                            <t:timeDetails task="${task}" taskTime="${taskEstimate}" subtasks="${subtasks}"
+                                           subtasksTime="${subtasksEstimate}" method="estimate"/>
                         </c:if>
 
                     </c:if>
@@ -415,7 +415,8 @@
                     <tr>
                         <c:if test="${not empty taskLogged}">
                             <td style="width:15px;">
-                                <i class="fa fa-plus-square clickable subtask-time-detail" aria-hidden="true"
+                                <i class="fa fa-plus-square clickable subtask-time-detail a-tooltip" aria-hidden="true"
+                                   data-container="body" data-target="subtask-logged"
                                    title="<s:message code="task.subtask.time.detail"/>"></i>
                             </td>
                         </c:if>
@@ -435,13 +436,8 @@
                         <td class="bar_td">${task.loggedWork}</td>
                     </tr>
                     <c:if test="${not task.subtask && not empty taskLogged}">
-                        <tr class="time-details-row">
-                            <td></td>
-                            <td colspan="3" class="bar_td">
-                                <div>${taskLogged}&nbsp;[${task.id}] + ${subtasksLogged}&nbsp;<s:message
-                                        code="tasks.subtasks"/></div>
-                            </td>
-                        </tr>
+                        <t:timeDetails task="${task}" taskTime="${taskLogged}" subtasks="${subtasks}"
+                                       subtasksTime="${subtasksLogged}" method="logged"/>
                     </c:if>
 
                     <%-- Remaining work bar --%>
@@ -449,6 +445,7 @@
                         <c:if test="${not empty taskRemaining}">
                             <td style="width:15px;">
                                 <i class="fa fa-plus-square clickable subtask-time-detail a-tooltip" aria-hidden="true"
+                                   data-target="subtask-remaining" data-container="body"
                                    title="<s:message code="task.subtask.time.detail"/>"></i>
                             </td>
                         </c:if>
@@ -465,15 +462,9 @@
                         <td class="bar_td">${task.remaining }</td>
                     </tr>
                     <c:if test="${not task.subtask && not empty taskRemaining}">
-                        <tr class="time-details-row">
-                            <td></td>
-                            <td colspan="3" class="bar_td">
-                                <div>${taskRemaining}&nbsp;[${task.id}] + ${subtasksRemaining}&nbsp;<s:message
-                                        code="tasks.subtasks"/></div>
-                            </td>
-                        </tr>
+                        <t:timeDetails task="${task}" taskTime="${taskRemaining}" subtasks="${subtasks}"
+                                       subtasksTime="${subtasksRemaining}" method="remaining"/>
                     </c:if>
-                    <%-- 					</c:if> --%>
                 </table>
             </div>
             <%-------------- RELATED TASKS ------------------%>
@@ -590,7 +581,7 @@
                                     code="tasks.subtasks"/>
 							</span>
                         </h5>
-                        <c:if test="${project_participant}">
+                        <c:if test="${project_participant && task.state ne 'CLOSED'}">
                             <a class="btn btn-default btn-xxs a-tooltip pull-right" style="min-width: 37px;"
                                href="<c:url value="/task/${task.id}/subtask"/>"
                                data-placement="top"
@@ -616,23 +607,25 @@
                                             href="<c:url value="/task/${subTask.id}"/>">[${subTask.id}]
                                             ${subTask.name}</a></td>
                                     <td style="width: 100px"><t:state state="${subTask.state}"/></td>
-                                    <td style="width: 50px; padding-top: 14px;">
+                                        <%--count percentage of done--%>
+                                    <c:set var="percentage">${subTask.percentage_logged}</c:set>
+                                    <c:set var="logged_class"/>
+                                    <c:if test="${subTask.state eq 'TO_DO'}">
+                                        <c:set var="percentage">0</c:set>
+                                    </c:if>
+                                    <c:if test="${subTask.state eq 'CLOSED'}">
+                                        <c:set var="logged_class">progress-bar-success</c:set>
+                                        <c:set var="percentage">100</c:set>
+                                    </c:if>
+                                    <c:if test="${subTask.state eq 'BLOCKED' || subTask.percentage_logged gt 100}">
+                                        <c:set var="logged_class">progress-bar-danger</c:set>
+                                    </c:if>
+                                    <td style="width: 50px; padding-top: 14px;cursor:help;" class="a-tooltip"
+                                        title="<s:message code="task.closed"/>: ${percentage}%<br><s:message code="task.estimate"/>: ${subTask.estimate}<br><s:message code="task.logged"/>: ${subTask.loggedWork}<br><s:message code="task.remaining"/>: ${subTask.remaining}"
+                                        data-html="true">
                                         <div class="progress" style="height: 5px;">
-                                            <c:set var="logged_class"></c:set>
-                                            <c:set var="percentage">${subTask.percentage_logged}</c:set>
-                                            <c:if test="${subTask.state eq 'TO_DO'}">
-                                                <c:set var="percentage">0</c:set>
-                                            </c:if>
-                                            <c:if test="${subTask.state eq 'CLOSED'}">
-                                                <c:set var="logged_class">progress-bar-success</c:set>
-                                                <c:set var="percentage">100</c:set>
-                                            </c:if>
-                                            <c:if
-                                                    test="${subTask.state eq 'BLOCKED' || subTask.percentage_logged gt 100}">
-                                                <c:set var="logged_class">progress-bar-danger</c:set>
-                                            </c:if>
                                             <div class="progress-bar ${logged_class} a-tooltip"
-                                                 title="${percentage}%" role="progressbar"
+                                                 role="progressbar"
                                                  aria-valuenow="${percentage}" aria-valuemin="0"
                                                  aria-valuemax="100" style="width:${percentage}%"></div>
                                         </div>
@@ -761,7 +754,8 @@
                     <c:if test="${project_participant}">
                         <div id="assign_button_div" class="row">
                             <div class="col-md-12 text-center">
-                                <span class="btn btn-default btn-sm a-tooltip assignToTask" style="width: 150px;margin-top: 5px;"
+                                <span class="btn btn-default btn-sm a-tooltip assignToTask"
+                                      style="width: 150px;margin-top: 5px;"
                                       title="<s:message code="task.assign"/> (a)" data-toggle="modal"
                                       data-target="#assign_modal" data-taskID="${task.id}"
                                       data-assignee="${task.assignee}"
@@ -776,28 +770,28 @@
             </div>
             <%----------------------DATES ----------------------------------------%>
             <div>
-                <div class="mod-header">
-                    <h5 class="mod-header-title">
-                        <i class="fa fa-calendar"></i>
-                        <s:message code="task.dates"/>
-                    </h5>
+                <div class="row">
+                    <div class="col-sm-4"><s:message code="task.created"/>&nbsp;:</div>
+                    <div class="col-sm-8">${task.create_date}</div>
                 </div>
-                <div>
-                    <div class="row">
-                        <div class="col-sm-4"><s:message code="task.created"/>&nbsp;:</div>
-                        <div class="col-sm-8">${task.create_date}</div>
-                    </div>
+                <c:if test="${empty task.finishDate || (task.lastUpdate ne task.finishDate)}">
                     <div class="row">
                         <div class="col-sm-4"><s:message code="task.lastUpdate"/>&nbsp;:</div>
                         <div class="col-sm-8">${task.lastUpdate}</div>
                     </div>
-                    <c:if test="${not empty task.due_date}">
-                        <div class="row">
-                            <div class="col-sm-4"><s:message code="task.due"/>&nbsp;:</div>
-                            <div class="col-sm-8">${task.due_date}</div>
-                        </div>
-                    </c:if>
-                </div>
+                </c:if>
+                <c:if test="${not empty task.due_date && task.state ne 'CLOSED'}">
+                    <div class="row">
+                        <div class="col-sm-4"><s:message code="task.due"/>&nbsp;:</div>
+                        <div class="col-sm-8">${task.due_date}</div>
+                    </div>
+                </c:if>
+                <c:if test="${task.state eq 'CLOSED'}">
+                    <div class="row">
+                        <div class="col-sm-4"><s:message code="task.closed"/>&nbsp;:</div>
+                        <div class="col-sm-8">${task.finishDate}</div>
+                    </div>
+                </c:if>
             </div>
             <%----------------SPRITNS/RELEASES ----------------------%>
             <c:set var="hidden">none</c:set>
@@ -866,9 +860,10 @@
                                 </div>
                                     <%-- Comment buttons --%>
                                 <div class="buttons_panel" style="float: right">
-                                    <a href="<c:url value="/task/${task.id}#c${comment.id}"/>"
-                                       title="<s:message code="comment.link" text="Link to this comment" />"
-                                       style="color: #676767"><i class="fa fa-link"></i></a>
+                                    <span data-url="<c:url value="/task/${task.id}#c${comment.id}"/>"
+                                          class="comment-link clickable a-tooltip"
+                                          title="<s:message code="comment.link" text="Link to this comment" />"
+                                          style="color: #676767"><i class="fa fa-link"></i></span>
                                     <c:if test="${user == comment.author }">
                                         <c:if test="${not empty comment.message}">
                                             <a href="#" class="comments_edit" data-toggle="modal"
@@ -903,6 +898,8 @@
                         </tr>
                     </c:forEach>
                 </table>
+                <%--textarea to copy comment link--%>
+                <textarea id="comment-link" style="display:none; position: relative; left: -10000px;"></textarea>
                 <%-- End of comments, comment addition div display --%>
                 <div id="comments_div" style="display: none">
                     <form id="commentForm" name="commentForm" method="post"
@@ -943,6 +940,7 @@
 <jsp:include page="../modals/file.jsp"/>
 <jsp:include page="../modals/assign.jsp"/>
 <jsp:include page="../modals/image.jsp"/>
+<jsp:include page="../modals/delete.jsp"/>
 <c:if test="${task.subtask}">
     <jsp:include page="../modals/convert2task.jsp"/>
 </c:if>
@@ -979,7 +977,7 @@
                         <div class="form-group">
                             <button class="btn btn-default pull-right addCommentButton" type="submit">
                                 <i class="fa fa-pencil"></i>
-                                <s:message code="main.edit" text="Edit"></s:message>
+                                <s:message code="main.edit" text="Edit"/>
                             </button>
                         </div>
                     </div>
@@ -1218,19 +1216,22 @@
         }
 
         function changePoints() {
+            var message = "<s:message code="task.storyPoints.invalid"/>";
             var points = $('#point-input').val();
-            if (isNumber(points) && points < 40) {
+            if (isNumber(points) && (points >= 0 && points <= 100)) {
                 showWait(true);
                 $.post('<c:url value="/task/changePoints"/>', {id: taskID, points: points}, function (result) {
-                    if (result.code == 'Error') {
+                    if (result.code == 'ERROR') {
                         showError(result.message);
                     }
                     else {
                         $("#point_value").html(points);
                         showSuccess(result.message);
-                        showWait(false);
                     }
+                    showWait(false);
                 });
+            } else {
+                showError(message);
             }
             togglePoints();
         }
@@ -1466,9 +1467,10 @@
         }
     });
     $('.subtask-time-detail').click(function () {
+        var target = $(this).data('target');
         $(this).toggleClass('fa-minus-square');
         $(this).toggleClass('fa-plus-square');
-        $(this).closest('tr').next(".time-details-row").toggle();
+        $("." + target).toggle("slow");
     });
 
     function convertToDate(str) {
@@ -1493,6 +1495,17 @@
                 return 'not yet added ';
         }
     }
+    $(".comment-link").on("click", function (e) {
+        e.preventDefault();
+        var url = getURLAbsolutePath() + $(this).data('url');
+        $("#comment-link").css('display', 'block').val(url).select();//show comment div for duration of copy
+        try {
+            document.execCommand('copy');
+            $("#comment-link").css('display', 'none');
+        } catch (err) {
+            console.error('There was error while trying to copy link');
+        }
+    });
 
     //----------- Key shortcuts -----------------------
     $(document).keyup(function (e) {
@@ -1522,7 +1535,7 @@
         }
     });
     //disable shortcuts on search
-    $("#searchField").focusin(function () {
+    $(".search-query").focusin(function () {
         inputInProgress = true;
     }).focusout(function () {
         inputInProgress = false;
@@ -1548,5 +1561,4 @@
             'scrollTop': $('#comments_div').offset().top
         }, 2000);
     }
-
 </script>

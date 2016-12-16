@@ -8,410 +8,421 @@
 <link href="<c:url value="/resources/css/hopscotch.css" />" rel="stylesheet"
       media="screen"/>
 <div class="white-frame" style="overflow: auto;">
-    <div class="pull-right">
-        <a id="project-manage" class="btn btn-default a-tooltip pull-right" style="padding: 6px 11px;" href="#" title=""
-           data-placement="bottom"
-           data-original-title="Manage project"><i class="fa fa-wrench"></i></a>
+    <div class="visible-sm visible-xs text-center">
+        <h3><i class="fa fa-mobile" aria-hidden="true"></i>
+            <i class="fa fa-arrow-right" aria-hidden="true"></i>
+            <i class="fa fa-desktop" aria-hidden="true"></i>
+        </h3>
+        <s:message code="main.page.nomobile"/>
     </div>
-    <div class="pull-right">
-        <a id="project-active" class="btn btn-default a-tooltip pull-right" href="#" title="" data-placement="bottom"
-           data-original-title="Set as active project"> <i class="fa fa-refresh"></i>
-        </a>
-        <a id="project-members" class="btn btn-default a-tooltip pull-right" title="" data-placement="bottom"
-           data-original-title="Project members">
-            <i class="fa fa-users"></i>
-        </a>
-    </div>
-    <h3>[TST] Testing Project<span id="project-title"></span>
-        <a href="<c:url value="/tour"/>" id="go-back" class="btn btn-default btn-success"
-           style="margin-left:100px; display:none">
-            Click here to go back to tours page
-        </a>
-    </h3>
-    Project to test application
-    <hr>
-    <div id="project-open-close" class="progress">
-        <div class="progress-bar progress-bar-warning a-tooltip" style="width: 42.857142857142854%" title=""
-             data-original-title="3&nbsp;To Do">
-            <span>3&nbsp;To Do</span>
+    <div class="hidden-xs hidden-sm">
+        <div class="pull-right">
+            <a id="project-manage" class="btn btn-default a-tooltip pull-right" style="padding: 6px 11px;" href="#"
+               title=""
+               data-placement="bottom"
+               data-original-title="Manage project"><i class="fa fa-wrench"></i></a>
         </div>
-        <div class="progress-bar a-tooltip" style="width: 28.571428571428573%" title=""
-             data-original-title="2&nbsp;In progress">
-            <span>2&nbsp;In progress</span>
+        <div class="pull-right">
+            <a id="project-active" class="btn btn-default a-tooltip pull-right" href="#" title=""
+               data-placement="bottom"
+               data-original-title="Set as active project"> <i class="fa fa-refresh"></i>
+            </a>
+            <a id="project-members" class="btn btn-default a-tooltip pull-right" title="" data-placement="bottom"
+               data-original-title="Project members">
+                <i class="fa fa-users"></i>
+            </a>
         </div>
-        <div class="progress-bar progress-bar-success a-tooltip" style="width: 0.0%" title=""
-             data-original-title="0&nbsp;Completed">
-        </div>
+        <h3>[TST] Testing Project<span id="project-title"></span>
+            <a href="<c:url value="/tour"/>" id="go-back" class="btn btn-default btn-success"
+               style="margin-left:100px; display:none">
+                Click here to go back to tours page
+            </a>
+        </h3>
+        Project to test application
+        <hr>
+        <div id="project-open-close" class="progress">
+            <div class="progress-bar progress-bar-warning a-tooltip" style="width: 42.857142857142854%" title=""
+                 data-original-title="3&nbsp;To Do">
+                <span>3&nbsp;To Do</span>
+            </div>
+            <div class="progress-bar a-tooltip" style="width: 28.571428571428573%" title=""
+                 data-original-title="2&nbsp;In progress">
+                <span>2&nbsp;In progress</span>
+            </div>
+            <div class="progress-bar progress-bar-success a-tooltip" style="width: 0.0%" title=""
+                 data-original-title="0&nbsp;Completed">
+            </div>
 
-        <div class="progress-bar progress-bar-closed  a-tooltip" style="width: 28.571428571428573%" title=""
-             data-original-title="2&nbsp;Closed ">
-            <span>2&nbsp;Closed </span>
+            <div class="progress-bar progress-bar-closed  a-tooltip" style="width: 28.571428571428573%" title=""
+                 data-original-title="2&nbsp;Closed ">
+                <span>2&nbsp;Closed </span>
+            </div>
+            <div class="progress-bar progress-bar-danger a-tooltip" style="width: 0.0%" title=""
+                 data-original-title="0&nbsp;Blocked">
+            </div>
         </div>
-        <div class="progress-bar progress-bar-danger a-tooltip" style="width: 0.0%" title=""
-             data-original-title="0&nbsp;Blocked">
+        <div id="project-chart" class="row" style="width: 90%; margin: 20px auto;">
+            <img class="responsive" src="<c:url value="/resources/img/help/sample_chart.png"/>">
         </div>
-    </div>
-    <div id="project-chart" class="row" style="height: 300px; width: 90%; margin: 20px auto;">
-        <img class="responsive" src="<c:url value="/resources/img/help/sample_chart.png"/>">
-    </div>
-    <div style="display: inherit; font-size: small; float: right;margin-top: 20px;">
+        <div class="row" style="display: inherit; font-size: small; float: right;margin-top: 20px;">
         <span id="project-30" class="clickable" data-all="false"><span id="moreEventsCheck"><i
                 class="fa fa-square-o"></i></span> Show more than 30 days</span>
-    </div>
+        </div>
 
-    <div style="display: table; width: 100%">
-        <div style="display: table-cell; width: 600px">
-            <h3>
-                Latest events</h3>
-            <div class="text-center">
-                <ul id="eventsTable_pagination_top" class="pagination">
-                    <li class="active"><a title="Current page is 1">1</a></li>
-                    <li class="pointer-cursor"><a title="Go to page 2">2</a></li>
-                    <li class="pointer-cursor"><a title="Go to page 3">3</a></li>
-                    <li class="pointer-cursor"><a title="Go to page 4">4</a></li>
-                    <li class="pointer-cursor"><a title="Go to next page">&gt;</a></li>
-                    <li class="pointer-cursor"><a title="Go to last page">&gt;&gt;</a></li>
-                </ul>
+        <div class="row">
+            <div class="col-md-6 col-sm-12">
+                <h3>
+                    Latest events</h3>
+                <div class="text-center">
+                    <ul id="eventsTable_pagination_top" class="pagination">
+                        <li class="active"><a title="Current page is 1">1</a></li>
+                        <li class="pointer-cursor"><a title="Go to page 2">2</a></li>
+                        <li class="pointer-cursor"><a title="Go to page 3">3</a></li>
+                        <li class="pointer-cursor"><a title="Go to page 4">4</a></li>
+                        <li class="pointer-cursor"><a title="Go to next page">&gt;</a></li>
+                        <li class="pointer-cursor"><a title="Go to last page">&gt;&gt;</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <table id="eventsTable" class="table table-condensed">
+                        <tbody>
+                        <tr class="projEvent">
+                            <td><img data-src="holder.js/30x30" class="avatar small"
+                                     src="<c:url value="/resources/img/avatar.png"/>"></td>
+                            <td>
+                                <div class="time-div" id="project-event">07-10-2016 15:58</div>
+                                <a href="#">Jakub Romaniszyn</a>&nbsp;created task <a href="#">[TST-4] Some sample
+                                task</a></td>
+                        </tr>
+                        <tr class="projEvent">
+                            <td><img data-src="holder.js/30x30" class="avatar small"
+                                     src="<c:url value="/resources/img/avatar.png"/>"></td>
+                            <td>
+                                <div class="time-div">01-04-2015 00:38</div>
+                                <a href="#">Jakub Romaniszyn</a>&nbsp;changed assignee <a href="#">[TST-1]
+                                Sample task</a>
+                                <div class="quote">Demo User</div>
+                            </td>
+                        </tr>
+                        <tr class="projEvent">
+                            <td><img data-src="holder.js/30x30" class="avatar small"
+                                     src="<c:url value="/resources/img/avatar.png"/>"></td>
+                            <td>
+                                <div class="time-div">01-04-2015 00:31</div>
+                                <a href="#">Jakub Romaniszyn</a>&nbsp;commented <a href="#">[TST-1] Sample
+                                task</a>
+                                <div class="quote">All blockers eliminated. Moving on with work</div>
+                            </td>
+                        </tr>
+                        <tr class="projEvent">
+                            <td><img data-src="holder.js/30x30" class="avatar small"
+                                     src="<c:url value="/resources/img/avatar.png"/>"></td>
+                            <td>
+                                <div class="time-div">01-04-2015 00:30</div>
+                                <a href="#">Jakub Romaniszyn</a>&nbsp;changed assignee <a href="#">[TST-1]
+                                Sample task</a>
+                                <div class="quote">Paweł Korga</div>
+                            </td>
+                        </tr>
+                        <tr class="projEvent">
+                            <td><img data-src="holder.js/30x30" class="avatar small"
+                                     src="<c:url value="/resources/img/avatar.png"/>"></td>
+                            <td>
+                                <div class="time-div">01-04-2015 00:30</div>
+                                <a href="#">Jakub Romaniszyn</a>&nbsp;closed task <a href="#">[TST-1/3]
+                                Some minor already finished task</a></td>
+                        </tr>
+                        <tr class="projEvent">
+                            <td><img data-src="holder.js/30x30" class="avatar small"
+                                     src="<c:url value="/resources/img/avatar.png"/>"></td>
+                            <td>
+                                <div class="time-div">01-04-2015 00:30</div>
+                                <a href="#">Jakub Romaniszyn</a>&nbsp;added subtask <a href="#">[TST-1/3]
+                                Some minor already finished task</a></td>
+                        </tr>
+                        <tr class="projEvent">
+                            <td><img data-src="holder.js/30x30" class="avatar small"
+                                     src="<c:url value="/resources/img/avatar.png"/>"></td>
+                            <td>
+                                <div class="time-div">01-04-2015 00:29</div>
+                                <a href="#">Jakub Romaniszyn</a>&nbsp;changed status <a href="#">[TST-1]
+                                Sample task</a>
+                                <div class="quote">
+                                    <table class="worklog_table">
+                                        <tbody>
+                                        <tr>
+                                            <td>Blocked</td>
+                                            <td>Ongoing</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="projEvent">
+                            <td><img data-src="holder.js/30x30" class="avatar small"
+                                     src="<c:url value="/resources/img/avatar.png"/>"></td>
+                            <td>
+                                <div class="time-div">01-04-2015 00:29</div>
+                                <a href="#">Jakub Romaniszyn</a>&nbsp;logged work <a href="#">[TST-1/2]
+                                Breaks</a>
+                                <div class="quote">2h 25m</div>
+                            </td>
+                        </tr>
+                        <tr class="projEvent">
+                            <td><img data-src="holder.js/30x30" class="avatar small"
+                                     src="<c:url value="/resources/img/avatar.png"/>"></td>
+                            <td>
+                                <div class="time-div">01-04-2015 00:28</div>
+                                <a href="#">Jakub Romaniszyn</a>&nbsp;edited <a href="#">[TST-1/2]
+                                Breaks</a>
+                                <div class="quote">
+                                    <table class="worklog_table">
+                                        <tbody>
+                                        <tr>
+                                            <td colspan="2"><b>Name :</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Coffee break</td>
+                                            <td>Breaks</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="projEvent">
+                            <td><img data-src="holder.js/30x30" class="avatar small"
+                                     src="<c:url value="/resources/img/avatar.png"/>"></td>
+                            <td>
+                                <div class="time-div">01-04-2015 00:28</div>
+                                <a href="#">Jakub Romaniszyn</a>&nbsp;logged work <a href="#">[TST-1/2]
+                                Breaks</a>
+                                <div class="quote">1h</div>
+                            </td>
+                        </tr>
+                        <tr class="projEvent">
+                            <td><img data-src="holder.js/30x30" class="avatar small"
+                                     src="<c:url value="/resources/img/avatar.png"/>"></td>
+                            <td>
+                                <div class="time-div">01-04-2015 00:28</div>
+                                <a href="#">Jakub Romaniszyn</a>&nbsp;added subtask <a href="#">[TST-1/2]
+                                Breaks</a></td>
+                        </tr>
+                        <tr class="projEvent">
+                            <td><img data-src="holder.js/30x30" class="avatar small"
+                                     src="<c:url value="/resources/img/avatar.png"/>"></td>
+                            <td>
+                                <div class="time-div">01-04-2015 00:27</div>
+                                <a href="#">Jakub Romaniszyn</a>&nbsp;added subtask <a href="#">[TST-1/1]
+                                Sub task </a></td>
+                        </tr>
+                        <tr class="projEvent">
+                            <td><img data-src="holder.js/30x30" class="avatar small"
+                                     src="<c:url value="/resources/img/avatar.png"/>"></td>
+                            <td>
+                                <div class="time-div">01-04-2015 00:26</div>
+                                <a href="#">Jakub Romaniszyn</a>&nbsp;linked tasks
+                                <div class="quote">TST-1 - TST-2</div>
+                            </td>
+                        </tr>
+                        <tr class="projEvent">
+                            <td><img data-src="holder.js/30x30" class="avatar small"
+                                     src="<c:url value="/resources/img/avatar.png"/>"></td>
+                            <td>
+                                <div class="time-div">01-04-2015 00:26</div>
+                                <a href="#">Jakub Romaniszyn</a>&nbsp;closed task <a href="#">[TST-2]
+                                Sample bug</a></td>
+                        </tr>
+                        <tr class="projEvent">
+                            <td><img data-src="holder.js/30x30" class="avatar small"
+                                     src="<c:url value="/resources/img/avatar.png"/>"></td>
+                            <td>
+                                <div class="time-div">01-04-2015 00:26</div>
+                                <a href="#">Jakub Romaniszyn</a>&nbsp;logged work <a href="#">[TST-2]
+                                Sample bug</a>
+                                <div class="quote">45m</div>
+                            </td>
+                        </tr>
+                        <tr class="projEvent">
+                            <td><img data-src="holder.js/30x30" class="avatar small"
+                                     src="<c:url value="/resources/img/avatar.png"/>"></td>
+                            <td>
+                                <div class="time-div">01-04-2015 00:26</div>
+                                <a href="#">Jakub Romaniszyn</a>&nbsp;created task <a href="#">[TST-2]
+                                Sample bug</a></td>
+                        </tr>
+                        <tr class="projEvent">
+                            <td><img data-src="holder.js/30x30" class="avatar small"
+                                     src="<c:url value="/resources/img/avatar.png"/>"></td>
+                            <td>
+                                <div class="time-div">01-04-2015 00:24</div>
+                                <a href="#">Jakub Romaniszyn</a>&nbsp;logged work <a href="#">[TST-1]
+                                Sample task</a>
+                                <div class="quote">3h</div>
+                            </td>
+                        </tr>
+                        <tr class="projEvent">
+                            <td><img data-src="holder.js/30x30" class="avatar small"
+                                     src="<c:url value="/resources/img/avatar.png"/>"></td>
+                            <td>
+                                <div class="time-div">01-04-2015 00:24</div>
+                                <a href="#">Jakub Romaniszyn</a>&nbsp;edited <a href="#">[TST-1] Sample
+                                task</a>
+                                <div class="quote">
+                                    <table class="worklog_table">
+                                        <tbody>
+                                        <tr>
+                                            <td colspan="2"><b>Estimate :</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td>0m</td>
+                                            <td>1d</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2"><b>Estimated :</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td>false</td>
+                                            <td>true</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="projEvent">
+                            <td><img data-src="holder.js/30x30" class="avatar small"
+                                     src="<c:url value="/resources/img/avatar.png"/>"></td>
+                            <td>
+                                <div class="time-div">01-04-2015 00:23</div>
+                                <a href="#">Jakub Romaniszyn</a>&nbsp;created task <a href="#">[TST-1]
+                                Sample task</a></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-center">
+                    <ul id="eventsTable_pagination_bottom" class="pagination">
+                        <li class="active"><a title="Current page is 1">1</a></li>
+                        <li class="pointer-cursor"><a title="Go to page 2">2</a></li>
+                        <li class="pointer-cursor"><a title="Go to page 3">3</a></li>
+                        <li class="pointer-cursor"><a title="Go to page 4">4</a></li>
+                        <li class="pointer-cursor"><a title="Go to next page">&gt;</a></li>
+                        <li class="pointer-cursor"><a title="Go to last page">&gt;&gt;</a></li>
+                    </ul>
+                </div>
+
             </div>
-            <div>
-                <table id="eventsTable" class="table table-condensed">
+            <div class="col-md-6 col-sm-12">
+                <h3>
+                    <a href="#" style="color: black">Tasks</a>
+                    <div class="pull-right">
+                        <div>
+                            <a id="project-task-closed" href="#"><span
+                                    style="display: inherit; font-size: small; font-weight: normal; color: black; float: right">
+									<i class="fa fa-check-square-o"></i> Hide closed tasks</span></a>
+                        </div>
+                        <div id="project-subtasks"
+                             style="display: inherit; font-size: small; font-weight: normal; color: black; float: right">
+                            Subtasks
+                            &nbsp; <i id="opensubtask" class="fa fa-plus-square clickable a-tooltip" title=""
+                                      data-original-title="Show all subtasks"></i> <i id="hidesubtask"
+                                                                                      class="fa fa-minus-square clickable a-tooltip"
+                                                                                      title=""
+                                                                                      data-original-title="Hide all subtasks"></i>
+                        </div>
+                    </div>
+                </h3>
+                <table id="project-tasklist" class="table table-hover">
                     <tbody>
-                    <tr class="projEvent">
-                        <td><img data-src="holder.js/30x30" class="avatar small"
-                                 src="<c:url value="/resources/img/avatar.png"/>"></td>
+                    <tr>
                         <td>
-                            <div class="time-div" id="project-event">07-10-2016 15:58</div>
-                            <a href="#">Jakub Romaniszyn</a>&nbsp;created task <a href="#">[TST-4] Some sample
-                            task</a></td>
-                    </tr>
-                    <tr class="projEvent">
-                        <td><img data-src="holder.js/30x30" class="avatar small"
-                                 src="<c:url value="/resources/img/avatar.png"/>"></td>
-                        <td>
-                            <div class="time-div">01-04-2015 00:38</div>
-                            <a href="#">Jakub Romaniszyn</a>&nbsp;changed assignee <a href="#">[TST-1]
-                            Sample task</a>
-                            <div class="quote">Demo User</div>
+                            <t:type type="USER_STORY" list="true"/>
                         </td>
-                    </tr>
-                    <tr class="projEvent">
-                        <td><img data-src="holder.js/30x30" class="avatar small"
-                                 src="<c:url value="/resources/img/avatar.png"/>"></td>
                         <td>
-                            <div class="time-div">01-04-2015 00:31</div>
-                            <a href="#">Jakub Romaniszyn</a>&nbsp;commented <a href="#">[TST-1] Sample
-                            task</a>
-                            <div class="quote">All blockers eliminated. Moving on with work</div>
+                            <%
+                                pageContext.setAttribute("major", TaskPriority.MAJOR);
+                            %>
+                            <t:priority priority="${major}" list="true"/>
                         </td>
-                    </tr>
-                    <tr class="projEvent">
-                        <td><img data-src="holder.js/30x30" class="avatar small"
-                                 src="<c:url value="/resources/img/avatar.png"/>"></td>
-                        <td>
-                            <div class="time-div">01-04-2015 00:30</div>
-                            <a href="#">Jakub Romaniszyn</a>&nbsp;changed assignee <a href="#">[TST-1]
-                            Sample task</a>
-                            <div class="quote">Paweł Korga</div>
+                        <td><a href="#" style="">
+                            [TST-4] Some sample task</a>
                         </td>
-                    </tr>
-                    <tr class="projEvent">
-                        <td><img data-src="holder.js/30x30" class="avatar small"
-                                 src="<c:url value="/resources/img/avatar.png"/>"></td>
                         <td>
-                            <div class="time-div">01-04-2015 00:30</div>
-                            <a href="#">Jakub Romaniszyn</a>&nbsp;closed task <a href="#">[TST-1/3]
-                            Some minor already finished task</a></td>
-                    </tr>
-                    <tr class="projEvent">
-                        <td><img data-src="holder.js/30x30" class="avatar small"
-                                 src="<c:url value="/resources/img/avatar.png"/>"></td>
+                        </td>
                         <td>
-                            <div class="time-div">01-04-2015 00:30</div>
-                            <a href="#">Jakub Romaniszyn</a>&nbsp;added subtask <a href="#">[TST-1/3]
-                            Some minor already finished task</a></td>
-                    </tr>
-                    <tr class="projEvent">
-                        <td><img data-src="holder.js/30x30" class="avatar small"
-                                 src="<c:url value="/resources/img/avatar.png"/>"></td>
-                        <td>
-                            <div class="time-div">01-04-2015 00:29</div>
-                            <a href="#">Jakub Romaniszyn</a>&nbsp;changed status <a href="#">[TST-1]
-                            Sample task</a>
-                            <div class="quote">
-                                <table class="worklog_table">
-                                    <tbody>
-                                    <tr>
-                                        <td>Blocked</td>
-                                        <td>Ongoing</td>
-                                    </tr>
-                                    </tbody>
-                                </table>
+                            <div class="progress" style="width: 50px">
+                                <div class="progress-bar progress-bar-success a-tooltip" role="progressbar"
+                                     aria-valuenow="0"
+                                     aria-valuemin="0" aria-valuemax="100" style="width:0%" title=""
+                                     data-original-title="0%"></div>
                             </div>
                         </td>
                     </tr>
-                    <tr class="projEvent">
-                        <td><img data-src="holder.js/30x30" class="avatar small"
-                                 src="<c:url value="/resources/img/avatar.png"/>"></td>
+                    <tr>
                         <td>
-                            <div class="time-div">01-04-2015 00:29</div>
-                            <a href="#">Jakub Romaniszyn</a>&nbsp;logged work <a href="#">[TST-1/2]
-                            Breaks</a>
-                            <div class="quote">2h 25m</div>
+                            <t:type type="TASK" list="true"/>
                         </td>
-                    </tr>
-                    <tr class="projEvent">
-                        <td><img data-src="holder.js/30x30" class="avatar small"
-                                 src="<c:url value="/resources/img/avatar.png"/>"></td>
+                        <%
+                            pageContext.setAttribute("minor", TaskPriority.MINOR);
+                        %>
+
                         <td>
-                            <div class="time-div">01-04-2015 00:28</div>
-                            <a href="#">Jakub Romaniszyn</a>&nbsp;edited <a href="#">[TST-1/2]
-                            Breaks</a>
-                            <div class="quote">
-                                <table class="worklog_table">
-                                    <tbody>
-                                    <tr>
-                                        <td colspan="2"><b>Name :</b></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Coffee break</td>
-                                        <td>Breaks</td>
-                                    </tr>
-                                    </tbody>
-                                </table>
+                            <t:priority priority="${minor}" list="true"/>
+                        </td>
+                        <td><a href="#" style="">
+                            [TST-3] New task</a>
+                        </td>
+                        <td>
+                        </td>
+                        <td>
+                            <div class="progress" style="width: 50px">
+                                <div class="progress-bar progress-bar-success a-tooltip" role="progressbar"
+                                     aria-valuenow="0"
+                                     aria-valuemin="0" aria-valuemax="100" style="width:0%" title=""
+                                     data-original-title="0%"></div>
                             </div>
                         </td>
                     </tr>
-                    <tr class="projEvent">
-                        <td><img data-src="holder.js/30x30" class="avatar small"
-                                 src="<c:url value="/resources/img/avatar.png"/>"></td>
+                    <tr>
                         <td>
-                            <div class="time-div">01-04-2015 00:28</div>
-                            <a href="#">Jakub Romaniszyn</a>&nbsp;logged work <a href="#">[TST-1/2]
-                            Breaks</a>
-                            <div class="quote">1h</div>
+                            <t:type type="USER_STORY"/>
                         </td>
-                    </tr>
-                    <tr class="projEvent">
-                        <td><img data-src="holder.js/30x30" class="avatar small"
-                                 src="<c:url value="/resources/img/avatar.png"/>"></td>
                         <td>
-                            <div class="time-div">01-04-2015 00:28</div>
-                            <a href="#">Jakub Romaniszyn</a>&nbsp;added subtask <a href="#">[TST-1/2]
-                            Breaks</a></td>
-                    </tr>
-                    <tr class="projEvent">
-                        <td><img data-src="holder.js/30x30" class="avatar small"
-                                 src="<c:url value="/resources/img/avatar.png"/>"></td>
-                        <td>
-                            <div class="time-div">01-04-2015 00:27</div>
-                            <a href="#">Jakub Romaniszyn</a>&nbsp;added subtask <a href="#">[TST-1/1]
-                            Sub task </a></td>
-                    </tr>
-                    <tr class="projEvent">
-                        <td><img data-src="holder.js/30x30" class="avatar small"
-                                 src="<c:url value="/resources/img/avatar.png"/>"></td>
-                        <td>
-                            <div class="time-div">01-04-2015 00:26</div>
-                            <a href="#">Jakub Romaniszyn</a>&nbsp;linked tasks
-                            <div class="quote">TST-1 - TST-2</div>
+                            <%
+                                pageContext.setAttribute("critical", TaskPriority.CRITICAL);
+                            %>
+                            <t:priority priority="${critical}" list="true"/>
                         </td>
-                    </tr>
-                    <tr class="projEvent">
-                        <td><img data-src="holder.js/30x30" class="avatar small"
-                                 src="<c:url value="/resources/img/avatar.png"/>"></td>
-                        <td>
-                            <div class="time-div">01-04-2015 00:26</div>
-                            <a href="#">Jakub Romaniszyn</a>&nbsp;closed task <a href="#">[TST-2]
-                            Sample bug</a></td>
-                    </tr>
-                    <tr class="projEvent">
-                        <td><img data-src="holder.js/30x30" class="avatar small"
-                                 src="<c:url value="/resources/img/avatar.png"/>"></td>
-                        <td>
-                            <div class="time-div">01-04-2015 00:26</div>
-                            <a href="#">Jakub Romaniszyn</a>&nbsp;logged work <a href="#">[TST-2]
-                            Sample bug</a>
-                            <div class="quote">45m</div>
-                        </td>
-                    </tr>
-                    <tr class="projEvent">
-                        <td><img data-src="holder.js/30x30" class="avatar small"
-                                 src="<c:url value="/resources/img/avatar.png"/>"></td>
-                        <td>
-                            <div class="time-div">01-04-2015 00:26</div>
-                            <a href="#">Jakub Romaniszyn</a>&nbsp;created task <a href="#">[TST-2]
-                            Sample bug</a></td>
-                    </tr>
-                    <tr class="projEvent">
-                        <td><img data-src="holder.js/30x30" class="avatar small"
-                                 src="<c:url value="/resources/img/avatar.png"/>"></td>
-                        <td>
-                            <div class="time-div">01-04-2015 00:24</div>
-                            <a href="#">Jakub Romaniszyn</a>&nbsp;logged work <a href="#">[TST-1]
-                            Sample task</a>
-                            <div class="quote">3h</div>
-                        </td>
-                    </tr>
-                    <tr class="projEvent">
-                        <td><img data-src="holder.js/30x30" class="avatar small"
-                                 src="<c:url value="/resources/img/avatar.png"/>"></td>
-                        <td>
-                            <div class="time-div">01-04-2015 00:24</div>
-                            <a href="#">Jakub Romaniszyn</a>&nbsp;edited <a href="#">[TST-1] Sample
-                            task</a>
-                            <div class="quote">
-                                <table class="worklog_table">
-                                    <tbody>
-                                    <tr>
-                                        <td colspan="2"><b>Estimate :</b></td>
-                                    </tr>
-                                    <tr>
-                                        <td>0m</td>
-                                        <td>1d</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2"><b>Estimated :</b></td>
-                                    </tr>
-                                    <tr>
-                                        <td>false</td>
-                                        <td>true</td>
-                                    </tr>
-                                    </tbody>
-                                </table>
+                        <td><i class="subtasks fa fa-minus-square" data-task="TST-1" id="subtasksTST-1"></i>
+                            <a href="#" style="">
+                                [TST-1] Sample task</a>
+                            <div style="margin-top: 5px;border-top: 1px solid lightgray;" class="subtaskdiv"
+                                 id="TST-1subtask">
+                                <div style="padding:2px;"><t:type type="SUBTASK" list="true"/><a
+                                        href="#" class="subtaskLink ">[TST-1/1] Sub task </a></div>
+                                <div style="padding:2px;"><t:type type="IDLE" list="true"/> <a href="#"
+                                                                                               class="subtaskLink ">[TST-1/2]
+                                    Breaks</a></div>
+                                <div style="padding:2px;"><t:type type="SUBBUG" list="true"/> <a
+                                        href="#" class="subtaskLink closed">[TST-1/3] Some minor already finished
+                                    task bug</a></div>
                             </div>
                         </td>
-                    </tr>
-                    <tr class="projEvent">
-                        <td><img data-src="holder.js/30x30" class="avatar small"
-                                 src="<c:url value="/resources/img/avatar.png"/>"></td>
                         <td>
-                            <div class="time-div">01-04-2015 00:23</div>
-                            <a href="#">Jakub Romaniszyn</a>&nbsp;created task <a href="#">[TST-1]
-                            Sample task</a></td>
+                        </td>
+                        <td>
+                            <div class="progress" style="width: 50px">
+                                <div class="progress-bar  a-tooltip" role="progressbar" aria-valuenow="41.0"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100" style="width:41.0%" title="" data-original-title="41.0%"></div>
+                            </div>
+                        </td>
                     </tr>
                     </tbody>
                 </table>
             </div>
-            <div class="text-center">
-                <ul id="eventsTable_pagination_bottom" class="pagination">
-                    <li class="active"><a title="Current page is 1">1</a></li>
-                    <li class="pointer-cursor"><a title="Go to page 2">2</a></li>
-                    <li class="pointer-cursor"><a title="Go to page 3">3</a></li>
-                    <li class="pointer-cursor"><a title="Go to page 4">4</a></li>
-                    <li class="pointer-cursor"><a title="Go to next page">&gt;</a></li>
-                    <li class="pointer-cursor"><a title="Go to last page">&gt;&gt;</a></li>
-                </ul>
-            </div>
-
-        </div>
-        <div style="display: table-cell; padding-left: 30px">
-            <h3>
-                <a href="#" style="color: black">Tasks</a>
-                <div class="pull-right">
-                    <div>
-                        <a id="project-task-closed" href="#"><span
-                                style="display: inherit; font-size: small; font-weight: normal; color: black; float: right">
-									<i class="fa fa-check-square-o"></i> Hide closed tasks</span></a>
-                    </div>
-                    <div id="project-subtasks"
-                         style="display: inherit; font-size: small; font-weight: normal; color: black; float: right">
-                        Subtasks
-                        &nbsp; <i id="opensubtask" class="fa fa-plus-square clickable a-tooltip" title=""
-                                  data-original-title="Show all subtasks"></i> <i id="hidesubtask"
-                                                                                  class="fa fa-minus-square clickable a-tooltip"
-                                                                                  title=""
-                                                                                  data-original-title="Hide all subtasks"></i>
-                    </div>
-                </div>
-            </h3>
-            <table id="project-tasklist" class="table table-hover">
-                <tbody>
-                <tr>
-                    <td>
-                        <t:type type="USER_STORY" list="true"/>
-                    </td>
-                    <td>
-                        <%
-                            pageContext.setAttribute("major", TaskPriority.MAJOR);
-                        %>
-                        <t:priority priority="${major}" list="true"/>
-                    </td>
-                    <td><a href="#" style="">
-                        [TST-4] Some sample task</a>
-                    </td>
-                    <td>
-                    </td>
-                    <td>
-                        <div class="progress" style="width: 50px">
-                            <div class="progress-bar progress-bar-success a-tooltip" role="progressbar"
-                                 aria-valuenow="0"
-                                 aria-valuemin="0" aria-valuemax="100" style="width:0%" title=""
-                                 data-original-title="0%"></div>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <t:type type="TASK" list="true"/>
-                    </td>
-                    <%
-                        pageContext.setAttribute("minor", TaskPriority.MINOR);
-                    %>
-
-                    <td>
-                        <t:priority priority="${minor}" list="true"/>
-                    </td>
-                    <td><a href="#" style="">
-                        [TST-3] New task</a>
-                    </td>
-                    <td>
-                    </td>
-                    <td>
-                        <div class="progress" style="width: 50px">
-                            <div class="progress-bar progress-bar-success a-tooltip" role="progressbar"
-                                 aria-valuenow="0"
-                                 aria-valuemin="0" aria-valuemax="100" style="width:0%" title=""
-                                 data-original-title="0%"></div>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <t:type type="USER_STORY"/>
-                    </td>
-                    <td>
-                        <%
-                            pageContext.setAttribute("critical", TaskPriority.CRITICAL);
-                        %>
-                        <t:priority priority="${critical}" list="true"/>
-                    </td>
-                    <td><i class="subtasks fa fa-minus-square" data-task="TST-1" id="subtasksTST-1"></i>
-                        <a href="#" style="">
-                            [TST-1] Sample task</a>
-                        <div style="margin-top: 5px;border-top: 1px solid lightgray;" class="subtaskdiv"
-                             id="TST-1subtask">
-                            <div style="padding:2px;"><t:type type="SUBTASK" list="true"/><a
-                                    href="#" class="subtaskLink ">[TST-1/1] Sub task </a></div>
-                            <div style="padding:2px;"><t:type type="IDLE" list="true"/> <a href="#"
-                                                                                           class="subtaskLink ">[TST-1/2]
-                                Breaks</a></div>
-                            <div style="padding:2px;"><t:type type="SUBBUG" list="true"/> <a
-                                    href="#" class="subtaskLink closed">[TST-1/3] Some minor already finished
-                                task bug</a></div>
-                        </div>
-                    </td>
-                    <td>
-                    </td>
-                    <td>
-                        <div class="progress" style="width: 50px">
-                            <div class="progress-bar  a-tooltip" role="progressbar" aria-valuenow="41.0"
-                                 aria-valuemin="0"
-                                 aria-valuemax="100" style="width:41.0%" title="" data-original-title="41.0%"></div>
-                        </div>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
         </div>
     </div>
 </div>
@@ -500,7 +511,7 @@
                 target: "project-manage",
                 placement: "left",
                 yOffset: -14,
-                width:400,
+                width: 400,
                 onNext: function () {
                     $('#go-back').show();
                 }
@@ -521,7 +532,9 @@
 
         ]
     };
-    hopscotch.startTour(tour);
+    if (!detectmob()) {
+        hopscotch.startTour(tour);
+    }
     $(document).on("click", ".hopscotch-bubble-close", function () {
         $('#go-back').show();
     });

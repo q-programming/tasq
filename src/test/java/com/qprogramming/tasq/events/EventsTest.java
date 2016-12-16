@@ -19,6 +19,7 @@ import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.test.MockSecurityContext;
 import com.qprogramming.tasq.test.TestUtils;
+import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.joda.time.Period;
 import org.junit.Assert;
@@ -30,6 +31,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.context.MessageSource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -41,6 +43,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.StringWriter;
 import java.util.*;
 
 import static com.qprogramming.tasq.test.TestUtils.*;
@@ -124,7 +127,7 @@ public class EventsTest {
         event.setUnread(true);
         when(eventsRepoMock.findById(1L)).thenReturn(event);
         ResultData result = eventsController.readEvent(1L);
-        Assert.assertTrue(result.code.equals(ResultData.OK));
+        Assert.assertTrue(result.code.equals(ResultData.Code.OK));
         Assert.assertFalse(event.isUnread());
         verify(eventsRepoMock, times(1)).save(any(Event.class));
     }
@@ -142,7 +145,7 @@ public class EventsTest {
         list.add(event1);
         when(eventsRepoMock.findByAccountIdOrderByDateDesc(testAccount.getId())).thenReturn(list);
         ResultData result = eventsController.readAllEvents();
-        Assert.assertTrue(result.code.equals(ResultData.OK));
+        Assert.assertTrue(result.code.equals(ResultData.Code.OK));
         Assert.assertFalse(event.isUnread());
         verify(eventsRepoMock, times(2)).save(any(Event.class));
     }
@@ -154,7 +157,7 @@ public class EventsTest {
         event.setUnread(true);
         when(eventsRepoMock.findById(1L)).thenReturn(event);
         ResultData result = eventsController.deleteEvent(1L);
-        Assert.assertTrue(result.code.equals(ResultData.OK));
+        Assert.assertTrue(result.code.equals(ResultData.Code.OK));
         verify(eventsRepoMock, times(1)).delete(any(Event.class));
     }
 
@@ -171,7 +174,7 @@ public class EventsTest {
         list.add(event1);
         when(eventsRepoMock.findByAccountIdOrderByDateDesc(testAccount.getId())).thenReturn(list);
         ResultData result = eventsController.deleteAllEvents();
-        Assert.assertTrue(result.code.equals(ResultData.OK));
+        Assert.assertTrue(result.code.equals(ResultData.Code.OK));
         verify(eventsRepoMock, times(1)).delete(list);
     }
 
@@ -215,10 +218,10 @@ public class EventsTest {
     @Test
     public void addWatchEventTest() {
         Project project = new Project(PROJECT_NAME, testAccount);
-        testAccount.setEmail_notifications(true);
+        testAccount.setWatchnotification(true);
         Set<Account> watchers = new HashSet<Account>();
         Account newAccount = new Account(EMAIL, "", USERNAME, Roles.ROLE_POWERUSER);
-        newAccount.setEmail_notifications(true);
+        newAccount.setWatchnotification(true);
         watchers.add(testAccount);
         watchers.add(newAccount);
         WatchedTask watched = new WatchedTask();
@@ -234,9 +237,22 @@ public class EventsTest {
         when(watchedTaskSrvMock.getByTask(TEST_1)).thenReturn(watched);
         Utils.setHttpRequest(requestMock);
         eventsService.addWatchEvent(worklog, "", new Date());
-        eventsService.addProjectEvent(newAccount, LogType.ASSIGN_PROJ, project);
+        eventsService.addProjectEvent(newAccount, LogType.ASSIGN_TO_PROJ, project);
         verify(eventsRepoMock, times(2)).save(any(Event.class));
     }
+
+    @Test
+    public void addSystemEventTest() {
+        Account owner = TestUtils.createAccount("Jon", "Doe");
+        owner.setSystemnotification(true);
+        Utils.setHttpRequest(requestMock);
+        when(resourceMock.getBasicResourceMap()).thenReturn(new HashMap<>());
+        eventsService.addSystemEvent(owner, LogType.DELETED, "message", "moreDetails");
+        verify(eventsRepoMock, times(1)).save(any(Event.class));
+        verify(velMock, times(1)).mergeTemplate(anyString(), anyString(), any(VelocityContext.class), any(StringWriter.class));
+        verify(mailerMock, times(1)).sendMail(anyInt(), anyString(), anyString(), anyString(), anyMapOf(String.class, Resource.class));
+    }
+
 
     // @Test
     // public void addTimedWorkLogTest() {

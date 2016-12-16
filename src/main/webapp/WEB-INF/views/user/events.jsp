@@ -93,23 +93,27 @@
                 }
                 row += '</td><td><div class="eventSummary">';
                 //title
+                var link;
+                var moreInfoLink = '';
+                var eventtask = '<s:message code="event.task"/>';
+                var deleteevent = '<s:message code="event.delete"/>';
                 if (event.task != null) {
-                    var link = '<a href="#" class="showMorelink" >[' + event.task + '] - ' + event.who + '&nbsp; ' + getEventTypeMsg(event.logtype) + '</a>';
+                    link = '<a href="#" class="showMorelink" >[' + event.task + '] - ' + event.who + '&nbsp; ' + getEventTypeMsg(event.logtype) + '</a>';
+                    taskurl = '<c:url value="/task/"/>' + event.task;
+                    moreInfoLink = '<a href="' + taskurl + '"><i class="fa fa-lg fa-link fa-flip-horizontal a-tooltip" title="' + eventtask + '" style="color: #545454 !important"></i></a>'
+                }
+                else if (event.logtype == 'OTHER') {
+                    link = '<a href="#" class="showMorelink" data-event="' + event.id + '">' + event.who + '&nbsp; ' + event.message + '</a>';
                 }
                 else {
-                    var link = '<a href="#" class="showMorelink" data-event="' + event.id + '">' + event.who + '&nbsp; ' + getEventTypeMsg(event.logtype) + '</a>';
+                    link = '<a href="#" class="showMorelink" data-event="' + event.id + '">' + event.who + '&nbsp; ' + getEventTypeMsg(event.logtype) + '</a>';
                 }
                 row += link;
                 //more
-                var eventtask = '<s:message code="event.task"/>';
-                var deleteevent = '<s:message code="event.delete"/>';
                 var taskurl = "#";
-                if(event.task){
-                    taskurl = '<c:url value="/task/"/>' + event.task;
-                }
                 var buttons = '<div class="pull-right buttons_panel">'
-                        + '<a href="' + taskurl + '"><i class="fa fa-lg fa-link fa-flip-horizontal a-tooltip" title="' + eventtask + '" style="color: #545454 !important"></i></a>'
-                        + '<a href="#" data-event="' + event.id + '" class="delete-event a-tooltip"	title="' + deleteevent + '"> <i class="fa fa-lg fa-trash" style="color: #545454 !important"></i></a></div>';
+                    + moreInfoLink
+                    + '<a href="#" data-event="' + event.id + '" class="delete-event a-tooltip"	title="' + deleteevent + '"> <i class="fa fa-lg fa-trash" style="color: #545454 !important"></i></a></div>';
                 if (event.message) {
                     var content = '<blockquote class="eventMore quote">' + event.message + '</blockquote>';
                     row += content;
@@ -200,40 +204,40 @@
     });
 
     $("#deleteAll").click(
-            function () {
-                var url = '<c:url value="/events/deleteAll"/>';
-                var msg = $(this).data('msg');
-                var lang = $(this).data('lang');
-                bootbox.setDefaults({
-                    locale: lang
-                });
-                bootbox.confirm("<p align=\"center\">" + msg + "</p>",
-                        function (confirmation) {
-                            if (confirmation) {
-                                $.post(url, {}, function (result) {
-                                    if (result.code == 'ERROR') {
-                                        showError(result.message);
-                                    } else {
-                                        $('tr.eventRow').each(function (i, obj) {
-                                            obj.remove();
-                                        });
-                                        var row = '<tr class="eventRow centerPadded"><td colspan="3"><i><s:message code="event.noEvents"/></i></td></tr>';
-                                        $("#eventsTable").append(row);
-                                        showSuccess(result.message);
-                                    }
+        function () {
+            var url = '<c:url value="/events/deleteAll"/>';
+            var msg = $(this).data('msg');
+            var lang = $(this).data('lang');
+            bootbox.setDefaults({
+                locale: lang
+            });
+            bootbox.confirm("<p align=\"center\">" + msg + "</p>",
+                function (confirmation) {
+                    if (confirmation) {
+                        $.post(url, {}, function (result) {
+                            if (result.code == 'ERROR') {
+                                showError(result.message);
+                            } else {
+                                $('tr.eventRow').each(function (i, obj) {
+                                    obj.remove();
                                 });
+                                var row = '<tr class="eventRow centerPadded"><td colspan="3"><i><s:message code="event.noEvents"/></i></td></tr>';
+                                $("#eventsTable").append(row);
+                                showSuccess(result.message);
                             }
                         });
-            });
+                    }
+                });
+        });
 
     function getEventTypeMsg(type) {
         switch (type) {
-                <c:forEach items="${types}" var="enum_type">
+            <c:forEach items="${types}" var="enum_type">
             case "${enum_type}":
                 return '<s:message code="${enum_type.code}"/> ';
-                </c:forEach>
+            </c:forEach>
             default:
-                return 'not yet added ';
+                return '';
         }
     }
 

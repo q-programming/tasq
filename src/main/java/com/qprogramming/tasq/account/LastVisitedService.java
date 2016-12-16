@@ -86,4 +86,8 @@ public class LastVisitedService {
         List<LastVisited> list = lastVisitedRepository.findByItemIdAndTypeNotNull(task.getId());
         lastVisitedRepository.delete(list);
     }
+    public void delete(Project project) {
+        List<LastVisited> list = lastVisitedRepository.findByItemIdAndTypeNull(project.getProjectId());
+        lastVisitedRepository.delete(list);
+    }
 }

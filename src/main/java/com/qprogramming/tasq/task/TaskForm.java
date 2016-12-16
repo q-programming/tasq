@@ -25,6 +25,9 @@ public class TaskForm {
 
     private static final String NOT_BLANK_MESSAGE = "{notBlank.message}";
     private static final String TYPE_NOT_BLANK_MESSAGE = "{error.taskType}";
+    public static final String STORY_POINTS = "story_points";
+    public static final String REMAINING = "remaining";
+    public static final String NAME = "name";
 
     private String id;
 
@@ -53,7 +56,7 @@ public class TaskForm {
 
     private Long addToSprint;
 
-    private Long assignee;
+    private String assignee;
 
     private List<MultipartFile> files;
 
@@ -213,11 +216,11 @@ public class TaskForm {
         this.addToSprint = addToSprint;
     }
 
-    public Long getAssignee() {
+    public String getAssignee() {
         return assignee;
     }
 
-    public void setAssignee(Long assignee) {
+    public void setAssignee(String assignee) {
         this.assignee = assignee;
     }
 

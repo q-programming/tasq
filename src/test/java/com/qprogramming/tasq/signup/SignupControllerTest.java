@@ -55,7 +55,7 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class SignupControllerTest {
 
-    private static final String PASSWORD = "password";
+    private static final String PASSWORD = "Password1";
     private static final String EMAIL = "user@test.com";
     private static final String NEW_EMAIL = "newuser@test.com";
     @Rule
@@ -108,7 +108,7 @@ public class SignupControllerTest {
     public void setUp() {
         accountSrv = new AccountService(accRepoMock, msgMock, velocityMock, resourceMock, mailerMock, encoderMock,
                 appSrvMock);
-        signupCtr = new SignupController(accountSrv, msgMock, themeSrvMock, appSrvMock);
+        signupCtr = new SignupController(accountSrv, msgMock, themeSrvMock, appSrvMock, mailerMock);
         testAccount = TestUtils.createAccount();
         testAccount.setLanguage("en");
         when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("MESSAGE");
@@ -187,11 +187,29 @@ public class SignupControllerTest {
     }
 
     @Test
+    public void SignupPasswordToWeakTest() {
+        String weak = "weak";
+        String longer = "verylongpasswordbutmissingAdigit";
+        SignupForm form = fillForm();
+        Errors errors = new BeanPropertyBindingResult(form, "form");
+        form.setPassword(weak);
+        form.setConfirmPassword(weak);
+        signupCtr.signup(form, errors, raMock, requestMock);
+        Assert.assertTrue(errors.hasErrors());
+        form = fillForm();
+        errors = new BeanPropertyBindingResult(form, "form");
+        form.setPassword(longer);
+        form.setConfirmPassword(longer);
+        signupCtr.signup(form, errors, raMock, requestMock);
+        Assert.assertTrue(errors.hasErrors());
+    }
+
+    @Test
     public void resetSubmitNotMatchingTest() {
         PasswordResetForm form = fillPasswordForm();
         Errors errors = new BeanPropertyBindingResult(form, "form");
         form.setConfirmPassword("wrong");
-        signupCtr.resetSubmit(form, errors, raMock,requestMock);
+        signupCtr.resetSubmit(form, errors, raMock, requestMock);
         Assert.assertTrue(errors.hasErrors());
     }
 
@@ -201,7 +219,7 @@ public class SignupControllerTest {
 
         PasswordResetForm form = fillPasswordForm();
         Errors errors = new BeanPropertyBindingResult(form, "form");
-        signupCtr.resetSubmit(form, errors, raMock,requestMock);
+        signupCtr.resetSubmit(form, errors, raMock, requestMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
     }
@@ -213,7 +231,7 @@ public class SignupControllerTest {
         when(encoderMock.encode(any(CharSequence.class))).thenReturn("encodedPassword");
         PasswordResetForm form = fillPasswordForm();
         Errors errors = new BeanPropertyBindingResult(form, "form");
-        signupCtr.resetSubmit(form, errors, raMock,requestMock);
+        signupCtr.resetSubmit(form, errors, raMock, requestMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
     }

@@ -22,48 +22,33 @@ public class Account implements java.io.Serializable, UserDetails {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "account_seq_gen")
     @SequenceGenerator(name = "account_seq_gen", sequenceName = "account_id_seq", allocationSize = 1)
     private Long id;
-
     @Column(unique = true)
     @NotEmpty
     private String username;
-
     @Column(unique = true)
     private String email;
-
     @JsonIgnore
     private String password;
-
     @Column
     private boolean confirmed = false;
-
     @Column
     private String language = "en";
-
     @Column
     private String name;
-
     @Column
     private String surname;
-
     @Enumerated(EnumType.STRING)
     private Roles role;
-
     @Column
     private String uuid;
-
     @Column
     private Boolean systemnotification = false;
     @Column
     private Boolean commentnotification = false;
     @Column
     private Boolean watchnotification = false;
-
-    @Column
-    private boolean email_notifications;
-
     @Column(columnDefinition = "boolean default false")
     private Boolean tour = false;
-
     @ManyToOne
     @JoinColumn(name = "theme")
     private Theme theme;
@@ -72,11 +57,20 @@ public class Account implements java.io.Serializable, UserDetails {
     /**
      * [0] Task ID [1] active task start time [2] task description
      */
+//    @Column
+//    private Object[] active_task;
+
     @Column
-    private Object[] active_task;
+    private String activeTask;
+
+    @Column
+    private DateTime activeTaskTimer;
 
     @Column
     private String activeProject;
+
+    @Column
+    private Boolean smallSidebar = false;
 
     protected Account() {
 
@@ -205,14 +199,6 @@ public class Account implements java.io.Serializable, UserDetails {
         this.uuid = uuid;
     }
 
-    public boolean getEmail_notifications() {
-        return email_notifications;
-    }
-
-    public void setEmail_notifications(boolean email_notifications) {
-        this.email_notifications = email_notifications;
-    }
-
     public boolean getSystemnotification() {
         return systemnotification == null ? false : systemnotification;
     }
@@ -237,20 +223,9 @@ public class Account implements java.io.Serializable, UserDetails {
         this.watchnotification = watchnotification;
     }
 
-    public Object[] getActive_task() {
-        return active_task;
-    }
-
-    public void setActive_task(Object[] task) {
-        active_task = task;
-    }
-
-    public Object getActive_task_time() {
-        return active_task[1];
-    }
-
     public void startTimerOnTask(Task task) {
-        active_task = new Object[]{task.getId(), new DateTime(), task.getId() + " - " + task.getName()};
+        this.activeTask = task.getId();
+        this.activeTaskTimer = new DateTime();
     }
 
     public String getActiveProject() {
@@ -261,15 +236,32 @@ public class Account implements java.io.Serializable, UserDetails {
         this.activeProject = activeProject;
     }
 
-    public void clearActive_task() {
-        active_task = new Object[]{};
+    public void clearActiveTask() {
+        this.activeTask = null;
+        this.activeTaskTimer = null;
     }
 
-    public long getActive_task_seconds() {
-        if (active_task != null && active_task.length > 0 && !active_task[0].equals("")) {
-            return ((DateTime) active_task[1]).getMillis() / 1000;
+    public long getActiveTaskSeconds() {
+        if (activeTaskTimer != null) {
+            return activeTaskTimer.getMillis() / 1000;
         }
         return 0;
+    }
+
+    public DateTime getActiveTaskTimer() {
+        return activeTaskTimer;
+    }
+
+    public void setActiveTaskTimer(DateTime activeTaskTimer) {
+        this.activeTaskTimer = activeTaskTimer;
+    }
+
+    public String getActiveTask() {
+        return activeTask;
+    }
+
+    public void setActiveTask(String activeTask) {
+        this.activeTask = activeTask;
     }
 
     public boolean getIsUser() {
@@ -397,38 +389,19 @@ public class Account implements java.io.Serializable, UserDetails {
         return true;
     }
 
+    public Boolean getSmallSidebar() {
+        return smallSidebar;
+    }
+
+    public void setSmallSidebar(Boolean smallSidebar) {
+        this.smallSidebar = smallSidebar;
+    }
+
     public Boolean hadTour() {
         return tour;
     }
 
     public void setTour(Boolean tour) {
         this.tour = tour;
-    }
-
-    public class ActiveTask {
-        private String taskID;
-        private DateTime started;
-
-        public ActiveTask(String taskID) {
-            this.taskID = taskID;
-            this.started = new DateTime();
-        }
-
-        public String getTaskID() {
-            return taskID;
-        }
-
-        public void setTaskID(String taskID) {
-            this.taskID = taskID;
-        }
-
-        public DateTime getStarted() {
-            return started;
-        }
-
-        public void setStarted(DateTime started) {
-            this.started = started;
-        }
-
     }
 }

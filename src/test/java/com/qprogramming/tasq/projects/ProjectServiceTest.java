@@ -1,4 +1,4 @@
-package com.qprogramming.tasq.project;
+package com.qprogramming.tasq.projects;
 
 import com.qprogramming.tasq.account.*;
 import com.qprogramming.tasq.projects.NewProjectForm;
@@ -62,7 +62,7 @@ public class ProjectServiceTest {
 
     @Test
     public void findByNameTest() {
-        when(projRepoMock.findByName(PROJECT_NAME)).thenReturn(testProject);
+        when(projRepoMock.findByNameIgnoreCase(PROJECT_NAME)).thenReturn(testProject);
         Assert.assertNotNull(projSrv.findByName(PROJECT_NAME));
     }
 

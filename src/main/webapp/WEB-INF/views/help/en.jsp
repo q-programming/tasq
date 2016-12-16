@@ -476,9 +476,7 @@
                     for team<br></li>
                 <li><b>Story points</b> recommended for agile projects. Each
                     task then is measured with points - which measures complexity of
-                    this task. Each team can freely translate how point is translated
-                    to work time. It's important to remember that 1SP is <b>not
-                        necessary</b> 1h!
+                    this task. More on <b><a href="#scrum-storypoints">story points</a></b>
                 </li>
             </ul>
             <p>Please note that it's not recommended to switch how progress
@@ -529,6 +527,15 @@
                     <i class="fa fa-user-times"></i>
                 </button>
                 button in users row
+            </p>
+            <security:authorize access="hasRole('ROLE_ADMIN')">
+                <h4>Deleting project</h4>
+                <span class="admin-button">Admin</span>
+                <p>Administrator is able to remove whole project. This option should be handled with care, as this
+                    action will purge all project information. System event will be sent to all people that were
+                    participating in that project<br>In order to commit project deletion it's ID and Project name has to
+                    be inputed </p>
+            </security:authorize>
             <hr>
             <a class="anchor" id="task"></a>
             <%-----------------------------------------TASKS---------------------------------------------%>
@@ -798,9 +805,11 @@
                 <tr>
                     <td><b><s:message code="task.estimate"/></b></td>
                     <td>Time estimation of how much this task can take. Standard
-                        format should be used : *w *d *h *m (weeks, days, hours, minutes ;
+                        format should be used : *d *h *m (weeks, days, hours, minutes ;
                         where * is any number )<br>
-                        <i class="fa fa-exclamation-circle"></i>&nbsp;If only number is inputted , default (h) hours will be used.
+                        <i class="fa fa-exclamation-circle"></i>&nbsp;If only number is inputted , default (h) hours
+                        will be used. Also values longer than 4 weeks ( 28 days ) will be rejected as it's not reccomend
+                        to plan so long tasks , and they should be splitted to smaller once
                     </td>
                 </tr>
                 <tr>
@@ -808,6 +817,7 @@
                     <td>Complexity measurement of newly created task. This value
                         can be changed later on via Edit menu, from Details screen , or
                         from Backlog view
+                        <br> More on <b><a href="#scrum-storypoints">story points</a></b>
                         <p></p>
                         <p>
                             <i class="fa fa-exclamation-circle"></i>&nbsp;If task is not
@@ -931,6 +941,11 @@
                     information about task removal will be added for project.<br>
                     All other information will be lost and cannot be restored!</u>
             </p>
+            <p>When deleting task, if other users are still working on it ( have active timer ) they will be listed.<br>
+                If user has role 'Power User' he will then be able to "Force delete" task which will stop all active
+                timers and remove task. <br>
+                After deletion assignee and task owner will be notified about that event (if current user
+                is one of those , he of course won't recieve notification)</p>
 
             <hr>
             <%-------------------------IMPORTING ------------------------------%>
@@ -1028,16 +1043,18 @@
                     <i class="fa fa-lg fa-calendar"></i> Log work
                 </button>
                 button to show logging modal window.<br>On it , input how much
-                time was spent on this task in format <i>*w *d *h *m</i> (weeks,
-                days, hours, minutes ; where * is any number ).<br>If work was
+                time was spent on this task in format <i>*d *h *m</i> (days, hours, minutes ; where * is any number
+                ).<br><i class="fa fa-exclamation-circle"></i>&nbsp;It's not possible to log more than 5 days at once to
+                force user to log work daily
+                <br>If work was
                 done in other date ( for ex. yesterday ) , mark correct date and
                 time in <b>Date</b> and <b>Time</b> fields.<br> <br>By
                 default remaining time will be automatically reduced, or it can be
                 manually set by selecting <b><input type="radio"
                                                     name="estimate_reduce" id="estimate_manual" value="auto">
-                Set manually</b> radio button and inputing remaining time ( same format
+                Set manually</b> radio button and inputting remaining time ( same format
                 applies).<br>The remaining time can never be less than 0.<br>If
-                more work was logged in task, it will be marked on task detials
+                more work was logged in task, it will be marked on task details
                 screen accordingly.
             </p>
             <a class="anchor" id="taskstatus"></a>
@@ -1081,8 +1098,9 @@
             </p>
             <p>
                 <i class="fa fa-exclamation-circle"></i>&nbsp;If more than one day
-                is on timer , user will be asked to confirm if he in fact would like
-                to log this time. Please remember that Tasker uses 8h = 1d
+                is on timer , user will be redirected to task page and timer canceled, because it's not possible to log
+                more than 1 day at once.
+                Please remember that Tasker uses 8h = 1d
                 conversion. This can be changed by admin
             <hr>
             <%--------------------------------SUBTASK ------------------------------------%>
@@ -1151,6 +1169,15 @@
             very good in tracking how team progresses within new areas or known
             ones, but with new project
             </p>
+            <a class="anchor" id="scrum-storypoints"></a>
+            <h4>Story points</h4>
+            <p>Each team can freely translate how point is translated
+                to work time. It's important to remember that 1SP is <b>not
+                    necessary</b> 1h!<br>To find 1 story point, try to take one of finished stories which was
+                smallest and quickest to do and try to estimate other based on hom much work is needed in them.
+                <br>Available values of story points is modified fibbonaci sequence : 1, 2 ,3 ,5 ,8 ,13 ,20 ,40 ,100
+                where
+                points above 13 indicate that story is big and could possibly divided into smaller onece</p>
             <a class="anchor" id="scrum-backlog"></a>
             <h4>
                 <i class="fa fa-book"></i> Backlog

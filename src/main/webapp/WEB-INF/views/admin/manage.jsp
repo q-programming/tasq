@@ -30,7 +30,7 @@
     <div>
         <div class="mod-header">
             <h5 class="mod-header-title">
-                <i class="fa fa-fw fa-caret-down toggler" data-tab="appnameToggle"></i>
+                <i class="fa fa-caret-down toggler" data-tab="appnameToggle"></i>
 				<span class="mod-header-title-txt">
 					<i class="fa fa-users"></i>&nbsp;<s:message code="manage.prop.name" text="Application name"/>
 				</span>
@@ -56,7 +56,7 @@
               action="<c:url value="/manage/logoUpload"/>" method="POST">
             <div class="mod-header">
                 <h5 class="mod-header-title">
-                    <i class="fa fa-fw fa-caret-down toggler" data-tab="avatarToggle"></i>
+                    <i class="fa fa-caret-down toggler" data-tab="avatarToggle"></i>
 					<span class="mod-header-title-txt">
 						<i class="fa fa-picture-o"></i>&nbsp;<s:message code="manage.logo" text="Application Avatar"/>
 					</span>
@@ -89,7 +89,7 @@
     <div>
         <div class="mod-header">
             <h5 class="mod-header-title">
-                <i class="fa fa-fw fa-caret-down toggler" data-tab="urlToggle"></i>
+                <i class="fa fa-caret-down toggler" data-tab="urlToggle"></i>
 				<span class="mod-header-title-txt">
 					<i class="fa fa-link"></i>&nbsp;<s:message code="manage.prop.url" text="Application url"/>
 				</span>
@@ -114,7 +114,7 @@
     <div>
         <div class="mod-header">
             <h5 class="mod-header-title">
-                <i class="fa fa-fw fa-caret-down toggler" data-tab="dirToggle"></i>
+                <i class="fa fa-caret-down toggler" data-tab="dirToggle"></i>
 				<span class="mod-header-title-txt">
 					<i class="fa fa-folder-open"></i>&nbsp;<s:message code="manage.prop.dir"
                                                                       text="Application directory"/>
@@ -139,7 +139,7 @@
     <div>
         <div class="mod-header">
             <h5 class="mod-header-title">
-                <i class="fa fa-fw fa-caret-down toggler" data-tab="langToggle"></i>
+                <i class="fa fa-caret-down toggler" data-tab="langToggle"></i>
 				<span class="mod-header-title-txt">
 					<i class="fa fa-globe"></i>&nbsp;<s:message code="manage.prop.defaultLang" text="Default language"/>
 				</span>
@@ -169,7 +169,7 @@
     <div>
         <div class="mod-header">
             <h5 class="mod-header-title">
-                <i class="fa fa-fw fa-caret-down toggler" data-tab="roleToggle"></i>
+                <i class="fa fa-caret-down toggler" data-tab="roleToggle"></i>
 				<span class="mod-header-title-txt">
 					<i class="fa fa-users"></i>&nbsp;<s:message code="manage.prop.defaulRole" text="Default Role"/>
 				</span>
@@ -201,7 +201,7 @@
     <div>
         <div class="mod-header">
             <h5 class="mod-header-title">
-                <i class="fa fa-fw fa-caret-down toggler" data-tab="emailToggle"></i>
+                <i class="fa fa-caret-down toggler" data-tab="emailToggle"></i>
 				<span class="mod-header-title-txt">
 					<i class="fa fa-envelope"></i>&nbsp;<s:message code="manage.prop.email"/>
 				</span>
@@ -305,7 +305,7 @@
     <div>
         <div class="mod-header">
             <h5 class="mod-header-title">
-                <i class="fa fa-fw fa-caret-down toggler" data-tab="themeToggle"></i>
+                <i class="fa fa-caret-down toggler" data-tab="themeToggle"></i>
 				<span class="mod-header-title-txt">
 					<i class="fa fa-paint-brush"></i> <s:message code="theme.themes"/>
 				</span>
@@ -472,7 +472,7 @@
     });
 
     $("#getURL").click(function () {
-        $("#url").val(getAbsolutePath());
+        $("#url").val(getURLAbsolutePath());
     });
 
     $("#theme-action").click(function () {
@@ -536,12 +536,5 @@
 
         }
     }
-    function getAbsolutePath() {
-        var loc = window.location;
-        var pathName = loc.pathname.substring(0, loc.pathname.lastIndexOf('/'));
-        var pathName = pathName.substring(0, pathName.lastIndexOf('/'));
-        return loc.href.substring(0, loc.href.length - ((loc.pathname + loc.search + loc.hash).length - pathName.length));
-    }
-
 </script>
 

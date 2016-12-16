@@ -19,7 +19,7 @@
 <c:if test="${user.language ne 'en' }">
     <script src="<c:url value="/resources/js/trumbowyg.${user.language}.min.js" />"></script>
 </c:if>
-<div class="white-frame" style="overflow: auto;">
+<div class="white-frame">
     <h2>
         <a href="<c:url value="/project/${project.projectId}"/>">[${project.projectId}]
             ${project.name}</a>
@@ -74,7 +74,7 @@
                                     priority="${enum_priority}"/></a></li>
                         </c:forEach>
                     </ul>
-					<span class="help-block"><s:message
+                    <span class="help-block"><s:message
                             code="project.manage.priority.help"/></span> <input
                         name="default_priority" id="default_priority" type="hidden"
                         value="${project.default_priority}">
@@ -106,7 +106,7 @@
                             </c:if>
                         </c:forEach>
                     </ul>
-					<span class="help-block"><s:message
+                    <span class="help-block"><s:message
                             code="project.manage.type.help"/></span> <input name="default_type"
                                                                             id="default_type" type="hidden"
                                                                             value="${project.default_type}">
@@ -117,7 +117,7 @@
                     <b><s:message code="project.manage.assignee"/></b>
                 </h5>
                 <input id="assign_taskID" name="defaultAssignee" type="hidden" value="${project.defaultAssigneeID}">
-                <input name="account" class="form-control" style="width:250px" id="assignee_input"
+                <input name="account" class="form-control" style="width:400px" id="assignee_input"
                        value="${defaultAssignee}">
                 <div id="assignUsersLoader" style="display: none">
                     <i class="fa fa-cog fa-spin"></i>
@@ -148,8 +148,8 @@
                                <c:if test="${project.workingWeekends}">checked</c:if>> <s:message
                             code="project.manage.workingweekends"
                             htmlEscape="false"/>
-                    <span class="help-block"><s:message
-                            code="project.manage.workingweekends.help" htmlEscape="false"/></span>
+                        <span class="help-block"><s:message
+                                code="project.manage.workingweekends.help" htmlEscape="false"/></span>
                     </label>
                 </h5>
             </div>
@@ -161,8 +161,8 @@
             </div>
             <div class="row marginleft_0 paddedleft40">
                 <input id="holidayInput" class="form-control datepicker pull-left" style="width: 200px">
-                    <span id="addHoliday" class="btn btn-default clickable pull-left"><i
-                            class="fa fa-calendar-plus-o"></i></span>
+                <button id="addHoliday" class="btn btn-default clickable pull-left"><i
+                        class="fa fa-calendar-plus-o"></i></button>
             </div>
             <div class="row marginleft_0 paddedleft40 margintop_20">
                 <table id="holidaysTable" class="table table-condensed table-hover table-striped table-bordered"
@@ -192,26 +192,28 @@
         </h3>
     </div>
     <%-----------ADMINS --%>
-    <div class="paddedleft40">
+    <div class="paddedleft40 row marginright_0">
         <div class="mod-header">
             <h5 class="mod-header-title">
                 <s:message code="project.admins"/>
             </h5>
         </div>
-        <table class="table">
-            <c:forEach items="${project.administrators}" var="admin">
-                <c:if test="${admin.id == user.id || is_admin}">
-                    <c:set var="can_edit" value="true"/>
-                </c:if>
-                <tr>
-                    <td><img data-src="holder.js/30x30"
-                             style="height: 30px; float: left; padding-right: 10px;"
-                             src="<c:url value="/../avatar/${admin.id}.png"/>"/>${admin}</td>
-                </tr>
-            </c:forEach>
-        </table>
+        <div class="col-md-12 marginright_0">
+            <table class="table">
+                <c:forEach items="${project.administrators}" var="admin">
+                    <c:if test="${admin.id == user.id || is_admin}">
+                        <c:set var="can_edit" value="true"/>
+                    </c:if>
+                    <tr>
+                        <td><img data-src="holder.js/30x30"
+                                 style="height: 30px; float: left; padding-right: 10px;"
+                                 src="<c:url value="/../avatar/${admin.id}.png"/>"/>${admin}</td>
+                    </tr>
+                </c:forEach>
+            </table>
+        </div>
     </div>
-    <div class="paddedleft40">
+    <div class="paddedleft40 row marginright_0">
         <div class="mod-header">
             <h5 class="mod-header-title">
                 <s:message code="project.members"/>
@@ -226,14 +228,14 @@
             </div>
             <div class="padding-left5 pull-left" style="display: none" id="add_div">
                 <div>
-                    <div class="input-group" style="width: 250px;">
+                    <div class="input-group" style="width: 400px;">
                         <input type="text" class="form-control input-sm"
                                placeholder="<s:message code="project.participant.hint"/>"
                                id="participant">
-							<span class="input-group-btn">
+                        <span class="input-group-btn">
 							<i id="participantsLoader" class="fa fa-lg fa-cog fa-spin" style="display:none"></i>
 							</span>
-							 <span class="input-group-btn">
+                        <span class="input-group-btn">
 								<button type="button" id="dismiss_add" class="close theme-close"
                                         style="padding-left: 5px">&times;</button>
 							</span>
@@ -254,68 +256,89 @@
         </div>
     </div>
     <%------------PARTICIPANTS --------------------------%>
-    <div class="paddedleft40">
-        <table class="table">
-            <c:forEach items="${project.participants}" var="participant">
-                <tr>
-                    <td><img data-src="holder.js/30x30"
-                             style="height: 30px; float: left; padding-right: 10px;"
-                             src="<c:url value="/../avatar/${participant.id}.png"/>"/>${participant}
-						<span style="color: #737373">(<s:message
+    <div class="paddedleft40 row marginright_0">
+        <div class="col-md-12">
+            <table class="table">
+                <c:forEach items="${project.participants}" var="participant">
+                    <tr>
+                        <td><img data-src="holder.js/30x30"
+                                 style="height: 30px; float: left; padding-right: 10px;"
+                                 src="<c:url value="/../avatar/${participant.id}.png"/>"/>${participant}
+                        <span style="color: #737373">(<s:message
                                 code="${participant.role.code}"/>)
 					</span></td>
-                    <td><c:if test="${can_edit}">
-                        <div class="pull-right">
+                        <td><c:if test="${can_edit}">
                             <div class="pull-right">
-                                <form action="<c:url value="/project/userRemove"/>"
-                                      method="post">
-                                    <input type="hidden" name="project_id" value="${project.projectId}">
-                                    <input type="hidden" name="account_id"
-                                           value="${participant.id}">
-                                    <button type="submit"
-                                            class="btn btn-default btn-sm a-tooltip "
-                                            title="<s:message code="project.participant.remove"/>">
-                                        <i class="fa fa-user-times"></i>
-                                    </button>
-                                </form>
+                                <div class="pull-right">
+                                    <form action="<c:url value="/project/userRemove"/>"
+                                          method="post">
+                                        <input type="hidden" name="project_id" value="${project.projectId}">
+                                        <input type="hidden" name="account_id"
+                                               value="${participant.id}">
+                                        <button type="submit"
+                                                class="btn btn-default btn-sm a-tooltip "
+                                                title="<s:message code="project.participant.remove"/>">
+                                            <i class="fa fa-user-times"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                                <c:if
+                                        test="${t:contains(project.administrators,participant)}">
+                                    <div class="pull-right">
+                                        <form action="<c:url value="/project/removeAdmin"/>"
+                                              method="post">
+                                            <input type="hidden" name="project_id" value="${project.projectId}">
+                                            <input type="hidden" name="account_id"
+                                                   value="${participant.id}">
+                                            <button type="submit"
+                                                    class="btn btn-default btn-sm a-tooltip "
+                                                    title="<s:message code="project.participant.admin.remove"/>">
+                                                <i class="fa fa-minus"></i><i class="fa fa-wrench"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </c:if>
+                                <c:if
+                                        test="${not t:contains(project.administrators,participant)}">
+                                    <div class="pull-right">
+                                        <form action="<c:url value="/project/grantAdmin"/>"
+                                              method="post">
+                                            <input type="hidden" name="project_id" value="${project.projectId}">
+                                            <input type="hidden" name="account_id"
+                                                   value="${participant.id}">
+                                            <button type="submit"
+                                                    class="btn btn-default btn-sm a-tooltip "
+                                                    title="<s:message code="project.participant.admin.add"/>">
+                                                <i class="fa fa-plus"></i><i class="fa fa-wrench"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </c:if>
                             </div>
-                            <c:if
-                                    test="${t:contains(project.administrators,participant)}">
-                                <div class="pull-right">
-                                    <form action="<c:url value="/project/removeAdmin"/>"
-                                          method="post">
-                                        <input type="hidden" name="project_id" value="${project.projectId}">
-                                        <input type="hidden" name="account_id"
-                                               value="${participant.id}">
-                                        <button type="submit"
-                                                class="btn btn-default btn-sm a-tooltip "
-                                                title="<s:message code="project.participant.admin.remove"/>">
-                                            <i class="fa fa-minus"></i><i class="fa fa-wrench"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </c:if>
-                            <c:if
-                                    test="${not t:contains(project.administrators,participant)}">
-                                <div class="pull-right">
-                                    <form action="<c:url value="/project/grantAdmin"/>"
-                                          method="post">
-                                        <input type="hidden" name="project_id" value="${project.projectId}">
-                                        <input type="hidden" name="account_id"
-                                               value="${participant.id}">
-                                        <button type="submit"
-                                                class="btn btn-default btn-sm a-tooltip "
-                                                title="<s:message code="project.participant.admin.add"/>">
-                                            <i class="fa fa-plus"></i><i class="fa fa-wrench"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </c:if>
-                        </div>
-                    </c:if></td>
-                </tr>
-            </c:forEach>
-        </table>
+                        </c:if></td>
+                    </tr>
+                </c:forEach>
+            </table>
+        </div>
+    </div>
+    <div>
+        <div class="mod-header">
+            <h3 class="mod-header-title">
+                <s:message code="project.delete"/>
+            </h3>
+        </div>
+        <div class="paddedleft40">
+             <span class="help-block"><i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+                 <s:message code="project.delete.help" htmlEscape="false"/>
+             </span>
+            <div>
+                <button id="remove-project" class="btn btn-danger"
+                        data-toggle="modal" data-target="#delete-project-modal" data-backdrop="static"
+                        data-keyboard="false">
+                    <i class="fa fa-trash-o" aria-hidden="true"></i>&nbsp;<s:message code="project.delete"/>
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 <div class="modal fade" id="editDescription" role="dialog"
@@ -343,6 +366,43 @@
                     <button id="" class="btn btn-default" type="submit">
                         <i class="fa fa-pencil"></i>&nbsp;<s:message code="main.edit"/>
                     </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="delete-project-modal" role="dialog"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="delete-form" action="<c:url value="/project/${project.projectId}/delete"/>" method="post">
+                <div class="modal-header theme">
+                    <h4 class="modal-title">
+                        <i class="fa fa-trash-o" aria-hidden="true"></i>&nbsp;<s:message code="project.delete"/>&nbsp;[${project.projectId}] ${project.name}
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        <i class="fa fa-lg fa-exclamation-triangle" style="display: initial;"></i>&nbsp<s:message code="project.delete.confirm.help" htmlEscape="false"/>
+                    </p>
+                    <div class="form-group">
+                        <label for="deleteProjectName"><s:message code="project.id"/>:</label>
+                        <input class="form-control" style="width: 150px;"
+                               name="projectId" id="deleteProjectid">
+                    </div>
+                    <div class="form-group">
+                        <label for="deleteProjectName"><s:message code="project.name"/>:</label>
+                        <input class="form-control"
+                               name="projectname" id="deleteProjectName">
+                    </div>
+                    <div id="deleteProjectError" style="display: none; color: red"><s:message code="project.delete.confirm"/></div>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn" data-dismiss="modal"><s:message
+                            code="main.cancel"/></a>
+                    <span id="deleteProjectSubmit" class="btn btn-danger clickable">
+                        <i class="fa fa-trash-o" aria-hidden="true"></i>&nbsp;<s:message code="project.delete"/>
+                    </span>
                 </div>
             </form>
         </div>
@@ -378,7 +438,7 @@
             lang: '${user.language}',
             fullscreenable: false,
             btns: ['formatting',
-                '|', ['bold', 'italic', 'underline', 'strikethrough', 'preformatted' ],
+                '|', ['bold', 'italic', 'underline', 'strikethrough', 'preformatted'],
                 '|', 'link',
                 '|', 'insertImage',
                 '|', 'btnGrp-justify',
@@ -398,8 +458,8 @@
                     response($.map(result, function (item) {
                         return {
                             // following property gets displayed in drop down
-                            label: item.name + " " + item.surname,
-                            value: item.email,
+                            label: item.name + " " + item.surname + " (" + item.username + ")",
+                            value: item.email
                         }
                     }));
                 });
@@ -435,16 +495,7 @@
                 var term = request.term;
                 var projectID = "${project.projectId}";
                 if (term in cache) {
-                    var results = [];
-                    var data =cache[term];
-                    $.each(data, function (i, item) {
-                        var itemToAdd = {
-                            value: item.email,
-                            label: item.name + " " + item.surname,
-                            id: item.id
-                        };
-                        results.push(itemToAdd);
-                    });
+                    response(cache[term]);
                     return;
                 }
                 $("#assignUsersLoader").show();
@@ -455,7 +506,7 @@
                     $.each(data, function (i, item) {
                         var itemToAdd = {
                             value: item.email,
-                            label: item.name + " " + item.surname,
+                            label: item.name + " " + item.surname + " (" + item.username + ")",
                             id: item.id
                         };
                         results.push(itemToAdd);
@@ -508,6 +559,39 @@
             }
         }
 
+        //delete project
+        $("#deleteProjectSubmit").click(function (e) {
+            e.preventDefault();
+            var id = "${project.projectId}";
+            var name = "${project.name}";
+            var valid = true;
+            var inputedID = $("#deleteProjectid").val();
+            var inputedName = $("#deleteProjectName").val();
+            if (inputedID != id) {
+                $("#deleteProjectid").parent().addClass("has-error");
+                valid = false;
+            } else {
+                $("#deleteProjectid").parent().removeClass("has-error");
+                valid = true;
+            }
+            if (inputedName != name) {
+                $("#deleteProjectName").parent().addClass("has-error");
+                valid = false;
+            } else {
+                $("#deleteProjectName").parent().removeClass("has-error");
+                valid = true;
+            }
+            if (valid) {
+                $("#deleteProjectError").hide();
+                $("#delete-form").submit();
+            }else{
+                $("#deleteProjectError").show();
+            }
+
+
+        })
+
+
         $("#add_button").click(function () {
             $('#add_button_div').toggle();
             $('#add_div').toggle("slide");
@@ -520,9 +604,16 @@
         // project workdays
         $(".datepicker").datepicker({
             dateFormat: 'dd-mm-yy',
-            firstDay: 1
+            firstDay: 1,
+            regional: ['${user.language}']
+        }).change(function () {
+            if (!isValidDate($(this).val())) {
+                showWarning("<s:message code="warning.date.invalid"/>");
+                $("#addHoliday").prop('disabled', true);
+            } else {
+                $("#addHoliday").prop('disabled', false);
+            }
         });
-        $('.datepicker').datepicker($.datepicker.regional['${user.language}']);
 
         $("#addHoliday").click(function () {
             var holiday = $("#holidayInput").val();

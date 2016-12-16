@@ -3,6 +3,7 @@ package com.qprogramming.tasq.task.importexport;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.Roles;
+import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
@@ -75,6 +76,8 @@ public class ImportExportControllerTest {
     @Mock
     private AccountService accountServiceMock;
     @Mock
+    private AgileService agileSrvMock;
+    @Mock
     private MockSecurityContext securityMock;
     @Mock
     private Authentication authMock;
@@ -113,7 +116,7 @@ public class ImportExportControllerTest {
         });
         when(taskSrvMock.createSubId(anyString(), anyString())).thenCallRealMethod();
         SecurityContextHolder.setContext(securityMock);
-        importExportCtrl = new ImportExportController(projSrvMock, taskSrvMock, wlSrvMock, msgMock);
+        importExportCtrl = new ImportExportController(projSrvMock, taskSrvMock, wlSrvMock, msgMock, agileSrvMock);
     }
 
     @Test

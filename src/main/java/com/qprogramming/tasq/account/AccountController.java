@@ -243,7 +243,7 @@ public class AccountController {
             // check if not admin or user
             List<Account> admins = accountSrv.findAdmins();
             if (account.getRole().equals(Roles.ROLE_ADMIN) && admins.size() == 1) {
-                return ResponseEntity.ok(new ResultData(ResultData.ERROR,
+                return ResponseEntity.ok(new ResultData(ResultData.Code.ERROR,
                         msg.getMessage("role.last.admin", null, Utils.getCurrentLocale())));
             } else {
                 String rolemsg = msg.getMessage(role.getCode(), null, Utils.getCurrentLocale());
@@ -251,7 +251,7 @@ public class AccountController {
                 accountSrv.update(account);
                 String resultMsg = msg.getMessage("role.change.succes", new Object[]{account.toString(), rolemsg},
                         Utils.getCurrentLocale());
-                return ResponseEntity.ok(new ResultData(ResultData.OK, resultMsg));
+                return ResponseEntity.ok(new ResultData(ResultData.Code.OK, resultMsg));
             }
         }
         return null;
@@ -275,6 +275,20 @@ public class AccountController {
                 msg.getMessage("panel.invite.sent", new Object[]{email}, Utils.getCurrentLocale()));
         return "redirect:" + request.getHeader("Referer");
     }
+
+    @RequestMapping(value = "/sidebar")
+    @ResponseBody
+    public ResponseEntity saveSidebarSize(@RequestParam Boolean enable) {
+        Account account = Utils.getCurrentAccount();
+        if (account == null) {
+            LOG.error("Something went wrong while fetching current account");
+            return ResponseEntity.badRequest().body("Error while saving property");
+        }
+        account.setSmallSidebar(enable);
+        accountSrv.update(account);
+        return ResponseEntity.ok("");
+    }
+
 
     private String getAvatarDir() {
         return appSrv.getProperty(AppService.TASQROOTDIR) + File.separator + AVATAR_DIR + File.separator;

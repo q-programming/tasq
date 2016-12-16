@@ -35,6 +35,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
@@ -79,9 +80,12 @@ public class SprintControllerTest {
     private HttpServletResponse responseMock;
     @Mock
     private HttpServletRequest requestMock;
+    @Mock
+    private EntityManager entityManagerMock;
     private Account testAccount;
     private Project project;
     private SprintController sprintCtrl;
+    private AgileService sprintSrv;
 
     @Before
     public void setUp() {
@@ -90,7 +94,7 @@ public class SprintControllerTest {
         project = TestUtils.createProject();
         Set<Account> participants = new HashSet<>(createAccountList());
         project.setParticipants(participants);
-        AgileService sprintSrv = new AgileService(sprintRepoMock, releaseRepoMock);
+        sprintSrv = spy(new AgileService(sprintRepoMock, releaseRepoMock, taskSrvMock));
         sprintCtrl = new SprintController(projSrvMock, taskSrvMock, sprintSrv, wrkLogSrvMock, msgMock);
         when(securityMock.getAuthentication()).thenReturn(authMock);
         when(authMock.getPrincipal()).thenReturn(testAccount);
@@ -219,7 +223,7 @@ public class SprintControllerTest {
         resultTask.addSprint(sprint);
         when(taskSrvMock.findById(PROJECT_ID)).thenReturn(task);
         ResultData result = sprintCtrl.assignSprint(PROJECT_ID, 1L, requestMock, raMock).getBody();
-        Assert.assertEquals(ResultData.OK, result.code);
+        Assert.assertEquals(ResultData.Code.OK, result.code);
         verify(taskSrvMock, times(1)).save(resultTask);
         // Add to active sprint
         sprint.setActive(true);
@@ -229,7 +233,7 @@ public class SprintControllerTest {
         task.setEstimated(true);
         task.setStory_points(0);
         result = sprintCtrl.assignSprint(PROJECT_ID, 1L, requestMock, raMock).getBody();
-        Assert.assertEquals(ResultData.WARNING, result.code);
+        Assert.assertEquals(ResultData.Code.WARNING, result.code);
     }
 
     @Test
@@ -298,7 +302,7 @@ public class SprintControllerTest {
         when(taskSrvMock.findById(PROJECT_ID)).thenReturn(task);
         when(projSrvMock.canAdminister(project)).thenReturn(true);
         ResultData result = sprintCtrl.removeFromSprint(PROJECT_ID, 1L, modelMock, requestMock, raMock).getBody();
-        Assert.assertEquals(ResultData.OK, result.code);
+        Assert.assertEquals(ResultData.Code.OK, result.code);
         verify(taskSrvMock, times(1)).save(resultTask);
         // remove from active sprint
         sprint.setActive(true);
@@ -319,7 +323,7 @@ public class SprintControllerTest {
         when(sprintRepoMock.findByProjectId(1L)).thenReturn(list);
         when(projSrvMock.canAdminister(any(Project.class))).thenReturn(true);
         ResultData result = sprintCtrl.startSprint(2L, 1L, "06-01-2015", "12-01-2015", "12:25", "23:15");
-        Assert.assertEquals(ResultData.WARNING, result.code);
+        Assert.assertEquals(ResultData.Code.WARNING, result.code);
 
     }
 
@@ -351,15 +355,15 @@ public class SprintControllerTest {
         when(taskSrvMock.findAllBySprint(sprint2)).thenReturn(taskList);
         testAccount.setRole(Roles.ROLE_POWERUSER);
         ResultData result = sprintCtrl.startSprint(2L, 1L, "06-02-2015", "12-02-2015", "12:25", "23:15");
-        Assert.assertEquals(ResultData.ERROR, result.code);
+        Assert.assertEquals(ResultData.Code.ERROR, result.code);
         testAccount.setRole(Roles.ROLE_ADMIN);
         result = sprintCtrl.startSprint(2L, 1L, "06-02-2015", "12-02-2015", "12:25", "23:15");
-        Assert.assertEquals(ResultData.OK, result.code);
+        Assert.assertEquals(ResultData.Code.OK, result.code);
         verify(sprintRepoMock, times(1)).save(any(Sprint.class));
         verify(wrkLogSrvMock, times(1)).addWorkLogNoTask(null, project, LogType.SPRINT_START);
         taskList.get(1).setStory_points(0);
         result = sprintCtrl.startSprint(2L, 1L, "06-02-2015", "12-02-2015", "12:25", "23:15");
-        Assert.assertEquals(ResultData.WARNING, result.code);
+        Assert.assertEquals(ResultData.Code.WARNING, result.code);
     }
 
     @Test
@@ -527,6 +531,32 @@ public class SprintControllerTest {
         Assert.assertEquals(1, ds.compareTo(ds2));
 
     }
+
+
+    @Test
+    public void validateSprintTest() {
+        String start = "20-20-20";
+        String end = "";
+        ResultData resultData = sprintCtrl.validateSprint(start, end, responseMock);
+        Assert.assertEquals(ResultData.Code.WARNING, resultData.code);
+    }
+
+    @Test
+    public void validateSprintValidTest() {
+        String start = "20-12-2016 11:15";
+        String end = "27-12-2016 11:15";
+        ResultData resultData = sprintCtrl.validateSprint(start, end, responseMock);
+        Assert.assertEquals(ResultData.Code.OK, resultData.code);
+    }
+
+    @Test
+    public void validateSprintTooLongTest() {
+        String start = "20-11-2016 11:15";
+        String end = "27-12-2016 11:15";
+        ResultData resultData = sprintCtrl.validateSprint(start, end, responseMock);
+        Assert.assertEquals(ResultData.Code.WARNING, resultData.code);
+    }
+
 
     private Sprint createSingleSprint() {
         Sprint sprint = new Sprint();

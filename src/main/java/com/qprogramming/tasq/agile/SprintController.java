@@ -185,7 +185,7 @@ public class SprintController {
         Hibernate.initialize(task.getSprints());
         if (sprint.isActive()) {
             if (checkIfNotEstimated(task, project)) {
-                result.code = ResultData.WARNING;
+                result.code = ResultData.Code.WARNING;
                 result.message = msg.getMessage(
                         "agile.task2Sprint.Notestimated",
                         new Object[]{task.getId(), sprint.getSprintNo()},
@@ -205,7 +205,7 @@ public class SprintController {
             subtask.addSprint(sprint);
             taskSrv.save(subtask);
         }
-        result.code = ResultData.OK;
+        result.code = ResultData.Code.OK;
         result.message = msg.getMessage("agile.task2Sprint", new Object[]{
                 task.getId(), sprint.getSprintNo()}, Utils.getCurrentLocale());
         return ResponseEntity.ok(result);
@@ -236,7 +236,7 @@ public class SprintController {
             subtask.removeSprint(sprint);
             taskSrv.save(subtask);
         }
-        result.code = ResultData.OK;
+        result.code = ResultData.Code.OK;
         result.message = msg.getMessage("agile.taskRemoved",
                 new Object[]{task.getId()}, Utils.getCurrentLocale());
         return ResponseEntity.ok(result);
@@ -291,18 +291,22 @@ public class SprintController {
         sprintEnd += " " + sprintEndTime;
         Date startDate = Utils.convertStringToDateAndTime(sprintStart);
         Date endDate = Utils.convertStringToDateAndTime(sprintEnd);
+        ResultData validateStartStop = validateStartStop(sprintStart, sprintEnd);
+        if (ResultData.Code.WARNING.equals(validateStartStop.code)) {
+            return validateStartStop;
+        }
         DateTime startTime = new DateTime(startDate);
         DateTime endTime = new DateTime(endDate);
         List<LocalDate> freeDays = projSrv.getFreeDays(project, startTime, endTime);
         String freeDaysString = String.join(", ", freeDays.stream().map(LocalDate::toString).collect(Collectors.toList()));
         if (freeDays.contains(new LocalDate(startTime))) {
-            return new ResultData(ResultData.WARNING, msg.getMessage(
+            return new ResultData(ResultData.Code.WARNING, msg.getMessage(
                     "agile.sprint.start.freeday",
                     new Object[]{sprintStart, freeDaysString},
                     Utils.getCurrentLocale()));
         }
         if (freeDays.contains(new LocalDate(endTime))) {
-            return new ResultData(ResultData.WARNING, msg.getMessage(
+            return new ResultData(ResultData.Code.WARNING, msg.getMessage(
                     "agile.sprint.end.freeday",
                     new Object[]{sprintEnd, freeDaysString},
                     Utils.getCurrentLocale()));
@@ -313,7 +317,7 @@ public class SprintController {
                 DateTime sprintStartDate = new DateTime(startDate);
                 if (sprintEndDate.equals(sprintStartDate)
                         || sprintStartDate.isBefore(sprintEndDate)) {
-                    return new ResultData(ResultData.WARNING, msg.getMessage(
+                    return new ResultData(ResultData.Code.WARNING, msg.getMessage(
                             "agile.sprint.startOnEnd",
                             new Object[]{sprint.getSprintNo(), sprintStart},
                             Utils.getCurrentLocale()));
@@ -347,7 +351,7 @@ public class SprintController {
                     totalStoryPoints += task.getStory_points();
                 }
                 if (warnings.length() > 0) {
-                    return new ResultData(ResultData.WARNING, msg.getMessage(
+                    return new ResultData(ResultData.Code.WARNING, msg.getMessage(
                             "agile.sprint.notEstimated.sp",
                             new Object[]{warnings.toString()},
                             Utils.getCurrentLocale()));
@@ -359,13 +363,13 @@ public class SprintController {
                 sprint.setActive(true);
                 agileSrv.save(sprint);
                 wrkLogSrv.addWorkLogNoTask(null, project, LogType.SPRINT_START);
-                return new ResultData(ResultData.OK, msg.getMessage(
+                return new ResultData(ResultData.Code.OK, msg.getMessage(
                         "agile.sprint.started",
                         new Object[]{sprint.getSprintNo()},
                         Utils.getCurrentLocale()));
             }
         }
-        return new ResultData(ResultData.ERROR, msg.getMessage("error.unknown",
+        return new ResultData(ResultData.Code.ERROR, msg.getMessage("error.unknown",
                 null, Utils.getCurrentLocale()));
     }
 
@@ -503,7 +507,7 @@ public class SprintController {
             result.setStart(fmt.print(startTime));
             result.setStop(fmt.print(endTime));
             List<Task> sprintTasks = taskSrv.findAllBySprint(sprint);
-            result.setTasksByStatus(endTime, sprintTasks);
+            agileSrv.setTasksByStatus(result, endTime, sprintTasks);
             // Fill maps based on time or story point driven board
             boolean timeTracked = project.getTimeTracked();
             List<WorkLog> wrkList = wrkLogSrv.getAllSprintEvents(sprint);
@@ -601,6 +605,38 @@ public class SprintController {
         return result;
     }
 
+    @RequestMapping(value = "/validateSprint", method = RequestMethod.GET)
+    @ResponseBody
+    public ResultData validateSprint(
+            @RequestParam String startDate, @RequestParam String endDate, HttpServletResponse response) {
+        response.setContentType("application/json");
+        return validateStartStop(startDate, endDate);
+    }
+
+    private ResultData validateStartStop(@RequestParam String startDate, @RequestParam String endDate) {
+        Date dateStart = Utils.convertStringToDate(startDate);
+        Date dateEnd = Utils.convertStringToDate(endDate);
+        ResultData result = new ResultData(ResultData.Code.OK, null);
+        if (dateStart == null) {
+            result.code = ResultData.Code.WARNING;
+            result.message = msg.getMessage("agile.sprint.start.wrong", null, Utils.getCurrentLocale());
+        }
+        if (dateEnd == null) {
+            result.code = ResultData.Code.WARNING;
+            result.message = result.message + " " + msg.getMessage("agile.sprint.end.wrong", null, Utils.getCurrentLocale());
+            ;
+        }
+        if (ResultData.Code.ERROR.equals(result.code)) {
+            return result;
+        }
+        Days days = Days.daysBetween(new DateTime(dateStart), new DateTime(dateEnd));
+        if (days.getDays() > 28) {
+            result.code = ResultData.Code.WARNING;
+            result.message = msg.getMessage("agile.sprint.range.4weeks", null, Utils.getCurrentLocale());
+        }
+        return result;
+    }
+
     /**
      * Checks if sprint with given id is active or not
      *
@@ -652,8 +688,9 @@ public class SprintController {
      */
     private SprintData fillLeftAndBurned(SprintData result, Sprint sprint,
                                          List<WorkLog> wrkList, boolean timeTracked) {
-        Map<DateTime, Float> leftMap = fillLeftMap(wrkList, timeTracked);
-        Map<DateTime, Float> burnedMap = fillBurnedMap(wrkList, timeTracked);
+        List<WorkLog> tasksOnly = wrkList.stream().filter(w -> !w.getTask().isSubtask()).collect(Collectors.toList());
+        Map<DateTime, Float> leftMap = fillLeftMap(tasksOnly, timeTracked);
+        Map<DateTime, Float> burnedMap = fillBurnedMap(tasksOnly, timeTracked);
         DateTime endTime = new DateTime(sprint.getRawEnd_date());
         SprintData data = result;
         Float burned = 0f;

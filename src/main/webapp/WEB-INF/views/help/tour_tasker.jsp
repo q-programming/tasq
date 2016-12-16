@@ -11,34 +11,43 @@
 <script src="<c:url value="/resources/js/hopscotch.js" />"></script>
 <link href="<c:url value="/resources/css/hopscotch.css" />" rel="stylesheet"
       media="screen"/>
-<div id="content" class="white-frame" style="overflow: auto;text-align: center;width:700px">
-    <h3>
-        <i class="fa fa-graduation-cap" aria-hidden="true"></i> Welcome to ${applicationName} tours page
+<div id="content" class="white-frame" style="overflow: auto;text-align: center;">
+    <div class="visible-sm visible-xs text-center">
+        <h3><i class="fa fa-mobile" aria-hidden="true"></i>
+            <i class="fa fa-arrow-right" aria-hidden="true"></i>
+            <i class="fa fa-desktop" aria-hidden="true"></i>
+        </h3>
+        <s:message code="main.page.nomobile"/>
+    </div>
+    <div class="hidden-xs hidden-sm">
+        <h3>
+            <i class="fa fa-graduation-cap" aria-hidden="true"></i> Welcome to ${applicationName} tours page
 
-    </h3>
-    <p>This tours will show basics, how to use, and move within application.<br>Following tours are available:</p>
-    <p><span id="start" class="btn btn-default tour-button"><span class="badge theme"
-                                                                  aria-hidden="true">1</span> Start ${applicationName} tour</span>
-    </p>
-    <p>
-        <a href="<c:url value="/tour?page=project"/>" class="btn btn-default tour-button">
-            <span class="badge theme" aria-hidden="true">2</span> Project details
-        </a>
-    </p>
-    <p>
-        <a href="<c:url value="/tour?page=tasklist"/>" class="btn btn-default tour-button">
-            <span class="badge theme" aria-hidden="true">3</span> Tasks list
-        </a>
-    </p>
-    <p>
-        <a id="task-tour" href="<c:url value="/tour?page=task"/>" class="btn btn-default tour-button">
-            <span class="badge theme" aria-hidden="true">4</span> Task details
-        </a>
-    </p>
-    <br>
-    <hr>
-    <p>You can alwyas come back to tours from <a href="<c:url value="/help"/>">help page</a></p>
-    <br>
+        </h3>
+        <p>This tours will show basics, how to use, and move within application.<br>Following tours are available:</p>
+        <p><span id="start" class="btn btn-default tour-button"><span class="badge theme"
+                                                                      aria-hidden="true">1</span> Start ${applicationName} tour</span>
+        </p>
+        <p>
+            <a href="<c:url value="/tour?page=project"/>" class="btn btn-default tour-button">
+                <span class="badge theme" aria-hidden="true">2</span> Project details
+            </a>
+        </p>
+        <p>
+            <a href="<c:url value="/tour?page=tasklist"/>" class="btn btn-default tour-button">
+                <span class="badge theme" aria-hidden="true">3</span> Tasks list
+            </a>
+        </p>
+        <p>
+            <a id="task-tour" href="<c:url value="/tour?page=task"/>" class="btn btn-default tour-button">
+                <span class="badge theme" aria-hidden="true">4</span> Task details
+            </a>
+        </p>
+        <br>
+        <hr>
+        <p>You can alwyas come back to tours from <a href="<c:url value="/help"/>">help page</a></p>
+        <br>
+    </div>
 </div>
 
 <script>
@@ -140,7 +149,7 @@
                     $(".agile-menu").show("blind");
                     $(".manage-menu").hide("blind");
                 },
-                yOffset: -20
+                yOffset: -40
             },
             </c:if>
             {
@@ -158,6 +167,12 @@
                     $(".agile-menu").show("blind");
                 }
                 </c:if>
+            },
+            {
+                title: "Small Side menu",
+                content: "If you'd like to have more space you can click this button to toggle smaller side menu, showing only vital application shortcuts<br/> Your choice will be saved to your account",
+                target: "small-sidebar-show",
+                placement: "top"
             },
 
 //                END OF SIDE MENU
@@ -203,7 +218,13 @@
         ]
     };
     $('#start').click(function () {
-        hopscotch.startTour(tour);
+        //toggle side menu
+        $("#sidebar-div").show();
+        $(".main").addClass("col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2").removeClass("col-sm-12 col-md-12 big");
+        $("#small-sidebar-div").hide();
+        if (!detectmob()) {
+            hopscotch.startTour(tour);
+        }
     });
     // Start the tour!
 </script>

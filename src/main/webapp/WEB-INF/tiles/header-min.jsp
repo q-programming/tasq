@@ -114,7 +114,7 @@
                     <form class="navbar-form navbar-right custom-search"
                           action="<s:url value="/tasks"/>">
                         <div class="form-group has-feedback">
-                            <input type="text" name="query"
+                            <input type="text" name="query" id="mobile-search"
                                    class="form-control nav-search small search-query input-sm"
                                    placeholder="<s:message code="task.search"/>"/> <span
                                 class="fa fa-2x fa-search theme-text form-control-feedback"></span>
@@ -143,7 +143,7 @@
     appName = '${applicationName} '
     appUrl = '<c:url value="/eventCount"/>';
     $(document).ready(function ($) {
-        $("#header-date").datepicker();
+        $("#header-date").datepicker({firstDay: 1});
         $(".header-time").click(function () {
             $('#header-date').toggle("blind");
         });

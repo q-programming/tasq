@@ -94,8 +94,8 @@ public class TagsControllerTest {
         Task task = createTask(TASK_NAME, 1, createProject());
         when(tagsRepoMock.findByName(TEST_1)).thenReturn(null);
         when(taskSrvMock.findById(PROJECT_ID + "-1")).thenReturn(task);
-        Assert.assertEquals(ResultData.ERROR, tagsRestController.addTag(TEST_1, PROJECT_ID + "-2"));
-        Assert.assertEquals(ResultData.OK, tagsRestController.addTag(TEST_1, PROJECT_ID + "-1"));
+        Assert.assertEquals(ResultData.Code.ERROR, tagsRestController.addTag(TEST_1, PROJECT_ID + "-2"));
+        Assert.assertEquals(ResultData.Code.OK, tagsRestController.addTag(TEST_1, PROJECT_ID + "-1"));
         verify(tagsRepoMock, times(1)).save(any(Tag.class));
     }
 
@@ -108,8 +108,8 @@ public class TagsControllerTest {
         task.setTags(taskTags);
         when(tagsRepoMock.findByName(TEST_1)).thenReturn(tag);
         when(taskSrvMock.findById(PROJECT_ID + "-1")).thenReturn(task);
-        Assert.assertEquals(ResultData.ERROR, tagsRestController.removeTag(TEST_1, PROJECT_ID + "-2"));
-        Assert.assertEquals(ResultData.OK, tagsRestController.removeTag(TEST_1, PROJECT_ID + "-1"));
+        Assert.assertEquals(ResultData.Code.ERROR, tagsRestController.removeTag(TEST_1, PROJECT_ID + "-2"));
+        Assert.assertEquals(ResultData.Code.OK, tagsRestController.removeTag(TEST_1, PROJECT_ID + "-1"));
         Assert.assertTrue(task.getTags().isEmpty());
     }
 }

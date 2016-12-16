@@ -38,7 +38,7 @@ public class ProjectService {
     }
 
     public Project findByName(String name) {
-        return projRepo.findByName(name);
+        return projRepo.findByNameIgnoreCase(name);
     }
 
     public Project findById(Long id) {
@@ -112,7 +112,8 @@ public class ProjectService {
             if (term == null) {
                 return allParticipants.stream().collect(Collectors.toList());
             } else {
-                return allParticipants.stream().filter(account -> StringUtils.containsIgnoreCase(account.toString(), term)).collect(Collectors.toList());
+                return allParticipants.stream().filter(account -> StringUtils.containsIgnoreCase(account.toString(), term)
+                        || StringUtils.containsIgnoreCase(account.getUsername(), term)).collect(Collectors.toList());
             }
         }
         return new LinkedList<>();
@@ -184,5 +185,10 @@ public class ProjectService {
             dateCounter = dateCounter.plusDays(1);
         }
         return freeDays;
+    }
+
+    @Transactional
+    public void delete(Project project) {
+        projRepo.delete(project);
     }
 }

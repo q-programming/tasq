@@ -25,17 +25,21 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 public class Utils {
     public static final int MILLIS_PER_SECOND = DateTimeConstants.MILLIS_PER_SECOND;
     public static final int SECONDS_PER_HOUR = DateTimeConstants.SECONDS_PER_HOUR;
     public static final String TABLE = "<table class=\"table worklog_table\">";
     public static final String TABLE_END = "</table>";
+    public static final String REDIRECT_TASK = "redirect:/task/";
+    public static final String REDIRECT = "redirect:";
     private static final String DATE_FORMAT = "dd-MM-yyyy";
     private static final String DATE_FORMAT_TIME = "dd-MM-yyyy HH:mm";
     private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
     private static final String HTML_TAG_PATTERN = "<(\\/)?([A-Za-z][A-Za-z0-9]*)\\b[^>]*>";
-    private static final String ESTIMATES_PATTENR = "(\\d*w)?\\s?(\\d*d)?\\s?(\\d*h)?\\s?(\\d*m)?";
+    private static final String ESTIMATES_PATTENR = "\\s?(\\d*d)?\\s?(\\d*h)?\\s?(\\d*m)?";
+    private static final int[] VALID_STORYPOINTS_VALUES = new int[]{0, 1, 2, 3, 5, 8, 13, 20, 40, 100};
     private static final long NUM_100NS_INTERVALS_SINCE_UUID_EPOCH = 0x01b21dd213814000L;
     private static final String TD_TR = "</td></tr>";
     private static final String TD_TD = "</td><td>";
@@ -309,6 +313,10 @@ public class Utils {
                 session.invalidate();
             }
         }
+    }
+
+    public static boolean validStoryPoint(final Integer sp) {
+        return IntStream.of(VALID_STORYPOINTS_VALUES).anyMatch(x -> x == sp);
     }
 
 }

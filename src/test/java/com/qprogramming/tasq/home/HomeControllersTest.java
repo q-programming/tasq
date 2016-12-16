@@ -22,6 +22,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
+import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.LinkedList;
@@ -62,6 +63,8 @@ public class HomeControllersTest {
     private Model model;
     @Mock
     private HttpServletRequest requestMock;
+    @Mock
+    private SessionLocaleResolver localeResolverMock;
     private Account testAccount;
 
     @Before
@@ -71,8 +74,8 @@ public class HomeControllersTest {
         when(authMock.getPrincipal()).thenReturn(testAccount);
         SecurityContextHolder.setContext(securityMock);
         projSrv = new ProjectService(projRepoMock, accSrvMock, usrSrvMock);
-        homeCtrl = new HomeController(taskSrvMock, projSrv, appSrvMock, eventSrvMock);
-        homeAdvCtrl = new HomeControllerAdvice(accSrvMock, eventSrvMock, visitedSrvMock);
+        homeCtrl = new HomeController(taskSrvMock, projSrv, appSrvMock, eventSrvMock, localeResolverMock);
+        homeAdvCtrl = new HomeControllerAdvice(visitedSrvMock);
     }
 
     @Test
@@ -85,6 +88,7 @@ public class HomeControllersTest {
 
     @Test
     public void notLoggedTest() {
+        when(appSrvMock.getProperty(AppService.DEFAULTLANG)).thenReturn("en");
         Assert.assertEquals("homeNotSignedIn", homeCtrl.index(null, model));
 
     }
@@ -100,7 +104,6 @@ public class HomeControllersTest {
 
     }
 
-    //TODO add test
     @Test
     public void getLastProjectsTest() {
         Project project = createProject();

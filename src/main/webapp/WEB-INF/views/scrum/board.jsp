@@ -45,7 +45,7 @@
                     class="fa fa-line-chart"></i> <s:message code="agile.reports"/></a></li>
         </ul>
     </div>
-    <div class=".visible-sm-* .visible-xs-* text-center">
+    <div class="visible-sm visible-xs text-center">
         <h3><i class="fa fa-mobile" aria-hidden="true"></i>
             <i class="fa fa-arrow-right" aria-hidden="true"></i>
             <i class="fa fa-desktop" aria-hidden="true"></i>

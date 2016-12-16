@@ -104,7 +104,7 @@
                                 </c:if>
                                 <a class="btn btn-default btn-sm a-tooltip confirm_action"
                                    href="<c:url value="/scrum/delete?id=${sprint.id}"/>"
-                                   title="<s:message code="agile.sprint.delete" />"
+                                   title="<s:message code="main.delete" />"
                                    data-lang="${pageContext.response.locale}"
                                    data-msg='<s:message code="agile.sprint.delete.confirm"></s:message>'>
                                     <i class="fa fa-lg fa-trash-o"></i>
@@ -161,7 +161,7 @@
                                             <c:if test="${task.story_points ne 0 && task.estimated}">
                                                 <c:set var="points_txt">${task.story_points}</c:set>
                                             </c:if>
-                                    <span class="points badge theme">
+                                            <span class="points badge theme">
                                     <span class="point-value" data-points="${task.story_points}">${points_txt}</span>
                                     <input class="point-input" data-id="${task.id}">
                                     <span class="point-approve" style="display:none;cursor: pointer;"><i
@@ -209,8 +209,8 @@
                         <div class="agile-card" data-id="${task.id}" id="${task.id}" data-tags="${task.getTagsList()}">
                             <div style="display: table-cell; width: 100%;">
                                 <span style="margin-right: -5px"><t:type type="${task.type}" list="true"/></span>
-                            <span style="margin-right: -5px"><t:priority priority="${task.priority}"
-                                                                         list="true"/></span>
+                                <span style="margin-right: -5px"><t:priority priority="${task.priority}"
+                                                                             list="true"/></span>
                                 <a href="<c:url value="/task/${task.id}"/>"
                                    style="color: inherit;">[${task.id}] ${task.name}</a>
                                 <form id="sprint_assign_${task.id}"
@@ -252,6 +252,7 @@
         var assign_txt = '<s:message code="agile.assing"/>';
         var assing_too_txt = '<s:message code="agile.assing2"/>';
         var remove_txt = '<s:message code="agile.sprint.remove"/>';
+        var empty_txt = '<s:message code="agile.sprint.empty"/>';
         var lang = "${pageContext.response.locale}";
         bootbox.setDefaults({
             locale: lang
@@ -267,19 +268,18 @@
             var no = $(this).data('sprintno');
             var title = '<i class="fa fa-play"></i>&nbsp;<s:message code="agile.sprint.start.title" /> ' + no;
             $("#sprintID").val(id);
+            if ($(".agile-list[sprint-id=" + id + "]").size() == 0) {
+                showWarning(empty_txt);
+            }
             $("#sprintStartModal").html(title);
             $("#errors").html("");
             $("#sprintStart").val("");
             $("#sprintStartTime").val("");
             $("#sprintEnd").val("");
             $("#sprintEndTime").val("");
+
         });
 
-        $(".datepicker").datepicker({
-// 		minDate : '0',
-            dateFormat: "dd-mm-yy",
-            firstDay: 1
-        });
         $("#sortable").sortable({
             cursor: 'move',
             update: function (event, ui) {
@@ -496,14 +496,15 @@
         }
 
         function changePoints(edited) {
+            var message = "<s:message code="task.storyPoints.invalid"/>";
             var parent = edited.closest('.points');
             var input = parent.find('.point-input');
             var taskID = input.data('id');
             var points = input.val();
-            if (isNumber(points) && points < 40) {
+            if (isNumber(points) && (points >= 0 && points <= 100)) {
                 showWait(true);
                 $.post('<c:url value="/task/changePoints"/>', {id: taskID, points: points}, function (result) {
-                    if (result.code == 'Error') {
+                    if (result.code == 'ERROR') {
                         showError(result.message);
                     }
                     else {
@@ -511,13 +512,15 @@
                         parent.find('.point-value').data("points", points);
                         //reload points
                         var sprintID = parent.closest(".agile-list").attr("sprint-id");
-                        if(sprintID){
+                        if (sprintID) {
                             reloadPoints(sprintID);
                         }
                         showSuccess(result.message);
-                        showWait(false);
                     }
+                    showWait(false);
                 });
+            } else {
+                showError(message);
             }
             togglePoints(edited);
         }
