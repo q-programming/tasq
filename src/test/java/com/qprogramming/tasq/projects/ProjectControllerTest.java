@@ -634,7 +634,7 @@ public class ProjectControllerTest {
         tasksList.add(task);
         when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
         when(taskSrvMock.findAllByProject(project)).thenReturn(tasksList);
-        when(taskSrvMock.deleteTask(task, true)).thenReturn(new ResultData(ResultData.ERROR, "MESSAGE"));
+        when(taskSrvMock.deleteTask(task, true)).thenReturn(new ResultData(ResultData.Code.ERROR, "MESSAGE"));
         projectCtr.deleteProject(TestUtils.PROJECT_ID, PROJECT_ID,PROJECT_NAME, raMock, requestMock);
         verify(projectCtr, times(1)).rollBack();
         verify(raMock, times(1)).addFlashAttribute(anyString(),
@@ -672,7 +672,7 @@ public class ProjectControllerTest {
         tasksList.add(task5);
         when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
         when(taskSrvMock.findAllByProject(project)).thenReturn(tasksList);
-        when(taskSrvMock.deleteTask(any(Task.class), anyBoolean())).thenReturn(new ResultData(ResultData.OK, null));
+        when(taskSrvMock.deleteTask(any(Task.class), anyBoolean())).thenReturn(new ResultData(ResultData.Code.OK, null));
         when(accountServiceMock.findAllWithActiveTask(task4.getId())).thenReturn(working);
         projectCtr.deleteProject(TestUtils.PROJECT_ID,PROJECT_ID,PROJECT_NAME, raMock, requestMock);
         verify(eventsSrvMock, times(3)).addSystemEvent(any(Account.class), any(LogType.class), anyString(), anyString());

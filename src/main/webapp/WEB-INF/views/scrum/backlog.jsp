@@ -252,6 +252,7 @@
         var assign_txt = '<s:message code="agile.assing"/>';
         var assing_too_txt = '<s:message code="agile.assing2"/>';
         var remove_txt = '<s:message code="agile.sprint.remove"/>';
+        var empty_txt = '<s:message code="agile.sprint.empty"/>';
         var lang = "${pageContext.response.locale}";
         bootbox.setDefaults({
             locale: lang
@@ -267,19 +268,18 @@
             var no = $(this).data('sprintno');
             var title = '<i class="fa fa-play"></i>&nbsp;<s:message code="agile.sprint.start.title" /> ' + no;
             $("#sprintID").val(id);
+            if ($(".agile-list[sprint-id=" + id + "]").size() == 0) {
+                showWarning(empty_txt);
+            }
             $("#sprintStartModal").html(title);
             $("#errors").html("");
             $("#sprintStart").val("");
             $("#sprintStartTime").val("");
             $("#sprintEnd").val("");
             $("#sprintEndTime").val("");
+
         });
 
-//        $(".datepicker").datepicker({
-//            minDate : '0',
-//            dateFormat: "dd-mm-yy",
-//            firstDay: 1
-//        });
         $("#sortable").sortable({
             cursor: 'move',
             update: function (event, ui) {
@@ -519,7 +519,7 @@
                     }
                     showWait(false);
                 });
-            }else{
+            } else {
                 showError(message);
             }
             togglePoints(edited);

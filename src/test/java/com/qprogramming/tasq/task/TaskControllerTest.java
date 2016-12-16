@@ -388,7 +388,7 @@ public class TaskControllerTest {
         when(accountServiceMock.findAllWithActiveTask(TEST_1)).thenReturn(active);
         doNothing().when(taskSrv).deleteFiles(task);
         ResultData resultData = taskSrv.deleteTask(task, true);
-        assertEquals(ResultData.OK, resultData.code);
+        assertEquals(ResultData.Code.OK, resultData.code);
         verify(accountServiceMock, times(2)).update(anyListOf(Account.class));
         verify(taskRepoMock, times(1)).delete(any(Task.class));
         verify(visitedSrvMock, times(2)).delete(any(Task.class));
@@ -578,7 +578,7 @@ public class TaskControllerTest {
         when(projSrvMock.canEdit(project)).thenReturn(true);
         ResponseEntity<ResultData> responseEntity = taskCtr.changeStoryPoints(TEST_1, 3);
         assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
-        assertEquals(responseEntity.getBody().code, ResultData.OK);
+        assertEquals(responseEntity.getBody().code, ResultData.Code.OK);
     }
 
     @Test
@@ -591,7 +591,7 @@ public class TaskControllerTest {
         when(projSrvMock.canEdit(project)).thenReturn(true);
         ResponseEntity<ResultData> responseEntity = taskCtr.changeStoryPoints(TEST_1, 6);
         assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
-        assertEquals(responseEntity.getBody().code, ResultData.ERROR);
+        assertEquals(responseEntity.getBody().code, ResultData.Code.ERROR);
     }
 
     @Test(expected = TasqAuthException.class)
@@ -855,7 +855,7 @@ public class TaskControllerTest {
         when(projSrvMock.canEdit(project)).thenReturn(false);
         testAccount.setRole(Roles.ROLE_VIEWER);
         ResponseEntity<ResultData> data = taskCtr.changeState(TEST_1, TaskState.COMPLETE, null, null, null, null);
-        Assert.assertEquals(ResultData.ERROR, data.getBody().code);
+        Assert.assertEquals(ResultData.Code.ERROR, data.getBody().code);
         boolean catched = false;
         try {
             taskCtr.changeStoryPoints(TEST_1, 2);
@@ -875,7 +875,7 @@ public class TaskControllerTest {
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(true);
         ResponseEntity<ResultData> data = taskCtr.changeState(TEST_1, TaskState.TO_DO, true, null, "Done", null);
-        Assert.assertEquals(ResultData.WARNING, data.getBody().code);
+        Assert.assertEquals(ResultData.Code.WARNING, data.getBody().code);
     }
 
     @Test
@@ -894,7 +894,7 @@ public class TaskControllerTest {
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(true);
         ResponseEntity<ResultData> data = taskCtr.changeState(TEST_1, TaskState.CLOSED, true, null, "Done", TaskResolution.CANNOT_REPRODUCE);
-        Assert.assertEquals(ResultData.WARNING, data.getBody().code);
+        Assert.assertEquals(ResultData.Code.WARNING, data.getBody().code);
     }
 
     @Test
@@ -914,7 +914,7 @@ public class TaskControllerTest {
         ResponseEntity<ResultData> result = taskCtr.changeState(TEST_1, TaskState.CLOSED, true, true, "Done", TaskResolution.FINISHED);
         verify(wrkLogSrv, times(1)).addActivityLog(subtask, "", LogType.CLOSED);
         verify(taskRepoMock, times(2)).save(any(Task.class));
-        Assert.assertEquals(ResultData.OK, result.getBody().code);
+        Assert.assertEquals(ResultData.Code.OK, result.getBody().code);
     }
 
     @Test

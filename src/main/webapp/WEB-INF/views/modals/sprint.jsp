@@ -25,7 +25,7 @@
                                data-html="true"></i>&nbsp;
                             <input id="sprintStart"
                                    name="sprintStart" style="width: 150px; height: 25px"
-                                   class="form-control datepicker" type="text" value="">
+                                   class="form-control datepicker sprintDates" type="text" value="">
                             <i class="fa fa-clock-o a-tooltip" title="<s:message code="main.time"/>"></i>&nbsp;
                             <input id="sprintStartTime"
                                    name="sprintStartTime" style="width: 70px; height: 25px"
@@ -41,7 +41,7 @@
                                data-html="true"></i>&nbsp;
                             <input id="sprintEnd"
                                    name="sprintEnd" style="width: 150px; height: 25px"
-                                   class="form-control datepicker" type="text" value="">
+                                   class="form-control datepicker sprintDates" type="text" value="">
                             <i class="fa fa-clock-o a-tooltip" title="<s:message code="main.time"/>"></i>
                             <input id="sprintEndTime"
                                    name="sprintEndTime" style="width: 70px; height: 25px"
@@ -57,7 +57,7 @@
             <div class="modal-footer">
                 <a class="btn" data-dismiss="modal"><s:message
                         code="main.cancel"/></a>
-                <button class="btn btn-default" id="sprint_start_btn">
+                <button class="btn btn-default" id="sprint_start_btn" disabled>
                     <s:message code="agile.sprint.start"/>
                 </button>
             </div>
@@ -70,7 +70,7 @@
         $("#sprintStartTime").val('');
         $("#sprintEnd").val('');
         $("#sprintEndTime").val('');
-        $("#sprint_start_btn").prop('disabled', false);
+        $("#sprint_start_btn").prop('disabled', true);
     });
 
     $(".datepicker").datepicker({
@@ -81,11 +81,12 @@
             showWarning("<s:message code="warning.date.invalid"/>");
             $("#sprint_start_btn").prop('disabled', true);
         } else {
-            $("#sprint_start_btn").prop('disabled', false);
+//            $("#sprint_start_btn").prop('disabled', false);
             var date = new Date;
             var minutes = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
             var hour = date.getHours();
             $(this).nextAll(".sprint_time").val(hour + ":" + minutes);
+            checkDates();
         }
     });
     $(".sprint_time").mask("Z0:A0", {
@@ -135,12 +136,33 @@
                     showWarning(result.message)
                 }
                 else {
-                    showSuccess(result.message);
-                    $("#start-sprint").remove();
+                    var backlogPage = '<c:url value="/${project.projectId}/scrum/backlog"/>';
+                    var url = '<c:url value="/redirect"/>' + "?page=" + backlogPage + "&type=OK&message=" + result.message;
+                    window.location = url;
                 }
                 $("#startSprint").modal('toggle');
             });
         }
     });
 
+    function checkDates() {
+        var start = $("#sprintStart").val();
+        var end = $("#sprintEnd").val();
+        if (start && end) {
+            showWait(true);
+            $.get('<c:url value="/validateSprint"/>', {
+                startDate: start,
+                endDate: end
+            }, function (result) {
+                if (result.code == 'WARNING') {
+                    showWarning(result.message);
+                    $("#sprint_start_btn").prop('disabled', true);
+                }
+                else {
+                    $("#sprint_start_btn").prop('disabled', false);
+                }
+                showWait(false);
+            });
+        }
+    }
 </script>

@@ -279,7 +279,7 @@ public class ProjectController {
         for (Task task : projectTasks) {
             notifyAccounts.addAll(accSrv.findAllWithActiveTask(task.getId()));
             result = taskSrv.deleteTask(task, true);
-            if (result.code.equals(ResultData.ERROR)) {
+            if (result.code.equals(ResultData.Code.ERROR)) {
                 MessageHelper.addErrorAttribute(ra, result.message, Utils.getCurrentLocale());
                 rollBack();
                 return Utils.REDIRECT + request.getHeader(REFERER);

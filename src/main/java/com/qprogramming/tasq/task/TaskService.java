@@ -262,7 +262,7 @@ public class TaskService {
             clearActiveTimersForTask(task);
         } else {
             resultData = checkTaskCanOperated(task, true);
-            if (resultData.code.equals(ResultData.ERROR)) {
+            if (resultData.code.equals(ResultData.Code.ERROR)) {
                 return resultData;
             }
         }
@@ -273,7 +273,7 @@ public class TaskService {
                 clearActiveTimersForTask(subtask);
             } else {
                 resultData = checkTaskCanOperated(subtask, true);
-                if (ResultData.ERROR.equals(resultData.code)) {
+                if (ResultData.Code.ERROR.equals(resultData.code)) {
                     return resultData;
                 }
             }
@@ -287,12 +287,12 @@ public class TaskService {
             String message = msg.getMessage("error.task.delete.files", new Object[]{task.getId(), e.getMessage()}, Utils.getCurrentLocale());
             LOG.error(message + " Exception {}", e.getMessage());
             LOG.debug("{}", e);
-            return new ResultData(ResultData.ERROR, message);
+            return new ResultData(ResultData.Code.ERROR, message);
         }
         removeTaskRelations(task);
         Task purged = save(purgeTask(task));
         delete(purged);
-        return new ResultData(ResultData.OK, null);
+        return new ResultData(ResultData.Code.OK, null);
     }
 
 
@@ -301,7 +301,7 @@ public class TaskService {
         if (!accounts.isEmpty()) {
             Account currentAccount = Utils.getCurrentAccount();
             if (accounts.size() > 1 || !accounts.get(0).equals(currentAccount)) {
-                return new ResultData(ResultData.ERROR, msg.getMessage("task.changeState.change.working",
+                return new ResultData(ResultData.Code.ERROR, msg.getMessage("task.changeState.change.working",
                         new Object[]{task.getId(), String.join(",", accounts.stream().map(Account::toString).collect(Collectors.toList()))}, Utils.getCurrentLocale()));
             }
             if (remove) {
@@ -309,7 +309,7 @@ public class TaskService {
                 accountSrv.update(currentAccount);
             }
         }
-        return new ResultData(ResultData.OK, null);
+        return new ResultData(ResultData.Code.OK, null);
     }
 
     public void deleteFiles(Task task) throws IOException {

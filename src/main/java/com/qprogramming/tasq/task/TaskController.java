@@ -668,7 +668,7 @@ public class TaskController {
         if (task != null) {
             if (state.equals(task.getState())) {
                 String stateText = msg.getMessage(state.getCode(), null, Utils.getCurrentLocale());
-                return ResponseEntity.ok(new ResultData(ResultData.WARNING, msg.getMessage("task.already.inState", new Object[]{stateText}, Utils.getCurrentLocale())));
+                return ResponseEntity.ok(new ResultData(ResultData.Code.WARNING, msg.getMessage("task.already.inState", new Object[]{stateText}, Utils.getCurrentLocale())));
             }
             // check if can edit
             if ((Utils.getCurrentAccount().equals(task.getOwner())
@@ -677,18 +677,18 @@ public class TaskController {
                 // check if reopening kanban
                 if (task.getState().equals(TaskState.CLOSED)
                         && Project.AgileType.KANBAN.equals(task.getProject().getAgile()) && task.getRelease() != null) {
-                    return ResponseEntity.ok(new ResultData(ResultData.ERROR, msg.getMessage("task.changeState.change.kanbanRelease",
+                    return ResponseEntity.ok(new ResultData(ResultData.Code.ERROR, msg.getMessage("task.changeState.change.kanbanRelease",
                             new Object[]{task.getRelease().getRelease()}, Utils.getCurrentLocale())));
                 }
                 if (TaskState.TO_DO.equals(state)) {
                     Hibernate.initialize(task.getLoggedWork());
                     if (!("0m").equals(task.getLoggedWork())) {
-                        return ResponseEntity.ok(new ResultData(ResultData.ERROR,
+                        return ResponseEntity.ok(new ResultData(ResultData.Code.ERROR,
                                 msg.getMessage("task.alreadyStarted", new Object[]{taskID}, Utils.getCurrentLocale())));
                     }
                 } else if (TaskState.CLOSED.equals(state)) {
                     ResultData result = taskSrv.checkTaskCanOperated(task, false);
-                    if (result.code.equals(ResultData.ERROR)) {
+                    if (result.code.equals(ResultData.Code.ERROR)) {
                         return ResponseEntity.ok(result);
                     } else {
                         stopTimer(task);
@@ -721,11 +721,11 @@ public class TaskController {
                 }
                 String message = worklogStateChange(state, oldState, task);
                 taskSrv.save(task);
-                return ResponseEntity.ok(new ResultData(ResultData.OK, message));
+                return ResponseEntity.ok(new ResultData(ResultData.Code.OK, message));
             }
-            return ResponseEntity.ok(new ResultData(ResultData.ERROR, msg.getMessage("error.unknown", null, Utils.getCurrentLocale())));
+            return ResponseEntity.ok(new ResultData(ResultData.Code.ERROR, msg.getMessage("error.unknown", null, Utils.getCurrentLocale())));
         } else {
-            return ResponseEntity.ok(new ResultData(ResultData.ERROR,
+            return ResponseEntity.ok(new ResultData(ResultData.Code.ERROR,
                     msg.getMessage("role.error.task.permission", null, Utils.getCurrentLocale())));
         }
 
@@ -738,7 +738,7 @@ public class TaskController {
                                                         @RequestParam(value = "points") Integer points) {
         //check if valud story point
         if (!Utils.validStoryPoint(points)) {
-            return ResponseEntity.ok(new ResultData(ResultData.ERROR, msg.getMessage("task.storyPoints.invalid", new Object[]{points}, Utils.getCurrentLocale())));
+            return ResponseEntity.ok(new ResultData(ResultData.Code.ERROR, msg.getMessage("task.storyPoints.invalid", new Object[]{points}, Utils.getCurrentLocale())));
         }
         // check if not admin or user
         Task task = taskSrv.findById(taskID);
@@ -758,10 +758,10 @@ public class TaskController {
             }
             task.setStory_points(points);
             taskSrv.save(task);
-            return ResponseEntity.ok(new ResultData(ResultData.OK, msg.getMessage("task.storypoints.edited",
+            return ResponseEntity.ok(new ResultData(ResultData.Code.OK, msg.getMessage("task.storypoints.edited",
                     new Object[]{task.getId(), points}, Utils.getCurrentLocale())));
         }
-        return ResponseEntity.ok(new ResultData(ResultData.ERROR, msg.getMessage("error.unknown", null, Utils.getCurrentLocale())));
+        return ResponseEntity.ok(new ResultData(ResultData.Code.ERROR, msg.getMessage("error.unknown", null, Utils.getCurrentLocale())));
     }
 
     @Transactional
@@ -878,10 +878,10 @@ public class TaskController {
             throw new TasqAuthException(msg);
         }
         if (assignMeToTask(id)) {
-            return ResponseEntity.ok(new ResultData(ResultData.OK,
+            return ResponseEntity.ok(new ResultData(ResultData.Code.OK,
                     msg.getMessage("task.assinged.me", null, Utils.getCurrentLocale()) + " " + id));
         } else {
-            return ResponseEntity.ok(new ResultData(ResultData.ERROR,
+            return ResponseEntity.ok(new ResultData(ResultData.Code.ERROR,
                     msg.getMessage("role.error.task.permission", null, Utils.getCurrentLocale())));
         }
     }
@@ -932,7 +932,7 @@ public class TaskController {
                 String taskName = task.getName();
                 ResultData result;
                 result = taskSrv.deleteTask(task, force);
-                if (result.code.equals(ResultData.ERROR)) {
+                if (result.code.equals(ResultData.Code.ERROR)) {
                     MessageHelper.addWarningAttribute(ra, result.message, currentLocale);
                     rollBack();
                     return REDIRECT + request.getHeader(REFERER);
@@ -1092,7 +1092,7 @@ public class TaskController {
             return REDIRECT + request.getHeader(REFERER);
         } else {
             ResultData checkResult = taskSrv.checkTaskCanOperated(subtask, false);
-            if (checkResult.code.equals(ResultData.ERROR)) {
+            if (checkResult.code.equals(ResultData.Code.ERROR)) {
                 MessageHelper.addWarningAttribute(ra, checkResult.message, Utils.getCurrentLocale());
                 return REDIRECT + request.getHeader(REFERER);
             }
@@ -1291,7 +1291,7 @@ public class TaskController {
 
     private ResultData taskIsClosed(Task task) {
         String localized = msg.getMessage(((TaskState) task.getState()).getCode(), null, Utils.getCurrentLocale());
-        return new ResultData(ResultData.ERROR,
+        return new ResultData(ResultData.Code.ERROR,
                 msg.getMessage("task.closed.cannot.operate=", new Object[]{localized}, Utils.getCurrentLocale()));
     }
 

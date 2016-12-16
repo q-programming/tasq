@@ -75,7 +75,7 @@ public class EventsController {
 		Event event = eventSrv.getById(id);
 		event.setUnread(false);
 		eventSrv.save(event);
-		result.code = ResultData.OK;
+		result.code = ResultData.Code.OK;
 		return result;
 	}
 
@@ -88,7 +88,7 @@ public class EventsController {
 			event.setUnread(false);
 			eventSrv.save(event);
 		});
-		result.code = ResultData.OK;
+		result.code = ResultData.Code.OK;
 		result.message = msg.getMessage("events.markAll.success", null, Utils.getCurrentLocale());
 		return result;
 	}
@@ -105,7 +105,7 @@ public class EventsController {
 		ResultData result = new ResultData();
 		Event event = eventSrv.getById(id);
 		eventSrv.delete(event);
-		result.code = ResultData.OK;
+		result.code = ResultData.Code.OK;
 		return result;
 	}
 
@@ -115,7 +115,7 @@ public class EventsController {
 		ResultData result = new ResultData();
 		List<Event> events = eventSrv.getEvents();
 		eventSrv.delete(events);
-		result.code = ResultData.OK;
+		result.code = ResultData.Code.OK;
 		result.message = msg.getMessage("events.deleteAll.success", null, Utils.getCurrentLocale());
 		return result;
 	}

@@ -8,37 +8,42 @@ $(document).on("click", "area , a", function (e) {
 });
 
 function showError(message) {
-    var errorMsg = '<div class="alert alert-danger fade in alert-overlay">'
+    var timestamp = new Date().getUTCMilliseconds();
+    var errorMsg = '<div class="alert alert-danger fade in alert-overlay" id="alert' + timestamp + '">'
         + '<button type="button" class="close" data-dismiss="alert">&times;</button>'
         + message
         + '</div>';
     $('#messages_div').append(errorMsg);
 };
 
-function showSuccess(message) {
-    var successMsg = '<div class="alert alert-success fade in alert-overlay">'
+function showSuccess(message,timeout) {
+    timeout = timeout || 10000;
+    var timestamp = new Date().getUTCMilliseconds();
+    var successMsg = '<div class="alert alert-success fade in alert-overlay" id="alert' + timestamp + '">'
         + '<button type="button" class="close" data-dismiss="alert">&times;</button>'
         + message
         + '</div>';
     $('#messages_div').append(successMsg);
     $(".alert").alert();
     window.setTimeout(function () {
-            $(".alert-success").alert('close');
-            $(".alert-info").alert('close');
+            $("#alert" + timestamp).alert('close');
         }
-        , 10000);
+        , timeout);
 };
 
-function showWarning(message) {
-    var warningMsg = '<div class="alert alert-warning fade in alert-overlay">'
+function showWarning(message, timeout) {
+    var timestamp = new Date().getUTCMilliseconds();
+    timeout = timeout || 15000;
+    var warningMsg = '<div class="alert alert-warning fade in alert-overlay" id="alert' + timestamp + '">'
         + '<button type="button" class="close" data-dismiss="alert">&times;</button>'
         + message
         + '</div>';
     $('#messages_div').append(warningMsg);
     $(".alert").alert();
     window.setTimeout(function () {
-        $(".alert-warning").alert('close');
-    }, 15000);
+        $("#alert" + timestamp).alert('close');
+    }, timeout);
+
 }
 
 $(".alert").alert();

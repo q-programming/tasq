@@ -6,17 +6,19 @@ package com.qprogramming.tasq.support;
  * @author Khobar
  */
 public class ResultData {
-    public static final String OK = "OK";
-    public static final String WARNING = "WARNING";
-    public static final String ERROR = "ERROR";
-    public String code;
+    public Code code;
     public String message;
 
     public ResultData() {
 
     }
 
-    public ResultData(String code, String message) {
+//    public ResultData(String code, String message) {
+//        this.code = code;
+//        this.message = message;
+//    }
+
+    public ResultData(Code code, String message) {
         this.code = code;
         this.message = message;
     }
@@ -24,6 +26,10 @@ public class ResultData {
     @Override
     public String toString() {
         return this.code + " " + this.message;
+    }
+
+    public enum Code {
+        OK, WARNING, ERROR
     }
 
 }

@@ -7,8 +7,10 @@ import com.qprogramming.tasq.events.EventsService;
 import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
+import com.qprogramming.tasq.support.ResultData;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
+import com.qprogramming.tasq.support.web.MessageHelper;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
@@ -120,5 +123,32 @@ public class HomeController {
         } else {
             return "help/tour_" + page;
         }
+    }
+
+    /**
+     * Special mapping to redirect to some other page with extra messages . Page must be valid mapping
+     *
+     * @param page    page where it shoud be redirected to. Must be correctly mapped starting with /
+     * @param type    {@link com.qprogramming.tasq.support.ResultData.Code}
+     * @param message Message to be added in alert
+     * @param ra      RedirectAttributes
+     * @return redirects
+     */
+    @RequestMapping(value = "/redirect")
+    public String redirect(@RequestParam String page, @RequestParam ResultData.Code type, @RequestParam String message, RedirectAttributes ra) {
+        switch (type) {
+            case OK:
+                MessageHelper.addSuccessAttribute(ra, message);
+                break;
+            case WARNING:
+                MessageHelper.addWarningAttribute(ra, message);
+                break;
+            case ERROR:
+                MessageHelper.addErrorAttribute(ra, message);
+                break;
+            default:
+                return "redirect:/";
+        }
+        return "redirect:" + page;
     }
 }

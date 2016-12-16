@@ -243,7 +243,7 @@ public class AccountController {
             // check if not admin or user
             List<Account> admins = accountSrv.findAdmins();
             if (account.getRole().equals(Roles.ROLE_ADMIN) && admins.size() == 1) {
-                return ResponseEntity.ok(new ResultData(ResultData.ERROR,
+                return ResponseEntity.ok(new ResultData(ResultData.Code.ERROR,
                         msg.getMessage("role.last.admin", null, Utils.getCurrentLocale())));
             } else {
                 String rolemsg = msg.getMessage(role.getCode(), null, Utils.getCurrentLocale());
@@ -251,7 +251,7 @@ public class AccountController {
                 accountSrv.update(account);
                 String resultMsg = msg.getMessage("role.change.succes", new Object[]{account.toString(), rolemsg},
                         Utils.getCurrentLocale());
-                return ResponseEntity.ok(new ResultData(ResultData.OK, resultMsg));
+                return ResponseEntity.ok(new ResultData(ResultData.Code.OK, resultMsg));
             }
         }
         return null;

@@ -127,7 +127,7 @@ public class EventsTest {
         event.setUnread(true);
         when(eventsRepoMock.findById(1L)).thenReturn(event);
         ResultData result = eventsController.readEvent(1L);
-        Assert.assertTrue(result.code.equals(ResultData.OK));
+        Assert.assertTrue(result.code.equals(ResultData.Code.OK));
         Assert.assertFalse(event.isUnread());
         verify(eventsRepoMock, times(1)).save(any(Event.class));
     }
@@ -145,7 +145,7 @@ public class EventsTest {
         list.add(event1);
         when(eventsRepoMock.findByAccountIdOrderByDateDesc(testAccount.getId())).thenReturn(list);
         ResultData result = eventsController.readAllEvents();
-        Assert.assertTrue(result.code.equals(ResultData.OK));
+        Assert.assertTrue(result.code.equals(ResultData.Code.OK));
         Assert.assertFalse(event.isUnread());
         verify(eventsRepoMock, times(2)).save(any(Event.class));
     }
@@ -157,7 +157,7 @@ public class EventsTest {
         event.setUnread(true);
         when(eventsRepoMock.findById(1L)).thenReturn(event);
         ResultData result = eventsController.deleteEvent(1L);
-        Assert.assertTrue(result.code.equals(ResultData.OK));
+        Assert.assertTrue(result.code.equals(ResultData.Code.OK));
         verify(eventsRepoMock, times(1)).delete(any(Event.class));
     }
 
@@ -174,7 +174,7 @@ public class EventsTest {
         list.add(event1);
         when(eventsRepoMock.findByAccountIdOrderByDateDesc(testAccount.getId())).thenReturn(list);
         ResultData result = eventsController.deleteAllEvents();
-        Assert.assertTrue(result.code.equals(ResultData.OK));
+        Assert.assertTrue(result.code.equals(ResultData.Code.OK));
         verify(eventsRepoMock, times(1)).delete(list);
     }
 
