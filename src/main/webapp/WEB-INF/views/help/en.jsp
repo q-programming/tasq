@@ -527,6 +527,15 @@
                     <i class="fa fa-user-times"></i>
                 </button>
                 button in users row
+            </p>
+            <security:authorize access="hasRole('ROLE_ADMIN')">
+                <h4>Deleting project</h4>
+                <span class="admin-button">Admin</span>
+                <p>Administrator is able to remove whole project. This option should be handled with care, as this
+                    action will purge all project information. System event will be sent to all people that were
+                    participating in that project<br>In order to commit project deletion it's ID and Project name has to
+                    be inputed </p>
+            </security:authorize>
             <hr>
             <a class="anchor" id="task"></a>
             <%-----------------------------------------TASKS---------------------------------------------%>
@@ -932,6 +941,11 @@
                     information about task removal will be added for project.<br>
                     All other information will be lost and cannot be restored!</u>
             </p>
+            <p>When deleting task, if other users are still working on it ( have active timer ) they will be listed.<br>
+                If user has role 'Power User' he will then be able to "Force delete" task which will stop all active
+                timers and remove task. <br>
+                After deletion assignee and task owner will be notified about that event (if current user
+                is one of those , he of course won't recieve notification)</p>
 
             <hr>
             <%-------------------------IMPORTING ------------------------------%>
@@ -1161,7 +1175,8 @@
                 to work time. It's important to remember that 1SP is <b>not
                     necessary</b> 1h!<br>To find 1 story point, try to take one of finished stories which was
                 smallest and quickest to do and try to estimate other based on hom much work is needed in them.
-                <br>Available values of story points is modified fibbonaci sequence : 1, 2 ,3 ,5 ,8 ,13 ,20 ,40 ,100 where
+                <br>Available values of story points is modified fibbonaci sequence : 1, 2 ,3 ,5 ,8 ,13 ,20 ,40 ,100
+                where
                 points above 13 indicate that story is big and could possibly divided into smaller onece</p>
             <a class="anchor" id="scrum-backlog"></a>
             <h4>
