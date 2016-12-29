@@ -597,7 +597,7 @@
                             <c:forEach var="subTask" items="${subtasks}">
                                 <tr
                                         class="<c:if test="${subTask.state eq 'CLOSED' }">closed</c:if>">
-                                    <td style="width: 30px"><t:type type="${subTask.type}"
+                                    <td style="width: 30px" class="hidden-xs"><t:type type="${subTask.type}"
                                                                     list="true"/></td>
                                     <td style="width: 30px"><t:priority
                                             priority="${subTask.priority}" list="true"/></td>
@@ -606,7 +606,8 @@
                                                     test="${subTask.state eq 'CLOSED' }">text-decoration: line-through;</c:if>"
                                             href="<c:url value="/task/${subTask.id}"/>">[${subTask.id}]
                                             ${subTask.name}</a></td>
-                                    <td style="width: 100px"><t:state state="${subTask.state}"/></td>
+                                    <td class="hidden-xs"><t:state state="${subTask.state}" list="false" /></td>
+                                    <td class="visible-xs"><t:state state="${subTask.state}" list="true" /></td>
                                         <%--count percentage of done--%>
                                     <c:set var="percentage">${subTask.percentage_logged}</c:set>
                                     <c:set var="logged_class"/>
@@ -620,7 +621,7 @@
                                     <c:if test="${subTask.state eq 'BLOCKED' || subTask.percentage_logged gt 100}">
                                         <c:set var="logged_class">progress-bar-danger</c:set>
                                     </c:if>
-                                    <td style="width: 50px; padding-top: 14px;cursor:help;" class="a-tooltip"
+                                    <td style="width: 50px; padding-top: 14px;cursor:help;" class="a-tooltip hidden-xs"
                                         title="<s:message code="task.closed"/>: ${percentage}%<br><s:message code="task.estimate"/>: ${subTask.estimate}<br><s:message code="task.logged"/>: ${subTask.loggedWork}<br><s:message code="task.remaining"/>: ${subTask.remaining}"
                                         data-html="true">
                                         <div class="progress" style="height: 5px;">

@@ -235,9 +235,9 @@
                             </c:forEach>
 						</ul>
 				</span></th>
-            <th style="width: 500px"><s:message code="task.name"/></th>
-            <th class="hidden-xs hidden-sm"><s:message code="task.progress"/></th>
-            <th>
+            <th><s:message code="task.name"/></th>
+            <th class="hidden-xs hidden-sm text-center" style="width: 110px"><s:message code="task.progress"/></th>
+            <th class="text-center">
                 <div class="dropdown" style="padding-top: 5px; cursor: pointer;">
                     <a class="filter dropdown-toggle theme" type="button" id="dropdownMenu1"
                        data-toggle="dropdown"><s:message code="task.state"/><span
@@ -346,8 +346,8 @@
                              aria-valuemax="100" style="width:${percentage}%;" title="${percentage}%"></div>
                     </div>
                 </td>
-                <%-- 			</c:if> --%>
-                <td class="${blinker}"><t:state state="${task.state}"/></td>
+                <td class="${blinker} hidden-xs"><t:state state="${task.state}" list="false"/></td>
+                <td class="${blinker} visible-xs text-center"><t:state state="${task.state}" list="true"/></td>
                 <td><c:if test="${empty task.assignee }">
                     <i><s:message code="task.unassigned"/></i>
                     <c:if test="${user.getIsUser()}">
