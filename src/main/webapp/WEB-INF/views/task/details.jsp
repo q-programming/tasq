@@ -111,7 +111,8 @@
                 </c:if>
             </button>
             <c:if test="${can_edit}">
-                <span class="btn btn-default btn-sm a-tooltip clickable delete-task-modal" title="<s:message code="task.delete" text="Delete task" />" data-taskid="${task.id}"
+                <span class="btn btn-default btn-sm a-tooltip clickable delete-task-modal"
+                      title="<s:message code="task.delete" text="Delete task" />" data-taskid="${task.id}"
                       data-toggle="modal" data-target="#delete-task-modal-dialog">
                     <i class="fa fa-lg fa-trash-o"></i>
                 </span>
@@ -278,19 +279,21 @@
                 </div>
             </div>
             <!-------------------------DESCRIPTION------------------------>
-            <div>
-                <div class="mod-header">
-                    <h5 class="mod-header-title">
-                        <i class="fa fa-caret-down toggler" data-tab="descriptionToggle"></i>
-                        <span class="mod-header-title-txt">
+            <c:if test="${not empty task.description}">
+                <div>
+                    <div class="mod-header">
+                        <h5 class="mod-header-title">
+                            <i class="fa fa-caret-down toggler" data-tab="descriptionToggle"></i>
+                            <span class="mod-header-title-txt">
                             <i class="fa fa-book"></i> <s:message code="task.description"/>
                         </span>
-                    </h5>
+                        </h5>
+                    </div>
+                    <div id="descriptionToggle">
+                            ${task.description}
+                    </div>
                 </div>
-                <div id="descriptionToggle">
-                    ${task.description}
-                </div>
-            </div>
+            </c:if>
             <%----------------ESTIMATES DIV -------------------------%>
             <div>
                 <div class="mod-header">
@@ -598,7 +601,7 @@
                                 <tr
                                         class="<c:if test="${subTask.state eq 'CLOSED' }">closed</c:if>">
                                     <td style="width: 30px" class="hidden-xs"><t:type type="${subTask.type}"
-                                                                    list="true"/></td>
+                                                                                      list="true"/></td>
                                     <td style="width: 30px"><t:priority
                                             priority="${subTask.priority}" list="true"/></td>
                                     <td><a
@@ -606,8 +609,8 @@
                                                     test="${subTask.state eq 'CLOSED' }">text-decoration: line-through;</c:if>"
                                             href="<c:url value="/task/${subTask.id}"/>">[${subTask.id}]
                                             ${subTask.name}</a></td>
-                                    <td class="hidden-xs"><t:state state="${subTask.state}" list="false" /></td>
-                                    <td class="visible-xs"><t:state state="${subTask.state}" list="true" /></td>
+                                    <td class="hidden-xs"><t:state state="${subTask.state}" list="false"/></td>
+                                    <td class="visible-xs"><t:state state="${subTask.state}" list="true"/></td>
                                         <%--count percentage of done--%>
                                     <c:set var="percentage">${subTask.percentage_logged}</c:set>
                                     <c:set var="logged_class"/>
@@ -1272,14 +1275,14 @@
                     <security:authorize access="hasRole('ROLE_ADMIN')">
                     var delurl = '<c:url value="/task/delWorklog?id="/>';
                     delbtn = '<div class="buttons_panel" style="float: right;">'
-                            + '<a class="delete_btn a-tooltip" style="color: #555;" href="' + delurl + worklog.id + '"'
-                            + ' title = "<s:message code="task.worklog.delete"/>"'
-                            + ' data-lang="${pageContext.response.locale}"'
-                            + ' data-msg="<s:message code="task.worklog.delete.confirm"/>" >'
-                            + '<i class="fa fa-trash-o"></i></a></div>';
+                        + '<a class="delete_btn a-tooltip" style="color: #555;" href="' + delurl + worklog.id + '"'
+                        + ' title = "<s:message code="task.worklog.delete"/>"'
+                        + ' data-lang="${pageContext.response.locale}"'
+                        + ' data-msg="<s:message code="task.worklog.delete.confirm"/>" >'
+                        + '<i class="fa fa-trash-o"></i></a></div>';
                     </security:authorize>
                     var row = '<tr><td>' + avatar + '</td><td style="font-size: smaller; color: dimgray;width: 100%;">' + account + '&nbsp;' + type + '<div class="time-div">' + worklog.timeLogged + '</div> ' + delbtn + message
-                            + '</td></tr>';
+                        + '</td></tr>';
                     $("#taskworklogs").append(row);
                     $(".a-tooltip").tooltip();
                 });
@@ -1309,7 +1312,7 @@
 
         $('body').on('click', 'a.delete_btn', function (e) {
             var msg = '<p style="text-align:center"><i class="fa fa-lg fa-exclamation-triangle" style="display: initial;"></i>&nbsp'
-                    + $(this).data('msg') + '</p>';
+                + $(this).data('msg') + '</p>';
             var lang = $(this).data('lang');
             bootbox.setDefaults({
                 locale: lang
@@ -1328,23 +1331,23 @@
         var init = true;
         var noTags = '<s:message code="task.tags.noTags" htmlEscape="false"/>';
         $('#taskTags').tagsinput(
-                {
-                    maxChars: 12,
-                    maxTags: 6,
-                    trimValue: true
-                }
+            {
+                maxChars: 12,
+                maxTags: 6,
+                trimValue: true
+            }
         );
         loadTags();
 // 	checkIfEmptyTags()
 
         $(".bootstrap-tagsinput").hover(
-                function () {
-                    $(this).addClass("inputHover");
-                    $("#editTags").show();
-                }, function () {
-                    $(this).removeClass("inputHover");
-                    $("#editTags").hide();
-                }
+            function () {
+                $(this).addClass("inputHover");
+                $("#editTags").show();
+            }, function () {
+                $(this).removeClass("inputHover");
+                $("#editTags").hide();
+            }
         );
         $('.bootstrap-tagsinput').focusin(function () {
             inputInProgress = true;
@@ -1478,20 +1481,20 @@
         var reggie = /(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})/;
         var dateArray = reggie.exec(str);
         return new Date(
-                (+dateArray[3]),
-                (+dateArray[2]) - 1, // Careful, month starts at 0!
-                (+dateArray[1]),
-                (+dateArray[4]),
-                (+dateArray[5])
+            (+dateArray[3]),
+            (+dateArray[2]) - 1, // Careful, month starts at 0!
+            (+dateArray[1]),
+            (+dateArray[4]),
+            (+dateArray[5])
         );
     }
 
     function getEventTypeMsg(type) {
         switch (type) {
-                <c:forEach items="${types}" var="enum_type">
+            <c:forEach items="${types}" var="enum_type">
             case "${enum_type}":
                 return '<s:message code="${enum_type.code}"/> ';
-                </c:forEach>
+            </c:forEach>
             default:
                 return 'not yet added ';
         }

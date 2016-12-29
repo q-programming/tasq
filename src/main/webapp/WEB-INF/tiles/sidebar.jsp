@@ -12,11 +12,10 @@
             <c:when test="${user.isPowerUser == true}">
                 <a class="secondaryPanelButton menu-toggle" type="button"
                    data-type="create-menu" style="margin: 0 auto;"><i
-                        class="fa fa-plus"></i> Create <span class="caret"></span></a>
+                        class="fa fa-plus"></i> <s:message code="main.create"/> <span class="caret"></span></a>
                 <ul class="menu-items create-menu" style="margin-left: 25px;">
                     <li><a href="<c:url value="/task/create"/>"><i
-                            class="fa fa-plus"></i> <s:message code="task.create"
-                                                               text="Create task"/></a></li>
+                            class="fa fa-plus"></i> <s:message code="task.create"/></a></li>
 
                     <li><a href="<c:url value="/project/create"/>"><i
                             class="fa fa-plus"></i> <s:message code="project.create"
@@ -26,7 +25,7 @@
             <c:when test="${user.isUser == true}">
                 <a class="secondaryPanelButton menu-toggle" type="button" href="<c:url value="/task/create"/>"
                    style="margin: 0 auto;"><i class="fa fa-plus">
-                </i> <s:message code="task.create" text="Create"/></a>
+                </i> <s:message code="task.create"/></a>
             </c:when>
         </c:choose>
     </li>
