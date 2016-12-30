@@ -178,22 +178,22 @@
                     var change;
                     var timeLogged;
                     if (timeTracked) {
-                        if (val.type == 'ESTIMATE' || val.type == 'TASKSPRINTADD') {
+                        if (val.type === 'ESTIMATE' || val.type === 'TASKSPRINTADD') {
                             change = '<td style="width:30px">' + val.message + '</td><td style="width:30px"></td>';
-                        } else if (val.type == 'LOG') {
+                        } else if (val.type === 'LOG') {
                             change = '<td style="width:30px"></td><td style="width:30px">' + val.message + '</td>';
                         }
                     } else {
                         var storyPoints = val.task.story_points;
-                        if (storyPoints == 0) {
+                        if (storyPoints === 0) {
                             storyPoints = "";
                         }
-                        if (val.type == 'REOPEN' || val.type == 'TASKSPRINTADD') {
+                        if (val.type === 'REOPEN' || val.type === 'TASKSPRINTADD') {
                             change = '<td style="width:30px">' + storyPoints + '</td><td style="width:30px"></td>';
-                        } else if (val.type == 'ESTIMATE') {
+                        } else if (val.type === 'ESTIMATE') {
                             change = '<td style="width:30px">' + val.message + '</td><td style="width:30px"></td>';
                         }
-                        else if (val.type == 'LOG' && timeTracked == false) {
+                        else if (val.type === 'LOG' && timeTracked === false) {
                             change = '<td style="width:30px"></td><td style="width:30px"></td>';
                         }
                         else {
@@ -224,7 +224,7 @@
                 }
                 $("#totalSummary").append(thead);
                 //Total
-                if (result.totalTime == '0m') {
+                if (result.totalTime === '0m') {
                     result.totalTime = '0h';
                 }
                 if (timeTracked) {
@@ -242,7 +242,7 @@
                         if (timeTracked) {
                             metter = '<td class="centerd">' + task.loggedWork + '</td>';
                         } else {
-                            if (task.story_points == 0) {
+                            if (task.story_points === 0) {
                                 task.story_points = '-';
                             }
                             metter = '<td class="centerd">' + task.story_points + '</td><td class="centerd">' + task.loggedWork + '</td>';

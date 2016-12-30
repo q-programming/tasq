@@ -1268,7 +1268,7 @@
                     var avatar = '<img data-src="holder.js/30x30" class="avatar small" src="' + avatarURL + worklog.account.id + '.png"/>';
                     var type = getEventTypeMsg(worklog.type);
                     var message = "";
-                    if (worklog.message != "") {
+                    if (worklog.message !== null && worklog.message !== "") {
                         message = '<div class="quote">' + worklog.message + '</div>'
                     }
                     var delbtn = '';
