@@ -79,12 +79,12 @@ public class SignupController {
             return null;
         }
         Utils.setHttpRequest(request);
-        if (null != accountSrv.findByEmail(signupForm.getEmail())) {
+        if (null != accountSrv.findByEmail(signupForm.getEmail().toLowerCase())) {
             errors.rejectValue("email", "error.email.notunique", new Object[]{signupForm.getEmail()}, Utils.getDefaultLocale().toString());
             return null;
         }
 
-        if (null != accountSrv.findByUsername((signupForm.getUsername()))) {
+        if (null != accountSrv.findByUsername((signupForm.getUsername().toLowerCase()))) {
             errors.rejectValue("username", "error.username.notunique", new Object[]{signupForm.getUsername()}, Utils.getDefaultLocale().toString());
             return null;
         }

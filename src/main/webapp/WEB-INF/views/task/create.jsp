@@ -97,8 +97,7 @@
                     <s:message code="project.project"/>
                 </h5>
             </div>
-            <form:select id="projects_list" style="width:300px;" path="project" class="form-control"
-                         disabled="${not empty param.p}">
+            <form:select id="projects_list" style="width:300px;" path="project" class="form-control">
                 <c:forEach items="${projects_list}" var="list_project">
                     <option
                             <c:if test="${list_project.projectId eq chosenProject}">selected
@@ -107,9 +106,9 @@
                     </option>
                 </c:forEach>
             </form:select>
-            <c:if test="${not empty param.p}">
-                <input type="hidden" name="project" value="${param.p}">
-            </c:if>
+            <%--<c:if test="${not empty param.p}">--%>
+                <%--<input type="hidden" name="project" value="${param.p}">--%>
+            <%--</c:if>--%>
             <span class="help-block"><s:message code="task.project.help"/></span>
                 <%--------------------	Assign to -------------------------------%>
             <a class="anchor" id="assignToA"></a>
@@ -280,8 +279,8 @@
             <div>
                 <form:input path="due_date" class="form-control datepicker"
                             id="due_date" style="width:150px"/>
-            <span class="help-block"><s:message
-                    code="task.dueDate.help"/></span>
+                <span class="help-block"><s:message
+                        code="task.dueDate.help"/></span>
             </div>
         </div>
         <%----------FILE UPLOAD --------------------------%>
@@ -453,7 +452,7 @@
             var active = $('#addToSprint option:selected').data('active');
             if (active) {
                 var message = '<i class="fa fa-exclamation-circle"></i>'
-                        + ' <s:message code="task.sprint.add.warning"/>';
+                    + ' <s:message code="task.sprint.add.warning"/>';
                 $("#sprintWarning").html(message);
             }
         });
@@ -504,7 +503,7 @@
                     $.each(data, function (i, item) {
                         var itemToAdd = {
                             value: item.email,
-                            label: item.name + " " + item.surname+ " (" + item.username + ")",
+                            label: item.name + " " + item.surname + " (" + item.username + ")",
                             id: item.id
                         };
                         results.push(itemToAdd);
@@ -592,10 +591,10 @@
                         isActive = " (<s:message code="agile.sprint.active"/>)";
                     }
                     $('#addToSprint')
-                            .append($("<option></option>")
-                                    .attr("value", sprint.sprintNo)
-                                    .attr("data-active", sprint.active)
-                                    .text("Sprint " + sprint.sprintNo + isActive));
+                        .append($("<option></option>")
+                            .attr("value", sprint.sprintNo)
+                            .attr("data-active", sprint.active)
+                            .text("Sprint " + sprint.sprintNo + isActive));
                     $('#addToSprint').val('');
                 });
             });

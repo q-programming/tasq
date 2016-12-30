@@ -202,15 +202,9 @@ public class TaskController {
             if (StringUtils.isNotBlank(linked)) {
                 Task linkedTask = taskSrv.findById(linked);
                 if (linkedTask != null) {
-                    if (linkedTask.getProject().equals(project)) {
-                        TaskLink link = new TaskLink(linkedTask.getId(), taskID, TaskLinkType.RELATES_TO);
-                        linkService.save(link);
-                        wlSrv.addWorkLogNoTask(linked + " - " + taskID, project, LogType.TASK_LINK);
-                    } else {
-                        MessageHelper.addWarningAttribute(ra,
-                                msg.getMessage("task.create.not.linked", null, Utils.getCurrentLocale()));
-
-                    }
+                    TaskLink link = new TaskLink(linkedTask.getId(), taskID, TaskLinkType.RELATES_TO);
+                    linkService.save(link);
+                    wlSrv.addWorkLogNoTask(linked + " - " + taskID, project, LogType.TASK_LINK);
                 }
             }
             //everything went well , save task

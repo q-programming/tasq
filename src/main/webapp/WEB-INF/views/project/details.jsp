@@ -38,7 +38,7 @@
         <div class="pull-right">
             <a class="btn btn-default a-tooltip pull-right"
                style="padding: 6px 11px;"
-               href='<s:url value="/project/${project.projectId}/manage"></s:url>'
+               href='<s:url value="/project/${project.projectId}/manage"/>'
                title="<s:message code="project.manage" text="Set as avtive" />"
                data-placement="bottom"><i class="fa fa-wrench"></i></a>
             <c:if test="${project.agile eq 'KANBAN'}">
@@ -69,6 +69,13 @@
            title="" data-placement="bottom" data-original-title="<s:message code="project.members"/>">
             <i class="fa fa-users"></i>
         </a>
+        <c:if test="${user.isUser}">
+            <a class="btn btn-default a-tooltip pull-right" href="<c:url value="/task/create"/>?p=${project.projectId} "
+               title="<s:message code="task.create"/>" data-placement="bottom"
+               data-original-title="<s:message code="project.members"/>">
+                <i class="fa fa-plus"></i>
+            </a>
+        </c:if>
     </div>
     <h3>[${project.projectId}] ${project.name}</h3>
     ${project.description}
