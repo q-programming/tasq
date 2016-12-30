@@ -9,6 +9,7 @@ import com.qprogramming.tasq.mail.MailMail;
 import com.qprogramming.tasq.manage.AppService;
 import com.qprogramming.tasq.manage.Theme;
 import com.qprogramming.tasq.support.Utils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
@@ -89,11 +90,17 @@ public class AccountService {
     }
 
     public Account findByEmail(String email) {
-        return accRepo.findByEmail(email);
+        if (StringUtils.isNotBlank(email)) {
+            return accRepo.findByEmail(email.toLowerCase());
+        }
+        return null;
     }
 
     public Account findByUsername(String username) {
-        return accRepo.findByUsername(username);
+        if (StringUtils.isNotBlank(username)) {
+            return accRepo.findByUsername(username.toLowerCase());
+        }
+        return null;
     }
 
     public Account findByUuid(String uiid) {
