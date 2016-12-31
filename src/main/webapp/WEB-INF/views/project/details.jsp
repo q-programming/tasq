@@ -27,7 +27,7 @@
         <c:set var="can_edit" value="true"/>
     </c:if>
 </c:forEach>
-<div class="white-frame" style="overflow: auto;">
+<div class="white-frame">
     <c:set var="projectName_text">
         <s:message code="project.name"/>
     </c:set>
@@ -86,42 +86,44 @@
     <c:set var="tasks_complete">${COMPLETE *100 / tasks_total}</c:set>
     <c:set var="tasks_closed">${CLOSED *100 / tasks_total}</c:set>
     <c:set var="tasks_blocked">${BLOCKED*100 / tasks_total}</c:set>
-    <div class="progress">
-        <div class="progress-bar progress-bar-warning a-tooltip"
-             style="width: ${tasks_todo}%"
-             title="${TO_DO}&nbsp;<s:message code="task.state.todo"/>">
-            <c:if test="${tasks_todo gt 10.0}">
-                <span>${TO_DO}&nbsp;<s:message code="task.state.todo"/></span>
-            </c:if>
-        </div>
-        <div class="progress-bar a-tooltip" style="width: ${tasks_ongoing}%"
-             title="${ONGOING}&nbsp;<s:message code="task.state.ongoing"/>">
-            <c:if test="${tasks_ongoing gt 10.0}">
-                <span>${ONGOING}&nbsp;<s:message code="task.state.ongoing"/></span>
-            </c:if>
-        </div>
-        <div class="progress-bar progress-bar-success a-tooltip" style="width: ${tasks_complete}%"
-             title="${COMPLETE}&nbsp;<s:message code="task.state.complete"/>">
-            <c:if test="${tasks_complete gt 10.0}">
-                <span>${COMPLETE}&nbsp;<s:message code="task.state.complete"/></span>
-            </c:if>
-        </div>
+    <c:if test="${tasks_total > 0}">
+        <div class="progress">
+            <div class="progress-bar progress-bar-warning a-tooltip"
+                 style="width: ${tasks_todo}%"
+                 title="${TO_DO}&nbsp;<s:message code="task.state.todo"/>">
+                <c:if test="${tasks_todo gt 10.0}">
+                    <span>${TO_DO}&nbsp;<s:message code="task.state.todo"/></span>
+                </c:if>
+            </div>
+            <div class="progress-bar a-tooltip" style="width: ${tasks_ongoing}%"
+                 title="${ONGOING}&nbsp;<s:message code="task.state.ongoing"/>">
+                <c:if test="${tasks_ongoing gt 10.0}">
+                    <span>${ONGOING}&nbsp;<s:message code="task.state.ongoing"/></span>
+                </c:if>
+            </div>
+            <div class="progress-bar progress-bar-success a-tooltip" style="width: ${tasks_complete}%"
+                 title="${COMPLETE}&nbsp;<s:message code="task.state.complete"/>">
+                <c:if test="${tasks_complete gt 10.0}">
+                    <span>${COMPLETE}&nbsp;<s:message code="task.state.complete"/></span>
+                </c:if>
+            </div>
 
-        <div class="progress-bar progress-bar-closed  a-tooltip"
-             style="width: ${tasks_closed}%"
-             title="${CLOSED}&nbsp;<s:message code="task.state.closed"/>">
-            <c:if test="${tasks_closed gt 10.0}">
-                <span>${CLOSED}&nbsp;<s:message code="task.state.closed"/></span>
-            </c:if>
+            <div class="progress-bar progress-bar-closed  a-tooltip"
+                 style="width: ${tasks_closed}%"
+                 title="${CLOSED}&nbsp;<s:message code="task.state.closed"/>">
+                <c:if test="${tasks_closed gt 10.0}">
+                    <span>${CLOSED}&nbsp;<s:message code="task.state.closed"/></span>
+                </c:if>
+            </div>
+            <div class="progress-bar progress-bar-danger a-tooltip"
+                 style="width: ${tasks_blocked}%"
+                 title="${BLOCKED}&nbsp;<s:message code="task.state.blocked"/>">
+                <c:if test="${tasks_blocked gt 10.0}">
+                    <span>${BLOCKED}&nbsp;<s:message code="task.state.blocked"/></span>
+                </c:if>
+            </div>
         </div>
-        <div class="progress-bar progress-bar-danger a-tooltip"
-             style="width: ${tasks_blocked}%"
-             title="${BLOCKED}&nbsp;<s:message code="task.state.blocked"/>">
-            <c:if test="${tasks_blocked gt 10.0}">
-                <span>${BLOCKED}&nbsp;<s:message code="task.state.blocked"/></span>
-            </c:if>
-        </div>
-    </div>
+    </c:if>
     <%----------CHART -----------%>
     <div id="chart_divarea" class="row" style="height: 300px; width: 90%; margin: 20px auto">
         <div id="chartdiv"></div>

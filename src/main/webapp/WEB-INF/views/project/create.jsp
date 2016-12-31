@@ -42,12 +42,14 @@
         </c:if>
         <div style="display:table-row">
             <div class="form-group pull-left ${id_class}" style="width: 100px">
+                <form:label path="project_id">${projectID_text}</form:label>
                 <form:input path="project_id" class="form-control"
-                            placeholder="${projectID_text}"/>
+                            placeholder="${projectID_text}" maxlength="5"/>
                 <form:errors path="project_id" element="p" class="text-danger"/>
             </div>
             <div class="form-group pull-left ${name_class }"
                  style="width: 500px; padding-left: 20px;">
+                <label for="name"><s:message code="project.name"/></label>
                 <form:input path="name" class="form-control"
                             placeholder="${projectName_text}"/>
                 <form:errors path="name" element="p" class="text-danger"/>
