@@ -61,9 +61,26 @@ public class LastVisitedService {
 
     }
 
+    /**
+     * In case oldTask was altered heavy( for example changed from subtask ) old relation is deleted,
+     * and replaced with new oldTask ( keeping old tasks order and time )
+     *
+     * @param oldTask    - old oldTask
+     * @param newTask - new oldTask ( can be also the same one if we just wan to update type , name etc. )
+     */
+    public void updateFromToVisitedTask(Task oldTask, Task newTask) {
+        List<LastVisited> list = lastVisitedRepository.findByItemIdAndTypeNotNull(oldTask.getId());
+        Map<Long, Date> accounts = list.stream().collect(Collectors.toMap(LastVisited::getAccount, LastVisited::getTime));
+        delete(oldTask);
+        accounts.entrySet().forEach(entry -> {
+            LastVisited lastVisited = new LastVisited(newTask, entry.getKey(), entry.getValue());
+            lastVisitedRepository.save(lastVisited);
+        });
+    }
+
     public void updateName(Project project) {
         List<LastVisited> list = lastVisitedRepository.findByItemIdAndTypeNull(project.getProjectId());
-        list.stream().forEach(lastVisited -> lastVisited.setItemName(project.getName()));
+        list.forEach(lastVisited -> lastVisited.setItemName(project.getName()));
         lastVisitedRepository.save(list);
 
     }
@@ -86,6 +103,7 @@ public class LastVisitedService {
         List<LastVisited> list = lastVisitedRepository.findByItemIdAndTypeNotNull(task.getId());
         lastVisitedRepository.delete(list);
     }
+
     public void delete(Project project) {
         List<LastVisited> list = lastVisitedRepository.findByItemIdAndTypeNull(project.getProjectId());
         lastVisitedRepository.delete(list);

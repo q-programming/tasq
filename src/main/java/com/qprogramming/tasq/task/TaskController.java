@@ -370,6 +370,7 @@ public class TaskController {
         if (message.length() > 37) {
             wlSrv.addActivityLog(task, message.toString(), LogType.EDITED);
         }
+        visitedSrv.updateFromToVisitedTask(task,task);
         taskSrv.save(task);
         return REDIRECT_TASK + taskID;
     }
@@ -1146,8 +1147,7 @@ public class TaskController {
             wlSrv.addActivityLog(task, message.toString(), LogType.SUBTASK2TASK);
             taskSrv.save(task);
             // cleanup
-            visitedSrv.delete(subtask);
-            visitedSrv.addLastVisited(getCurrentAccount().getId(),task);
+            visitedSrv.updateFromToVisitedTask(subtask,task);
             taskSrv.deleteTask(subtask, false);
             MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.subtasks.2task.success",
                     new Object[]{id, taskID}, Utils.getCurrentLocale()));
