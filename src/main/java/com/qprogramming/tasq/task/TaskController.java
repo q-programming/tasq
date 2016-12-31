@@ -64,6 +64,7 @@ import java.util.stream.Collectors;
 
 import static com.qprogramming.tasq.support.Utils.REDIRECT;
 import static com.qprogramming.tasq.support.Utils.REDIRECT_TASK;
+import static com.qprogramming.tasq.support.Utils.getCurrentAccount;
 import static com.qprogramming.tasq.task.TaskForm.*;
 
 /**
@@ -1145,6 +1146,8 @@ public class TaskController {
             wlSrv.addActivityLog(task, message.toString(), LogType.SUBTASK2TASK);
             taskSrv.save(task);
             // cleanup
+            visitedSrv.delete(subtask);
+            visitedSrv.addLastVisited(getCurrentAccount().getId(),task);
             taskSrv.deleteTask(subtask, false);
             MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.subtasks.2task.success",
                     new Object[]{id, taskID}, Utils.getCurrentLocale()));
