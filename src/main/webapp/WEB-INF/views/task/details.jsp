@@ -544,7 +544,7 @@
                                                    style="border-top-style: hidden;">
                                                 <c:forEach var="linkTask" items="${linkType.value}">
                                                     <tr>
-                                                        <td style="width: 30px"><t:type
+                                                        <td class="hidden-xs" style="width: 30px"><t:type
                                                                 type="${linkTask.type}" list="true"/></td>
                                                         <td style="width: 30px"><t:priority
                                                                 priority="${linkTask.priority}" list="true"/></td>
