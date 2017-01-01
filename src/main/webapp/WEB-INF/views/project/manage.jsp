@@ -38,21 +38,6 @@
                 </h3>
             </div>
             <div class="paddedleft40">
-                <h5>
-                    <b><s:message code="project.manage.timetrack"/></b>
-                </h5>
-                <select id="timeTracked" name="timeTracked" class="form-control"
-                        style="width: 200px">
-                    <option value="true"
-                            <c:if test="${project.timeTracked}">selected</c:if>><s:message
-                            code="project.manage.timetrack.time"/></option>
-                    <option value="false"
-                            <c:if test="${not project.timeTracked}">selected</c:if>><s:message
-                            code="project.manage.timetrack.sp"/></option>
-                </select> <span class="help-block"><s:message
-                    code="project.manage.timetrack.help"/></span>
-            </div>
-            <div class="paddedleft40">
                 <h5 class="mod-header-title">
                     <s:message code="project.manage.priority"/>
                 </h5>
@@ -428,7 +413,7 @@
 // 		$("#priority_form").submit();
         });
         </c:forEach>
-        $("#timeTracked, #defaultAssignes").change(function () {
+        $("#defaultAssignes").change(function () {
 // 		$("#priority_form").submit();
         });
 

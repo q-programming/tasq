@@ -108,8 +108,6 @@
         var avatarURL = '<c:url value="/../avatar/"/>';
         var taskURL = '<c:url value="/task/"/>';
         var loading_indicator = '<div id="loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td>';
-        var timeTracked = ${project.timeTracked};
-
         $(".sprintMenuNo").click(function () {
             var number = $(this).data('number');
             renderSprintData(number);
@@ -117,12 +115,7 @@
 
         //Initial sprint render ( from param )
         renderSprintData(lastSprint);
-
         var labelFormat = '%s SP';
-        if (timeTracked) {
-            labelFormat = '%#.1f h';
-        }
-
 
         function renderSprintData(sprintNo) {
             //init arrays and remove first element via pop()
@@ -144,11 +137,7 @@
             $('#eventsTable tbody').html('');
             $('#summaryTable tbody').html('');
             $('#totalSummary tr').remove();
-            if (timeTracked) {
-                $('th:nth-child(4)').hide();
-            } else {
-                $('th:nth-child(4)').show();
-            }
+            $('th:nth-child(4)').show();
             $("#sprintNoMenu").html('<h4><b>Sprint ' + sprintNo + '</b> <span class="caret"></span></h4>');
             $.get('<c:url value="/${project.projectId}/sprint-data"/>', {sprint: sprintNo}, function (result) {
                 //Fill arrays of data
@@ -177,76 +166,54 @@
                     var event = "<td>" + getEventTypeMsg(val.type) + "</td>";
                     var change;
                     var timeLogged;
-                    if (timeTracked) {
-                        if (val.type === 'ESTIMATE' || val.type === 'TASKSPRINTADD') {
-                            change = '<td style="width:30px">' + val.message + '</td><td style="width:30px"></td>';
-                        } else if (val.type === 'LOG') {
-                            change = '<td style="width:30px"></td><td style="width:30px">' + val.message + '</td>';
-                        }
-                    } else {
-                        var storyPoints = val.task.story_points;
-                        if (storyPoints === 0) {
-                            storyPoints = "";
-                        }
-                        if (val.type === 'REOPEN' || val.type === 'TASKSPRINTADD') {
-                            change = '<td style="width:30px">' + storyPoints + '</td><td style="width:30px"></td>';
-                        } else if (val.type === 'ESTIMATE') {
-                            change = '<td style="width:30px">' + val.message + '</td><td style="width:30px"></td>';
-                        }
-                        else if (val.type === 'LOG' && timeTracked === false) {
-                            change = '<td style="width:30px"></td><td style="width:30px"></td>';
-                        }
-                        else {
-                            change = '<td style="width:30px"></td><td style="width:30px">' + storyPoints + '</td>';
-                        }
-                        var timeLogged = "<td>";
-                        if (val.activity) {
-                            timeLogged = "<td>";
-                            timeLogged += val.message;
-                        }
-                        timeLogged += "</td>";
+                    var storyPoints = val.task.story_points;
+                    if (storyPoints === 0) {
+                        storyPoints = "";
                     }
+                    if (val.type === 'REOPEN' || val.type === 'TASKSPRINTADD') {
+                        change = '<td style="width:30px">' + storyPoints + '</td><td style="width:30px"></td>';
+                    } else if (val.type === 'ESTIMATE') {
+                        change = '<td style="width:30px">' + val.message + '</td><td style="width:30px"></td>';
+                    }
+                    else if (val.type === 'LOG') {
+                        change = '<td style="width:30px"></td><td style="width:30px"></td>';
+                    }
+                    else {
+                        change = '<td style="width:30px"></td><td style="width:30px">' + storyPoints + '</td>';
+                    }
+                    var timeLogged = "<td>";
+                    if (val.activity) {
+                        timeLogged = "<td>";
+                        timeLogged += val.message;
+                    }
+                    timeLogged += "</td>";
                     var account = val.account.name + " " + val.account.surname;
                     var accountTd = '<td rel="popover" data-container="body" data-placement="top" data-account="'
-                            + account + '" data-account_email="' + val.account.email + '" data-account_img="' + avatarURL + val.account.id + '.png">'
-                            + account
-                            + '</td>';
+                        + account + '" data-account_email="' + val.account.email + '" data-account_img="' + avatarURL + val.account.id + '.png">'
+                        + account
+                        + '</td>';
                     var row = task + date + change + timeLogged + event + accountTd;
                     $("#eventsTable").append("<tr>" + row + "</tr>");
                 });
                 //Summary
                 //All tasks within sprint
-                var thead;
-                if (timeTracked) {
-                    thead = '<tr><th colspan=2><s:message code="task.task" /></th><th><s:message code="agile.time"/></th></tr>';
-                } else {
-                    thead = '<tr><th colspan=1><s:message code="task.task" /></th><th><s:message code="task.storyPoints" /></th><th><s:message code="agile.time"/></th></tr>';
-                }
+                var thead = '<tr><th colspan=1><s:message code="task.task" /></th><th><s:message code="task.storyPoints" /></th><th><s:message code="agile.time"/></th></tr>';
                 $("#totalSummary").append(thead);
                 //Total
                 if (result.totalTime === '0m') {
                     result.totalTime = '0h';
                 }
-                if (timeTracked) {
-                    var totalRow = '<tr class="theme"><th>Completed</th><th></th><th style="text-align:center">~ ' + result.totalTime + ' h</th>';
-                    $("#summaryTable").append(totalRow);
-                } else {
-                    var totalRow = '<tr class="theme"><th>Completed</th><th style="text-align:center">' + result.totalPoints + ' SP</th><th style="text-align:center">~ ' + result.totalTime + ' h</th>';
-                    $("#summaryTable").append(totalRow);
-                }
+                var totalRow = '<tr class="theme"><th>Completed</th><th style="text-align:center">' + result.totalPoints + ' SP</th><th style="text-align:center">~ ' + result.totalTime + ' h</th>';
+                $("#summaryTable").append(totalRow);
                 $.each(result.tasks.CLOSED, function (key, task) {
                     if (!task.subtask) {
                         var type = getTaskType(task.type);
                         var taskCell = '<td>' + type + '<a href="' + taskURL + task.id + '">[' + task.id + '] ' + task.name + '</a></td>';
                         var metter;
-                        if (timeTracked) {
-                            metter = '<td class="centerd">' + task.loggedWork + '</td>';
-                        } else {
-                            if (task.story_points === 0) {
-                                task.story_points = '-';
-                            }
-                            metter = '<td class="centerd">' + task.story_points + '</td><td class="centerd">' + task.loggedWork + '</td>';
+                        if (task.story_points === 0) {
+                            task.story_points = '-';
                         }
+                        metter = '<td class="centerd">' + task.story_points + '</td><td class="centerd">' + task.loggedWork + '</td>';
                         row = '<tr>' + taskCell + metter + '</tr>';
                         $("#summaryTable").append(row);
                     }
@@ -258,11 +225,7 @@
                         var type = getTaskType(task.type);
                         var taskCell = '<td>' + type + '<a href="' + taskURL + task.id + '">[' + task.id + '] ' + task.name + '</a></td>';
                         var metter;
-                        if (timeTracked) {
-                            metter = '<td class="centerd">' + task.loggedWork + '</td>';
-                        } else {
-                            metter = '<td class="centerd">' + task.story_points + '</td><td class="centerd"></td>';
-                        }
+                        metter = '<td class="centerd">' + task.story_points + '</td><td class="centerd"></td>';
                         row = '<tr>' + taskCell + metter + '</tr>';
                         $("#summaryTable").append(row);
                     }

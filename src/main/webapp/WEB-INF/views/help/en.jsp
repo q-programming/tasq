@@ -467,22 +467,10 @@
             by clicking <i class="fa fa-pencil"></i> icon next to project name.<br>It's
             impossible to change ID of project, once it has been created <b>Task
             progress in project</b>
-            <p>Tasker has two option two track progress within project.</p>
-            <ul>
-                <li><b>Estimated time tracked</b> - Each task before "sprint"
-                    is started, should have estimated time set right away. Sprint is in
-                    quotes on purpose, as if time tracked it's not completely SCRUM
-                    anymore. Regardless this option can still be used to track progress
-                    for team<br></li>
-                <li><b>Story points</b> recommended for agile projects. Each
-                    task then is measured with points - which measures complexity of
-                    this task. More on <b><a href="#scrum-storypoints">story points</a></b>
-                </li>
-            </ul>
-            <p>Please note that it's not recommended to switch how progress
-                is tracked while project is ongoing or has already some sprint which
-                were tracked. This can cause some errors and very odd charts in
-                reports</p>
+            <p>Tasker tracks progress in story points. Each task then is measured with points - which measures
+                complexity of
+                this task. More on <b><a href="#scrum-storypoints">story points</a></b>
+            </p>
             <b>Default task priority</b>
             <p>Every new task created within this project will have this
                 priority. Of course it can be freely changes by user</p>

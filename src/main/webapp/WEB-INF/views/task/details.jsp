@@ -238,7 +238,7 @@
                         <c:set var="points">${task.story_points}</c:set>
                     </c:if>
                     <c:if
-                            test="${(not task.subtask) && (task.estimated) && not task.project.timeTracked}">
+                            test="${(not task.subtask) && (task.estimated)}">
                         <div class="row">
                             <div class="col-md-2 col-sm-6"><s:message code="task.storyPoints"/></div>
                             <div class="col-md-4 col-sm-6 paddingleft_20"><span

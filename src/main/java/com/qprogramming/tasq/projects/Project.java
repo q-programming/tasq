@@ -61,9 +61,6 @@ public class Project implements Serializable {
     private AgileType agile;
 
     @Column
-    private Boolean timeTracked = false;
-
-    @Column
     private Long defaultAssigneeID;
 
     @Column
@@ -204,14 +201,6 @@ public class Project implements Serializable {
 
     public void setAgile(String agile) {
         this.agile = AgileType.valueOf(agile);
-    }
-
-    public Boolean getTimeTracked() {
-        return timeTracked;
-    }
-
-    public void setTimeTracked(Boolean timeBurndown) {
-        this.timeTracked = timeBurndown;
     }
 
     public Long getDefaultAssigneeID() {

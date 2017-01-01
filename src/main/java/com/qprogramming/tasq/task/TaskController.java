@@ -189,9 +189,6 @@ public class TaskController {
                         return null;
                     }
                     String message = "";
-                    if (task.isEstimated() && project.getTimeTracked()) {
-                        message = task.getEstimate();
-                    }
                     wlSrv.addActivityLog(task, message, LogType.TASKSPRINTADD);
                 }
             }
@@ -367,7 +364,7 @@ public class TaskController {
         }
         LOG.debug(message.toString());
         message.append(Utils.TABLE_END);
-        if (message.length() > 37) {
+        if (message.length() > 43) {
             wlSrv.addActivityLog(task, message.toString(), LogType.EDITED);
         }
         visitedSrv.updateFromToVisitedTask(task,task);
@@ -1342,17 +1339,7 @@ public class TaskController {
     }
 
     private boolean checkIfNotEstimated(Task task, Project project) {
-        if (!project.getTimeTracked()) {
-            if (task.getStory_points() == 0 && task.isEstimated()) {
-                return true;
-            }
-        } else {
-            if (task.getEstimate().equals("0m") && task.isEstimated()) {
-                return true;
-            }
-
-        }
-        return false;
+        return task.getStory_points() == 0 && task.isEstimated();
     }
 
     private String worklogStateChange(TaskState state, TaskState oldState, Task task) {
