@@ -1273,6 +1273,38 @@ public class TaskController {
         }
     }
 
+    @Deprecated
+    @Transactional
+    @RequestMapping(value = "task/updateClosed", method = RequestMethod.GET)
+    public String updateMissingEvent(@RequestParam(value = "project") Long project,
+                                     RedirectAttributes ra, HttpServletRequest request, Model model) {
+        if (Roles.isAdmin()) {
+            if (project != null) {
+                Project projectById = projectSrv.findById(project);
+                List<Task> list = taskSrv.findByProjectAndState(projectById, TaskState.CLOSED);
+                StringBuilder console = new StringBuilder("Updating closed events on tasks within application");
+                console.append(BR);
+                for (Task task : list) {
+                    if (task.getState().equals(TaskState.CLOSED)) {
+                        List<WorkLog> worklogs = wlSrv.getTaskEvents(task.getId());
+                        if (worklogs.stream().noneMatch(workLog -> workLog.getType().equals(LogType.CLOSED))) {
+                            wlSrv.addActivityLog(task, "", LogType.CLOSED);
+                            taskSrv.save(task);
+                            console.append(task.toString());
+                            console.append(": added missing closed event");
+                            console.append(BR);
+                        }
+                    }
+                }
+                model.addAttribute("console", console.toString());
+            }
+            return "other/console";
+        } else {
+            throw new TasqAuthException();
+        }
+    }
+
+
     @RequestMapping(value = "/activeTaskAccounts", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<DisplayAccount>> getActiveTaskAccounts(@RequestParam String taskID, HttpServletResponse response) {
