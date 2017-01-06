@@ -386,8 +386,7 @@
 <script>
     $(document).ready(function ($) {
         taskURL = '<c:url value="/task/"/>';
-        apiurl = '<c:url value="/task/getSubTasks"/>';
-        small_loading_indicator = '<div id="small_loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br></div>';
+        subTaskurl = '<c:url value="/task/getSubTasks"/>';
 
         $("#project").change(function () {
             var query = "${state_url}${query_url}${priority_url}${assignee_url}${type_url}";

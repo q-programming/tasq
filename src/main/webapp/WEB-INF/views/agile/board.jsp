@@ -84,6 +84,10 @@
 </tr>
 </table>
 <script>
+    small_loading_indicator = '<div id="small_loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br></div>';
+    subTaskurl = '<c:url value="/task/getSubTasks"/>';
+    relatedurl = '<c:url value="/task/getRelated"/>';
+    taskURL = '<c:url value="/task/"/>';
     var currentTag;
     var maxHeight = 0;
     $(window).resize(function () {
@@ -201,6 +205,36 @@
         window.open(url, "Cards Print");
     });
 
+    $(".show-more-details").click(function () {
+        if (!$(this).hasClass('expanded')) {
+            var moreDetailsDiv = $(this).parent().next('.more-details-div')
+            var taskID = $(this).data('task');
+
+            //fill in subtasks
+            var targetSubtaskDiv = moreDetailsDiv.find('.agile-card-subtasks');
+            targetSubtaskDiv.append(small_loading_indicator);
+            $.get(subTaskurl, {taskID: taskID}, function (result) {
+                $("#small_loading").remove();
+                if (result.length > 0) {
+                    var subtaskDiv = ' <div class="mod-header-bg"><span class="mod-header-title theme"><i class="fa fa-lg fa-sitemap"></i>&nbsp;<s:message code="tasks.subtasks"/></span></div><div>';
+                    $.each(result, function (key, val) {
+                        var closed = '';
+                        if (val.state == 'CLOSED') {
+                            closed = 'closed';
+                        }
+                        var type = getTaskType(val.type);
+                        var url = taskURL + val.id;
+                        subtaskDiv += '<div style="padding:2px;">' + type + ' <a href="' + url + '" class="subtaskLink ' + closed + ' black-link">' + '[' + val.id + '] ' + val.name + '</a></div>';
+                    });
+                    subtaskDiv += '</div>';
+                    targetSubtaskDiv.html(subtaskDiv);
+                }
+            });
+            //fill related
+
+            $(this).addClass('expanded');
+        }
+    });
 
 
     function resizeDivs() {
@@ -218,13 +252,13 @@
         var url = '<c:url value="/project/getParticipants"/>';
         var term = '';
         var projId = "${project.id}"
-        $.get(url, {id: projId, term: term,userOnly:true}, function (data) {
+        $.get(url, {id: projId, term: term, userOnly: true}, function (data) {
             console.log(data);
             var avatarURL = '<c:url value="/../avatar/"/>';
             for (var j = 0; j < data.length; j++) {
                 var account = data[j];
                 var avatar = '<img data-src="holder.js/30x30" class="avatar small member clickable a-tooltip" src="' + avatarURL + +account.id + '.png" ' +
-                        'title="'+account.name+' '+ account.surname+'" data-account="'+account.id+'"/>&nbsp;';
+                    'title="' + account.name + ' ' + account.surname + '" data-account="' + account.id + '"/>&nbsp;';
                 $("#members").append(avatar);
             }
             $('.a-tooltip').tooltip();

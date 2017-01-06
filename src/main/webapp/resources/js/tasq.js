@@ -16,7 +16,7 @@ function showError(message) {
     $('#messages_div').append(errorMsg);
 };
 
-function showSuccess(message,timeout) {
+function showSuccess(message, timeout) {
     timeout = timeout || 10000;
     var timestamp = new Date().getUTCMilliseconds();
     var successMsg = '<div class="alert alert-success fade in alert-overlay" id="alert' + timestamp + '">'
@@ -78,7 +78,11 @@ function isNumber(n) {
 $(document).on("click", ".toggler", function () {
     var target = $(this).data('tab');
     $(this).nextAll(".mod-header-title-txt").toggleClass('closed');
-    $('#' + target).toggle("blind", 500);
+    if ($(this).data('quick')) {
+        $('#' + target).toggle();
+    } else {
+        $('#' + target).toggle("blind", 500);
+    }
     $(this).toggleClass('closed');
     $(this).toggleClass('fa-caret-down');
     $(this).toggleClass('fa-caret-right');
@@ -208,8 +212,10 @@ $(document).on("click", ".tag_filter", function () {
                 }
             }
         });
-        $('.tag_filter').not(this).each(function () {
-            $(this).addClass("not_selected");
+        $('.tag_filter').each(function () {
+            if ($(this).data("name") !== tag) {
+                $(this).addClass("not_selected");
+            }
         });
         currentTag = tag;
     } else {

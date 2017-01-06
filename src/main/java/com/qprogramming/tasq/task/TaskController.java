@@ -64,7 +64,6 @@ import java.util.stream.Collectors;
 
 import static com.qprogramming.tasq.support.Utils.REDIRECT;
 import static com.qprogramming.tasq.support.Utils.REDIRECT_TASK;
-import static com.qprogramming.tasq.support.Utils.getCurrentAccount;
 import static com.qprogramming.tasq.task.TaskForm.*;
 
 /**
@@ -367,7 +366,7 @@ public class TaskController {
         if (message.length() > 43) {
             wlSrv.addActivityLog(task, message.toString(), LogType.EDITED);
         }
-        visitedSrv.updateFromToVisitedTask(task,task);
+        visitedSrv.updateFromToVisitedTask(task, task);
         taskSrv.save(task);
         return REDIRECT_TASK + taskID;
     }
@@ -924,6 +923,10 @@ public class TaskController {
                 Set<Account> notify = notifyWhileDeleting(task);
                 String taskName = task.getName();
                 ResultData result;
+                //if removed task is subtask and it's last one
+                if (task.isSubtask()) {
+                    updateSubtaskCount(task);
+                }
                 result = taskSrv.deleteTask(task, force);
                 if (result.code.equals(ResultData.Code.ERROR)) {
                     MessageHelper.addWarningAttribute(ra, result.message, currentLocale);
@@ -948,6 +951,19 @@ public class TaskController {
             return "redirect:/";
         }
         return REDIRECT + request.getHeader(REFERER);
+    }
+
+    /**
+     * If removed task/subtask is deleted converted and it's last subtask , update parent task and remove task count
+     *
+     * @param task - task which potential parent have to be updated
+     */
+    private void updateSubtaskCount(Task task) {
+        Task parentTask = taskSrv.findById(task.getParent());
+        if (taskSrv.findSubtasks(task.getParent()).size() == 1) {
+            parentTask.setSubtasks(0);
+            taskSrv.save(parentTask);
+        }
     }
 
     /**
@@ -1144,7 +1160,8 @@ public class TaskController {
             wlSrv.addActivityLog(task, message.toString(), LogType.SUBTASK2TASK);
             taskSrv.save(task);
             // cleanup
-            visitedSrv.updateFromToVisitedTask(subtask,task);
+            visitedSrv.updateFromToVisitedTask(subtask, task);
+            updateSubtaskCount(subtask);
             taskSrv.deleteTask(subtask, false);
             MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.subtasks.2task.success",
                     new Object[]{id, taskID}, Utils.getCurrentLocale()));

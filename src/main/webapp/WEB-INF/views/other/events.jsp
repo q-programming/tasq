@@ -8,7 +8,7 @@
 %>
 <script>
     taskURL = '<c:url value="/task/"/>';
-    apiurl = '<c:url value="/task/getSubTasks"/>';
+    subTaskurl = '<c:url value="/task/getSubTasks"/>';
     small_loading_indicator = '<div id="small_loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br></div>';
     loading_indicator = '<div id="loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></div>';
 

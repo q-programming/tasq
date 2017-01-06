@@ -4,7 +4,8 @@
     margin: 10px auto;
     background: white;
 }
-.white-frame-nomargin{
+
+.white-frame-nomargin {
     border: 1px solid lightgray;
     padding: 10px;
     background: white;
@@ -13,17 +14,21 @@
 .white-frame.sidepadded {
     padding: 10px 25px;
 }
-.big > .main-container{
+
+.big > .main-container {
     margin-left: 35px;
 }
-.big > .footer-time{
+
+.big > .footer-time {
     margin-left: 35px;
 }
+
 @media ( max-width: 768px) {
-    .big > .main-container{
+    .big > .main-container {
         margin-left: 0;
     }
-    .big > .footer-time{
+
+    .big > .footer-time {
         margin-left: 0;
     }
 }
@@ -101,7 +106,19 @@ table.button-table tr:hover td .buttons_panel {
 }
 
 .agile-card {
+    color: inherit;
+    padding: 5px;
+    margin-bottom: 5px;
+    border: 1px solid lightgray;
+    position: relative;
     max-width: 600px
+}
+
+div.agile-card > .bottom-tab {
+    /*position: absolute;*/
+    padding-right: 10px;
+    bottom: 0;
+    width: 100%
 }
 
 .max-width {
@@ -149,6 +166,9 @@ form.form-search:before {
 
 a.filter {
     text-decoration: none;
+}
+.mod-header-bg{
+    background: url(images/mod_header_bg.png) repeat-x center;
 }
 
 .mod-header {
@@ -216,6 +236,7 @@ table.togglerContent {
 .marginbottom_1 {
     margin-bottom: 1px;
 }
+
 .marginbottom_5 {
     margin-bottom: 5px;
 }
@@ -223,12 +244,15 @@ table.togglerContent {
 .marginbottom_20 {
     margin-bottom: 20px;
 }
-.margintop_5{
+
+.margintop_5 {
     margin-top: 5px;
 }
-.margintop_10{
+
+.margintop_10 {
     margin-top: 10px;
 }
+
 .margintop_20 {
     margin-top: 20px;
 }
@@ -294,15 +318,15 @@ a.closed {
 }
 
 /*.form-group.col-md-4 {*/
-    /*width: 150px;*/
-    /*display: table-cell;*/
+/*width: 150px;*/
+/*display: table-cell;*/
 /*}*/
 
 /*.form-group.col-md-6 {*/
-    /*width: 450px;*/
-    /*display: table-cell;*/
-    /*vertical-align: middle;*/
-    /*padding-left: 20px;*/
+/*width: 450px;*/
+/*display: table-cell;*/
+/*vertical-align: middle;*/
+/*padding-left: 20px;*/
 /*}*/
 
 /*make autocomplete maximum 300px tall*/
@@ -457,6 +481,7 @@ table.worklog_table {
     -moz-hyphens: auto;
     hyphens: auto;
 }
+
 /*IE 10+ specific behavior to cut words because they are not wrapped correctly*/
 _:-ms-lang(x), table.worklog_table {
     width: 100%;
@@ -471,7 +496,8 @@ table.worklog_table td {
     padding: 2px;
     border: 1px solid lightgray;
 }
-div.quote > table.worklog_table > tbody > tr > td{
+
+div.quote > table.worklog_table > tbody > tr > td {
     padding: 2px;
     border: 1px solid lightgray;
 }
@@ -740,7 +766,8 @@ li.wider {
     background-color: #468847;
     border-color: #d6e9c6;
 }
-.alert-danger{
+
+.alert-danger {
     background-color: #cd3f3f;
 }
 
@@ -793,8 +820,9 @@ body {
         background-color: #f5f5f5;
         border-right: 1px solid #eee;
     }
-    .sidebar.smaller{
-        top:52px;
+
+    .sidebar.smaller {
+        top: 52px;
         padding: -1px;
         display: none;
     }
@@ -809,8 +837,9 @@ body {
     /*     margin-left: -8px; */
     /*     border-radius: 0px; */
 }
-.nav-bottom{
-    position: absolute  !important;
+
+.nav-bottom {
+    position: absolute !important;
     bottom: 0;
     width: 100%;
 }
@@ -1037,7 +1066,7 @@ td.width200 {
     color: rgba(0, 0, 0, 0.8);
 }
 
-.passwordStrength >.progress {
+.passwordStrength > .progress {
     height: 10px;
     margin-top: -10px;
 }
