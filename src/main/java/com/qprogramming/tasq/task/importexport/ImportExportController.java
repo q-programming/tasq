@@ -226,7 +226,9 @@ public class ImportExportController {
             // validation finished
             TaskForm taskForm = new TaskForm();
             taskForm.setName(row.getCell(NAME_CELL).getStringCellValue());
-            taskForm.setDescription(row.getCell(DESCRIPTION_CELL).getStringCellValue());
+            if (row.getCell(DESCRIPTION_CELL) != null) {
+                taskForm.setDescription(row.getCell(DESCRIPTION_CELL).getStringCellValue());
+            }
             taskForm.setType(row.getCell(TYPE_CELL).getStringCellValue());
             taskForm.setPriority(row.getCell(PRIORITY_CELL).getStringCellValue());
             if (row.getCell(ESTIMATE_CELL) != null) {
@@ -440,7 +442,7 @@ public class ImportExportController {
         for (int i = 0; i < 7; i++) {
             Cell cell = row.getCell(i);
             if ((cell == null || cell.getCellType() == Cell.CELL_TYPE_BLANK)
-                    && (i != ESTIMATE_CELL & i != SP_CELL & i != DUE_DATE_CELL)) {
+                    && (i != ESTIMATE_CELL & i != SP_CELL & i != DUE_DATE_CELL & i != DESCRIPTION_CELL)) {
                 logger.append(logHeader);
                 logger.append("Cell ");
                 logger.append(COLS.charAt(i));
@@ -505,16 +507,6 @@ public class ImportExportController {
         if (taskXML.getName() == null) {
             logger.append(logHeader);
             logger.append("Name can't be empty");
-            logger.append(BR);
-        }
-        if (taskXML.getDescription() == null) {
-            logger.append(logHeader);
-            logger.append("Description can't be empty");
-            logger.append(BR);
-        }
-        if (taskXML.getDescription() == null) {
-            logger.append(logHeader);
-            logger.append("Description can't be empty");
             logger.append(BR);
         }
         if (taskXML.getType() == null || !isTaskTypeValid(taskXML.getType(), subtasks)) {
@@ -592,7 +584,6 @@ public class ImportExportController {
     private boolean isEstimateCellValid(Row row) {
         Cell estimateCell = row.getCell(ESTIMATE_CELL);
         return estimateCell == null || estimateCell.getCellType() == Cell.CELL_TYPE_BLANK || (estimateCell.getCellType() == Cell.CELL_TYPE_STRING && Utils.correctEstimate(estimateCell.getStringCellValue()));
-
     }
 
 

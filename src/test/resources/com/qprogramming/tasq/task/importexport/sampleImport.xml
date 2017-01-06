@@ -79,5 +79,13 @@
             <estimate>estimate</estimate>
             <story_points>string</story_points>
         </task>
+        <task number="6">
+            <name>Project manage screen improvements</name>
+            <type>USER_STORY</type>
+            <priority>MAJOR</priority>
+            <estimate>2h</estimate>
+            <story_points>1</story_points>
+            <notestimated>true</notestimated>
+        </task>
     </taskList>
 </projectXML>
