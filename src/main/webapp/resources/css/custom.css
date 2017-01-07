@@ -207,6 +207,13 @@ a.filter {
     display: inline;
     margin-right: 3px;
 }
+.agile-card>div>.toggler{
+    margin-right:3px;
+}
+.agile-card>div>.toggler.closed{
+    margin-right:0px;
+}
+
 
 .mod-header:hover .toggler {
     display: inline;

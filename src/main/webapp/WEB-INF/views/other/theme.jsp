@@ -82,6 +82,9 @@ ${user.theme.font.link}
     .mod-header-title.theme {
         background-color: rgba(249, 253, 255, 1);
     }
+    .toggler.theme {
+        background-color: rgba(249, 253, 255, 1);
+    }
 
     thead.theme {
         background: ${color};
