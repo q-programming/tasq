@@ -23,6 +23,11 @@ public class ResultData {
         this.message = message;
     }
 
+    public ResultData(Code code) {
+        this.code = code;
+    }
+
+
     @Override
     public String toString() {
         return this.code + " " + this.message;

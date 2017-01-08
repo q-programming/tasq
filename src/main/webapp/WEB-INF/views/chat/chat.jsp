@@ -12,27 +12,26 @@
 </div>
 <div class="row">
     <%--this can be manipulated for smaller chat--%>
-    <div class="col-sm-12 col-md-8">
-        <div>
-            <div class="row">
-                <div class="col-sm-12 chat-input">
-                    <form class="form-inline">
-                        <div class="form-group" style="width: 75%">
-                            <input type="text" id="message" class="form-control" placeholder="Message..."
-                                   style="width: 90%">
-                        </div>
-                        <button id="send" class="btn btn-default" type="submit">Send</button>
-                    </form>
+    <div class="col-md-offset-1 col-md-11 col-sm-12">
+        <div class="row margintop_5" style="padding-bottom: 10px">
+            <div class="col-md-12">
+                <div id="messages-tab">
                 </div>
-            </div>
-            <div class="row margintop_5" style="padding-bottom: 10px">
-                <div class="col-md-12">
-                    <div id="messages-tab">
-                    </div>
-                    <a class="anchor" id="chat-bottom"></a>
-                </div>
+                <a class="anchor" id="chat-bottom"></a>
             </div>
         </div>
+    </div>
+</div>
+<div class=" chat-input">
+    <div class="row" style="width: 100%">
+        <form>
+            <div class="col-sm-8">
+                <input type="text" id="message" class="form-control" placeholder="Message...">
+            </div>
+            <div class="col-sm-2">
+                <button id="send" class="btn btn-default" type="submit">Send</button>
+            </div>
+        </form>
     </div>
 </div>
 <script>
@@ -41,6 +40,7 @@
     var avatarURL = '<c:url value="/../avatar/"/>';
     var accountURL = '<c:url value="/user/"/>';
     var messagesURL = '<c:url value="/${chatProject.projectId}/chat/projectmessages"/>';
+    var validateURL = '<c:url value="/chat/validate"/>';
     var project = "${chatProject.projectId}";
     var loading_indicator = '<div id="loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td>';
 
@@ -73,27 +73,29 @@
 
     function showMessage(message) {
         if (message.account !== null) {
-            var avatar = '<img data-src="holder.js/30x30" class="avatar small hidden-xs hidden-sm" src="' + avatarURL + message.account.id + '.png"/>';
             var account = '<a href="' + accountURL + message.account.username + '">' + message.account.name + " " + message.account.surname + '</a>';
             if (message.account.username !== "${user.username}") {
+                var avatar = '<img data-src="holder.js/30x30" class="avatar small hidden-xs hidden-sm pull-right" src="' + avatarURL + message.account.id + '.png"/>';
                 $("#messages-tab").append("<div class='row margintop_5'>" +
-                    "<div class='col-md-9'>" +
-                    "<div class='chat-bubble '>" +
+                    "<div class='col-md-1'>" + avatar + "</div>" +
+                    "<div class='col-md-8'>" +
+                    "<div class='chat-bubble-user'>" + account +
                     "<div class='time-div'>" + message.time + "</div>" +
                     "<div>" + message.message + "</div>" +
                     "</div>" +
                     "</div>" +
-                    "<div class='col-md-3'>" + avatar + account + "</div>" +
                     "</div>");
             } else {
+                var avatar = '<img data-src="holder.js/30x30" class="avatar small hidden-xs hidden-sm pull-left" src="' + avatarURL + message.account.id + '.png"/>';
                 $("#messages-tab").append("<div class='row margintop_5'>" +
-                    "<div class='col-md-3'>" + avatar + account + "</div>" +
-                    "<div class='col-md-9'>" +
-                    "<div class='chat-bubble-user'>" +
+                    "<div class='col-md-offset-1 col-md-8'>" +
+                    "<div class='chat-bubble'>" + account +
                     "<div class='time-div'>" + message.time + "</div>" +
                     "<div>" + message.message + "</div>" +
                     "</div>" +
-                    "</div></div>");
+                    "</div>" +
+                    "<div class='col-md-1'>" + avatar + "</div>" +
+                    "</div>");
             }
         } else {
             $("#messages-tab").append("<div style='font-style: italic;'>" + message.message + "</div>");
@@ -116,9 +118,21 @@
             e.preventDefault();
         });
         $("#send").click(function () {
-            if ($("#message").val() !== '') {
-                sendMessage($("#message").val(), username);
-                $("#message").val('')
+            var message = $("#message").val();
+            if (message !== '') {
+                if (message.length > 4000) {
+                    var warning = "<s:message code="chat.error.lenght"/>";
+                    showWarning(warning);
+                } else {
+                    $.get(validateURL, {message: message}, function (result) {
+                        if (result.code === 'ERROR') {
+                            showWarning(result.message);
+                        } else {
+                            sendMessage($("#message").val(), username);
+                            $("#message").val('')
+                        }
+                    });
+                }
             }
 
         });

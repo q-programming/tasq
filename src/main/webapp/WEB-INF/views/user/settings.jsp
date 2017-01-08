@@ -282,7 +282,7 @@
                 file = input.files[0];
                 img = new Image();
                 img.onload = function () {
-                    if (this.width > 150 || this.height > 150) {
+                    if (this.width > 500 || this.height > 500) {
                         showError(imageWRN);
                     } else {
                         var reader = new FileReader();
