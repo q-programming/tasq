@@ -1077,6 +1077,70 @@ td.width200 {
     height: 10px;
     margin-top: -10px;
 }
+.chat-bubble-user {
+    position: relative;
+    background: white;
+    padding: 5px;
+}
+.chat-bubble-user:after, .chat-bubble-user:before {
+    right: 100%;
+    top: 25%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+}
+
+.chat-bubble-user:after {
+    border-color: transparent;
+    border-right-color: white;
+    border-width: 8px;
+    margin-top: -8px;
+}
+.chat-bubble-user:before {
+    border-color: transparent;
+    border-right-color: white;
+    border-width: 9px;
+    margin-top: -9px;
+}
+.chat-bubble {
+    position: relative;
+    background: white;
+    padding: 5px;
+}
+.chat-bubble:after, .chat-bubble:before {
+    left: 100%;
+    top: 25%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+}
+
+.chat-bubble:after {
+    border-color: transparent;
+    border-left-color: white;
+    border-width: 8px;
+    margin-top: -8px;
+}
+.chat-bubble:before {
+    border-color: transparent;
+    border-left-color: white;
+    border-width: 9px;
+    margin-top: -9px;
+}
+.chat-input{
+    position: fixed;
+    bottom: 0;
+    z-index: 1000;
+    background: white;
+    padding-bottom: 10px;
+    padding-top: 5px;
+}
 
 /* .search { position: relative; } */
 /* .search input { text-indent: 30px;} */
