@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,22 +48,31 @@ public class ChatController {
 
     @MessageMapping("/{projectId}/send")
     @SendTo("/chat/{projectId}/messages")
-    public DisplayChatMessage sendMessage(@DestinationVariable String projectId, MessageSent message) throws Exception {
-        Thread.sleep(500); // simulated delay
-        if (StringUtils.isNotBlank(message.getUsername())) {
-            ResultData validate = validate(message.getMessage());
-            if (validate.code.equals(ResultData.Code.ERROR)) {
-                return new DisplayChatMessage(new ChatMessage(validate.message));
-            } else {
-                Account account = accSrv.findByUsername(message.getUsername());
-                ChatMessage chatMessage = chatSrv.save(new ChatMessage(message.getMessage(), account, projectId));
-                return new DisplayChatMessage(chatMessage);
+    public ChatResponse sendMessage(@DestinationVariable String projectId, MessageSent message) throws Exception {
+        if (ChatEvent.MESSAGE.equals(message.getEvent())) {
+            Thread.sleep(500); // simulated delay
+            if (StringUtils.isNotBlank(message.getUsername())) {
+                ResultData validate = validate(message.getMessage());
+                if (ResultData.Code.ERROR.equals(validate.code)) {
+                    return new ChatResponse.ResponseBuilder().message(validate.message).event(ChatEvent.ERROR).build();
+                } else {
+                    Account account = accSrv.findByUsername(message.getUsername());
+                    ChatMessage chatMessage = chatSrv.save(new ChatMessage(message.getMessage(), account, projectId));
+                    return new ChatResponse(chatMessage);
+                }
             }
-        } else {//only technical messages, no need to store them
-            return new DisplayChatMessage(new ChatMessage(message.getMessage()));
+        } else if (ChatEvent.ONLINE.equals(message.getEvent()) || ChatEvent.OFFLINE.equals(message.getEvent())) {
+            if (StringUtils.isNotBlank(message.getUsername())) {
+                Account account = accSrv.findByUsername(message.getUsername());
+                return new ChatResponse.ResponseBuilder()
+                        .user(account)
+                        .event(message.getEvent())
+                        .time(Utils.convertDateTimeToString(new Date()))
+                        .build();
+            }
         }
+        return new ChatResponse.ResponseBuilder().message("Nothing to process").event(ChatEvent.ERROR).build();
     }
-
 
     @RequestMapping("/{projectId}/chat")
     public String chat(@PathVariable String projectId, Model model, RedirectAttributes ra) {
@@ -81,8 +91,8 @@ public class ChatController {
 
     @ResponseBody
     @RequestMapping("/{projectId}/chat/projectmessages")
-    public List<DisplayChatMessage> getProjectMessages(@PathVariable String projectId) {
-        return chatSrv.findByProject(projectId).stream().map(DisplayChatMessage::new).collect(Collectors.toList());
+    public List<ChatResponse> getProjectMessages(@PathVariable String projectId) {
+        return chatSrv.findByProject(projectId).stream().map(ChatResponse::new).collect(Collectors.toList());
     }
 
     @ResponseBody

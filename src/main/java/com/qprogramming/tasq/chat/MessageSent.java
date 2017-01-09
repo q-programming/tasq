@@ -8,6 +8,7 @@ public class MessageSent {
     private String message;
     private String username;
     private String project;
+    private ChatEvent event;
 
     public MessageSent() {
     }
@@ -34,5 +35,13 @@ public class MessageSent {
 
     public void setProject(String project) {
         this.project = project;
+    }
+
+    public ChatEvent getEvent() {
+        return event;
+    }
+
+    public void setEvent(ChatEvent event) {
+        this.event = event;
     }
 }

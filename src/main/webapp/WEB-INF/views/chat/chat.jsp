@@ -5,14 +5,10 @@
 <script src="<c:url value="/resources/js/sockjs.min.js" />"></script>
 <script src="<c:url value="/resources/js/stomp.min.js" />"></script>
 <div class="row">
-    <div class="col-md-12">
+    <%--this can be manipulated for smaller chat--%>
+    <div class="col-md-offset-1 col-md-10 col-sm-12">
         <h3><a href="<c:url value="/project/${chatProject.projectId}"/>">[${chatProject.projectId}]
             ${chatProject.name}</a> chat</h3>
-    </div>
-</div>
-<div class="row">
-    <%--this can be manipulated for smaller chat--%>
-    <div class="col-md-offset-1 col-md-11 col-sm-12">
         <div class="row margintop_5" style="padding-bottom: 10px">
             <div class="col-md-12">
                 <div id="messages-tab">
@@ -21,17 +17,31 @@
             </div>
         </div>
     </div>
+    <%--ACTIVE USERS--%>
+    <div class="col-md-1 hidden-xs hidden-sm " style="position: fixed;right: 0">
+        <h4><s:message code="chat.active.users"/></h4>
+        <div id="chat-users">
+            <c:forEach items="${chatProject.participants}" var="participant">
+                <div class="chat-participant">
+                    <img id="account-${participant.username}" data-src="holder.js/50x50"
+                         class="avatar offline a-tooltip"
+                         data-username="${participant.username}"
+                         title="${participant}"
+                         data-placement="bottom"
+                         src="<c:url value="/../avatar/${participant.id}.png"/>"/>
+                </div>
+            </c:forEach>
+        </div>
+    </div>
 </div>
 <div class=" chat-input">
     <div class="row" style="width: 100%">
-        <form>
-            <div class="col-sm-8">
-                <input type="text" id="message" class="form-control" placeholder="Message...">
+        <form class="form-inline">
+            <div class="form-group col-xs-8">
+                <input type="text" id="message" class="form-control" placeholder="Message..." style="width: 100%"
+                       autocomplete="off">
             </div>
-            <div class="col-sm-2">
-                <button id="send" class="btn btn-default" type="submit">Send</button>
-            </div>
-        </form>
+            <button id="send" class="btn btn-default" type="submit"><s:message code="chat.send"/></button>
     </div>
 </div>
 <script>
@@ -44,63 +54,110 @@
     var project = "${chatProject.projectId}";
     var loading_indicator = '<div id="loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></td>';
 
+    const ERROR = 'ERROR';
+    const ONLINE = 'ONLINE';
+    const OFFLINE = 'OFFLINE';
+    const MESSAGE = 'MESSAGE';
+
     function connect() {
         var socket = new SockJS('/gs-guide-websocket');
         stompClient = Stomp.over(socket);
         stompClient.debug = null
         stompClient.connect({}, function (frame) {
             //console.log('Connected: ' + frame);
-            stompClient.subscribe('<c:url value="/chat/${chatProject.projectId}/messages"/>', function (message) {
-                showMessage(JSON.parse(message.body));
+            stompClient.subscribe('<c:url value="/chat/${chatProject.projectId}/messages"/>', function (data) {
+                var response = JSON.parse(data.body);
+                if (response.event === ERROR) {
+                    $("#messages-tab").append("<div style='font-style: italic;'>" + response.message + "</div>");
+                } else {
+                    if (response.event === ONLINE) {
+                        userOnline(response);
+                    } else if (response.event === OFFLINE) {
+                        userOffline(response.user.username);
+                    } else if (response.event === MESSAGE) {
+                        userOnline(response);
+                        showMessage(response);
+                    }
+                }
             });
-            sendMessage("${user} connected");
+            sendMessage("", "${user.username}", ONLINE);
         });
     }
 
     function disconnect() {
         if (stompClient !== null) {
-            sendMessage("${user} disconnected");
+            sendMessage("", "${user.username}", OFFLINE);
             stompClient.disconnect();
         }
     }
 
-    function sendMessage(message, username) {
+    function sendMessage(message, username, event) {
         stompClient.send("<c:url value="/chat/${chatProject.projectId}/send"/>", {}, JSON.stringify({
             'message': message,
-            'username': username
+            'username': username,
+            'event': event
         }));
     }
 
-    function showMessage(message) {
-        if (message.account !== null) {
-            var account = '<a href="' + accountURL + message.account.username + '">' + message.account.name + " " + message.account.surname + '</a>';
-            if (message.account.username !== "${user.username}") {
-                var avatar = '<img data-src="holder.js/30x30" class="avatar small hidden-xs hidden-sm pull-right" src="' + avatarURL + message.account.id + '.png"/>';
+    function showMessage(response) {
+        if (response.user !== null) {
+            var account = '<span class="chat-message-username" data-username="' + response.user.username + '"><a href="' + accountURL + response.user.username + '">' + response.user.name + " " + response.user.surname + '</a></span>';
+            var avatar;
+            if (response.user.username !== "${user.username}") {
+                <%--var online = '<i class="fa fa-user a-tooltip" style="color:mediumseagreen; position: absolute;top: 20px;right: 10px;" title="<s:message code="main.online"/>"></i>';--%>
+                avatar = '<img data-src="holder.js/30x30" class="avatar small hidden-xs hidden-sm pull-right" src="' + avatarURL + response.user.id + '.png"/>';
                 $("#messages-tab").append("<div class='row margintop_5'>" +
                     "<div class='col-md-1'>" + avatar + "</div>" +
-                    "<div class='col-md-8'>" +
+                    "<div class='col-md-10'>" +
                     "<div class='chat-bubble-user'>" + account +
-                    "<div class='time-div'>" + message.time + "</div>" +
-                    "<div>" + message.message + "</div>" +
+                    "<div class='time-div'>" + response.time + "</div>" +
+                    "<div>" + response.message + "</div>" +
                     "</div>" +
                     "</div>" +
                     "</div>");
             } else {
-                var avatar = '<img data-src="holder.js/30x30" class="avatar small hidden-xs hidden-sm pull-left" src="' + avatarURL + message.account.id + '.png"/>';
+                avatar = '<img data-src="holder.js/30x30" class="avatar small hidden-xs hidden-sm pull-left" src="' + avatarURL + response.user.id + '.png"/>';
                 $("#messages-tab").append("<div class='row margintop_5'>" +
-                    "<div class='col-md-offset-1 col-md-8'>" +
+                    "<div class='col-md-offset-1 col-md-10'>" +
                     "<div class='chat-bubble'>" + account +
-                    "<div class='time-div'>" + message.time + "</div>" +
-                    "<div>" + message.message + "</div>" +
+                    "<div class='time-div'>" + response.time + "</div>" +
+                    "<div>" + response.message + "</div>" +
                     "</div>" +
                     "</div>" +
                     "<div class='col-md-1'>" + avatar + "</div>" +
                     "</div>");
             }
         } else {
-            $("#messages-tab").append("<div style='font-style: italic;'>" + message.message + "</div>");
+            $("#messages-tab").append("<div style='font-style: italic;'>" + response.message + "</div>");
         }
         $(document.body).scrollTop($('#chat-bottom').offset().top);
+    }
+
+    function userOnline(response) {
+        var username = response.user.username
+        var online_status = "<div class='online-status a-tooltip' title='<s:message code="chat.active"/><br>" + response.time + "' data-html='true' data-placement='bottom'></div>";
+        var userIMG = $("#account-" + username);
+        userIMG.removeClass("offline");
+        if (userIMG.parent().find(".online-status").length === 0) {
+            userIMG.parent().prepend(online_status);
+        }
+        userIMG.parent().hide().prependTo('#chat-users').fadeIn();
+        //add mobile online indicators
+        $(".mobile-online-status[data-username='" + username + "']").remove();
+        $(".chat-message-username[data-username='" + username + "']").each(function () {
+            var online = '<span class="mobile-online-status visible-xs visible-sm" data-username="' + username + '">&nbsp;</span>';
+            $(this).append(online)
+        });
+        $(".a-tooltip").tooltip();
+    }
+    function userOffline(username) {
+        var userIMG = $("#account-" + username);
+        userIMG.addClass("offline");
+        var onlineStatus = userIMG.parent().find(".online-status");
+        if (onlineStatus) {
+            onlineStatus.remove();
+        }
+        $(".mobile-online-status[data-username='" + username + "']").remove();
     }
 
     function readProjectMessages() {
@@ -128,7 +185,7 @@
                         if (result.code === 'ERROR') {
                             showWarning(result.message);
                         } else {
-                            sendMessage($("#message").val(), username);
+                            sendMessage($("#message").val(), username, MESSAGE);
                             $("#message").val('')
                         }
                     });
@@ -138,5 +195,9 @@
         });
     });
     connect();
-    readProjectMessages()
+    readProjectMessages();
+    $(window).bind('beforeunload', function () {
+        disconnect();
+    });
+
 </script>
