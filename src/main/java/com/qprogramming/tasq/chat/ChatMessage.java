@@ -51,6 +51,10 @@ public class ChatMessage {
         this.account = account;
     }
 
+    public Date getRawTime() {
+        return this.time;
+    }
+
     public String getTime() {
         return Utils.convertDateTimeToString(time);
     }
