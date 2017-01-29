@@ -37,7 +37,7 @@
 <div class=" chat-input">
     <div class="row" style="width: 100%">
         <form class="form-inline">
-            <div class="form-group col-xs-8">
+            <div class="form-group col-xs-8" style="margin-bottom: auto">
                 <input type="text" id="message" class="form-control" placeholder="Message..." style="width: 100%"
                        autocomplete="off">
             </div>
@@ -145,7 +145,8 @@
         //add mobile online indicators
         $(".mobile-online-status[data-username='" + username + "']").remove();
         $(".chat-message-username[data-username='" + username + "']").each(function () {
-            var online = '<span class="mobile-online-status visible-xs visible-sm" data-username="' + username + '">&nbsp;</span>';
+            var online ='<i class="fa fa-circle mobile-online-status" aria-hidden="true" data-username="' + username + '"></i>'
+//            var online = '<span class="mobile-online-status visible-xs visible-sm" data-username="' + username + '">&nbsp;</span>';
             $(this).append(online)
         });
         $(".a-tooltip").tooltip();

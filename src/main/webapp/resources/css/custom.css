@@ -990,6 +990,11 @@ a.secondaryPanelButton {
     height: 50px;
     border-radius: 50%
 }
+.avatar.big {
+    height: initial;
+    padding: 10px;
+    border-radius: 50%;
+}
 
 .avatar.small {
     height: 30px;
@@ -1015,12 +1020,8 @@ a.secondaryPanelButton {
     position: absolute;
 }
 .mobile-online-status{
-    background-color: mediumseagreen;
-    border-radius: 50%;
-    width: 10px;
-    height: 10px;
-    font-size: xx-small;
-    float:left;
+    color: mediumseagreen;
+    margin-left: 2px;
 }
 
 .chat-participant {
