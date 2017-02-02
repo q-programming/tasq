@@ -283,9 +283,7 @@ table.togglerContent {
 }
 
 .state_default {
-    border-style: dashed;
-    border-width: 2px;
-    border-color: lightgray;
+    border: 2px dashed lightgray;
 }
 
 .state_highlight {
@@ -990,6 +988,7 @@ a.secondaryPanelButton {
     height: 50px;
     border-radius: 50%
 }
+
 .avatar.big {
     height: initial;
     padding: 10px;
@@ -1019,7 +1018,8 @@ a.secondaryPanelButton {
     left: 40px;
     position: absolute;
 }
-.mobile-online-status{
+
+.mobile-online-status {
     color: mediumseagreen;
     margin-left: 2px;
 }
