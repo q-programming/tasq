@@ -62,6 +62,50 @@
                                 class="fa fw fa-pencil"></i> <s:message code="task.edit"/>
                         </a></li>
                     </c:if>
+                    <c:if test="${task.subtask}">
+                        <li>
+                            <a href="#" class="convert2task" data-toggle="modal" data-target="#convert2task"
+                               data-taskid="${task.id}" data-type="${task.type}"
+                               data-project="${task.project.projectId}">
+                                <i class="fa fw fa-level-up"></i>&nbsp;<s:message
+                                    code="task.subtasks.2task"/>
+                            </a>
+                        </li>
+                    </c:if>
+                    <li>
+                        <a class="addFileButton" href="#" data-toggle="modal"
+                           data-target="#files_task" data-taskID="${task.id}"> <i
+                                class="fa fw fa-file"></i>&nbsp;<s:message code="task.addFile"/>
+                        </a>
+                    </li>
+                    <li role="separator" class="divider"></li>
+                    <c:if test="${task.loggedWork eq '0m' }">
+                        <li>
+                            <a href="#"
+                               class="estimates-modal" data-toggle="modal"
+                               data-target="#estimate-modal-dialog" data-taskID="${task.id}"
+                               data-val="${task.estimate}">
+                                <i class="fa fa-calendar-o"></i>&nbsp;<s:message code="task.estimate.change"/>
+                            </a>
+                        </li>
+                    </c:if>
+                    <li>
+                        <a href="#" class="worklog " data-toggle="modal" data-target="#logWorkform"
+                           data-taskID="${task.id}">
+                            <i class="fa fa-calendar-plus-o"></i>&nbsp;<s:message code="task.logWork"/>
+                        </a>
+                    </li>
+                    <c:if test="${task.loggedWork ne '0m' }">
+                        <li>
+                            <a href="#"
+                               class="remaining-modal " data-toggle="modal"
+                               data-target="#estimate-modal-dialog" data-taskID="${task.id}"
+                               data-val="${task.remaining}">
+                                <i class="fa fa-calendar"></i>&nbsp;<s:message code="task.remaining.change"/>
+                            </a>
+                        </li>
+                    </c:if>
+                    <li role="separator" class="divider"></li>
                     <li><a class="linkButton" href="#"> <i
                             class="fa fw fa-link fa-flip-horizontal"></i>&nbsp;<s:message
                             code="task.link"/>
@@ -79,20 +123,6 @@
                             <s:message code="task.linked.create"/>
                         </a>
                     </li>
-                    <li><a class="addFileButton" href="#" data-toggle="modal"
-                           data-target="#files_task" data-taskID="${task.id}"> <i
-                            class="fa fw fa-file"></i>&nbsp;<s:message code="task.addFile"/>
-                    </a></li>
-                    <c:if test="${task.subtask}">
-                        <li>
-                            <a href="#" class="convert2task" data-toggle="modal" data-target="#convert2task"
-                               data-taskid="${task.id}" data-type="${task.type}"
-                               data-project="${task.project.projectId}">
-                                <i class="fa fw fa-level-up"></i>&nbsp;<s:message
-                                    code="task.subtasks.2task"/>
-                            </a>
-                        </li>
-                    </c:if>
                 </ul>
             </c:if>
             <c:if test="${task.state eq'CLOSED' && project_participant}">
@@ -312,6 +342,7 @@
                         <i class="fa fa-lg fa-calendar"></i>
                         <s:message code="task.logWork"/>
                     </button>
+
                     <c:if
                             test="${user.activeTask eq task.id}">
                         <a href="#">
@@ -335,6 +366,7 @@
                             </button>
                         </a>
                     </c:if>
+
                 </c:if>
                 <%--ESTIMATES TAB	--%>
                 <%-- Default values --%>
@@ -384,6 +416,7 @@
                         <td></td>
                         <td style="width: 150px"></td>
                         <td></td>
+                        <td></td>
                     </tr>
                     <%-- Estimate bar --%>
                     <c:if test="${task.estimate ne '0m'}">
@@ -405,7 +438,16 @@
                                          style="width: 100%;"></div>
                                 </div>
                             </td>
-                            <td class="bar_td">${task.estimate}&nbsp;
+                            <td class="bar_td">${task.estimate}</td>
+                            <td>
+                                <c:if test="${task.loggedWork eq '0m' }">
+                                <span class="estimate-modal a-tooltip clickable" data-toggle="modal"
+                                      title="<s:message code="task.estimate.change"/>"
+                                      data-target="#estimate-modal-dialog" data-taskID="${task.id}"
+                                      data-val="${task.estimate}">
+                                        <i class="fa fa-calendar-o" aria-hidden="true"></i>
+                                 </span>
+                                </c:if>
                             </td>
                         </tr>
                         <c:if test="${not task.subtask && not empty taskEstimate}">
@@ -437,6 +479,13 @@
                             </div>
                         </td>
                         <td class="bar_td">${task.loggedWork}</td>
+                        <td>
+                            <span class="worklog a-tooltip clickable" data-toggle="modal"
+                                  title="<s:message code="task.logWork"/>&nbsp;(l)"
+                                  data-target="#logWorkform" data-taskID="${task.id}">
+                                <i class="fa fa-calendar-plus-o"></i>
+                            </span>
+                        </td>
                     </tr>
                     <c:if test="${not task.subtask && not empty taskLogged}">
                         <t:timeDetails task="${task}" taskTime="${taskLogged}" subtasks="${subtasks}"
@@ -463,6 +512,16 @@
                             </div>
                         </td>
                         <td class="bar_td">${task.remaining }</td>
+                        <td>
+                            <c:if test="${task.loggedWork ne '0m' }">
+                                <span class="remaining-modal a-tooltip clickable" data-toggle="modal"
+                                      title="<s:message code="task.remaining.change"/>"
+                                      data-target="#estimate-modal-dialog" data-taskID="${task.id}"
+                                      data-val="${task.remaining}">
+                                    <i class="fa fa-calendar"></i>
+                                </span>
+                            </c:if>
+                        </td>
                     </tr>
                     <c:if test="${not task.subtask && not empty taskRemaining}">
                         <t:timeDetails task="${task}" taskTime="${taskRemaining}" subtasks="${subtasks}"
@@ -945,6 +1004,7 @@
 <jsp:include page="../modals/assign.jsp"/>
 <jsp:include page="../modals/image.jsp"/>
 <jsp:include page="../modals/delete.jsp"/>
+<jsp:include page="../modals/estimate.jsp"/>
 <c:if test="${task.subtask}">
     <jsp:include page="../modals/convert2task.jsp"/>
 </c:if>

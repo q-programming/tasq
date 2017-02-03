@@ -197,6 +197,12 @@ a.filter {
     font-weight: bold;
 }
 
+@media (min-width: 768px) {
+    .modal-md {
+        width: 400px;
+    }
+}
+
 .toggler {
     /*display: none;*/
     color: gray;

@@ -244,7 +244,7 @@
                         code="main.optional"/></span></div>
                 <form:errors path="estimate" element="p" class="text-danger"/>
                 <span class="help-block"><s:message code="task.estimate.help"/><br>
-					<s:message code="task.estimate.help.pattern"/> </span>
+					<s:message code="task.estimate.help.pattern" htmlEscape="false"/> </span>
             </div>
             <div id="estimate_div">
                 <div class="form-group ${story_points_class}">
