@@ -33,6 +33,7 @@ import com.qprogramming.tasq.task.worklog.TaskResolution;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Hibernate;
@@ -59,7 +60,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.*;
+import java.text.ParseException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.qprogramming.tasq.support.Utils.REDIRECT;
@@ -1501,8 +1505,10 @@ public class TaskController {
         // Save
         for (MultipartFile multipartFile : filesArray) {
             if (!multipartFile.isEmpty()) {
-                File file = new File(
-                        taskSrv.getTaskDirectory(task) + File.separator + multipartFile.getOriginalFilename());
+                String taskDir = taskSrv.getTaskDirectory(task) + File.separator;
+                File file = new File(taskDir + multipartFile.getOriginalFilename());
+                //check if file exists, if yes , add suffix
+                file = createUniqueFile(taskDir, file);
                 try {
                     FileUtils.writeByteArrayToFile(file, multipartFile.getBytes());
                 } catch (IOException e) {
@@ -1512,6 +1518,35 @@ public class TaskController {
             }
         }
         return true;
+    }
+
+    /**
+     * Creates unique file. If file with such filename already exists in that folder, _# is added , where # is increased until free number is found
+     *
+     * @param taskDir - task directory
+     * @param file    file to be created unique
+     * @return
+     */
+    private File createUniqueFile(String taskDir, File file) {
+        long i;
+        while (file.exists()) {
+            String pathname = FilenameUtils.getBaseName(file.getName());
+            Pattern p = Pattern.compile("(\\d*)$");
+            Matcher matcher = p.matcher(pathname);
+            if (matcher.find() && StringUtils.isNotBlank(matcher.group())) {
+                try {
+                    i = Integer.parseInt(matcher.group()) + 1;
+                } catch (NumberFormatException e) {
+                    LOG.debug("Something  went wrong with numbers, adding timestamp. {}", e);
+                    i = System.currentTimeMillis();
+                }
+            } else {
+                i = 0;
+            }
+            pathname = FilenameUtils.getBaseName(pathname).split("(_\\d*)$")[0];
+            file = new File(taskDir + FilenameUtils.getBaseName(pathname) + "_" + i + FilenameUtils.EXTENSION_SEPARATOR + FilenameUtils.getExtension(file.getName()));
+        }
+        return file;
     }
 
     /**
