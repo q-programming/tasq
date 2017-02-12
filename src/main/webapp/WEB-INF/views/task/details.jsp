@@ -82,8 +82,8 @@
                     <c:if test="${task.loggedWork eq '0m' }">
                         <li>
                             <a href="#"
-                               class="estimates-modal" data-toggle="modal"
-                               data-target="#estimate-modal-dialog" data-taskID="${task.id}"
+                               class="estimate-modal" data-toggle="modal"
+                               data-target="#new-time-modal-dialog" data-taskID="${task.id}"
                                data-val="${task.estimate}">
                                 <i class="fa fa-calendar-o"></i>&nbsp;<s:message code="task.estimate.change"/>
                             </a>
@@ -99,7 +99,7 @@
                         <li>
                             <a href="#"
                                class="remaining-modal " data-toggle="modal"
-                               data-target="#estimate-modal-dialog" data-taskID="${task.id}"
+                               data-target="#new-time-modal-dialog" data-taskID="${task.id}"
                                data-val="${task.remaining}">
                                 <i class="fa fa-calendar"></i>&nbsp;<s:message code="task.remaining.change"/>
                             </a>
@@ -339,7 +339,7 @@
                     <button class="btn btn-default btn-sm worklog a-tooltip" data-toggle="modal"
                             title="<s:message code="task.logWork"/>&nbsp;(l)"
                             data-target="#logWorkform" data-taskID="${task.id}">
-                        <i class="fa fa-lg fa-calendar"></i>
+                        <i class="fa fa-lg fa-calendar-plus-o"></i>
                         <s:message code="task.logWork"/>
                     </button>
 
@@ -443,7 +443,7 @@
                                 <c:if test="${task.loggedWork eq '0m' }">
                                 <span class="estimate-modal a-tooltip clickable" data-toggle="modal"
                                       title="<s:message code="task.estimate.change"/>"
-                                      data-target="#estimate-modal-dialog" data-taskID="${task.id}"
+                                      data-target="#new-time-modal-dialog" data-taskID="${task.id}"
                                       data-val="${task.estimate}">
                                         <i class="fa fa-calendar-o" aria-hidden="true"></i>
                                  </span>
@@ -516,7 +516,7 @@
                             <c:if test="${task.loggedWork ne '0m' }">
                                 <span class="remaining-modal a-tooltip clickable" data-toggle="modal"
                                       title="<s:message code="task.remaining.change"/>"
-                                      data-target="#estimate-modal-dialog" data-taskID="${task.id}"
+                                      data-target="#new-time-modal-dialog" data-taskID="${task.id}"
                                       data-val="${task.remaining}">
                                     <i class="fa fa-calendar"></i>
                                 </span>

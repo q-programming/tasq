@@ -66,7 +66,7 @@
                                     style="margin-left: 5px" type="button" data-toggle="modal"
                                     data-target="#logWorkform" data-taskID="${task.id}" id="log_time"
                                     title="<s:message code="task.logWork"/>">
-                                <i class="fa fa-lg fa-clock-o"></i>
+                                <i class="fa fa-lg fa-calendar-plus-o"></i>
                             </button>
                         </c:if>
                     </c:if>

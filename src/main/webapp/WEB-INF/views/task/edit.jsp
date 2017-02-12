@@ -124,7 +124,7 @@
         <%-- Estimate --%>
         <div id="estimate_div">
             <div class="form-group ${estimate_class}">
-                <c:if test="${task.loggedWork ne '0m' && task.subtasks lt 1}">
+                <c:if test="${task.loggedWork ne '0m'}">
                     <div>
                         <div class="mod-header">
                             <h5 class="mod-header-title">

@@ -120,6 +120,10 @@ div.agile-card > .bottom-tab {
     bottom: 0;
     width: 100%
 }
+.pointsdiv{
+    display: table-cell;
+    margin-top: -20px
+}
 
 .max-width {
     max-width: 100%;

@@ -152,9 +152,10 @@
                                         <input type="hidden" name="taskID" value="${task.id}">
                                     </form>
                                 </div>
-                                <c:if test="${!sprint.active}">
-                                    <c:if test="${task.estimated}">
-                                        <div class="pointsdiv" style="display: table-cell">
+                                <div class="pointsdiv pull-right">
+                                    <c:if test="${!sprint.active}">
+                                        <%--STORY POINTS--%>
+                                        <c:if test="${task.estimated}">
                                             <c:if test="${task.story_points == 0 && task.estimated}">
                                                 <c:set var="points_txt">?</c:set>
                                             </c:if>
@@ -162,19 +163,18 @@
                                                 <c:set var="points_txt">${task.story_points}</c:set>
                                             </c:if>
                                             <span class="points badge theme">
-                                    <span class="point-value" data-points="${task.story_points}">${points_txt}</span>
-                                    <input class="point-input" data-id="${task.id}">
-                                    <span class="point-approve" style="display:none;cursor: pointer;"><i
-                                            class="fa fa-check"></i></span>
-                                    <span class="point-cancel" style="display:none;cursor: pointer;"><i
-                                            class="fa fa-times"></i></span>
-                                    <span class="point-edit"><i class="fa fa-pencil points"></i></span>
-                                    </span>
-                                        </div>
+                                                <span class="point-value"
+                                                      data-points="${task.story_points}">${points_txt}</span>
+                                                <input class="point-input" data-id="${task.id}">
+                                                <span class="point-approve" style="display:none;cursor: pointer;"><i
+                                                        class="fa fa-check"></i></span>
+                                                <span class="point-cancel" style="display:none;cursor: pointer;"><i
+                                                        class="fa fa-times"></i></span>
+                                                <span class="point-edit"><i class="fa fa-pencil points"></i></span>
+                                            </span>
+                                        </c:if>
                                     </c:if>
-                                </c:if>
-                                <c:if test="${sprint.active}">
-                                    <div class="points-div" style="display: table-cell">
+                                    <c:if test="${sprint.active}">
                                         <c:if test="${task.story_points ne 0 && task.estimated}">
                                             <span class="badge theme point-value"
                                                   data-points="${task.story_points}">${task.story_points} </span>
@@ -182,8 +182,34 @@
                                         <c:if test="${task.story_points eq 0 && task.estimated}">
                                             <span class="badge theme point-value" data-points=0>? </span>
                                         </c:if>
-                                    </div>
-                                </c:if>
+                                    </c:if>
+                                    <c:choose>
+                                        <c:when test="${can_edit || task.owner.id == user.id || task.assignee.id == user.id }">
+                                            <c:set var="can_work" value="true"/>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <c:set var="can_work" value="false"/>
+                                        </c:otherwise>
+                                    </c:choose>
+                                        <%--ESTIMATE--%>
+                                    <c:if test="${can_work && task.loggedWork eq '0m' }">
+                                    <span class="estimate-modal a-tooltip clickable" data-toggle="modal"
+                                          title="<s:message code="task.estimate.change"/>"
+                                          data-target="#new-time-modal-dialog" data-taskID="${task.id}"
+                                          data-val="${task.estimate}">
+                                            <i class="fa fa-calendar-o" aria-hidden="true"></i>
+                                     </span>
+                                    </c:if>
+                                        <%--REMAINING--%>
+                                    <c:if test="${can_work && task.loggedWork ne '0m' }">
+                                    <span class="remaining-modal a-tooltip clickable" data-toggle="modal"
+                                          title="<s:message code="task.remaining.change"/>"
+                                          data-target="#new-time-modal-dialog" data-taskID="${task.id}"
+                                          data-val="${task.remaining}">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                    </c:if>
+                                </div>
                             </div>
                         </c:forEach>
                     </div>
@@ -220,8 +246,9 @@
                                         type="hidden" id="sprintID_${task.id}" name="sprintID">
                                 </form>
                             </div>
-                            <c:if test="${task.estimated}">
-                                <div class="pointsdiv" style="display: table-cell">
+                            <div class="pointsdiv pull-right">
+                                    <%--STORY POINTS--%>
+                                <c:if test="${task.estimated}">
                                     <c:if test="${task.story_points == 0 && task.estimated}">
                                         <c:set var="points_txt">?</c:set>
                                     </c:if>
@@ -237,8 +264,34 @@
                                             class="fa fa-times"></i></span>
                                     <span class="point-edit"><i class="fa fa-pencil points"></i></span>
                                     </span>
-                                </div>
-                            </c:if>
+                                </c:if>
+                                <c:choose>
+                                    <c:when test="${can_edit || task.owner.id == user.id || task.assignee.id == user.id }">
+                                        <c:set var="can_work" value="true"/>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <c:set var="can_work" value="false"/>
+                                    </c:otherwise>
+                                </c:choose>
+                                    <%--ESTIMATE--%>
+                                <c:if test="${can_work && task.loggedWork eq '0m' }">
+                                    <span class="estimate-modal a-tooltip clickable" data-toggle="modal"
+                                          title="<s:message code="task.estimate.change"/>"
+                                          data-target="#new-time-modal-dialog" data-taskID="${task.id}"
+                                          data-val="${task.estimate}">
+                                            <i class="fa fa-calendar-o" aria-hidden="true"></i>
+                                     </span>
+                                </c:if>
+                                    <%--REMAINING--%>
+                                <c:if test="${can_work && task.loggedWork ne '0m' }">
+                                    <span class="remaining-modal a-tooltip clickable" data-toggle="modal"
+                                          title="<s:message code="task.remaining.change"/>"
+                                          data-target="#new-time-modal-dialog" data-taskID="${task.id}"
+                                          data-val="${task.remaining}">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </c:if>
+                            </div>
                         </div>
                     </c:if>
                 </c:forEach>
@@ -246,7 +299,10 @@
         </div>
     </div>
 </div>
-<jsp:include page="../modals/sprint.jsp"/>
+<c:if test="${can_edit}">
+    <jsp:include page="../modals/sprint.jsp"/>
+</c:if>
+<jsp:include page="../modals/estimate.jsp"/>
 <script>
     $(document).ready(function ($) {
         var assign_txt = '<s:message code="agile.assing"/>';

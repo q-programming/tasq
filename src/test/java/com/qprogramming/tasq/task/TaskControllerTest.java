@@ -61,7 +61,6 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TaskControllerTest {
-
     private static final String NEW_DESCRIPTION = "newDescription";
     private static final String TASQ_AUTH_MSG = "TasqAuthException was not thrown";
     private static final String NEW_EMAIL = "newuser@test.com";
@@ -78,7 +77,7 @@ public class TaskControllerTest {
     @Mock
     private AgileService sprintSrvMock;
     @Mock
-    private WorkLogService wrkLogSrv;
+    private WorkLogService wrkLogSrvMock;
     @Mock
     private AppService appSrv;
     @Mock
@@ -120,8 +119,8 @@ public class TaskControllerTest {
         when(securityMock.getAuthentication()).thenReturn(authMock);
         when(authMock.getPrincipal()).thenReturn(testAccount);
         SecurityContextHolder.setContext(securityMock);
-        taskSrv = spy(new TaskService(taskRepoMock, appSrv, accountServiceMock, msgMock, wrkLogSrv, commentSrvMock, taskLinkSrvMock, watchSrvMock, visitedSrvMock));
-        taskCtr = spy(new TaskController(taskSrv, projSrvMock, accountServiceMock, wrkLogSrv, msgMock, sprintSrvMock,
+        taskSrv = spy(new TaskService(taskRepoMock, appSrv, accountServiceMock, msgMock, wrkLogSrvMock, commentSrvMock, taskLinkSrvMock, watchSrvMock, visitedSrvMock));
+        taskCtr = spy(new TaskController(taskSrv, projSrvMock, accountServiceMock, wrkLogSrvMock, msgMock, sprintSrvMock,
                 taskLinkSrvMock, commentSrvMock, tagsRepoMock, watchSrvMock, eventSrvMock, visitedSrvMock));
         doNothing().when(taskCtr).rollBack();
         doReturn(entityManagerMock).when(taskSrv).getEntitymanager();
@@ -288,7 +287,7 @@ public class TaskControllerTest {
         when(taskSrv.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.findById(1L)).thenReturn(project);
         testAccount.setRole(Roles.ROLE_USER);
-        taskCtr.deleteTask(TEST_1,false, raMock, requestMock);
+        taskCtr.deleteTask(TEST_1, false, raMock, requestMock);
         fail("Exception not thrown");
     }
 
@@ -304,7 +303,7 @@ public class TaskControllerTest {
         when(taskSrv.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.findById(1L)).thenReturn(project);
         when(accountServiceMock.findAllWithActiveTask(TEST_1)).thenReturn(active);
-        taskCtr.deleteTask(TEST_1,false, raMock, requestMock);
+        taskCtr.deleteTask(TEST_1, false, raMock, requestMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.WARNING, new Object[]{}));
     }
@@ -329,7 +328,7 @@ public class TaskControllerTest {
         when(projSrvMock.findById(1L)).thenReturn(project);
         when(accountServiceMock.findAllWithActiveTask(TEST_1)).thenReturn(new LinkedList<>());
         when(accountServiceMock.findAllWithActiveTask(subId)).thenReturn(active);
-        taskCtr.deleteTask(TEST_1,false, raMock, requestMock);
+        taskCtr.deleteTask(TEST_1, false, raMock, requestMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.WARNING, new Object[]{}));
     }
@@ -355,11 +354,11 @@ public class TaskControllerTest {
         when(accountServiceMock.findAllWithActiveTask(TEST_1)).thenReturn(active);
         when(accountServiceMock.findAllWithActiveTask(subId)).thenReturn(new LinkedList<>());
         doNothing().when(taskSrv).deleteFiles(task);
-        taskCtr.deleteTask(TEST_1,false, raMock, requestMock);
+        taskCtr.deleteTask(TEST_1, false, raMock, requestMock);
         verify(taskRepoMock, times(1)).delete(anyCollectionOf(Task.class));
         verify(taskRepoMock, times(1)).delete(any(Task.class));
         verify(eventSrvMock, times(1)).addSystemEvent(any(Account.class), any(LogType.class), anyString(), anyString());
-        verify(wrkLogSrv, times(1)).addWorkLogNoTask(anyString(), any(Project.class), any(LogType.class));
+        verify(wrkLogSrvMock, times(1)).addWorkLogNoTask(anyString(), any(Project.class), any(LogType.class));
         verify(taskSrv, times(1)).deleteFiles(any(Task.class));
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.SUCCESS, new Object[]{}));
@@ -404,7 +403,7 @@ public class TaskControllerTest {
         when(projSrvMock.findById(1L)).thenReturn(project);
         when(accountServiceMock.findAllWithActiveTask(TEST_1)).thenReturn(new LinkedList<>());
         doThrow(IOException.class).when(taskSrv).deleteFiles(task);
-        taskCtr.deleteTask(TEST_1,false, raMock, requestMock);
+        taskCtr.deleteTask(TEST_1, false, raMock, requestMock);
         verify(taskCtr, times(1)).rollBack();
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.WARNING, new Object[]{}));
@@ -534,9 +533,9 @@ public class TaskControllerTest {
         when(projSrvMock.canEdit(project)).thenReturn(true);
         when(sprintSrvMock.taskInActiveSprint(task)).thenReturn(true);
         taskCtr.editTask(form, errors, raMock, requestMock, modelMock);
-        verify(wrkLogSrv, times(1)).addActivityPeriodLog(any(Task.class), anyString(), any(Period.class),
+        verify(wrkLogSrvMock, times(1)).addActivityPeriodLog(any(Task.class), anyString(), any(Period.class),
                 any(LogType.class));
-        verify(wrkLogSrv, times(2)).addActivityLog(any(Task.class), anyString(), any(LogType.class));
+        verify(wrkLogSrvMock, times(2)).addActivityLog(any(Task.class), anyString(), any(LogType.class));
     }
 
     @Test
@@ -792,11 +791,11 @@ public class TaskControllerTest {
         testAccount.setRole(Roles.ROLE_POWERUSER);
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(true);
-        when(wrkLogSrv.addTimedWorkLog(any(Task.class), anyString(), any(Date.class), any(Period.class), any(Period.class), any(LogType.class))).thenReturn(loggedTask);
+        when(wrkLogSrvMock.addTimedWorkLog(any(Task.class), anyString(), any(Date.class), any(Period.class), any(Period.class), any(LogType.class))).thenReturn(loggedTask);
         when(taskRepoMock.save(loggedTask)).thenReturn(loggedTask);
         taskCtr.logWork(TEST_1, "1d", "10m", "1-05-2015", "12:00", raMock, requestMock);
-        verify(wrkLogSrv, times(1)).addDatedWorkLog(any(Task.class), anyString(), any(Date.class), any(LogType.class));
-        verify(wrkLogSrv, times(1)).addTimedWorkLog(any(Task.class), anyString(), any(Date.class), any(Period.class),
+        verify(wrkLogSrvMock, times(1)).addDatedWorkLog(any(Task.class), anyString(), any(Date.class), any(LogType.class));
+        verify(wrkLogSrvMock, times(1)).addTimedWorkLog(any(Task.class), anyString(), any(Date.class), any(Period.class),
                 any(Period.class), any(LogType.class));
     }
 
@@ -812,9 +811,9 @@ public class TaskControllerTest {
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(taskSrv.save(loggedTask)).thenReturn(loggedTask);
         when(projSrvMock.canEdit(project)).thenReturn(true);
-        when(wrkLogSrv.addTimedWorkLog(any(Task.class), anyString(), any(Date.class), any(Period.class), any(Period.class), any(LogType.class))).thenReturn(loggedTask);
+        when(wrkLogSrvMock.addTimedWorkLog(any(Task.class), anyString(), any(Date.class), any(Period.class), any(Period.class), any(LogType.class))).thenReturn(loggedTask);
         taskCtr.logWork(TEST_1, "5h", null, null, null, raMock, requestMock);
-        verify(wrkLogSrv, times(1)).addTimedWorkLog(any(Task.class), anyString(), any(Date.class), any(Period.class),
+        verify(wrkLogSrvMock, times(1)).addTimedWorkLog(any(Task.class), anyString(), any(Date.class), any(Period.class),
                 any(Period.class), any(LogType.class));
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.WARNING, new Object[]{}));
@@ -912,7 +911,7 @@ public class TaskControllerTest {
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(true);
         ResponseEntity<ResultData> result = taskCtr.changeState(TEST_1, TaskState.CLOSED, true, true, "Done", TaskResolution.FINISHED);
-        verify(wrkLogSrv, times(1)).addActivityLog(subtask, "", LogType.CLOSED);
+        verify(wrkLogSrvMock, times(1)).addActivityLog(subtask, "", LogType.CLOSED);
         verify(taskRepoMock, times(2)).save(any(Task.class));
         Assert.assertEquals(ResultData.Code.OK, result.getBody().code);
     }
@@ -937,6 +936,120 @@ public class TaskControllerTest {
         Assert.assertEquals(2, result.size());
         Assert.assertNotEquals(result.get(1).getPercentage(), disp1.getPercentage());
         Assert.assertNotEquals(result.get(1).hashCode(), disp1.hashCode());
-
     }
+
+    @Test
+    public void changeEstimateTime() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        task.setEstimate(new Period(1, 0, 0, 0));
+        task.setRemaining(new Period(1, 0, 0, 0));
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(projSrvMock.canEdit(project)).thenReturn(true);
+        ResultData resultData = taskCtr.changeEstimateTime(TestUtils.TEST_1, "2h", true);
+        assertEquals(ResultData.Code.OK, resultData.code);
+    }
+
+    @Test
+    public void changeEstimateTimeIsAssignee() {
+        testAccount.setRole(Roles.ROLE_USER);
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        task.setEstimate(new Period(1, 0, 0, 0));
+        task.setRemaining(new Period(1, 0, 0, 0));
+        task.setAssignee(testAccount);
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(projSrvMock.canEdit(project)).thenReturn(false);
+        ResultData resultData = taskCtr.changeEstimateTime(TestUtils.TEST_1, "2h", true);
+        assertEquals(ResultData.Code.OK, resultData.code);
+    }
+    @Test
+    public void changeEstimateTimeIsOwner() {
+        testAccount.setRole(Roles.ROLE_USER);
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        task.setEstimate(new Period(1, 0, 0, 0));
+        task.setRemaining(new Period(1, 0, 0, 0));
+        task.setOwner(testAccount);
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(projSrvMock.canEdit(project)).thenReturn(false);
+        ResultData resultData = taskCtr.changeEstimateTime(TestUtils.TEST_1, "2h", true);
+        assertEquals(ResultData.Code.OK, resultData.code);
+    }
+
+    @Test
+    public void changeEstimateTimeCannotEdit() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(projSrvMock.canEdit(project)).thenReturn(false);
+        ResultData resultData = taskCtr.changeEstimateTime(TestUtils.TEST_1, "2h", true);
+        assertEquals(ResultData.Code.ERROR, resultData.code);
+    }
+
+    @Test
+    public void changeEstimateTimeSameEstimate() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        task.setEstimate(new Period(1, 0, 0, 0));
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        ResultData resultData = taskCtr.changeEstimateTime(TestUtils.TEST_1, "1h", true);
+        assertEquals(ResultData.Code.ERROR, resultData.code);
+    }
+
+    @Test
+    public void changeEstimateTimeLoggedWork() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        task.setEstimate(new Period(1, 0, 0, 0));
+        task.addLoggedWork(new Period(1, 0, 0, 0));
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        ResultData resultData = taskCtr.changeEstimateTime(TestUtils.TEST_1, "2h", true);
+        assertEquals(ResultData.Code.ERROR, resultData.code);
+    }
+
+
+    @Test
+    public void changeEstimateTimeEmpty() {
+        ResultData resultData = taskCtr.changeEstimateTime(TestUtils.TEST_1, "", true);
+        assertEquals(ResultData.Code.ERROR, resultData.code);
+    }
+
+
+    @Test
+    public void changeEstimateTimeNoTask() {
+        ResultData resultData = taskCtr.changeEstimateTime(TestUtils.TEST_1, "2h", true);
+        assertEquals(ResultData.Code.ERROR, resultData.code);
+    }
+
+
+    @Test
+    public void changeEstimateTimeInSprint() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        task.setEstimate(new Period(1, 0, 0, 0));
+        task.setRemaining(new Period(1, 0, 0, 0));
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(projSrvMock.canEdit(project)).thenReturn(true);
+        when(sprintSrvMock.taskInActiveSprint(task)).thenReturn(true);
+        ResultData resultData = taskCtr.changeEstimateTime(TestUtils.TEST_1, "2h", true);
+        assertEquals(ResultData.Code.OK, resultData.code);
+        //checks if was changed
+        Period difference = new Period(1, 0, 0, 0);
+        verify(wrkLogSrvMock, times(1)).addActivityPeriodLog(task, PeriodHelper.outFormat(difference), difference, LogType.ESTIMATE);
+    }
+
+    @Test
+    public void changeRemainingTime() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        task.setEstimate(new Period(1, 0, 0, 0));
+        task.setRemaining(new Period(3, 0, 0, 0));
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(projSrvMock.canEdit(project)).thenReturn(true);
+        ResultData resultData = taskCtr.changeEstimateTime(TestUtils.TEST_1, "2h", false);
+        assertEquals(ResultData.Code.OK, resultData.code);
+    }
+
+
 }

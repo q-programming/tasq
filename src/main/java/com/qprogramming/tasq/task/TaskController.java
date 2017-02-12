@@ -34,7 +34,7 @@ import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Hibernate;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
@@ -310,24 +310,12 @@ public class TaskController {
             message.append(Utils.changedFromTo(DESCRIPTION_TXT, task.getDescription(), taskForm.getDescription()));
             task.setDescription(taskForm.getDescription());
         }
-        if ((taskForm.getEstimate() != null) && (!task.getEstimate().equalsIgnoreCase(taskForm.getEstimate()))) {
-            Period estimate = PeriodHelper.inFormat(taskForm.getEstimate());
-            Period difference = PeriodHelper.minusPeriods(estimate, task.getRawEstimate());
-            // only add estimate change event if task is in sprint
-            if (sprintSrv.taskInActiveSprint(task)) {
-                wlSrv.addActivityPeriodLog(task, PeriodHelper.outFormat(difference), difference, LogType.ESTIMATE);
-            } else {
-                message.append(Utils.changedFromTo(ESTIMATE_TXT, task.getEstimate(), taskForm.getEstimate()));
-            }
-            task.setEstimate(estimate);
-            task.setRemaining(estimate);
+        if ((StringUtils.isNotBlank(taskForm.getEstimate()) && (!task.getEstimate().equalsIgnoreCase(taskForm.getEstimate())))) {
+            message.append(changeEstimate(taskForm.getEstimate(), task));
         }
-        if ((taskForm.getRemaining() != null) && (!task.getRemaining().equalsIgnoreCase(taskForm.getRemaining()))) {
-            Period remaining = PeriodHelper.inFormat(taskForm.getRemaining());
-            message.append(Utils.changedFromTo(REMAINING_TXT, task.getRemaining(), taskForm.getRemaining()));
-            task.setRemaining(remaining);
+        if (StringUtils.isNotBlank(taskForm.getRemaining()) && (!task.getRemaining().equalsIgnoreCase(taskForm.getRemaining()))) {
+            message.append(changeRemaining(taskForm.getRemaining(), task));
         }
-
         boolean estimated = !taskForm.getNotEstimated();
         if (!task.isEstimated().equals(estimated) && !task.isInSprint()) {
             message.append(
@@ -370,6 +358,68 @@ public class TaskController {
         taskSrv.save(task);
         return REDIRECT_TASK + taskID;
     }
+
+    private String changeRemaining(String remainingString, Task task) {
+        Period remaining = PeriodHelper.inFormat(remainingString);
+        task.setRemaining(remaining);
+        return Utils.changedFromTo(REMAINING_TXT, task.getRemaining(), remainingString).toString();
+    }
+
+    private String changeEstimate(String est, Task task) {
+        String result = "";
+        Period estimate = PeriodHelper.inFormat(est);
+        Period difference = PeriodHelper.minusPeriods(estimate, task.getRawEstimate());
+        // only add estimate change event if task is in sprint
+        if (sprintSrv.taskInActiveSprint(task)) {
+            wlSrv.addActivityPeriodLog(task, PeriodHelper.outFormat(difference), difference, LogType.ESTIMATE);
+        } else {
+            result = Utils.changedFromTo(ESTIMATE_TXT, task.getEstimate(), est).toString();
+        }
+        task.setEstimate(estimate);
+        task.setRemaining(estimate);
+        return result;
+    }
+
+
+    @Transactional
+    @ResponseBody
+    @RequestMapping(value = "task/changeEstimateTime", method = RequestMethod.POST)
+    public ResultData changeEstimateTime(@RequestParam(name = "id") String id, @RequestParam String newValue, @RequestParam Boolean estimate) {
+        Task task = taskSrv.findById(id);
+        ResultData result = validateNewTime(newValue, task, estimate);
+        if (ResultData.Code.ERROR.equals(result.code)) {
+            return result;
+        } else {
+            if (estimate) {
+                changeEstimate(newValue, task);
+                result.message = msg.getMessage("task.estimate.changed", new Object[]{id, newValue}, Utils.getCurrentLocale());
+            } else {
+                changeRemaining(newValue, task);
+                result.message = msg.getMessage("task.remaining.changed", new Object[]{id, newValue}, Utils.getCurrentLocale());
+            }
+        }
+        return result;
+    }
+
+    private ResultData validateNewTime(String newValue, Task task, Boolean estimate) {
+        ResultData result = new ResultData();
+        result.code = ResultData.Code.OK;
+        if (StringUtils.isBlank(newValue) || task == null || (estimate && !task.getLoggedWork().equals("0m")) || task.getEstimate().trim().equalsIgnoreCase(newValue)) {
+            result.code = ResultData.Code.ERROR;
+            result.message = msg.getMessage("error.changeTime", null, Utils.getCurrentLocale());
+        } else if (!projectSrv.canEdit(task.getProject())) {
+            if (!Roles.isUser() || (!isOwnerOrAssignee(task))) {
+                result.code = ResultData.Code.ERROR;
+                result.message = msg.getMessage(ERROR_ACCES_RIGHTS, null, Utils.getCurrentLocale());
+            }
+        }
+        return result;
+    }
+
+    private boolean isOwnerOrAssignee(Task task) {
+        return Utils.getCurrentAccount().equals(task.getOwner()) || Utils.getCurrentAccount().equals(task.getAssignee());
+    }
+
 
     private int getStoryPoints(TaskForm taskForm) {
         return (StringUtils.isNotBlank(taskForm.getStory_points()) && StringUtils.isNumeric(taskForm.getStory_points())) ? Integer.parseInt(taskForm.getStory_points())
@@ -1335,7 +1385,7 @@ public class TaskController {
     private ResultData taskIsClosed(Task task) {
         String localized = msg.getMessage(((TaskState) task.getState()).getCode(), null, Utils.getCurrentLocale());
         return new ResultData(ResultData.Code.ERROR,
-                msg.getMessage("task.closed.cannot.operate=", new Object[]{localized}, Utils.getCurrentLocale()));
+                msg.getMessage("task.closed.cannot.operate", new Object[]{localized}, Utils.getCurrentLocale()));
     }
 
     /**
