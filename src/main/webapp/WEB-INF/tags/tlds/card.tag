@@ -60,7 +60,7 @@
                 style="display: table; width: 100%; margin-top: 5px; min-height: 30px;">
             <div style="display: table-row">
                 <div style="display: table-cell; vertical-align: bottom;">
-                    <c:if test="${can_edit}">
+                    <c:if test="${can_edit && task.state ne 'CLOSED'}">
                         <c:if test="${task.assignee.id eq user.id}">
                             <button class="btn btn-default btn-xxs a-tooltip worklog"
                                     style="margin-left: 5px" type="button" data-toggle="modal"
@@ -75,7 +75,7 @@
                 <%---Assignee--%>
                 <div id="assignee_${task.id}"
                      style="margin-top: 10px; text-align: right; display: table-cell; vertical-align: bottom;">
-                    <c:if test="${empty task.assignee}">
+                    <c:if test="${empty task.assignee && task.state ne 'CLOSED'}">
                         <i><s:message code="task.unassigned"/> <c:if
                                 test="${can_edit}">
                             &nbsp;<button class="btn btn-default assignToTask btn-xxs a-tooltip assign_me"

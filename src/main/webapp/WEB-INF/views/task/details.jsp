@@ -41,6 +41,9 @@
 <c:if test="${task.assignee.id == user.id}">
     <c:set var="is_assignee" value="true"/>
 </c:if>
+<c:if test="${task.state ne 'CLOSED' && (can_edit || user.isPowerUser || is_assignee)}">
+    <c:set var="can_be_logged" value="true"/>
+</c:if>
 <div class="white-frame sidepadded" style="overflow: auto;">
     <%----------------------TASK NAME-----------------------------%>
     <c:set var="taskName_text">
@@ -335,16 +338,14 @@
                     </h5>
                 </div>
                 <!-- logwork trigger modal -->
-                <c:if test="${can_edit && user.isPowerUser || is_assignee}">
+                <c:if test="${can_be_logged}">
                     <button class="btn btn-default btn-sm worklog a-tooltip" data-toggle="modal"
                             title="<s:message code="task.logWork"/>&nbsp;(l)"
                             data-target="#logWorkform" data-taskID="${task.id}">
                         <i class="fa fa-lg fa-calendar-plus-o"></i>
                         <s:message code="task.logWork"/>
                     </button>
-
-                    <c:if
-                            test="${user.activeTask eq task.id}">
+                    <c:if test="${user.activeTask eq task.id}">
                         <a href="#">
                             <button class="btn btn-default btn-sm a-tooltip handleTimerBtn"
                                     title="<s:message code="task.stopTime.description" />">
@@ -353,12 +354,10 @@
                             </button>
                         </a>
                         <div class="bar_td">
-                            <s:message code="task.currentTime"/>
-                            : <span id="task_timer"></span>
+                            <s:message code="task.currentTime"/>: <span id="task_timer"></span>
                         </div>
                     </c:if>
-                    <c:if
-                            test="${empty user.activeTask ne task.id}">
+                    <c:if test="${empty user.activeTask ne task.id}">
                         <a href="<c:url value="/task/time?id=${task.id}&action=start"/>">
                             <button class="btn btn-default btn-sm">
                                 <i class="fa fa-lg fa-clock-o"></i>
@@ -366,7 +365,6 @@
                             </button>
                         </a>
                     </c:if>
-
                 </c:if>
                 <%--ESTIMATES TAB	--%>
                 <%-- Default values --%>
@@ -440,7 +438,7 @@
                             </td>
                             <td class="bar_td">${task.estimate}</td>
                             <td>
-                                <c:if test="${task.loggedWork eq '0m' }">
+                                <c:if test="${task.loggedWork eq '0m' && can_be_logged}">
                                 <span class="estimate-modal a-tooltip clickable" data-toggle="modal"
                                       title="<s:message code="task.estimate.change"/>"
                                       data-target="#new-time-modal-dialog" data-taskID="${task.id}"
@@ -480,11 +478,13 @@
                         </td>
                         <td class="bar_td">${task.loggedWork}</td>
                         <td>
-                            <span class="worklog a-tooltip clickable" data-toggle="modal"
-                                  title="<s:message code="task.logWork"/>&nbsp;(l)"
-                                  data-target="#logWorkform" data-taskID="${task.id}">
-                                <i class="fa fa-calendar-plus-o"></i>
-                            </span>
+                            <c:if test="${can_be_logged}">
+                                <span class="worklog a-tooltip clickable" data-toggle="modal"
+                                      title="<s:message code="task.logWork"/>&nbsp;(l)"
+                                      data-target="#logWorkform" data-taskID="${task.id}">
+                                    <i class="fa fa-calendar-plus-o"></i>
+                                </span>
+                            </c:if>
                         </td>
                     </tr>
                     <c:if test="${not task.subtask && not empty taskLogged}">
@@ -513,7 +513,7 @@
                         </td>
                         <td class="bar_td">${task.remaining }</td>
                         <td>
-                            <c:if test="${task.loggedWork ne '0m' }">
+                            <c:if test="${task.loggedWork ne '0m' && can_be_logged}">
                                 <span class="remaining-modal a-tooltip clickable" data-toggle="modal"
                                       title="<s:message code="task.remaining.change"/>"
                                       data-target="#new-time-modal-dialog" data-taskID="${task.id}"
@@ -814,7 +814,7 @@
                             </c:if>
                         </div>
                     </div>
-                    <c:if test="${project_participant}">
+                    <c:if test="${project_participant && can_be_logged}">
                         <div id="assign_button_div" class="row">
                             <div class="col-md-12 text-center">
                                 <span class="btn btn-default btn-sm a-tooltip assignToTask"

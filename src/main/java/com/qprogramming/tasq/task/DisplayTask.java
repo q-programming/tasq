@@ -38,10 +38,12 @@ public class DisplayTask implements Comparable<DisplayTask> {
         if (task.getAssignee() != null) {
             assignee = new DisplayAccount(task.getAssignee());
         }
-        owner = new DisplayAccount(task.getOwner());
+        if (task.getOwner() != null) {
+            owner = new DisplayAccount(task.getOwner());
+        }
         this.percentage = task.getPercentage_logged();
         this.subtask = task.isSubtask();
-        tags = new HashSet<String>();
+        tags = new HashSet<>();
     }
 
     /**

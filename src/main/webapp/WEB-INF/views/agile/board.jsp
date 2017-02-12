@@ -176,6 +176,7 @@
                                 showSuccess(result.message);
                                 if (oldState == 'CLOSED') {
                                     $('#' + taskID + ' a[href]').toggleClass('closed');
+                                    window.setTimeout('location.reload()', 5000);
                                 }
                             }
                             showWait(false);

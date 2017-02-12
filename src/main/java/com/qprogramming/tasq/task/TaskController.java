@@ -864,7 +864,6 @@ public class TaskController {
                     ResultData result = taskIsClosed(task);
                     MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
                     return REDIRECT + request.getHeader(REFERER);
-
                 }
                 if (("").equals(email) && task.getAssignee() != null) {
                     task.setAssignee(null);
@@ -907,7 +906,15 @@ public class TaskController {
     @RequestMapping(value = "/task/assignMe", method = RequestMethod.GET)
     public String assignMe(@RequestParam(value = "id") String taskID, RedirectAttributes ra,
                            HttpServletRequest request) {
-        assignMeToTask(taskID);
+        Task task = taskSrv.findById(taskID);
+        if (task != null) {
+            if (task.getState().equals(TaskState.CLOSED)) {
+                ResultData result = taskIsClosed(task);
+                MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
+                return REDIRECT + request.getHeader(REFERER);
+            }
+            assignMeToTask(task);
+        }
         return REDIRECT + request.getHeader(REFERER);
     }
 
@@ -919,13 +926,20 @@ public class TaskController {
         if (!Roles.isPowerUser()) {
             throw new TasqAuthException(msg);
         }
-        if (assignMeToTask(id)) {
-            return ResponseEntity.ok(new ResultData(ResultData.Code.OK,
-                    msg.getMessage("task.assinged.me", null, Utils.getCurrentLocale()) + " " + id));
-        } else {
-            return ResponseEntity.ok(new ResultData(ResultData.Code.ERROR,
-                    msg.getMessage("role.error.task.permission", null, Utils.getCurrentLocale())));
+        Task task = taskSrv.findById(id);
+        if (task != null) {
+            if (task.getState().equals(TaskState.CLOSED)) {
+                return ResponseEntity.ok(taskIsClosed(task));
+            }
+            if (assignMeToTask(task)) {
+                return ResponseEntity.ok(new ResultData(ResultData.Code.OK,
+                        msg.getMessage("task.assinged.me", null, Utils.getCurrentLocale()) + " " + id));
+            } else {
+                return ResponseEntity.ok(new ResultData(ResultData.Code.ERROR,
+                        msg.getMessage("role.error.task.permission", null, Utils.getCurrentLocale())));
+            }
         }
+        return ResponseEntity.ok(new ResultData(ResultData.Code.ERROR, "?"));
     }
 
     @Transactional
@@ -1524,11 +1538,10 @@ public class TaskController {
     /**
      * Assigns currently logged user into task with given ID
      *
-     * @param id
+     * @param task task to be checked
      * @return
      */
-    private boolean assignMeToTask(String id) {
-        Task task = taskSrv.findById(id);
+    private boolean assignMeToTask(Task task) {
         String previous = getAssignee(task);
         if (!projectSrv.canEdit(task.getProject())) {
             return false;
