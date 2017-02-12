@@ -75,7 +75,7 @@ function isNumber(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
-$(document).on("click", ".toggler", function () {
+function toggleDiv() {
     var target = $(this).data('tab');
     $(this).nextAll(".mod-header-title-txt").toggleClass('closed');
     if ($(this).data('quick')) {
@@ -83,9 +83,19 @@ $(document).on("click", ".toggler", function () {
     } else {
         $('#' + target).toggle("blind", 500);
     }
-    $(this).toggleClass('closed');
+    $(this).toggleClass('open');
     $(this).toggleClass('fa-caret-down');
     $(this).toggleClass('fa-caret-right');
+}
+$(document).on("click", ".toggler", function () {
+    toggleDiv.call(this);
+});
+
+$(document).on("click", ".toggler-colapse", function () {
+    $(".toggler.open").each(function () {
+        toggleDiv.call(this);
+    });
+    $(this).hide()
 });
 
 $(document).on("click", ".menu-toggle", function () {

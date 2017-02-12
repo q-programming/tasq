@@ -143,9 +143,15 @@
                                     <c:if test="${task.state eq 'CLOSED' }">
                                         style="text-decoration: line-through;"
                                     </c:if>>
-                                <div style="display: table-cell; width: 100%;"><t:type type="${task.type}" list="true"/><a
-                                        href="<c:url value="/task/${task.id}"/>"
-                                        style="color: inherit;">[${task.id}] ${task.name}</a>
+                                <div style="display: table-cell; width: 100%;">
+                                    <i class="fa fa-caret-right toggler theme show-more-details a-tooltip"
+                                       data-tab="sprint-moredetails-${task.id}" data-quick="true"
+                                       data-task="${task.id}" title="<s:message code="agile.card.showmore"/>"></i>
+                                    <span style="margin-right: -5px">
+                                        <t:type type="${task.type}" list="true"/>
+                                    </span>
+                                    <a href="<c:url value="/task/${task.id}"/>"
+                                       style="color: inherit;">[${task.id}] ${task.name}</a>
                                     <form id="sprint_remove_${task.id}"
                                           action="<c:url value="/${project.projectId}/scrum/sprintRemove"/>"
                                           method="post">
@@ -210,6 +216,39 @@
                                     </span>
                                     </c:if>
                                 </div>
+                                <div class="more-details-div" id="sprint-moredetails-${task.id}" style="display: none;">
+                                    <div class="mod-header-bg">
+                                    <span class="mod-header-title theme">
+                                        <i class="fa fa-lg fa-clock-o"></i> <s:message code="task.timetrack"/>
+                                    </span>
+                                    </div>
+                                    <div>
+                                        <s:message code="task.closed"/>: <span
+                                            class="pull-right">${task.percentage}%</span><br>
+                                        <s:message code="task.estimate"/>: <span
+                                            class="pull-right">${task.estimate}</span><br>
+                                        <s:message code="task.logged"/>: <span
+                                            class="pull-right">${task.loggedWork}</span><br>
+                                        <s:message code="task.remaining"/>: <span
+                                            class="pull-right">${task.remaining}</span>
+                                    </div>
+                                    <c:if test="${not empty task.getTagsList()}">
+                                        <div class="mod-header-bg">
+                                        <span class="mod-header-title theme">
+                                            <i class="fa fa-tags"></i>&nbsp;<s:message code="task.tags"/>
+                                        </span>
+                                        </div>
+                                        <div>
+                                            <c:forEach items="${task.getTagsList()}" var="tag">
+                                            <span class="tag label label-info theme tag_filter a-tooltip"
+                                                  title="<s:message code="task.tags.click.filter"/>"
+                                                  data-name="${tag}">${tag}</span>
+                                            </c:forEach>
+                                        </div>
+                                    </c:if>
+                                    <div class="agile-card-subtasks">
+                                    </div>
+                                </div>
                             </div>
                         </c:forEach>
                     </div>
@@ -227,16 +266,25 @@
             <h4>
                 <s:message code="task.tasks"/>
                 <span class="btn btn-default pull-right" id="save_order" style="display:none;width: 120px"><i
-                        class="fa fa-floppy-o"></i>&nbsp;Save order</span>
+                        class="fa fa-floppy-o"></i>&nbsp;<s:message code="main.save.order"/> </span>
+                <span class="a-tooltip btn btn-default pull-right toggler-colapse" id="colapse_all" title="<s:message code="main.collapse.all"/>"
+                      style="display: none"><i
+                        class="fa fa-minus-square-o"></i></span>
             </h4>
             <ul id="sortable" style="margin-top: 20px;margin-left: -40px;">
                 <c:forEach items="${tasks}" var="task">
                     <c:if test="${not task.inSprint && task.state ne 'CLOSED'}">
                         <div class="agile-card" data-id="${task.id}" id="${task.id}" data-tags="${task.getTagsList()}">
                             <div style="display: table-cell; width: 100%;">
-                                <span style="margin-right: -5px"><t:type type="${task.type}" list="true"/></span>
-                                <span style="margin-right: -5px"><t:priority priority="${task.priority}"
-                                                                             list="true"/></span>
+                                <i class="fa fa-caret-right toggler theme show-more-details a-tooltip"
+                                   data-tab="free-moredetails-${task.id}" data-quick="true"
+                                   data-task="${task.id}" title="<s:message code="agile.card.showmore"/>"></i>
+                                <span style="margin-right: -5px">
+                                    <t:type type="${task.type}" list="true"/>
+                                </span>
+                                <span style="margin-right: -5px">
+                                    <t:priority priority="${task.priority}" list="true"/>
+                                </span>
                                 <a href="<c:url value="/task/${task.id}"/>"
                                    style="color: inherit;">[${task.id}] ${task.name}</a>
                                 <form id="sprint_assign_${task.id}"
@@ -291,6 +339,38 @@
                                         <i class="fa fa-calendar"></i>
                                     </span>
                                 </c:if>
+                            </div>
+                            <div class="more-details-div" id="free-moredetails-${task.id}" style="display: none;">
+                                <div class="mod-header-bg">
+                                    <span class="mod-header-title theme">
+                                        <i class="fa fa-lg fa-clock-o"></i> <s:message code="task.timetrack"/>
+                                    </span>
+                                </div>
+                                <div>
+                                    <s:message code="task.closed"/>: <span class="pull-right">${task.percentage}%</span><br>
+                                    <s:message code="task.estimate"/>: <span
+                                        class="pull-right">${task.estimate}</span><br>
+                                    <s:message code="task.logged"/>: <span
+                                        class="pull-right">${task.loggedWork}</span><br>
+                                    <s:message code="task.remaining"/>: <span
+                                        class="pull-right">${task.remaining}</span>
+                                </div>
+                                <c:if test="${not empty task.getTagsList()}">
+                                    <div class="mod-header-bg">
+                                        <span class="mod-header-title theme">
+                                            <i class="fa fa-tags"></i>&nbsp;<s:message code="task.tags"/>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <c:forEach items="${task.getTagsList()}" var="tag">
+                                            <span class="tag label label-info theme tag_filter a-tooltip"
+                                                  title="<s:message code="task.tags.click.filter"/>"
+                                                  data-name="${tag}">${tag}</span>
+                                        </c:forEach>
+                                    </div>
+                                </c:if>
+                                <div class="agile-card-subtasks">
+                                </div>
                             </div>
                         </div>
                     </c:if>
@@ -583,5 +663,45 @@
 
 
         </c:if>
+        small_loading_indicator = '<div id="small_loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br></div>';
+        small_loading_indicator = '<div id="small_loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br></div>';
+        subTaskurl = '<c:url value="/task/getSubTasks"/>';
+        relatedurl = '<c:url value="/task/getRelated"/>';
+        taskURL = '<c:url value="/task/"/>';
+        //TODO put in one place with agile\board code
+        $(".show-more-details").click(function () {
+            if (!$(this).hasClass('expanded')) {
+                var moreDetailsDiv = $(this).parent().nextAll('.more-details-div')
+                var taskID = $(this).data('task');
+                //fill in subtasks
+                var targetSubtaskDiv = moreDetailsDiv.find('.agile-card-subtasks');
+                targetSubtaskDiv.append(small_loading_indicator);
+                $.get(subTaskurl, {taskID: taskID}, function (result) {
+                    $("#small_loading").remove();
+                    if (result.length > 0) {
+                        var subtaskDiv = ' <div class="mod-header-bg"><span class="mod-header-title theme"><i class="fa fa-lg fa-sitemap"></i>&nbsp;<s:message code="tasks.subtasks"/></span></div><div>';
+                        $.each(result, function (key, val) {
+                            var closed = '';
+                            if (val.state === 'CLOSED') {
+                                closed = 'closed';
+                            }
+                            var type = getTaskType(val.type);
+                            var url = taskURL + val.id;
+                            subtaskDiv += '<div style="padding:2px;">' + type + ' <a href="' + url + '" class="subtaskLink ' + closed + ' black-link">' + '[' + val.id + '] ' + val.name + '</a></div>';
+                        });
+                        subtaskDiv += '</div>';
+                        targetSubtaskDiv.html(subtaskDiv);
+                    }
+                });
+                $(this).addClass('expanded');
+
+            }
+            $(this).toggleClass("expanded-toggler");
+            if ($(".expanded-toggler").size() > 0) {
+                $("#colapse_all").show()
+            } else {
+                $("#colapse_all").hide()
+            }
+        });
     });
 </script>

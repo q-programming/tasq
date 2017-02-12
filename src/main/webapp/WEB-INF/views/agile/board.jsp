@@ -154,7 +154,7 @@
                     dragged.data('state', state);
                     target.append(dragged.clone(true).show());
                     $("#save_order").hide();
-                    if (state == 'CLOSED') {
+                    if (state === 'CLOSED') {
                         $('#close_task').modal({
                             show: true,
                             keyboard: false,
@@ -209,7 +209,6 @@
         if (!$(this).hasClass('expanded')) {
             var moreDetailsDiv = $(this).parent().next('.more-details-div')
             var taskID = $(this).data('task');
-
             //fill in subtasks
             var targetSubtaskDiv = moreDetailsDiv.find('.agile-card-subtasks');
             targetSubtaskDiv.append(small_loading_indicator);
@@ -219,7 +218,7 @@
                     var subtaskDiv = ' <div class="mod-header-bg"><span class="mod-header-title theme"><i class="fa fa-lg fa-sitemap"></i>&nbsp;<s:message code="tasks.subtasks"/></span></div><div>';
                     $.each(result, function (key, val) {
                         var closed = '';
-                        if (val.state == 'CLOSED') {
+                        if (val.state === 'CLOSED') {
                             closed = 'closed';
                         }
                         var type = getTaskType(val.type);
@@ -230,9 +229,13 @@
                     targetSubtaskDiv.html(subtaskDiv);
                 }
             });
-            //fill related
-
             $(this).addClass('expanded');
+        }
+        $(this).toggleClass("expanded-toggler");
+        if ($(".expanded-toggler").size() > 0) {
+            $("#colapse_all").show()
+        } else {
+            $("#colapse_all").hide()
         }
     });
 
