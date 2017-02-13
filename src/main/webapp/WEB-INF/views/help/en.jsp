@@ -1028,9 +1028,9 @@
                 can be logged either from task details page , or directly from Agile
                 board. Click
                 <button class="btn btn-default btn-sm worklog">
-                    <i class="fa fa-lg fa-calendar"></i> Log work
+                    <i class="fa fa-lg fa-calendar-plus-o"></i> Log work
                 </button>
-                button to show logging modal window.<br>On it , input how much
+                button to show logging modal window.This can be also executed from edit menu<br>On it , input how much
                 time was spent on this task in format <i>*d *h *m</i> (days, hours, minutes ; where * is any number
                 ).<br><i class="fa fa-exclamation-circle"></i>&nbsp;It's not possible to log more than 5 days at once to
                 force user to log work daily
@@ -1041,7 +1041,12 @@
                 manually set by selecting <b><input type="radio"
                                                     name="estimate_reduce" id="estimate_manual" value="auto">
                 Set manually</b> radio button and inputting remaining time ( same format
-                applies).<br>The remaining time can never be less than 0.<br>If
+                applies).<br>The remaining time can never be less than 0.Remaining time can be set also clicking
+                <span class="remaining-modal a-tooltip clickable" data-toggle="modal" title=""
+                      data-target="#new-time-modal-dialog" data-taskid="TASQ-224" data-val="15m"
+                      data-original-title="Change remaining time">
+                                    <i class="fa fa-calendar"></i>
+                </span>, or by choosing option from task edit menu<br>If
                 more work was logged in task, it will be marked on task details
                 screen accordingly.
             </p>
@@ -1125,8 +1130,13 @@
                     class="fa fa-list"></i> <s:message code="agile.showAll"
                                                        text="Show all"/></b> menu option
             </p>
-
-
+            <p>
+                On Backlog and Board view more details about task can be shown by clicking little triangle next to it's
+                name for example:
+                <i class="fa toggler theme show-more-details a-tooltip expanded expanded-toggler open fa-caret-down"
+                   title="Click to show more details"></i>
+                &nbsp;<a href="#" class="black-link">[TASK-1] Some task</a>
+            </p>
             <hr>
             <%-----------------------------	SCRUM ---------------------------------%>
             <a class="anchor" id="scrum"></a>
@@ -1236,7 +1246,16 @@
                 show context menu , on which we can assign this task to one of
                 existing sprints, or move this task to top or bottom of backlog.
                 Moving to top/bottom of backlog still requires confirmation of new
-                tasks order.
+                tasks order.<br> In here you can also quickly change story points or estimate/remaining time
+                by using buttons on right side of story card
+                <span class="btn btn-default">
+                    <span class="points badge theme">
+                        <span class="point-value" data-points="2">2</span>
+                    </span>
+                    <span class="a-tooltip clickable" title="Change estimate">
+                            <i class="fa fa-calendar-o" aria-hidden="true"></i>
+                    </span>
+                </span>
             </p>
             <a class="anchor" id="scrum-board"></a>
             <h4>
@@ -1279,6 +1298,76 @@
                             class="fa fa-floppy-o"></i>&nbsp;Save order </span> button
                 </li>
             </ul>
+            <p>
+                Sample story card:
+            </p>
+            <div class="agile-card theme" data-id="TASQ-281" state="ONGOING" data-subtasks="1" id="TASQ-281"
+                 style="max-width: 280px"
+                 data-tags="" data-assignee="1">
+                <div style="padding-left: 5px;min-height: 50px">
+                    <div class="pull-right">
+                        <div>
+                            <span class="badge theme pull-right">2</span>
+                        </div>
+                    </div>
+                    <i class="fa toggler theme show-more-details a-tooltip expanded expanded-toggler open fa-caret-down"
+                       data-original-title="Click to show more details"></i>
+                    <i class="fa fa-lg fa fa-magic a-tooltip fa-fw" title="" data-original-title="Change request"></i>
+                    <a href="#" style="color: inherit;" class="">
+                        [TASQ-281] Show more info on agile cards
+                    </a>
+                </div>
+                <div class="more-details-div" id="moredetails-TASQ-281" style="">
+                    <div class="mod-header-bg">
+            <span class="mod-header-title theme">
+                <i class="fa fa-lg fa-clock-o"></i> Time tracking
+            </span>
+                    </div>
+                    <div>
+                        Closed: <span class="pull-right">50.0%</span><br>
+                        Estimate: <span class="pull-right">1h </span><br>
+                        Logged: <span class="pull-right">30m</span><br>
+                        Remaining: <span class="pull-right">30m</span>
+                    </div>
+                    <div class="agile-card-subtasks">
+                        <div class="mod-header-bg"><span class="mod-header-title theme"><i
+                                class="fa fa-lg fa-sitemap"></i>&nbsp;Subtasks</span></div>
+                        <div>
+                            <div style="padding:2px;"><i class="fa fa-lg fa-fw fa-check-circle-o"></i> <a
+                                    href="#" class="subtaskLink  black-link">[TASQ-281/1] Add estimated
+                                value</a></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bottom-tab">
+                    <div style="display: table; width: 100%; margin-top: 5px; min-height: 30px;">
+                        <div style="display: table-row">
+                            <div style="display: table-cell; vertical-align: bottom;">
+                                <button class="btn btn-default btn-xxs a-tooltip" style="margin-left: 5px"
+                                        type="button" title="Log work">
+                                    <i class="fa fa-lg fa-calendar-plus-o"></i>
+                                </button>
+                            </div>
+                            <div id="assignee_TASQ-281"
+                                 style="margin-top: 10px; text-align: right; display: table-cell; vertical-align: bottom;">
+                                <a class="a-tooltip pull-right" href="#" title=""
+                                   data-original-title="Jakub Romaniszyn">
+                                    <img data-src="holder.js/30x30" class="avatar small"
+                                         src="<c:url value="/resources/img/avatar.png" />">
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: table;padding-left:10px;padding-right:10px;width: 100%;">
+                        <div class="progress a-tooltip" style="height: 5px;cursor: help" data-html="true" title=""
+                             data-original-title="Closed: 50.0%<br>Estimate: 1h <br>Logged: 30m<br>Remaining: 30m">
+                            <div class="progress-bar  a-tooltip" title="" role="progressbar" aria-valuenow="50.0"
+                                 aria-valuemin="0" aria-valuemax="100" style="width:50.0%; margin-top:1px"
+                                 data-original-title="50.0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <a class="anchor" id="scrum-reports"></a>
             <h4>
                 <i class="fa fa-line-chart"></i> Reports
