@@ -96,18 +96,6 @@ public class CommentService {
         return true;
     }
 
-    /**
-     * Checks if it's allowed to add comment. By default it's not if task is
-     * closed
-     *
-     * @param task
-     * @return
-     */
-
-    public boolean isCommentAllowed(Task task) {
-        return !task.getState().equals(TaskState.CLOSED);
-    }
-
     public Set<Comment> findByTaskIdOrderByDateDesc(String id) {
         return commRepo.findByTaskIdOrderByDateDesc(id);
     }

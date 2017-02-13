@@ -22,6 +22,7 @@ public class DisplayTask implements Comparable<DisplayTask> {
     private Enum<TaskState> state;
     private Enum<TaskType> type;
     private Enum<TaskPriority> priority;
+    private DisplayAccount owner;
     private DisplayAccount assignee;
     private Boolean estimated = false;
     private boolean inSprint;
@@ -37,9 +38,12 @@ public class DisplayTask implements Comparable<DisplayTask> {
         if (task.getAssignee() != null) {
             assignee = new DisplayAccount(task.getAssignee());
         }
+        if (task.getOwner() != null) {
+            owner = new DisplayAccount(task.getOwner());
+        }
         this.percentage = task.getPercentage_logged();
         this.subtask = task.isSubtask();
-        tags = new HashSet<String>();
+        tags = new HashSet<>();
     }
 
     /**
@@ -200,6 +204,14 @@ public class DisplayTask implements Comparable<DisplayTask> {
         this.subtask = subtask;
     }
 
+    public DisplayAccount getOwner() {
+        return owner;
+    }
+
+    public void setOwner(DisplayAccount owner) {
+        this.owner = owner;
+    }
+
     public Set<String> getTags() {
         if (tags == null) {
             tags = new HashSet<String>();
@@ -207,9 +219,9 @@ public class DisplayTask implements Comparable<DisplayTask> {
         return tags;
     }
 
-	public void setTagsFromTask(Set<Tag> tags) {
-		this.tags.addAll(tags.stream().map(Tag::getName).collect(Collectors.toList()));
-	}
+    public void setTagsFromTask(Set<Tag> tags) {
+        this.tags.addAll(tags.stream().map(Tag::getName).collect(Collectors.toList()));
+    }
 
     public void addTag(String tag) {
         getTags().add(tag);

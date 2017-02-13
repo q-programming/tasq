@@ -18,134 +18,119 @@ import com.qprogramming.tasq.task.TaskType;
 @Service
 public class WatchedTaskService {
 
-	private WatchedTaskRepository watchRepo;
+    private WatchedTaskRepository watchRepo;
 
-	@Autowired
-	public WatchedTaskService(WatchedTaskRepository watchRepo) {
-		this.watchRepo = watchRepo;
-	}
+    @Autowired
+    public WatchedTaskService(WatchedTaskRepository watchRepo) {
+        this.watchRepo = watchRepo;
+    }
 
-	public WatchedTask getByTask(String taskID) {
-		return watchRepo.findById(taskID);
-	}
+    public WatchedTask getByTask(String taskID) {
+        return watchRepo.findById(taskID);
+    }
 
-	public WatchedTask getByTask(Task task) {
-		return watchRepo.findById(task.getId());
-	}
+    public WatchedTask getByTask(Task task) {
+        return watchRepo.findById(task.getId());
+    }
 
-	/**
-	 * Returns all task watched by given account
-	 * 
-	 * @param account
-	 *            - account for which watchers will be returned
-	 * @return List of WatchedTasks
-	 */
-	public List<WatchedTask> findByWatcher(Account account) {
-		return watchRepo.findByWatchersId(account.getId());
-	}
+    /**
+     * Returns all task watched by given account
+     *
+     * @param account - account for which watchers will be returned
+     * @return List of WatchedTasks
+     */
+    public List<WatchedTask> findByWatcher(Account account) {
+        return watchRepo.findByWatchersId(account.getId());
+    }
 
-	/**
-	 * Returns watchers for given project
-	 * 
-	 * @param project
-	 * @return
-	 */
-	public Set<Account> getWatchers(String task) {
-		WatchedTask watchedTask = getByTask(task);
-		if (watchedTask != null) {
-			return watchedTask.getWatchers();
-		}
-		return null;
-	}
+    /**
+     * Starts watching as given account
+     *
+     * @param task
+     */
+    @Transactional
+    public WatchedTask addToWatchers(Task task, Account account) {
+        WatchedTask watchedTask = getWatchedTask(task);
+        watchedTask.getWatchers().add(account);
+        return watchRepo.save(watchedTask);
+    }
 
-	/**
-	 * Starts watching as given account
-	 * 
-	 * @param task
-	 */
-	@Transactional
-	public WatchedTask addToWatchers(Task task, Account account) {
-		WatchedTask watchedTask = getWatchedTask(task);
-		watchedTask.getWatchers().add(account);
-		return watchRepo.save(watchedTask);
-	}
+    /**
+     * Starts watching as currently logged-in user Current user will be added to
+     * watchers list
+     *
+     * @param task Task which is now watched by current account
+     */
+    @Transactional
+    public WatchedTask startWatching(Task task) {
+        WatchedTask watchedTask = getWatchedTask(task);
+        watchedTask.getWatchers().add(Utils.getCurrentAccount());
+        return watchRepo.save(watchedTask);
+    }
 
-	/**
-	 * Starts watching as currently logged-in user Current user will be added to
-	 * watchers list
-	 * 
-	 * @param task
-	 */
-	@Transactional
-	public WatchedTask startWatching(Task task) {
-		WatchedTask watchedTask = getWatchedTask(task);
-		watchedTask.getWatchers().add(Utils.getCurrentAccount());
-		return watchRepo.save(watchedTask);
-	}
+    /**
+     * Removes current account from project watch.
+     *
+     * @param task Task which is no longer watched
+     */
+    @Transactional
+    public WatchedTask stopWatching(Task task) {
+        WatchedTask watchedTask = getByTask(task);
+        if (watchedTask != null) {
+            Account current_user = Utils.getCurrentAccount();
+            Set<Account> watchers = watchedTask.getWatchers();
+            if (watchers != null) {
+                watchers.remove(current_user);
+                watchedTask.setWatchers(watchers);
+            }
+            return watchRepo.save(watchedTask);
+        }
+        return null;
+    }
 
-	/**
-	 * Removes current account from project watch.
-	 * 
-	 * @param project_id
-	 */
-	@Transactional
-	public WatchedTask stopWatching(Task task) {
-		WatchedTask watchedTask = getByTask(task);
-		if (watchedTask != null) {
-			Account current_user = Utils.getCurrentAccount();
-			Set<Account> watchers = watchedTask.getWatchers();
-			if (watchers != null) {
-				watchers.remove(current_user);
-				watchedTask.setWatchers(watchers);
-			}
-			return watchRepo.save(watchedTask);
-		}
-		return null;
-	}
+    /**
+     * Checks if currently logged account is watching task
+     *
+     * @param taskID
+     * @return true if account is watching this task
+     */
+    public boolean isWatching(String taskID) {
+        WatchedTask watched = getByTask(taskID);
+        return watched != null && watched.getWatchers().contains(
+                Utils.getCurrentAccount());
+    }
 
-	/**
-	 * Checks if currently logged account is watching task
-	 * 
-	 * @param taskID
-	 * @return true if account is watching this task
-	 */
-	public boolean isWatching(String taskID) {
-		WatchedTask watched = getByTask(taskID);
-		return watched != null && watched.getWatchers().contains(
-				Utils.getCurrentAccount());
-	}
+    /**
+     * Removes whole watcher. Overwrites WatchedTask with new instance and then
+     * deletes it
+     *
+     * @param wpDelete
+     */
+    @Transactional
+    public void deleteWatchedTask(String taskID) {
+        WatchedTask wpDelete = new WatchedTask();
+        wpDelete.setId(taskID);
+        watchRepo.delete(wpDelete);
+    }
 
-	/**
-	 * Removes whole watcher. Overwrites WatchedTask with new instance and then
-	 * deletes it
-	 * 
-	 * @param wpDelete
-	 */
-	@Transactional
-	public void deleteWatchedTask(String taskID) {
-		WatchedTask wpDelete = new WatchedTask();
-		wpDelete.setId(taskID);
-		watchRepo.delete(wpDelete);
-	}
+    private WatchedTask getWatchedTask(Task task) {
+        WatchedTask watchedTask = getByTask(task);
+        if (watchedTask == null) {
+            watchedTask = new WatchedTask();
+        }
+        Set<Account> watchers = watchedTask.getWatchers();
+        if (watchers == null) {
+            watchers = new HashSet<Account>();
+        }
+        watchedTask.setId(task.getId());
+        watchedTask.setType((TaskType) task.getType());
+        watchedTask.setWatchers(watchers);
+        watchedTask.setName(task.getName());
+        watchedTask.setWatchers(watchers);
+        return watchedTask;
+    }
 
-	private WatchedTask getWatchedTask(Task task) {
-		WatchedTask watchedTask = getByTask(task);
-		if (watchedTask == null) {
-			watchedTask = new WatchedTask();
-		}
-		Set<Account> watchers = watchedTask.getWatchers();
-		if (watchers == null) {
-			watchers = new HashSet<Account>();
-		}
-		watchedTask.setId(task.getId());
-		watchedTask.setType((TaskType) task.getType());
-		watchedTask.setWatchers(watchers);
-		watchedTask.setName(task.getName());
-		watchedTask.setWatchers(watchers);
-		return watchedTask;
-	}
-
-	public Page<WatchedTask> findByWatcher(Account currentAccount, Pageable p) {
-		return watchRepo.findByWatchersId(currentAccount.getId(), p);
-	}
+    public Page<WatchedTask> findByWatcher(Account currentAccount, Pageable p) {
+        return watchRepo.findByWatchersId(currentAccount.getId(), p);
+    }
 }

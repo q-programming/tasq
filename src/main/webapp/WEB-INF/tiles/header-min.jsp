@@ -143,7 +143,10 @@
     appName = '${applicationName} '
     appUrl = '<c:url value="/eventCount"/>';
     $(document).ready(function ($) {
-        $("#header-date").datepicker({firstDay: 1});
+        $("#header-date").datepicker({
+            firstDay: 1,
+            autoclose: true
+        });
         $(".header-time").click(function () {
             $('#header-date').toggle("blind");
         });

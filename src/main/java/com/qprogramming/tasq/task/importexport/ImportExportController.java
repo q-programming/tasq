@@ -14,7 +14,7 @@ import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
@@ -67,6 +67,7 @@ public class ImportExportController {
     private static final int SP_CELL = 5;
     private static final int DUE_DATE_CELL = 6;
     private static final int PARENT_CELL = 7;
+    private static final int NOT_ESTIMATED_CELL = 8;
     private static final String BR = "<br>";
     private static final String ROW_SKIPPED = "Row was skipped";
     private static final String NODE_SKIPPED = "Node was skipped";
@@ -83,7 +84,7 @@ public class ImportExportController {
 
     @Autowired
     public ImportExportController(ProjectService projectSrv, TaskService taskSrv, WorkLogService wlSrv,
-                                  MessageSource msg,AgileService agileSrv) {
+                                  MessageSource msg, AgileService agileSrv) {
         this.projectSrv = projectSrv;
         this.taskSrv = taskSrv;
         this.wlSrv = wlSrv;
@@ -180,7 +181,6 @@ public class ImportExportController {
                         Sprint active = agileSrv.findByProjectIdAndActiveTrue(task.getProject().getId());
                         subTask.addSprint(active);
                     }
-
                     logHeader = "<br>[Task number=" + subTaskXML.getNumber() + "]";
                     logger.append(logHeader);
                     logger.append(SUCCESS_SUBTASK);
@@ -201,8 +201,9 @@ public class ImportExportController {
         taskForm.setEstimate(taskxml.getEstimate());
         Task task = taskForm.createTask();
         task.setDue_date(taskxml.getDue_date());
+        task.setEstimated(!taskxml.getNotestimated());
         // optional fields
-        if (taskxml.getStory_points() != null) {
+        if (taskxml.getStory_points() != null && task.isEstimated()) {
             task.setStory_points(Integer.parseInt(taskxml.getStory_points()));
         }
         return task;
@@ -225,7 +226,9 @@ public class ImportExportController {
             // validation finished
             TaskForm taskForm = new TaskForm();
             taskForm.setName(row.getCell(NAME_CELL).getStringCellValue());
-            taskForm.setDescription(row.getCell(DESCRIPTION_CELL).getStringCellValue());
+            if (row.getCell(DESCRIPTION_CELL) != null) {
+                taskForm.setDescription(row.getCell(DESCRIPTION_CELL).getStringCellValue());
+            }
             taskForm.setType(row.getCell(TYPE_CELL).getStringCellValue());
             taskForm.setPriority(row.getCell(PRIORITY_CELL).getStringCellValue());
             if (row.getCell(ESTIMATE_CELL) != null) {
@@ -237,9 +240,13 @@ public class ImportExportController {
                 task.setStory_points(((Double) row.getCell(SP_CELL).getNumericCellValue()).intValue());
             }
             if (row.getCell(DUE_DATE_CELL) != null
-                    && !"".equals(row.getCell(DUE_DATE_CELL).getStringCellValue())) {
+                    && StringUtils.isNotBlank(row.getCell(DUE_DATE_CELL).getStringCellValue())) {
                 Date date = row.getCell(DUE_DATE_CELL).getDateCellValue();
                 task.setDue_date(date);
+            }
+            if (row.getCell(NOT_ESTIMATED_CELL) != null
+                    && StringUtils.isNotBlank(row.getCell(NOT_ESTIMATED_CELL).getStringCellValue())) {
+                task.setEstimated(false);
             }
             Cell parentCell = row.getCell(PARENT_CELL);
             //subtask
@@ -293,13 +300,13 @@ public class ImportExportController {
         task.setId(taskID);
         task.setProject(project);
         task.setTaskOrder(taskCount);
+        task = taskSrv.save(task);
         if (taskCount != null) {
             project.getTasks().add(task);
             project.setLastTaskNo(taskCount);
         }
         projectSrv.save(project);
         wlSrv.addActivityLog(task, "", LogType.CREATE);
-        task = taskSrv.save(task);
         return task;
     }
 
@@ -391,6 +398,9 @@ public class ImportExportController {
         row.createCell(ESTIMATE_CELL).setCellValue(task.getEstimate());
         row.createCell(SP_CELL).setCellValue(task.getStory_points());
         row.createCell(DUE_DATE_CELL).setCellValue(task.getDue_date());
+        if (task.isEstimated()) {
+            row.createCell(NOT_ESTIMATED_CELL).setCellValue("true");
+        }
     }
 
     private TaskXML toTaskXML(String count, Task task) {
@@ -432,7 +442,7 @@ public class ImportExportController {
         for (int i = 0; i < 7; i++) {
             Cell cell = row.getCell(i);
             if ((cell == null || cell.getCellType() == Cell.CELL_TYPE_BLANK)
-                    && (i != ESTIMATE_CELL & i != SP_CELL & i != DUE_DATE_CELL)) {
+                    && (i != ESTIMATE_CELL & i != SP_CELL & i != DUE_DATE_CELL & i != DESCRIPTION_CELL)) {
                 logger.append(logHeader);
                 logger.append("Cell ");
                 logger.append(COLS.charAt(i));
@@ -499,16 +509,6 @@ public class ImportExportController {
             logger.append("Name can't be empty");
             logger.append(BR);
         }
-        if (taskXML.getDescription() == null) {
-            logger.append(logHeader);
-            logger.append("Description can't be empty");
-            logger.append(BR);
-        }
-        if (taskXML.getDescription() == null) {
-            logger.append(logHeader);
-            logger.append("Description can't be empty");
-            logger.append(BR);
-        }
         if (taskXML.getType() == null || !isTaskTypeValid(taskXML.getType(), subtasks)) {
             logger.append(logHeader);
             logger.append("Empty or wrong task type");
@@ -524,7 +524,7 @@ public class ImportExportController {
             logger.append("Story points must be empty or a number");
             logger.append(BR);
         }
-        if(!Utils.correctEstimate(taskXML.getEstimate())){
+        if (!Utils.correctEstimate(taskXML.getEstimate())) {
             logger.append(logHeader);
             logger.append("Estimate has to be blank or in correct *w *d *h *m format");
             logger.append(BR);
@@ -584,7 +584,6 @@ public class ImportExportController {
     private boolean isEstimateCellValid(Row row) {
         Cell estimateCell = row.getCell(ESTIMATE_CELL);
         return estimateCell == null || estimateCell.getCellType() == Cell.CELL_TYPE_BLANK || (estimateCell.getCellType() == Cell.CELL_TYPE_STRING && Utils.correctEstimate(estimateCell.getStringCellValue()));
-
     }
 
 

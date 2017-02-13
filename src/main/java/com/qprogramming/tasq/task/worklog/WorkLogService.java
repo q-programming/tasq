@@ -11,6 +11,7 @@ import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.support.sorters.WorkLogSorter;
 import com.qprogramming.tasq.task.Task;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Hibernate;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
@@ -62,7 +63,7 @@ public class WorkLogService {
         loggedTask.setLastUpdate(new Date());
         eventSrv.addWatchEvent(wl, PeriodHelper.outFormat(activity), when);
         return loggedTask;
-        }
+    }
 
     @Transactional
     public Task addDatedWorkLog(Task loggedTask, String msg, Date when, LogType type) {
@@ -96,7 +97,9 @@ public class WorkLogService {
         wl.setTime(new Date());
         wl.setTimeLogged(new Date());
         wl.setType(type);
-        wl.setMessage(msg);
+        if (StringUtils.isNotBlank(msg)) {
+            wl.setMessage(msg);
+        }
         wl = wlRepo.save(wl);
         Hibernate.initialize(loggedTask.getWorklog());
         loggedTask.addWorkLog(wl);

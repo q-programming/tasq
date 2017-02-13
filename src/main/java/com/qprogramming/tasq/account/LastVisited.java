@@ -55,6 +55,10 @@ public class LastVisited implements Serializable {
         this.account = account;
         this.time = new Date();
     }
+    public LastVisited(Task task, Long account, Date time) {
+        this(task,account);
+        this.setTime(time);
+    }
 
     public Long getId() {
         return id;

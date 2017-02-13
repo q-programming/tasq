@@ -12,21 +12,19 @@
             <c:when test="${user.isPowerUser == true}">
                 <a class="secondaryPanelButton menu-toggle" type="button"
                    data-type="create-menu" style="margin: 0 auto;"><i
-                        class="fa fa-plus"></i> Create <span class="caret"></span></a>
+                        class="fa fa-plus"></i> <s:message code="main.create"/> <span class="caret"></span></a>
                 <ul class="menu-items create-menu" style="margin-left: 25px;">
-                    <li><a href="<c:url value="/task/create"/>"><i
-                            class="fa fa-plus"></i> <s:message code="task.create"
-                                                               text="Create task"/></a></li>
-
                     <li><a href="<c:url value="/project/create"/>"><i
                             class="fa fa-plus"></i> <s:message code="project.create"
                                                                text="Create project"/></a></li>
+                    <li><a href="<c:url value="/task/create"/>"><i
+                            class="fa fa-plus"></i> <s:message code="task.create"/></a></li>
                 </ul>
             </c:when>
             <c:when test="${user.isUser == true}">
                 <a class="secondaryPanelButton menu-toggle" type="button" href="<c:url value="/task/create"/>"
                    style="margin: 0 auto;"><i class="fa fa-plus">
-                </i> <s:message code="task.create" text="Create"/></a>
+                </i> <s:message code="task.create"/></a>
             </c:when>
         </c:choose>
     </li>
@@ -167,7 +165,9 @@
         </a>
     </li>
     <li class="nav-bottom">
-        <a href="#" id="small-sidebar-show"><i class="fa fa-lg fw fa-angle-double-left" aria-hidden="true"></i>&nbsp;<s:message code="menu.small.sidebar.show"/> </a>
+        <a href="#" id="small-sidebar-show"><i class="fa fa-lg fw fa-angle-double-left"
+                                               aria-hidden="true"></i>&nbsp;<s:message code="menu.small.sidebar.show"/>
+        </a>
     </li>
 </ul>
 <script>

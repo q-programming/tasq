@@ -23,101 +23,102 @@ import com.qprogramming.tasq.support.Utils;
 @Controller
 public class EventsController {
 
-	private EventsService eventSrv;
-	private MessageSource msg;
+    private EventsService eventSrv;
+    private MessageSource msg;
 
-	@Autowired
-	public EventsController(EventsService eventSrv, MessageSource msg) {
-		this.eventSrv = eventSrv;
-		this.msg = msg;
-	}
+    @Autowired
+    public EventsController(EventsService eventSrv, MessageSource msg) {
+        this.eventSrv = eventSrv;
+        this.msg = msg;
+    }
 
-	/**
-	 * Get list of all tasks watched by currently logged user
-	 * 
-	 * @param model
-	 * @return
-	 */
-	@RequestMapping(value = "/events", method = RequestMethod.GET)
-	public String events(Model model) {
-		// List<Event> events = eventSrv.getEvents();
-		// model.addAttribute("events", events);
-		return "user/events";
-	}
+    /**
+     * Get list of all tasks watched by currently logged user
+     *
+     * @param model
+     * @return
+     */
+    @RequestMapping(value = "/events", method = RequestMethod.GET)
+    public String events(Model model) {
+        // List<Event> events = eventSrv.getEvents();
+        // model.addAttribute("events", events);
+        return "user/events";
+    }
 
-	/**
-	 * Get list of all tasks watched by currently logged user
-	 * 
-	 * @param model
-	 * @return
-	 */
-	@RequestMapping(value = "/listEvents", method = RequestMethod.GET)
-	public @ResponseBody Page<DisplayEvent> eventsPaged(@RequestParam(required = false) String term,
-			@PageableDefault(size = 25, page = 0, sort = "date", direction = Direction.DESC) Pageable p) {
-		Page<Event> events = eventSrv.getEvents(p);
-		List<DisplayEvent> eventList = new ArrayList<DisplayEvent>();
-		for (Event event : events) {
-			eventList.add(new DisplayEvent(event));
-		}
-		return  new PageImpl<DisplayEvent>(eventList, p, events.getTotalElements());
-	}
+    /**
+     * Get list of all tasks watched by currently logged user
+     *
+     * @param model
+     * @return
+     */
+    @RequestMapping(value = "/listEvents", method = RequestMethod.GET)
+    public @ResponseBody
+    Page<DisplayEvent> eventsPaged(@RequestParam(required = false) String term,
+                                   @PageableDefault(size = 25, page = 0, sort = "date", direction = Direction.DESC) Pageable p) {
+        Page<Event> events = eventSrv.getEvents(p);
+        List<DisplayEvent> eventList = new ArrayList<DisplayEvent>();
+        for (Event event : events) {
+            eventList.add(new DisplayEvent(event));
+        }
+        return new PageImpl<DisplayEvent>(eventList, p, events.getTotalElements());
+    }
 
-	/**
-	 * Sets event with id as read
-	 * 
-	 * @param id
-	 * @return
-	 */
-	@RequestMapping(value = "/events/read", method = RequestMethod.POST)
-	@ResponseBody
-	public ResultData readEvent(@RequestParam(value = "id") Long id) {
-		ResultData result = new ResultData();
-		Event event = eventSrv.getById(id);
-		event.setUnread(false);
-		eventSrv.save(event);
-		result.code = ResultData.Code.OK;
-		return result;
-	}
+    /**
+     * Sets event with id as read
+     *
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/events/read", method = RequestMethod.POST)
+    @ResponseBody
+    public ResultData readEvent(@RequestParam(value = "id") Long id) {
+        ResultData result = new ResultData();
+        Event event = eventSrv.getById(id);
+        event.setUnread(false);
+        eventSrv.save(event);
+        result.code = ResultData.Code.OK;
+        return result;
+    }
 
-	@RequestMapping(value = "/events/readAll", method = RequestMethod.POST)
-	@ResponseBody
-	public ResultData readAllEvents() {
-		ResultData result = new ResultData();
-		List<Event> events = eventSrv.getEvents();
-		events.stream().filter(Event::isUnread).forEach(event -> {
-			event.setUnread(false);
-			eventSrv.save(event);
-		});
-		result.code = ResultData.Code.OK;
-		result.message = msg.getMessage("events.markAll.success", null, Utils.getCurrentLocale());
-		return result;
-	}
+    @RequestMapping(value = "/events/readAll", method = RequestMethod.POST)
+    @ResponseBody
+    public ResultData readAllEvents() {
+        ResultData result = new ResultData();
+        List<Event> events = eventSrv.getEvents();
+        events.stream().filter(Event::isUnread).forEach(event -> {
+            event.setUnread(false);
+            eventSrv.save(event);
+        });
+        result.code = ResultData.Code.OK;
+        result.message = msg.getMessage("events.markAll.success", null, Utils.getCurrentLocale());
+        return result;
+    }
 
-	/**
-	 * Returns int how many accounts is currently watching task with id
-	 * 
-	 * @param id
-	 * @return
-	 */
-	@RequestMapping(value = "/events/delete", method = RequestMethod.POST)
-	@ResponseBody
-	public ResultData deleteEvent(@RequestParam(value = "id") Long id) {
-		ResultData result = new ResultData();
-		Event event = eventSrv.getById(id);
-		eventSrv.delete(event);
-		result.code = ResultData.Code.OK;
-		return result;
-	}
+    /**
+     * Returns int how many accounts is currently watching task with id
+     *
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/events/delete", method = RequestMethod.POST)
+    @ResponseBody
+    public ResultData deleteEvent(@RequestParam(value = "id") Long id) {
+        ResultData result = new ResultData();
+        Event event = eventSrv.getById(id);
+        eventSrv.delete(event);
+        result.code = ResultData.Code.OK;
+        return result;
+    }
 
-	@RequestMapping(value = "/events/deleteAll", method = RequestMethod.POST)
-	@ResponseBody
-	public ResultData deleteAllEvents() {
-		ResultData result = new ResultData();
-		List<Event> events = eventSrv.getEvents();
-		eventSrv.delete(events);
-		result.code = ResultData.Code.OK;
-		result.message = msg.getMessage("events.deleteAll.success", null, Utils.getCurrentLocale());
-		return result;
-	}
+    @RequestMapping(value = "/events/deleteAll", method = RequestMethod.POST)
+    @ResponseBody
+    public ResultData deleteAllEvents() {
+        ResultData result = new ResultData();
+        List<Event> events = eventSrv.getEvents();
+        eventSrv.delete(events);
+        result.code = ResultData.Code.OK;
+        result.message = msg.getMessage("events.deleteAll.success", null, Utils.getCurrentLocale());
+        return result;
+    }
 
 }

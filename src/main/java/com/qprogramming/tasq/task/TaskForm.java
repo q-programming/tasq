@@ -36,7 +36,6 @@ public class TaskForm {
 
     private String project;
 
-    @NotBlank(message = NOT_BLANK_MESSAGE)
     private String description;
 
     @NotBlank(message = TYPE_NOT_BLANK_MESSAGE)

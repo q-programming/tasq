@@ -41,6 +41,9 @@
 <c:if test="${task.assignee.id == user.id}">
     <c:set var="is_assignee" value="true"/>
 </c:if>
+<c:if test="${task.state ne 'CLOSED' && (can_edit || user.isPowerUser || is_assignee)}">
+    <c:set var="can_be_logged" value="true"/>
+</c:if>
 <div class="white-frame sidepadded" style="overflow: auto;">
     <%----------------------TASK NAME-----------------------------%>
     <c:set var="taskName_text">
@@ -62,6 +65,50 @@
                                 class="fa fw fa-pencil"></i> <s:message code="task.edit"/>
                         </a></li>
                     </c:if>
+                    <c:if test="${task.subtask}">
+                        <li>
+                            <a href="#" class="convert2task" data-toggle="modal" data-target="#convert2task"
+                               data-taskid="${task.id}" data-type="${task.type}"
+                               data-project="${task.project.projectId}">
+                                <i class="fa fw fa-level-up"></i>&nbsp;<s:message
+                                    code="task.subtasks.2task"/>
+                            </a>
+                        </li>
+                    </c:if>
+                    <li>
+                        <a class="addFileButton" href="#" data-toggle="modal"
+                           data-target="#files_task" data-taskID="${task.id}"> <i
+                                class="fa fw fa-file"></i>&nbsp;<s:message code="task.addFile"/>
+                        </a>
+                    </li>
+                    <li role="separator" class="divider"></li>
+                    <c:if test="${task.loggedWork eq '0m' }">
+                        <li>
+                            <a href="#"
+                               class="estimate-modal" data-toggle="modal"
+                               data-target="#new-time-modal-dialog" data-taskID="${task.id}"
+                               data-val="${task.estimate}">
+                                <i class="fa fa-calendar-o"></i>&nbsp;<s:message code="task.estimate.change"/>
+                            </a>
+                        </li>
+                    </c:if>
+                    <li>
+                        <a href="#" class="worklog " data-toggle="modal" data-target="#logWorkform"
+                           data-taskID="${task.id}">
+                            <i class="fa fa-calendar-plus-o"></i>&nbsp;<s:message code="task.logWork"/>
+                        </a>
+                    </li>
+                    <c:if test="${task.loggedWork ne '0m' }">
+                        <li>
+                            <a href="#"
+                               class="remaining-modal " data-toggle="modal"
+                               data-target="#new-time-modal-dialog" data-taskID="${task.id}"
+                               data-val="${task.remaining}">
+                                <i class="fa fa-calendar"></i>&nbsp;<s:message code="task.remaining.change"/>
+                            </a>
+                        </li>
+                    </c:if>
+                    <li role="separator" class="divider"></li>
                     <li><a class="linkButton" href="#"> <i
                             class="fa fw fa-link fa-flip-horizontal"></i>&nbsp;<s:message
                             code="task.link"/>
@@ -79,20 +126,6 @@
                             <s:message code="task.linked.create"/>
                         </a>
                     </li>
-                    <li><a class="addFileButton" href="#" data-toggle="modal"
-                           data-target="#files_task" data-taskID="${task.id}"> <i
-                            class="fa fw fa-file"></i>&nbsp;<s:message code="task.addFile"/>
-                    </a></li>
-                    <c:if test="${task.subtask}">
-                        <li>
-                            <a href="#" class="convert2task" data-toggle="modal" data-target="#convert2task"
-                               data-taskid="${task.id}" data-type="${task.type}"
-                               data-project="${task.project.projectId}">
-                                <i class="fa fw fa-level-up"></i>&nbsp;<s:message
-                                    code="task.subtasks.2task"/>
-                            </a>
-                        </li>
-                    </c:if>
                 </ul>
             </c:if>
             <c:if test="${task.state eq'CLOSED' && project_participant}">
@@ -111,7 +144,8 @@
                 </c:if>
             </button>
             <c:if test="${can_edit}">
-                <span class="btn btn-default btn-sm a-tooltip clickable delete-task-modal" title="<s:message code="task.delete" text="Delete task" />" data-taskid="${task.id}"
+                <span class="btn btn-default btn-sm a-tooltip clickable delete-task-modal"
+                      title="<s:message code="task.delete" text="Delete task" />" data-taskid="${task.id}"
                       data-toggle="modal" data-target="#delete-task-modal-dialog">
                     <i class="fa fa-lg fa-trash-o"></i>
                 </span>
@@ -237,7 +271,7 @@
                         <c:set var="points">${task.story_points}</c:set>
                     </c:if>
                     <c:if
-                            test="${(not task.subtask) && (task.estimated) && not task.project.timeTracked}">
+                            test="${(not task.subtask) && (task.estimated)}">
                         <div class="row">
                             <div class="col-md-2 col-sm-6"><s:message code="task.storyPoints"/></div>
                             <div class="col-md-4 col-sm-6 paddingleft_20"><span
@@ -278,19 +312,21 @@
                 </div>
             </div>
             <!-------------------------DESCRIPTION------------------------>
-            <div>
-                <div class="mod-header">
-                    <h5 class="mod-header-title">
-                        <i class="fa fa-caret-down toggler" data-tab="descriptionToggle"></i>
-                        <span class="mod-header-title-txt">
+            <c:if test="${not empty task.description}">
+                <div>
+                    <div class="mod-header">
+                        <h5 class="mod-header-title">
+                            <i class="fa fa-caret-down toggler" data-tab="descriptionToggle"></i>
+                            <span class="mod-header-title-txt">
                             <i class="fa fa-book"></i> <s:message code="task.description"/>
                         </span>
-                    </h5>
+                        </h5>
+                    </div>
+                    <div id="descriptionToggle">
+                            ${task.description}
+                    </div>
                 </div>
-                <div id="descriptionToggle">
-                    ${task.description}
-                </div>
-            </div>
+            </c:if>
             <%----------------ESTIMATES DIV -------------------------%>
             <div>
                 <div class="mod-header">
@@ -302,15 +338,14 @@
                     </h5>
                 </div>
                 <!-- logwork trigger modal -->
-                <c:if test="${can_edit && user.isPowerUser || is_assignee}">
+                <c:if test="${can_be_logged}">
                     <button class="btn btn-default btn-sm worklog a-tooltip" data-toggle="modal"
                             title="<s:message code="task.logWork"/>&nbsp;(l)"
                             data-target="#logWorkform" data-taskID="${task.id}">
-                        <i class="fa fa-lg fa-calendar"></i>
+                        <i class="fa fa-lg fa-calendar-plus-o"></i>
                         <s:message code="task.logWork"/>
                     </button>
-                    <c:if
-                            test="${user.activeTask eq task.id}">
+                    <c:if test="${user.activeTask eq task.id}">
                         <a href="#">
                             <button class="btn btn-default btn-sm a-tooltip handleTimerBtn"
                                     title="<s:message code="task.stopTime.description" />">
@@ -319,12 +354,10 @@
                             </button>
                         </a>
                         <div class="bar_td">
-                            <s:message code="task.currentTime"/>
-                            : <span id="task_timer"></span>
+                            <s:message code="task.currentTime"/>: <span id="task_timer"></span>
                         </div>
                     </c:if>
-                    <c:if
-                            test="${empty user.activeTask ne task.id}">
+                    <c:if test="${empty user.activeTask ne task.id}">
                         <a href="<c:url value="/task/time?id=${task.id}&action=start"/>">
                             <button class="btn btn-default btn-sm">
                                 <i class="fa fa-lg fa-clock-o"></i>
@@ -381,6 +414,7 @@
                         <td></td>
                         <td style="width: 150px"></td>
                         <td></td>
+                        <td></td>
                     </tr>
                     <%-- Estimate bar --%>
                     <c:if test="${task.estimate ne '0m'}">
@@ -402,7 +436,16 @@
                                          style="width: 100%;"></div>
                                 </div>
                             </td>
-                            <td class="bar_td">${task.estimate}&nbsp;
+                            <td class="bar_td">${task.estimate}</td>
+                            <td>
+                                <c:if test="${task.loggedWork eq '0m' && can_be_logged}">
+                                <span class="estimate-modal a-tooltip clickable" data-toggle="modal"
+                                      title="<s:message code="task.estimate.change"/>"
+                                      data-target="#new-time-modal-dialog" data-taskID="${task.id}"
+                                      data-val="${task.estimate}">
+                                        <i class="fa fa-calendar-o" aria-hidden="true"></i>
+                                 </span>
+                                </c:if>
                             </td>
                         </tr>
                         <c:if test="${not task.subtask && not empty taskEstimate}">
@@ -434,6 +477,15 @@
                             </div>
                         </td>
                         <td class="bar_td">${task.loggedWork}</td>
+                        <td>
+                            <c:if test="${can_be_logged}">
+                                <span class="worklog a-tooltip clickable" data-toggle="modal"
+                                      title="<s:message code="task.logWork"/>&nbsp;(l)"
+                                      data-target="#logWorkform" data-taskID="${task.id}">
+                                    <i class="fa fa-calendar-plus-o"></i>
+                                </span>
+                            </c:if>
+                        </td>
                     </tr>
                     <c:if test="${not task.subtask && not empty taskLogged}">
                         <t:timeDetails task="${task}" taskTime="${taskLogged}" subtasks="${subtasks}"
@@ -460,6 +512,16 @@
                             </div>
                         </td>
                         <td class="bar_td">${task.remaining }</td>
+                        <td>
+                            <c:if test="${task.loggedWork ne '0m' && can_be_logged}">
+                                <span class="remaining-modal a-tooltip clickable" data-toggle="modal"
+                                      title="<s:message code="task.remaining.change"/>"
+                                      data-target="#new-time-modal-dialog" data-taskID="${task.id}"
+                                      data-val="${task.remaining}">
+                                    <i class="fa fa-calendar"></i>
+                                </span>
+                            </c:if>
+                        </td>
                     </tr>
                     <c:if test="${not task.subtask && not empty taskRemaining}">
                         <t:timeDetails task="${task}" taskTime="${taskRemaining}" subtasks="${subtasks}"
@@ -541,7 +603,7 @@
                                                    style="border-top-style: hidden;">
                                                 <c:forEach var="linkTask" items="${linkType.value}">
                                                     <tr>
-                                                        <td style="width: 30px"><t:type
+                                                        <td class="hidden-xs" style="width: 30px"><t:type
                                                                 type="${linkTask.type}" list="true"/></td>
                                                         <td style="width: 30px"><t:priority
                                                                 priority="${linkTask.priority}" list="true"/></td>
@@ -597,8 +659,8 @@
                             <c:forEach var="subTask" items="${subtasks}">
                                 <tr
                                         class="<c:if test="${subTask.state eq 'CLOSED' }">closed</c:if>">
-                                    <td style="width: 30px"><t:type type="${subTask.type}"
-                                                                    list="true"/></td>
+                                    <td style="width: 30px" class="hidden-xs"><t:type type="${subTask.type}"
+                                                                                      list="true"/></td>
                                     <td style="width: 30px"><t:priority
                                             priority="${subTask.priority}" list="true"/></td>
                                     <td><a
@@ -606,7 +668,8 @@
                                                     test="${subTask.state eq 'CLOSED' }">text-decoration: line-through;</c:if>"
                                             href="<c:url value="/task/${subTask.id}"/>">[${subTask.id}]
                                             ${subTask.name}</a></td>
-                                    <td style="width: 100px"><t:state state="${subTask.state}"/></td>
+                                    <td class="hidden-xs"><t:state state="${subTask.state}" list="false"/></td>
+                                    <td class="visible-xs"><t:state state="${subTask.state}" list="true"/></td>
                                         <%--count percentage of done--%>
                                     <c:set var="percentage">${subTask.percentage_logged}</c:set>
                                     <c:set var="logged_class"/>
@@ -620,7 +683,7 @@
                                     <c:if test="${subTask.state eq 'BLOCKED' || subTask.percentage_logged gt 100}">
                                         <c:set var="logged_class">progress-bar-danger</c:set>
                                     </c:if>
-                                    <td style="width: 50px; padding-top: 14px;cursor:help;" class="a-tooltip"
+                                    <td style="width: 50px; padding-top: 14px;cursor:help;" class="a-tooltip hidden-xs"
                                         title="<s:message code="task.closed"/>: ${percentage}%<br><s:message code="task.estimate"/>: ${subTask.estimate}<br><s:message code="task.logged"/>: ${subTask.loggedWork}<br><s:message code="task.remaining"/>: ${subTask.remaining}"
                                         data-html="true">
                                         <div class="progress" style="height: 5px;">
@@ -751,7 +814,7 @@
                             </c:if>
                         </div>
                     </div>
-                    <c:if test="${project_participant}">
+                    <c:if test="${project_participant && can_be_logged}">
                         <div id="assign_button_div" class="row">
                             <div class="col-md-12 text-center">
                                 <span class="btn btn-default btn-sm a-tooltip assignToTask"
@@ -941,6 +1004,7 @@
 <jsp:include page="../modals/assign.jsp"/>
 <jsp:include page="../modals/image.jsp"/>
 <jsp:include page="../modals/delete.jsp"/>
+<jsp:include page="../modals/estimate.jsp"/>
 <c:if test="${task.subtask}">
     <jsp:include page="../modals/convert2task.jsp"/>
 </c:if>
@@ -1264,21 +1328,21 @@
                     var avatar = '<img data-src="holder.js/30x30" class="avatar small" src="' + avatarURL + worklog.account.id + '.png"/>';
                     var type = getEventTypeMsg(worklog.type);
                     var message = "";
-                    if (worklog.message != "") {
+                    if (worklog.message !== null && worklog.message !== "") {
                         message = '<div class="quote">' + worklog.message + '</div>'
                     }
                     var delbtn = '';
                     <security:authorize access="hasRole('ROLE_ADMIN')">
                     var delurl = '<c:url value="/task/delWorklog?id="/>';
                     delbtn = '<div class="buttons_panel" style="float: right;">'
-                            + '<a class="delete_btn a-tooltip" style="color: #555;" href="' + delurl + worklog.id + '"'
-                            + ' title = "<s:message code="task.worklog.delete"/>"'
-                            + ' data-lang="${pageContext.response.locale}"'
-                            + ' data-msg="<s:message code="task.worklog.delete.confirm"/>" >'
-                            + '<i class="fa fa-trash-o"></i></a></div>';
+                        + '<a class="delete_btn a-tooltip" style="color: #555;" href="' + delurl + worklog.id + '"'
+                        + ' title = "<s:message code="task.worklog.delete"/>"'
+                        + ' data-lang="${pageContext.response.locale}"'
+                        + ' data-msg="<s:message code="task.worklog.delete.confirm"/>" >'
+                        + '<i class="fa fa-trash-o"></i></a></div>';
                     </security:authorize>
                     var row = '<tr><td>' + avatar + '</td><td style="font-size: smaller; color: dimgray;width: 100%;">' + account + '&nbsp;' + type + '<div class="time-div">' + worklog.timeLogged + '</div> ' + delbtn + message
-                            + '</td></tr>';
+                        + '</td></tr>';
                     $("#taskworklogs").append(row);
                     $(".a-tooltip").tooltip();
                 });
@@ -1308,7 +1372,7 @@
 
         $('body').on('click', 'a.delete_btn', function (e) {
             var msg = '<p style="text-align:center"><i class="fa fa-lg fa-exclamation-triangle" style="display: initial;"></i>&nbsp'
-                    + $(this).data('msg') + '</p>';
+                + $(this).data('msg') + '</p>';
             var lang = $(this).data('lang');
             bootbox.setDefaults({
                 locale: lang
@@ -1327,23 +1391,23 @@
         var init = true;
         var noTags = '<s:message code="task.tags.noTags" htmlEscape="false"/>';
         $('#taskTags').tagsinput(
-                {
-                    maxChars: 12,
-                    maxTags: 6,
-                    trimValue: true
-                }
+            {
+                maxChars: 12,
+                maxTags: 6,
+                trimValue: true
+            }
         );
         loadTags();
 // 	checkIfEmptyTags()
 
         $(".bootstrap-tagsinput").hover(
-                function () {
-                    $(this).addClass("inputHover");
-                    $("#editTags").show();
-                }, function () {
-                    $(this).removeClass("inputHover");
-                    $("#editTags").hide();
-                }
+            function () {
+                $(this).addClass("inputHover");
+                $("#editTags").show();
+            }, function () {
+                $(this).removeClass("inputHover");
+                $("#editTags").hide();
+            }
         );
         $('.bootstrap-tagsinput').focusin(function () {
             inputInProgress = true;
@@ -1477,20 +1541,20 @@
         var reggie = /(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})/;
         var dateArray = reggie.exec(str);
         return new Date(
-                (+dateArray[3]),
-                (+dateArray[2]) - 1, // Careful, month starts at 0!
-                (+dateArray[1]),
-                (+dateArray[4]),
-                (+dateArray[5])
+            (+dateArray[3]),
+            (+dateArray[2]) - 1, // Careful, month starts at 0!
+            (+dateArray[1]),
+            (+dateArray[4]),
+            (+dateArray[5])
         );
     }
 
     function getEventTypeMsg(type) {
         switch (type) {
-                <c:forEach items="${types}" var="enum_type">
+            <c:forEach items="${types}" var="enum_type">
             case "${enum_type}":
                 return '<s:message code="${enum_type.code}"/> ';
-                </c:forEach>
+            </c:forEach>
             default:
                 return 'not yet added ';
         }

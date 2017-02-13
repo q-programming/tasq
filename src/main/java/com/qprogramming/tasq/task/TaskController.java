@@ -33,8 +33,9 @@ import com.qprogramming.tasq.task.worklog.TaskResolution;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Hibernate;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
@@ -59,7 +60,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.*;
+import java.text.ParseException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.qprogramming.tasq.support.Utils.REDIRECT;
@@ -188,9 +192,6 @@ public class TaskController {
                         return null;
                     }
                     String message = "";
-                    if (task.isEstimated() && project.getTimeTracked()) {
-                        message = task.getEstimate();
-                    }
                     wlSrv.addActivityLog(task, message, LogType.TASKSPRINTADD);
                 }
             }
@@ -202,15 +203,9 @@ public class TaskController {
             if (StringUtils.isNotBlank(linked)) {
                 Task linkedTask = taskSrv.findById(linked);
                 if (linkedTask != null) {
-                    if (linkedTask.getProject().equals(project)) {
-                        TaskLink link = new TaskLink(linkedTask.getId(), taskID, TaskLinkType.RELATES_TO);
-                        linkService.save(link);
-                        wlSrv.addWorkLogNoTask(linked + " - " + taskID, project, LogType.TASK_LINK);
-                    } else {
-                        MessageHelper.addWarningAttribute(ra,
-                                msg.getMessage("task.create.not.linked", null, Utils.getCurrentLocale()));
-
-                    }
+                    TaskLink link = new TaskLink(linkedTask.getId(), taskID, TaskLinkType.RELATES_TO);
+                    linkService.save(link);
+                    wlSrv.addWorkLogNoTask(linked + " - " + taskID, project, LogType.TASK_LINK);
                 }
             }
             //everything went well , save task
@@ -319,24 +314,12 @@ public class TaskController {
             message.append(Utils.changedFromTo(DESCRIPTION_TXT, task.getDescription(), taskForm.getDescription()));
             task.setDescription(taskForm.getDescription());
         }
-        if ((taskForm.getEstimate() != null) && (!task.getEstimate().equalsIgnoreCase(taskForm.getEstimate()))) {
-            Period estimate = PeriodHelper.inFormat(taskForm.getEstimate());
-            Period difference = PeriodHelper.minusPeriods(estimate, task.getRawEstimate());
-            // only add estimate change event if task is in sprint
-            if (sprintSrv.taskInActiveSprint(task)) {
-                wlSrv.addActivityPeriodLog(task, PeriodHelper.outFormat(difference), difference, LogType.ESTIMATE);
-            } else {
-                message.append(Utils.changedFromTo(ESTIMATE_TXT, task.getEstimate(), taskForm.getEstimate()));
-            }
-            task.setEstimate(estimate);
-            task.setRemaining(estimate);
+        if ((StringUtils.isNotBlank(taskForm.getEstimate()) && (!task.getEstimate().equalsIgnoreCase(taskForm.getEstimate())))) {
+            message.append(changeEstimate(taskForm.getEstimate(), task));
         }
-        if ((taskForm.getRemaining() != null) && (!task.getRemaining().equalsIgnoreCase(taskForm.getRemaining()))) {
-            Period remaining = PeriodHelper.inFormat(taskForm.getRemaining());
-            message.append(Utils.changedFromTo(REMAINING_TXT, task.getRemaining(), taskForm.getRemaining()));
-            task.setRemaining(remaining);
+        if (StringUtils.isNotBlank(taskForm.getRemaining()) && (!task.getRemaining().equalsIgnoreCase(taskForm.getRemaining()))) {
+            message.append(changeRemaining(taskForm.getRemaining(), task));
         }
-
         boolean estimated = !taskForm.getNotEstimated();
         if (!task.isEstimated().equals(estimated) && !task.isInSprint()) {
             message.append(
@@ -372,12 +355,75 @@ public class TaskController {
         }
         LOG.debug(message.toString());
         message.append(Utils.TABLE_END);
-        if (message.length() > 37) {
+        if (message.length() > 43) {
             wlSrv.addActivityLog(task, message.toString(), LogType.EDITED);
         }
+        visitedSrv.updateFromToVisitedTask(task, task);
         taskSrv.save(task);
         return REDIRECT_TASK + taskID;
     }
+
+    private String changeRemaining(String remainingString, Task task) {
+        Period remaining = PeriodHelper.inFormat(remainingString);
+        task.setRemaining(remaining);
+        return Utils.changedFromTo(REMAINING_TXT, task.getRemaining(), remainingString).toString();
+    }
+
+    private String changeEstimate(String est, Task task) {
+        String result = "";
+        Period estimate = PeriodHelper.inFormat(est);
+        Period difference = PeriodHelper.minusPeriods(estimate, task.getRawEstimate());
+        // only add estimate change event if task is in sprint
+        if (sprintSrv.taskInActiveSprint(task)) {
+            wlSrv.addActivityPeriodLog(task, PeriodHelper.outFormat(difference), difference, LogType.ESTIMATE);
+        } else {
+            result = Utils.changedFromTo(ESTIMATE_TXT, task.getEstimate(), est).toString();
+        }
+        task.setEstimate(estimate);
+        task.setRemaining(estimate);
+        return result;
+    }
+
+
+    @Transactional
+    @ResponseBody
+    @RequestMapping(value = "task/changeEstimateTime", method = RequestMethod.POST)
+    public ResultData changeEstimateTime(@RequestParam(name = "id") String id, @RequestParam String newValue, @RequestParam Boolean estimate) {
+        Task task = taskSrv.findById(id);
+        ResultData result = validateNewTime(newValue, task, estimate);
+        if (ResultData.Code.ERROR.equals(result.code)) {
+            return result;
+        } else {
+            if (estimate) {
+                changeEstimate(newValue, task);
+                result.message = msg.getMessage("task.estimate.changed", new Object[]{id, newValue}, Utils.getCurrentLocale());
+            } else {
+                changeRemaining(newValue, task);
+                result.message = msg.getMessage("task.remaining.changed", new Object[]{id, newValue}, Utils.getCurrentLocale());
+            }
+        }
+        return result;
+    }
+
+    private ResultData validateNewTime(String newValue, Task task, Boolean estimate) {
+        ResultData result = new ResultData();
+        result.code = ResultData.Code.OK;
+        if (StringUtils.isBlank(newValue) || task == null || (estimate && !task.getLoggedWork().equals("0m")) || task.getEstimate().trim().equalsIgnoreCase(newValue)) {
+            result.code = ResultData.Code.ERROR;
+            result.message = msg.getMessage("error.changeTime", null, Utils.getCurrentLocale());
+        } else if (!projectSrv.canEdit(task.getProject())) {
+            if (!Roles.isUser() || (!isOwnerOrAssignee(task))) {
+                result.code = ResultData.Code.ERROR;
+                result.message = msg.getMessage(ERROR_ACCES_RIGHTS, null, Utils.getCurrentLocale());
+            }
+        }
+        return result;
+    }
+
+    private boolean isOwnerOrAssignee(Task task) {
+        return Utils.getCurrentAccount().equals(task.getOwner()) || Utils.getCurrentAccount().equals(task.getAssignee());
+    }
+
 
     private int getStoryPoints(TaskForm taskForm) {
         return (StringUtils.isNotBlank(taskForm.getStory_points()) && StringUtils.isNumeric(taskForm.getStory_points())) ? Integer.parseInt(taskForm.getStory_points())
@@ -822,7 +868,6 @@ public class TaskController {
                     ResultData result = taskIsClosed(task);
                     MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
                     return REDIRECT + request.getHeader(REFERER);
-
                 }
                 if (("").equals(email) && task.getAssignee() != null) {
                     task.setAssignee(null);
@@ -865,7 +910,15 @@ public class TaskController {
     @RequestMapping(value = "/task/assignMe", method = RequestMethod.GET)
     public String assignMe(@RequestParam(value = "id") String taskID, RedirectAttributes ra,
                            HttpServletRequest request) {
-        assignMeToTask(taskID);
+        Task task = taskSrv.findById(taskID);
+        if (task != null) {
+            if (task.getState().equals(TaskState.CLOSED)) {
+                ResultData result = taskIsClosed(task);
+                MessageHelper.addWarningAttribute(ra, result.message, Utils.getCurrentLocale());
+                return REDIRECT + request.getHeader(REFERER);
+            }
+            assignMeToTask(task);
+        }
         return REDIRECT + request.getHeader(REFERER);
     }
 
@@ -877,13 +930,20 @@ public class TaskController {
         if (!Roles.isPowerUser()) {
             throw new TasqAuthException(msg);
         }
-        if (assignMeToTask(id)) {
-            return ResponseEntity.ok(new ResultData(ResultData.Code.OK,
-                    msg.getMessage("task.assinged.me", null, Utils.getCurrentLocale()) + " " + id));
-        } else {
-            return ResponseEntity.ok(new ResultData(ResultData.Code.ERROR,
-                    msg.getMessage("role.error.task.permission", null, Utils.getCurrentLocale())));
+        Task task = taskSrv.findById(id);
+        if (task != null) {
+            if (task.getState().equals(TaskState.CLOSED)) {
+                return ResponseEntity.ok(taskIsClosed(task));
+            }
+            if (assignMeToTask(task)) {
+                return ResponseEntity.ok(new ResultData(ResultData.Code.OK,
+                        msg.getMessage("task.assinged.me", null, Utils.getCurrentLocale()) + " " + id));
+            } else {
+                return ResponseEntity.ok(new ResultData(ResultData.Code.ERROR,
+                        msg.getMessage("role.error.task.permission", null, Utils.getCurrentLocale())));
+            }
         }
+        return ResponseEntity.ok(new ResultData(ResultData.Code.ERROR, "?"));
     }
 
     @Transactional
@@ -931,6 +991,10 @@ public class TaskController {
                 Set<Account> notify = notifyWhileDeleting(task);
                 String taskName = task.getName();
                 ResultData result;
+                //if removed task is subtask and it's last one
+                if (task.isSubtask()) {
+                    updateSubtaskCount(task);
+                }
                 result = taskSrv.deleteTask(task, force);
                 if (result.code.equals(ResultData.Code.ERROR)) {
                     MessageHelper.addWarningAttribute(ra, result.message, currentLocale);
@@ -955,6 +1019,19 @@ public class TaskController {
             return "redirect:/";
         }
         return REDIRECT + request.getHeader(REFERER);
+    }
+
+    /**
+     * If removed task/subtask is deleted converted and it's last subtask , update parent task and remove task count
+     *
+     * @param task - task which potential parent have to be updated
+     */
+    private void updateSubtaskCount(Task task) {
+        Task parentTask = taskSrv.findById(task.getParent());
+        if (taskSrv.findSubtasks(task.getParent()).size() == 1) {
+            parentTask.setSubtasks(0);
+            taskSrv.save(parentTask);
+        }
     }
 
     /**
@@ -1151,6 +1228,8 @@ public class TaskController {
             wlSrv.addActivityLog(task, message.toString(), LogType.SUBTASK2TASK);
             taskSrv.save(task);
             // cleanup
+            visitedSrv.updateFromToVisitedTask(subtask, task);
+            updateSubtaskCount(subtask);
             taskSrv.deleteTask(subtask, false);
             MessageHelper.addSuccessAttribute(ra, msg.getMessage("task.subtasks.2task.success",
                     new Object[]{id, taskID}, Utils.getCurrentLocale()));
@@ -1276,6 +1355,38 @@ public class TaskController {
         }
     }
 
+    @Deprecated
+    @Transactional
+    @RequestMapping(value = "task/updateClosed", method = RequestMethod.GET)
+    public String updateMissingEvent(@RequestParam(value = "project") Long project,
+                                     RedirectAttributes ra, HttpServletRequest request, Model model) {
+        if (Roles.isAdmin()) {
+            if (project != null) {
+                Project projectById = projectSrv.findById(project);
+                List<Task> list = taskSrv.findByProjectAndState(projectById, TaskState.CLOSED);
+                StringBuilder console = new StringBuilder("Updating closed events on tasks within application");
+                console.append(BR);
+                for (Task task : list) {
+                    if (task.getState().equals(TaskState.CLOSED)) {
+                        List<WorkLog> worklogs = wlSrv.getTaskEvents(task.getId());
+                        if (worklogs.stream().noneMatch(workLog -> workLog.getType().equals(LogType.CLOSED))) {
+                            wlSrv.addActivityLog(task, "", LogType.CLOSED);
+                            taskSrv.save(task);
+                            console.append(task.toString());
+                            console.append(": added missing closed event");
+                            console.append(BR);
+                        }
+                    }
+                }
+                model.addAttribute("console", console.toString());
+            }
+            return "other/console";
+        } else {
+            throw new TasqAuthException();
+        }
+    }
+
+
     @RequestMapping(value = "/activeTaskAccounts", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<DisplayAccount>> getActiveTaskAccounts(@RequestParam String taskID, HttpServletResponse response) {
@@ -1292,7 +1403,7 @@ public class TaskController {
     private ResultData taskIsClosed(Task task) {
         String localized = msg.getMessage(((TaskState) task.getState()).getCode(), null, Utils.getCurrentLocale());
         return new ResultData(ResultData.Code.ERROR,
-                msg.getMessage("task.closed.cannot.operate=", new Object[]{localized}, Utils.getCurrentLocale()));
+                msg.getMessage("task.closed.cannot.operate", new Object[]{localized}, Utils.getCurrentLocale()));
     }
 
     /**
@@ -1313,17 +1424,7 @@ public class TaskController {
     }
 
     private boolean checkIfNotEstimated(Task task, Project project) {
-        if (!project.getTimeTracked()) {
-            if (task.getStory_points() == 0 && task.isEstimated()) {
-                return true;
-            }
-        } else {
-            if (task.getEstimate().equals("0m") && task.isEstimated()) {
-                return true;
-            }
-
-        }
-        return false;
+        return task.getStory_points() == 0 && task.isEstimated();
     }
 
     private String worklogStateChange(TaskState state, TaskState oldState, Task task) {
@@ -1404,8 +1505,10 @@ public class TaskController {
         // Save
         for (MultipartFile multipartFile : filesArray) {
             if (!multipartFile.isEmpty()) {
-                File file = new File(
-                        taskSrv.getTaskDirectory(task) + File.separator + multipartFile.getOriginalFilename());
+                String taskDir = taskSrv.getTaskDirectory(task) + File.separator;
+                File file = new File(taskDir + multipartFile.getOriginalFilename());
+                //check if file exists, if yes , add suffix
+                file = createUniqueFile(taskDir, file);
                 try {
                     FileUtils.writeByteArrayToFile(file, multipartFile.getBytes());
                 } catch (IOException e) {
@@ -1415,6 +1518,35 @@ public class TaskController {
             }
         }
         return true;
+    }
+
+    /**
+     * Creates unique file. If file with such filename already exists in that folder, _# is added , where # is increased until free number is found
+     *
+     * @param taskDir - task directory
+     * @param file    file to be created unique
+     * @return
+     */
+    private File createUniqueFile(String taskDir, File file) {
+        long i;
+        while (file.exists()) {
+            String pathname = FilenameUtils.getBaseName(file.getName());
+            Pattern p = Pattern.compile("(\\d*)$");
+            Matcher matcher = p.matcher(pathname);
+            if (matcher.find() && StringUtils.isNotBlank(matcher.group())) {
+                try {
+                    i = Integer.parseInt(matcher.group()) + 1;
+                } catch (NumberFormatException e) {
+                    LOG.debug("Something  went wrong with numbers, adding timestamp. {}", e);
+                    i = System.currentTimeMillis();
+                }
+            } else {
+                i = 0;
+            }
+            pathname = FilenameUtils.getBaseName(pathname).split("(_\\d*)$")[0];
+            file = new File(taskDir + FilenameUtils.getBaseName(pathname) + "_" + i + FilenameUtils.EXTENSION_SEPARATOR + FilenameUtils.getExtension(file.getName()));
+        }
+        return file;
     }
 
     /**
@@ -1441,11 +1573,10 @@ public class TaskController {
     /**
      * Assigns currently logged user into task with given ID
      *
-     * @param id
+     * @param task task to be checked
      * @return
      */
-    private boolean assignMeToTask(String id) {
-        Task task = taskSrv.findById(id);
+    private boolean assignMeToTask(Task task) {
         String previous = getAssignee(task);
         if (!projectSrv.canEdit(task.getProject())) {
             return false;

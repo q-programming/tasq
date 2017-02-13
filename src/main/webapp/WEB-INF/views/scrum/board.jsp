@@ -80,9 +80,13 @@
                 </c:forEach>
             </div>
         </div>
-    <span class="btn btn-default pull-right" id="save_order"
-          style="display: none"><i class="fa fa-floppy-o"></i>&nbsp;Save order
-    </span>
+        <span class="btn btn-default pull-right" id="save_order"
+              style="display: none"><i class="fa fa-floppy-o"></i>&nbsp;<s:message code="main.save.order"/>
+        </span>
+        <span class="a-tooltip btn btn-default pull-right toggler-colapse" id="colapse_all"
+              title="<s:message code="main.collapse.all"/>"
+              style="display: none"><i
+                class="fa fa-minus-square-o"></i></span>
         <table style="width:100%">
             <jsp:include page="../agile/board.jsp"/>
     </div>

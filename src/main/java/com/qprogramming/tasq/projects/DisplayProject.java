@@ -18,7 +18,6 @@ public class DisplayProject {
 	private Enum<TaskType> default_type;
 	private Enum<TaskPriority> default_priority;
 	private AgileType agile;
-	private Boolean timeTracked = false;
 	private Long defaultAssigneeID;
 	private DisplayAccount defaultAssignee;
 	private Long lastTaskNo;
@@ -89,14 +88,6 @@ public class DisplayProject {
 
 	public void setAgile(AgileType agile) {
 		this.agile = agile;
-	}
-
-	public Boolean getTimeTracked() {
-		return timeTracked;
-	}
-
-	public void setTimeTracked(Boolean timeTracked) {
-		this.timeTracked = timeTracked;
 	}
 
 	public Long getDefaultAssigneeID() {

@@ -4,7 +4,7 @@
            uri="http://www.springframework.org/security/tags" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <script src="<c:url value="/resources/js/bootstrap.file-input.js"/>"></script>
-<div class="row">
+<div class="row margintop_10">
     <div class="white-frame-nomargin col-md-offset-3 col-md-6 col-sm-12">
         <h3>
             <s:message code="panel.settings"></s:message>
@@ -282,7 +282,7 @@
                 file = input.files[0];
                 img = new Image();
                 img.onload = function () {
-                    if (this.width > 150 || this.height > 150) {
+                    if (this.width > 500 || this.height > 500) {
                         showError(imageWRN);
                     } else {
                         var reader = new FileReader();

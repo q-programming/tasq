@@ -62,18 +62,12 @@ public class CommentsController {
         Account currAccount = Utils.getCurrentAccount();
         Locale locale = Utils.getCurrentLocale();
         Task task = taskSrv.findById(id);
-        if (!commentSrv.isCommentAllowed(task)) {
-            MessageHelper.addWarningAttribute(ra, msg.getMessage(
-                    "comment.notallowed", new Object[]{((TaskState) task
-                            .getState()).getDescription()}, locale));
-        } else {
-            if (commentSrv.commentMessageValid(message, ra)) {
-                task.addComment(commentSrv.addComment(message, currAccount, task));
-                taskSrv.save(task);
-                // search for watchers and send notifications
-                MessageHelper.addSuccessAttribute(ra,
-                        msg.getMessage("comment.added", null, locale));
-            }
+        if (commentSrv.commentMessageValid(message, ra)) {
+            task.addComment(commentSrv.addComment(message, currAccount, task));
+            taskSrv.save(task);
+            // search for watchers and send notifications
+            MessageHelper.addSuccessAttribute(ra,
+                    msg.getMessage("comment.added", null, locale));
         }
         return "redirect:" + request.getHeader("Referer");
     }
@@ -93,23 +87,17 @@ public class CommentsController {
         Utils.setHttpRequest(request);
         Locale locale = Utils.getCurrentLocale();
         Task task = taskSrv.findById(taskId);
-        if (!commentSrv.isCommentAllowed(task)) {
-            MessageHelper.addWarningAttribute(ra, msg.getMessage(
-                    "comment.editNotallowed", new Object[]{((TaskState) task
-                            .getState()).getDescription()}, locale));
+        Comment comment = commentSrv.findById(id);
+        if (comment == null
+                || !comment.getAuthor().equals(Utils.getCurrentAccount())) {
+            MessageHelper.addErrorAttribute(ra,
+                    msg.getMessage("main.generalError", null, locale));
         } else {
-            Comment comment = commentSrv.findById(id);
-            if (comment == null
-                    || !comment.getAuthor().equals(Utils.getCurrentAccount())) {
-                MessageHelper.addErrorAttribute(ra,
-                        msg.getMessage("main.generalError", null, locale));
-            } else {
-                comment.setMessage(null);
-                comment.setDate_edited(null);
-                commentSrv.save(comment);
-                MessageHelper.addSuccessAttribute(ra,
-                        msg.getMessage("comment.deleted", null, locale));
-            }
+            comment.setMessage(null);
+            comment.setDate_edited(null);
+            commentSrv.save(comment);
+            MessageHelper.addSuccessAttribute(ra,
+                    msg.getMessage("comment.deleted", null, locale));
         }
         return "redirect:" + request.getHeader("Referer");
     }
@@ -122,15 +110,9 @@ public class CommentsController {
         Utils.setHttpRequest(request);
         Locale locale = Utils.getCurrentLocale();
         Task task = taskSrv.findById(taskId);
-        if (!commentSrv.isCommentAllowed(task)) {
-            MessageHelper.addWarningAttribute(ra, msg.getMessage(
-                    "comment.editNotallowed", new Object[]{((TaskState) task
-                            .getState()).getDescription()}, locale));
-        } else {
-            if (commentSrv.editComment(id, message, ra)) {
-                MessageHelper.addSuccessAttribute(ra,
-                        msg.getMessage("comment.edited", null, locale));
-            }
+        if (commentSrv.editComment(id, message, ra)) {
+            MessageHelper.addSuccessAttribute(ra,
+                    msg.getMessage("comment.edited", null, locale));
         }
         return "redirect:" + request.getHeader("Referer");
     }

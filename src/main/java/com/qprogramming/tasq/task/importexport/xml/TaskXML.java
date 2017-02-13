@@ -11,7 +11,7 @@ import java.util.List;
 
 @XmlRootElement(namespace = "com.qprogramming.tasq.task.importexport.xml.ProjectXML")
 @XmlType(propOrder = {"name", "description", "type", "priority", "estimate",
-        "story_points", "due_date", "subTasksList"})
+        "story_points", "due_date","notestimated", "subTasksList"})
 public class TaskXML {
     private String number;
     private String name;
@@ -21,6 +21,7 @@ public class TaskXML {
     private String estimate;
     private String story_points;
     private Date due_date;
+    private boolean notestimated;
     private List<TaskXML> subTasksList;
 
     public TaskXML() {
@@ -32,6 +33,7 @@ public class TaskXML {
         this.type = ((TaskType) task.getType()).getEnum();
         this.story_points = Integer.toString(task.getStory_points());
         this.due_date = task.getRawDue_date();
+        this.notestimated = !task.getEstimated();
     }
 
     @XmlAttribute
@@ -99,13 +101,21 @@ public class TaskXML {
         this.due_date = due_date;
     }
 
-    @XmlElementWrapper(name = "subTasksList")
-    @XmlElement(name = "task")
-    public void setSubTasksList(List<TaskXML> subTasks) {
-        this.subTasksList = subTasks;
+    public boolean getNotestimated() {
+        return notestimated;
+    }
+
+    public void setNotestimated(boolean notestimated) {
+        this.notestimated = notestimated;
     }
 
     public List<TaskXML> getSubTasksList() {
         return subTasksList;
+    }
+
+    @XmlElementWrapper(name = "subTasksList")
+    @XmlElement(name = "task")
+    public void setSubTasksList(List<TaskXML> subTasks) {
+        this.subTasksList = subTasks;
     }
 }

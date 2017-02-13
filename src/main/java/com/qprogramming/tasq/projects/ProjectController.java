@@ -563,7 +563,7 @@ public class ProjectController {
 
     @Transactional
     @RequestMapping(value = "project/{id}/update", method = RequestMethod.POST)
-    public String updateProperties(@PathVariable String id, @RequestParam(value = "timeTracked") Boolean timeTracked,
+    public String updateProperties(@PathVariable String id,
                                    @RequestParam(value = "default_priority") TaskPriority priority,
                                    @RequestParam(value = "default_type") TaskType type,
                                    @RequestParam(value = "defaultAssignee") Long assigneId, RedirectAttributes ra,
@@ -585,13 +585,6 @@ public class ProjectController {
         project.setDefaultAssigneeID(assigneId);
         projSrv.save(project);
         Sprint activeSprint = sprintSrv.findByProjectIdAndActiveTrue(project.getId());
-        if (activeSprint != null && !project.getTimeTracked().equals(timeTracked)) {
-            MessageHelper.addWarningAttribute(ra,
-                    msg.getMessage("project.sprintActive", null, Utils.getCurrentLocale()));
-            return "redirect:" + request.getHeader(REFERER);
-        } else {
-            project.setTimeTracked(timeTracked);
-        }
         return "redirect:" + request.getHeader(REFERER);
     }
 

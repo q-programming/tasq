@@ -160,7 +160,7 @@
                 <form:input path="estimate" class="form-control" style="width:150px"/>
                 <form:errors path="estimate" element="p" class="text-danger"/>
                 <span class="help-block"><s:message code="task.estimate.help"/><br>
-					<s:message code="task.estimate.help.pattern"/> </span>
+					<s:message code="task.estimate.help.pattern" htmlEscape="false"/> </span>
             </div>
         </div>
         <!-- <label class="checkbox" style="display: inherit; font-weight: normal"> -->

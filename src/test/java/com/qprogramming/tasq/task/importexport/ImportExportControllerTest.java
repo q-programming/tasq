@@ -152,7 +152,7 @@ public class ImportExportControllerTest {
             mockMultipartFile = new MockMultipartFile("content", fileURL.getFile(), "text/plain",
                     getClass().getResourceAsStream("sampleImport.xls"));
             importExportCtrl.importTasks(mockMultipartFile, PROJECT_ID, modelMock);
-            verify(taskSrvMock, times(1)).save(any(Task.class));
+            verify(taskSrvMock, times(2)).save(any(Task.class));
             verify(taskSrvMock, times(3)).createSubTask(any(Project.class), any(Task.class), any(Task.class));
         } catch (IOException e) {
             fail(e.getMessage());
@@ -168,7 +168,7 @@ public class ImportExportControllerTest {
             mockMultipartFile = new MockMultipartFile("content", fileURL.getFile(), "text/plain",
                     getClass().getResourceAsStream("sampleImport.xml"));
             importExportCtrl.importTasks(mockMultipartFile, PROJECT_ID, modelMock);
-            verify(taskSrvMock, times(2)).save(any(Task.class));
+            verify(taskSrvMock, times(3)).save(any(Task.class));
             verify(taskSrvMock, times(3)).createSubTask(any(Project.class), any(Task.class), any(Task.class));
         } catch (IOException e) {
             fail(e.getMessage());

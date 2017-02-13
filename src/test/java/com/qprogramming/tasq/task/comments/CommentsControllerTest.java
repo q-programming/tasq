@@ -80,16 +80,6 @@ public class CommentsControllerTest {
     }
 
     @Test
-    public void taskCommentNotAllowedTest() {
-        Task task = createTask(TASK_NAME, 1, createProject());
-        task.setState(TaskState.CLOSED);
-        when(taskSrvMock.findById(TEST_1)).thenReturn(task);
-        commentsController.addComment(TEST_1, "Comment", requestMock, raMock);
-        verify(raMock, times(1)).addFlashAttribute(anyString(),
-                new Message(anyString(), Message.Type.WARNING, new Object[]{}));
-    }
-
-    @Test
     public void taskCommentMessageNotValidTest() {
         Task task = createTask(TASK_NAME, 1, createProject());
         when(taskSrvMock.findById(TEST_1)).thenReturn(task);
@@ -116,17 +106,6 @@ public class CommentsControllerTest {
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.SUCCESS, new Object[]{}));
         verify(taskSrvMock, times(1)).save(task);
-    }
-
-    @Test
-    public void taskCommentDeleteNotAllowedTest() {
-        Task task = createTask(TASK_NAME, 1, createProject());
-        task.setState(TaskState.CLOSED);
-        task.setComments(new HashSet<>());
-        when(taskSrvMock.findById(TEST_1)).thenReturn(task);
-        commentsController.deleteComment(TEST_1, 1L, requestMock, raMock);
-        verify(raMock, times(1)).addFlashAttribute(anyString(),
-                new Message(anyString(), Message.Type.DANGER, new Object[]{}));
     }
 
     @Test
@@ -174,16 +153,6 @@ public class CommentsControllerTest {
         verify(commRepoMock, times(1)).save(comment);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.SUCCESS, new Object[]{}));
-    }
-
-    @Test
-    public void taskCommentEditNotAllowedTest() {
-        Task task = createTask(TASK_NAME, 1, createProject());
-        task.setState(TaskState.CLOSED);
-        when(taskSrvMock.findById(TEST_1)).thenReturn(task);
-        commentsController.editComment(TEST_1, 1L, "comment", requestMock, raMock);
-        verify(raMock, times(1)).addFlashAttribute(anyString(),
-                new Message(anyString(), Message.Type.WARNING, new Object[]{}));
     }
 
     @Test

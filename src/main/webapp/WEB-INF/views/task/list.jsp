@@ -199,14 +199,14 @@
     <table class="table table-hover table-condensed">
         <thead class="theme">
         <tr>
-            <th class="export_cell export-hidden" style="width: 30px"><input
+            <th class="export_cell export-hidden" style="width: 2%"><input
                     id="select_all" type="checkbox" class="a-tooltip"
                     title="<s:message code="task.export.clickAll"/>"></th>
-            <th style="width: 60px;text-align: center;">
+            <th style="width: 5%;text-align: center;">
                 <span class="dropdown a-tooltip clickable" title="<s:message code="task.type" />">
                     <a class="filter dropdown-toggle theme" type="button" id="dropdownMenuType"
-                       data-toggle="dropdown">
-                        <s:message code="task.type"/> <span class="caret theme hidden-xs hidden-sm"></span></a>
+                       data-toggle="dropdown"><span class="hidden-xs hidden-sm"><s:message code="task.type"/></span>
+                         <span class="caret theme"></span></a>
                         <ul class="dropdown-menu">
                             <%
                                 pageContext.setAttribute("types", TaskType.getTypes(false));
@@ -218,9 +218,9 @@
                         </ul>
                 </span>
             </th>
-            <th style="width: 30px;"><span class="dropdown a-tooltip"
-                                           title="<s:message code="task.priority" />"
-                                           style="padding-top: 5px; cursor: pointer;"> <a
+            <th style="width: 5%;"><span class="dropdown a-tooltip"
+                                         title="<s:message code="task.priority" />"
+                                         style="padding-top: 5px; cursor: pointer;"> <a
                     class="dropdown-toggle theme" type="button" id="dropdownMenu2"
                     data-toggle="dropdown" style="color: black"> <span
                     class="caret theme"></span></a>
@@ -235,13 +235,14 @@
                             </c:forEach>
 						</ul>
 				</span></th>
-            <th style="width: 500px"><s:message code="task.name"/></th>
-            <th class="hidden-xs hidden-sm"><s:message code="task.progress"/></th>
-            <th>
+            <th><s:message code="task.name"/></th>
+            <th class="hidden-xs hidden-sm text-center" style="width: 110px"><s:message code="task.progress"/></th>
+            <th class="text-center">
                 <div class="dropdown" style="padding-top: 5px; cursor: pointer;">
                     <a class="filter dropdown-toggle theme" type="button" id="dropdownMenu1"
-                       data-toggle="dropdown"><s:message code="task.state"/><span
-                            class="caret theme hidden-xs hidden-sm"></span></a>
+                       data-toggle="dropdown">
+                        <span class="hidden-xs hidden-sm"><s:message code="task.state"/></span>
+                        <span class="caret theme"></span></a>
                     <%
                         pageContext.setAttribute("states", TaskState.values());
                     %>
@@ -260,11 +261,13 @@
                     </ul>
                 </div>
             </th>
-            <th style="width: 200px">
+            <th style="width: 15%">
                 <div class="dropdown" style="padding-top: 5px; cursor: pointer;">
                     <a class="filter dropdown-toggle theme" type="button" id="dropdownMenuAssignee"
-                       data-toggle="dropdown"><s:message code="task.assignee"/><span
-                            class="caret theme hidden-xs hidden-sm"></span></a>
+                       data-toggle="dropdown">
+                        <span class="hidden-xs hidden-sm"><s:message code="task.assignee"/></span>
+                        <span class="caret theme"></span>
+                    </a>
                     <ul class="dropdown-menu" style="padding: 5px;width: 200px;z-index: 1;">
                         <li>
                             <input type="text" class="form-control input-sm"
@@ -287,13 +290,11 @@
             <c:forEach items="${tasks}" var="task">
                 <c:if test="${task.id eq user.activeTask}">
                     <tr class="bg-color theme">
-                    <c:set var="blinker" value="blink"/>
                     <c:set var="link">
                         class="theme"
                     </c:set>
                 </c:if>
                 <c:if test="${task.id ne user.activeTask}">
-                    <c:set var="blinker" value=""/>
                     <c:set var="tr_bg" value=""/>
                     <c:set var="link" value=""/>
                     <c:if test="${task.state eq 'CLOSED'}">
@@ -318,10 +319,6 @@
                                </c:if>">[${task.id}]
                             ${task.name}</a>
                 </td>
-                <%-- 			<c:if test="${not task.estimated}"> --%>
-                <%-- 				<td>${task.loggedWork}</td> --%>
-                <%-- 			</c:if> --%>
-                <%-- 			<c:if test="${task.estimated}"> --%>
                 <td class="hidden-xs hidden-sm">
                     <div class="progress" style="width: 100px;">
                         <c:set var="logged_class"/>
@@ -346,10 +343,10 @@
                              aria-valuemax="100" style="width:${percentage}%;" title="${percentage}%"></div>
                     </div>
                 </td>
-                <%-- 			</c:if> --%>
-                <td class="${blinker}"><t:state state="${task.state}"/></td>
+                <td class="hidden-xs"><t:state state="${task.state}" list="false"/></td>
+                <td class="visible-xs text-center"><t:state state="${task.state}" list="true"/></td>
                 <td><c:if test="${empty task.assignee }">
-                    <i><s:message code="task.unassigned"/></i>
+                    <i class=" hidden-xs"><s:message code="task.unassigned"/></i>
                     <c:if test="${user.getIsUser()}">
                         <span class="btn btn-default btn-xxs a-tooltip assignToTask pull-right"
                               title="<s:message code="task.assign"/>" data-toggle="modal" data-target="#assign_modal"
@@ -360,10 +357,17 @@
                         </span>
                     </c:if>
                 </c:if> <c:if test="${not empty task.assignee}">
-                    <img data-src="holder.js/20x20"
-                         class="avatar xsmall"
-                         src="<c:url value="/../avatar/${task.assignee.id}.png"/>"/>
-                    &nbsp;<a ${link} href="<c:url value="/user/${task.assignee.username}"/>">${task.assignee}</a>
+                    <a ${link} href="<c:url value="/user/${task.assignee.username}"/>" class="visible-xs pull-right">
+                        <img data-src="holder.js/30x30"
+                             class="avatar small"
+                             src="<c:url value="/../avatar/${task.assignee.id}.png"/>"/>&nbsp;
+                    </a>
+                    <a ${link} href="<c:url value="/user/${task.assignee.username}"/>" class="hidden-xs">
+                        <img data-src="holder.js/20x20"
+                             class="avatar xsmall"
+                             src="<c:url value="/../avatar/${task.assignee.id}.png"/>"/>&nbsp;
+                        <span class="hidden-xs">${task.assignee}</span>
+                    </a>
                 </c:if></td>
                 </tr>
             </c:forEach>
@@ -386,8 +390,7 @@
 <script>
     $(document).ready(function ($) {
         taskURL = '<c:url value="/task/"/>';
-        apiurl = '<c:url value="/task/getSubTasks"/>';
-        small_loading_indicator = '<div id="small_loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br></div>';
+        subTaskurl = '<c:url value="/task/getSubTasks"/>';
 
         $("#project").change(function () {
             var query = "${state_url}${query_url}${priority_url}${assignee_url}${type_url}";

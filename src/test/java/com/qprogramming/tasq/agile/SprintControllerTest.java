@@ -453,31 +453,6 @@ public class SprintControllerTest {
     }
 
     @Test
-    public void showBurdownChartTimedTest() {
-        project.setTimeTracked(true);
-        Sprint sprint = createSingleSprint();
-        sprint.setStart_date(new LocalDate().minusDays(5).toDate());
-        sprint.setEnd_date(new LocalDate().plusDays(5).toDate());
-        sprint.setTotalEstimate(new Period(10, 0, 0, 0));
-        Task task = createTask(PROJECT_ID, 1, project);
-        task.setEstimate(new Period(10, 0, 0, 0));
-        WorkLog wrk = new WorkLog();
-        wrk.setActivity(new Period(1, 0, 0, 0));
-        wrk.setTask(task);
-        wrk.setTime(new LocalDate().minusDays(2).toDate());
-        wrk.setTimeLogged(wrk.getRawTime());
-        wrk.setAccount(testAccount);
-        List<WorkLog> workLogs = new LinkedList<WorkLog>();
-        workLogs.add(wrk);
-        when(projSrvMock.findByProjectId(PROJECT_ID)).thenReturn(project);
-        when(sprintRepoMock.findByProjectIdAndSprintNo(project.getId(), 1L)).thenReturn(sprint);
-        when(msgMock.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("TEST");
-        when(wrkLogSrvMock.getAllSprintEvents(sprint)).thenReturn(workLogs);
-        SprintData result = sprintCtrl.showBurndownChart(PROJECT_ID, 1L);
-        Assert.assertNull(result.getMessage());
-    }
-
-    @Test
     public void showBurdownChartTest() {
         Sprint sprint = createSingleSprint();
         sprint.setStart_date(new LocalDate().minusDays(5).toDate());

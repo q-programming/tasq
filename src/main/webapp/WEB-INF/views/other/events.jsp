@@ -8,7 +8,7 @@
 %>
 <script>
     taskURL = '<c:url value="/task/"/>';
-    apiurl = '<c:url value="/task/getSubTasks"/>';
+    subTaskurl = '<c:url value="/task/getSubTasks"/>';
     small_loading_indicator = '<div id="small_loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br></div>';
     loading_indicator = '<div id="loading" class="centerPadded"><i class="fa fa-cog fa-spin"></i> <s:message code="main.loading"/><br><img src="<c:url value="/resources/img/loading.gif"/>"></img></div>';
 
@@ -43,12 +43,11 @@
                     var event = getEventTypeMsg(content.type);
                     var task = '';
                     var row = '<tr class="projEvent"><td>' + avatar + '</td><td>';
-                    if (content.task != null) {
+                    if (content.task !== null) {
                         task = '<a href="' + taskURL + content.task.id + '">[' + content.task.id + '] ' + content.task.name + '</a>';
                     }
                     var message = '';
-                    if (content.message != null && content.message != '') {
-
+                    if (content.message !== null && content.message !== '') {
                         message = '<div class="quote">' + content.message + '</div>';
                     }
                     row += timeLogged + account + event + task + message;
@@ -81,15 +80,14 @@
 
     function getEventTypeMsg(type) {
         switch (type) {
-                <c:forEach items="${types}" var="enum_type">
+            <c:forEach items="${types}" var="enum_type">
             case "${enum_type}":
                 return '<s:message code="${enum_type.code}"/> ';
-                </c:forEach>
+            </c:forEach>
             default:
                 return 'not yet added ';
         }
     }
-
 
 
 </script>

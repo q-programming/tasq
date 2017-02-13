@@ -124,7 +124,7 @@
         <%-- Estimate --%>
         <div id="estimate_div">
             <div class="form-group ${estimate_class}">
-                <c:if test="${task.loggedWork ne '0m' && task.subtasks lt 1}">
+                <c:if test="${task.loggedWork ne '0m'}">
                     <div>
                         <div class="mod-header">
                             <h5 class="mod-header-title">
@@ -136,7 +136,7 @@
                         <form:errors path="remaining" element="p" class="text-danger"/>
                         <span class="help-block"><s:message
                                 code="task.edit.remaining.help"/><br> <s:message
-                                code="task.estimate.help.pattern"/> </span>
+                                code="task.estimate.help.pattern" htmlEscape="false"/> </span>
                     </div>
                 </c:if>
                 <c:if test="${task.loggedWork eq '0m' }">
@@ -150,7 +150,7 @@
                     <form:errors path="estimate" element="p" class="text-danger"/>
                     <span class="help-block"><s:message
                             code="task.estimate.help"/><br> <s:message
-                            code="task.estimate.help.pattern"/> </span>
+                            code="task.estimate.help.pattern" htmlEscape="false"/> </span>
                 </c:if>
             </div>
             <c:if test="${not task.subtask}">

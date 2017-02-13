@@ -361,7 +361,7 @@ public class ProjectControllerTest {
         boolean catched = false;
         testAccount.setRole(Roles.ROLE_VIEWER);
         try {
-            projectCtr.updateProperties(PROJECT_ID, true, TaskPriority.BLOCKER, TaskType.BUG, 1L, raMock, requestMock);
+            projectCtr.updateProperties(PROJECT_ID, TaskPriority.BLOCKER, TaskType.BUG, 1L, raMock, requestMock);
         } catch (TasqAuthException e) {
             catched = true;
         }
@@ -371,21 +371,9 @@ public class ProjectControllerTest {
     @Test
     public void updatePropertiesNoProjectTest() {
         when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(null);
-        projectCtr.updateProperties(PROJECT_ID, true, TaskPriority.BLOCKER, TaskType.BUG, 1L, raMock, requestMock);
+        projectCtr.updateProperties(PROJECT_ID, TaskPriority.BLOCKER, TaskType.BUG, 1L, raMock, requestMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
-    }
-
-    @Test
-    public void updatePropertiesActiveSprintTest() {
-        Project project = createForm(PROJECT_NAME, PROJECT_ID).createProject();
-        project.setId(1L);
-        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
-        when(sprintSrvMock.findByProjectIdAndActiveTrue(1L)).thenReturn(new Sprint());
-        when(accountServiceMock.findById(1L)).thenReturn(testAccount);
-        projectCtr.updateProperties(PROJECT_ID, true, TaskPriority.BLOCKER, TaskType.BUG, 1L, raMock, requestMock);
-        verify(raMock, times(1)).addFlashAttribute(anyString(),
-                new Message(anyString(), Message.Type.WARNING, new Object[]{}));
     }
 
     @Test
@@ -395,7 +383,7 @@ public class ProjectControllerTest {
         when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
         when(sprintSrvMock.findByProjectIdAndActiveTrue(1L)).thenReturn(null);
         when(accountServiceMock.findById(1L)).thenReturn(testAccount);
-        projectCtr.updateProperties(PROJECT_ID, true, TaskPriority.BLOCKER, TaskType.BUG, 1L, raMock, requestMock);
+        projectCtr.updateProperties(PROJECT_ID, TaskPriority.BLOCKER, TaskType.BUG, 1L, raMock, requestMock);
         verify(projSrv, times(1)).save(project);
     }
 

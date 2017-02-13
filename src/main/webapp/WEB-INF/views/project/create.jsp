@@ -15,10 +15,17 @@
 <c:set var="projectDesc_text">
     <s:message code="project.description"/>
 </c:set>
-<div class="white-frame" style="width: 700px; overflow: auto;">
-    <h3>
-        <s:message code="project.create"/>
-    </h3>
+<div class="white-frame col-lg-10 col-md-10" style="display: table">
+    <div style="display:table-caption;margin-left: 10px;">
+        <ul class="nav nav-tabs" style="border-bottom:0">
+            <li class="active"><a style="color: black" href="#">
+                <i class="fa fa-plus"></i>&nbsp;<s:message code="project.create"/>
+            </li>
+        </ul>
+    </div>
+    <%--<h3>--%>
+        <%--<s:message code="project.create"/>--%>
+    <%--</h3>--%>
     <form:form modelAttribute="newProjectForm" id="newProjectForm"
                method="post">
         <%-- Check all potential errors --%>
@@ -40,36 +47,37 @@
         <c:if test="${not empty desc_error}">
             <c:set var="desc_class" value="trumbowyg-error"/>
         </c:if>
-        <div style="display:table-row">
-            <div class="form-group pull-left ${id_class}" style="width: 100px">
+        <div class="row">
+            <div class="form-group pull-left ${id_class} col-md-3">
+                <form:label path="project_id">${projectID_text}</form:label>
                 <form:input path="project_id" class="form-control"
-                            placeholder="${projectID_text}"/>
+                            placeholder="${projectID_text}" maxlength="5"/>
                 <form:errors path="project_id" element="p" class="text-danger"/>
             </div>
-            <div class="form-group pull-left ${name_class }"
-                 style="width: 500px; padding-left: 20px;">
+            <div class="form-group pull-left ${name_class } col-md-9 paddingleft_20">
+                <label for="name"><s:message code="project.name"/></label>
                 <form:input path="name" class="form-control"
                             placeholder="${projectName_text}"/>
                 <form:errors path="name" element="p" class="text-danger"/>
             </div>
         </div>
-        <div style="display:table-row">
-            <div class="form-group">
+        <div class="row">
+            <div class="form-group col-md-12">
                 <span class="help-block"><s:message code="project.create.name.hint" htmlEscape="false"/></span>
             </div>
         </div>
-        <div class="form-group"
-             style="width: 300px;">
-            <label><s:message code="project.agile.type"/></label>
-            <form:select path="agile" class="form-control">
-                <option value="SCRUM" selected>SCRUM</option>
-                <option value="KANBAN">Kanban</option>
-            </form:select>
+        <div class="row">
+            <div class="form-group col-sm-3">
+                <label><s:message code="project.agile.type"/></label>
+                <form:select path="agile" class="form-control">
+                    <option value="SCRUM" selected>SCRUM</option>
+                    <option value="KANBAN">Kanban</option>
+                </form:select>
+            </div>
         </div>
         <div class="form-group ${desc_class}">
             <label>${projectDesc_text}</label>
-            <form:textarea path="description" class="form-control" rows="5"
-                           placeholder="${projectDesc_text}"/>
+            <form:textarea path="description" class="form-control" rows="5"/>
             <form:errors path="description" element="p" class="text-danger"/>
         </div>
         <div class="form-group" style="margin: 0 auto; text-align: center">

@@ -122,7 +122,7 @@
 
 
         function renderReleaseData(releaseNo) {
-            $.jqplot.postDrawHooks.push(function() {
+            $.jqplot.postDrawHooks.push(function () {
                 $(".jqplot-overlayCanvas-canvas").css('z-index', '0'); //send overlay canvas to back
                 $(".jqplot-series-canvas").css('z-index', '1'); //send series canvas to front
                 $(".jqplot-highlighter-tooltip").css('z-index', '2'); //make sure the tooltip is over the series
@@ -195,13 +195,15 @@
                     var event = "<td>" + getEventTypeMsg(val.type) + "</td>";
                     var change;
                     var timeLogged = "<td>";
-                    timeLogged += val.message;
+                    if (val.message !== null && val.message !== '') {
+                        timeLogged += val.message;
+                    }
                     timeLogged += "</td>";
                     var account = val.account.name + " " + val.account.surname;
                     var accountTd = '<td rel="popover" data-container="body" data-placement="top" data-account="'
-                            + account + '" data-account_email="' + val.account.email + '" data-account_img="' + avatarURL + val.account.id + '.png">'
-                            + account
-                            + '</td>';
+                        + account + '" data-account_email="' + val.account.email + '" data-account_img="' + avatarURL + val.account.id + '.png">'
+                        + account
+                        + '</td>';
                     var row = task + date + timeLogged + event + accountTd;
                     $("#eventsTable").append("<tr>" + row + "</tr>");
                 });

@@ -93,7 +93,7 @@
     });
 
     function fillLogWorkValues(taskID) {
-        var title = '<i class="fa fa-calendar"></i> <s:message code="task.logWork" /> ' + taskID;
+        var title = '<i class="fa fa-calendar-plus-o"></i> <s:message code="task.logWork" /> ' + taskID;
         $("#myModalLabel").html(title);
         $("#modal_taskID").val(taskID);
     }
