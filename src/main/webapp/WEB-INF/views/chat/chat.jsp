@@ -60,7 +60,7 @@
     const MESSAGE = 'MESSAGE';
 
     function connect() {
-        var socket = new SockJS('/gs-guide-websocket');
+        var socket = new SockJS('<c:url value="/gs-guide-websocket/"/>');
         stompClient = Stomp.over(socket);
         stompClient.debug = null
         stompClient.connect({}, function (frame) {
@@ -145,8 +145,7 @@
         //add mobile online indicators
         $(".mobile-online-status[data-username='" + username + "']").remove();
         $(".chat-message-username[data-username='" + username + "']").each(function () {
-            var online ='<i class="fa fa-circle mobile-online-status" aria-hidden="true" data-username="' + username + '"></i>'
-//            var online = '<span class="mobile-online-status visible-xs visible-sm" data-username="' + username + '">&nbsp;</span>';
+            var online = '<i class="fa fa-circle mobile-online-status visible-xs visible-sm" aria-hidden="true" data-username="' + username + '"></i>'
             $(this).append(online)
         });
         $(".a-tooltip").tooltip();

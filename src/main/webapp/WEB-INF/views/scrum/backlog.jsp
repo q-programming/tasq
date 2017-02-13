@@ -143,21 +143,6 @@
                                     <c:if test="${task.state eq 'CLOSED' }">
                                         style="text-decoration: line-through;"
                                     </c:if>>
-                                <div style="display: table-cell; width: 100%;">
-                                    <i class="fa fa-caret-right toggler theme show-more-details a-tooltip"
-                                       data-tab="sprint-moredetails-${task.id}" data-quick="true"
-                                       data-task="${task.id}" title="<s:message code="agile.card.showmore"/>"></i>
-                                    <span style="margin-right: -5px">
-                                        <t:type type="${task.type}" list="true"/>
-                                    </span>
-                                    <a href="<c:url value="/task/${task.id}"/>"
-                                       style="color: inherit;">[${task.id}] ${task.name}</a>
-                                    <form id="sprint_remove_${task.id}"
-                                          action="<c:url value="/${project.projectId}/scrum/sprintRemove"/>"
-                                          method="post">
-                                        <input type="hidden" name="taskID" value="${task.id}">
-                                    </form>
-                                </div>
                                 <div class="pointsdiv pull-right">
                                     <c:if test="${!sprint.active}">
                                         <%--STORY POINTS--%>
@@ -216,6 +201,21 @@
                                     </span>
                                     </c:if>
                                 </div>
+                                <div style="display: table-cell; width: 100%;">
+                                    <i class="fa fa-caret-right toggler theme show-more-details a-tooltip"
+                                       data-tab="sprint-moredetails-${task.id}" data-quick="true"
+                                       data-task="${task.id}" title="<s:message code="agile.card.showmore"/>"></i>
+                                    <span style="margin-right: -5px">
+                                        <t:type type="${task.type}" list="true"/>
+                                    </span>
+                                    <a href="<c:url value="/task/${task.id}"/>"
+                                       style="color: inherit;">[${task.id}] ${task.name}</a>
+                                    <form id="sprint_remove_${task.id}"
+                                          action="<c:url value="/${project.projectId}/scrum/sprintRemove"/>"
+                                          method="post">
+                                        <input type="hidden" name="taskID" value="${task.id}">
+                                    </form>
+                                </div>
                                 <div class="more-details-div" id="sprint-moredetails-${task.id}" style="display: none;">
                                     <div class="mod-header-bg">
                                     <span class="mod-header-title theme">
@@ -267,7 +267,8 @@
                 <s:message code="task.tasks"/>
                 <span class="btn btn-default pull-right" id="save_order" style="display:none;width: 120px"><i
                         class="fa fa-floppy-o"></i>&nbsp;<s:message code="main.save.order"/> </span>
-                <span class="a-tooltip btn btn-default pull-right toggler-colapse" id="colapse_all" title="<s:message code="main.collapse.all"/>"
+                <span class="a-tooltip btn btn-default pull-right toggler-colapse" id="colapse_all"
+                      title="<s:message code="main.collapse.all"/>"
                       style="display: none"><i
                         class="fa fa-minus-square-o"></i></span>
             </h4>
@@ -275,25 +276,6 @@
                 <c:forEach items="${tasks}" var="task">
                     <c:if test="${not task.inSprint && task.state ne 'CLOSED'}">
                         <div class="agile-card" data-id="${task.id}" id="${task.id}" data-tags="${task.getTagsList()}">
-                            <div style="display: table-cell; width: 100%;">
-                                <i class="fa fa-caret-right toggler theme show-more-details a-tooltip"
-                                   data-tab="free-moredetails-${task.id}" data-quick="true"
-                                   data-task="${task.id}" title="<s:message code="agile.card.showmore"/>"></i>
-                                <span style="margin-right: -5px">
-                                    <t:type type="${task.type}" list="true"/>
-                                </span>
-                                <span style="margin-right: -5px">
-                                    <t:priority priority="${task.priority}" list="true"/>
-                                </span>
-                                <a href="<c:url value="/task/${task.id}"/>"
-                                   style="color: inherit;">[${task.id}] ${task.name}</a>
-                                <form id="sprint_assign_${task.id}"
-                                      action=""
-                                      method="post">
-                                    <input type="hidden" name="taskID" value="${task.id}"> <input
-                                        type="hidden" id="sprintID_${task.id}" name="sprintID">
-                                </form>
-                            </div>
                             <div class="pointsdiv pull-right">
                                     <%--STORY POINTS--%>
                                 <c:if test="${task.estimated}">
@@ -339,6 +321,25 @@
                                         <i class="fa fa-calendar"></i>
                                     </span>
                                 </c:if>
+                            </div>
+                            <div style="display: table-cell; width: 100%;">
+                                <i class="fa fa-caret-right toggler theme show-more-details a-tooltip"
+                                   data-tab="free-moredetails-${task.id}" data-quick="true"
+                                   data-task="${task.id}" title="<s:message code="agile.card.showmore"/>"></i>
+                                <span style="margin-right: -5px">
+                                    <t:type type="${task.type}" list="true"/>
+                                </span>
+                                <span style="margin-right: -5px">
+                                    <t:priority priority="${task.priority}" list="true"/>
+                                </span>
+                                <a href="<c:url value="/task/${task.id}"/>"
+                                   style="color: inherit;">[${task.id}] ${task.name}</a>
+                                <form id="sprint_assign_${task.id}"
+                                      action=""
+                                      method="post">
+                                    <input type="hidden" name="taskID" value="${task.id}"> <input
+                                        type="hidden" id="sprintID_${task.id}" name="sprintID">
+                                </form>
                             </div>
                             <div class="more-details-div" id="free-moredetails-${task.id}" style="display: none;">
                                 <div class="mod-header-bg">
