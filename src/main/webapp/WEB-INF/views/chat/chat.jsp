@@ -60,12 +60,12 @@
     const MESSAGE = 'MESSAGE';
 
     function connect() {
-        var socket = new SockJS('<c:url value="/gs-guide-websocket/"/>');
+        var socket = new SockJS('<c:url value="/chat-websocket/"/>');
         stompClient = Stomp.over(socket);
         stompClient.debug = null
         stompClient.connect({}, function (frame) {
-            //console.log('Connected: ' + frame);
-            stompClient.subscribe('<c:url value="/chat/${chatProject.projectId}/messages"/>', function (data) {
+            console.log('Connected: ' + frame);
+            stompClient.subscribe('<c:url value="/chat-messages2/${chatProject.projectId}"/>', function (data) {
                 var response = JSON.parse(data.body);
                 if (response.event === ERROR) {
                     $("#messages-tab").append("<div style='font-style: italic;'>" + response.message + "</div>");
@@ -92,9 +92,10 @@
     }
 
     function sendMessage(message, username, event) {
-        stompClient.send("<c:url value="/chat/${chatProject.projectId}/send"/>", {}, JSON.stringify({
+        stompClient.send("<c:url value="/chat/message/${chatProject.projectId}"/>", {}, JSON.stringify({
             'message': message,
             'username': username,
+            'project': project,
             'event': event
         }));
     }
