@@ -46,9 +46,9 @@ public class ChatController {
         this.msg = msg;
     }
 
-    @MessageMapping("/{projectId}/send")
-    @SendTo("/chat/{projectId}/messages")
-    public ChatResponse sendMessage(@DestinationVariable String projectId, MessageSent message) throws Exception {
+    @MessageMapping("/message/{projectId}")
+    @SendTo("/chat-messages/{projectId}")
+    public ChatResponse sendMessage(@DestinationVariable String projectId, MessageSent message) throws InterruptedException {
         if (ChatEvent.MESSAGE.equals(message.getEvent())) {
             Thread.sleep(500); // simulated delay
             if (StringUtils.isNotBlank(message.getUsername())) {
