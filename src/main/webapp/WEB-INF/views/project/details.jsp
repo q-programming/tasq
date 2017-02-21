@@ -76,10 +76,13 @@
                 <i class="fa fa-plus"></i>
             </a>
         </c:if>
-        <a class="btn btn-default a-tooltip pull-right" href="<c:url value="/${project.projectId}/chat"/>"
-           title="<s:message code="project.chat"/>" data-placement="bottom">
-            <i class="fa fa-comments" aria-hidden="true"></i>
-        </a>
+        <%--TODO fix app running under different than root context path--%>
+        <c:if test="${empty pageContext.request.contextPath}">
+            <a class="btn btn-default a-tooltip pull-right" href="<c:url value="/${project.projectId}/chat"/>"
+               title="<s:message code="project.chat"/>" data-placement="bottom">
+                <i class="fa fa-comments" aria-hidden="true"></i>
+            </a>
+        </c:if>
     </div>
     <h3>[${project.projectId}] ${project.name}</h3>
     ${project.description}
