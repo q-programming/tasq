@@ -166,18 +166,12 @@
                         showWait(true);
                         $("#save_order").hide();
                         $.post('<c:url value="/task/changeState"/>', {id: taskID, state: state}, function (result) {
-                            if (result.code == 'ERROR') {
-                                reloadmsg = ' <s:message code="main.pageReload" arguments="5"/>';
-                                showError(result.message + reloadmsg);
-                                window.setTimeout('location.reload()', 5000);
-                            }
-                            else {
+                            if (result.code === 'ERROR' || oldState === 'CLOSED') {
+                                var locationUrl = '${requestScope['javax.servlet.forward.servlet_path']}';
+                                window.location = '<c:url value="/redirect"/>' + "?page=" + locationUrl + "&type=" + result.code + "&message=" + result.message;
+                            } else {
                                 $("#save_order").hide();
                                 showSuccess(result.message);
-                                if (oldState == 'CLOSED') {
-                                    $('#' + taskID + ' a[href]').toggleClass('closed');
-                                    window.setTimeout('location.reload()', 5000);
-                                }
                             }
                             showWait(false);
                         });
