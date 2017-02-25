@@ -60,7 +60,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.*;
-import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -147,7 +146,7 @@ public class TaskController {
         }
         checkEstimatesValues(taskForm, errors);
         int storyPoints = getStoryPoints(taskForm);
-        if (!StringUtils.isNumeric(taskForm.getStory_points()) || !Utils.validStoryPoint(storyPoints)) {
+        if (!taskForm.getNotEstimated() && !StringUtils.isNumeric(taskForm.getStory_points()) || !Utils.validStoryPoint(storyPoints)) {
             errors.rejectValue(STORY_POINTS, "task.storyPoints.invalid");
         }
         if (errors.hasErrors()) {
@@ -285,7 +284,7 @@ public class TaskController {
             errors.rejectValue(REMAINING, "error.estimateFormat");
         }
         int storyPoints = getStoryPoints(taskForm);
-        if (!task.isSubtask() && !StringUtils.isNumeric(taskForm.getStory_points()) || !Utils.validStoryPoint(storyPoints)) {
+        if (!taskForm.getNotEstimated() && !task.isSubtask() && !StringUtils.isNumeric(taskForm.getStory_points()) || !Utils.validStoryPoint(storyPoints)) {
             errors.rejectValue(STORY_POINTS, "task.storyPoints.invalid");
         }
         if (errors.hasErrors()) {
