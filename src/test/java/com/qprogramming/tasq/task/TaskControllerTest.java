@@ -545,6 +545,7 @@ public class TaskControllerTest {
         Task task = createTask(TASK_NAME, 1, project);
         testAccount.setRole(Roles.ROLE_POWERUSER);
         TaskForm form = new TaskForm(task);
+        form.setNotEstimated(false);
         when(taskRepoMock.findById(TEST_1)).thenReturn(task);
         when(projSrvMock.canEdit(project)).thenReturn(true);
         //Negative
