@@ -65,7 +65,7 @@
         stompClient.debug = null
         stompClient.connect({}, function (frame) {
             console.log('Connected: ' + frame);
-            stompClient.subscribe('<c:url value="/chat-messages2/${chatProject.projectId}"/>', function (data) {
+            stompClient.subscribe('/chat-messages/${chatProject.projectId}', function (data) {
                 var response = JSON.parse(data.body);
                 if (response.event === ERROR) {
                     $("#messages-tab").append("<div style='font-style: italic;'>" + response.message + "</div>");
