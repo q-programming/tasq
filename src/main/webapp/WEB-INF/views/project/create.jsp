@@ -18,13 +18,15 @@
 <div class="white-frame col-lg-10 col-md-10" style="display: table">
     <div style="display:table-caption;margin-left: 10px;">
         <ul class="nav nav-tabs" style="border-bottom:0">
-            <li class="active"><a style="color: black" href="#">
-                <i class="fa fa-plus"></i>&nbsp;<s:message code="project.create"/>
+            <li class="active">
+                <a style="color: black" href="#">
+                    <i class="fa fa-plus"></i>&nbsp;<s:message code="project.create"/>
+                </a>
             </li>
         </ul>
     </div>
     <%--<h3>--%>
-        <%--<s:message code="project.create"/>--%>
+    <%--<s:message code="project.create"/>--%>
     <%--</h3>--%>
     <form:form modelAttribute="newProjectForm" id="newProjectForm"
                method="post">
