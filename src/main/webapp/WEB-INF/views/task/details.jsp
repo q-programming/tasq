@@ -126,6 +126,14 @@
                             <s:message code="task.linked.create"/>
                         </a>
                     </li>
+                    <c:if test="${can_edit && not task.subtask}">
+                        <li>
+                            <a href="<c:url value="/task/clone"/>?id=${task.id}">
+                                <i class="fa fa-clone" aria-hidden="true"></i>
+                                <s:message code="task.clone"/>
+                            </a>
+                        </li>
+                    </c:if>
                 </ul>
             </c:if>
             <c:if test="${task.state eq'CLOSED' && project_participant}">

@@ -3,7 +3,6 @@ package com.qprogramming.tasq.task;
 import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.LastVisitedService;
-import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.agile.Release;
 import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.manage.AppService;
@@ -21,6 +20,7 @@ import org.apache.commons.io.FileUtils;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
@@ -398,6 +398,15 @@ public class TaskService {
         List<Task> subtasks = findSubtasks(task);
         return addSubtaskTimers(task, subtasks);
     }
+
+    public Task cloneTask(Task task, String taskID) {
+        Task cloned = new Task();
+        BeanUtils.copyProperties(task, cloned);
+        cloned.setId(taskID);
+        cloned.setName("Cloned " + task.getName());
+        return taskRepo.save(cloned);
+    }
+
 
     protected EntityManager getEntitymanager() {
         return entityManager;

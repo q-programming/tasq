@@ -1176,7 +1176,7 @@ public class TaskController {
             long taskCount = project.getLastTaskNo();
             taskCount++;
             String taskID = project.getProjectId() + "-" + taskCount;
-            Task task = cloneTask(subtask, taskID);
+            Task task = createCopyOfTask(subtask, taskID, false, true);
             task.setParent(null);
             task.setType(type);
             task.setTaskOrder(taskCount);
@@ -1205,17 +1205,6 @@ public class TaskController {
                 }
                 linkService.save(taskLink);
             }
-            // files
-            File oldDir = new File(taskSrv.getTaskDir(subtask));
-            if (oldDir.exists()) {
-                File newDir = new File(taskSrv.getTaskDir(task));
-                if (!newDir.mkdirs()) {
-                    LOG.error("Failed to create new dir {}", newDir.getAbsolutePath());
-                }
-                newDir.setWritable(true, false);
-                newDir.setReadable(true, false);
-                FileUtils.copyDirectory(oldDir, newDir);
-            }
             project.setLastTaskNo(taskCount);
             project.getTasks().add(task);
             projectSrv.save(project);
@@ -1238,23 +1227,95 @@ public class TaskController {
         }
     }
 
-    private Task cloneTask(Task subtask, String taskID) {
-        Task task = new Task();
-        BeanUtils.copyProperties(subtask, task);
-        task.setId(taskID);
-        task.setEstimate(subtask.getRawEstimate());
-        task.setLoggedWork(subtask.getRawLoggedWork());
-        task.setRemaining(subtask.getRawRemaining());
-        task.setDue_date(subtask.getRawDue_date());
-        task.setCreate_date(subtask.getRawCreate_date());
-        task.setLastUpdate(new Date());
-        Hibernate.initialize(subtask.getTags());
-        Set<Tag> tags = subtask.getTags();
-        task.setTags(tags);
-        Hibernate.initialize(subtask.getSprints());
-        Set<Sprint> sprints = subtask.getSprints();
-        task.setSprints(sprints);
-        return task;
+    private void copyFiles(Task taskFrom, Task taskTo) throws IOException {
+        File oldDir = new File(taskSrv.getTaskDir(taskFrom));
+        if (oldDir.exists()) {
+            File newDir = new File(taskSrv.getTaskDir(taskTo));
+            if (!newDir.mkdirs()) {
+                LOG.error("Failed to create new dir {}", newDir.getAbsolutePath());
+            }
+            newDir.setWritable(true, false);
+            newDir.setReadable(true, false);
+            FileUtils.copyDirectory(oldDir, newDir);
+        }
+    }
+
+    private Task createCopyOfTask(Task original, String taskID, boolean fresh, boolean copySprints) throws IOException {
+        Task taskCopy = new Task();
+        BeanUtils.copyProperties(original, taskCopy);
+        taskCopy.setId(taskID);
+        taskCopy.setEstimate(original.getRawEstimate());
+        if (!fresh) {
+            taskCopy.setLoggedWork(original.getRawLoggedWork());
+            taskCopy.setRemaining(original.getRawRemaining());
+            taskCopy.setCreate_date(original.getRawCreate_date());
+        } else {
+            taskCopy.setCreate_date(new Date());
+            taskCopy.setRemaining(original.getRawEstimate());
+        }
+        taskCopy.setDue_date(original.getRawDue_date());
+        taskCopy.setLastUpdate(new Date());
+        Hibernate.initialize(original.getTags());
+        Set<Tag> tags = original.getTags();
+        taskCopy.setTags(tags);
+        if (copySprints) {
+            Hibernate.initialize(original.getSprints());
+            Set<Sprint> sprints = original.getSprints();
+            taskCopy.setSprints(sprints);
+        }
+        copyFiles(taskCopy, taskCopy);
+        return taskCopy;
+    }
+
+    @Transactional
+    @RequestMapping(value = "task/clone", method = RequestMethod.GET)
+    public String cloneTask(@RequestParam("id") String id, RedirectAttributes ra, HttpServletRequest request) throws IOException {
+        Task originalTask = taskSrv.findById(id);
+        if (originalTask == null) {
+            MessageHelper.addErrorAttribute(ra, msg.getMessage("task.notexists", null, Utils.getCurrentLocale()));
+            return REDIRECT + "/tasks";
+        }
+        Project project = originalTask.getProject();
+        if (project != null) {
+            // check if can edit
+            if (!projectSrv.canEdit(project)) {
+                MessageHelper.addErrorAttribute(ra,
+                        msg.getMessage(ERROR_ACCES_RIGHTS, null, Utils.getCurrentLocale()));
+                return REDIRECT + request.getHeader(REFERER);
+            }
+            // build ID
+            long taskCount = project.getLastTaskNo();
+            taskCount++;
+            String taskID = project.getProjectId() + "-" + taskCount;
+            Task cloned = createCopyOfTask(originalTask, taskID, true, false);
+            cloned.setName(prependCloned(originalTask));
+            cloned.setSubtasks(0);
+            cloned.setState(TaskState.TO_DO);
+            project.getTasks().add(cloned);
+            project.setLastTaskNo(taskCount);
+            taskSrv.save(cloned);
+            //clone all subtasks
+            if (originalTask.getSubtasks() > 0) {
+                List<Task> subtasksList = taskSrv.findSubtasks(originalTask);
+                for (Task subTask : subtasksList) {
+                    Task clonedSubstask = createCopyOfTask(subTask, taskID, true, false);
+                    clonedSubstask.setName(prependCloned(subTask));
+                    taskSrv.createSubTask(project, cloned, clonedSubstask);
+                }
+            }
+            TaskLink link = new TaskLink(originalTask.getId(), taskID, TaskLinkType.RELATES_TO);
+            linkService.save(link);
+            projectSrv.save(project);
+            wlSrv.addActivityLog(originalTask, "", LogType.CLONED);
+            String page = "/task/" + cloned.getId() + "/edit";
+            String message = msg.getMessage("task.clone.success", new Object[]{cloned.getId()}, Utils.getCurrentLocale());
+            return REDIRECT + "/redirect?page=" + page + "&type=OK&message=" + message;
+        }
+        return null;
+    }
+
+    private String prependCloned(Task originalTask) {
+        return "Cloned " + originalTask.getName();
     }
 
     @Transactional

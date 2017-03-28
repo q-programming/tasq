@@ -16,6 +16,7 @@ import com.qprogramming.tasq.support.ResultData;
 import com.qprogramming.tasq.support.web.Message;
 import com.qprogramming.tasq.task.comments.Comment;
 import com.qprogramming.tasq.task.comments.CommentService;
+import com.qprogramming.tasq.task.link.TaskLink;
 import com.qprogramming.tasq.task.link.TaskLinkService;
 import com.qprogramming.tasq.task.tag.TagsRepository;
 import com.qprogramming.tasq.task.watched.WatchedTaskService;
@@ -163,9 +164,7 @@ public class TaskControllerTest {
         boolean catched = false;
         Project project = createProject(1L);
         Project project2 = createProject(2L);
-        List<Project> list = new LinkedList<Project>();
-        list.add(project);
-        list.add(project2);
+        List<Project> list = Arrays.asList(project,project2);
         Task task = createTask(TASK_NAME, 1, project);
         TaskForm form = new TaskForm(task);
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
@@ -187,9 +186,7 @@ public class TaskControllerTest {
     public void createTaskCantEditTest() {
         Project project = createProject(1L);
         Project project2 = createProject(2L);
-        List<Project> list = new LinkedList<Project>();
-        list.add(project);
-        list.add(project2);
+        List<Project> list = Arrays.asList(project,project2);
         Task task = createTask(TASK_NAME, 1, project);
         TaskForm form = new TaskForm(task);
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
@@ -229,9 +226,7 @@ public class TaskControllerTest {
         Project project = createProject(1L);
         project.setLastTaskNo(0L);
         Project project2 = createProject(2L);
-        List<Project> list = new LinkedList<Project>();
-        list.add(project);
-        list.add(project2);
+        List<Project> list = Arrays.asList(project,project2);
         Task task = createTask(TASK_NAME, 1, project);
         task.setStory_points(null);
         task.setEstimated(true);
@@ -377,7 +372,7 @@ public class TaskControllerTest {
         String subId = TEST_1 + "/1";
         subtask.setId(subId);
         testAccount.startTimerOnTask(subtask);
-        List<Task> listSubtask = new LinkedList<>();
+        List<Task> listSubtask = new ArrayList<>();
         listSubtask.add(subtask);
         List<Account> active = new LinkedList<>();
         active.add(owner);
@@ -663,17 +658,9 @@ public class TaskControllerTest {
         task5.setLoggedWork(new Period(0, 10, 0, 0));
         task5.setRemaining(new Period(0, 10, 0, 0));
         task5.setParent(TEST_1);
-        List<Task> allList = new LinkedList<Task>();
-        List<Task> toDoList = new LinkedList<Task>();
-        List<Task> subtasks = new LinkedList<Task>();
-        subtasks.add(task5);
-        allList.add(task1);
-        allList.add(task2);
-        allList.add(task3);
-        allList.add(task4);
-        allList.add(task5);
-        toDoList.add(task1);
-        toDoList.add(task2);
+        List<Task> allList = Arrays.asList(task1,task2,task3,task4,task5);
+        List<Task> toDoList = Arrays.asList(task1,task2);
+        List<Task> subtasks = Arrays.asList(task5);
         task1.setInSprint(true);
         task1.setOwner(testAccount);
         when(taskRepoMock.findById(TEST_1)).thenReturn(task1);
@@ -964,6 +951,7 @@ public class TaskControllerTest {
         ResultData resultData = taskCtr.changeEstimateTime(TestUtils.TEST_1, "2h", true);
         assertEquals(ResultData.Code.OK, resultData.code);
     }
+
     @Test
     public void changeEstimateTimeIsOwner() {
         testAccount.setRole(Roles.ROLE_USER);
@@ -1050,6 +1038,70 @@ public class TaskControllerTest {
         when(projSrvMock.canEdit(project)).thenReturn(true);
         ResultData resultData = taskCtr.changeEstimateTime(TestUtils.TEST_1, "2h", false);
         assertEquals(ResultData.Code.OK, resultData.code);
+    }
+
+    @Test
+    public void cloneTaskNotFound() {
+        try {
+            taskCtr.cloneTask("notFound", raMock, requestMock);
+            verify(raMock, times(1)).addFlashAttribute(anyString(),
+                    new Message(anyString(), Message.Type.DANGER, new Object[]{}));
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void cloneTaskNoPermission() {
+        try {
+            Project project = createProject(1L);
+            Task task = createTask(TASK_NAME, 1, project);
+            when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+            when(projSrvMock.canEdit(project)).thenReturn(false);
+            taskCtr.cloneTask(TEST_1, raMock, requestMock);
+            verify(raMock, times(1)).addFlashAttribute(anyString(),
+                    new Message(anyString(), Message.Type.DANGER, new Object[]{}));
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void cloneTaskSuccess() {
+        try {
+            Project project = createProject(1L);
+            project.setLastTaskNo(1L);
+            Task task = createTask(TASK_NAME, 1, project);
+            when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+            when(projSrvMock.canEdit(project)).thenReturn(true);
+            taskCtr.cloneTask(TEST_1, raMock, requestMock);
+            verify(taskRepoMock, times(1)).save(any(Task.class));
+            verify(taskLinkSrvMock, times(1)).save(any(TaskLink.class));
+            verify(projSrvMock, times(1)).save(any(Project.class));
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void cloneTaskWithSubtasksSuccess() {
+        try {
+            Project project = createProject(1L);
+            project.setLastTaskNo(1L);
+            Task task = createTask(TASK_NAME, 1, project);
+            Task subtask = createTask(TASK_NAME, 1, project);
+            subtask.setId(TEST_1 + "/1");
+            task.addSubTask();
+            when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+            when(taskRepoMock.findByParent(TEST_1)).thenReturn(Arrays.asList(subtask));
+            when(projSrvMock.canEdit(project)).thenReturn(true);
+            taskCtr.cloneTask(TEST_1, raMock, requestMock);
+            verify(taskRepoMock, times(3)).save(any(Task.class));
+            verify(taskLinkSrvMock, times(1)).save(any(TaskLink.class));
+            verify(projSrvMock, times(1)).save(any(Project.class));
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
     }
 
 
