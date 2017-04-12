@@ -164,7 +164,7 @@ public class TaskControllerTest {
         boolean catched = false;
         Project project = createProject(1L);
         Project project2 = createProject(2L);
-        List<Project> list = Arrays.asList(project,project2);
+        List<Project> list = Arrays.asList(project, project2);
         Task task = createTask(TASK_NAME, 1, project);
         TaskForm form = new TaskForm(task);
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
@@ -183,10 +183,27 @@ public class TaskControllerTest {
     }
 
     @Test
+    public void createTaskInvalidSPTest() {
+        Project project = createProject(1L);
+        Project project2 = createProject(2L);
+        List<Project> list = Arrays.asList(project, project2);
+        Task task = createTask(TASK_NAME, 1, project);
+        TaskForm form = new TaskForm(task);
+        form.setStory_points("4");
+        form.setNotEstimated(false);
+        BindingResult errors = new BeanPropertyBindingResult(form, "form");
+        when(projSrvMock.findUserActiveProject()).thenReturn(project);
+        when(projSrvMock.findAllByUser()).thenReturn(list);
+        taskCtr.createTask(form, errors, null, raMock, requestMock, modelMock);
+        assertTrue(errors.hasErrors());
+    }
+
+
+    @Test
     public void createTaskCantEditTest() {
         Project project = createProject(1L);
         Project project2 = createProject(2L);
-        List<Project> list = Arrays.asList(project,project2);
+        List<Project> list = Arrays.asList(project, project2);
         Task task = createTask(TASK_NAME, 1, project);
         TaskForm form = new TaskForm(task);
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
@@ -226,7 +243,7 @@ public class TaskControllerTest {
         Project project = createProject(1L);
         project.setLastTaskNo(0L);
         Project project2 = createProject(2L);
-        List<Project> list = Arrays.asList(project,project2);
+        List<Project> list = Arrays.asList(project, project2);
         Task task = createTask(TASK_NAME, 1, project);
         task.setStory_points(null);
         task.setEstimated(true);
@@ -261,6 +278,7 @@ public class TaskControllerTest {
         TaskForm form = new TaskForm(task);
         form.setAssignee(testAccount.getEmail());
         form.setAddToSprint(1L);
+        form.setStory_points("Not valid number");
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
         when(projSrvMock.findUserActiveProject()).thenReturn(project);
         when(projSrvMock.findAllByUser()).thenReturn(list);
@@ -658,8 +676,8 @@ public class TaskControllerTest {
         task5.setLoggedWork(new Period(0, 10, 0, 0));
         task5.setRemaining(new Period(0, 10, 0, 0));
         task5.setParent(TEST_1);
-        List<Task> allList = Arrays.asList(task1,task2,task3,task4,task5);
-        List<Task> toDoList = Arrays.asList(task1,task2);
+        List<Task> allList = Arrays.asList(task1, task2, task3, task4, task5);
+        List<Task> toDoList = Arrays.asList(task1, task2);
         List<Task> subtasks = Arrays.asList(task5);
         task1.setInSprint(true);
         task1.setOwner(testAccount);

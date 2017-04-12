@@ -13,6 +13,7 @@ import com.qprogramming.tasq.support.Utils;
 import com.qprogramming.tasq.task.comments.Comment;
 import com.qprogramming.tasq.task.comments.CommentService;
 import com.qprogramming.tasq.task.link.TaskLinkService;
+import com.qprogramming.tasq.task.tag.Tag;
 import com.qprogramming.tasq.task.watched.WatchedTaskService;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
@@ -29,6 +30,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -182,14 +184,19 @@ public class TaskService {
      * @param tags if tags should be included (!requires transaction )
      * @return
      */
-    public List<DisplayTask> convertToDisplay(List<Task> list, boolean tags) {
-        List<DisplayTask> resultList = new LinkedList<DisplayTask>();
+    public List<DisplayTask> convertToDisplay(List<Task> list, boolean tags, boolean subTaskPercentage) {
+        List<DisplayTask> resultList = new LinkedList<>();
         for (Task task : list) {
-            DisplayTask displayTask = new DisplayTask(task);
+            Set<Tag> tagsList = new HashSet<>();
             if (tags) {
                 Hibernate.initialize(task.getTags());
-                displayTask.setTagsFromTask(task.getTags());
+                tagsList = task.getTags();
             }
+            if (subTaskPercentage && task.getSubtasks() > 0) {
+                List<Task> subtasks = findSubtasks(task);
+                addSubtaskTimers(task, subtasks);
+            }
+            DisplayTask displayTask = new DisplayTask(task);
             resultList.add(displayTask);
         }
         return resultList;

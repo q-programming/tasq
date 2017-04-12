@@ -164,7 +164,7 @@
             <i class="fa fa-lg fa-question-circle"></i>&nbsp;<strong><s:message code="menu.help" text="Help"/></strong>
         </a>
     </li>
-    <li class="nav-bottom">
+    <li class="col-sm-3 col-md-2 nav-bottom">
         <a href="#" id="small-sidebar-show"><i class="fa fa-lg fw fa-angle-double-left"
                                                aria-hidden="true"></i>&nbsp;<s:message code="menu.small.sidebar.show"/>
         </a>

@@ -100,7 +100,7 @@ public class AgileController {
                     result.add(eliminateHTML(task));
                 }
             }
-            model.addAttribute("tasks", taskSrv.convertToDisplay(result, true));
+            model.addAttribute("tasks", taskSrv.convertToDisplay(result, true,false));
             model.addAttribute("project", project);
         }
         return "/agile/print";

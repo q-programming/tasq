@@ -83,7 +83,7 @@ public class KanbanController {
                 Hibernate.initialize(task.getTags());
                 tags.addAll(task.getTags());
             }
-            List<DisplayTask> resultList = taskSrv.convertToDisplay(taskList, true);
+            List<DisplayTask> resultList = taskSrv.convertToDisplay(taskList, true,true);
             model.addAttribute("tags", tags);
             model.addAttribute("tasks", resultList);
             return "/kanban/board";

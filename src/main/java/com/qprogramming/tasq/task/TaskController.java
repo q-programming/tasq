@@ -146,7 +146,7 @@ public class TaskController {
         }
         checkEstimatesValues(taskForm, errors);
         int storyPoints = getStoryPoints(taskForm);
-        if (!taskForm.getNotEstimated() && !StringUtils.isNumeric(taskForm.getStory_points()) || !Utils.validStoryPoint(storyPoints)) {
+        if (!taskForm.getNotEstimated() && !Utils.validStoryPoint(storyPoints)) {
             errors.rejectValue(STORY_POINTS, "task.storyPoints.invalid");
         }
         if (errors.hasErrors()) {
