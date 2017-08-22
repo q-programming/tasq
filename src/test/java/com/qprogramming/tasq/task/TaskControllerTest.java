@@ -5,6 +5,7 @@ import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.LastVisitedService;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.agile.AgileService;
+import com.qprogramming.tasq.agile.Release;
 import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.events.EventsService;
@@ -900,6 +901,48 @@ public class TaskControllerTest {
         when(projSrvMock.canEdit(project)).thenReturn(true);
         ResponseEntity<ResultData> data = taskCtr.changeState(TEST_1, TaskState.CLOSED, true, null, "Done", TaskResolution.CANNOT_REPRODUCE);
         Assert.assertEquals(ResultData.Code.WARNING, data.getBody().code);
+    }
+
+    @Test
+    public void changeStateCLOSEDParentTest() {
+        Project project = createProject(1L);
+        project.setAgile(Project.AgileType.SCRUM.toString());
+        Task task = createTask(TASK_NAME, 1, project);
+        task.setState(TaskState.CLOSED);
+        task.setComments(new HashSet<>());
+        Task subtask = createTask(TASK_NAME, 2, project);
+        subtask.setParent(task.getId());
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(taskRepoMock.findById(subtask.getId())).thenReturn(subtask);
+        when(projSrvMock.canEdit(project)).thenReturn(true);
+        ResponseEntity<ResultData> data = taskCtr.changeState(subtask.getId(), TaskState.ONGOING, true, null, "Done", null);
+        Assert.assertEquals(ResultData.Code.ERROR, data.getBody().code);
+    }
+
+    @Test
+    public void changeStateTODOLoggedWorkTest() {
+        Project project = createProject(1L);
+        project.setAgile(Project.AgileType.SCRUM.toString());
+        Task task = createTask(TASK_NAME, 1, project);
+        task.setState(TaskState.ONGOING);
+        task.setLoggedWork(new Period(1, 0, 0, 0));
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(projSrvMock.canEdit(project)).thenReturn(true);
+        ResponseEntity<ResultData> data = taskCtr.changeState(task.getId(), TaskState.TO_DO, true, null, "Done", null);
+        Assert.assertEquals(ResultData.Code.ERROR, data.getBody().code);
+    }
+
+    @Test
+    public void changeStateCLOSEDKanbanTest() {
+        Project project = createProject(1L);
+        project.setAgile(Project.AgileType.KANBAN.toString());
+        Task task = createTask(TASK_NAME, 1, project);
+        task.setState(TaskState.CLOSED);
+        task.setRelease(new Release());
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(projSrvMock.canEdit(project)).thenReturn(true);
+        ResponseEntity<ResultData> data = taskCtr.changeState(task.getId(), TaskState.TO_DO, true, null, "Done", null);
+        Assert.assertEquals(ResultData.Code.ERROR, data.getBody().code);
     }
 
     @Test

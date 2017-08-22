@@ -719,9 +719,13 @@ public class TaskController {
             if ((Utils.getCurrentAccount().equals(task.getOwner())
                     || Utils.getCurrentAccount().equals(task.getAssignee()))
                     || (Roles.isPowerUser() | projectSrv.canEdit(task.getProject()))) {
+                //check if parent is not closed
+                if (task.isSubtask() && TaskState.CLOSED.equals(taskSrv.findById(task.getParent()).getState())) {
+                    return ResponseEntity.ok(new ResultData(ResultData.Code.ERROR, msg.getMessage("task.changeState.parentClosed",
+                            new Object[]{task.getParent()}, Utils.getCurrentLocale())));
+                }
                 // check if reopening kanban
-                if (task.getState().equals(TaskState.CLOSED)
-                        && Project.AgileType.KANBAN.equals(task.getProject().getAgile()) && task.getRelease() != null) {
+                if (task.getState().equals(TaskState.CLOSED) && Project.AgileType.KANBAN.equals(task.getProject().getAgile()) && task.getRelease() != null) {
                     return ResponseEntity.ok(new ResultData(ResultData.Code.ERROR, msg.getMessage("task.changeState.change.kanbanRelease",
                             new Object[]{task.getRelease().getRelease()}, Utils.getCurrentLocale())));
                 }

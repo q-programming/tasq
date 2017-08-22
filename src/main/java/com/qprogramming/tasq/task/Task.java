@@ -13,6 +13,7 @@ import com.qprogramming.tasq.task.tag.Tag;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.TaskResolution;
 import com.qprogramming.tasq.task.worklog.WorkLog;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Hibernate;
 import org.joda.time.Period;
 
@@ -301,7 +302,7 @@ public class Task implements java.io.Serializable {
     }
 
     public List<Comment> getComments() {
-        List<Comment> comments_list = new ArrayList<Comment>(comments);
+        List<Comment> comments_list = new ArrayList<>(comments);
         Collections.sort(comments_list, new CommentsSorter(false));
         return comments_list;
     }
@@ -359,7 +360,7 @@ public class Task implements java.io.Serializable {
 
     public Set<Sprint> getSprints() {
         if (sprints == null) {
-            sprints = new HashSet<Sprint>();
+            sprints = new HashSet<>();
         }
         return sprints;
     }
@@ -606,6 +607,6 @@ public class Task implements java.io.Serializable {
     }
 
     public boolean isSubtask() {
-        return parent != null;
+        return StringUtils.isNotBlank(parent);
     }
 }

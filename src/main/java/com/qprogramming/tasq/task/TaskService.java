@@ -303,6 +303,13 @@ public class TaskService {
     }
 
 
+    /**
+     * Check if task can be operated on. If for example there are other users still working on it
+     *
+     * @param task   task to be checked
+     * @param remove if it's remove operation
+     * @return {@link ResultData} with validation results
+     */
     public ResultData checkTaskCanOperated(Task task, boolean remove) {
         List<Account> accounts = accountSrv.findAllWithActiveTask(task.getId());
         if (!accounts.isEmpty()) {
