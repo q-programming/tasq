@@ -413,14 +413,6 @@ public class TaskService {
         return addSubtaskTimers(task, subtasks);
     }
 
-    public Task cloneTask(Task task, String taskID) {
-        Task cloned = new Task();
-        BeanUtils.copyProperties(task, cloned);
-        cloned.setId(taskID);
-        cloned.setName("Cloned " + task.getName());
-        return taskRepo.save(cloned);
-    }
-
 
     protected EntityManager getEntitymanager() {
         return entityManager;

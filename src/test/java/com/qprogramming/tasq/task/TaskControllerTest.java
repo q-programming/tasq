@@ -26,6 +26,7 @@ import com.qprogramming.tasq.task.worklog.TaskResolution;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 import com.qprogramming.tasq.test.MockSecurityContext;
 import com.qprogramming.tasq.test.TestUtils;
+import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.junit.Assert;
 import org.junit.Before;
@@ -54,6 +55,7 @@ import java.util.*;
 
 import static com.qprogramming.tasq.test.TestUtils.*;
 import static org.junit.Assert.*;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
@@ -63,10 +65,14 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TaskControllerTest {
+    public static final String STOP = "stop";
     private static final String NEW_DESCRIPTION = "newDescription";
     private static final String TASQ_AUTH_MSG = "TasqAuthException was not thrown";
     private static final String NEW_EMAIL = "newuser@test.com";
     private static final String NEWUSERNAME = "newuser";
+    public static final String START = "start";
+    public static final String CANCEL = "cancel";
+    public static final String NOT_FOUND = "NOT_FOUND";
     @Rule
     public ExpectedException thrown = ExpectedException.none();
     private Account testAccount;
@@ -199,6 +205,20 @@ public class TaskControllerTest {
         assertTrue(errors.hasErrors());
     }
 
+    @Test
+    public void createTaskContainsHTMLTest() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        TaskForm form = new TaskForm(task);
+        form.setStory_points("4");
+        form.setNotEstimated(false);
+        form.setName("<script>alert(\"Hello\")</script>");
+        BindingResult errors = new BeanPropertyBindingResult(form, "form");
+        when(projSrvMock.findUserActiveProject()).thenReturn(project);
+        taskCtr.createTask(form, errors, null, raMock, requestMock, modelMock);
+        assertTrue(errors.hasErrors());
+    }
+
 
     @Test
     public void createTaskCantEditTest() {
@@ -279,16 +299,19 @@ public class TaskControllerTest {
         TaskForm form = new TaskForm(task);
         form.setAssignee(testAccount.getEmail());
         form.setAddToSprint(1L);
-        form.setStory_points("Not valid number");
+        form.setStory_points("1");
+        form.setProject(project.getProjectId());
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
         when(projSrvMock.findUserActiveProject()).thenReturn(project);
         when(projSrvMock.findAllByUser()).thenReturn(list);
-        when(projSrvMock.findById(1L)).thenReturn(project);
+        when(projSrvMock.findByProjectId(project.getProjectId())).thenReturn(project);
         when(projSrvMock.canEdit(project)).thenReturn(true);
         when(accountServiceMock.findByEmail(testAccount.getEmail())).thenReturn(testAccount);
-        when(taskRepoMock.save(any(Task.class))).thenReturn(task);
+        when(taskRepoMock.save(any(Task.class))).thenAnswer(returnsFirstArg());
         when(sprintSrvMock.findByProjectIdAndSprintNo(1L, 1L)).thenReturn(sprint);
         taskCtr.createTask(form, errors, null, raMock, requestMock, modelMock);
+        verify(taskRepoMock, times(3)).save(any(Task.class));
+        verify(watchSrvMock, times(1)).startWatching(any(Task.class));
     }
 
     @Test(expected = TasqAuthException.class)
@@ -1165,5 +1188,281 @@ public class TaskControllerTest {
         }
     }
 
+    @Test
+    public void showDisplayTasksTest() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 5, project);
+        task.addSubTask();
+        Task subtask = createTask(TASK_NAME, 6, project);
+        subtask.addLoggedWork(new Period(1, 0, 0, 0));
+        subtask.setParent(task.getId());
+        when(taskRepoMock.findByParent(task.getId())).thenReturn(Collections.singletonList(subtask));
+        List<Task> list = Arrays.asList(task, createTask(TASK_NAME, 1, project), createTask(TASK_NAME, 2, project), createTask(TASK_NAME, 3, project), createTask(TASK_NAME, 4, project));
+        List<DisplayTask> displayTasks = taskSrv.convertToDisplay(list, true, true);
+        assertTrue(displayTasks.size() == 5);
+        Optional<DisplayTask> result = displayTasks.stream().filter(displayTask -> displayTask.getId().equalsIgnoreCase(task.getId())).findFirst();
+        assertEquals((result.isPresent() ? result.get().getLoggedWork() : "0h").trim(), "1h");
+    }
+
+    @Test
+    public void handleTimerNotFoundTest() {
+        taskCtr.handleTimer(NOT_FOUND, START, raMock, requestMock);
+        verify(raMock, times(1)).addFlashAttribute(anyString(),
+                new Message(anyString(), Message.Type.DANGER, new Object[]{}));
+    }
+
+    @Test
+    public void handleTimerNoAuthTest() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(projSrvMock.canEdit(project)).thenReturn(false);
+        testAccount.setRole(Roles.ROLE_USER);
+        taskCtr.handleTimer(TEST_1, START, raMock, requestMock);
+        verify(raMock, times(1)).addFlashAttribute(anyString(),
+                new Message(anyString(), Message.Type.DANGER, new Object[]{}));
+    }
+
+    @Test
+    public void handleTimerStartTest() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        taskCtr.handleTimer(TEST_1, START, raMock, requestMock);
+        verify(accountServiceMock, times(1)).update(any(Account.class));
+        verify(taskRepoMock, times(1)).save(any(Task.class));
+        assertEquals(task.getState(), TaskState.ONGOING);
+    }
+
+    @Test
+    public void handleTimerStartAlreadyIsTimerTest() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        testAccount.setActiveTask(TEST_1);
+        testAccount.setActiveTaskTimer(new DateTime().minusHours(1));
+        taskCtr.handleTimer(TEST_1, START, raMock, requestMock);
+        verify(raMock, times(1)).addFlashAttribute(anyString(),
+                new Message(anyString(), Message.Type.WARNING, new Object[]{}));
+    }
+
+
+    @Test
+    public void handleTimerStopTest() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        testAccount.setActiveTask(TEST_1);
+        testAccount.setActiveTaskTimer(new DateTime().minusHours(1));
+        taskCtr.handleTimer(TEST_1, STOP, raMock, requestMock);
+        verify(accountServiceMock, times(1)).update(any(Account.class));
+        assertNull(testAccount.getActiveTask());
+        assertNull(testAccount.getActiveTaskTimer());
+    }
+
+    @Test
+    public void handleTimerCancelTest() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        testAccount.setActiveTask(TEST_1);
+        testAccount.setActiveTaskTimer(new DateTime().minusHours(1));
+        taskCtr.handleTimer(TEST_1, CANCEL, raMock, requestMock);
+        verify(accountServiceMock, times(1)).update(any(Account.class));
+        assertNull(testAccount.getActiveTask());
+        assertNull(testAccount.getActiveTaskTimer());
+    }
+
+    @Test
+    public void assignTaskNotFoundTest() {
+        taskCtr.assign(NOT_FOUND, "", raMock, requestMock);
+        verify(raMock, times(1)).addFlashAttribute(anyString(),
+                new Message(anyString(), Message.Type.DANGER, new Object[]{}));
+    }
+
+    @Test(expected = TasqAuthException.class)
+    public void assignTaskNoAuthTest() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        testAccount.setRole(Roles.ROLE_USER);
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(projSrvMock.canEdit(project)).thenReturn(false);
+        taskCtr.assign(task.getId(), testAccount.getEmail(), raMock, requestMock);
+    }
+
+    @Test
+    public void assignTaskSameUserTest() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        task.setAssignee(testAccount);
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(projSrvMock.canEdit(project)).thenReturn(false);
+        when(accountServiceMock.findByEmail(testAccount.getEmail())).thenReturn(testAccount);
+        taskCtr.assign(task.getId(), testAccount.getEmail(), raMock, requestMock);
+        assertEquals(testAccount, task.getAssignee());
+    }
+
+    @Test
+    public void assignTaskUnassignTest() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        task.setAssignee(testAccount);
+        DateTime lastUpdate = new DateTime().minusDays(1);
+        task.setLastUpdate(lastUpdate.toDate());
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(accountServiceMock.findByEmail(testAccount.getEmail())).thenReturn(testAccount);
+        taskCtr.assign(task.getId(), "", raMock, requestMock);
+        assertNull(task.getAssignee());
+        assertTrue(lastUpdate.isBefore(new DateTime(task.getRawLastUpdate())));
+    }
+
+    @Test
+    public void assignTaskClosedTest() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        task.setState(TaskState.CLOSED);
+        DateTime lastUpdate = new DateTime().minusDays(1);
+        task.setLastUpdate(lastUpdate.toDate());
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(accountServiceMock.findByEmail(testAccount.getEmail())).thenReturn(testAccount);
+        taskCtr.assign(task.getId(), "", raMock, requestMock);
+        verify(raMock, times(1)).addFlashAttribute(anyString(),
+                new Message(anyString(), Message.Type.WARNING, new Object[]{}));
+        assertFalse(lastUpdate.isBefore(new DateTime(task.getRawLastUpdate())));
+    }
+
+    @Test
+    public void assignTaskNoProjectEditTest() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        DateTime lastUpdate = new DateTime().minusDays(1);
+        task.setLastUpdate(lastUpdate.toDate());
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(accountServiceMock.findByEmail(testAccount.getEmail())).thenReturn(testAccount);
+        when(projSrvMock.canEdit(project)).thenReturn(false);
+        testAccount.setRole(Roles.ROLE_POWERUSER);
+        taskCtr.assign(task.getId(), testAccount.getEmail(), raMock, requestMock);
+        verify(raMock, times(1)).addFlashAttribute(anyString(),
+                new Message(anyString(), Message.Type.DANGER, new Object[]{}));
+    }
+
+    @Test
+    public void assignTaskTest() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        DateTime lastUpdate = new DateTime().minusDays(1);
+        task.setLastUpdate(lastUpdate.toDate());
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(accountServiceMock.findByEmail(testAccount.getEmail())).thenReturn(testAccount);
+        when(projSrvMock.canEdit(project)).thenReturn(true);
+        testAccount.setRole(Roles.ROLE_POWERUSER);
+        taskCtr.assign(task.getId(), testAccount.getEmail(), raMock, requestMock);
+        assertEquals(testAccount, task.getAssignee());
+        assertTrue(lastUpdate.isBefore(new DateTime(task.getRawLastUpdate())));
+        verify(watchSrvMock, times(1)).addToWatchers(task, testAccount);
+        verify(taskSrv, times(1)).save(task);
+    }
+
+    @Test
+    public void assignMeTaskNotFoundTest() {
+        taskCtr.assignMe(NOT_FOUND, raMock, requestMock);
+        verify(raMock, times(1)).addFlashAttribute(anyString(),
+                new Message(anyString(), Message.Type.DANGER, new Object[]{}));
+    }
+
+    @Test
+    public void assignMeTaskNoAuthTest() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        DateTime lastUpdate = new DateTime().minusDays(1);
+        task.setLastUpdate(lastUpdate.toDate());
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(accountServiceMock.findByEmail(testAccount.getEmail())).thenReturn(testAccount);
+        when(projSrvMock.canEdit(project)).thenReturn(false);
+        testAccount.setRole(Roles.ROLE_POWERUSER);
+        taskCtr.assignMe(task.getId(), raMock, requestMock);
+        assertNotEquals(testAccount, task.getAssignee());
+    }
+
+    @Test
+    public void assignMeTaskClosedTest() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        task.setState(TaskState.CLOSED);
+        DateTime lastUpdate = new DateTime().minusDays(1);
+        task.setLastUpdate(lastUpdate.toDate());
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(accountServiceMock.findByEmail(testAccount.getEmail())).thenReturn(testAccount);
+        testAccount.setRole(Roles.ROLE_POWERUSER);
+        taskCtr.assignMe(task.getId(), raMock, requestMock);
+        assertNotEquals(testAccount, task.getAssignee());
+        verify(raMock, times(1)).addFlashAttribute(anyString(),
+                new Message(anyString(), Message.Type.DANGER, new Object[]{}));
+    }
+
+    @Test
+    public void assignMeTaskTest() {
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        DateTime lastUpdate = new DateTime().minusDays(1);
+        task.setLastUpdate(lastUpdate.toDate());
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(accountServiceMock.findByEmail(testAccount.getEmail())).thenReturn(testAccount);
+        when(projSrvMock.canEdit(project)).thenReturn(true);
+        when(taskRepoMock.save(any(Task.class))).thenAnswer(returnsFirstArg());
+        testAccount.setRole(Roles.ROLE_POWERUSER);
+        taskCtr.assignMe(task.getId(), raMock, requestMock);
+        assertEquals(testAccount, task.getAssignee());
+        assertTrue(lastUpdate.isBefore(new DateTime(task.getRawLastUpdate())));
+        verify(watchSrvMock, times(1)).startWatching(task);
+        verify(taskSrv, times(1)).save(task);
+    }
+
+    @Test
+    public void assignMePOSTAuthTest() {
+        testAccount.setRole(Roles.ROLE_POWERUSER);
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        DateTime lastUpdate = new DateTime().minusDays(1);
+        task.setLastUpdate(lastUpdate.toDate());
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(projSrvMock.canEdit(project)).thenReturn(false);
+        ResponseEntity<ResultData> result = taskCtr.assignMePOST(TEST_1);
+        assertEquals(ResultData.Code.ERROR, result.getBody().code);
+    }
+
+    @Test
+    public void assignMePOSTTest() {
+        testAccount.setRole(Roles.ROLE_POWERUSER);
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        DateTime lastUpdate = new DateTime().minusDays(1);
+        task.setLastUpdate(lastUpdate.toDate());
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(projSrvMock.canEdit(project)).thenReturn(true);
+        ResponseEntity<ResultData> result = taskCtr.assignMePOST(TEST_1);
+        assertEquals(ResultData.Code.OK, result.getBody().code);
+    }
+
+    @Test
+    public void assignMePOSTNotFoundTest() {
+        testAccount.setRole(Roles.ROLE_POWERUSER);
+        ResponseEntity<ResultData> result = taskCtr.assignMePOST(TEST_1);
+        assertEquals(ResultData.Code.ERROR, result.getBody().code);
+    }
+
+    @Test
+    public void assignMePOSTClosedTest() {
+        testAccount.setRole(Roles.ROLE_POWERUSER);
+        Project project = createProject(1L);
+        Task task = createTask(TASK_NAME, 1, project);
+        task.setState(TaskState.CLOSED);
+        DateTime lastUpdate = new DateTime().minusDays(1);
+        task.setLastUpdate(lastUpdate.toDate());
+        when(taskRepoMock.findById(TEST_1)).thenReturn(task);
+        when(projSrvMock.canEdit(project)).thenReturn(true);
+        ResponseEntity<ResultData> result = taskCtr.assignMePOST(TEST_1);
+        assertEquals(ResultData.Code.ERROR, result.getBody().code);
+    }
 
 }

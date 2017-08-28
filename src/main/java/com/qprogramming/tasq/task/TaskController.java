@@ -175,9 +175,9 @@ public class TaskController {
             // assigne
             setCreatedTaskAssignee(taskForm, task);
             task = taskSrv.save(task);//save before adding rest
+            // Create log work
             wlSrv.addActivityLog(task, "", LogType.CREATE);
             // lookup for sprint
-            // Create log work
             if (taskForm.getAddToSprint() != null) {
                 Sprint sprint = sprintSrv.findByProjectIdAndSprintNo(project.getId(), taskForm.getAddToSprint());
                 task.addSprint(sprint);
@@ -864,8 +864,8 @@ public class TaskController {
     public String assign(@RequestParam(value = "taskID") String taskID, @RequestParam(value = "email") String email,
                          RedirectAttributes ra, HttpServletRequest request) {
         Task task = taskSrv.findById(taskID);
-        String previous = getAssignee(task);
         if (task != null) {
+            String previous = getAssignee(task);
             if (Roles.isPowerUser() | projectSrv.canEdit(task.getProject())) {
                 if (task.getState().equals(TaskState.CLOSED)) {
                     ResultData result = taskIsClosed(task);
@@ -900,6 +900,8 @@ public class TaskController {
             } else {
                 throw new TasqAuthException(msg);
             }
+        } else {
+            MessageHelper.addErrorAttribute(ra, msg.getMessage("error.task.notfound", null, Utils.getCurrentLocale()));
         }
         return REDIRECT + request.getHeader(REFERER);
 
@@ -921,6 +923,8 @@ public class TaskController {
                 return REDIRECT + request.getHeader(REFERER);
             }
             assignMeToTask(task);
+        } else {
+            MessageHelper.addErrorAttribute(ra, msg.getMessage("error.task.notfound", null, Utils.getCurrentLocale()));
         }
         return REDIRECT + request.getHeader(REFERER);
     }
