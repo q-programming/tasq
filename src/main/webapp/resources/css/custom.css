@@ -120,7 +120,8 @@ div.agile-card > .bottom-tab {
     bottom: 0;
     width: 100%
 }
-.pointsdiv{
+
+.pointsdiv {
     display: table-cell;
 }
 
@@ -1190,6 +1191,18 @@ td.width200 {
     width: 100%;
 }
 
+/*stats*/
+.stats-progress {
+    height: 20px;
+    background-color: transparent;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+.animated-progress span {
+    color: #000;
+}
+
 /* .search { position: relative; } */
 /* .search input { text-indent: 30px;} */
 /* .search .fa-search {  */
@@ -1198,3 +1211,7 @@ td.width200 {
 /*   left: 7px; */
 /*   font-size: 15px; */
 /* } */
+.task-count {
+    float: right !important;
+    margin-right: -25px;
+}

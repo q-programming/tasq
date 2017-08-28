@@ -5,9 +5,9 @@ import com.qprogramming.tasq.account.AccountService;
 import com.qprogramming.tasq.account.LastVisitedService;
 import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.agile.AgileService;
-import com.qprogramming.tasq.agile.Sprint;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.events.EventsService;
+import com.qprogramming.tasq.projects.dto.ProjectChart;
 import com.qprogramming.tasq.projects.holiday.HolidayService;
 import com.qprogramming.tasq.support.ResultData;
 import com.qprogramming.tasq.support.web.Message;
@@ -62,6 +62,7 @@ public class ProjectControllerTest {
     public ExpectedException thrown = ExpectedException.none();
     private Account testAccount;
     private ProjectController projectCtr;
+    private ProjectRestController projectRestCtr;
     @Mock
     private ProjectService projSrv;
     @Mock
@@ -104,8 +105,9 @@ public class ProjectControllerTest {
         when(securityMock.getAuthentication()).thenReturn(authMock);
         when(authMock.getPrincipal()).thenReturn(testAccount);
         SecurityContextHolder.setContext(securityMock);
-        projectCtr = spy(new ProjectController(projSrv, accountServiceMock, taskSrvMock, sprintSrvMock, wrkLogSrv, msg,
+        projectCtr = spy(new ProjectController(projSrv, accountServiceMock, taskSrvMock, sprintSrvMock, msg,
                 eventsSrvMock, holidayServiceMock, visitedSrvMock));
+        projectRestCtr = new ProjectRestController(projSrv,accountServiceMock,msgMock,wrkLogSrv);
         doNothing().when(projectCtr).rollBack();
     }
 
@@ -133,10 +135,10 @@ public class ProjectControllerTest {
         when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
         when(taskSrvMock.findByProjectAndOpen(project)).thenReturn(openTaskList);
         projectCtr.showDetails(PROJECT_ID, null, modelMock, raMock);
-        verify(modelMock, times(1)).addAttribute("TO_DO", 1);
-        verify(modelMock, times(1)).addAttribute("ONGOING", 1);
-        verify(modelMock, times(1)).addAttribute("CLOSED", 1);
-        verify(modelMock, times(1)).addAttribute("BLOCKED", 0);
+        verify(modelMock, times(1)).addAttribute("TO_DO", 1L);
+        verify(modelMock, times(1)).addAttribute("ONGOING", 1L);
+        verify(modelMock, times(1)).addAttribute("CLOSED", 1L);
+        verify(modelMock, times(1)).addAttribute("BLOCKED", 0L);
         verify(modelMock, times(1)).addAttribute("tasks", openTaskList);
         verify(modelMock, times(1)).addAttribute("project", project);
     }
@@ -213,8 +215,8 @@ public class ProjectControllerTest {
         when(wrkLogSrv.findByProjectId(anyLong(), any(Pageable.class))).thenReturn(page);
         when(wrkLogSrv.findProjectCreateCloseEvents(project, false)).thenReturn(list);
         Pageable p = new PageRequest(0, 5, new Sort(Sort.Direction.ASC, "time"));
-        ResponseEntity<Page<DisplayWorkLog>> result = projectCtr.getProjectEvents(PROJECT_ID, p);
-        ResponseEntity<ProjectChart> chart = projectCtr.getProjectChart(PROJECT_ID, false, responseMock);
+        ResponseEntity<Page<DisplayWorkLog>> result = projectRestCtr.getProjectEvents(PROJECT_ID, p);
+        ResponseEntity<ProjectChart> chart = projectRestCtr.getProjectChart(PROJECT_ID, false, responseMock);
         String today = new LocalDate().toString();
         Assert.assertEquals(Integer.valueOf(1), chart.getBody().getClosed().get(today));
         Assert.assertEquals(Integer.valueOf(5), chart.getBody().getCreated().get(today));
@@ -230,7 +232,7 @@ public class ProjectControllerTest {
         project.setParticipants(new HashSet<Account>());
         when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
         try {
-            projectCtr.getProjectEvents(PROJECT_ID, null);
+            projectRestCtr.getProjectEvents(PROJECT_ID, null);
         } catch (TasqAuthException e) {
             catched = true;
         }
@@ -241,7 +243,7 @@ public class ProjectControllerTest {
     @Test
     public void getProjectEventsNoProjectTest() {
         when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(null);
-        Assert.assertNull(projectCtr.getProjectEvents(PROJECT_ID, null));
+        Assert.assertNull(projectRestCtr.getProjectEvents(PROJECT_ID, null));
     }
 
     @Test
@@ -555,9 +557,9 @@ public class ProjectControllerTest {
         project.setDefaultAssigneeID(1L);
         when(accountServiceMock.findById(1L)).thenReturn(testAccount);
         when(projSrv.findByProjectId(TestUtils.PROJECT_ID)).thenReturn(project);
-        Assert.assertNotNull(projectCtr.getDefaults(TestUtils.PROJECT_ID, responseMock));
+        Assert.assertNotNull(projectRestCtr.getDefaults(TestUtils.PROJECT_ID, responseMock));
         project.setDefaultAssigneeID(null);
-        Assert.assertNull(projectCtr.getDefaults(TestUtils.PROJECT_ID, responseMock).getBody().getDefaultAssignee());
+        Assert.assertNull(projectRestCtr.getDefaults(TestUtils.PROJECT_ID, responseMock).getBody().getDefaultAssignee());
     }
 
     @Test

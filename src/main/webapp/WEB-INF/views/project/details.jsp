@@ -76,7 +76,11 @@
                 <i class="fa fa-plus"></i>
             </a>
         </c:if>
-        <a class="btn btn-default a-tooltip pull-right" href="<c:url value="/${project.projectId}/chat"/>"
+        <a class="btn btn-default a-tooltip pull-right" href="<c:url value="/project/${project.projectId}/statistics"/>"
+           title="<s:message code="project.stats"/>" data-placement="bottom">
+            <i class="fa fa-bar-chart"></i>
+        </a>
+        <a class="btn btn-default a-tooltip pull-right" href="<c:url value="/project/${project.projectId}/chat"/>"
            title="<s:message code="project.chat"/>" data-placement="bottom">
             <i class="fa fa-comments" aria-hidden="true"></i>
         </a>

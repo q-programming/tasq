@@ -1,4 +1,4 @@
-package com.qprogramming.tasq.projects;
+package com.qprogramming.tasq.projects.dto;
 
 import com.qprogramming.tasq.agile.StartStop;
 
@@ -7,28 +7,27 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class ProjectChart {
-    private Map<String, Integer> created;
-    private Map<String, Integer> closed;
-    private List<StartStop> freeDays;
+public class ProjectDataBase {
+    protected Map<String, Integer> closed;
+    protected List<StartStop> freeDays;
 
-    public ProjectChart() {
-        created = new LinkedHashMap<>();
+    protected ProjectDataBase() {
         closed = new LinkedHashMap<>();
         freeDays = new LinkedList<>();
-    }
-
-    public Map<String, Integer> getCreated() {
-        return created;
     }
 
     public Map<String, Integer> getClosed() {
         return closed;
     }
 
+    public void putClosed(String key, Integer value) {
+        closed.put(key, value);
+    }
+
     public List<StartStop> getFreeDays() {
         return freeDays;
     }
+
 
     public void setFreeDays(List<StartStop> freeDays) {
         this.freeDays = freeDays;

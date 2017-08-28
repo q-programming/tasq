@@ -74,7 +74,7 @@ public class ChatController {
         return new ChatResponse.ResponseBuilder().message("Nothing to process").event(ChatEvent.ERROR).build();
     }
 
-    @RequestMapping("/{projectId}/chat")
+    @RequestMapping("/project/{projectId}/chat")
     public String chat(@PathVariable String projectId, Model model, RedirectAttributes ra) {
         Project project = projSrv.findByProjectId(projectId);
         if (project != null) {

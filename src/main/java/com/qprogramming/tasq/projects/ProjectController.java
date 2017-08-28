@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.qprogramming.tasq.account.*;
 import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.agile.Sprint;
-import com.qprogramming.tasq.agile.StartStop;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.events.EventsService;
 import com.qprogramming.tasq.projects.holiday.HolidayService;
@@ -14,26 +13,12 @@ import com.qprogramming.tasq.support.sorters.ProjectSorter;
 import com.qprogramming.tasq.support.sorters.TaskSorter;
 import com.qprogramming.tasq.support.web.MessageHelper;
 import com.qprogramming.tasq.task.*;
-import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
 import com.qprogramming.tasq.task.worklog.LogType;
-import com.qprogramming.tasq.task.worklog.WorkLog;
-import com.qprogramming.tasq.task.worklog.WorkLogService;
 import org.hibernate.Hibernate;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
@@ -44,7 +29,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -52,29 +36,25 @@ import java.util.stream.Collectors;
 @Controller
 public class ProjectController {
 
-    public static final String APPLICATION_JSON = "application/json";
+
     public static final String REFERER = "Referer";
     private static final Logger LOG = LoggerFactory.getLogger(ProjectController.class);
     private ProjectService projSrv;
     private AccountService accSrv;
     private TaskService taskSrv;
     private AgileService sprintSrv;
-    private WorkLogService wrkLogSrv;
     private MessageSource msg;
     private EventsService eventsSrv;
     private HolidayService holidayService;
     private LastVisitedService visitedSrv;
 
-    private DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
-
     @Autowired
     public ProjectController(ProjectService projSrv, AccountService accSrv, TaskService taskSrv, AgileService sprintSrv,
-                             WorkLogService wrklSrv, MessageSource msg, EventsService eventsSrv, HolidayService holidayService, LastVisitedService visitedSrv) {
+                             MessageSource msg, EventsService eventsSrv, HolidayService holidayService, LastVisitedService visitedSrv) {
         this.projSrv = projSrv;
         this.accSrv = accSrv;
         this.taskSrv = taskSrv;
         this.sprintSrv = sprintSrv;
-        this.wrkLogSrv = wrklSrv;
         this.msg = msg;
         this.eventsSrv = eventsSrv;
         this.holidayService = holidayService;
@@ -96,68 +76,44 @@ public class ProjectController {
         Account account = Utils.getCurrentAccount();
         visitedSrv.addLastVisited(account.getId(), project);
         // Check status of all projects
-        List<Task> tasks = project.getTasks().stream().filter(task -> !task.isSubtask()).collect(Collectors.toList());
-        Map<TaskState, Integer> stateCount = new HashMap<>();
-        for (TaskState state : TaskState.values()) {
-            stateCount.put(state, 0);
-        }
-        for (Task task : tasks) {
-            Integer value = stateCount.get(task.getState());
-            value++;
-            stateCount.put((TaskState) task.getState(), value);
-        }
-        model.addAttribute("TO_DO", stateCount.get(TaskState.TO_DO));
-        model.addAttribute("ONGOING", stateCount.get(TaskState.ONGOING));
-        model.addAttribute("COMPLETE", stateCount.get(TaskState.COMPLETE));
-        model.addAttribute("CLOSED", stateCount.get(TaskState.CLOSED));
-        model.addAttribute("BLOCKED", stateCount.get(TaskState.BLOCKED));
+        fillTaskByStatus(model, project);
         List<Task> taskList;
         if (closed == null) {
             taskList = taskSrv.findByProjectAndOpen(project);
         } else {
             taskList = taskSrv.findAllByProject(project);
         }
-        Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ID, false));
+        taskList.sort(new TaskSorter(TaskSorter.SORTBY.ID, false));
         model.addAttribute("tasks", taskList);
         model.addAttribute("project", project);
         return "project/details";
     }
 
-    @RequestMapping(value = "projectEvents", method = RequestMethod.GET)
-    @ResponseBody
-    public ResponseEntity<Page<DisplayWorkLog>> getProjectEvents(@RequestParam(value = "id") String id,
-                                                                 @PageableDefault(size = 25, page = 0, sort = "time", direction = Direction.DESC) Pageable p) {
+    @Transactional
+    @RequestMapping(value = "project/{id}/statistics", method = RequestMethod.GET)
+    public String showStats(@PathVariable String id, Model model, RedirectAttributes ra) {
         Project project = projSrv.findByProjectId(id);
         if (project == null) {
-            // NULL
-            return null;
+            MessageHelper.addErrorAttribute(ra, msg.getMessage("project.notexists", null, Utils.getCurrentLocale()));
+            return "redirect:/projects";
         }
         if (!project.getParticipants().contains(Utils.getCurrentAccount()) && !Roles.isAdmin()) {
             throw new TasqAuthException(msg, "role.error.project.permission");
         }
-        // Fetch events
-        Page<WorkLog> page = wrkLogSrv.findByProjectId(project.getId(), p);
-        List<DisplayWorkLog> list = new LinkedList<DisplayWorkLog>();
-        for (WorkLog workLog : page) {
-            list.add(new DisplayWorkLog(workLog));
-        }
-        return ResponseEntity.ok(new PageImpl<>(list, p, page.getTotalElements()));
+        fillTaskByStatus(model, project);
+        model.addAttribute("project", project);
+        return "project/statistics";
     }
 
-    @RequestMapping(value = "/usersProjectsEvents", method = RequestMethod.GET)
-    @ResponseBody
-    public ResponseEntity<Page<DisplayWorkLog>> getProjectsLogs(
-            @PageableDefault(size = 25, page = 0, sort = "time", direction = Direction.DESC) Pageable p) {
-        Account account = Utils.getCurrentAccount();
-        List<Project> usersProjects = projSrv.findAllByUser(account.getId());
-        if (!usersProjects.isEmpty()) {
-            List<Long> ids = usersProjects.stream().map(Project::getId).collect(Collectors.toCollection(LinkedList::new));
-            Page<WorkLog> page = wrkLogSrv.findByProjectIdIn(ids, p);
-            List<DisplayWorkLog> list = page.getContent().stream().map(DisplayWorkLog::new).collect(Collectors.toList());
-            return ResponseEntity.ok(new PageImpl<>(list, p, page.getTotalElements()));
-        }
-        return null;
+    private void fillTaskByStatus(Model model, Project project) {
+        Map<Enum<TaskState>, Long> stateCount = project.getTasks().stream().filter(task -> !task.isSubtask()).collect(Collectors.groupingBy(Task::getState, Collectors.counting()));
+        model.addAttribute("TO_DO", stateCount.getOrDefault(TaskState.TO_DO, 0L));
+        model.addAttribute("ONGOING", stateCount.getOrDefault(TaskState.ONGOING, 0L));
+        model.addAttribute("COMPLETE", stateCount.getOrDefault(TaskState.COMPLETE, 0L));
+        model.addAttribute("CLOSED", stateCount.getOrDefault(TaskState.CLOSED, 0L));
+        model.addAttribute("BLOCKED", stateCount.getOrDefault(TaskState.BLOCKED, 0L));
     }
+
 
     @RequestMapping(value = "projects", method = RequestMethod.GET)
     public String listProjects(Model model) {
@@ -167,7 +123,7 @@ public class ProjectController {
         } else {
             projects = projSrv.findAllByUser();
         }
-        Collections.sort(projects, new ProjectSorter(ProjectSorter.SORTBY.LAST_VISIT,
+        projects.sort(new ProjectSorter(ProjectSorter.SORTBY.LAST_VISIT,
                 Utils.getCurrentAccount().getActiveProject(), true));
         model.addAttribute("projects", projects);
         return "project/list";
@@ -315,7 +271,7 @@ public class ProjectController {
         participantsAndAdmins.addAll(project.getParticipants());
         participantsAndAdmins.addAll(project.getAdministrators());
         Set<Account> removeActive = participantsAndAdmins.stream().filter(account -> project.getProjectId().equals(account.getActiveProject())).collect(Collectors.toSet());
-        removeActive.stream().forEach(account -> account.setActiveProject(null));
+        removeActive.forEach(account -> account.setActiveProject(null));
         accSrv.update(new ArrayList<>(removeActive));
         return participantsAndAdmins;
     }
@@ -448,118 +404,6 @@ public class ProjectController {
         return "redirect:" + request.getHeader(REFERER);
     }
 
-    @RequestMapping(value = "/project/getParticipants", method = RequestMethod.GET)
-    public
-    @ResponseBody
-    ResponseEntity<List<DisplayAccount>> listParticipants(@RequestParam String id, @RequestParam String term,
-                                                          @RequestParam(required = false) boolean userOnly, HttpServletResponse response) {
-        response.setContentType(APPLICATION_JSON);
-        List<Account> accounts = projSrv.getProjectAccounts(id, term);
-        if (userOnly) {
-            return ResponseEntity.ok(accounts.stream().filter(Account::getIsUser).map(DisplayAccount::new).collect(Collectors.toList()));
-        }
-        return ResponseEntity.ok(accounts.stream().map(DisplayAccount::new).collect(Collectors.toList()));
-    }
-
-
-    @Transactional
-    @RequestMapping(value = "/project/getChart", method = RequestMethod.GET)
-    @ResponseBody
-    public ResponseEntity<ProjectChart> getProjectChart(@RequestParam String id,
-                                                        @RequestParam(required = false) boolean all, HttpServletResponse response) {
-        response.setContentType(APPLICATION_JSON);
-        Project project = projSrv.findByProjectId(id);
-        Map<String, Integer> created = new HashMap<>();
-        Map<String, Integer> closed = new HashMap<>();
-        ProjectChart result = new ProjectChart();
-        List<WorkLog> events = wrkLogSrv.findProjectCreateCloseEvents(project, all);
-        // Fill maps
-        if (events.size() > 0) {
-            for (WorkLog workLog : events) {
-                // Don't calculate for subtask ( not important )
-                if (workLog.getTask() != null && !workLog.getTask().isSubtask()) {
-                    LocalDate date = new LocalDate(workLog.getRawTime());
-                    if (LogType.CREATE.equals(workLog.getType())) {
-                        Integer value = created.get(date.toString());
-                        if (value == null) {
-                            value = 0;
-                        }
-                        value++;
-                        created.put(date.toString(), value);
-                    } else if (LogType.REOPEN.equals(workLog.getType())) {
-                        Integer value = closed.get(date.toString());
-                        if (value == null) {
-                            value = 0;
-                        }
-                        value--;
-                        closed.put(date.toString(), value);
-                    } else {
-                        Integer value = closed.get(date.toString());
-                        if (value == null) {
-                            value = 0;
-                        }
-                        value++;
-                        closed.put(date.toString(), value);
-                    }
-                }
-            }
-            // Look for the first event ever (they are sorted)
-            LocalDate start = new LocalDate(events.get(0).getRawTime());
-            LocalDate end = new LocalDate().plusDays(1);
-            LocalDate counter = start;
-            Integer taskCreated = 0;
-            Integer taskClosed = 0;
-            LocalTime nearMidnight = new LocalTime(23, 59);
-            DateTime startTime = start.toDateTime(new LocalTime(0, 0));
-            DateTime endTime = end.toDateTime(nearMidnight);
-            List<LocalDate> freeDays = projSrv.getFreeDays(project, startTime, endTime);
-            result.setFreeDays(freeDays.stream()
-                    .map(dateTime -> new StartStop(fmt.print(dateTime.minusDays(1).toDateTime(nearMidnight)), fmt.print(dateTime.toDateTime(nearMidnight))))
-                    .collect(Collectors.toList()));
-            while (counter.isBefore(end)) {
-                Integer createValue = created.get(counter.toString());
-                if (createValue == null) {
-                    createValue = 0;
-                }
-                taskCreated += createValue;
-                result.getCreated().put(counter.toString(), taskCreated);
-
-                Integer closeValue = closed.get(counter.toString());
-                if (closeValue == null) {
-                    closeValue = 0;
-                }
-                taskClosed += closeValue;
-                result.getClosed().put(counter.toString(), taskClosed);
-                counter = counter.plusDays(1);
-            }
-        }
-        return ResponseEntity.ok(result);
-    }
-
-    /**
-     * Returns DisplayProject - minified version of project detials to get all
-     * default values etc.
-     *
-     * @param id       id of project
-     * @param response
-     * @return
-     */
-    @RequestMapping(value = "/project/getDefaults", method = RequestMethod.GET)
-    public
-    @ResponseBody
-    ResponseEntity<DisplayProject> getDefaults(@RequestParam String id, HttpServletResponse response) {
-        response.setContentType(APPLICATION_JSON);
-        Project project = projSrv.findByProjectId(id);
-        if (project == null) {
-            return ResponseEntity.badRequest().body(null);
-        }
-        DisplayProject result = new DisplayProject(project);
-        Account account = accSrv.findById(project.getDefaultAssigneeID());
-        if (account != null) {
-            result.setDefaultAssignee(new DisplayAccount(account));
-        }
-        return ResponseEntity.ok(result);
-    }
 
     @Transactional
     @RequestMapping(value = "project/{id}/update", method = RequestMethod.POST)
