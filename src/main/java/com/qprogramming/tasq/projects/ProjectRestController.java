@@ -9,14 +9,14 @@ import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.dto.DisplayProject;
 import com.qprogramming.tasq.projects.dto.ProjectChart;
 import com.qprogramming.tasq.projects.dto.ProjectStats;
+import com.qprogramming.tasq.support.PeriodHelper;
 import com.qprogramming.tasq.support.Utils;
+import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
+import org.joda.time.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
@@ -30,15 +30,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
 public class ProjectRestController {
     private static final String APPLICATION_JSON = "application/json";
+    public static final int ACTIVE_DAYS = 14;
     private ProjectService projSrv;
     private AccountService accSrv;
     private MessageSource msg;
@@ -158,39 +156,81 @@ public class ProjectRestController {
 
     /**
      * Returns statistics for all live of project
-     * @param id ID of project
-     * @param response response to set json format
+     *
+     * @param id       ID of project
      * @return {@link ProjectStats}
      */
     @Transactional
     @RequestMapping(value = "/project/getStats", method = RequestMethod.GET)
-    public ResponseEntity<ProjectStats> getProjectStats(@RequestParam String id, HttpServletResponse response) {
+    public ResponseEntity<ProjectStats> getProjectStats(@RequestParam String id) {
         Project project = projSrv.findByProjectId(id);
         if (project == null) {
             return ResponseEntity.notFound().build();
         }
         ProjectStats stats = new ProjectStats();
         //process events
-        List<WorkLog> events = wrkLogSrv.findProjectCreateCloseCommentEvents(project);
+        setEventsAndDates(project, stats);
+        //get task count
+        long taskCount = project.getTasks().size();
+        long subTaskCount = project.getTasks().stream().filter(Task::isSubtask).count();
+        stats.setTaskCount(taskCount - subTaskCount);
+        stats.setSubTaskCount(subTaskCount);
+        //get total estimated/logged/remaining
+        setPeriodsTotals(project, stats);
+        //active members
+        setActiveMembers(project, stats);
+        return ResponseEntity.ok(stats);
+    }
+
+    private void setEventsAndDates(Project project, ProjectStats stats) {
+        List<WorkLog> events = wrkLogSrv.findProjectCreateCloseLogEvents(project);
         ProcessedEvents processedEvents = processEvents(events);
         LocalDate start = new LocalDate(events.get(0).getRawTime());
         LocalDate end = new LocalDate().plusDays(1);
+        WorkLog lastEvent = events.get(events.size() - 1);
+        LocalDate lastActiveDay = new LocalDate(lastEvent.getRawTime());
         LocalDate counter = start;
         stats.setFreeDays(getFreeDays(project, start, end));
         Integer taskClosed = 0;
-        Integer comments = 0;
         while (counter.isBefore(end)) {
-            Integer commentValue = processedEvents.getComments(counter);
-            comments += commentValue;
-            stats.putCommented(counter.toString(), comments);
+            Period logged = processedEvents.getLogged(counter);
+            stats.putLogged(counter.toString(), Utils.getFloatValue(logged));
             Integer closeValue = processedEvents.getClosed(counter);
             taskClosed += closeValue;
             stats.putClosed(counter.toString(), taskClosed);
             counter = counter.plusDays(1);
         }
-        //get task count
+        //dates
+        stats.setStartDate(start);
+        stats.setLastEventDate(lastActiveDay);
+        stats.setActive(Days.daysBetween(lastActiveDay, new LocalDate()).getDays() < ACTIVE_DAYS);
+    }
 
-        return ResponseEntity.ok(stats);
+    private void setPeriodsTotals(Project project, ProjectStats stats) {
+        Period totalEstimate = new Period();
+        Period totalLogged = new Period();
+        Period totalRemaining = new Period();
+        for (Task task : project.getTasks()) {
+            totalEstimate = PeriodHelper.plusPeriodsInHours(totalEstimate, task.getRawEstimate());
+            totalLogged = PeriodHelper.plusPeriodsInHours(totalLogged, task.getRawLoggedWork());
+            totalRemaining = PeriodHelper.plusPeriodsInHours(totalRemaining, task.getRawRemaining());
+        }
+        stats.setTotalEstimate(PeriodHelper.outFormat(totalEstimate));
+        stats.setTotalLogged(PeriodHelper.outFormat(totalLogged));
+        stats.setTotalRemaining(PeriodHelper.outFormat(totalRemaining));
+    }
+
+    private void setActiveMembers(Project project, ProjectStats stats) {
+        Map<DisplayAccount, Long> assignees = project.getTasks()
+                .stream()
+                .filter(task -> task.getAssignee() != null)
+                .collect(Collectors.groupingBy((Task t) -> new DisplayAccount(t.getAssignee()), Collectors.counting()));
+
+        stats.setTopActive(assignees.entrySet()
+                .stream()
+                .sorted(Map.Entry.<DisplayAccount, Long>comparingByValue().reversed())
+                .limit(10)
+                .map(entry -> new ProjectStats.ActiveAccount(entry.getKey(), entry.getValue())).collect(Collectors.toList()));
     }
 
     private ProcessedEvents processEvents(List<WorkLog> events) {
@@ -213,9 +253,9 @@ public class ProjectRestController {
         } else if (LogType.CLOSED.equals(workLog.getType())) {
             Integer value = result.getClosed(date);
             result.setClosed(date, ++value);
-        } else if (LogType.COMMENT.equals(workLog.getType())) {
-            Integer value = result.getComments(date);
-            result.setComments(date, ++value);
+        } else if (LogType.LOG.equals(workLog.getType())) {
+            Period value = result.getLogged(date);
+            result.setLogged(date, PeriodHelper.plusPeriods(value, workLog.getActivity()));
         }
     }
 
@@ -225,7 +265,8 @@ public class ProjectRestController {
         DateTime endTime = end.toDateTime(nearMidnight);
         List<LocalDate> freeDays = projSrv.getFreeDays(project, startTime, endTime);
         return freeDays.stream()
-                .map(dateTime -> new StartStop(Utils.convertDateTimeToString(dateTime.minusDays(1).toDateTime(nearMidnight)), Utils.convertDateTimeToString(dateTime.toDateTime(nearMidnight))))
+                .map(dateTime -> new StartStop(Utils.convertDateTimeToString(dateTime.minusDays(1).toDateTime(nearMidnight).toDate())
+                        , Utils.convertDateTimeToString(dateTime.toDateTime(nearMidnight).toDate())))
                 .collect(Collectors.toList());
 
     }
@@ -233,7 +274,7 @@ public class ProjectRestController {
     class ProcessedEvents {
         Map<String, Integer> created = new HashMap<>();
         Map<String, Integer> closed = new HashMap<>();
-        Map<String, Integer> comments = new HashMap<>();
+        Map<String, Period> logged = new HashMap<>();
 
 
         Integer getClosed(LocalDate key) {
@@ -244,8 +285,8 @@ public class ProjectRestController {
             return created.getOrDefault(key.toString(), 0);
         }
 
-        Integer getComments(LocalDate key) {
-            return comments.getOrDefault(key.toString(), 0);
+        Period getLogged(LocalDate key) {
+            return logged.getOrDefault(key.toString(), new Period());
         }
 
         void setCreated(LocalDate key, Integer value) {
@@ -256,8 +297,8 @@ public class ProjectRestController {
             closed.put(key.toString(), value);
         }
 
-        void setComments(LocalDate key, Integer value) {
-            comments.put(key.toString(), value);
+        void setLogged(LocalDate key, Period value) {
+            logged.put(key.toString(), value);
         }
     }
 }

@@ -8,6 +8,7 @@ import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.events.EventsService;
 import com.qprogramming.tasq.projects.dto.ProjectChart;
+import com.qprogramming.tasq.projects.dto.ProjectStats;
 import com.qprogramming.tasq.projects.holiday.HolidayService;
 import com.qprogramming.tasq.support.ResultData;
 import com.qprogramming.tasq.support.web.Message;
@@ -19,6 +20,7 @@ import com.qprogramming.tasq.task.worklog.WorkLogService;
 import com.qprogramming.tasq.test.MockSecurityContext;
 import com.qprogramming.tasq.test.TestUtils;
 import org.joda.time.LocalDate;
+import org.joda.time.Period;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -42,6 +44,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
 import static com.qprogramming.tasq.test.TestUtils.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
@@ -107,7 +111,7 @@ public class ProjectControllerTest {
         SecurityContextHolder.setContext(securityMock);
         projectCtr = spy(new ProjectController(projSrv, accountServiceMock, taskSrvMock, sprintSrvMock, msg,
                 eventsSrvMock, holidayServiceMock, visitedSrvMock));
-        projectRestCtr = new ProjectRestController(projSrv,accountServiceMock,msgMock,wrkLogSrv);
+        projectRestCtr = new ProjectRestController(projSrv, accountServiceMock, msgMock, wrkLogSrv);
         doNothing().when(projectCtr).rollBack();
     }
 
@@ -218,9 +222,94 @@ public class ProjectControllerTest {
         ResponseEntity<Page<DisplayWorkLog>> result = projectRestCtr.getProjectEvents(PROJECT_ID, p);
         ResponseEntity<ProjectChart> chart = projectRestCtr.getProjectChart(PROJECT_ID, false, responseMock);
         String today = new LocalDate().toString();
-        Assert.assertEquals(Integer.valueOf(1), chart.getBody().getClosed().get(today));
-        Assert.assertEquals(Integer.valueOf(5), chart.getBody().getCreated().get(today));
-        Assert.assertEquals(8L, result.getBody().getTotalElements());
+        assertEquals(Integer.valueOf(1), chart.getBody().getClosed().get(today));
+        assertEquals(Integer.valueOf(5), chart.getBody().getCreated().get(today));
+        assertEquals(8L, result.getBody().getTotalElements());
+    }
+
+    @Test
+    public void getProjectStatsTest() {
+        Project project = createForm(PROJECT_NAME, PROJECT_ID).createProject();
+        Task task = TestUtils.createTask(PROJECT_NAME, 1, project);
+        task.setEstimate(new Period(2, 0, 0, 0));
+        task.setLoggedWork(new Period(0, 0, 0, 0));
+        task.setRemaining(new Period(0, 0, 0, 0));
+        Task task2 = TestUtils.createTask(PROJECT_NAME, 2, project);
+        task2.setState(TaskState.CLOSED);
+        task2.setAssignee(testAccount);
+        task2.setEstimate(new Period(1, 0, 0, 0));
+        task2.setLoggedWork(new Period(1, 0, 0, 0));
+        task2.setRemaining(new Period(0, 0, 0, 0));
+        Task task3 = TestUtils.createTask(PROJECT_NAME, 3, project);
+        task3.setState(TaskState.ONGOING);
+        task3.setAssignee(testAccount);
+        task3.setEstimate(new Period(3, 0, 0, 0));
+        task3.setLoggedWork(new Period(2, 0, 0, 0));
+        task3.setRemaining(new Period(1, 0, 0, 0));
+        project.addParticipant(testAccount);
+        project.setTasks(Arrays.asList(task, task2, task3));
+        when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
+        WorkLog wl = new WorkLog();
+        wl.setAccount(testAccount);
+        wl.setType(LogType.CREATE);
+        wl.setMessage("msg");
+        wl.setTime(new Date());
+        wl.setTimeLogged(new Date());
+        wl.setTask(task);
+        WorkLog w2 = new WorkLog();
+        w2.setAccount(testAccount);
+        w2.setType(LogType.CLOSED);
+        w2.setMessage("msg");
+        w2.setTime(new Date());
+        w2.setTimeLogged(new Date());
+        w2.setTask(task);
+        WorkLog w3 = new WorkLog();
+        w3.setAccount(testAccount);
+        w3.setType(LogType.REOPEN);
+        w3.setMessage("msg");
+        w3.setTime(new Date());
+        w3.setTimeLogged(new Date());
+        w3.setTask(task);
+        WorkLog w4 = new WorkLog();
+        w4.setAccount(testAccount);
+        w4.setType(LogType.CLOSED);
+        w4.setMessage("msg");
+        w4.setTime(new Date());
+        w4.setTimeLogged(new Date());
+        w4.setTask(task2);
+        WorkLog w5 = new WorkLog();
+        w5.setAccount(testAccount);
+        w5.setType(LogType.LOG);
+        w5.setTime(new Date());
+        w5.setTimeLogged(new Date());
+        w5.setTask(task2);
+        w5.setActivity(new Period(1, 0, 0, 0));
+        WorkLog w6 = new WorkLog();
+        w6.setAccount(testAccount);
+        w6.setType(LogType.LOG);
+        w6.setTime(new Date());
+        w6.setTimeLogged(new Date());
+        w6.setTask(task2);
+        w6.setActivity(new Period(1, 0, 0, 0));
+        WorkLog w7 = new WorkLog();
+        w7.setAccount(testAccount);
+        w7.setType(LogType.LOG);
+        w7.setTime(new Date());
+        w7.setTimeLogged(new Date());
+        w7.setTask(task3);
+        w7.setActivity(new Period(1, 0, 0, 0));
+        List<WorkLog> list = Arrays.asList(wl, w2, w3, w4, w5, w6, w7);
+        when(wrkLogSrv.findProjectCreateCloseLogEvents(project)).thenReturn(list);
+        ResponseEntity<ProjectStats> result = projectRestCtr.getProjectStats(PROJECT_ID);
+        String today = new LocalDate().toString();
+        ProjectStats stats = result.getBody();
+        assertEquals(Integer.valueOf(1), stats.getClosed().get(today));
+        assertEquals("6h", stats.getTotalEstimate().trim());
+        assertEquals("3h", stats.getTotalLogged().trim());
+        assertEquals("1h", stats.getTotalRemaining().trim());
+        assertTrue(stats.isActive());
+        assertTrue(stats.getlogged().get(today) == 3.0f);
+
 
     }
 
@@ -258,7 +347,7 @@ public class ProjectControllerTest {
         testAccount.setRole(Roles.ROLE_ADMIN);
         projectCtr.listProjects(modelMock);
         verify(modelMock, times(2)).addAttribute("projects", list);
-        Assert.assertEquals(new Long(4), list.get(0).getId());
+        assertEquals(new Long(4), list.get(0).getId());
     }
 
     @Test
@@ -266,7 +355,7 @@ public class ProjectControllerTest {
         NewProjectForm form = createForm(PROJECT_NAME, PROJECT_ID);
         List<Project> list = createList(1);
         Project project = form.createProject();
-        Assert.assertEquals(form.getProject_id(), new NewProjectForm(project).getProject_id());
+        assertEquals(form.getProject_id(), new NewProjectForm(project).getProject_id());
         when(projSrv.findByName(anyString())).thenReturn(null);
         when(projSrv.findAllByUser()).thenReturn(list);
         when(msg.getMessage(anyString(), any(Object[].class), anyString(), any(Locale.class))).thenReturn("MSG");
@@ -611,7 +700,7 @@ public class ProjectControllerTest {
         testAccount.setRole(Roles.ROLE_USER);
         Project project = TestUtils.createProject();
         when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
-        projectCtr.deleteProject(TestUtils.PROJECT_ID,PROJECT_ID,PROJECT_NAME, raMock, requestMock);
+        projectCtr.deleteProject(TestUtils.PROJECT_ID, PROJECT_ID, PROJECT_NAME, raMock, requestMock);
     }
 
     @Test
@@ -625,7 +714,7 @@ public class ProjectControllerTest {
         when(projSrv.findByProjectId(PROJECT_ID)).thenReturn(project);
         when(taskSrvMock.findAllByProject(project)).thenReturn(tasksList);
         when(taskSrvMock.deleteTask(task, true)).thenReturn(new ResultData(ResultData.Code.ERROR, "MESSAGE"));
-        projectCtr.deleteProject(TestUtils.PROJECT_ID, PROJECT_ID,PROJECT_NAME, raMock, requestMock);
+        projectCtr.deleteProject(TestUtils.PROJECT_ID, PROJECT_ID, PROJECT_NAME, raMock, requestMock);
         verify(projectCtr, times(1)).rollBack();
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
@@ -664,7 +753,7 @@ public class ProjectControllerTest {
         when(taskSrvMock.findAllByProject(project)).thenReturn(tasksList);
         when(taskSrvMock.deleteTask(any(Task.class), anyBoolean())).thenReturn(new ResultData(ResultData.Code.OK, null));
         when(accountServiceMock.findAllWithActiveTask(task4.getId())).thenReturn(working);
-        projectCtr.deleteProject(TestUtils.PROJECT_ID,PROJECT_ID,PROJECT_NAME, raMock, requestMock);
+        projectCtr.deleteProject(TestUtils.PROJECT_ID, PROJECT_ID, PROJECT_NAME, raMock, requestMock);
         verify(eventsSrvMock, times(3)).addSystemEvent(any(Account.class), any(LogType.class), anyString(), anyString());
         verify(projSrv, times(1)).delete(project);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
@@ -674,7 +763,7 @@ public class ProjectControllerTest {
 
     @Test
     public void deleteProjectNotExistsTest() {
-        projectCtr.deleteProject(TestUtils.PROJECT_ID,PROJECT_ID,PROJECT_NAME, raMock, requestMock);
+        projectCtr.deleteProject(TestUtils.PROJECT_ID, PROJECT_ID, PROJECT_NAME, raMock, requestMock);
         verify(raMock, times(1)).addFlashAttribute(anyString(),
                 new Message(anyString(), Message.Type.DANGER, new Object[]{}));
     }

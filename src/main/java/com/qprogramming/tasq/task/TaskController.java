@@ -510,8 +510,8 @@ public class TaskController {
         }
         Account currentAccount = Utils.getCurrentAccount();
         List<Project> projects = projectSrv.findAllByUser();
-        Collections.sort(projects, new ProjectSorter(ProjectSorter.SORTBY.LAST_VISIT,
-                currentAccount.getActiveProject(), true));
+        projects.sort(new ProjectSorter(ProjectSorter.SORTBY.LAST_VISIT,
+                currentAccount.getActiveProject(), false));
         Account assigneeAccount = null;
         if (StringUtils.isNotEmpty(assignee)) {
             assigneeAccount = accSrv.findByUsername(assignee);

@@ -101,6 +101,10 @@ public class ProjectController {
             throw new TasqAuthException(msg, "role.error.project.permission");
         }
         fillTaskByStatus(model, project);
+        List<Project> projects = projSrv.findAllByUser();
+        projects.sort(new ProjectSorter(ProjectSorter.SORTBY.LAST_VISIT,
+                Utils.getCurrentAccount().getActiveProject(), false));
+        model.addAttribute("projects", projects);
         model.addAttribute("project", project);
         return "project/statistics";
     }

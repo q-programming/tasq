@@ -197,14 +197,14 @@ public class WorkLogService {
                 || LogType.CLOSED.equals(workLog.getType())).collect(Collectors.toCollection(LinkedList::new));
     }
 
-    public List<WorkLog> findProjectCreateCloseCommentEvents(Project project) {
+    public List<WorkLog> findProjectCreateCloseLogEvents(Project project) {
         return wlRepo.findByProjectIdOrderByTimeAsc(project.getId())
                 .stream()
                 .parallel()
                 .filter(workLog -> LogType.CREATE.equals(workLog.getType())
                         || LogType.REOPEN.equals(workLog.getType())
                         || LogType.CLOSED.equals(workLog.getType())
-                        || LogType.COMMENT.equals(workLog.getType()))
+                        || LogType.LOG.equals(workLog.getType()))
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
