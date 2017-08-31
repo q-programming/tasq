@@ -5,10 +5,17 @@
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="t" uri="/WEB-INF/tasq.tld" %>
+<security:authentication property="principal" var="user"/>
 <script language="javascript" type="text/javascript"
         src="<c:url value="/resources/js/jquery.jqplot.min.js"/>"></script>
 <script language="javascript" type="text/javascript"
         src="<c:url value="/resources/js/jqplot.highlighter.min.js"/>"></script>
+<script language="javascript" type="text/javascript"
+        src="<c:url value="/resources/js/jqplot.barRenderer.min.js"/>"></script>
+<script language="javascript" type="text/javascript"
+        src="<c:url value="/resources/js/jqplot.categoryAxisRenderer.min.js"/>"></script>
+<script language="javascript" type="text/javascript"
+        src="<c:url value="/resources/js/jqplot.pointLabels.min.js"/>"></script>
 <script language="javascript" type="text/javascript"
         src="<c:url value="/resources/js/jqplot.dateAxisRenderer.min.js"/>"></script>
 <script language="javascript" type="text/javascript"
@@ -100,21 +107,24 @@
             <div class="row">
                 <div class="col-xs-12 col-sm-9">
                     <i class="fa fa-fw fa-calendar-o"></i><s:message code="project.stats.totalEstimate"/>
-                    <span id="hours-estimated" class="stats-status pull-right">
+                    <span class="stats-status pull-right">
+                        <span id="hours-estimated" class="counter"></span>&nbsp;h
                     </span>
                 </div>
             </div>
             <div class="row">
                 <div class="col-xs-12 col-sm-9">
                     <i class="fa fa-fw fa-calendar-plus-o"></i><s:message code="project.stats.totalLogged"/>
-                    <span id="hours-logged" class="stats-status pull-right">
+                    <span class="stats-status pull-right">
+                        <span id="hours-logged" class="counter"></span>&nbsp;h
                     </span>
                 </div>
             </div>
             <div class="row">
                 <div class="col-xs-12 col-sm-9">
                     <i class="fa fa-fw fa-calendar"></i><s:message code="project.stats.totalRemaining"/>
-                    <span id="hours-left" class="stats-status pull-right">
+                    <span class="stats-status pull-right">
+                        <span id="hours-left" class="counter"></span>&nbsp;h
                     </span>
                 </div>
             </div>
@@ -210,7 +220,9 @@
             <div id="chart_divarea2" class="row" style="height: 200px; width: 90%; margin: 20px auto">
                 <div id="loggedChart" style="height: 200px;"></div>
             </div>
-
+            <div id="chart_divarea3" class="row" style="height: 200px; width: 90%; margin: 20px auto">
+                <div id="weekdays" style="height: 200px;"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -241,8 +253,9 @@
             $("#hours-estimated").html(result.totalEstimate);
             $("#hours-logged").html(result.totalLogged);
             $("#hours-left").html(result.totalRemaining);
-            printDataChart(result.closed, "closedChart", '<i class="fa fa-archive"></i>&nbsp;<s:message code="task.state.closed"/>', '<s:message code="task.state.closed"/>', false);
-            printDataChart(result.logged, "loggedChart", '<i class="fa fa-bar-chart"></i>&nbsp;<s:message code="agile.timelogged.day"/>', ' h', true);
+            printDataChart(result.closed, "closedChart", '<i class="fa fa-archive"></i>&nbsp;<s:message code="task.state.closed"/>', '<s:message code="task.state.closed"/>', false,"#488A48");
+            printDataChart(result.logged, "loggedChart", '<i class="fa fa-bar-chart"></i>&nbsp;<s:message code="agile.timelogged.day"/>', ' h', true,'#5cb85c');
+            printActivityPerDayChart(result.daysOfWeek, "weekdays", '<i class="fa fa-fw fa-calendar"></i><s:message code="project.stats.workload"/>');
             //assignees
             $.each(result.topActive, function (key, data) {
                 var user = userURL + data.account.username + '&projectID=' + projectID;
@@ -269,7 +282,7 @@
         });
     });
 
-    function printDataChart(data, chartID, label, unit, fill) {
+    function printDataChart(data, chartID, label, unit, fill,color) {
         var plot;
         $.jqplot.postDrawHooks.push(function () {
             $(".jqplot-overlayCanvas-canvas").css('z-index', '0'); //send overlay canvas to back
@@ -293,6 +306,7 @@
                     rendererOptions: {
                         smooth: true
                     },
+                    color: '${user.theme.color}',
                     fill: fill
                 },
                 cursor: {
@@ -326,12 +340,73 @@
                 },
                 series: [
                     {
-                        color: '#5cb85c',
+                        color: color,
                         highlighter: {formatString: '[%s] %s ' + unit}
                     }],
                 legend: {
                     show: false,
                 }
+            });
+        } else {
+            $("#chart_divarea").hide('slow');
+            $("#no_events").show('slow');
+        }
+    }
+
+    function printActivityPerDayChart(data, chartID, label) {
+//        var plot2 = $.jqplot(chartID, [[['a',25],['b',14],['c',7]]], {
+//            seriesDefaults:{ renderer:$.jqplot.PieRenderer, trendline:{ show: true } },
+//            legend:{ show: true }
+//        });
+        var plot;
+        $.jqplot.postDrawHooks.push(function () {
+            $(".jqplot-overlayCanvas-canvas").css('z-index', '0'); //send overlay canvas to back
+            $(".jqplot-series-canvas").css('z-index', '1'); //send series canvas to front
+            $(".jqplot-highlighter-tooltip").css('z-index', '2'); //make sure the tooltip is over the series
+            $(".jqplot-event-canvas").css('z-index', '5'); //must be on the very top since it is responsible for event catchin
+        });
+        var width = $("#" + chartID).width();
+        width = width / 7;
+        width = (width * 50) / 100;
+
+        var values = new Array([]);
+        var days = new Array([]);
+        values.pop();
+        days.pop();
+        $.each(data, function (key, val) {
+            values.push(val);
+            days.push(key);
+        });
+
+        if (values.length > 0) {
+            plot = $.jqplot(chartID, [values], {
+                title: label,
+                seriesDefaults: {
+                    showMarker: false,
+                    shadow: false,
+                    renderer: $.jqplot.BarRenderer,
+                    color: '#5783ca',
+                    pointLabels: {
+                        show: true,
+                        formatString: '%s %'
+                    },
+                    rendererOptions: {barWidth: width}
+
+                },
+                grid: {
+                    background: '#ffffff'
+                },
+                animate: true,
+                axes: {
+                    yaxis:{
+                        pad:2
+                    },
+                    xaxis: {
+                        renderer: $.jqplot.CategoryAxisRenderer,
+                        ticks: days
+                    }
+                },
+                highlighter: {show: false}
             });
         } else {
             $("#chart_divarea").hide('slow');

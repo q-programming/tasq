@@ -133,7 +133,7 @@ public class ProjectRestController {
         List<WorkLog> events = wrkLogSrv.findProjectCreateCloseEvents(project, all);
         // Fill maps
         if (events.size() > 0) {
-            ProcessedEvents processedEvents = processEvents(events);
+            ProcessedEvents processedEvents = processEvents(events, true);
             // Look for the first event ever (they are sorted)
             LocalDate start = new LocalDate(events.get(0).getRawTime());
             LocalDate end = new LocalDate().plusDays(1);
@@ -157,7 +157,7 @@ public class ProjectRestController {
     /**
      * Returns statistics for all live of project
      *
-     * @param id       ID of project
+     * @param id ID of project
      * @return {@link ProjectStats}
      */
     @Transactional
@@ -184,7 +184,13 @@ public class ProjectRestController {
 
     private void setEventsAndDates(Project project, ProjectStats stats) {
         List<WorkLog> events = wrkLogSrv.findProjectCreateCloseLogEvents(project);
-        ProcessedEvents processedEvents = processEvents(events);
+        ProcessedEvents processedEvents = processEvents(events, false);
+        int allEvents = processedEvents.days.values().stream().reduce(0, Integer::sum);
+        Map<String, Integer> eventPerWeekday = new LinkedHashMap<>();
+        for (Map.Entry<String, Integer> e : processedEvents.days.entrySet()) {
+            eventPerWeekday.put(e.getKey(), calcPercentage(e.getValue(), allEvents));
+        }
+        stats.setDaysOfWeek(eventPerWeekday);
         LocalDate start = new LocalDate(events.get(0).getRawTime());
         LocalDate end = new LocalDate().plusDays(1);
         WorkLog lastEvent = events.get(events.size() - 1);
@@ -204,6 +210,11 @@ public class ProjectRestController {
         stats.setStartDate(start);
         stats.setLastEventDate(lastActiveDay);
         stats.setActive(Days.daysBetween(lastActiveDay, new LocalDate()).getDays() < ACTIVE_DAYS);
+        //days of week
+    }
+
+    private int calcPercentage(Integer val, Integer total) {
+        return Math.round((val.floatValue() / total.floatValue()) * 100);
     }
 
     private void setPeriodsTotals(Project project, ProjectStats stats) {
@@ -215,9 +226,9 @@ public class ProjectRestController {
             totalLogged = PeriodHelper.plusPeriodsInHours(totalLogged, task.getRawLoggedWork());
             totalRemaining = PeriodHelper.plusPeriodsInHours(totalRemaining, task.getRawRemaining());
         }
-        stats.setTotalEstimate(PeriodHelper.outFormat(totalEstimate));
-        stats.setTotalLogged(PeriodHelper.outFormat(totalLogged));
-        stats.setTotalRemaining(PeriodHelper.outFormat(totalRemaining));
+        stats.setTotalEstimate(String.valueOf(totalEstimate.getHours()));
+        stats.setTotalLogged(String.valueOf(totalLogged.getHours()));
+        stats.setTotalRemaining(String.valueOf(totalRemaining.getHours()));
     }
 
     private void setActiveMembers(Project project, ProjectStats stats) {
@@ -233,12 +244,18 @@ public class ProjectRestController {
                 .map(entry -> new ProjectStats.ActiveAccount(entry.getKey(), entry.getValue())).collect(Collectors.toList()));
     }
 
-    private ProcessedEvents processEvents(List<WorkLog> events) {
+    private ProcessedEvents processEvents(List<WorkLog> events, boolean noSubtask) {
         ProcessedEvents result = new ProcessedEvents();
-        events.stream()
-                // Don't calculate for subtask ( not important )
-                .filter(workLog -> workLog.getTask() != null && !workLog.getTask().isSubtask())
-                .forEach(workLog -> evaluateEvent(result, workLog));
+        if (noSubtask) {
+            events.stream()
+                    // Don't calculate for subtask ( not important )
+                    .filter(workLog -> workLog.getTask() != null && !workLog.getTask().isSubtask())
+                    .forEach(workLog -> evaluateEvent(result, workLog));
+        } else {
+            events.stream()
+                    .filter(workLog -> workLog.getTask() != null)
+                    .forEach(workLog -> evaluateEvent(result, workLog));
+        }
         return result;
     }
 
@@ -256,7 +273,11 @@ public class ProjectRestController {
         } else if (LogType.LOG.equals(workLog.getType())) {
             Period value = result.getLogged(date);
             result.setLogged(date, PeriodHelper.plusPeriods(value, workLog.getActivity()));
+        } else {
+            return;
         }
+        Integer day = result.getDay(date);
+        result.setDays(date, ++day);
     }
 
     private List<StartStop> getFreeDays(Project project, LocalDate start, LocalDate end) {
@@ -271,11 +292,21 @@ public class ProjectRestController {
 
     }
 
-    class ProcessedEvents {
+    static class ProcessedEvents {
         Map<String, Integer> created = new HashMap<>();
         Map<String, Integer> closed = new HashMap<>();
         Map<String, Period> logged = new HashMap<>();
+        Map<String, Integer> days = new LinkedHashMap<>();
 
+        /**
+         * Init class with days map pre-filled to maintain days order
+         */
+        ProcessedEvents() {
+            for (int i = 1; i <= 7; i++) {
+                LocalDate day = new LocalDate().dayOfWeek().setCopy(i);
+                setDays(day, 0);
+            }
+        }
 
         Integer getClosed(LocalDate key) {
             return closed.getOrDefault(key.toString(), 0);
@@ -287,6 +318,14 @@ public class ProjectRestController {
 
         Period getLogged(LocalDate key) {
             return logged.getOrDefault(key.toString(), new Period());
+        }
+
+        Integer getDay(LocalDate key) {
+            return days.getOrDefault(key.dayOfWeek().getAsText(Utils.getCurrentLocale()), 0);
+        }
+
+        void setDays(LocalDate key, Integer value) {
+            days.put(key.dayOfWeek().getAsText(Utils.getCurrentLocale()), value);
         }
 
         void setCreated(LocalDate key, Integer value) {

@@ -20,6 +20,7 @@ public class ProjectStats extends ProjectDataBase {
     private String totalLogged;
     private String totalRemaining;
     private List<ActiveAccount> topActive;
+    private Map<String, Integer> daysOfWeek;
 
     public ProjectStats() {
         super();
@@ -108,6 +109,14 @@ public class ProjectStats extends ProjectDataBase {
 
     public void setTopActive(List<ActiveAccount> topActive) {
         this.topActive = topActive;
+    }
+
+    public void setDaysOfWeek(Map<String, Integer> daysOfWeek) {
+        this.daysOfWeek = daysOfWeek;
+    }
+
+    public Map<String, Integer> getDaysOfWeek() {
+        return daysOfWeek;
     }
 
     public static class ActiveAccount {

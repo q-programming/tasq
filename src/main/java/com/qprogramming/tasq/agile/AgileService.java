@@ -75,10 +75,10 @@ public class AgileService {
         Map<String, Float> resultsBurned = new LinkedHashMap<String, Float>();
         for (int i = 0; i < sprintDays; i++) {
             LocalDate date = new LocalDate(startTime.plusDays(i));
-            Period value = timeBurndownMap.get(new LocalDate(date));
             if (date.isAfter(LocalDate.now())) {
                 resultsBurned.put(date.toString(), 0f);
             } else {
+                Period value = timeBurndownMap.get(new LocalDate(date));
                 if (value != null) {
                     Float result = Utils.getFloatValue(value);
                     resultsBurned.put(date.toString(), result);

@@ -83,7 +83,7 @@ public class KanbanController {
                 Hibernate.initialize(task.getTags());
                 tags.addAll(task.getTags());
             }
-            List<DisplayTask> resultList = taskSrv.convertToDisplay(taskList, true,true);
+            List<DisplayTask> resultList = taskSrv.convertToDisplay(taskList, true, true);
             model.addAttribute("tags", tags);
             model.addAttribute("tasks", resultList);
             return "/kanban/board";
@@ -190,7 +190,6 @@ public class KanbanController {
                     startTime = new DateTime(project.getRawStartDate());
                 } else {
                     startTime = release.getEndDate();
-                    release = null;
                 }
                 releaseTasks = taskSrv.findAllByRelease(project, release);
                 endTime = new DateTime();
@@ -211,16 +210,14 @@ public class KanbanController {
                     .map(localDate -> new StartStop(fmt.print(localDate.minusDays(1).toDateTime(nearMidnight)), fmt.print(localDate.toDateTime(nearMidnight))))
                     .collect(Collectors.toList()));
             List<WorkLog> wrkList = wrkLogSrv.getAllReleaseEvents(release);
-            agileSrv.setTasksByStatus(result,endTime,releaseTasks);
+            agileSrv.setTasksByStatus(result, endTime, releaseTasks);
             result.setWorklogs(DisplayWorkLog.convertToDisplayWorkLogs(wrkList));
             result.setTimeBurned(agileSrv.fillTimeBurndownMap(wrkList,
                     startTime, endTime));
-            Period totalTime = new Period();
-            for (Map.Entry<String, Float> entry : result.getTimeBurned()
-                    .entrySet()) {
-                totalTime = PeriodHelper.plusPeriods(totalTime,
-                        Utils.getPeriodValue(entry.getValue()));
-            }
+            Period totalTime = result.getTimeBurned().values()
+                    .stream()
+                    .map(Utils::getPeriodValue)
+                    .reduce(new Period(), PeriodHelper::plusPeriods);
             result.setTotalTime(String.valueOf(Utils.round(
                     Utils.getFloatValue(totalTime), 2)));
             return ResponseEntity.ok(fillOpenAndClosed(result, release, wrkList));
@@ -262,10 +259,7 @@ public class KanbanController {
 
     private boolean isOngoing(WorkLog workLog) {
         String message = workLog.getMessage();
-        if (StringUtils.isNotBlank(message)) {
-            return message.contains(TODO_ONGOING) || message.contains(COMPLETED_ONGOING);
-        }
-        return false;
+        return StringUtils.isNotBlank(message) && (message.contains(TODO_ONGOING) || message.contains(COMPLETED_ONGOING));
     }
 
     private void fillChartData(KanbanData data,
