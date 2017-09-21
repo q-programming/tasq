@@ -304,9 +304,9 @@ public class ProjectControllerTest {
         String today = new LocalDate().toString();
         ProjectStats stats = result.getBody();
         assertEquals(Integer.valueOf(1), stats.getClosed().get(today));
-        assertEquals("6h", stats.getTotalEstimate().trim());
-        assertEquals("3h", stats.getTotalLogged().trim());
-        assertEquals("1h", stats.getTotalRemaining().trim());
+        assertEquals("6", stats.getTotalEstimate().trim());
+        assertEquals("3", stats.getTotalLogged().trim());
+        assertEquals("1", stats.getTotalRemaining().trim());
         assertTrue(stats.isActive());
         assertTrue(stats.getlogged().get(today) == 3.0f);
 
