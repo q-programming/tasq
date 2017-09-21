@@ -1,7 +1,8 @@
-package com.qprogramming.tasq.projects;
+package com.qprogramming.tasq.projects.dto;
 
 import java.util.Date;
 
+import com.qprogramming.tasq.projects.Project;
 import org.springframework.beans.BeanUtils;
 import com.qprogramming.tasq.account.DisplayAccount;
 import com.qprogramming.tasq.projects.Project.AgileType;

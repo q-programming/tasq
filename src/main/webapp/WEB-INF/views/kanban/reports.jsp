@@ -131,13 +131,13 @@
             //init arrays and remove first element via pop()
             time = new Array([]);
             openData = new Array([]);
-            closedData = new Array([]);
+            chartData = new Array([]);
             progressData = new Array([]);
             freeDays = new Array();
             var timePresent = false;
             time.pop();
             openData.pop();
-            closedData.pop();
+            chartData.pop();
             progressData.pop();
             if (plot) {
                 plot.destroy();
@@ -169,7 +169,7 @@
                     openData.push([key, val]);
                 });
                 $.each(result.closed, function (key, val) {
-                    closedData.push([key, val]);
+                    chartData.push([key, val]);
                 });
                 $.each(result.inProgress, function (key, val) {
                     progressData.push([key, val, result.progressLabels[key]]);
@@ -232,7 +232,7 @@
                 //render chart
                 var startStop = result.startStop;
                 var labelFormat = '%d';
-                plot = $.jqplot('chartdiv', [openData, progressData, closedData], {
+                plot = $.jqplot('chartdiv', [openData, progressData, chartData], {
                     title: '<i class="fa fa-line-chart"></i> <s:message code="agile.release.chart"/><p style="font-size: x-small;">' + startStop + '</p>',
                     animate: true,
                     grid: {

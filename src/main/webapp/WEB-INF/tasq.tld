@@ -65,4 +65,9 @@
         <function-signature>java.lang.String stripHtml(java.lang.String)
         </function-signature>
     </function>
+    <function>
+        <name>round</name>
+        <function-class>com.qprogramming.tasq.support.Utils</function-class>
+        <function-signature>java.lang.Integer round(double)</function-signature>
+    </function>
 </taglib>

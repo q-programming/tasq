@@ -93,7 +93,7 @@ public class SprintController {
                     true));
             Set<String> tags = new HashSet<>();
             List<DisplayTask> resultList = taskSrv.convertToDisplay(taskList,
-                    true);
+                    true, true);
             for (DisplayTask displayTask : resultList) {
                 tags.addAll(displayTask.getTags());
             }
@@ -121,7 +121,7 @@ public class SprintController {
             Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ORDER,
                     true));
             Set<String> tags = new HashSet<>();
-            List<DisplayTask> resultList = taskSrv.convertToDisplay(taskList, true);
+            List<DisplayTask> resultList = taskSrv.convertToDisplay(taskList, true, false);
 
             Map<Sprint, List<DisplayTask>> sprint_result = new LinkedHashMap<>();
             List<Sprint> sprintList = agileSrv.findByProjectIdAndFinished(
@@ -662,10 +662,10 @@ public class SprintController {
     /**
      * Fills Left and burndown charts data
      *
-     * @param result      - Previously filled SpringData
-     * @param sprint      - sprint for which data will be filled
-     * @param wrkList     - list of all worklogs from this sprint
-     *                    story point
+     * @param result  - Previously filled SpringData
+     * @param sprint  - sprint for which data will be filled
+     * @param wrkList - list of all worklogs from this sprint
+     *                story point
      * @return
      */
     private SprintData fillLeftAndBurned(SprintData result, Sprint sprint,

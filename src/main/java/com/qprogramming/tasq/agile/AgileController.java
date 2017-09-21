@@ -37,7 +37,7 @@ public class AgileController {
         } else {
             projects = projSrv.findAllByUser();
         }
-        Collections.sort(projects, new ProjectSorter(ProjectSorter.SORTBY.LAST_VISIT,
+        projects.sort(new ProjectSorter(ProjectSorter.SORTBY.LAST_VISIT,
                 Utils.getCurrentAccount().getActiveProject(), true));
         model.addAttribute("projects", projects);
         return "agile/list";
@@ -100,7 +100,7 @@ public class AgileController {
                     result.add(eliminateHTML(task));
                 }
             }
-            model.addAttribute("tasks", taskSrv.convertToDisplay(result, true));
+            model.addAttribute("tasks", taskSrv.convertToDisplay(result, true,false));
             model.addAttribute("project", project);
         }
         return "/agile/print";

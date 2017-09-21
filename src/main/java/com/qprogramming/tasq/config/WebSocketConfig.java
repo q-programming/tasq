@@ -16,14 +16,11 @@ import javax.servlet.ServletContext;
 @EnableWebSocketMessageBroker
 public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
 
-    @Autowired
-    private ServletContext servletContext;
-
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
 
         config.enableSimpleBroker("/chat-messages");
-        config.setApplicationDestinationPrefixes(servletContext.getContextPath() + "/chat");
+        config.setApplicationDestinationPrefixes("/chat");
     }
 
     @Override

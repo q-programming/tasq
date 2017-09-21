@@ -9,7 +9,7 @@ public enum LogType {
             "log.type.reopen"), CLOSED("log.type.closed"), COMMENT(
             "log.type.comment"), EDITED("log.type.edited"), ASSIGNED(
             "log.type.assign"), PRIORITY("log.type.priority"), DELETED(
-            "log.type.delete"), SPRINT_START("log.type.sprintstart"), SPRINT_STOP(
+            "log.type.delete"),CLONED("log.type.clone"), SPRINT_START("log.type.sprintstart"), SPRINT_STOP(
             "log.type.sprintstop"), TASK_LINK("log.type.taskLink"), TASK_LINK_DEL(
             "log.type.taskLink.delete"), TASKSPRINTADD("log.type.taskSprintAdd"), TASKSPRINTREMOVE(
             "log.type.taskSprintRemove"), SUBTASK("log.type.subtask"), SUBTASK2TASK("log.type.subtask2task"), ASSIGN_TO_PROJ(
