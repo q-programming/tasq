@@ -44,6 +44,22 @@
 <c:if test="${task.state ne 'CLOSED' && (can_edit || user.isPowerUser || is_assignee)}">
     <c:set var="can_be_logged" value="true"/>
 </c:if>
+<c:if test="${task.subtask}">
+    <c:set var="taskEsimate" value="${task.etimate}"/>
+</c:if>
+<c:if test="${not task.subtask && empty taskRemaining}">
+    <c:set var="parentTaskRemaining">${task.remaining}</c:set>
+</c:if>
+<c:if test="${not task.subtask && empty taskEstimate}">
+    <c:set var="parentTaskEstimate">${task.estimate}</c:set>
+</c:if>
+<c:if test="${not task.subtask && not empty taskEstimate}">
+    <c:set var="parentTaskEstimate">${taskEstimate}</c:set>
+</c:if>
+
+<c:if test="${not task.subtask && not empty taskRemaining}">
+    <c:set var="parentTaskRemaining">${taskRemaining}</c:set>
+</c:if>
 <div class="white-frame sidepadded" style="overflow: auto;">
     <%----------------------TASK NAME-----------------------------%>
     <c:set var="taskName_text">
@@ -87,7 +103,7 @@
                             <a href="#"
                                class="estimate-modal" data-toggle="modal"
                                data-target="#new-time-modal-dialog" data-taskID="${task.id}"
-                               data-val="${task.estimate}">
+                               data-val="${parentTaskEstimate}">
                                 <i class="fa fa-calendar-o"></i>&nbsp;<s:message code="task.estimate.change"/>
                             </a>
                         </li>
@@ -103,7 +119,7 @@
                             <a href="#"
                                class="remaining-modal " data-toggle="modal"
                                data-target="#new-time-modal-dialog" data-taskID="${task.id}"
-                               data-val="${task.remaining}">
+                               data-val="${parentTaskRemaining}">
                                 <i class="fa fa-calendar"></i>&nbsp;<s:message code="task.remaining.change"/>
                             </a>
                         </li>
@@ -450,7 +466,7 @@
                                 <span class="estimate-modal a-tooltip clickable" data-toggle="modal"
                                       title="<s:message code="task.estimate.change"/>"
                                       data-target="#new-time-modal-dialog" data-taskID="${task.id}"
-                                      data-val="${task.estimate}">
+                                      data-val="${parentTaskEstimate}">
                                         <i class="fa fa-calendar-o" aria-hidden="true"></i>
                                  </span>
                                 </c:if>
@@ -525,7 +541,7 @@
                                 <span class="remaining-modal a-tooltip clickable" data-toggle="modal"
                                       title="<s:message code="task.remaining.change"/>"
                                       data-target="#new-time-modal-dialog" data-taskID="${task.id}"
-                                      data-val="${task.remaining}">
+                                      data-val="${parentTaskRemaining}">
                                     <i class="fa fa-calendar"></i>
                                 </span>
                             </c:if>
