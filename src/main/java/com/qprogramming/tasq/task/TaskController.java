@@ -309,7 +309,7 @@ public class TaskController {
             updateWatched(task);
             visitedSrv.updateName(task);
         }
-        if (!task.getDescription().equals(taskForm.getDescription())) {
+        if (task.getDescription() == null || !task.getDescription().equals(taskForm.getDescription())) {
             message.append(Utils.changedFromTo(DESCRIPTION_TXT, task.getDescription(), taskForm.getDescription()));
             task.setDescription(taskForm.getDescription());
         }
