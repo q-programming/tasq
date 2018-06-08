@@ -541,7 +541,7 @@ public class TaskController {
             }
             Collections.sort(tasks, new TaskSorter(TaskSorter.SORTBY.ID, false));
             model.addAttribute("tasks", tasks);
-            model.addAttribute("active_project", project);
+            model.addAttribute("active_project", project.getProjectId());
         }
         return "task/list";
     }
