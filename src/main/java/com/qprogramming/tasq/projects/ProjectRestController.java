@@ -192,8 +192,8 @@ public class ProjectRestController {
         }
         stats.setDaysOfWeek(eventPerWeekday);
         LocalDate start = new LocalDate(events.get(0).getRawTime());
-        LocalDate end = new LocalDate().plusDays(1);
         WorkLog lastEvent = events.get(events.size() - 1);
+        LocalDate end = new LocalDate(lastEvent.getRawTime()).plusDays(1);
         LocalDate lastActiveDay = new LocalDate(lastEvent.getRawTime());
         LocalDate counter = start;
         stats.setFreeDays(getFreeDays(project, start, end));
