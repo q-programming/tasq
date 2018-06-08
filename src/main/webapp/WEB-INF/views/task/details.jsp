@@ -45,7 +45,7 @@
     <c:set var="can_be_logged" value="true"/>
 </c:if>
 <c:if test="${task.subtask}">
-    <c:set var="taskEsimate" value="${task.etimate}"/>
+    <c:set var="taskEsimate" value="${task.estimate}"/>
 </c:if>
 <c:if test="${not task.subtask && empty taskRemaining}">
     <c:set var="parentTaskRemaining">${task.remaining}</c:set>
