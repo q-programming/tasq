@@ -179,7 +179,7 @@ $(document).on("click", ".avatar.small.member", function () {
         });
         currentAccount = account;
     } else {
-        currentAccount = "";
+        currentAccount = -1;
     }
 })
 
