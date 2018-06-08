@@ -76,7 +76,11 @@
                 <i class="fa fa-plus"></i>
             </a>
         </c:if>
-        <a class="btn btn-default a-tooltip pull-right" href="<c:url value="/${project.projectId}/chat"/>"
+        <a class="btn btn-default a-tooltip pull-right" href="<c:url value="/project/${project.projectId}/statistics"/>"
+           title="<s:message code="project.stats"/>" data-placement="bottom">
+            <i class="fa fa-bar-chart"></i>
+        </a>
+        <a class="btn btn-default a-tooltip pull-right" href="<c:url value="/project/${project.projectId}/chat"/>"
            title="<s:message code="project.chat"/>" data-placement="bottom">
             <i class="fa fa-comments" aria-hidden="true"></i>
         </a>
@@ -279,14 +283,14 @@
             $("#loading").remove();
             //console.log(result);
             createdData = new Array([]);
-            closedData = new Array([]);
+            chartData = new Array([]);
             createdData.pop();
-            closedData.pop();
+            chartData.pop();
             $.each(result.created, function (key, val) {
                 createdData.push([key, val]);
             });
             $.each(result.closed, function (key, val) {
-                closedData.push([key, val]);
+                chartData.push([key, val]);
             });
             $.each(result.freeDays, function (key, val) {
                 freeDays.push({
@@ -301,8 +305,8 @@
                 });
             });
 
-            if (createdData.length > 0 && closedData.length > 0) {
-                plot = $.jqplot('chartdiv', [createdData, closedData], {
+            if (createdData.length > 0 && chartData.length > 0) {
+                plot = $.jqplot('chartdiv', [createdData, chartData], {
                     title: '<s:message code="task.created"/>/<s:message code="task.state.closed"/>',
                     seriesDefaults: {
                         rendererOptions: {

@@ -120,7 +120,8 @@ div.agile-card > .bottom-tab {
     bottom: 0;
     width: 100%
 }
-.pointsdiv{
+
+.pointsdiv {
     display: table-cell;
 }
 
@@ -277,6 +278,9 @@ table.togglerContent {
 
 .marginLeft_20 {
     margin-left: 20px;
+}
+.marginLeft_18 {
+    margin-left: 18px;
 }
 
 .table_state {
@@ -857,7 +861,7 @@ body {
 .nav-bottom {
     position: fixed !important;
     bottom: 0;
-    width: 100%;
+    /*width: 100%;*/
     background-color: #f5f5f5;
 }
 
@@ -1190,6 +1194,46 @@ td.width200 {
     width: 100%;
 }
 
+/*stats*/
+.stats-progress {
+    height: 20px;
+    background-color: transparent;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+.animated-progress span {
+    color: #000;
+}
+
+.full-page-loader {
+    z-index: 1000;
+    background: white;
+    height: 100%;
+    padding: 30px;
+    font-size: larger;
+}
+
+.stats-status {
+    font-weight: bold;
+}
+
+.stats-status .inactive {
+    font-size: larger;
+    color: gray;
+}
+
+.stats-status .active {
+    color: green;
+    font-size: larger;
+}
+.stats-status .time-div{
+    color: gray;
+    font-size: smaller;
+    padding-left: 10px;
+    float: none;
+}
+
 /* .search { position: relative; } */
 /* .search input { text-indent: 30px;} */
 /* .search .fa-search {  */
@@ -1198,3 +1242,7 @@ td.width200 {
 /*   left: 7px; */
 /*   font-size: 15px; */
 /* } */
+.task-count {
+    float: right !important;
+    margin-right: -25px;
+}

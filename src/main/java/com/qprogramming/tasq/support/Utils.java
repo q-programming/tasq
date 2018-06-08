@@ -4,6 +4,7 @@ import com.qprogramming.tasq.account.Account;
 import com.qprogramming.tasq.task.Task;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Hibernate;
+import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.Period;
 import org.jsoup.Jsoup;
@@ -187,6 +188,16 @@ public class Utils {
      * @param date
      * @return
      */
+    public static String convertDateTimeToString(DateTime date) {
+        return new SimpleDateFormat(DATE_FORMAT_TIME).format(date);
+    }
+
+    /**
+     * Returns strng with date and time
+     *
+     * @param date
+     * @return
+     */
     public static String convertDateTimeToString(Date date) {
         return new SimpleDateFormat(DATE_FORMAT_TIME).format(date);
     }
@@ -258,6 +269,10 @@ public class Utils {
 
     public static String stripHtml(String string) {
         return Jsoup.parse(string).text();
+    }
+
+    public static Integer round(double number) {
+        return (int) Math.round(number);
     }
 
     /**

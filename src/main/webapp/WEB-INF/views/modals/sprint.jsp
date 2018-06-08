@@ -7,7 +7,8 @@
         <div class="modal-content">
             <div class="modal-header theme">
                 <button type="button" class="close theme-close" data-dismiss="modal"
-                        aria-hidden="true">&times;</button>
+                        aria-hidden="true">&times;
+                </button>
                 <h4 class="modal-title" id="sprintStartModal">
                 </h4>
             </div>
@@ -49,7 +50,7 @@
                         </div>
                     </div>
                     <p id="errors" class="text-danger"></p>
-					<span class="help-block"><s:message
+                    <span class="help-block"><s:message
                             code="agile.sprint.startstop"/></span>
 
                 </div>
@@ -116,7 +117,7 @@
 
         var start_date = $.datepicker.parseDate("dd-mm-yy", start);
         var end_date = $.datepicker.parseDate("dd-mm-yy", end);
-        if (start_date == null || end_date == null || start_date > end_date || startTime == "" || endTime == "") {
+        if (start_date === null || end_date === null || start_date > end_date || startTime === "" || endTime === "") {
             var error_msg = "<s:message code="agile.sprint.startstop.error"/>";
             $("#errors").html(error_msg);
             event.preventDefault();
@@ -130,13 +131,13 @@
                 sprintStartTime: startTime,
                 sprintEndTime: endTime
             }, function (result) {
-                if (result.code == 'ERROR') {
+                if (result.code === 'ERROR') {
                     showError(result.message);
-                } else if (result.code == 'WARNING') {
+                } else if (result.code === 'WARNING') {
                     showWarning(result.message)
                 }
                 else {
-                    var backlogPage = '<c:url value="/${project.projectId}/scrum/backlog"/>';
+                    var backlogPage = '${project.projectId}/scrum/backlog';
                     var url = '<c:url value="/redirect"/>' + "?page=" + backlogPage + "&type=OK&message=" + result.message;
                     window.location = url;
                 }

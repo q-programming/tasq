@@ -63,7 +63,7 @@ public class PeriodHelper {
     }
 
     /**
-     * Adds to periods ( plus standardize based on normals ) TODO change to 8h
+     * Adds to periods ( plus standardize based on normals )
      * based work day ?
      *
      * @param period1
@@ -73,6 +73,21 @@ public class PeriodHelper {
     public static Period plusPeriods(Period period1, Period period2) {
         Period result = period1.plus(period2);
         return normalizedStandard(result);
+    }
+
+
+    /**
+     * Adds two periods ( plus standardize based on normals )
+     * Afterwards it's converted to standard duration and result is normal Period with hours only
+     *
+     * @param period1
+     * @param period2
+     * @return
+     */
+    public static Period plusPeriodsInHours(Period period1, Period period2) {
+        Period total = plusPeriods(period1, period2);
+        return new Period(toStandardDuration(total));
+
     }
 
     /**

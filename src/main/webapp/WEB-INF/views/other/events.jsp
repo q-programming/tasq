@@ -33,7 +33,7 @@
                 var row = '<tr class="eventRow centerPadded"><td colspan="3"><i><s:message code="event.noEvents"/></i></td></tr>';
                 $("#eventsTable").append(row);
             } else {
-                printWorkLogNavigation(page, data);
+                printWorkLogNavigation(page, data,projectID);
                 var rows = "";
                 for (var j = 0; j < data.content.length; j++) {
                     var content = data.content[j];
@@ -61,7 +61,7 @@
         });
 
     }
-    function printWorkLogNavigation(page, data) {
+    function printWorkLogNavigation(page, data,projectID) {
         var options = {
             bootstrapMajorVersion: 3,
             currentPage: page + 1,
@@ -71,7 +71,7 @@
             },
             numberOfPages: 10,
             onPageChanged: function (e, oldPage, newPage) {
-                fetchWorkLogData(newPage - 1);
+                fetchWorkLogData(newPage - 1,projectID);
             }
         };
         $("#eventsTable_pagination_top").bootstrapPaginator(options);

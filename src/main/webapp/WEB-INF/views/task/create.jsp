@@ -14,7 +14,7 @@
 <script src="<c:url value="/resources/js/bootstrap.file-input.js"/>"></script>
 <security:authentication property="principal" var="user"/>
 <c:if test="${user.language ne 'en' }">
-    <script src="<c:url value="/resources/js/trumbowyg.${user.language}2.min.js" />"></script>
+    <script src="<c:url value="/resources/js/trumbowyg.${user.language}.min.js" />"></script>
 </c:if>
 
 <c:set var="taskName_text">

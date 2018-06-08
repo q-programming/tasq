@@ -231,7 +231,14 @@ public class SignupController {
     }
 
     private String getAvatarDir() {
-        return appSrv.getProperty(AppService.TASQROOTDIR) + File.separator + AVATAR_DIR + File.separator;
+        String avatarDirString = appSrv.getProperty(AppService.TASQROOTDIR) + File.separator + AVATAR_DIR + File.separator;
+        File dir = new File(avatarDirString);
+        if (!dir.exists() || !dir.isDirectory()) {
+            if (!dir.mkdir()) {
+                throw new TasqException("Failed to create directory :" + avatarDirString);
+            }
+        }
+        return avatarDirString;
     }
 
     private String getAvatar(Long id) {

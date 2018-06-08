@@ -92,7 +92,7 @@
     }
 
     function sendMessage(message, username, event) {
-        stompClient.send("<c:url value="/chat/message/${chatProject.projectId}"/>", {}, JSON.stringify({
+        stompClient.send("/chat/message/${chatProject.projectId}", {}, JSON.stringify({
             'message': message,
             'username': username,
             'project': project,

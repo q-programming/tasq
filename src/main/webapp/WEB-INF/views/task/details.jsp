@@ -44,6 +44,22 @@
 <c:if test="${task.state ne 'CLOSED' && (can_edit || user.isPowerUser || is_assignee)}">
     <c:set var="can_be_logged" value="true"/>
 </c:if>
+<c:if test="${task.subtask}">
+    <c:set var="taskEsimate" value="${task.estimate}"/>
+</c:if>
+<c:if test="${not task.subtask && empty taskRemaining}">
+    <c:set var="parentTaskRemaining">${task.remaining}</c:set>
+</c:if>
+<c:if test="${not task.subtask && empty taskEstimate}">
+    <c:set var="parentTaskEstimate">${task.estimate}</c:set>
+</c:if>
+<c:if test="${not task.subtask && not empty taskEstimate}">
+    <c:set var="parentTaskEstimate">${taskEstimate}</c:set>
+</c:if>
+
+<c:if test="${not task.subtask && not empty taskRemaining}">
+    <c:set var="parentTaskRemaining">${taskRemaining}</c:set>
+</c:if>
 <div class="white-frame sidepadded" style="overflow: auto;">
     <%----------------------TASK NAME-----------------------------%>
     <c:set var="taskName_text">
@@ -87,7 +103,7 @@
                             <a href="#"
                                class="estimate-modal" data-toggle="modal"
                                data-target="#new-time-modal-dialog" data-taskID="${task.id}"
-                               data-val="${task.estimate}">
+                               data-val="${parentTaskEstimate}">
                                 <i class="fa fa-calendar-o"></i>&nbsp;<s:message code="task.estimate.change"/>
                             </a>
                         </li>
@@ -103,7 +119,7 @@
                             <a href="#"
                                class="remaining-modal " data-toggle="modal"
                                data-target="#new-time-modal-dialog" data-taskID="${task.id}"
-                               data-val="${task.remaining}">
+                               data-val="${parentTaskRemaining}">
                                 <i class="fa fa-calendar"></i>&nbsp;<s:message code="task.remaining.change"/>
                             </a>
                         </li>
@@ -126,6 +142,14 @@
                             <s:message code="task.linked.create"/>
                         </a>
                     </li>
+                    <c:if test="${can_edit && not task.subtask}">
+                        <li>
+                            <a href="<c:url value="/task/clone"/>?id=${task.id}">
+                                <i class="fa fa-clone" aria-hidden="true"></i>
+                                <s:message code="task.clone"/>
+                            </a>
+                        </li>
+                    </c:if>
                 </ul>
             </c:if>
             <c:if test="${task.state eq'CLOSED' && project_participant}">
@@ -442,7 +466,7 @@
                                 <span class="estimate-modal a-tooltip clickable" data-toggle="modal"
                                       title="<s:message code="task.estimate.change"/>"
                                       data-target="#new-time-modal-dialog" data-taskID="${task.id}"
-                                      data-val="${task.estimate}">
+                                      data-val="${parentTaskEstimate}">
                                         <i class="fa fa-calendar-o" aria-hidden="true"></i>
                                  </span>
                                 </c:if>
@@ -517,7 +541,7 @@
                                 <span class="remaining-modal a-tooltip clickable" data-toggle="modal"
                                       title="<s:message code="task.remaining.change"/>"
                                       data-target="#new-time-modal-dialog" data-taskID="${task.id}"
-                                      data-val="${task.remaining}">
+                                      data-val="${parentTaskRemaining}">
                                     <i class="fa fa-calendar"></i>
                                 </span>
                             </c:if>
@@ -1016,7 +1040,8 @@
         <div class="modal-content">
             <div class="modal-header theme">
                 <button type="button" class="close theme-close" data-dismiss="modal"
-                        aria-hidden="true">&times;</button>
+                        aria-hidden="true">&times;
+                </button>
                 <h4>
                     <i class="fa fa-pencil"></i>&nbsp;<s:message code="comment.edit" text="Edit comment"/>
                 </h4>
@@ -1202,8 +1227,8 @@
             var current_state = $("#current_state").data('state');
             var newState = $(this).html();
             var subTasks = "${task.subtasks}";
-            if (state != current_state) {
-                if (state == 'CLOSED') {
+            if (state !== current_state) {
+                if (state === 'CLOSED') {
                     $('#modal_subtaskCount').html(subTasks);
                     $('#close_task').modal({
                         show: true,
@@ -1214,17 +1239,17 @@
                 else {
                     showWait(true);
                     $.post('<c:url value="/task/changeState"/>', {id: taskID, state: state}, function (result) {
-                        if (result.code == 'ERROR') {
+                        if (result.code === 'ERROR') {
                             showError(result.message);
-                        }
-                        else {
+                        } else {
                             $("#current_state").data('state', state).html(newState);
-                            showSuccess(result.message);
-                            //Reopening task forces page to reload after 5s
-                            if (current_state == 'CLOSED') {
-                                setTimeout(function () {
-                                    window.location.reload(1);
-                                }, 5000);
+                            //Reopening task forces page to reload
+                            if (current_state === 'CLOSED') {
+                                var locationUrl = '${requestScope['javax.servlet.forward.servlet_path']}';
+                                var url = '<c:url value="/redirect"/>' + "?page=" + locationUrl + "&type=" + result.code + "&message=" + result.message;
+                                window.location = url;
+                            } else {
+                                showSuccess(result.message);
                             }
                         }
                         showWait(false);
@@ -1237,7 +1262,7 @@
         $("#watch").click(function () {
             var url = '<c:url value="/task/watch"/>';
             $.post(url, {id: taskID}, function (result) {
-                if (result.code == 'ERROR') {
+                if (result.code === 'ERROR') {
                     showError(result.message);
                 }
                 else {
@@ -1261,7 +1286,7 @@
 
         $('#point-input').keypress(function (e) {
             var key = e.which;
-            if (key == 13)  // the enter key code
+            if (key === 13)  // the enter key code
             {
                 changePoints();
             }
@@ -1285,7 +1310,7 @@
             if (isNumber(points) && (points >= 0 && points <= 100)) {
                 showWait(true);
                 $.post('<c:url value="/task/changePoints"/>', {id: taskID, points: points}, function (result) {
-                    if (result.code == 'ERROR') {
+                    if (result.code === 'ERROR') {
                         showError(result.message);
                     }
                     else {
@@ -1380,7 +1405,7 @@
             e.preventDefault();
             var $link = $(this);
             bootbox.confirm(msg, function (result) {
-                if (result == true) {
+                if (result === true) {
                     document.location.assign($link.attr('href'));
                 }
             });
@@ -1453,7 +1478,7 @@
                 showWait(true);
                 var url = '<c:url value="/addTaskTag"/>';
                 $.get(url, {name: event.item, taskID: taskID}, function (data) {
-                    if (data == 'ERROR') {
+                    if (data === 'ERROR') {
                         event.cancel = true;
                         var warning = '<s:message code="task.tags.notAdded"/>';
                         showWarning(warning);
@@ -1498,7 +1523,7 @@
 
         function checkIfEmptyTags() {
             if ('${can_edit}') {
-                if ($("#taskTags").val() == "") {
+                if ($("#taskTags").val() === "") {
                     $("#tagsinput").attr("placeholder", noTags);
                 } else {
                     $("#tagsinput").attr("placeholder", "");
@@ -1593,7 +1618,7 @@
                 fillLogWorkValues('${task.id}');
                 $("#logWorkform").modal('show');
             }
-            else if (e.which == 67) {
+            else if (e.which === 67) {
                 toggle_comment();
             }
         }
