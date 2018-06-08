@@ -10,13 +10,11 @@ import com.qprogramming.tasq.support.web.MessageHelper;
 import com.qprogramming.tasq.task.DisplayTask;
 import com.qprogramming.tasq.task.Task;
 import com.qprogramming.tasq.task.TaskService;
-import com.qprogramming.tasq.task.tag.Tag;
 import com.qprogramming.tasq.task.worklog.DisplayWorkLog;
 import com.qprogramming.tasq.task.worklog.LogType;
 import com.qprogramming.tasq.task.worklog.WorkLog;
 import com.qprogramming.tasq.task.worklog.WorkLogService;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Hibernate;
 import org.joda.time.*;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -78,12 +76,8 @@ public class KanbanController {
             List<Task> taskList = taskSrv.findAllWithoutRelease(project);
             Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ORDER,
                     true));
-            Set<Tag> tags = new HashSet<Tag>();
-            for (Task task : taskList) {
-                Hibernate.initialize(task.getTags());
-                tags.addAll(task.getTags());
-            }
             List<DisplayTask> resultList = taskSrv.convertToDisplay(taskList, true, true);
+            Set<String> tags = resultList.stream().map(DisplayTask::getTagsList).collect(Collectors.toSet());
             model.addAttribute("tags", tags);
             model.addAttribute("tasks", resultList);
             return "/kanban/board";

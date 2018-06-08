@@ -197,6 +197,7 @@ public class TaskService {
                 addSubtaskTimers(task, subtasks);
             }
             DisplayTask displayTask = new DisplayTask(task);
+            displayTask.setTagsFromTask(tagsList);
             resultList.add(displayTask);
         }
         return resultList;
