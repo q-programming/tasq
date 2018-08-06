@@ -74,10 +74,12 @@ public class KanbanController {
             }
             model.addAttribute("project", project);
             List<Task> taskList = taskSrv.findAllWithoutRelease(project);
-            Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ORDER,
+            taskList.sort(new TaskSorter(TaskSorter.SORTBY.ORDER,
                     true));
             List<DisplayTask> resultList = taskSrv.convertToDisplay(taskList, true, true);
-            Set<String> tags = resultList.stream().map(DisplayTask::getTagsList).collect(Collectors.toSet());
+            Set<String> tags = resultList.stream().map(DisplayTask::getTags).flatMap(Collection::stream)   //Stream<String>
+                    .distinct()
+                    .collect(Collectors.toSet());
             model.addAttribute("tags", tags);
             model.addAttribute("tasks", resultList);
             return "/kanban/board";

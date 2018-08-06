@@ -228,16 +228,7 @@ public class DisplayTask implements Comparable<DisplayTask> {
     }
 
     public String getTagsList() {
-        String delimiter = "";
-        StringBuffer allTags = new StringBuffer();
-        for (String tag : this.tags) {
-            allTags.append(delimiter);
-            allTags.append(tag);
-            delimiter = ",";
-        }
-        //Not able to use join in Java 1.7
-        //return String.join(",",allTags);
-        return allTags.toString();
+        return String.join(",", this.tags);
     }
 
     @Override

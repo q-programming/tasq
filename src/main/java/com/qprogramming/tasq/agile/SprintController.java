@@ -91,12 +91,11 @@ public class SprintController {
             List<Task> taskList = taskSrv.findAllBySprint(sprint);
             Collections.sort(taskList, new TaskSorter(TaskSorter.SORTBY.ORDER,
                     true));
-            Set<String> tags = new HashSet<>();
             List<DisplayTask> resultList = taskSrv.convertToDisplay(taskList,
                     true, true);
-            for (DisplayTask displayTask : resultList) {
-                tags.addAll(displayTask.getTags());
-            }
+            Set<String> tags = resultList.stream().map(DisplayTask::getTags).flatMap(Collection::stream)   //Stream<String>
+                    .distinct()
+                    .collect(Collectors.toSet());
             model.addAttribute("tags", tags);
             model.addAttribute("sprint", sprint);
             model.addAttribute("tasks", resultList);
