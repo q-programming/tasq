@@ -55,6 +55,13 @@
                         class="fa fa-archive fa-stack-1x"></i>
 				</span></a> Check all tasks and add missing close event
             </div>
+            <div>
+                <a class="btn btn-default" onclick="addURL(this)"
+                   href="<c:url value="/task/kanban-fix"></c:url>"> <span
+                        class="fa-stack"> <i class="fa fa-repeat fa-stack-2x"></i> <i
+                        class="fa fa-calendar fa-stack-1x"></i>
+				</span></a> Fix all release dates
+            </div>
         </div>
     </div>
 </div>

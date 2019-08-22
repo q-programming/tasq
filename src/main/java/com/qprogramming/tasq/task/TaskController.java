@@ -1354,6 +1354,7 @@ public class TaskController {
      * @return
      */
     @Transactional
+    @Deprecated
     @RequestMapping(value = "task/updatelogs", method = RequestMethod.GET)
     public String update(@RequestParam(value = "project", required = false) Long project, RedirectAttributes ra,
                          HttpServletRequest request, Model model) {

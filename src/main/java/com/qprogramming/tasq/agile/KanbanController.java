@@ -1,5 +1,6 @@
 package com.qprogramming.tasq.agile;
 
+import com.qprogramming.tasq.account.Roles;
 import com.qprogramming.tasq.error.TasqAuthException;
 import com.qprogramming.tasq.projects.Project;
 import com.qprogramming.tasq.projects.ProjectService;
@@ -41,6 +42,7 @@ public class KanbanController {
             .getLogger(KanbanController.class);
     private static final String TODO_ONGOING = "<strike>To do</strike> &#10151; Ongoing";
     private static final String COMPLETED_ONGOING = "<strike>Complete</strike> &#10151; Ongoing";
+    private static final String BR = "<br>";
     // TODO depreciated
     private static final String TODO_ONGOING_DEPR = "To do -> Ongoing";
     private static final String ONGOING = "ongoing";
@@ -102,14 +104,11 @@ public class KanbanController {
             Release unique = agileSrv.findByProjectIdAndRelease(
                     project.getId(), releaseNo);
             if (unique != null) {
-                StringBuilder projectName = new StringBuilder("[");
-                projectName.append(project.getProjectId());
-                projectName.append("] ");
-                projectName.append(project.getName());
+                String projectName = "[" + project.getProjectId() + "] " + project.getName();
                 MessageHelper.addWarningAttribute(
                         ra,
                         msg.getMessage("agile.release.exists", new Object[]{
-                                        releaseNo, projectName.toString()},
+                                        releaseNo, projectName},
                                 Utils.getCurrentLocale()));
                 return "redirect:" + request.getHeader("Referer");
             }
@@ -126,8 +125,7 @@ public class KanbanController {
             List<Release> releases = agileSrv
                     .findReleaseByProjectIdOrderByDateDesc(project.getId());
             if (!releases.isEmpty()) {
-                release.setStartDate(releases.get(releases.size() - 1)
-                        .getEndDate());
+                release.setStartDate(releases.get(0).getEndDate());
             }
             release = agileSrv.save(release);
             int count = 0;
@@ -221,6 +219,39 @@ public class KanbanController {
             return ResponseEntity.ok(result);
         }
     }
+
+    @Transactional
+    @RequestMapping(value = "task/kanban-fix", method = RequestMethod.GET)
+    public String fixDates(@RequestParam(value = "project", required = false) Long id, RedirectAttributes ra,
+                           HttpServletRequest request, Model model) {
+        if (!Roles.isAdmin()) {
+            throw new TasqAuthException(msg);
+        }
+        Project project = projSrv.findById(id);
+        if (project != null) {
+            if (!projSrv.canAdminister(project)) {
+                throw new TasqAuthException(msg);
+            }
+            StringBuilder console = new StringBuilder("Fixing start dates for releases");
+            console.append(BR);
+            ArrayList<Release> releases = (ArrayList<Release>) agileSrv
+                    .findReleaseByProjectIdOrderByDateDesc(project.getId());
+            for (int i = 0; i < releases.size() - 1; i++) {
+                Release release = releases.get(i);
+                Release previousRelease = releases.get(i + 1);
+                release.setStartDate(previousRelease.getEndDate());
+                console.append(String.format("Fixing start date for release %s setting new start date: %s", release.getRelease(), release.getStartDate().toDate()));
+                console.append(BR);
+            }
+            model.addAttribute("console", console.toString());
+            return "other/console";
+        } else {
+            MessageHelper.addWarningAttribute(
+                    ra, "Project was not found ");
+            return "redirect:" + request.getHeader("Referer");
+        }
+    }
+
 
     private KanbanData fillOpenAndClosed(KanbanData result, Release release,
                                          List<WorkLog> wrkList) {

@@ -137,7 +137,7 @@ public class AgileService {
         if (list.isEmpty()) {
             return null;
         }
-        return list.get(list.size() - 1);
+        return list.get(0);
     }
 
     public boolean taskInActiveSprint(Task task) {
