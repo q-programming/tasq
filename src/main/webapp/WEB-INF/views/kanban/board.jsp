@@ -12,6 +12,9 @@
     </div>
     <div class="col-sm12 col-md-6">
         <div class="margintop_20 pull-right ">
+			<span class="btn btn-default pull-left" id="new release" data-toggle="modal" data-target="#releaseModal">
+				<i class="fa fa-clipboard"></i>&nbsp;<s:message code="agile.newRelease"/>
+			</span>
             <a class="btn btn-default print_cards" style="width: 120px">
                 <i class="fa fa-print"></i>&nbsp;<s:message code="agile.print"/></a>
         </div>
@@ -56,8 +59,8 @@
                 </c:forEach>
             </div>
         </div>
-    <span class="btn btn-default pull-right" id="save_order"
-          style="display: none"><i class="fa fa-floppy-o"></i>&nbsp;Save order
+        <span class="btn btn-default pull-right" id="save_order"
+              style="display: none"><i class="fa fa-floppy-o"></i>&nbsp;Save order
     </span>
         <table style="width:100%">
             <jsp:include page="../agile/board.jsp"/>
@@ -66,5 +69,6 @@
 <jsp:include page="../modals/logWork.jsp"/>
 <jsp:include page="../modals/close.jsp"/>
 <jsp:include page="../modals/assign.jsp"/>
+<jsp:include page="../modals/release.jsp"/>
 
 

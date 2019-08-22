@@ -882,7 +882,7 @@
             </div>
             <%----------------SPRITNS/RELEASES ----------------------%>
             <c:set var="hidden">none</c:set>
-            <c:if test="${task.project.agile eq 'KANBAN' && not empty task.release }">
+            <c:if test="${task.project.agile eq 'KANBAN'}">
                 <c:set var="hidden">block</c:set>
             </c:if>
             <c:if test="${not task.subtask}">
@@ -893,11 +893,20 @@
                                 <s:message code="agile.release"/>
                             </h5>
                         </div>
-                        <div>
-                            <a
-                                    href="<c:url value="/${task.project.projectId}/${fn:toLowerCase(task.project.agile)}/reports?release=${task.release.release}"/>">
-                                    ${task.release.release}</a>
-                        </div>
+                        <c:if test="${not empty task.release}">
+                            <div>
+                                <a
+                                        href="<c:url value="/${task.project.projectId}/${fn:toLowerCase(task.project.agile)}/reports?release=${task.release.release}"/>">
+                                        ${task.release.release}</a>
+                            </div>
+                        </c:if>
+                        <c:if test="${empty task.release}">
+                            <div>
+                                <a href="<c:url value="/${task.project.projectId}/${fn:toLowerCase(task.project.agile)}/board"/>">
+                                <s:message code="agile.board.KANBAN.boardlink" />
+                                </a>
+                            </div>
+                        </c:if>
                     </c:if>
                     <c:if test="${task.project.agile eq 'SCRUM'}">
                         <div class="mod-header">
@@ -1584,6 +1593,7 @@
                 return 'not yet added ';
         }
     }
+
     $(".comment-link").on("click", function (e) {
         e.preventDefault();
         var url = getURLAbsolutePath() + $(this).data('url');
