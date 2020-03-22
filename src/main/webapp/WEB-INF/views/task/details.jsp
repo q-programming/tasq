@@ -918,6 +918,20 @@
                     </c:if>
                 </div>
             </c:if>
+
+            <%--------------------GIT HISTORY -----------------------%>
+            <c:if test="${not empty task.project.git}">
+                <div class="mod-header">
+                    <h5 class="mod-header-title">
+                        <i class="fa fa-caret-down toggler" data-tab="gitToggle"></i>
+                        <span class="mod-header-title-txt">
+                            <i class="fa fa-code-fork"></i> <s:message code="task.commits"/>
+                        </span>
+                    </h5>
+                </div>
+                <div id="gitToggle">
+                </div>
+            </c:if>
         </div>
     </div>
     <%--------------------------- BOTTOM TABS------------------------------------%>
@@ -1098,6 +1112,9 @@
         <c:if test="${not task.subtask}">
         getSprints();
         </c:if>
+        <c:if test="${not empty task.project.git}">
+        loadCommits();
+        </c:if>
         var maxchars = 4000;
 
         //--------------------------------------Coments----------------------------
@@ -1244,8 +1261,7 @@
                         keyboard: false,
                         backdrop: 'static'
                     });
-                }
-                else {
+                } else {
                     showWait(true);
                     $.post('<c:url value="/task/changeState"/>', {id: taskID, state: state}, function (result) {
                         if (result.code === 'ERROR') {
@@ -1273,8 +1289,7 @@
             $.post(url, {id: taskID}, function (result) {
                 if (result.code === 'ERROR') {
                     showError(result.message);
-                }
-                else {
+                } else {
                     showSuccess(result.message);
                     $("#watch_icon").toggleClass("fa-eye").toggleClass("fa-eye-slash");
                     updateWatchers();
@@ -1321,8 +1336,7 @@
                 $.post('<c:url value="/task/changePoints"/>', {id: taskID, points: points}, function (result) {
                     if (result.code === 'ERROR') {
                         showError(result.message);
-                    }
-                    else {
+                    } else {
                         $("#point_value").html(points);
                         showSuccess(result.message);
                     }
@@ -1627,8 +1641,7 @@
             else if (e.which === 76) {
                 fillLogWorkValues('${task.id}');
                 $("#logWorkform").modal('show');
-            }
-            else if (e.which === 67) {
+            } else if (e.which === 67) {
                 toggle_comment();
             }
         }
@@ -1660,4 +1673,26 @@
             'scrollTop': $('#comments_div').offset().top
         }, 2000);
     }
+
+    function loadCommits() {
+        var url = 'https://api.github.com/search/commits?q=repo:${task.project.git}+' + taskID;
+        $.ajax({
+            url: url,
+            headers: {"Accept": "application/vnd.github.cloak-preview"},
+            success: function (result) {
+                $.each(result.items, function (key, item) {
+                    var sha = item.sha.substr(0, 7);
+                    var message = item.commit.message.length < 50 ? item.commit.message : item.commit.message.substr(0, 50) + '...';
+                    var icon = '<span class="fa-stack" style="font-size: 10px;">' +
+                        '<i class="fa fa-minus fa-rotate-90 fa-stack-2x"></i>' +
+                        '<i style="margin-left: 1px;" class="fa fa-circle fa-inverse fa-stack-1x"></i>' +
+                        '<i style="margin-left: 1px;" class="fa fa-circle-o fa-stack-1x"></i></span>';
+                    var link = sha + ' <a href=' + item.html_url + ' target="_blank">' + message + '</a>';
+                    var row = '<div>' + icon + link + '</div>';
+                    $("#gitToggle").append(row);
+                });
+            }
+        });
+    }
+
 </script>

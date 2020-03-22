@@ -249,8 +249,8 @@
                         <td><img data-src="holder.js/30x30"
                                  style="height: 30px; float: left; padding-right: 10px;"
                                  src="<c:url value="/../avatar/${participant.id}.png"/>"/>${participant}
-                        <span style="color: #737373">(<s:message
-                                code="${participant.role.code}"/>)
+                            <span style="color: #737373">(<s:message
+                                    code="${participant.role.code}"/>)
 					</span></td>
                         <td><c:if test="${can_edit}">
                             <div class="pull-right">
@@ -305,6 +305,29 @@
                 </c:forEach>
             </table>
         </div>
+    </div>
+    <div>
+        <form id="project_git" action="<c:url value="/project/${project.projectId}/git"/>" method="post">
+            <div class="mod-header">
+                <h3 class="mod-header-title">
+                    <s:message code="project.git"/>
+                </h3>
+            </div>
+            <div class="paddedleft40">
+                <div>
+                    <input name="git" class="form-control" style="width:400px"
+                           placeholder="<s:message code="project.git.placeholder"/>"
+                           value="${project.git}">
+                </div>
+                <span class="help-block">
+                    <s:message code="project.git.help" htmlEscape="false"/>
+                </span>
+                <div style="text-align: center;">
+                    <button class="btn btn-success " type="submit"><i class="fa fa-floppy-o"></i>&nbsp;<s:message
+                            code="main.save"/></button>
+                </div>
+            </div>
+        </form>
     </div>
     <div>
         <div class="mod-header">
@@ -363,12 +386,14 @@
             <form id="delete-form" action="<c:url value="/project/${project.projectId}/delete"/>" method="post">
                 <div class="modal-header theme">
                     <h4 class="modal-title">
-                        <i class="fa fa-trash-o" aria-hidden="true"></i>&nbsp;<s:message code="project.delete"/>&nbsp;[${project.projectId}] ${project.name}
+                        <i class="fa fa-trash-o" aria-hidden="true"></i>&nbsp;<s:message
+                            code="project.delete"/>&nbsp;[${project.projectId}] ${project.name}
                     </h4>
                 </div>
                 <div class="modal-body">
                     <p>
-                        <i class="fa fa-lg fa-exclamation-triangle" style="display: initial;"></i>&nbsp<s:message code="project.delete.confirm.help" htmlEscape="false"/>
+                        <i class="fa fa-lg fa-exclamation-triangle" style="display: initial;"></i>&nbsp<s:message
+                            code="project.delete.confirm.help" htmlEscape="false"/>
                     </p>
                     <div class="form-group">
                         <label for="deleteProjectName"><s:message code="project.id"/>:</label>
@@ -380,7 +405,8 @@
                         <input class="form-control"
                                name="projectname" id="deleteProjectName">
                     </div>
-                    <div id="deleteProjectError" style="display: none; color: red"><s:message code="project.delete.confirm"/></div>
+                    <div id="deleteProjectError" style="display: none; color: red"><s:message
+                            code="project.delete.confirm"/></div>
                 </div>
                 <div class="modal-footer">
                     <a class="btn" data-dismiss="modal"><s:message
@@ -534,6 +560,7 @@
             }
             checkIfEmpty();
         });
+
         function checkIfEmpty() {
             if (!$("#assign_taskID").val()) {
                 var unassign = '<s:message code="task.unassigned" />';
@@ -569,7 +596,7 @@
             if (valid) {
                 $("#deleteProjectError").hide();
                 $("#delete-form").submit();
-            }else{
+            } else {
                 $("#deleteProjectError").show();
             }
 

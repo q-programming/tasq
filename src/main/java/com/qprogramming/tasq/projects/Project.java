@@ -72,6 +72,9 @@ public class Project implements Serializable {
     @Column
     private Boolean workingWeekends = false;
 
+    @Column
+    private String git;
+
     public Project() {
     }
 
@@ -238,11 +241,19 @@ public class Project implements Serializable {
         this.workingWeekends = workingWeekends;
     }
 
+    public String getGit() {
+        return git;
+    }
+
+    public void setGit(String git) {
+        this.git = git;
+    }
+
     /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Object#toString()
-         */
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString() {
         return "[" + getProjectId() + "] " + getName();
