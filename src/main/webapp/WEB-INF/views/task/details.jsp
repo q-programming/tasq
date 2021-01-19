@@ -1681,15 +1681,17 @@
             headers: {"Accept": "application/vnd.github.cloak-preview"},
             success: function (result) {
                 $.each(result.items, function (key, item) {
-                    var sha = item.sha.substr(0, 7);
-                    var message = item.commit.message.length < 50 ? item.commit.message : item.commit.message.substr(0, 50) + '...';
-                    var icon = '<span class="fa-stack" style="font-size: 10px;">' +
-                        '<i class="fa fa-minus fa-rotate-90 fa-stack-2x"></i>' +
-                        '<i style="margin-left: 1px;" class="fa fa-circle fa-inverse fa-stack-1x"></i>' +
-                        '<i style="margin-left: 1px;" class="fa fa-circle-o fa-stack-1x"></i></span>';
-                    var link = sha + ' <a href=' + item.html_url + ' target="_blank">' + message + '</a>';
-                    var row = '<div>' + icon + link + '</div>';
-                    $("#gitToggle").append(row);
+                    if (item.commit.message.toLowerCase().indexOf(taskID.toLowerCase()) >= 0) {
+                        var sha = item.sha.substr(0, 7);
+                        var message = item.commit.message.length < 50 ? item.commit.message : item.commit.message.substr(0, 50) + '...';
+                        var icon = '<span class="fa-stack" style="font-size: 10px;">' +
+                            '<i class="fa fa-minus fa-rotate-90 fa-stack-2x"></i>' +
+                            '<i style="margin-left: 1px;" class="fa fa-circle fa-inverse fa-stack-1x"></i>' +
+                            '<i style="margin-left: 1px;" class="fa fa-circle-o fa-stack-1x"></i></span>';
+                        var link = sha + ' <a href=' + item.html_url + ' target="_blank">' + message + '</a>';
+                        var row = '<div>' + icon + link + '</div>';
+                        $("#gitToggle").append(row);
+                    }
                 });
             }
         });
