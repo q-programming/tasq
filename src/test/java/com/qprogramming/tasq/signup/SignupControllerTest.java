@@ -131,6 +131,7 @@ public class SignupControllerTest {
             when(encoderMock.encode(any(CharSequence.class))).thenReturn("encodedPassword");
             when(appSrvMock.getProperty(AppService.URL)).thenReturn("http://dummy.com");
             when(appSrvMock.getProperty(AppService.DEFAULTROLE)).thenReturn("ROLE_USER");
+            when(appSrvMock.getProperty(AppService.TASQROOTDIR)).thenReturn(".");
             when(mailerMock.sendMail(anyInt(), anyString(), anyString(), anyString(),
                     anyMapOf(String.class, Resource.class))).thenReturn(true);
             SignupForm form = fillForm();
