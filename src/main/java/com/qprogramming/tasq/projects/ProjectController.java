@@ -469,6 +469,28 @@ public class ProjectController {
         return "redirect:" + request.getHeader(REFERER);
     }
 
+    @RequestMapping(value = "project/{id}/git", method = RequestMethod.POST)
+    public String editGIT(@PathVariable String id, @RequestParam(value = "git") String git,
+                          RedirectAttributes ra, HttpServletRequest request) {
+        if (!Roles.isPowerUser()) {
+            throw new TasqAuthException(msg);
+        }
+        Project project = projSrv.findByProjectId(id);
+        if (project == null) {
+            MessageHelper.addErrorAttribute(ra, msg.getMessage("project.notexists", null, Utils.getCurrentLocale()));
+            return "redirect:/projects";
+        }
+        if (!projSrv.canEdit(project.getId())) {
+            MessageHelper.addErrorAttribute(ra, msg.getMessage("error.accesRights", null, Utils.getCurrentLocale()));
+            return "redirect:" + request.getHeader(REFERER);
+        }
+        if (!StringUtils.isEmpty(git)) {
+            project.setGit(git);
+            projSrv.save(project);
+        }
+        return "redirect:" + request.getHeader(REFERER);
+    }
+
     @VisibleForTesting
     void rollBack() {
         TransactionInterceptor.currentTransactionStatus().setRollbackOnly();

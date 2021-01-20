@@ -49,6 +49,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.apache.poi.ss.usermodel.CellType.*;
+
 @Controller
 public class ImportExportController {
 
@@ -131,7 +133,7 @@ public class ImportExportController {
                     workbook = WorkbookFactory.create(importFile.getInputStream());
                     Sheet sheet = workbook.getSheetAt(0);
                     processImportSheet(project, taskCount, logger, sheet);
-                } catch (InvalidFormatException e) {
+                } catch (IOException e) {
                     LOG.error("Failed to determine excel type");
                     logger.append(e.getMessage());
                 }
@@ -215,82 +217,87 @@ public class ImportExportController {
             if (row.getRowNum() == 0) {
                 continue;
             }
-            StringBuilder logRow = verifyRow(row);
-            // If there was at least one error with row , add it to
-            // logger and move to next row
-            if (logRow.length() > 0) {
-                logger.append(logRow);
-                continue;
-            }
-            String logHeader = "[Row " + (row.getRowNum() + 1) + "]";
-            // validation finished
-            TaskForm taskForm = new TaskForm();
-            taskForm.setName(row.getCell(NAME_CELL).getStringCellValue());
-            if (row.getCell(DESCRIPTION_CELL) != null) {
-                taskForm.setDescription(row.getCell(DESCRIPTION_CELL).getStringCellValue());
-            }
-            taskForm.setType(row.getCell(TYPE_CELL).getStringCellValue());
-            taskForm.setPriority(row.getCell(PRIORITY_CELL).getStringCellValue());
-            if (row.getCell(ESTIMATE_CELL) != null) {
-                taskForm.setEstimate(row.getCell(ESTIMATE_CELL).getStringCellValue());
-            }
-            Task task = taskForm.createTask();
-            // optional fields
-            if (row.getCell(SP_CELL) != null && row.getCell(SP_CELL).getCellType() == Cell.CELL_TYPE_NUMERIC) {
-                task.setStory_points(((Double) row.getCell(SP_CELL).getNumericCellValue()).intValue());
-            }
-            if (row.getCell(DUE_DATE_CELL) != null
-                    && StringUtils.isNotBlank(row.getCell(DUE_DATE_CELL).getStringCellValue())) {
-                Date date = row.getCell(DUE_DATE_CELL).getDateCellValue();
-                task.setDue_date(date);
-            }
-            if (row.getCell(NOT_ESTIMATED_CELL) != null
-                    && StringUtils.isNotBlank(row.getCell(NOT_ESTIMATED_CELL).getStringCellValue())) {
-                task.setEstimated(false);
-            }
-            Cell parentCell = row.getCell(PARENT_CELL);
-            //subtask
-            if (parentCell != null) {
-                String parentTaskId = null;
-                Task parentTask;
-                if (parentCell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-                    int parentRow = (int) parentCell.getNumericCellValue();
-                    parentTask = createdTasks.get(parentRow);
-                    if (parentTask != null) {
-                        parentTaskId = parentTask.getId();
+            try {
+                StringBuilder logRow = verifyRow(row);
+                // If there was at least one error with row , add it to
+                // logger and move to next row
+                if (logRow.length() > 0) {
+                    logger.append(logRow);
+                    continue;
+                }
+                String logHeader = "[Row " + (row.getRowNum() + 1) + "]";
+                // validation finished
+                TaskForm taskForm = new TaskForm();
+                taskForm.setName(row.getCell(NAME_CELL).getStringCellValue());
+                if (row.getCell(DESCRIPTION_CELL) != null) {
+                    taskForm.setDescription(row.getCell(DESCRIPTION_CELL).getStringCellValue());
+                }
+                taskForm.setType(row.getCell(TYPE_CELL).getStringCellValue());
+                taskForm.setPriority(row.getCell(PRIORITY_CELL).getStringCellValue());
+                if (row.getCell(ESTIMATE_CELL) != null) {
+                    taskForm.setEstimate(row.getCell(ESTIMATE_CELL).getStringCellValue());
+                }
+                Task task = taskForm.createTask();
+                // optional fields
+                if (row.getCell(SP_CELL) != null && NUMERIC.equals(row.getCell(SP_CELL).getCellType())) {
+                    task.setStory_points(((Double) row.getCell(SP_CELL).getNumericCellValue()).intValue());
+                }
+                if (row.getCell(DUE_DATE_CELL) != null
+                        && StringUtils.isNotBlank(row.getCell(DUE_DATE_CELL).getStringCellValue())) {
+                    Date date = row.getCell(DUE_DATE_CELL).getDateCellValue();
+                    task.setDue_date(date);
+                }
+                if (row.getCell(NOT_ESTIMATED_CELL) != null
+                        && StringUtils.isNotBlank(row.getCell(NOT_ESTIMATED_CELL).getStringCellValue())) {
+                    task.setEstimated(false);
+                }
+                Cell parentCell = row.getCell(PARENT_CELL);
+                //subtask
+                if (parentCell != null) {
+                    String parentTaskId;
+                    Task parentTask;
+                    if (NUMERIC.equals(parentCell.getCellType())) {
+                        int parentRow = (int) parentCell.getNumericCellValue();
+                        parentTask = createdTasks.get(parentRow);
+                        if (parentTask != null) {
+                            parentTaskId = parentTask.getId();
+                        } else {
+                            parentTaskId = "" + parentRow;
+                        }
                     } else {
-                        parentTaskId = "" + parentRow;
+                        parentTaskId = parentCell.getStringCellValue();
+                    }
+                    //get real task ( should be created by now)
+                    parentTask = taskSrv.findById(parentTaskId);
+                    if (parentTask != null) {
+                        task = taskSrv.createSubTask(project, parentTask, task);
+                        logger.append(logHeader);
+                        logger.append(SUCCESS_SUBTASK);
+                        logger.append(task);
+                        logger.append(SUCCESFULLY_END);
+                        logger.append(DIVIDER);
+                        wlSrv.addActivityLog(task, "", LogType.SUBTASK);
+                    } else {
+                        logger.append(logHeader);
+                        logger.append(String.format("Parent '%s' was not found either in excel nor in database.", parentTaskId));
+                        logger.append(BR);
+                        logger.append(logHeader);
+                        logger.append(ROW_SKIPPED);
+                        logger.append(DIVIDER);
                     }
                 } else {
-                    parentTaskId = parentCell.getStringCellValue();
-                }
-                //get real task ( should be created by now)
-                parentTask = taskSrv.findById(parentTaskId);
-                if (parentTask != null) {
-                    task = taskSrv.createSubTask(project, parentTask, task);
+                    taskCount++;
+                    task = finalizeTaskCretion(task, taskCount, project);
+                    createdTasks.put(row.getRowNum() + 1, task);
                     logger.append(logHeader);
-                    logger.append(SUCCESS_SUBTASK);
+                    logger.append(SUCCESS_TASK);
                     logger.append(task);
                     logger.append(SUCCESFULLY_END);
                     logger.append(DIVIDER);
-                    wlSrv.addActivityLog(task, "", LogType.SUBTASK);
-                } else {
-                    logger.append(logHeader);
-                    logger.append(String.format("Parent '%s' was not found either in excel nor in database.", parentTaskId));
-                    logger.append(BR);
-                    logger.append(logHeader);
-                    logger.append(ROW_SKIPPED);
-                    logger.append(DIVIDER);
                 }
-            } else {
-                taskCount++;
-                task = finalizeTaskCretion(task, taskCount, project);
-                createdTasks.put(row.getRowNum() + 1, task);
-                logger.append(logHeader);
-                logger.append(SUCCESS_TASK);
-                logger.append(task);
-                logger.append(SUCCESFULLY_END);
-                logger.append(DIVIDER);
+            } catch (IllegalArgumentException e) {
+                LOG.error("Failed to parse row {}", row.getRowNum());
+                throw e;
             }
         }
     }
@@ -441,7 +448,7 @@ public class ImportExportController {
         String logHeader = "[Row " + (row.getRowNum() + 1) + "]";
         for (int i = 0; i < 7; i++) {
             Cell cell = row.getCell(i);
-            if ((cell == null || cell.getCellType() == Cell.CELL_TYPE_BLANK)
+            if ((cell == null || NUMERIC.equals(cell.getCellType()))
                     && (i != ESTIMATE_CELL & i != SP_CELL & i != DUE_DATE_CELL & i != DESCRIPTION_CELL)) {
                 logger.append(logHeader);
                 logger.append("Cell ");
@@ -556,8 +563,8 @@ public class ImportExportController {
     private boolean isNumericCellValid(Row row, int cell) {
         Cell numericCell = row.getCell(cell);
         return !(numericCell != null
-                && numericCell.getCellType() != Cell.CELL_TYPE_NUMERIC
-                && numericCell.getCellType() == Cell.CELL_TYPE_STRING
+                && !NUMERIC.equals(numericCell.getCellType())
+                && STRING.equals(numericCell.getCellType())
                 && StringUtils.isNotBlank(numericCell.getStringCellValue()));
     }
 
@@ -583,7 +590,7 @@ public class ImportExportController {
 
     private boolean isEstimateCellValid(Row row) {
         Cell estimateCell = row.getCell(ESTIMATE_CELL);
-        return estimateCell == null || estimateCell.getCellType() == Cell.CELL_TYPE_BLANK || (estimateCell.getCellType() == Cell.CELL_TYPE_STRING && Utils.correctEstimate(estimateCell.getStringCellValue()));
+        return estimateCell == null || BLANK.equals(estimateCell.getCellType()) || (STRING.equals(estimateCell.getCellType()) && Utils.correctEstimate(estimateCell.getStringCellValue()));
     }
 
 
@@ -595,7 +602,7 @@ public class ImportExportController {
      */
     private boolean isTaskTypeValid(Row row) {
         Cell cell = row.getCell(TYPE_CELL);
-        return !(cell != null && cell.getCellType() != Cell.CELL_TYPE_BLANK) || isTaskTypeCellValid(row);
+        return cell != null && !cell.getCellType().equals(BLANK) && isTaskTypeCellValid(row);
     }
 
     private boolean isTaskTypeCellValid(Row row) {
@@ -646,7 +653,7 @@ public class ImportExportController {
      */
     private boolean isTaskPriorityValid(Row row) {
         Cell cell = row.getCell(PRIORITY_CELL);
-        return !(cell != null && cell.getCellType() != Cell.CELL_TYPE_BLANK) || isTaskPriorityValid(cell.getStringCellValue());
+        return cell != null && !cell.getCellType().equals(BLANK) && isTaskPriorityValid(cell.getStringCellValue());
     }
 
     /**
@@ -660,10 +667,10 @@ public class ImportExportController {
             return true;
         }
         Cell parentcell = row.getCell(PARENT_CELL);
-        if (parentcell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+        if (NUMERIC.equals(parentcell.getCellType())) {
             double parentRow = parentcell.getNumericCellValue();
             return parentRow < row.getRowNum() + 1;
-        } else if (parentcell.getCellType() == Cell.CELL_TYPE_STRING) {
+        } else if (STRING.equals(parentcell.getCellType())) {
             Pattern r = Pattern.compile(ID_REGEXP_PATERN);
             Matcher m = r.matcher(parentcell.getStringCellValue());
             return m.matches();
@@ -673,7 +680,7 @@ public class ImportExportController {
 
     private boolean parentCellEmpty(Row row) {
         Cell cell = row.getCell(PARENT_CELL);
-        return cell == null || cell.getCellType() == Cell.CELL_TYPE_BLANK;
+        return cell == null || BLANK.equals(cell.getCellType());
     }
 
     private boolean isTaskPriorityValid(String priority) {

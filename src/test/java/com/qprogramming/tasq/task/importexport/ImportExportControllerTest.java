@@ -28,6 +28,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -145,15 +146,19 @@ public class ImportExportControllerTest {
 
     @Test
     public void importTasksTest() {
+        Model model = new ExtendedModelMap();
         URL fileURL = getClass().getResource("sampleImport.xls");
         Project project = TestUtils.createProject();
         when(projSrvMock.findByProjectId(PROJECT_ID)).thenReturn(project);
         try {
             mockMultipartFile = new MockMultipartFile("content", fileURL.getFile(), "text/plain",
                     getClass().getResourceAsStream("sampleImport.xls"));
-            importExportCtrl.importTasks(mockMultipartFile, PROJECT_ID, modelMock);
+            importExportCtrl.importTasks(mockMultipartFile, PROJECT_ID, model);
             verify(taskSrvMock, times(2)).save(any(Task.class));
             verify(taskSrvMock, times(3)).createSubTask(any(Project.class), any(Task.class), any(Task.class));
+            String loggerOutput = (String) model.asMap().get("logger");
+            System.out.println("Logger output:");
+            System.out.println(loggerOutput.replaceAll("<br>", "\n"));
         } catch (IOException e) {
             fail(e.getMessage());
         }
@@ -234,7 +239,7 @@ public class ImportExportControllerTest {
     public void exportTasksExceptionTest() {
         boolean catched = false;
         try {
-            List<Task> list = new LinkedList<Task>();
+            List<Task> list = new LinkedList<>();
             Task task3 = createTask(TASK_NAME, 3, TestUtils.createProject(2L));
             task1.setEstimate(new Period());
             list.add(task1);
