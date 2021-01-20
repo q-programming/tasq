@@ -133,12 +133,12 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-jpa</artifactId>
-            <version>1.11.8.RELEASE</version>
+            <version>1.11.23.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-mongodb</artifactId>
-            <version>1.9.6.RELEASE</version>
+            <version>1.10.23.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -243,7 +243,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>21.0</version>
+            <version>30.1-jre</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>

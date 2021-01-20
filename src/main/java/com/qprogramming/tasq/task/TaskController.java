@@ -1,9 +1,5 @@
-/**
- *
- */
 package com.qprogramming.tasq.task;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.qprogramming.tasq.account.*;
 import com.qprogramming.tasq.agile.AgileService;
 import com.qprogramming.tasq.agile.Sprint;
@@ -96,18 +92,18 @@ public class TaskController {
     private static final String ERROR_ACCES_RIGHTS = "error.accesRights";
     private static final String REFERER = "Referer";
     private static final String ERROR_NAME_HTML = "error.name.html";
-    private TaskService taskSrv;
-    private ProjectService projectSrv;
-    private AccountService accSrv;
-    private WorkLogService wlSrv;
-    private MessageSource msg;
-    private AgileService sprintSrv;
-    private TaskLinkService linkService;
-    private WatchedTaskService watchSrv;
-    private CommentService commSrv;
-    private TagsRepository tagsRepo;
-    private EventsService eventSrv;
-    private LastVisitedService visitedSrv;
+    private final TaskService taskSrv;
+    private final ProjectService projectSrv;
+    private final AccountService accSrv;
+    private final WorkLogService wlSrv;
+    private final MessageSource msg;
+    private final AgileService sprintSrv;
+    private final TaskLinkService linkService;
+    private final WatchedTaskService watchSrv;
+    private final CommentService commSrv;
+    private final TagsRepository tagsRepo;
+    private final EventsService eventSrv;
+    private final LastVisitedService visitedSrv;
 
     @Autowired
     public TaskController(TaskService taskSrv, ProjectService projectSrv, AccountService accSrv, WorkLogService wlSrv,
@@ -1060,8 +1056,8 @@ public class TaskController {
         return !force || Roles.isPowerUser();
     }
 
-    @VisibleForTesting
-    void rollBack() {
+
+    protected void rollBack() {
         TransactionInterceptor.currentTransactionStatus().setRollbackOnly();
     }
 
