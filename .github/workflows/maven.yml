@@ -40,6 +40,6 @@ jobs:
         if: github.event_name == 'release'
         uses: JasonEtco/upload-to-release@master
         with:
-          args: target/gifts.war application/zip
+          args: target/tasq.war application/zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
