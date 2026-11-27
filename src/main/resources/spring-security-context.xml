@@ -6,6 +6,8 @@
        http://www.springframework.org/schema/security
        http://www.springframework.org/schema/security/spring-security.xsd">
 
+    <bean id="pageRequestCache" class="com.qprogramming.tasq.signin.PageRequestCache"/>
+
     <security:http pattern="/resources/**" security="none"></security:http>
     <security:http auto-config="true" disable-url-rewriting="true"
                    use-expressions="true">
@@ -13,6 +15,7 @@
                              authentication-failure-url="/signin?error=1"
                              always-use-default-target="false"
                              authentication-success-handler-ref="localeSettingAuthenticationSuccessHandler"/>
+        <security:request-cache ref="pageRequestCache"/>
         <security:logout logout-url="/logout"/>
         <security:remember-me key="tasq-aWreDWE4343asrwerewraWeFFTgxcv9u1X" services-ref="rememberMeServices"/>
         <security:session-management
